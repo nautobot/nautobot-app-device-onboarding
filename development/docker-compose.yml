@@ -1,50 +1,52 @@
 ---
-version: '3'
+version: "3"
 services:
-  netbox:
+  nautobot:
     build:
-      context: ../
-      dockerfile: development/Dockerfile
-    image: "ntc-netbox-plugin-onboarding/netbox:${NETBOX_VER}-py${PYTHON_VER}"
+      context: "../"
+      dockerfile: "development/Dockerfile"
+    image: "nautobot-device-onboarding/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
     command: >
-      sh -c "python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
+      sh -c "nautobot-server migrate &&
+             nautobot-server runserver 0.0.0.0:8000"
     ports:
       - "8000:8000"
     depends_on:
-      - postgres
-      - redis
+      - "postgres"
+      - "redis"
     env_file:
-      - ./dev.env
+      - "./dev.env"
     volumes:
-      - ./configuration.py:/opt/netbox/netbox/netbox/configuration.py
-      - ../:/source
+      - "./nautobot_config.py:/etc/nautobot/nautobot_config.py"
+      - "../:/source"
     tty: true
   worker:
     build:
-      context: ../
-      dockerfile: development/Dockerfile
-    image: "ntc-netbox-plugin-onboarding/netbox:${NETBOX_VER}-py${PYTHON_VER}"
-    command: sh -c "python manage.py rqworker"
+      context: "../"
+      dockerfile: "development/Dockerfile"
+    image: "nautobot-device-onboarding/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
+    entrypoint: "nautobot-server rqworker"
     depends_on:
-      - netbox
+      - "nautobot"
     env_file:
-      - ./dev.env
+      - "./dev.env"
     volumes:
-      - ./configuration.py:/opt/netbox/netbox/netbox/configuration.py
-      - ../netbox_onboarding:/source/netbox_onboarding
+      - "./nautobot_config.py:/etc/nautobot/nautobot_config.py"
+      - "../nautobot_device_onboarding:/source/nautobot_device_onboarding"
     tty: true
   postgres:
-    image: postgres:10
-    env_file: dev.env
+    image: "postgres:12"
+    env_file:
+      - "./dev.env"
     volumes:
-      - pgdata_netbox_onboarding:/var/lib/postgresql/data
+      - "pgdata_nautobot_device_onboarding:/var/lib/postgresql/data"
   redis:
-    image: redis:5-alpine
+    image: "redis:5-alpine"
     command:
-      - sh
-      - -c  # this is to evaluate the $REDIS_PASSWORD from the env
-      - redis-server --appendonly yes --requirepass $$REDIS_PASSWORD  ## $$ because of docker-compose
-    env_file: ./dev.env
+      - "sh"
+      - "-c"  # this is to evaluate the $REDIS_PASSWORD from the env
+      - "redis-server --appendonly yes --requirepass $$REDIS_PASSWORD"  ## $$ because of docker-compose
+    env_file:
+      - "dev.env"
 volumes:
-  pgdata_netbox_onboarding:
+  pgdata_nautobot_device_onboarding: {}

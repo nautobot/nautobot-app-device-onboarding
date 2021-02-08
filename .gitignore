@@ -1,4 +1,4 @@
-ntc_netbox_plugin_onboarding.egg-info
+nautobot_device_onboarding.egg-info
 __pycache__
 *.swp
 dist
