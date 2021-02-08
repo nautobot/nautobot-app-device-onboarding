@@ -8,7 +8,7 @@
 # configuration.py
 # If need you can override the default settings
 # PLUGINS_CONFIG = {
-#   "netbox_onboarding": {
+#   "nautobot_device_onboarding": {
 #         "create_platform_if_missing": True,
 #         "create_manufacturer_if_missing": True,
 #         "create_device_type_if_missing": True,
@@ -44,10 +44,10 @@
 
 ## Do I need to setup a dedicated RQ Worker node ?
 
-> **No**, The plugin is leveraging the existing RQ Worker infrastructure already in place in NetBox, the only requirement is to ensure the plugin itself is installed in the Worker node.
+> **No**, The plugin is leveraging the existing RQ Worker infrastructure already in place in Nautobot, the only requirement is to ensure the plugin itself is installed in the Worker node.
 
 ## Why don't I see a webhook generated when a new device is onboarded successfully ?
 
-> It's expected that any changes done asynchronously in NetBox currently (within a worker) will not generate a webhook.
+> It's expected that any changes done asynchronously in Nautobot currently (within a worker) will not generate a webhook.
 
 

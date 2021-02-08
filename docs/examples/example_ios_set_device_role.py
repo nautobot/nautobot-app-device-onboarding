@@ -1,6 +1,6 @@
 """Example of custom onboarding class.
 
-(c) 2020 Network To Code
+(c) 2020-2021 Network To Code
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -12,8 +12,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from netbox_onboarding.netbox_keeper import NetboxKeeper
-from netbox_onboarding.onboarding.onboarding import Onboarding
+from nautobot_device_onboarding.nautobot_keeper import NautobotKeeper
+from nautobot_device_onboarding.onboarding.onboarding import Onboarding
 
 
 class MyOnboardingClass(Onboarding):
@@ -21,7 +21,7 @@ class MyOnboardingClass(Onboarding):
 
     Main purpose of this class is to access and modify the onboarding_kwargs.
     By accessing the onboarding kwargs, user gains ability to modify
-    onboarding parameters before the objects are created in NetBox.
+    onboarding parameters before the objects are created in Nautobot.
 
     This class adds the get_device_role method that does the static
      string comparison and returns the device role.
@@ -35,7 +35,7 @@ class MyOnboardingClass(Onboarding):
         # Update the device role in onboarding kwargs dictionary
         onboarding_kwargs["netdev_nb_role_slug"] = device_new_role
 
-        nb_k = NetboxKeeper(**onboarding_kwargs)
+        nb_k = NautobotKeeper(**onboarding_kwargs)
         nb_k.ensure_device()
 
         self.created_device = nb_k.device

@@ -1,6 +1,6 @@
 """Tasks for use with Invoke.
 
-(c) 2020 Network To Code
+(c) 2020-2021 Network To Code
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -16,31 +16,40 @@ import os
 from invoke import task
 
 PYTHON_VER = os.getenv("PYTHON_VER", "3.7")
-NETBOX_VER = os.getenv("NETBOX_VER", "master")
+NAUTOBOT_VER = os.getenv("NAUTOBOT_VER", "main")
 
 # Name of the docker image/container
-NAME = os.getenv("IMAGE_NAME", "ntc-netbox-plugin-onboarding")
+NAME = os.getenv("IMAGE_NAME", "nautobot-device-onboarding")
 PWD = os.getcwd()
 
 COMPOSE_FILE = "development/docker-compose.yml"
-BUILD_NAME = "netbox_onboarding"
+BUILD_NAME = "nautobot_device_onboarding"
 
 
 # ------------------------------------------------------------------------------
 # BUILD
 # ------------------------------------------------------------------------------
 @task
-def build(context, netbox_ver=NETBOX_VER, python_ver=PYTHON_VER):
+def build(context, nautobot_ver=NAUTOBOT_VER, python_ver=PYTHON_VER, nocache=False, forcerm=False):
     """Build all docker images.
 
     Args:
         context (obj): Used to run specific commands
-        netbox_ver (str): NetBox version to use to build the container
+        nautobot_ver (str): Nautobot version to use to build the container
         python_ver (str): Will use the Python version docker image to build from
+        nocache (bool): Do not use cache when building the image
+        forcerm (bool): Always remove intermediate containers
     """
+    command = "build"
+
+    if nocache:
+        command += " --no-cache"
+    if forcerm:
+        command += " --force-rm"
+
     context.run(
-        f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} build --build-arg netbox_ver={netbox_ver} --build-arg python_ver={python_ver}",
-        env={"NETBOX_VER": netbox_ver, "PYTHON_VER": python_ver},
+        f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} {command}",
+        env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
     )
 
 
@@ -48,69 +57,69 @@ def build(context, netbox_ver=NETBOX_VER, python_ver=PYTHON_VER):
 # START / STOP / DEBUG
 # ------------------------------------------------------------------------------
 @task
-def debug(context, netbox_ver=NETBOX_VER, python_ver=PYTHON_VER):
-    """Start NetBox and its dependencies in debug mode.
+def debug(context, nautobot_ver=NAUTOBOT_VER, python_ver=PYTHON_VER):
+    """Start Nautobot and its dependencies in debug mode.
 
     Args:
         context (obj): Used to run specific commands
-        netbox_ver (str): NetBox version to use to build the container
+        nautobot_ver (str): Nautobot version to use to build the container
         python_ver (str): Will use the Python version docker image to build from
     """
-    print("Starting Netbox .. ")
+    print("Starting Nautobot .. ")
     context.run(
         f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} up",
-        env={"NETBOX_VER": netbox_ver, "PYTHON_VER": python_ver},
+        env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
     )
 
 
 @task
-def start(context, netbox_ver=NETBOX_VER, python_ver=PYTHON_VER):
-    """Start NetBox and its dependencies in detached mode.
+def start(context, nautobot_ver=NAUTOBOT_VER, python_ver=PYTHON_VER):
+    """Start Nautobot and its dependencies in detached mode.
 
     Args:
         context (obj): Used to run specific commands
-        netbox_ver (str): NetBox version to use to build the container
+        nautobot_ver (str): Nautobot version to use to build the container
         python_ver (str): Will use the Python version docker image to build from
     """
-    print("Starting Netbox in detached mode.. ")
+    print("Starting Nautobot in detached mode.. ")
     context.run(
         f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} up -d",
-        env={"NETBOX_VER": netbox_ver, "PYTHON_VER": python_ver},
+        env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
     )
 
 
 @task
-def stop(context, netbox_ver=NETBOX_VER, python_ver=PYTHON_VER):
-    """Stop NetBox and its dependencies.
+def stop(context, nautobot_ver=NAUTOBOT_VER, python_ver=PYTHON_VER):
+    """Stop Nautobot and its dependencies.
 
     Args:
         context (obj): Used to run specific commands
-        netbox_ver (str): NetBox version to use to build the container
+        nautobot_ver (str): Nautobot version to use to build the container
         python_ver (str): Will use the Python version docker image to build from
     """
-    print("Stopping Netbox .. ")
+    print("Stopping Nautobot .. ")
     context.run(
         f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} down",
-        env={"NETBOX_VER": netbox_ver, "PYTHON_VER": python_ver},
+        env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
     )
 
 
 @task
-def destroy(context, netbox_ver=NETBOX_VER, python_ver=PYTHON_VER):
+def destroy(context, nautobot_ver=NAUTOBOT_VER, python_ver=PYTHON_VER):
     """Destroy all containers and volumes.
 
     Args:
         context (obj): Used to run specific commands
-        netbox_ver (str): NetBox version to use to build the container
+        nautobot_ver (str): Nautobot version to use to build the container
         python_ver (str): Will use the Python version docker image to build from
     """
     context.run(
         f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} down",
-        env={"NETBOX_VER": netbox_ver, "PYTHON_VER": python_ver},
+        env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
     )
     context.run(
-        f"docker volume rm -f {BUILD_NAME}_pgdata_netbox_onboarding",
-        env={"NETBOX_VER": netbox_ver, "PYTHON_VER": python_ver},
+        f"docker volume rm -f {BUILD_NAME}_pgdata_nautobot_device_onboarding",
+        env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
     )
 
 
@@ -118,83 +127,83 @@ def destroy(context, netbox_ver=NETBOX_VER, python_ver=PYTHON_VER):
 # ACTIONS
 # ------------------------------------------------------------------------------
 @task
-def nbshell(context, netbox_ver=NETBOX_VER, python_ver=PYTHON_VER):
+def nbshell(context, nautobot_ver=NAUTOBOT_VER, python_ver=PYTHON_VER):
     """Launch a nbshell session.
 
     Args:
         context (obj): Used to run specific commands
-        netbox_ver (str): NetBox version to use to build the container
+        nautobot_ver (str): Nautobot version to use to build the container
         python_ver (str): Will use the Python version docker image to build from
     """
     context.run(
-        f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run netbox python manage.py nbshell",
-        env={"NETBOX_VER": netbox_ver, "PYTHON_VER": python_ver},
+        f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run nautobot nautobot-server nbshell",
+        env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
         pty=True,
     )
 
 
 @task
-def cli(context, netbox_ver=NETBOX_VER, python_ver=PYTHON_VER):
-    """Launch a bash shell inside the running NetBox container.
+def cli(context, nautobot_ver=NAUTOBOT_VER, python_ver=PYTHON_VER):
+    """Launch a bash shell inside the running Nautobot container.
 
     Args:
         context (obj): Used to run specific commands
-        netbox_ver (str): NetBox version to use to build the container
+        nautobot_ver (str): Nautobot version to use to build the container
         python_ver (str): Will use the Python version docker image to build from
     """
     context.run(
-        f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run netbox bash",
-        env={"NETBOX_VER": netbox_ver, "PYTHON_VER": python_ver},
+        f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run nautobot bash",
+        env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
         pty=True,
     )
 
 
 @task
-def create_user(context, user="admin", netbox_ver=NETBOX_VER, python_ver=PYTHON_VER):
+def create_user(context, user="admin", nautobot_ver=NAUTOBOT_VER, python_ver=PYTHON_VER):
     """Create a new user in django (default: admin), will prompt for password.
 
     Args:
         context (obj): Used to run specific commands
         user (str): name of the superuser to create
-        netbox_ver (str): NetBox version to use to build the container
+        nautobot_ver (str): Nautobot version to use to build the container
         python_ver (str): Will use the Python version docker image to build from
     """
     context.run(
-        f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run netbox python manage.py createsuperuser --username {user}",
-        env={"NETBOX_VER": netbox_ver, "PYTHON_VER": python_ver},
+        f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run nautobot nautobot-server createsuperuser --username {user}",
+        env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
         pty=True,
     )
 
 
 @task
-def makemigrations(context, name="", netbox_ver=NETBOX_VER, python_ver=PYTHON_VER):
+def makemigrations(context, name="", nautobot_ver=NAUTOBOT_VER, python_ver=PYTHON_VER):
     """Run Make Migration in Django.
 
     Args:
         context (obj): Used to run specific commands
         name (str): Name of the migration to be created
-        netbox_ver (str): NetBox version to use to build the container
+        nautobot_ver (str): Nautobot version to use to build the container
         python_ver (str): Will use the Python version docker image to build from
     """
     context.run(
         f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} up -d postgres",
-        env={"NETBOX_VER": netbox_ver, "PYTHON_VER": python_ver},
+        env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
     )
 
     if name:
         context.run(
-            f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run netbox python manage.py makemigrations --name {name}",
-            env={"NETBOX_VER": netbox_ver, "PYTHON_VER": python_ver},
+            f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run nautobot nautobot-server makemigrations --name {name}",
+            env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
         )
     else:
         context.run(
-            f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run netbox python manage.py makemigrations",
-            env={"NETBOX_VER": netbox_ver, "PYTHON_VER": python_ver},
+            f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run nautobot nautobot-server makemigrations",
+            env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
         )
 
     context.run(
         f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} down",
-        env={"NETBOX_VER": netbox_ver, "PYTHON_VER": python_ver},
+        env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
     )
 
 
@@ -202,114 +211,165 @@ def makemigrations(context, name="", netbox_ver=NETBOX_VER, python_ver=PYTHON_VE
 # TESTS / LINTING
 # ------------------------------------------------------------------------------
 @task
-def unittest(context, netbox_ver=NETBOX_VER, python_ver=PYTHON_VER):
+def unittest(context, nautobot_ver=NAUTOBOT_VER, python_ver=PYTHON_VER):
     """Run Django unit tests for the plugin.
 
     Args:
         context (obj): Used to run specific commands
-        netbox_ver (str): NetBox version to use to build the container
+        nautobot_ver (str): Nautobot version to use to build the container
         python_ver (str): Will use the Python version docker image to build from
     """
-    docker = f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run netbox"
+    docker = f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run nautobot"
     context.run(
-        f'{docker} sh -c "python manage.py test netbox_onboarding"',
-        env={"NETBOX_VER": netbox_ver, "PYTHON_VER": python_ver},
+        f'{docker} sh -c "nautobot-server test nautobot_device_onboarding"',
+        env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
         pty=True,
     )
 
 
 @task
-def pylint(context, netbox_ver=NETBOX_VER, python_ver=PYTHON_VER):
+def pylint(context, nautobot_ver=NAUTOBOT_VER, python_ver=PYTHON_VER):
     """Run pylint code analysis.
 
     Args:
         context (obj): Used to run specific commands
-        netbox_ver (str): NetBox version to use to build the container
+        nautobot_ver (str): Nautobot version to use to build the container
         python_ver (str): Will use the Python version docker image to build from
     """
-    docker = f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run netbox"
+    docker = f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run nautobot"
     # We exclude the /migrations/ directory since it is autogenerated code
     context.run(
-        f"{docker} sh -c \"cd /source && find . -name '*.py' -not -path '*/migrations/*' | "
-        'PYTHONPATH=/opt/netbox/netbox DJANGO_SETTINGS_MODULE=netbox.settings xargs pylint"',
-        env={"NETBOX_VER": netbox_ver, "PYTHON_VER": python_ver},
+        f"{docker} sh -c \"cd /source && find . -name '*.py' -not -path '*/migrations/*' | xargs pylint\"",
+        env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
         pty=True,
     )
 
 
 @task
-def black(context, netbox_ver=NETBOX_VER, python_ver=PYTHON_VER):
+def black(context, nautobot_ver=NAUTOBOT_VER, python_ver=PYTHON_VER):
     """Run black to check that Python files adhere to its style standards.
 
     Args:
         context (obj): Used to run specific commands
-        netbox_ver (str): NetBox version to use to build the container
+        nautobot_ver (str): Nautobot version to use to build the container
         python_ver (str): Will use the Python version docker image to build from
     """
-    docker = f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run netbox"
+    docker = f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run nautobot"
     context.run(
         f'{docker} sh -c "cd /source && black --check --diff ."',
-        env={"NETBOX_VER": netbox_ver, "PYTHON_VER": python_ver},
+        env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
         pty=True,
     )
 
 
 @task
-def pydocstyle(context, netbox_ver=NETBOX_VER, python_ver=PYTHON_VER):
+def blacken(context, nautobot_ver=NAUTOBOT_VER, python_ver=PYTHON_VER):
+    """Run black to format Python files to adhere to its style standards.
+
+    Args:
+        context (obj): Used to run specific commands
+        nautobot_ver (str): Nautobot version to use to build the container
+        python_ver (str): Will use the Python version docker image to build from
+    """
+    docker = f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run nautobot"
+    context.run(
+        f'{docker} sh -c "cd /source && black ."',
+        env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
+        pty=True,
+    )
+
+
+@task
+def pydocstyle(context, nautobot_ver=NAUTOBOT_VER, python_ver=PYTHON_VER):
     """Run pydocstyle to validate docstring formatting adheres to NTC defined standards.
 
     Args:
         context (obj): Used to run specific commands
-        netbox_ver (str): NetBox version to use to build the container
+        nautobot_ver (str): Nautobot version to use to build the container
         python_ver (str): Will use the Python version docker image to build from
     """
-    docker = f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run netbox"
+    docker = f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run nautobot"
     # We exclude the /migrations/ directory since it is autogenerated code
     context.run(
         f"{docker} sh -c \"cd /source && find . -name '*.py' -not -path '*/migrations/*' | xargs pydocstyle\"",
-        env={"NETBOX_VER": netbox_ver, "PYTHON_VER": python_ver},
+        env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
         pty=True,
     )
 
 
 @task
-def bandit(context, netbox_ver=NETBOX_VER, python_ver=PYTHON_VER):
+def flake8(context, nautobot_ver=NAUTOBOT_VER, python_ver=PYTHON_VER):
+    """This will run flake8 for the specified name and Python version.
+
+    Args:
+        context (obj): Used to run specific commands
+        nautobot_ver (str): Nautobot version to use to build the container
+        python_ver (str): Will use the Python version docker image to build from
+    """
+    docker = f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run nautobot"
+    context.run(
+        f"{docker} sh -c \"cd /source && find . -name '*.py' | xargs flake8\"",
+        env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
+        pty=True,
+    )
+
+
+@task
+def yamllint(context, nautobot_ver=NAUTOBOT_VER, python_ver=PYTHON_VER):
+    """Run yamllint to validate formatting adheres to NTC defined YAML standards.
+
+    Args:
+        context (obj): Used to run specific commands
+        nautobot_ver (str): Nautobot version to use to build the container
+        python_ver (str): Will use the Python version docker image to build from
+    """
+    docker = f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run nautobot"
+    context.run(
+        f'{docker} sh -c "cd /source && yamllint ."',
+        env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
+        pty=True,
+    )
+
+
+@task
+def bandit(context, nautobot_ver=NAUTOBOT_VER, python_ver=PYTHON_VER):
     """Run bandit to validate basic static code security analysis.
 
     Args:
         context (obj): Used to run specific commands
-        netbox_ver (str): NetBox version to use to build the container
+        nautobot_ver (str): Nautobot version to use to build the container
         python_ver (str): Will use the Python version docker image to build from
     """
-    docker = f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run netbox"
+    docker = f"docker-compose -f {COMPOSE_FILE} -p {BUILD_NAME} run nautobot"
     context.run(
         f'{docker} sh -c "cd /source && bandit --configfile .bandit.yml --recursive ./"',
-        env={"NETBOX_VER": netbox_ver, "PYTHON_VER": python_ver},
+        env={"NAUTOBOT_VER": nautobot_ver, "PYTHON_VER": python_ver},
         pty=True,
     )
 
 
 @task
-def tests(context, netbox_ver=NETBOX_VER, python_ver=PYTHON_VER):
+def tests(context, nautobot_ver=NAUTOBOT_VER, python_ver=PYTHON_VER):
     """Run all tests for this plugin.
 
     Args:
          context (obj): Used to run specific commands
-        netbox_ver (str): NetBox version to use to build the container
+        nautobot_ver (str): Nautobot version to use to build the container
         python_ver (str): Will use the Python version docker image to build from
     """
     # Sorted loosely from fastest to slowest
     print("Running black...")
-    black(context, netbox_ver=netbox_ver, python_ver=python_ver)
+    black(context, nautobot_ver=nautobot_ver, python_ver=python_ver)
+    print("Running yamllint...")
+    yamllint(context, NAME, python_ver)
     print("Running bandit...")
-    bandit(context, netbox_ver=netbox_ver, python_ver=python_ver)
-    print("Running pydocstyle...")
-    pydocstyle(context, netbox_ver=netbox_ver, python_ver=python_ver)
-    print("Running pylint...")
-    pylint(context, netbox_ver=netbox_ver, python_ver=python_ver)
+    bandit(context, nautobot_ver=nautobot_ver, python_ver=python_ver)
+    # print("Running pydocstyle...")
+    # pydocstyle(context, nautobot_ver=nautobot_ver, python_ver=python_ver)
+    print("Running flake8...")
+    flake8(context, nautobot_ver=nautobot_ver, python_ver=python_ver)
+    # print("Running pylint...")
+    # pylint(context, nautobot_ver=nautobot_ver, python_ver=python_ver)
     print("Running unit tests...")
-    unittest(context, netbox_ver=netbox_ver, python_ver=python_ver)
-    # print("Running yamllint...")
-    # yamllint(context, NAME, python_ver)
-
+    unittest(context, nautobot_ver=nautobot_ver, python_ver=python_ver)
     print("All tests have passed!")
