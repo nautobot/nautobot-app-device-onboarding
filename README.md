@@ -14,23 +14,23 @@ If using the installation pattern from the Nautobot Documentation, you will need
 virtual environment before installing so that you install the package into the virtual environment.
 
 ```shell
+sudo -iu nautobot
+# This may not be required if already in the /opt/nautobot directory
 cd /opt/nautobot
-source venv/bin/activate
+source bin/activate
 ```
 
-The plugin is available as a Python package in pypi and can be installed with pip. Once the
-installation is completed, then Nautobot and the Nautobot worker must be restarted.
+The plugin is available as a Python package in pypi and can be installed with pip.
 
 ```shell
 pip install nautobot-device-onboarding
-systemctl restart nautobot nautobot-rq
 ```
 
 ### Compatibility Matrix
 
-|                              |  Nautobot 1.0  |
-|------------------------------|----------------|
-| Device Onboarding plugin 1.0 |        X       |
+|                              | Nautobot 1.0 |
+| ---------------------------- | ------------ |
+| Device Onboarding plugin 1.0 | X            |
 
 To ensure Device Onboarding plugin is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the Nautobot root directory (alongside `requirements.txt`) and list the `nautobot-device-onboarding` package:
 
@@ -50,11 +50,14 @@ PLUGINS = ["nautobot_device_onboarding"]
 # }
 ```
 
-Finally, make sure to run the migrations for this plugin
+Finally, run the migrations for this plugin, and restart Nautobot and the Nautobot worker.
 
 ```bash
 nautobot-server migrate
+systemctl restart nautobot nautobot-worker
 ```
+
+### Plugin Configuration Options
 
 The plugin behavior can be controlled with the following list of settings
 
