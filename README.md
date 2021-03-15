@@ -5,25 +5,20 @@
 
 A plugin for [Nautobot](https://github.com/nautobot/nautobot) to easily onboard new devices.
 
-`nautobot-device-onboarding` is using [Netmiko](https://github.com/ktbyers/netmiko), [NAPALM](https://napalm.readthedocs.io/en/latest/) & [Django-RQ](https://github.com/rq/django-rq) to simplify the onboarding process of a new device into Nautobot down to an IP Address and a site.
-The goal of this plugin is not to import everything about a device into Nautobot but rather to help build quickly an inventory in Nautobot that is often the first step into an automation journey.
+`nautobot-device-onboarding` is using [Netmiko](https://github.com/ktbyers/netmiko), [NAPALM](https://napalm.readthedocs.io/en/latest/) & [Django-RQ](https://github.com/rq/django-rq) to simplify the onboarding process of a new device into Nautobot down to an IP Address and a site. The goal of this plugin is not to import everything about a device into Nautobot but rather to help build quickly an inventory in Nautobot that is often the first step into an automation journey.
 
 ## Installation
 
-If using the installation pattern from the Nautobot Documentation, you will need to activate the
-virtual environment before installing so that you install the package into the virtual environment.
+If using the installation pattern from the Nautobot Documentation, you will need sudo to the `nautobot` user before installing so that you install the package into the Nautobot virtual environment.
 
-```shell
-sudo -iu nautobot
-# This may not be required if already in the /opt/nautobot directory
-cd /opt/nautobot
-source bin/activate
+```no-highlight
+$ sudo -iu nautobot
 ```
 
-The plugin is available as a Python package in pypi and can be installed with pip.
+The plugin is available as a Python package in PyPI and can be installed with `pip3`.
 
-```shell
-pip install nautobot-device-onboarding
+```no-highlight
+$ pip3 install nautobot-device-onboarding
 ```
 
 ### Compatibility Matrix
@@ -32,10 +27,12 @@ pip install nautobot-device-onboarding
 | ---------------------------- | ------------ |
 | Device Onboarding plugin 1.0 | X            |
 
-To ensure Device Onboarding plugin is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the Nautobot root directory (alongside `requirements.txt`) and list the `nautobot-device-onboarding` package:
+To ensure Device Onboarding plugin is automatically re-installed during future upgrades, create a file named
+`local_requirements.txt` (or append if it already exists) in the
+[`NAUTOBOT_ROOT`](https://nautobot.readthedocs.io/en/latest/configuration/optional-settings/#nautobot_root) directory and list the `nautobot-device-onboarding` package:
 
 ```no-highlight
-# echo nautobot-device-onboarding >> local_requirements.txt
+$ echo nautobot-device-onboarding >> $NAUTOBOT_ROOT/local_requirements.txt
 ```
 
 Once installed, the plugin needs to be enabled in your `nautobot_config.py`
@@ -50,11 +47,16 @@ PLUGINS = ["nautobot_device_onboarding"]
 # }
 ```
 
-Finally, run the migrations for this plugin, and restart Nautobot and the Nautobot worker.
+Next, run the migrations for this plugin.
 
-```bash
-nautobot-server migrate
-systemctl restart nautobot nautobot-worker
+```no-highlight
+$ nautobot-server migrate
+```
+
+Finally, as root, restart Nautobot and the Nautobot worker.
+
+```no-highlight
+$ sudo systemctl restart nautobot nautobot-worker
 ```
 
 ### Plugin Configuration Options
