@@ -11,7 +11,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from django.contrib.auth.models import User  # pylint: disable=imported-auth-user
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
@@ -21,6 +21,8 @@ from nautobot.users.models import Token
 from nautobot.dcim.models import Site
 
 from nautobot_device_onboarding.models import OnboardingTask
+
+User = get_user_model()
 
 
 class OnboardingTaskTestCase(TestCase):
