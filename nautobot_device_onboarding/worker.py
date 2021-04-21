@@ -53,7 +53,7 @@ def onboard_device(task_id, credentials):  # pylint: disable=too-many-statements
     try:
         try:
             if ot.ip_address:
-                onboarded_device = Device.objects.get(primary_ip4__address__net_host=ot.ip_address)
+                onboarded_device = Device.objects.get(primary_ip4__host=ot.ip_address)
 
             if OnboardingDevice.objects.filter(device=onboarded_device, enabled=False):
                 ot.status = OnboardingStatusChoices.STATUS_SKIPPED

@@ -18,11 +18,12 @@ import re
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.utils.text import slugify
+from nautobot.dcim.choices import InterfaceTypeChoices
 from nautobot.dcim.models import Manufacturer, Device, Interface, DeviceType, DeviceRole
 from nautobot.dcim.models import Platform
 from nautobot.dcim.models import Site
-from nautobot.ipam.models import IPAddress
 from nautobot.extras.models import Status
+from nautobot.ipam.models import IPAddress
 
 from .constants import NETMIKO_TO_NAPALM_STATIC
 from .exceptions import OnboardException
@@ -148,7 +149,7 @@ class NautobotKeeper:
         """
         try:
             if self.netdev_mgmt_ip_address:
-                self.onboarded_device = Device.objects.get(primary_ip4__address__net_host=self.netdev_mgmt_ip_address)
+                self.onboarded_device = Device.objects.get(primary_ip4__host=self.netdev_mgmt_ip_address)
         except Device.DoesNotExist:
             logger.info(
                 "Could not find existing Nautobot device for requested primary IP address (%s)",
@@ -304,7 +305,7 @@ class NautobotKeeper:
             and create_platform_if_missing is enabled
 
         Return:
-            dcim.models.Platform object
+            nautobot.dcim.models.Platform object
 
         Raises:
             OnboardException
@@ -381,9 +382,9 @@ class NautobotKeeper:
             try:
                 device_status = Status.objects.get(content_types__in=[ct], name=default_status)
             except Status.DoesNotExist:
-                logger.info(
-                    "Could not find existing device status (%s)",
-                    default_status,
+                raise OnboardException(
+                    reason="fail-general",
+                    message=f"ERROR could not find existing device status: {default_status}",
                 )
             except Status.MultipleObjectsReturned:
                 raise OnboardException(
@@ -399,7 +400,7 @@ class NautobotKeeper:
                     platform=self.nb_platform,
                     site=self.nb_site,
                     serial=self.netdev_serial_number,
-                    # status= defined only for new devices, no update for existing should occur
+                    # `status` field is defined only for new devices, no update for existing should occur
                     status=device_status,
                 ),
             }
@@ -421,7 +422,9 @@ class NautobotKeeper:
     def ensure_interface(self):
         """Ensures that the interface associated with the mgmt_ipaddr exists and is assigned to the device."""
         if self.netdev_mgmt_ifname:
-            self.nb_mgmt_ifname, _ = Interface.objects.get_or_create(name=self.netdev_mgmt_ifname, device=self.device)
+            self.nb_mgmt_ifname, _ = Interface.objects.get_or_create(
+                name=self.netdev_mgmt_ifname, device=self.device, defaults=dict(type=InterfaceTypeChoices.TYPE_OTHER)
+            )
 
     def ensure_primary_ip(self):
         """Ensure mgmt_ipaddr exists in IPAM, has the device interface, and is assigned as the primary IP address."""
@@ -434,10 +437,12 @@ class NautobotKeeper:
             if created or self.nb_primary_ip not in self.nb_mgmt_ifname.ip_addresses.all():
                 logger.info("ASSIGN: IP address %s to %s", self.nb_primary_ip.address, self.nb_mgmt_ifname.name)
                 self.nb_mgmt_ifname.ip_addresses.add(self.nb_primary_ip)
+                self.nb_mgmt_ifname.full_clean()
                 self.nb_mgmt_ifname.save()
 
             # Ensure the primary IP is assigned to the device
             self.device.primary_ip4 = self.nb_primary_ip
+            self.device.full_clean()
             self.device.save()
 
     def ensure_device(self):
