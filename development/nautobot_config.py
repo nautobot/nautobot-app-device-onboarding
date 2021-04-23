@@ -84,13 +84,29 @@ RQ_QUEUES = {
         "SSL": is_truthy(os.environ.get("REDIS_SSL", False)),
         "DEFAULT_TIMEOUT": 300,
     },
-    "check_releases": {
-        "HOST": os.environ["REDIS_HOST"],
+    "webhooks": {
+        "HOST": os.getenv("REDIS_HOST"),
         "PORT": int(os.environ.get("REDIS_PORT", 6379)),
         "DB": 0,
-        "PASSWORD": os.environ["REDIS_PASSWORD"],
+        "PASSWORD": os.getenv("REDIS_PASSWORD"),
         "SSL": is_truthy(os.environ.get("REDIS_SSL", False)),
         "DEFAULT_TIMEOUT": 300,
+    },
+    "check_releases": {
+        "HOST": os.getenv("REDIS_HOST"),
+        "PORT": int(os.environ.get("REDIS_PORT", 6379)),
+        "DB": 0,
+        "PASSWORD": os.getenv("REDIS_PASSWORD"),
+        "SSL": is_truthy(os.environ.get("REDIS_SSL", False)),
+        "DEFAULT_TIMEOUT": 300,
+    },
+    "custom_fields": {
+        "HOST": os.getenv("REDIS_HOST"),
+        "PORT": int(os.environ.get("REDIS_PORT", 6379)),
+        "DB": 0,
+        "PASSWORD": os.getenv("REDIS_PASSWORD"),
+        "SSL": is_truthy(os.environ.get("REDIS_SSL", False)),
+        "DEFAULT_TIMEOUT": 900,
     },
 }
 

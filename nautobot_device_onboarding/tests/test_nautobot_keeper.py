@@ -15,6 +15,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.utils.text import slugify
+from nautobot.dcim.choices import InterfaceTypeChoices
 from nautobot.dcim.models import Site, Manufacturer, DeviceType, DeviceRole, Device, Interface, Platform
 from nautobot.ipam.models import IPAddress
 from nautobot.extras.models import Status
@@ -350,7 +351,7 @@ class NautobotKeeperTestCase(TestCase):
             serial="987654",
         )
 
-        intf = Interface.objects.create(name=netdev_mgmt_ifname, device=device)
+        intf = Interface.objects.create(name=netdev_mgmt_ifname, device=device, type=InterfaceTypeChoices.TYPE_OTHER)
 
         onboarding_kwargs = {
             "netdev_hostname": device_name,
