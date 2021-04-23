@@ -16,7 +16,7 @@ import os
 from invoke import task
 
 PYTHON_VER = os.getenv("PYTHON_VER", "3.7")
-NAUTOBOT_VER = os.getenv("NAUTOBOT_VER", "main")
+NAUTOBOT_VER = os.getenv("NAUTOBOT_VER", "1.0.0b4")
 
 # Name of the docker image/container
 NAME = os.getenv("IMAGE_NAME", "nautobot-device-onboarding")

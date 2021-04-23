@@ -36,7 +36,7 @@ REQUEST_TIME = Summary("onboardingtask_processing_seconds", "Time spent processi
 
 @REQUEST_TIME.time()
 @job("default")
-def onboard_device(task_id, credentials):  # pylint: disable=too-many-statements
+def onboard_device(task_id, credentials):  # pylint: disable=too-many-statements, too-many-branches
     """Process a single OnboardingTask instance."""
     username = credentials.username
     password = credentials.password
@@ -53,7 +53,7 @@ def onboard_device(task_id, credentials):  # pylint: disable=too-many-statements
     try:
         try:
             if ot.ip_address:
-                onboarded_device = Device.objects.get(primary_ip4__address__net_host=ot.ip_address)
+                onboarded_device = Device.objects.get(primary_ip4__host=ot.ip_address)
 
             if OnboardingDevice.objects.filter(device=onboarded_device, enabled=False):
                 ot.status = OnboardingStatusChoices.STATUS_SKIPPED
@@ -107,6 +107,10 @@ def onboard_device(task_id, credentials):  # pylint: disable=too-many-statements
         ot.message = str(exc)
         ot.save()
         onboarding_status = False
+
+    finally:
+        if onboarded_device and not OnboardingDevice.objects.filter(device=onboarded_device):
+            OnboardingDevice.objects.create(device=onboarded_device)
 
     onboardingtask_results_counter.labels(status=ot.status).inc()
 

@@ -12,7 +12,7 @@
         </div>
     </div>
 
-    <h1>{% block title %}Device: {{ object.ip_address }}{% endblock %}</h1>
+    <h1>{% block title %}{{ object }}{% endblock %}</h1>
 
     <ul class="nav nav-tabs">
         <li role="presentation"{% if not active_tab %} class="active"{% endif %}>

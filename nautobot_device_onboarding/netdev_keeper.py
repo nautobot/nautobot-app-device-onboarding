@@ -178,7 +178,12 @@ class NetdevKeeper:
             logger.error("ERROR: %s", str(err))
             raise OnboardException(reason="fail-general", message=f"ERROR: {str(err)}")
 
-        logger.info("INFO device type is: %s", guessed_device_type)
+        else:
+            if guessed_device_type is None:
+                logger.error("ERROR: Could not detect device type with SSHDetect")
+                raise OnboardException(
+                    reason="fail-general", message="ERROR: Could not detect device type with SSHDetect"
+                )
 
         return guessed_device_type
 
