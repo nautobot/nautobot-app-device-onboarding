@@ -72,7 +72,7 @@ class OnboardingDriverExtensions:
     def __init__(self, napalm_device):
         """Inits the class."""
         self.napalm_device = napalm_device
-        self.onboarding_class = MyOnboardingClass
+        self.onboarding_class = self.get_onboarding_class()
         self.ext_result = None
 
     def get_onboarding_class(self):
@@ -83,7 +83,7 @@ class OnboardingDriverExtensions:
         Result of this method is used by the OnboardingManager to
         initiate the instance of the onboarding class.
         """
-        return self.onboarding_class
+        return MyOnboardingClass
 
     def get_ext_result(self):
         """This method is used to store any object as a return value.
