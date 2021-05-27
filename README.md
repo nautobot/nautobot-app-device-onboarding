@@ -138,6 +138,11 @@ GET     ​   /api/plugins​/device-onboarding​/onboarding​/{id}​/  Check
 DELETE    ​ /api/plugins​/device-onboarding​/onboarding​/{id}​/  Delete a specific onboarding task
 ```
 
+## Customizing onboarding behaviour with onboarding extensions
+
+Onboarding plugin provides methods to customize onboarding behaviour. By creating onboarding extensions, it is possible to onboard switch stacks, HA pairs and perform other customizations. Please see dedicated FAQ for device onboarding: [onboarding_extensions.md](docs/onboarding-extensions/onboarding_extensions.md)
+
+
 ## Contributing
 
 Pull requests are welcomed and automatically built and tested against multiple version of Python and multiple version of Nautobot through TravisCI.
