@@ -18,7 +18,8 @@ from django.utils.text import slugify
 from nautobot.dcim.choices import InterfaceTypeChoices
 from nautobot.dcim.models import Site, Manufacturer, DeviceType, DeviceRole, Device, Interface, Platform
 from nautobot.ipam.models import IPAddress
-from nautobot.extras.models import Status
+from nautobot.extras.choices import CustomFieldTypeChoices
+from nautobot.extras.models import CustomField, Status
 
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.nautobot_keeper import NautobotKeeper
@@ -32,6 +33,63 @@ class NautobotKeeperTestCase(TestCase):
     def setUp(self):
         """Create a superuser and token for API calls."""
         self.site1 = Site.objects.create(name="USWEST", slug="uswest")
+        DATA = (
+            {
+                "field_type": CustomFieldTypeChoices.TYPE_TEXT,
+                "field_name": "cf_manufacturer",
+                "default_value": "Foobar!",
+                "model": Manufacturer,
+            },
+            {
+                "field_type": CustomFieldTypeChoices.TYPE_INTEGER,
+                "field_name": "cf_devicetype",
+                "default_value": 5,
+                "model": DeviceType,
+            },
+            {
+                "field_type": CustomFieldTypeChoices.TYPE_INTEGER,
+                "field_name": "cf_devicerole",
+                "default_value": 10,
+                "model": DeviceRole,
+            },
+            {
+                "field_type": CustomFieldTypeChoices.TYPE_BOOLEAN,
+                "field_name": "cf_platform",
+                "default_value": True,
+                "model": Platform,
+            },
+            {
+                "field_type": CustomFieldTypeChoices.TYPE_BOOLEAN,
+                "field_name": "cf_device",
+                "default_value": False,
+                "model": Device,
+            },
+            {
+                "field_type": CustomFieldTypeChoices.TYPE_BOOLEAN,
+                "field_name": "cf_device_null",
+                "default_value": None,
+                "model": Device,
+            },
+            {
+                "field_type": CustomFieldTypeChoices.TYPE_DATE,
+                "field_name": "cf_interface",
+                "default_value": "2016-06-23",
+                "model": Interface,
+            },
+            {
+                "field_type": CustomFieldTypeChoices.TYPE_URL,
+                "field_name": "cf_ipaddress",
+                "default_value": "http://example.com/",
+                "model": IPAddress,
+            },
+        )
+
+        for data in DATA:
+            # Create a custom field
+            cf = CustomField.objects.create(
+                type=data["field_type"], name=data["field_name"], default=data["default_value"], required=False
+            )
+            cf.content_types.set([ContentType.objects.get_for_model(data["model"])])
 
     def test_ensure_device_manufacturer_strict_missing(self):
         """Verify ensure_device_manufacturer function when Manufacturer object is not present."""
@@ -473,3 +531,33 @@ class NautobotKeeperTestCase(TestCase):
             Platform.objects.get(name=PLUGIN_SETTINGS["platform_map"]["cisco_ios"]).name,
             slugify(PLUGIN_SETTINGS["platform_map"]["cisco_ios"]),
         )
+
+    def test_ensure_custom_fields(self):
+        """Verify objects inherit default custom fields."""
+        onboarding_kwargs = {
+            "netdev_hostname": "sw1",
+            "netdev_nb_role_slug": "switch",
+            "netdev_vendor": "Cisco",
+            "netdev_model": "c2960",
+            "netdev_nb_site_slug": self.site1.slug,
+            "netdev_netmiko_device_type": "cisco_ios",
+            "netdev_serial_number": "123456",
+            "netdev_mgmt_ip_address": "192.0.2.15",
+            "netdev_mgmt_ifname": "Management0",
+            "netdev_mgmt_pflen": 24,
+            "netdev_nb_role_color": "ff0000",
+        }
+
+        nbk = NautobotKeeper(**onboarding_kwargs)
+        nbk.ensure_device()
+
+        device = Device.objects.get(name="sw1")
+
+        self.assertEqual(device.cf["cf_device"], False)
+        self.assertEqual("cf_device_null" in device.cf, False)
+        self.assertEqual(device.platform.cf["cf_platform"], True)
+        self.assertEqual(device.device_type.cf["cf_devicetype"], 5)
+        self.assertEqual(device.device_role.cf["cf_devicerole"], 10)
+        self.assertEqual(device.device_type.manufacturer.cf["cf_manufacturer"], "Foobar!")
+        self.assertEqual(device.interfaces.get(name="Management0").cf["cf_interface"], "2016-06-23")
+        self.assertEqual(device.primary_ip.cf["cf_ipaddress"], "http://example.com/")

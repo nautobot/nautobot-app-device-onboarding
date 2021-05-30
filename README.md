@@ -68,7 +68,8 @@ The plugin behavior can be controlled with the following list of settings
 - `create_manufacturer_if_missing` boolean (default True), If True, a new manufacturer object will be created if the manufacturer discovered by Napalm is do not match an existing manufacturer, this option is only valid if `create_device_type_if_missing` is True as well.
 - `create_device_role_if_missing` boolean (default True), If True, a new device role object will be created if the device role provided was not provided as part of the onboarding and if the `default_device_role` do not already exist.
 - `create_management_interface_if_missing` boolean (default True), If True, add management interface and IP address to the device. If False no management interfaces will be created, nor will the IP address be added to Nautobot, while the device will still get added.
-- `default_device_status` string (default "Active"), status assigned to a new device by default (must be lowercase).
+- `default_device_status` string (default "Active"), status assigned to a new device by default.
+- `default_ip_status` string (default "Active"), status assigned to a new device management IP.
 - `default_device_role` string (default "network")
 - `default_device_role_color` string (default FF0000), color assigned to the device role if it needs to be created.
 - `default_management_interface` string (default "PLACEHOLDER"), name of the management interface that will be created, if one can't be identified on the device.
