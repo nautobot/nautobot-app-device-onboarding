@@ -5,7 +5,31 @@
 
 A plugin for [Nautobot](https://github.com/nautobot/nautobot) to easily onboard new devices.
 
-`nautobot-device-onboarding` is using [Netmiko](https://github.com/ktbyers/netmiko), [NAPALM](https://napalm.readthedocs.io/en/latest/) & [Django-RQ](https://github.com/rq/django-rq) to simplify the onboarding process of a new device into Nautobot down to an IP Address and a site. The goal of this plugin is not to import everything about a device into Nautobot but rather to help build quickly an inventory in Nautobot that is often the first step into an automation journey.
+`nautobot-device-onboarding` is using [Netmiko](https://github.com/ktbyers/netmiko), 
+[NAPALM](https://napalm.readthedocs.io/en/latest/) & [Django-RQ](https://github.com/rq/django-rq) to simplify the onboarding 
+process of a new device into Nautobot down to, in many cases, an IP Address and a site. In some cases, the user may also
+have to specify a specific Platform and Port. Regardless, the Onboarding Plugin greatly simplifies the onboarding process
+by allowing the user to specify a small amount of info and having the plugin populate a much larger amount of device data in Nautobot.
+
+In most cases, the user would specify:
+* Device Name 
+* Site
+* Platform [^note]
+* Transport Port [^note]
+
+[^note]: Necessary for NXOS API and Arista EOS platform onboarding
+
+And the Onboarding Plugin would populate the following:
+* Device Type (Model) - Creates if it does not exist
+* Device Role - defaults to `network` 
+* Platform - Creates Cisco IOS, Cisco NXOS (ssh), and Junos Platforms if they do not exist
+* Manufacturer - Creates Cisco/Juniper/Arista if it does not exist
+* Management Interface
+* Management Interface IP
+* Serial Number (when available)
+
+The goal of this plugin is not to import everything about a device into Nautobot but rather to help build quickly an 
+inventory in Nautobot that is often the first step into an automation journey.
 
 ## Installation
 
