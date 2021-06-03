@@ -35,6 +35,8 @@ To ensure Device Onboarding plugin is automatically re-installed during future u
 $ echo nautobot-device-onboarding >> $NAUTOBOT_ROOT/local_requirements.txt
 ```
 
+### Nautobot Server Configuration
+
 Once installed, the plugin needs to be enabled in your `nautobot_config.py`
 ```python
 # In your nautobot_config.py
@@ -47,7 +49,23 @@ PLUGINS = ["nautobot_device_onboarding"]
 # }
 ```
 
-Next, run the migrations for this plugin.
+#### NAPALM Username and Password
+
+The Onboarding Plugin uses NAPALM. You can configure a default NAPALM user and password in `nautobot_config.py`.
+
+When `NAPALM_USERNAME` and `NAPALM_PASSWORD` are configured in `nautobot_config.py`, the user does not have to 
+specify the `Username` and `Password` fields in the Device Onboarding Task, unless they wish to override the values in 
+`nautobot_config.py`:
+
+```python
+# Credentials that Nautobot will uses to authenticate to devices when connecting via NAPALM.
+NAPALM_USERNAME = "<napalm username>"
+NAPALM_PASSWORD = "<napalm pwd>"
+```
+
+#### Final Configuration Steps
+
+After installing the plugin and modifying `nautobot_config.py`, as the `nautobot` user, run the server migration:
 
 ```no-highlight
 $ nautobot-server migrate
