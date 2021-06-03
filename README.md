@@ -100,15 +100,67 @@ When a new release comes out it may be necessary to run a migration of the datab
 
 ### Preparation
 
-To properly onboard a device, the plugin needs to only know the Site as well as device's primary IP address or DNS Name.
+To properly onboard a device, the plugin needs to know the Site as well as device's primary IP address or DNS Name, at a minimum.
 
 > For DNS Name Resolution to work, the instance of Nautobot must be able to resolve the name of the
 > device to IP address.
+
+The user will need to specify additional information for platforms where Netmiko's ssh_autodetect feature does not work.  
+
+The table below shows which platforms will be SSH auto-detected by default.
+
+|Platform     |Platform Autodetect|
+--------------|--------------------
+Juniper/Junos | Yes|
+Cisco IOS-XE  |Yes|
+Cisco NXOS (ssh) | Yes|
+Cisco NXOS (nxapi)| No|
+Arista EOS | No|
 
 Providing other attributes (`Platform`, `Device Type`, `Device Role`) is optional - if any of these attributes is provided, plugin will use provided value for the onboarded device.
 If `Platform`, `Device Type` and/or `Device Role` are not provided, the plugin will try to identify these information automatically and, based on the settings, it can create them in Nautobot as needed.
 > If the Platform is provided, it must point to an existing Nautobot Platform. NAPALM driver of this platform will be used only if it is defined for the platform in Nautobot.
 > To use a preferred NAPALM driver, either define it in Nautobot per platform or in the plugins settings under `platform_map`
+
+For the platforms where SSH auto-detection does not work, the user will need to:
+1. Manually define a Platform in Nautobot (this will be a one-time task)
+2. During onboarding, a Port and Platform must explicitly be specified (in addition to the IP and Site)
+
+> There are two ways the NXOS devices can be accessed: via SSH or the `nxapi` feature. 
+> The former will be autodetected; the latter will require the additional steps
+
+## Creating a Platform
+
+This section will demonstrate how to create a new Platform in the Nautobot UI. Specifically, it will offer examples for
+creating Cisco `nxapi` and Arista `eos` Platforms, but the concepts are applicable to any Platform that is manually created.
+
+In the Nautobot dropdown menu, go to Devices--> Platforms--> Add/+.
+
+Define the attributes for the Platform on this screen and click on the 'Create' button. 
+
+The Slug value will be auto-populated based on the Platform Name, but you can overwrite that auto-populated value.
+
+'Manufacturer' and 'NAPALM arguments' are optional.
+
+### NXAPI Platform
+
+A Platform that will work with NXOS devices running the `nxapi` feature must have specific values for these attributes:
+* `Slug` **MUST** be `nxos` (you may have to overwrite the auto-populated Slug value)
+* `NAPALM driver` **MUST** be `nxos`
+
+![pic of nxapi platform](docs/images/create_nxapi_platform.png)
+
+
+### Arista EOS Platform
+
+A Platform that will work with Arista EOS devices must have specific values for these attributes:
+* `Slug` **MUST** be `arista_eos` (you may have to overwrite the auto-populated Slug value)
+* `NAPALM driver` **MUST** be `eos`
+
+![pic of eos platform](docs/images/create_eos_platform.png)
+
+
+## Device Onboarding
 
 ### Onboard a new device
 
@@ -120,6 +172,23 @@ A new device can be onboarded via :
 During a successful onboarding process, a new device will be created in Nautobot with its management interface and its primary IP assigned. The management interface will be discovered on the device based on the IP address provided.
 
 > By default, the plugin is using the credentials defined in the main `configuration.py` for Napalm (`NAPALM_USERNAME`/`NAPALM_PASSWORD`). It's possible to define specific credentials for each onboarding task.
+
+
+### Onboarding an NXOS Device Running the `nxapi` Feature
+
+When onboarding an NXOS device with the `nxapi` feature, there are a few requirements:
+* The `Port` must be the same value configured for `nxapi https port` on the NXOS device
+* The `Platform` must be explicitly configured to be the 
+
+![onboard nxos](docs/images/onboard_nxos.png)
+
+
+### Onboarding an Arista EOS Device 
+
+![onboard eos](docs/images/onboard_eos.png)
+
+
+
 
 ### Consult the status of onboarding tasks
 
