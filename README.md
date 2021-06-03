@@ -5,7 +5,37 @@
 
 A plugin for [Nautobot](https://github.com/nautobot/nautobot) to easily onboard new devices.
 
-`nautobot-device-onboarding` is using [Netmiko](https://github.com/ktbyers/netmiko), [NAPALM](https://napalm.readthedocs.io/en/latest/) & [Django-RQ](https://github.com/rq/django-rq) to simplify the onboarding process of a new device into Nautobot down to an IP Address and a site. The goal of this plugin is not to import everything about a device into Nautobot but rather to help build quickly an inventory in Nautobot that is often the first step into an automation journey.
+`nautobot-device-onboarding` is using [Netmiko](https://github.com/ktbyers/netmiko) and 
+[NAPALM](https://napalm.readthedocs.io/en/latest/) to simplify the onboarding 
+process of a new device into Nautobot down to, in many cases, an IP Address and a site. In some cases, the user may also
+have to specify a specific Device Platform and Device Port. Regardless, the Onboarding Plugin greatly simplifies the onboarding process
+by allowing the user to specify a small amount of info and having the plugin populate a much larger amount of device data in Nautobot.
+
+In most cases, the user would specify:
+* Device Name 
+* Site
+* Platform **
+* Transport Port **
+
+> ** Necessary for onboarding NXOS API, Arista EOS, or any other platform not using SSH as a transport
+
+And the Onboarding Plugin would populate the following:
+* Device Type (Model) - Creates if it does not exist
+* Device Role - defaults to `network` 
+* Platform - Creates Cisco IOS, Cisco NXOS (ssh), and Junos Platforms if they do not exist
+* Manufacturer - Creates Cisco/Juniper/Arista if it does not exist
+* Management Interface
+* Management Interface IP
+* Serial Number (when available)
+
+The goal of this plugin is not to import everything about a device into Nautobot. Rather, the goal is to quickly build an 
+inventory of basic device data in Nautobot that provides basic info on how to access the devices. 
+For example, getting the Management IP and Platform data into Nautobot allows a follow-on tool that uses the 
+basic info to access each device, retrieve data, and then populate Nautobot with that data.
+
+One example of a solution that can retrieve that additional device data and import it into Nautobot is the [Network Importer](https://github.com/networktocode/network-importer).
+Other options would include an Ansible playbook or a Python script.
+
 
 ## Installation
 
@@ -35,33 +65,19 @@ To ensure Device Onboarding plugin is automatically re-installed during future u
 $ echo nautobot-device-onboarding >> $NAUTOBOT_ROOT/local_requirements.txt
 ```
 
+### Nautobot Configuration
+
+#### Enabling Plugin
+
 Once installed, the plugin needs to be enabled in your `nautobot_config.py`
 ```python
 # In your nautobot_config.py
 PLUGINS = ["nautobot_device_onboarding"]
-
-# PLUGINS_CONFIG = {
-#   "nautobot_device_onboarding": {
-#     ADD YOUR SETTINGS HERE
-#   }
-# }
 ```
 
-Next, run the migrations for this plugin.
+#### Plugin Configuration Options
 
-```no-highlight
-$ nautobot-server migrate
-```
-
-Finally, as root, restart Nautobot and the Nautobot worker.
-
-```no-highlight
-$ sudo systemctl restart nautobot nautobot-worker
-```
-
-### Plugin Configuration Options
-
-The plugin behavior can be controlled with the following list of settings
+Although plugin can run without providing any settings, the plugin behavior can be controlled with the following list of settings defined in `nautobot_config.py`
 
 - `create_platform_if_missing` boolean (default True), If True, a new platform object will be created if the platform discovered by netmiko do not already exist and is in the list of supported platforms (`cisco_ios`, `cisco_nxos`, `arista_eos`, `juniper_junos`, `cisco_xr`)
 - `create_device_type_if_missing` boolean (default True), If True, a new device type object will be created if the model discovered by Napalm do not match an existing device type.
@@ -93,6 +109,48 @@ currently two strategies, strict and loose. Strict has to be a direct match, nor
 using a slug. Loose allows a range of search criteria to match a single object. If multiple
 objects are returned an error is raised. 
 
+Modify `nautobot_config.py` with settings of your choice. Example settings are shown below:
+
+```python
+# Example settings In your nautobot_config.py
+PLUGINS_CONFIG = {
+  "nautobot_device_onboarding": {
+    "default_ip_status": "Active",
+    "default_device_role": "leaf",
+    "skip_device_type_on_update": True,
+  }
+}
+```
+
+
+#### NAPALM Credentials
+
+The Onboarding Plugin uses NAPALM. You can configure a default NAPALM username and password in `nautobot_config.py`.
+
+When `NAPALM_USERNAME` and `NAPALM_PASSWORD` are configured in `nautobot_config.py`, the user does not have to 
+specify the `Username` and `Password` fields in the Device Onboarding Task, unless they wish to override the values in 
+`nautobot_config.py`:
+
+```python
+# Credentials that Nautobot will uses to authenticate to devices when connecting via NAPALM.
+NAPALM_USERNAME = "<napalm username>"
+NAPALM_PASSWORD = "<napalm pwd>"
+```
+
+### Final Configuration Steps
+
+After installing the plugin and modifying `nautobot_config.py`, as the `nautobot` user, run the server migration:
+
+```no-highlight
+$ nautobot-server migrate
+```
+
+Finally, as root, restart Nautobot and the Nautobot worker.
+
+```no-highlight
+$ sudo systemctl restart nautobot nautobot-worker
+```
+
 ## Upgrades
 
 When a new release comes out it may be necessary to run a migration of the database to account for any changes in the data models used by this plugin. Execute the command `nautobot-server migrate` from the Nautobot install `nautobot/` directory after updating the package.
@@ -101,15 +159,77 @@ When a new release comes out it may be necessary to run a migration of the datab
 
 ### Preparation
 
-To properly onboard a device, the plugin needs to only know the Site as well as device's primary IP address or DNS Name.
+To properly onboard a device, user needs to provide, at a minimum:
+1. The Device's Site 
+2. The Device's primary IP address or DNS Name
 
 > For DNS Name Resolution to work, the instance of Nautobot must be able to resolve the name of the
 > device to IP address.
 
-Providing other attributes (`Platform`, `Device Type`, `Device Role`) is optional - if any of these attributes is provided, plugin will use provided value for the onboarded device.
+If other attributes (`Platform`, `Device Type`, `Device Role`) are provided in the onboarding task, the plugin will use provided value for the onboarded device.
 If `Platform`, `Device Type` and/or `Device Role` are not provided, the plugin will try to identify these information automatically and, based on the settings, it can create them in Nautobot as needed.
 > If the Platform is provided, it must point to an existing Nautobot Platform. NAPALM driver of this platform will be used only if it is defined for the platform in Nautobot.
 > To use a preferred NAPALM driver, either define it in Nautobot per platform or in the plugins settings under `platform_map`
+
+#### SSH Autodetect
+
+Plugin recognizes platform types with a Netmiko SSH Autodetect mechanism. The user will need to specify additional information for platforms where Netmiko's `ssh_autodetect` feature does not work. 
+[Here is the list](https://github.com/ktbyers/netmiko/blob/v3.4.0/netmiko/ssh_autodetect.py#L50) of platforms supported by `ssh_autodetect`.
+
+The `nautobot-device-onboarding` plugin can be used with any devices that are supported by NAPALM. Even custom NAPALM driver plugins can be used with a bit of effort.
+
+Devices that are supported by NAPALM but are not running SSH or don't have support for `ssh_autodetect` will still work with this plugin, but will require some additional information in the onboarding task.
+
+The table below shows which common platforms will be SSH auto-detected by default.
+
+|Platform     |Platform Autodetect|
+--------------|--------------------
+Juniper/Junos | Yes (when running Netconf over SSH)|
+Cisco IOS-XE  |Yes|
+Cisco NXOS (ssh) | Yes|
+Cisco NXOS (nxapi)| No|
+Arista EOS | No|
+
+For the platforms where SSH auto-detection does not work, the user will need to:
+1. Manually define a Platform in Nautobot (this will be a one-time task in order to support any number of devices using this Platform)
+2. During onboarding, a Port and Platform must explicitly be specified (in addition to the IP and Site)
+
+## IOS and Junos Auto-Created Platforms
+
+The Onboarding Plugin will automatically create Platforms for vendor operating systems where platform auto-detection works.
+The picture below shows the details of auto-created Platforms for `cisco_ios` and `juniper_junos`.
+
+![cisco_ios_platform](https://github.com/nautobot/nautobot-plugin-device-onboarding/raw/main/docs/images/platform_cisco_ios.png)
+![juniper_junos_platform](https://github.com/nautobot/nautobot-plugin-device-onboarding/raw/main/docs/images/platform_juniper_junos.png)
+
+## Creating a Platform
+
+This section will demonstrate how to create a new Platform in the Nautobot UI. Specifically, it will offer examples for
+creating Cisco `nxapi` and Arista `eos` Platforms, but the concepts are applicable to any Platform that is manually created.
+
+In the Nautobot dropdown menu, go to Devices--> Platforms--> Add/+.
+
+Define the attributes for the Platform on this screen and click on the 'Create' button. 
+
+The Slug value will be auto-populated based on the Platform Name, but you can overwrite that auto-populated value. For the platform to work correctly with this plugin, in many cases you will need to set a specific Slug value for it to work properly.
+
+'Manufacturer' and 'NAPALM arguments' are optional.
+
+### Cisco NXOS Platform
+
+A Platform that will work with NXOS devices running the `nxapi` feature must have specific values for these attributes:
+* `Slug` **SHOULD** be `cisco_nxos` (you may have to overwrite the auto-populated Slug value)
+* `NAPALM driver` **MUST** be `nxos`
+
+
+### Arista EOS Platform
+
+A Platform that will work with Arista EOS devices must have specific values for these attributes:
+* `Slug` **SHOULD** be `arista_eos` (you may have to overwrite the auto-populated Slug value)
+* `NAPALM driver` **MUST** be `eos`
+
+
+## Device Onboarding
 
 ### Onboard a new device
 
@@ -122,15 +242,29 @@ During a successful onboarding process, a new device will be created in Nautobot
 
 > By default, the plugin is using the credentials defined in the main `configuration.py` for Napalm (`NAPALM_USERNAME`/`NAPALM_PASSWORD`). It's possible to define specific credentials for each onboarding task.
 
-### Consult the status of onboarding tasks
+
+### Onboarding a Cisco NXOS Device Running the `nxapi` Feature
+
+When onboarding an NXOS device with the `nxapi` feature, there are a few requirements:
+* The `Port` must be the same value configured for `nxapi https port` on the Cisco Nexus device
+* The `Platform` must be explicitly set to be one with the specific parameters in the [Cisco NXOS Platform](#cisco-nxos-platform) section
+
+### Onboarding an Arista EOS Device 
+
+When onboarding an Arista EOS device, there are a few requirements:
+* The `Port` must be the same value configured for HTTPS on the Arista device
+* The `Platform` must be explicitly set to be the one with the specific parameters in the [Arista EOS Platform](#arista-eos-platform) section
+
+
+## Consult the Status of Onboarding Tasks
 
 The status of the onboarding process for each device is maintained is a dedicated table in Nautobot and can be retrived :
 - Via the UI `/plugins/device-onboarding/`
 - Via the API `GET /api/plugins​/device-onboarding​/onboarding​/`
 
-### API
+## API
 
-The plugin includes 4 API endpoints to manage the onbarding tasks
+The plugin includes 4 API endpoints to manage the onboarding tasks:
 
 ```shell
 GET        /api/plugins​/device-onboarding​/onboarding​/       Check status of all onboarding tasks.
@@ -139,9 +273,9 @@ GET     ​   /api/plugins​/device-onboarding​/onboarding​/{id}​/  Check
 DELETE    ​ /api/plugins​/device-onboarding​/onboarding​/{id}​/  Delete a specific onboarding task
 ```
 
-## Customizing onboarding behaviour with onboarding extensions
+## Customizing Onboarding Behaviour With Onboarding Extensions
 
-Onboarding plugin provides methods to customize onboarding behaviour. By creating onboarding extensions, it is possible to onboard switch stacks, HA pairs and perform other customizations. Please see dedicated FAQ for device onboarding: [onboarding_extensions.md](docs/onboarding-extensions/onboarding_extensions.md)
+This plugin provides methods to customize onboarding behaviour. By creating onboarding extensions, it is possible to onboard switch stacks, HA pairs and perform other customizations. Please see the dedicated FAQ for [device onboarding](https://github.com/nautobot/nautobot-plugin-device-onboarding/blob/develop/docs/onboarding-extensions/onboarding_extensions.md).
 
 
 ## Contributing
@@ -160,7 +294,7 @@ The project is coming with a CLI helper based on [invoke](http://www.pyinvoke.or
 
 Each command can be executed with `invoke <command>`. All commands support the arguments `--nautobot-ver` and `--python-ver` if you want to manually define the version of Python and Nautobot to use. Each command also has its own help `invoke <command> --help`
 
-#### Local dev environment
+#### Local dev Environment
 ```
   build            Build all docker images.
   debug            Start Nautobot and its dependencies in debug mode.
@@ -195,14 +329,13 @@ Sign up [here](http://slack.networktocode.com/)
 ## Screenshots
 
 List of Onboarding Tasks
-![Onboarding Tasks](docs/images/onboarding_tasks_view.png)
+![Onboarding Tasks](https://github.com/nautobot/nautobot-plugin-device-onboarding/raw/main/docs/images/onboarding_tasks_view.png)
 
 CSV form to import multiple devices
-![CSV Form](docs/images/csv_import_view.png)
+![CSV Form](https://github.com/nautobot/nautobot-plugin-device-onboarding/raw/main/docs/images/csv_import_view.png)
 
 Onboard a single device
-![Single Device Form](docs/images/single_device_form.png)
+![Single Device Form](https://github.com/nautobot/nautobot-plugin-device-onboarding/raw/main/docs/images/single_device_form.png)
 
 Menu 
-![Menu](docs/images/menu.png)
-
+![Menu](https://github.com/nautobot/nautobot-plugin-device-onboarding/raw/main/docs/images/menu.png)
