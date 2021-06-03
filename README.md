@@ -178,7 +178,7 @@ During a successful onboarding process, a new device will be created in Nautobot
 
 When onboarding an NXOS device with the `nxapi` feature, there are a few requirements:
 * The `Port` must be the same value configured for `nxapi https port` on the NXOS device
-* The `Platform` must be explicitly configured to be the 
+* The `Platform` must be explicitly set to be one with the specific parameters in the [NXAPI Platform](#nxapi-platform) section
 
 ![onboard nxos](docs/images/onboard_nxos.png)
 
