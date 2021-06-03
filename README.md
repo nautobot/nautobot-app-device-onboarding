@@ -29,7 +29,8 @@ And the Onboarding Plugin would populate the following:
 * Serial Number (when available)
 
 The goal of this plugin is not to import everything about a device into Nautobot but rather to help build quickly an 
-inventory in Nautobot that is often the first step into an automation journey.
+inventory in Nautobot that is often the first step into an automation journey. For example, once the Management IP and 
+Platform are in Nautobot, they could be used in an Ansible Playbook that retrieves more information about each device.
 
 ## Installation
 
