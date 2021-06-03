@@ -185,18 +185,20 @@ When onboarding an NXOS device with the `nxapi` feature, there are a few require
 
 ### Onboarding an Arista EOS Device 
 
+When onboarding an Arista EOS device, there are a few requirements:
+* The `Port` must be the same value configured for https on the Arista device
+* The `Platform` must be explicitly set to be the one with the specific parameters in the [Arista EOS Platform](#arista-eos-platform) section
+
 ![onboard eos](docs/images/onboard_eos.png)
 
 
-
-
-### Consult the status of onboarding tasks
+## Consult the status of onboarding tasks
 
 The status of the onboarding process for each device is maintained is a dedicated table in Nautobot and can be retrived :
 - Via the UI `/plugins/device-onboarding/`
 - Via the API `GET /api/plugins​/device-onboarding​/onboarding​/`
 
-### API
+## API
 
 The plugin includes 4 API endpoints to manage the onbarding tasks
 
