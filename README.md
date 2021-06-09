@@ -150,6 +150,11 @@ To properly onboard a device, the plugin needs to know, at a minimum:
 > For DNS Name Resolution to work, the instance of Nautobot must be able to resolve the name of the
 > device to IP address.
 
+If other attributes (`Platform`, `Device Type`, `Device Role`) are provided in the onboarding task, the plugin will use provided value for the onboarded device.
+If `Platform`, `Device Type` and/or `Device Role` are not provided, the plugin will try to identify these information automatically and, based on the settings, it can create them in Nautobot as needed.
+> If the Platform is provided, it must point to an existing Nautobot Platform. NAPALM driver of this platform will be used only if it is defined for the platform in Nautobot.
+> To use a preferred NAPALM driver, either define it in Nautobot per platform or in the plugins settings under `platform_map`
+
 #### SSH Autodetect
 
 The user will need to specify additional information for platforms where Netmiko's `ssh_autodetect` feature does not work. 
@@ -168,11 +173,6 @@ Cisco IOS-XE  |Yes|
 Cisco NXOS (ssh) | Yes|
 Cisco NXOS (nxapi)| No|
 Arista EOS | No|
-
-If other attributes (`Platform`, `Device Type`, `Device Role`) are provided in the onboarding task, the plugin will use provided value for the onboarded device.
-If `Platform`, `Device Type` and/or `Device Role` are not provided, the plugin will try to identify these information automatically and, based on the settings, it can create them in Nautobot as needed.
-> If the Platform is provided, it must point to an existing Nautobot Platform. NAPALM driver of this platform will be used only if it is defined for the platform in Nautobot.
-> To use a preferred NAPALM driver, either define it in Nautobot per platform or in the plugins settings under `platform_map`
 
 For the platforms where SSH auto-detection does not work, the user will need to:
 1. Manually define a Platform in Nautobot (this will be a one-time task)
