@@ -14,10 +14,10 @@ by allowing the user to specify a small amount of info and having the plugin pop
 In most cases, the user would specify:
 * Device Name 
 * Site
-* Platform [^note]
-* Transport Port [^note]
+* Platform **
+* Transport Port **
 
-[^note]: Necessary for NXOS API and Arista EOS platform onboarding
+> ** Necessary for onboarding NXOS API, Arista EOS, or any other platform not using SSH as a transport
 
 And the Onboarding Plugin would populate the following:
 * Device Type (Model) - Creates if it does not exist
@@ -143,24 +143,33 @@ When a new release comes out it may be necessary to run a migration of the datab
 
 ### Preparation
 
-To properly onboard a device, the plugin needs to know the Site as well as device's primary IP address or DNS Name, at a minimum.
+To properly onboard a device, the plugin needs to know, at a minimum:
+1. The Device's Site 
+2. The Device's primary IP address or DNS Name
 
 > For DNS Name Resolution to work, the instance of Nautobot must be able to resolve the name of the
 > device to IP address.
 
-The user will need to specify additional information for platforms where Netmiko's ssh_autodetect feature does not work.  
+#### SSH Autodetect
 
-The table below shows which platforms will be SSH auto-detected by default.
+The user will need to specify additional information for platforms where Netmiko's `ssh_autodetect` feature does not work. 
+[Here is the list](https://github.com/ktbyers/netmiko/blob/2dc032b64c3049d3048966441ee30a0139bebc81/netmiko/ssh_autodetect.py#L50) of platforms supported by `ssh_autodetect`.
+
+The `nautobot-device-onboarding` plugin is compatible for devices that are supported by NAPALM.
+
+Devices that are supported by NAPALM but are not running SSH or don't have support for `ssh_autodetect` will still work with this plugin, but will require some additional information in the onboarding task.
+
+The table below shows which common platforms will be SSH auto-detected by default.
 
 |Platform     |Platform Autodetect|
 --------------|--------------------
-Juniper/Junos | Yes|
+Juniper/Junos | Yes (when running Netconf over SSH)|
 Cisco IOS-XE  |Yes|
 Cisco NXOS (ssh) | Yes|
 Cisco NXOS (nxapi)| No|
 Arista EOS | No|
 
-Providing other attributes (`Platform`, `Device Type`, `Device Role`) is optional - if any of these attributes is provided, plugin will use provided value for the onboarded device.
+If other attributes (`Platform`, `Device Type`, `Device Role`) are provided in the onboarding task, the plugin will use provided value for the onboarded device.
 If `Platform`, `Device Type` and/or `Device Role` are not provided, the plugin will try to identify these information automatically and, based on the settings, it can create them in Nautobot as needed.
 > If the Platform is provided, it must point to an existing Nautobot Platform. NAPALM driver of this platform will be used only if it is defined for the platform in Nautobot.
 > To use a preferred NAPALM driver, either define it in Nautobot per platform or in the plugins settings under `platform_map`
