@@ -28,9 +28,14 @@ And the Onboarding Plugin would populate the following:
 * Management Interface IP
 * Serial Number (when available)
 
-The goal of this plugin is not to import everything about a device into Nautobot but rather to help build quickly an 
-inventory in Nautobot that is often the first step into an automation journey. For example, once the Management IP and 
-Platform are in Nautobot, they could be used in an Ansible Playbook that retrieves more information about each device.
+The goal of this plugin is not to import everything about a device into Nautobot. Rather, the goal is to quickly build an 
+inventory of basic device data in Nautobot that provides basic info on how to access the devices. 
+For example, getting the Management IP and Platform data into Nautobot allows a follow-on tool that uses the 
+basic info to access each device, retrieve data, and then populate Nautobot with that data.
+
+One example of a solution that can retrieve that additional device data and import it into Nautobot is the [Network Importer](https://github.com/networktocode/network-importer).
+Other options would include an Ansible playbook or a Python script.
+
 
 ## Installation
 
