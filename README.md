@@ -8,7 +8,7 @@ A plugin for [Nautobot](https://github.com/nautobot/nautobot) to easily onboard 
 `nautobot-device-onboarding` is using [Netmiko](https://github.com/ktbyers/netmiko), 
 [NAPALM](https://napalm.readthedocs.io/en/latest/) & [Django-RQ](https://github.com/rq/django-rq) to simplify the onboarding 
 process of a new device into Nautobot down to, in many cases, an IP Address and a site. In some cases, the user may also
-have to specify a specific Platform and Port. Regardless, the Onboarding Plugin greatly simplifies the onboarding process
+have to specify a specific Device Platform and Device Port. Regardless, the Onboarding Plugin greatly simplifies the onboarding process
 by allowing the user to specify a small amount of info and having the plugin populate a much larger amount of device data in Nautobot.
 
 In most cases, the user would specify:
@@ -79,7 +79,7 @@ PLUGINS = ["nautobot_device_onboarding"]
 # }
 ```
 
-#### NAPALM Username and Password
+#### NAPALM Credentials
 
 The Onboarding Plugin uses NAPALM. You can configure a default NAPALM user and password in `nautobot_config.py`.
 
@@ -186,6 +186,13 @@ For the platforms where SSH auto-detection does not work, the user will need to:
 > There are two ways the NXOS devices can be accessed: via SSH or the `nxapi` feature. 
 > The former will be autodetected; the latter will require the additional steps
 
+## IOS and Junos Auto-Created Platforms
+
+The Onboarding Plugin will automatically create Platforms for vendor operating systems where platform auto-detection works.
+The picture below shows the details of auto-created Platforms for *ios* and *junos*.
+
+![ios and junos platforms](docs/images/ios_junos_auto_created_platforms.png)
+
 ## Creating a Platform
 
 This section will demonstrate how to create a new Platform in the Nautobot UI. Specifically, it will offer examples for
@@ -249,7 +256,7 @@ When onboarding an Arista EOS device, there are a few requirements:
 ![onboard eos](docs/images/onboard_eos.png)
 
 
-## Consult the status of onboarding tasks
+## Consult the Status of Onboarding Tasks
 
 The status of the onboarding process for each device is maintained is a dedicated table in Nautobot and can be retrived :
 - Via the UI `/plugins/device-onboarding/`
@@ -266,7 +273,7 @@ GET     ​   /api/plugins​/device-onboarding​/onboarding​/{id}​/  Check
 DELETE    ​ /api/plugins​/device-onboarding​/onboarding​/{id}​/  Delete a specific onboarding task
 ```
 
-## Customizing onboarding behaviour with onboarding extensions
+## Customizing Onboarding Behaviour With Onboarding Extensions
 
 Onboarding plugin provides methods to customize onboarding behaviour. By creating onboarding extensions, it is possible to onboard switch stacks, HA pairs and perform other customizations. Please see dedicated FAQ for device onboarding: [onboarding_extensions.md](docs/onboarding-extensions/onboarding_extensions.md)
 
@@ -287,7 +294,7 @@ The project is coming with a CLI helper based on [invoke](http://www.pyinvoke.or
 
 Each command can be executed with `invoke <command>`. All commands support the arguments `--nautobot-ver` and `--python-ver` if you want to manually define the version of Python and Nautobot to use. Each command also has its own help `invoke <command> --help`
 
-#### Local dev environment
+#### Local dev Environment
 ```
   build            Build all docker images.
   debug            Start Nautobot and its dependencies in debug mode.
