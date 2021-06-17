@@ -52,9 +52,10 @@ def get_mgmt_info(
     the interface addresses present on the device. We need to handle this.
     """
     for if_name, if_data in ip_ifs.items():
-        for if_addr, if_addr_data in if_data["ipv4"].items():
-            if if_addr == hostname:
-                return if_name, if_addr_data["prefix_length"]
+        if "ipv4" in if_data:
+            for if_addr, if_addr_data in if_data["ipv4"].items():
+                if if_addr == hostname:
+                    return if_name, if_addr_data["prefix_length"]
 
     return default_mgmt_if, default_mgmt_pfxlen
 
