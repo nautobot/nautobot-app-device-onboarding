@@ -13,12 +13,12 @@ limitations under the License.
 """
 
 from rest_framework import serializers
-from django_rq import get_queue
 
 from nautobot.dcim.models import Site, DeviceRole, Platform
 
 from nautobot_device_onboarding.models import OnboardingTask
 from nautobot_device_onboarding.utils.credentials import Credentials
+from nautobot_device_onboarding.worker import enqueue_onboarding_task
 
 
 class OnboardingTaskSerializer(serializers.ModelSerializer):
@@ -130,8 +130,6 @@ class OnboardingTaskSerializer(serializers.ModelSerializer):
 
         ot = OnboardingTask.objects.create(**validated_data)
 
-        webhook_queue = get_queue("default")
-
-        webhook_queue.enqueue("nautobot_device_onboarding.worker.onboard_device", ot.id, credentials)
+        enqueue_onboarding_task(ot.id, credentials)
 
         return ot

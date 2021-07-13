@@ -25,3 +25,20 @@ class Credentials:
     def __repr__(self):
         """Return string representation of a Credentials object."""
         return "*Credentials argument hidden*"
+
+    def nautobot_serialize(self):
+        """Serialize object for Celery."""
+        return {
+            "username": self.username,
+            "password": self.password,
+            "secret": self.secret,
+        }
+
+    @classmethod
+    def nautobot_deserialize(cls, data):
+        """Deserialize object for Celery."""
+        return cls(
+            username=data["username"],
+            password=data["password"],
+            secret=data["secret"],
+        )
