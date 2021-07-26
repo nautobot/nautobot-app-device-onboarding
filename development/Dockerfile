@@ -4,8 +4,7 @@ FROM python:${python_ver}
 # Set env vars that won't change per image
 ENV PYTHONUNBUFFERED=1 \
     prometheus_multiproc_dir=/prom_cache \
-    PATH="/root/.poetry/bin:$PATH" \
-    NAUTOBOT_CONFIG="/etc/nautobot/nautobot_config.py"
+    PATH="/root/.poetry/bin:$PATH"
 
 RUN mkdir /prom_cache
 
