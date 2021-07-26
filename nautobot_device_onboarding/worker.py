@@ -14,7 +14,6 @@ limitations under the License.
 import logging
 
 from django.core.exceptions import ValidationError
-from django_rq import job
 from prometheus_client import Summary
 
 from nautobot.dcim.models import Device
@@ -34,8 +33,30 @@ logger = logging.getLogger("rq.worker")
 REQUEST_TIME = Summary("onboardingtask_processing_seconds", "Time spent processing onboarding request")
 
 
+try:
+    from nautobot.core.celery import nautobot_task
+
+    CELERY_WORKER = True
+
+    @nautobot_task
+    def onboard_device_worker(task_id, credentials):
+        """Onboard device with Celery worker."""
+        return onboard_device(task_id=task_id, credentials=credentials)
+
+
+except ImportError:
+    logger.info("INFO: Celery was not found - using Django RQ Worker")
+
+    CELERY_WORKER = False
+
+    from django_rq import get_queue
+
+    def onboard_device_worker(task_id, credentials):
+        """Onboard device with RQ worker."""
+        return onboard_device(task_id=task_id, credentials=credentials)
+
+
 @REQUEST_TIME.time()
-@job("default")
 def onboard_device(task_id, credentials):  # pylint: disable=too-many-statements, too-many-branches
     """Process a single OnboardingTask instance."""
     username = credentials.username
@@ -115,3 +136,12 @@ def onboard_device(task_id, credentials):  # pylint: disable=too-many-statements
     onboardingtask_results_counter.labels(status=ot.status).inc()
 
     return dict(ok=onboarding_status)
+
+
+def enqueue_onboarding_task(task_id, credentials):
+    """Detect worker type and enqueue task."""
+    if CELERY_WORKER:
+        onboard_device_worker.delay(task_id, credentials)
+
+    if not CELERY_WORKER:
+        get_queue("default").enqueue("nautobot_device_onboarding.worker.onboard_device_worker", task_id, credentials)

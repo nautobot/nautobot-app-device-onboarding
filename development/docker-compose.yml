@@ -17,7 +17,7 @@ services:
     env_file:
       - "./dev.env"
     volumes:
-      - "./nautobot_config.py:/etc/nautobot/nautobot_config.py"
+      - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
       - "../:/source"
     tty: true
   worker:
@@ -31,8 +31,22 @@ services:
     env_file:
       - "./dev.env"
     volumes:
-      - "./nautobot_config.py:/etc/nautobot/nautobot_config.py"
-      - "../nautobot_device_onboarding:/source/nautobot_device_onboarding"
+      - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
+      - "../:/source"
+    tty: true
+  celery:
+    build:
+      context: "../"
+      dockerfile: "development/Dockerfile"
+    image: "nautobot-device-onboarding/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
+    entrypoint: "nautobot-server celery worker -B -l INFO"
+    depends_on:
+      - "nautobot"
+    env_file:
+      - "./dev.env"
+    volumes:
+      - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
+      - "../:/source"
     tty: true
   postgres:
     image: "postgres:12"

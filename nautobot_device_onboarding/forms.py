@@ -14,7 +14,6 @@ limitations under the License.
 
 from django import forms
 from django.db import transaction
-from django_rq import get_queue
 
 from nautobot.utilities.forms import BootstrapMixin, CSVModelForm
 from nautobot.dcim.models import Site, Platform, DeviceRole, DeviceType
@@ -22,6 +21,7 @@ from nautobot.dcim.models import Site, Platform, DeviceRole, DeviceType
 from .models import OnboardingTask
 from .choices import OnboardingStatusChoices, OnboardingFailChoices
 from .utils.credentials import Credentials
+from .worker import enqueue_onboarding_task
 
 BLANK_CHOICE = (("", "---------"),)
 
@@ -82,7 +82,7 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
         model = super().save(commit=commit, **kwargs)
         if commit:
             credentials = Credentials(self.data.get("username"), self.data.get("password"), self.data.get("secret"))
-            get_queue("default").enqueue("nautobot_device_onboarding.worker.onboard_device", model.pk, credentials)
+            transaction.on_commit(lambda: enqueue_onboarding_task(model.pk, credentials))
         return model
 
 
@@ -177,9 +177,5 @@ class OnboardingTaskFeedCSVForm(CSVModelForm):
         model = super().save(commit=commit, **kwargs)
         if commit:
             credentials = Credentials(self.data.get("username"), self.data.get("password"), self.data.get("secret"))
-            transaction.on_commit(
-                lambda: get_queue("default").enqueue(
-                    "nautobot_device_onboarding.worker.onboard_device", model.pk, credentials
-                )
-            )
+            transaction.on_commit(lambda: enqueue_onboarding_task(model.pk, credentials))
         return model
