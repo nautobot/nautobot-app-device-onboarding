@@ -17,12 +17,14 @@ import re
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from django.utils.text import slugify
 from nautobot.dcim.choices import InterfaceTypeChoices
 from nautobot.dcim.models import Manufacturer, Device, Interface, DeviceType, DeviceRole
 from nautobot.dcim.models import Platform
 from nautobot.dcim.models import Site
 from nautobot.extras.models import Status
+from nautobot.extras.models.customfields import CustomField
 from nautobot.ipam.models import IPAddress
 
 from .constants import NETMIKO_TO_NAPALM_STATIC
@@ -31,6 +33,21 @@ from .exceptions import OnboardException
 logger = logging.getLogger("rq.worker")
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
+
+
+def ensure_default_cf(obj, model):
+    """Update objects's default custom fields."""
+    for cf in CustomField.objects.get_for_model(model):
+        if (cf.default is not None) and (cf.name not in obj.cf):
+            obj.cf[cf.name] = cf.default
+
+    try:
+        obj.validated_save()
+    except ValidationError as err:
+        raise OnboardException(
+            reason="fail-general",
+            message=f"ERROR: {obj} validation error: {err.messages}",
+        )
 
 
 def object_match(obj, search_array):
@@ -192,6 +209,7 @@ class NautobotKeeper:
         except Manufacturer.DoesNotExist:
             if create_manufacturer:
                 self.nb_manufacturer = Manufacturer.objects.create(name=self.netdev_vendor, slug=nb_manufacturer_slug)
+                ensure_default_cf(obj=self.nb_manufacturer, model=Manufacturer)
             else:
                 raise OnboardException(
                     reason="fail-config", message=f"ERROR manufacturer not found: {self.netdev_vendor}"
@@ -264,6 +282,7 @@ class NautobotKeeper:
                     model=nb_device_type_slug.upper(),
                     manufacturer=self.nb_manufacturer,
                 )
+                ensure_default_cf(obj=self.nb_device_type, model=DeviceType)
             else:
                 raise OnboardException(
                     reason="fail-config", message=f"ERROR device type not found: {self.netdev_model}"
@@ -292,6 +311,7 @@ class NautobotKeeper:
                     color=self.netdev_nb_role_color,
                     vm_role=False,
                 )
+                ensure_default_cf(obj=self.nb_device_role, model=DeviceRole)
             else:
                 raise OnboardException(
                     reason="fail-config", message=f"ERROR device role not found: {self.netdev_nb_role_slug}"
@@ -344,6 +364,7 @@ class NautobotKeeper:
                     slug=self.netdev_nb_platform_slug,
                     napalm_driver=netmiko_to_napalm[self.netdev_netmiko_device_type],
                 )
+                ensure_default_cf(obj=self.nb_platform, model=Platform)
             else:
                 raise OnboardException(
                     reason="fail-general",
@@ -407,6 +428,7 @@ class NautobotKeeper:
 
         try:
             self.device, created = Device.objects.update_or_create(**lookup_args)
+            ensure_default_cf(obj=self.device, model=Device)
 
             if created:
                 logger.info("CREATED device: %s", self.netdev_hostname)
@@ -425,14 +447,31 @@ class NautobotKeeper:
             self.nb_mgmt_ifname, _ = Interface.objects.get_or_create(
                 name=self.netdev_mgmt_ifname, device=self.device, defaults=dict(type=InterfaceTypeChoices.TYPE_OTHER)
             )
+            ensure_default_cf(obj=self.nb_mgmt_ifname, model=Interface)
 
     def ensure_primary_ip(self):
         """Ensure mgmt_ipaddr exists in IPAM, has the device interface, and is assigned as the primary IP address."""
         # see if the primary IP address exists in IPAM
         if self.netdev_mgmt_ip_address and self.netdev_mgmt_pflen:
+            ct = ContentType.objects.get_for_model(IPAddress)  # pylint: disable=invalid-name
+            default_status_name = PLUGIN_SETTINGS["default_ip_status"]
+            try:
+                ip_status = Status.objects.get(content_types__in=[ct], name=default_status_name)
+            except Status.DoesNotExist:
+                raise OnboardException(
+                    reason="fail-general",
+                    message=f"ERROR could not find existing IP Address status: {default_status_name}",
+                )
+            except Status.MultipleObjectsReturned:
+                raise OnboardException(
+                    reason="fail-general",
+                    message=f"ERROR multiple IP Address status using same name: {default_status_name}",
+                )
+
             self.nb_primary_ip, created = IPAddress.objects.get_or_create(
-                address=f"{self.netdev_mgmt_ip_address}/{self.netdev_mgmt_pflen}"
+                address=f"{self.netdev_mgmt_ip_address}/{self.netdev_mgmt_pflen}", defaults={"status": ip_status}
             )
+            ensure_default_cf(obj=self.nb_primary_ip, model=IPAddress)
 
             if created or self.nb_primary_ip not in self.nb_mgmt_ifname.ip_addresses.all():
                 logger.info("ASSIGN: IP address %s to %s", self.nb_primary_ip.address, self.nb_mgmt_ifname.name)
