@@ -12,7 +12,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-__version__ = "1.0.1"
+__version__ = "1.1.0"
 
 from nautobot.extras.plugins import PluginConfig
 
@@ -23,7 +23,7 @@ class OnboardingConfig(PluginConfig):
     name = "nautobot_device_onboarding"
     verbose_name = "Device Onboarding"
     version = __version__
-    min_version = "1.0.0b4"
+    min_version = "1.0.0"
     author = "Network to Code"
     author_email = "opensource@networktocode.com"
     description = "A plugin for Nautobot to easily onboard new devices."
