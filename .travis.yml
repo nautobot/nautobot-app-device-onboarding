@@ -23,6 +23,10 @@ services:
 # --------------------------------------------------------------------------
 # Tests
 # --------------------------------------------------------------------------
+
+before_install: >
+  echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin || travis_terminate 1
+
 before_script:
   - "pip install invoke toml docker-compose poetry"
 script:
@@ -32,6 +36,8 @@ script:
 jobs:
   include:
     - stage: "lint"
+      before_install: >
+        echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin || travis_terminate 1
       before_script:
         - "pip install invoke toml"
         - "invoke build --nocache"
