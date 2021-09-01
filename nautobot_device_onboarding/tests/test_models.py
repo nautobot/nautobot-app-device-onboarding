@@ -98,3 +98,8 @@ class OnboardingDeviceModelTestCase(TestCase):
         """Verify OnboardingDevice last ot."""
         onboarding_device = OnboardingDevice.objects.get(device=self.device)
         self.assertEqual(onboarding_device.last_ot, self.failed_task2)
+
+    def test_tasks_labels(self):
+        """Verify created tasks are with labels following creation order."""
+        for index, task_object in enumerate(OnboardingTask.objects.order_by("created"), start=1):
+            self.assertEqual(index, task_object.label)
