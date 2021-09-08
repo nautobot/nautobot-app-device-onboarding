@@ -27,6 +27,8 @@ from .choices import OnboardingStatusChoices, OnboardingFailChoices
 class OnboardingTask(BaseModel, ChangeLoggedModel):
     """The status of each onboarding Task is tracked in the OnboardingTask table."""
 
+    label = models.PositiveIntegerField(default=0, editable=False, help_text="Label for sorting tasks")
+
     created_device = models.ForeignKey(to="dcim.Device", on_delete=models.SET_NULL, blank=True, null=True)
 
     ip_address = models.CharField(max_length=255, help_text="primary ip address for the device", null=True)
@@ -61,6 +63,13 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
     def get_absolute_url(self):
         """Provide absolute URL to an OnboardingTask."""
         return reverse("plugins:nautobot_device_onboarding:onboardingtask", kwargs={"pk": self.pk})
+
+    def save(self, *args, **kwargs):
+        """Overwrite method to get latest label value and update Task object."""
+        if not self.label:
+            latest_task = OnboardingTask.objects.all().order_by("-label").first()
+            self.label = (latest_task.label if latest_task else 0) + 1
+        super(OnboardingTask, self).save(*args, **kwargs)
 
     objects = RestrictedQuerySet.as_manager()
 

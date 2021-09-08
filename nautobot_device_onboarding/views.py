@@ -40,7 +40,7 @@ class OnboardingTaskView(generic.ObjectView):
 class OnboardingTaskListView(generic.ObjectListView):
     """View for listing all extant OnboardingTasks."""
 
-    queryset = OnboardingTask.objects.all().order_by("-id")
+    queryset = OnboardingTask.objects.all().order_by("-label")
     filterset = OnboardingTaskFilter
     filterset_form = OnboardingTaskFilterForm
     table = OnboardingTaskTable
