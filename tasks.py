@@ -29,6 +29,7 @@ import os
 
 def is_truthy(arg):
     """Convert "truthy" strings into Booleans.
+
     Examples:
         >>> is_truthy('yes')
         True
@@ -81,6 +82,7 @@ def task(function=None, *args, **kwargs):
 
 def docker_compose(context, command, **kwargs):
     """Helper function for running a specific docker-compose command with all appropriate parameters and environment.
+
     Args:
         context (obj): Used to run specific commands
         command (str): Command string to append to the "docker-compose ..." command, such as "build", "up", etc.
