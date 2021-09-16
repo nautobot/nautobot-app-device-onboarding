@@ -89,8 +89,8 @@ jobs:
         uses: "actions/checkout@v2"
       - name: "Setup environment"
         uses: "./.github/actions/setup-environment"
-      - name: "Build Container"
-        run: "poetry run invoke build"
+      # - name: "Build Container"
+      #   run: "poetry run invoke build"
       # - name: "Linting: Pylint"
       #   run: "poetry run invoke pylint"
     needs:

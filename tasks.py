@@ -283,16 +283,9 @@ def yamllint(context):
         "buffer": "Discard output from passing tests",
     }
 )
-def unittest(context, keepdb=False, label="nautobot_device_onboarding", failfast=False, buffer=True):
+def unittest(context):
     """Run Nautobot unit tests."""
-    command = f"coverage run --module nautobot.core.cli test {label}"
-
-    if keepdb:
-        command += " --keepdb"
-    if failfast:
-        command += " --failfast"
-    if buffer:
-        command += " --buffer"
+    command = "nautobot-server test nautobot_device_onboarding"
     run_command(context, command)
 
 
