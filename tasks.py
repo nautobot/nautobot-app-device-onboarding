@@ -275,14 +275,7 @@ def yamllint(context):
     run_command(context, command)
 
 
-@task(
-    help={
-        "keepdb": "save and re-use test database between test runs for faster re-testing.",
-        "label": "specify a directory or module to test instead of running all Nautobot tests",
-        "failfast": "fail as soon as a single test fails don't run the entire test suite",
-        "buffer": "Discard output from passing tests",
-    }
-)
+@task
 def unittest(context):
     """Run Nautobot unit tests."""
     command = "nautobot-server test nautobot_device_onboarding"
