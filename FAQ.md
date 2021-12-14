@@ -56,11 +56,11 @@
 
 ## How many devices can I import at the same time ?
 
-> **Many**, There are no strict limitations regarding the number of devices that can be imported. The speed at which devices will be imported will depend of the number of active RQ workers.
+> **Many**, There are no strict limitations regarding the number of devices that can be imported. The speed at which devices will be imported will depend of the number of active Nautobot workers.
 
-## Do I need to setup a dedicated RQ Worker node ?
+## Do I need to setup a dedicated RQ or Celery Worker node ?
 
-> **No**, The plugin is leveraging the existing RQ Worker infrastructure already in place in Nautobot, the only requirement is to ensure the plugin itself is installed in the Worker node.
+> **No**, The plugin is leveraging the existing RQ or Celery Worker infrastructure already in place in Nautobot, the only requirement is to ensure the plugin itself is installed in the Worker node.
 
 ## Why don't I see a webhook generated when a new device is onboarded successfully ?
 
