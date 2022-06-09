@@ -1,4 +1,4 @@
-# {{ cookiecutter.verbose_name }}
+# Nautobot Device Onboarding
 
 Administrator's guide.
 
