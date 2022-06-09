@@ -1,4 +1,4 @@
-# Nautobot Device Onboarding
+# {{ cookiecutter.verbose_name }}
 
 Developer guide.
 
@@ -12,5 +12,5 @@ Contributing to the App <dev_contributing>
 
 ```{toctree}
 :maxdepth: 3
-Nautobot Device Onboarding </dev/api/nautobot_device_onboarding/index>
+{{ cookiecutter.verbose_name }} </dev/api/{{ cookiecutter.plugin_name }}/index>
 ```

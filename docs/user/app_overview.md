@@ -6,9 +6,13 @@
 
 ## Features Used/Employed
 
-> i.e. what is shown today in the Installed Plugins page in Nautobot
+```{admonition} Developer Note - Remove Me!
+What is shown today in the Installed Plugins page in Nautobot.
+```
 
 ### Extras
 
-> Custom Fields - things like which CFs are created by this app?
-> Jobs - are jobs, if so, which ones, installed by this app?
+```{admonition} Developer Note - Remove Me!
+Custom Fields - things like which CFs are created by this app?
+Jobs - are jobs, if so, which ones, installed by this app?
+```
