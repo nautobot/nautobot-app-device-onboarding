@@ -2,10 +2,14 @@
 
 ## Audience (User Personas)
 
+```{admonition} Developer Note - Remove Me!
 Who is this meant for/ who is the common user of this app
+```
 
 ## Use-cases and common workflows
 
 ## Screenshots
 
-> Ideally captures every view exposed by the App.  Should include a decent dataset.
+```{admonition} Developer Note - Remove Me!
+Ideally captures every view exposed by the App. Should include a relevant dataset.
+```
