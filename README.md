@@ -7,7 +7,7 @@
   <a href="https://pypi.org/project/nautobot-device-onboarding/"><img src="https://img.shields.io/pypi/v/nautobot-device-onboarding"></a>
   <a href="https://pypi.org/project/nautobot-device-onboarding/"><img src="https://img.shields.io/pypi/dm/nautobot-device-onboarding"></a>
   <br>
-  A plugin for Nautobot to easily onboard new devices.
+  A plugin for <a href="https://github.com/nautobot/nautobot">Nautobot</a> to easily onboard new devices.
 </p>
 
 ## Overview
@@ -39,7 +39,9 @@ Full web-based HTML documentation for this app can be found over on the [Nautobo
 
 ### Contributing to the Docs
 
-You can find all the sources for the App documentation under the [docs](docs/) folder in this repository. Any PRs with fixes or improvements are very welcome!
+You can find all the Markdown source for the App documentation under the [docs](docs/) folder in this repository. Any PRs with fixes or improvements are very welcome!
+
+A container hosting the docs will be started using the `invoke docs` command on [http://localhost:8001](http://localhost:8001), and, as changes are made and saved, the docs will be automatically reloaded.
 
 ## Questions
 
