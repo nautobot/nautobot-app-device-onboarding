@@ -1,13 +1,14 @@
 # Nautobot Device Onboarding
 
-<center>
-<img src="docs/images/icon-DeviceOnboarding.png" height="200px">
-
-[![Build Status](https://github.com/nautobot/nautobot-plugin-device-onboarding/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/nautobot/nautobot-plugin-device-onboarding/actions) [![](https://img.shields.io/pypi/v/nautobot-device-onboarding)](https://pypi.org/project/nautobot-device-onboarding/) [![](https://img.shields.io/pypi/dm/nautobot-device-onboarding)](https://pypi.org/project/nautobot-device-onboarding/)
-
-</center>
-
-A plugin for [Nautobot](https://github.com/nautobot/nautobot) to easily onboard new devices.
+<p align="center">
+  <img src="docs/images/icon-DeviceOnboarding.png" height="200px">
+  <br>
+  <a href="https://github.com/nautobot/nautobot-plugin-device-onboarding/actions"><img src="https://github.com/nautobot/nautobot-plugin-device-onboarding/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <a href="https://pypi.org/project/nautobot-device-onboarding/"><img src="https://img.shields.io/pypi/v/nautobot-device-onboarding"></a>
+  <a href="https://pypi.org/project/nautobot-device-onboarding/"><img src="https://img.shields.io/pypi/dm/nautobot-device-onboarding"></a>
+  <br>
+  A plugin for Nautobot to easily onboard new devices.
+</p>
 
 ## Overview
 
