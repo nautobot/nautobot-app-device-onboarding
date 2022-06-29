@@ -43,7 +43,6 @@ try:
         """Onboard device with Celery worker."""
         return onboard_device(task_id=task_id, credentials=credentials)
 
-
 except ImportError:
     logger.info("INFO: Celery was not found - using Django RQ Worker")
 
