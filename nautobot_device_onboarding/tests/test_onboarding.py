@@ -73,7 +73,7 @@ class NapalmMockEos(NapalmMock):
 
 
 class SSHDetectMock:
-    """Base SSHDetect mock class for tests."""
+    """SSHDetect mock class for tests."""
 
     def __init__(self, *args, **kwargs):
         self.driver = args[0]
@@ -83,7 +83,7 @@ class SSHDetectMock:
 
 
 class OnboardingTestCase(TestCase):
-    """Test the NetdevKeeper Class."""
+    """Test the OnboardingManager Class."""
 
     def setUp(self):
         """Prepare test objects."""
