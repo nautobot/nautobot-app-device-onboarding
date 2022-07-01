@@ -15,6 +15,8 @@ limitations under the License.
 import importlib
 import logging
 import socket
+import netaddr
+from netaddr.core import AddrFormatError
 
 from django.conf import settings
 from napalm import get_network_driver
@@ -115,6 +117,39 @@ class NetdevKeeper:
 
         # Enable loading driver extensions
         self.load_driver_extension = True
+
+    def fqdn_to_ip(self):
+        """Method to assure hostname is FQDN resolved to IP address and rewritten into NetdevKeeper.
+
+        If it is a DNS name, attempt to resolve the DNS address and assign the IP address to the
+        name.
+
+        Returns:
+            None
+
+        Raises:
+          OnboardException("fail-prefix"):
+            When a prefix was entered for an IP address
+          OnboardException("fail-dns"):
+            When a Name lookup via DNS fails to resolve an IP address
+        """
+        try:
+            # If successful, this is an IP address and can pass
+            netaddr.IPAddress(self.hostname)
+        # Raise an Exception for Prefix values
+        except ValueError:
+            raise OnboardException(reason="fail-prefix", message=f"ERROR appears a prefix was entered: {self.hostname}")
+        # An AddrFormatError exception means that there is not an IP address in the field, and should continue on
+        except AddrFormatError:
+            try:
+                # Perform DNS Lookup
+                ip_address = socket.gethostbyname(self.hostname)
+                self.hostname = ip_address
+            except socket.gaierror:
+                # DNS Lookup has failed, Raise an exception for unable to complete DNS lookup
+                raise OnboardException(
+                    reason="fail-dns", message=f"ERROR failed to complete DNS lookup: {self.hostname}"
+                )
 
     def check_reachability(self):
         """Ensure that the device at the mgmt-ipaddr provided is reachable.
@@ -227,6 +262,7 @@ class NetdevKeeper:
           OnboardException('fail-general'):
             Any other unexpected device comms failure.
         """
+        self.fqdn_to_ip()
         self.check_reachability()
 
         logger.info("COLLECT: device information %s", self.hostname)
