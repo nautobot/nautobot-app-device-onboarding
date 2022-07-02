@@ -46,6 +46,14 @@ class NetdevKeeperTestCase(TestCase):
             ip_address="192.0.2.1/32", site=self.site1, role=self.device_role1, platform=self.platform1
         )
 
+        # Apply patch on connectivity check
+        self.reachability_patch = mock.patch("nautobot_device_onboarding.netdev_keeper.NetdevKeeper.check_reachability")
+        self.reachability_patch.start()
+
+    def tearDown(self):
+        """Disable patches."""
+        self.reachability_patch.stop()
+
     @mock.patch("nautobot_device_onboarding.netdev_keeper.socket.gethostbyname")
     def test_check_ip(self, mock_get_hostbyname):
         """Check DNS to IP address."""
@@ -54,8 +62,8 @@ class NetdevKeeperTestCase(TestCase):
 
         # FQDN -> IP
         hostname = self.onboarding_task4.ip_address
-        nk = NetdevKeeper(hostname)
-        nk.fqdn_to_ip()
+        napalm_driver = self.onboarding_task4.platform.napalm_driver
+        nk = NetdevKeeper(hostname, napalm_driver=napalm_driver)
 
         # Run the check to change the IP address
         self.assertEqual(nk.hostname, "192.0.2.1")
@@ -69,15 +77,16 @@ class NetdevKeeperTestCase(TestCase):
         # Check for bad.local raising an exception
         with self.assertRaises(OnboardException) as exc_info:
             hostname = self.onboarding_task5.ip_address
-            nk = NetdevKeeper(hostname)
-            nk.fqdn_to_ip()
+            napalm_driver = self.onboarding_task5.platform.napalm_driver
+            NetdevKeeper(hostname, napalm_driver=napalm_driver)
         self.assertEqual(exc_info.exception.message, "ERROR failed to complete DNS lookup: bad.local")
         self.assertEqual(exc_info.exception.reason, "fail-dns")
 
-        # Check for exception with prefix address entered
+    def test_failed_check_prefix(self):
+        """Check for exception with prefix address entered."""
         with self.assertRaises(OnboardException) as exc_info:
             hostname = self.onboarding_task7.ip_address
-            nk = NetdevKeeper(hostname)
-            nk.fqdn_to_ip()
+            napalm_driver = self.onboarding_task7.platform.napalm_driver
+            NetdevKeeper(hostname, napalm_driver=napalm_driver)
         self.assertEqual(exc_info.exception.reason, "fail-prefix")
         self.assertEqual(exc_info.exception.message, "ERROR appears a prefix was entered: 192.0.2.1/32")

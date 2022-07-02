@@ -118,6 +118,12 @@ class NetdevKeeper:
         # Enable loading driver extensions
         self.load_driver_extension = True
 
+        # Run dns resolution check
+        self.fqdn_to_ip()
+
+        # Check connectivity
+        self.check_reachability()
+
     def fqdn_to_ip(self):
         """Method to assure hostname is FQDN resolved to IP address and rewritten into NetdevKeeper.
 
@@ -262,16 +268,13 @@ class NetdevKeeper:
           OnboardException('fail-general'):
             Any other unexpected device comms failure.
         """
-        self.fqdn_to_ip()
-        self.check_reachability()
-
         logger.info("COLLECT: device information %s", self.hostname)
 
         try:
             # Get Napalm Driver with Netmiko if needed
             self.set_napalm_driver_name()
 
-            # Raise if no Napalm Driver not selected
+            # Raise if Napalm Driver not selected
             self.check_napalm_driver_name()
 
             driver = get_network_driver(self.napalm_driver)
@@ -335,7 +338,7 @@ class NetdevKeeper:
 
     def get_netdev_dict(self):
         """Construct network device dict."""
-        netdev_dict = {
+        return {
             "netdev_hostname": self.facts["hostname"],
             "netdev_vendor": self.facts["vendor"].title(),
             "netdev_model": self.facts["model"].lower(),
@@ -346,5 +349,3 @@ class NetdevKeeper:
             "onboarding_class": self.onboarding_class,
             "driver_addon_result": self.driver_addon_result,
         }
-
-        return netdev_dict
