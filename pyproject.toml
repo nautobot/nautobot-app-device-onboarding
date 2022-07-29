@@ -19,7 +19,7 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.7"
-napalm = ">=2.5.0, <4"
+napalm = ">=2.5.0, <5"
 zipp = "^3.4.0"
 nautobot = ">=1.0.0"
 
