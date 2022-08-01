@@ -14,7 +14,7 @@ limitations under the License.
 
 from nautobot.extras.plugins import PluginConfig
 
-__version__ = "1.1.1"
+__version__ = "1.1.2"
 
 
 class OnboardingConfig(PluginConfig):
