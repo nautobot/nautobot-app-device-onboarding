@@ -20,9 +20,9 @@ from django.conf import settings
 from napalm import get_network_driver
 from napalm.base.exceptions import ConnectionException, CommandErrorException
 from napalm.base.netmiko_helpers import netmiko_args
-from netmiko.ssh_autodetect import SSHDetect
-from netmiko.ssh_exception import NetMikoAuthenticationException
-from netmiko.ssh_exception import NetMikoTimeoutException
+from netmiko import SSHDetect
+from netmiko import NetMikoAuthenticationException
+from netmiko import NetMikoTimeoutException
 from paramiko.ssh_exception import SSHException
 
 from nautobot.dcim.models import Platform

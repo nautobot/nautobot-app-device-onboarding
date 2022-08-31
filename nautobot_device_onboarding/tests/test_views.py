@@ -51,3 +51,6 @@ class OnboardingTestCase(
             "uswest,10.10.10.20",
             "uswest,10.10.10.30",
         )
+
+    def test_has_advanced_tab(self):
+        """Overwrite the test as OnboardingTask doesn't have advanced tab."""
