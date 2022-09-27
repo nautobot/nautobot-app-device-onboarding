@@ -60,7 +60,7 @@ class OnboardingTaskCreateView(generic.ObjectEditView):
 class OnboardingTaskBulkDeleteView(generic.BulkDeleteView):
     """View for deleting one or more OnboardingTasks."""
 
-    queryset = OnboardingTask.objects.filter()  # TODO: can we exclude currently-running tasks?
+    queryset = OnboardingTask.objects.filter().exclude(status="running")
     table = OnboardingTaskTable
     default_return_url = "plugins:nautobot_device_onboarding:onboardingtask_list"
 
