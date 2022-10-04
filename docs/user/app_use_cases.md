@@ -9,14 +9,16 @@ To properly onboard a device, user needs to provide, at a minimum:
 1. The Device's Site
 2. The Device's primary IP address or DNS Name
 
-> For DNS Name Resolution to work, the instance of Nautobot must be able to resolve the name of the device to IP address.
+!!! note
+    For DNS Name Resolution to work, the instance of Nautobot must be able to resolve the name of the device to IP address.
 
 If other attributes (`Platform`, `Device Type`, `Device Role`) are provided in the onboarding task, the plugin will use provided value for the onboarded device.
 
 If `Platform`, `Device Type` and/or `Device Role` are not provided, the plugin will try to identify these information automatically and, based on the settings, it can create them in Nautobot as needed.
 
-> If the Platform is provided, it must point to an existing Nautobot Platform. NAPALM driver of this platform will be used only if it is defined for the platform in Nautobot.
-> To use a preferred NAPALM driver, either define it in Nautobot per platform or in the plugins settings under `platform_map`.
+!!! note
+    If the Platform is provided, it must point to an existing Nautobot Platform. NAPALM driver of this platform will be used only if it is defined for the platform in Nautobot.
+    To use a preferred NAPALM driver, either define it in Nautobot per platform or in the plugins settings under `platform_map`.
 
 #### SSH Autodetect
 
@@ -47,12 +49,11 @@ For the platforms where SSH auto-detection does not work, the user will need to:
 
 The Onboarding Plugin will automatically create Platforms for vendor operating systems where platform auto-detection works. The picture below shows the details of auto-created Platforms for `cisco_ios` and `juniper_junos`.
 
-![cisco_ios_platform](../images/ss_platform_cisco_ios.png)
-![juniper_junos_platform](../images/ss_platform_juniper_junos.png)
+![cisco_ios_platform](../images/platform_cisco_ios.png)
+![juniper_junos_platform](../images/platform_juniper_junos.png)
 
 
 ## Use-cases and common workflows
-
 
 ### Create a New Platform
 
@@ -62,7 +63,8 @@ This section demonstrates how to create a new Platform in the Nautobot UI. Speci
 - Define the attributes for the Platform on this screen and click on the 'Create' button.
 - 'Manufacturer' and 'NAPALM arguments' are optional.
 
-> The Slug value will be auto-populated based on the Platform Name, but you can overwrite that auto-populated value. For the platform to work correctly with this plugin, in many cases you will need to set a specific Slug value for it to work properly.
+!!! note
+    The Slug value will be auto-populated based on the Platform Name, but you can overwrite that auto-populated value. For the platform to work correctly with this plugin, in many cases you will need to set a specific Slug value for it to work properly.
 
 #### Cisco NXOS Platform
 
@@ -89,7 +91,8 @@ A new device can be onboarded via :
 
 During a successful onboarding process, a new device will be created in Nautobot with its management interface and its primary IP assigned. The management interface will be discovered on the device based on the IP address provided.
 
-> By default, the plugin is using the credentials defined in the main `configuration.py` for Napalm (`NAPALM_USERNAME`/`NAPALM_PASSWORD`). It's possible to define specific credentials for each onboarding task.
+!!! note
+    By default, the plugin is using the credentials defined in the main `configuration.py` for Napalm (`NAPALM_USERNAME`/`NAPALM_PASSWORD`). It's possible to define specific credentials for each onboarding task.
 
 ### Onboard a Cisco NXOS Device Running the `nxapi` Feature
 
@@ -115,22 +118,18 @@ The status of the onboarding process for each device is maintained is a dedicate
 
 ## Screenshots
 
-```{admonition} Developer Note - Remove Me!
-Ideally captures every view exposed by the App. Should include a relevant dataset.
-```
-
 ### List of Onboarding Tasks
 
-![Onboarding Tasks](../images/ss_onboarding_tasks_view.png)
+![Onboarding Tasks](../images/onboarding_tasks_view.png)
 
 ### CSV form to import multiple devices
 
-![CSV Form](../images/ss_csv_import_view.png)
+![CSV Form](../images/csv_import_view.png)
 
 ### Onboard a single device
 
-![Single Device Form](../images/ss_single_device_form.png)
+![Single Device Form](../images/single_device_form.png)
 
 ### Menu
 
-![Menu](../images/ss_menu.png)
+![Menu](../images/menu.png)
