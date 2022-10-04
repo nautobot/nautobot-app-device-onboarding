@@ -2,7 +2,7 @@
 
 ## What are the use cases for Onboarding Extensions?
 
-See dedicated FAQ for device [onboarding extensions](../dev/dev_onboarding_extensions.md).
+See dedicated FAQ for device [onboarding extensions](../dev/onboarding_extensions.md).
 
 ## How do I onboard a device using HTTPS-API?
 
@@ -12,18 +12,18 @@ You need to disable automatic platform detection, specify the device platform ty
 
 **Yes**! Using the plugin settings, it's possible to control individually the creation of `device_role`, `device_type`, `manufacturer` & `platform`.
 
-```
+```python
 # configuration.py
 # If need you can override the default settings
-# PLUGINS_CONFIG = {
-#   "nautobot_device_onboarding": {
-#         "create_platform_if_missing": True,
-#         "create_manufacturer_if_missing": True,
-#         "create_device_type_if_missing": True,
-#         "create_device_role_if_missing": True,
-#         "default_device_role": "network",
-#   }
-# }
+PLUGINS_CONFIG = {
+  "nautobot_device_onboarding": {
+        "create_platform_if_missing": True,
+        "create_manufacturer_if_missing": True,
+        "create_device_type_if_missing": True,
+        "create_device_role_if_missing": True,
+        "default_device_role": "network",
+  }
+}
 ```
 
 ## How can I update the default credentials used to connect to a device?
@@ -38,7 +38,8 @@ Optional arguments are often used to define a `secret` for Cisco devices and oth
 
 **No**. The plugin will only discover and create the management interface and the management IP address. Importing all interfaces and IP addresses is a much larger problem that requires more preparation. This is out of scope of this project.
 
-> We recommend Network Importer tool from Network to Code for a post-onboarding network state synchronization. See [its GitHub repository](https://github.com/networktocode/network-importer) for more details.
+!!! tip
+    We recommend Network Importer tool from Network to Code for a post-onboarding network state synchronization. See [its GitHub repository](https://github.com/networktocode/network-importer) for more details.
 
 ## Does this plugin support the discovery of device based on fqdn?
 

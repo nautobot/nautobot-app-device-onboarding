@@ -1,8 +1,8 @@
 # External Interactions
 
-```{admonition} Developer Note - Remove Me!
-What (if any) interactions exist between this Nautobot App and the outside world (i.e. systems that are not part of Nautobot).
-```
+!!! warning "Developer Note - Remove Me!"
+    Optional page, remove if not applicable.
+    What (if any) interactions exist between this Nautobot App and the outside world (i.e. systems that are not part of Nautobot).
 
 ## External System Integrations
 
@@ -12,11 +12,8 @@ What (if any) interactions exist between this Nautobot App and the outside world
 
 ## Nautobot REST API endpoints
 
-```{admonition} Developer Note - Remove Me!
-TBD: This is 50-50 user/developer - so TBD on location. Maybe just a pointer to a page under the dev guide.
-
-API documentation in this doc - including python request examples, curl examples, postman collections referred etc.
-```
+!!! warning "Developer Note - Remove Me!"
+    API documentation in this doc - including python request examples, curl examples, postman collections referred etc.
 
 The plugin includes 4 API endpoints to manage the onboarding tasks:
 
