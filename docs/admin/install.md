@@ -1,56 +1,15 @@
 # Installing the App in Nautobot
 
+!!! warning "Developer Note - Remove Me!"
+    Detailed instructions on installing the App. You will need to update this section based on any additional dependencies or prerequisites.
+
 ## Prerequisites
 
-### Compatibility Matrix
+- The plugin is compatible with Nautobot 1.2.0 and higher.
+- Databases supported: PostgreSQL, MySQL
 
-|                              | Nautobot 1.0 |
-| ---------------------------- | ------------ |
-| Device Onboarding plugin 1.0 | X            |
-
-## Install Guide
-
-If using the installation pattern from the Nautobot Documentation, you will need sudo to the `nautobot` user before installing so that you install the package into the Nautobot virtual environment.
-
-```no-highlight
-$ sudo -iu nautobot
-```
-
-The plugin is available as a Python package in PyPI and can be installed with `pip3`.
-
-```no-highlight
-$ pip3 install nautobot-device-onboarding
-```
-
-### Enabling Plugin in Nautobot
-
-Once installed, the plugin needs to be enabled in your `nautobot_config.py`
-```python
-# In your nautobot_config.py
-PLUGINS = ["nautobot_device_onboarding"]
-```
-
-To ensure the Device Onboarding plugin is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (or append if it already exists) in the [`NAUTOBOT_ROOT`](https://nautobot.readthedocs.io/en/latest/configuration/optional-settings/#nautobot_root) directory and list the `nautobot-device-onboarding` package:
-
-```no-highlight
-$ echo nautobot-device-onboarding >> $NAUTOBOT_ROOT/local_requirements.txt
-```
-
-### Final Configuration Steps
-
-After installing the plugin and modifying `nautobot_config.py`, as the `nautobot` user, run the server migration:
-
-```no-highlight
-$ nautobot-server migrate
-```
-
-Finally, as root, restart Nautobot and the Nautobot worker.
-
-```no-highlight
-$ sudo systemctl restart nautobot nautobot-worker
-```
-
-
+!!! note
+    Please check the [dedicated page](compatibility_matrix.md) for a full compatibility matrix and the deprecation policy.
 
 ### Access Requirements
 
@@ -66,12 +25,60 @@ NAPALM_USERNAME = "<napalm username>"
 NAPALM_PASSWORD = "<napalm pwd>"
 ```
 
+## Install Guide
+
+!!! note
+    Plugins can be installed manually or using Python's `pip`. See the [nautobot documentation](https://nautobot.readthedocs.io/en/latest/plugins/#install-the-package) for more details. The pip package name for this plugin is [`nautobot-device-onboarding`](https://pypi.org/project/nautobot-device-onboarding/).
+
+The plugin is available as a Python package via PyPI and can be installed with `pip`:
+
+```shell
+pip install nautobot-device-onboarding
+```
+
+To ensure Device Onboarding is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if not already existing) in the Nautobot root directory (alongside `requirements.txt`) and list the `nautobot-device-onboarding` package:
+
+```shell
+echo nautobot-device-onboarding >> local_requirements.txt
+```
+
+Once installed, the plugin needs to be enabled in your Nautobot configuration. The following block of code below shows the additional configuration required to be added to your `nautobot_config.py` file:
+
+- Append `"nautobot_device_onboarding"` to the `PLUGINS` list.
+- Append the `"nautobot_device_onboarding"` dictionary to the `PLUGINS_CONFIG` dictionary and override any defaults.
+
+```python
+# In your nautobot_config.py
+PLUGINS = ["nautobot_device_onboarding"]
+
+# PLUGINS_CONFIG = {
+#   "nautobot_device_onboarding": {
+#     ADD YOUR SETTINGS HERE
+#   }
+# }
+```
+
+Once the Nautobot configuration is updated, run the Post Upgrade command (`nautobot-server post_upgrade`) to run migrations and clear any cache.
+
+```shell
+nautobot-server post_upgrade
+```
+
+Then restart (if necessary) the Nautobot services which may include:
+
+- Nautobot
+- Nautobot Workers
+- Nautobot Scheduler
+
+```shell
+sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
+```
 
 ## App Configuration
 
-Although plugin can run without providing any settings, the plugin behavior can be controlled with the following list of settings defined in `nautobot_config.py`:
+Although the plugin can run without providing any settings, the plugin behavior can be controlled with the following list of settings defined in `nautobot_config.py`:
 
-- `create_platform_if_missing` boolean (default True), If True, a new platform object will be created if the platform discovered by netmiko do not already exist and is in the list of supported platforms (`cisco_ios`, `cisco_nxos`, `arista_eos`, `juniper_junos`, `cisco_xr`)
+- `create_platform_if_missing` boolean (default True). If True, a new platform object will be created if the platform discovered by netmiko do not already exist and is in the list of supported platforms (`cisco_ios`, `cisco_nxos`, `arista_eos`, `juniper_junos`, `cisco_xr`)
 - `create_device_type_if_missing` boolean (default True), If True, a new device type object will be created if the model discovered by Napalm do not match an existing device type.
 - `create_manufacturer_if_missing` boolean (default True), If True, a new manufacturer object will be created if the manufacturer discovered by Napalm is do not match an existing manufacturer, this option is only valid if `create_device_type_if_missing` is True as well.
 - `create_device_role_if_missing` boolean (default True), If True, a new device role object will be created if the device role provided was not provided as part of the onboarding and if the `default_device_role` do not already exist.
@@ -110,4 +117,3 @@ PLUGINS_CONFIG = {
   }
 }
 ```
-
