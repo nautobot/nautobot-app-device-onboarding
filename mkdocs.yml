@@ -107,9 +107,11 @@ nav:
       - Compatibility Matrix: "admin/compatibility_matrix.md"
       - Release Notes:
           - "admin/release_notes/index.md"
-          - v0.1: "admin/release_notes/version_0.1.md"
+          - v1.1: "admin/release_notes/version_1.1.md"
+          - v1.0: "admin/release_notes/version_1.0.md"
   - Developer Guide:
       - Extending the App: "dev/extending.md"
+      - Onboarding Extensions: "dev/onboarding_extensions.md"
       - Contributing to the App: "dev/contributing.md"
       - Development Environment: "dev/dev_environment.md"
       - Code Reference:

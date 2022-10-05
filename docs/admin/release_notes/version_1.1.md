@@ -1,6 +1,6 @@
 # v1.1 Release Notes
 
-This document describes all new features and changes in nautobot-device-onboarding plugin 1.1
+This document describes all new features and changes in `nautobot-device-onboarding` plugin 1.1.
 
 
 ## Release Overview
@@ -28,6 +28,7 @@ Celery has been introduced to eventually replace RQ for executing background tas
 ### Changed
 
 ### Fixed
+
 - [#45](https://github.com/nautobot/nautobot-plugin-device-onboarding/pull/45) - Update Plugin Dependencies. Fix importing issue with Netmiko 4.x, enable Napalm 4.
 
 ## v1.1.1 (2021-09-08)
@@ -35,6 +36,7 @@ Celery has been introduced to eventually replace RQ for executing background tas
 ### Added
 
 ### Changed
+
 - [#23](https://github.com/nautobot/nautobot-plugin-device-onboarding/pull/23) - Label attribute for sorting and identifying OnboaringTasks.
 
 ### Fixed
