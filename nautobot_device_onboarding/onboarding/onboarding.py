@@ -15,7 +15,7 @@ limitations under the License.
 from nautobot_device_onboarding.nautobot_keeper import NautobotKeeper
 
 
-class Onboarding:
+class Onboarding:  # pylint: disable=too-few-public-methods
     """Generic onboarding class."""
 
     def __init__(self):
@@ -28,7 +28,7 @@ class Onboarding:
         raise NotImplementedError
 
 
-class StandaloneOnboarding(Onboarding):
+class StandaloneOnboarding(Onboarding):  # pylint: disable=too-few-public-methods
     """Standalone onboarding class."""
 
     def run(self, onboarding_kwargs):

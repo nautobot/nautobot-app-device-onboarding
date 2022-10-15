@@ -21,7 +21,7 @@ from nautobot.dcim.models import Device
 from nautobot.extras.models import ChangeLoggedModel
 from nautobot.utilities.querysets import RestrictedQuerySet
 
-from .choices import OnboardingStatusChoices, OnboardingFailChoices
+from nautobot_device_onboarding.choices import OnboardingStatusChoices, OnboardingFailChoices
 
 
 class OnboardingTask(BaseModel, ChangeLoggedModel):
@@ -69,7 +69,7 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
         if not self.label:
             latest_task = OnboardingTask.objects.all().order_by("-label").first()
             self.label = (latest_task.label if latest_task else 0) + 1
-        super(OnboardingTask, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     objects = RestrictedQuerySet.as_manager()
 

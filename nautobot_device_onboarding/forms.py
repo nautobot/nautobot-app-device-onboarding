@@ -18,10 +18,10 @@ from django.db import transaction
 from nautobot.utilities.forms import BootstrapMixin, CSVModelForm
 from nautobot.dcim.models import Site, Platform, DeviceRole, DeviceType
 
-from .models import OnboardingTask
-from .choices import OnboardingStatusChoices, OnboardingFailChoices
-from .utils.credentials import Credentials
-from .worker import enqueue_onboarding_task
+from nautobot_device_onboarding.models import OnboardingTask
+from nautobot_device_onboarding.choices import OnboardingStatusChoices, OnboardingFailChoices
+from nautobot_device_onboarding.utils.credentials import Credentials
+from nautobot_device_onboarding.worker import enqueue_onboarding_task
 
 BLANK_CHOICE = (("", "---------"),)
 

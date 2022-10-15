@@ -17,17 +17,17 @@ from nautobot.utilities.testing import ViewTestCases
 from nautobot_device_onboarding.models import OnboardingTask
 
 
-class OnboardingTestCase(
+class OnboardingTestCase(  # pylint: disable=no-member,too-many-ancestors
     ViewTestCases.GetObjectViewTestCase,
     ViewTestCases.ListObjectsViewTestCase,
     ViewTestCases.CreateObjectViewTestCase,
     ViewTestCases.BulkDeleteObjectsViewTestCase,
-    ViewTestCases.BulkImportObjectsViewTestCase,  # pylint: disable=no-member
+    ViewTestCases.BulkImportObjectsViewTestCase,
 ):
     """Test the OnboardingTask views."""
 
     def _get_base_url(self):
-        return "plugins:{}:{}_{{}}".format(self.model._meta.app_label, self.model._meta.model_name)
+        return f"plugins:{self.model._meta.app_label}:{self.model._meta.model_name}_" + "{}"
 
     model = OnboardingTask
 
@@ -54,3 +54,9 @@ class OnboardingTestCase(
 
     def test_has_advanced_tab(self):
         """Overwrite the test as OnboardingTask doesn't have advanced tab."""
+
+    def test_list_objects_unknown_filter_no_strict_filtering(self):
+        """Overwrite the test as strict filtering."""
+
+    def test_list_objects_unknown_filter_strict_filtering(self):
+        """Overwrite the test as strict filtering option yet."""

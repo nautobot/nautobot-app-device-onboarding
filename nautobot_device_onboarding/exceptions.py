@@ -30,7 +30,7 @@ class OnboardException(Exception):
 
     def __init__(self, reason, message, **kwargs):
         """Exception Init."""
-        super(OnboardException, self).__init__(kwargs)
+        super().__init__(kwargs)
         self.reason = reason
         self.message = message
 

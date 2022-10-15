@@ -11,16 +11,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-import logging
-
 from django.shortcuts import get_object_or_404, render
 
 from nautobot.core.views import generic
 
-from .filters import OnboardingTaskFilter
-from .forms import OnboardingTaskForm, OnboardingTaskFilterForm, OnboardingTaskFeedCSVForm
-from .models import OnboardingTask
-from .tables import OnboardingTaskTable, OnboardingTaskFeedBulkTable
+from nautobot_device_onboarding.filters import OnboardingTaskFilter
+from nautobot_device_onboarding.forms import OnboardingTaskForm, OnboardingTaskFilterForm, OnboardingTaskFeedCSVForm
+from nautobot_device_onboarding.models import OnboardingTask
+from nautobot_device_onboarding.tables import OnboardingTaskTable, OnboardingTaskFeedBulkTable
 
 
 class OnboardingTaskView(generic.ObjectView):

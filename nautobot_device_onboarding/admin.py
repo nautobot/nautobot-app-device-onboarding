@@ -12,7 +12,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from django.contrib import admin
-from .models import OnboardingTask
+from nautobot_device_onboarding.models import OnboardingTask
 
 
 @admin.register(OnboardingTask)

@@ -33,19 +33,23 @@ def is_truthy(arg):
 
 
 # Use pyinvoke configuration for default values, see http://docs.pyinvoke.org/en/stable/concepts/configuration.html
-# Variables may be overwritten in invoke.yml or by the environment variables INVOKE_{{cookiecutter.plugin_name.upper()}}_xxx
+# Variables may be overwritten in invoke.yml or by the environment variables INVOKE_NAUTOBOT_DEVICE_ONBOARDING_xxx
 namespace = Collection("nautobot_device_onboarding")
 namespace.configure(
     {
         "nautobot_device_onboarding": {
-            "nautobot_ver": "1.1.0",
+            "nautobot_ver": "1.5.1",
             "project_name": "nautobot_device_onboarding",
             "python_ver": "3.7",
             "local": False,
             "compose_dir": os.path.join(os.path.dirname(__file__), "development"),
             "compose_files": [
-                "docker-compose.yml",
+                "docker-compose.base.yml",
+                "docker-compose.redis.yml",
+                "docker-compose.postgres.yml",
+                "docker-compose.dev.yml",
             ],
+            "compose_http_timeout": "86400",
         }
     }
 )
@@ -79,6 +83,9 @@ def docker_compose(context, command, **kwargs):
         **kwargs: Passed through to the context.run() call.
     """
     build_env = {
+        # Note: 'docker-compose logs' will stop following after 60 seconds by default,
+        # so we are overriding that by setting this environment variable.
+        "COMPOSE_HTTP_TIMEOUT": context.nautobot_device_onboarding.compose_http_timeout,
         "NAUTOBOT_VER": context.nautobot_device_onboarding.nautobot_ver,
         "PYTHON_VER": context.nautobot_device_onboarding.python_ver,
     }
@@ -129,27 +136,41 @@ def build(context, force_rm=False, cache=True):
     docker_compose(context, command)
 
 
+@task
+def generate_packages(context):
+    """Generate all Python packages inside docker and copy the file locally under dist/."""
+    command = "poetry build"
+    run_command(context, command)
+
+
 # ------------------------------------------------------------------------------
 # START / STOP / DEBUG
 # ------------------------------------------------------------------------------
 @task
 def debug(context):
     """Start Nautobot and its dependencies in debug mode."""
-    print("Starting Nautobot .. ")
+    print("Starting Nautobot in debug mode...")
     docker_compose(context, "up")
 
 
 @task
 def start(context):
     """Start Nautobot and its dependencies in detached mode."""
-    print("Starting Nautobot in detached mode.. ")
+    print("Starting Nautobot in detached mode...")
     docker_compose(context, "up --detach")
+
+
+@task
+def restart(context):
+    """Gracefully restart all containers."""
+    print("Restarting Nautobot...")
+    docker_compose(context, "restart")
 
 
 @task
 def stop(context):
     """Stop Nautobot and its dependencies."""
-    print("Stopping Nautobot .. ")
+    print("Stopping Nautobot...")
     docker_compose(context, "down")
 
 
@@ -160,6 +181,34 @@ def destroy(context):
     docker_compose(context, "down --volumes")
 
 
+@task
+def vscode(context):
+    """Launch Visual Studio Code with the appropriate Environment variables to run in a container."""
+    command = "code nautobot.code-workspace"
+
+    context.run(command)
+
+
+@task(
+    help={
+        "service": "Docker-compose service name to view (default: nautobot)",
+        "follow": "Follow logs",
+        "tail": "Tail N number of lines or 'all'",
+    }
+)
+def logs(context, service="nautobot", follow=False, tail=None):
+    """View the logs of a docker-compose service."""
+    command = "logs "
+
+    if follow:
+        command += "--follow "
+    if tail:
+        command += f"--tail={tail} "
+
+    command += service
+    docker_compose(context, command)
+
+
 # ------------------------------------------------------------------------------
 # ACTIONS
 # ------------------------------------------------------------------------------
@@ -167,6 +216,13 @@ def destroy(context):
 def nbshell(context):
     """Launch an interactive nbshell session."""
     command = "nautobot-server nbshell"
+    run_command(context, command)
+
+
+@task
+def shell_plus(context):
+    """Launch an interactive shell_plus session."""
+    command = "nautobot-server shell_plus"
     run_command(context, command)
 
 
@@ -203,8 +259,35 @@ def makemigrations(context, name=""):
     run_command(context, command)
 
 
+@task
+def migrate(context):
+    """Perform migrate operation in Django."""
+    command = "nautobot-server migrate"
+
+    run_command(context, command)
+
+
+@task(help={})
+def post_upgrade(context):
+    """
+    Performs Nautobot common post-upgrade operations using a single entrypoint.
+
+    This will run the following management commands with default settings, in order:
+
+    - migrate
+    - trace_paths
+    - collectstatic
+    - remove_stale_contenttypes
+    - clearsessions
+    - invalidate all
+    """
+    command = "nautobot-server post_upgrade"
+
+    run_command(context, command)
+
+
 # ------------------------------------------------------------------------------
-# TESTS / LINTING
+# TESTS
 # ------------------------------------------------------------------------------
 @task(
     help={
@@ -226,7 +309,14 @@ def black(context, autoformat=False):
 @task
 def flake8(context):
     """Check for PEP8 compliance and other style issues."""
-    command = "flake8 . --config .flake8"
+    command = "flake8 ."
+    run_command(context, command)
+
+
+@task
+def hadolint(context):
+    """Check Dockerfile for hadolint compliance and other style issues."""
+    command = "hadolint development/Dockerfile"
     run_command(context, command)
 
 
@@ -243,7 +333,7 @@ def pylint(context):
 def pydocstyle(context):
     """Run pydocstyle to validate docstring formatting adheres to NTC defined standards."""
     # We exclude the /migrations/ directory since it is autogenerated code
-    command = "pydocstyle --config=.pydocstyle.ini ."
+    command = "pydocstyle ."
     run_command(context, command)
 
 
@@ -266,34 +356,67 @@ def yamllint(context):
 
 
 @task
-def unittest(context):
+def check_migrations(context):
+    """Check for missing migrations."""
+    command = "nautobot-server --config=nautobot/core/tests/nautobot_config.py makemigrations --dry-run --check"
+
+    run_command(context, command)
+
+
+@task(
+    help={
+        "keepdb": "save and re-use test database between test runs for faster re-testing.",
+        "label": "specify a directory or module to test instead of running all Nautobot tests",
+        "failfast": "fail as soon as a single test fails don't run the entire test suite",
+        "buffer": "Discard output from passing tests",
+    }
+)
+def unittest(context, keepdb=False, label="nautobot_device_onboarding", failfast=False, buffer=True):
     """Run Nautobot unit tests."""
-    command = "nautobot-server test nautobot_device_onboarding"
+    command = f"coverage run --module nautobot.core.cli test {label}"
+
+    if keepdb:
+        command += " --keepdb"
+    if failfast:
+        command += " --failfast"
+    if buffer:
+        command += " --buffer"
     run_command(context, command)
 
 
 @task
-def tests(context):
-    """Run all tests for this plugin.
+def unittest_coverage(context):
+    """Report on code test coverage as measured by 'invoke unittest'."""
+    command = "coverage report --skip-covered --include 'nautobot_device_onboarding/*' --omit *migrations*"
 
-    Args:
-         context (obj): Used to run specific commands
-        nautobot_ver (str): Nautobot version to use to build the container
-        python_ver (str): Will use the Python version docker image to build from
-    """
+    run_command(context, command)
+
+
+@task(
+    help={
+        "failfast": "fail as soon as a single test fails don't run the entire test suite",
+    }
+)
+def tests(context, failfast=False):
+    """Run all tests for this plugin."""
+    # If we are not running locally, start the docker containers so we don't have to for each test
+    if not is_truthy(context.nautobot_device_onboarding.local):
+        print("Starting Docker Containers...")
+        start(context)
     # Sorted loosely from fastest to slowest
     print("Running black...")
     black(context)
-    print("Running yamllint...")
-    yamllint(context)
+    print("Running flake8...")
+    flake8(context)
     print("Running bandit...")
     bandit(context)
     print("Running pydocstyle...")
     pydocstyle(context)
-    print("Running flake8...")
-    flake8(context)
-    # print("Running pylint...")
-    # pylint(context)
+    print("Running yamllint...")
+    yamllint(context)
+    print("Running pylint...")
+    pylint(context)
     print("Running unit tests...")
-    unittest(context)
+    unittest(context, failfast=failfast)
     print("All tests have passed!")
+    unittest_coverage(context)

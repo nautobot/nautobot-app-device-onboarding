@@ -11,6 +11,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+# pylint: disable=no-self-use
 
 from unittest import mock
 
@@ -24,20 +25,21 @@ from nautobot_device_onboarding.onboard import OnboardingManager
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
 
-class NapalmMock:
+class NapalmMock:  # pylint: disable=too-few-public-methods
     """Base napalm mock class for tests."""
 
     def __init__(self, *args, **kwargs):
         pass
 
     def open(self):
-        pass
+        """Mock test open ssh connection."""
 
 
 class NapalmMockNxos(NapalmMock):
     """Mock napalm for nxos tests."""
 
     def get_facts(self):
+        """Mock test get napalm facts."""
         return {
             "uptime": 4066631,
             "vendor": "Cisco",
@@ -50,6 +52,7 @@ class NapalmMockNxos(NapalmMock):
         }
 
     def get_interfaces_ip(self):
+        """Mock test get interface ip facts."""
         return {"mgmnt0": {"ipv4": {"1.1.1.1": {"prefix_length": 32}}}}
 
 
@@ -57,6 +60,7 @@ class NapalmMockEos(NapalmMock):
     """Mock napalm for eos tests."""
 
     def get_facts(self):
+        """Mock test get napalm facts on eos."""
         return {
             "fqdn": "arista-device.domain.net",
             "hostname": "arista-device",
@@ -69,16 +73,18 @@ class NapalmMockEos(NapalmMock):
         }
 
     def get_interfaces_ip(self):
+        """Mock test get napalm interfaces on eos."""
         return {"Vlan100": {"ipv4": {"2.2.2.2": {"prefix_length": 32}}}}
 
 
-class SSHDetectMock:
+class SSHDetectMock:  # pylint: disable=too-few-public-methods
     """SSHDetect mock class for tests."""
 
     def __init__(self, *args, **kwargs):
         self.driver = args[0]
 
     def autodetect(self):
+        """Mock test SSH."""
         return self.driver
 
 
@@ -113,12 +119,12 @@ class OnboardingTestCase(TestCase):
         mock_ssh_detect.return_value = SSHDetectMock("cisco_nxos")
 
         # Run onboarding
-        om = OnboardingManager(self.onboarding_task1, "user", "pass", "secret")
+        on_manager = OnboardingManager(self.onboarding_task1, "user", "pass", "secret")
 
-        self.assertEqual(om.created_device.name, "nxos-spine1")
-        self.assertEqual(om.created_device.platform.name, "cisco_nxos")
-        self.assertEqual(om.created_device.platform.napalm_driver, "nxos_ssh")
-        self.assertEqual(str(om.created_device.primary_ip4), "1.1.1.1/32")
+        self.assertEqual(on_manager.created_device.name, "nxos-spine1")
+        self.assertEqual(on_manager.created_device.platform.name, "cisco_nxos")
+        self.assertEqual(on_manager.created_device.platform.napalm_driver, "nxos_ssh")
+        self.assertEqual(str(on_manager.created_device.primary_ip4), "1.1.1.1/32")
 
     @mock.patch("nautobot_device_onboarding.netdev_keeper.SSHDetect")
     @mock.patch("nautobot_device_onboarding.netdev_keeper.get_network_driver")
@@ -129,9 +135,9 @@ class OnboardingTestCase(TestCase):
         mock_ssh_detect.return_value = SSHDetectMock("arista_eos")
 
         # Run onboarding
-        om = OnboardingManager(self.onboarding_task2, "user", "pass", "secret")
+        on_manager = OnboardingManager(self.onboarding_task2, "user", "pass", "secret")
 
-        self.assertEqual(om.created_device.name, "arista-device")
-        self.assertEqual(om.created_device.platform.name, "arista_eos")
-        self.assertEqual(om.created_device.platform.napalm_driver, "eos")
-        self.assertEqual(str(om.created_device.primary_ip4), "2.2.2.2/32")
+        self.assertEqual(on_manager.created_device.name, "arista-device")
+        self.assertEqual(on_manager.created_device.platform.name, "arista_eos")
+        self.assertEqual(on_manager.created_device.platform.napalm_driver, "eos")
+        self.assertEqual(str(on_manager.created_device.primary_ip4), "2.2.2.2/32")
