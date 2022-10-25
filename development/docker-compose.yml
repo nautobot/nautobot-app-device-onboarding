@@ -8,9 +8,9 @@ services:
     image: "nautobot-device-onboarding/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
     command: >
       sh -c "nautobot-server migrate &&
-             nautobot-server runserver 0.0.0.0:8000"
+             nautobot-server runserver 0.0.0.0:8080"
     ports:
-      - "8000:8000"
+      - "8080:8080"
     depends_on:
       - "postgres"
       - "redis"
