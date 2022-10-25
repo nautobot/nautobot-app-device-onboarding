@@ -6,6 +6,10 @@ A step-by-step tutorial on how to get the App going and how to use it.
 
 To install the App, please follow the instructions detailed in the [Installation Guide](../admin/install.md).
 
-## First steps with the App
+## Prequisites
 
-## What are the next steps?
+After installing the `nauobot-device-onboarding` plugin. You should create at least one site in Nautobot. Sites are the only other requirement for the plugin to onboard a device.
+
+## Onboarding a Device
+
+
