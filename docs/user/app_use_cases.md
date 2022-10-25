@@ -4,7 +4,7 @@
 
 ### Preparation
 
-To properly onboard a device, user needs to provide, at a minimum:
+To properly onboard a device, a user needs to provide, at a minimum:
 
 1. The Device's Site
 2. The Device's primary IP address or DNS Name
@@ -22,7 +22,7 @@ If `Platform`, `Device Type` and/or `Device Role` are not provided, the plugin w
 
 #### SSH Autodetect
 
-Plugin recognizes platform types with a Netmiko SSH Autodetect mechanism. The user will need to specify additional information for platforms where Netmiko's `ssh_autodetect` feature does not work.
+The `nautobot-device-onboarding` plugin recognizes platform types with a Netmiko SSH Autodetect mechanism. The user may need to specify additional information for platforms where Netmiko's `ssh_autodetect` feature does not work.
 
 [Here is the list](https://github.com/ktbyers/netmiko/blob/v3.4.0/netmiko/ssh_autodetect.py#L50) of platforms supported by `ssh_autodetect`.
 
