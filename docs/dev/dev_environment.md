@@ -29,10 +29,11 @@ Using **Invoke** these configuration options can be overridden using [several me
 
 This project is managed by [Python Poetry](https://python-poetry.org/) and has a few requirements to setup your development environment:
 
-1. Install Poetry, see the [Poetry Documentation](https://python-poetry.org/docs/#installation) for your operating system.
+1. Install Poetry, see the [Poetry documentation](https://python-poetry.org/docs/#installation) for your operating system.
 2. Install Docker, see the [Docker documentation](https://docs.docker.com/get-docker/) for your operating system.
+3. Install Docker-compose, see the [Docker-compose documentation](https://github.com/docker/compose) for your operation system.
 
-Once you have Poetry and Docker installed you can run the following commands (in the root of the repository) to install all other development dependencies in an isolated Python virtual environment:
+Once you have Poetry, Docker, and Docker-compose installed you can run the following commands (in the root of the repository) to install all other development dependencies in an isolated Python virtual environment:
 
 ```shell
 poetry shell
@@ -46,7 +47,7 @@ The Nautobot server can now be accessed at [http://localhost:8080](http://localh
 
 To either stop or destroy the development environment use the following options.
 
-- **invoke stop** - Stop the containers, but keep all underlying systems intact
+- **invoke stop** - Stop the containers, but keep all underlying systems intact (including any changes to the DB)
 - **invoke destroy** - Stop and remove all containers, volumes, etc. (This results in data loss due to the volume being deleted)
 
 ### Local Poetry Development Environment
@@ -401,7 +402,7 @@ namespace.configure(
 )
 ```
 
-Or set the `INVOKE_NAUTOBOT_GOLDEN_CONFIG_PYTHON_VER` variable.
+Or set the `INVOKE_NAUTOBOT_DEVICE_ONBOARDING_PYTHON_VER` variable.
 
 ### Updating Nautobot Version
 

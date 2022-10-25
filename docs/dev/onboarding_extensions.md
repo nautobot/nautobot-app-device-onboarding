@@ -41,7 +41,7 @@ At first, plugin will initiate an instance of your `OnboardingDriverExtensions` 
 - `onboarding_class` (mandatory)
 - `ext_result` (optional).
 
-In `onboarding_class` attribute, you have to return a custom class that defines your onboarding methods. This is useful, as you might want to onboard devices in multiple different ways and `onboarding_class` acts as an distinguisher here.
+In `onboarding_class` attribute, you have to return a custom class that defines your onboarding methods. This is useful, as you might want to onboard devices in multiple different ways and `onboarding_class` acts as a distinguisher here.
 
 The `ext_result` attribute allows to collect and store any data while the device connection is active. Your custom `OnboardingClass` will be initiated with `driver_addon_result` attribute containing the value of `ext_result`.
 
