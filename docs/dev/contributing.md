@@ -1,8 +1,5 @@
 # Contributing to the App
 
-!!! warning "Developer Note - Remove Me!"
-    Information on how to contribute fixes, functionality, or documentation changes back to the project.
-
 Pull requests are welcome and automatically built and tested against multiple version of Python and multiple version of Nautobot through GitHub Actions.
 
 The project is packaged with a light [development environment](dev_environment.md) based on `docker-compose` to help with the local development of the project and to run tests.
