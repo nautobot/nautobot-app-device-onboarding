@@ -1,8 +1,5 @@
 # Installing the App in Nautobot
 
-!!! warning "Developer Note - Remove Me!"
-    Detailed instructions on installing the App. You will need to update this section based on any additional dependencies or prerequisites.
-
 ## Prerequisites
 
 - The plugin is compatible with Nautobot 1.2.0 and higher.

@@ -16,11 +16,11 @@ You will need:
 
 The device must be reachable from the Nautobot and Nautobot worker instances (usually if one can reach it, the other can as well). You can test reachability directly with ssh. Since the plugin uses Napalm and Netmiko, they could also be used for a more accurate test.
 
-Sites are the only other Nautobot prequisite for the plugin to onboard a device. 
+Sites are the only other Nautobot prerequisite for the plugin to onboard a device. 
 
 ## Onboarding a Device
 
-Navigate to the Device Onboarding plugin: Plugins > Onboarding Tasks. Clicking the plus button to take you directly to the Onboarding form. 
+Navigate to the Device Onboarding plugin: Plugins > Onboarding Tasks. Clicking the plus button takes you directly to the Onboarding form. 
 
 [!Device Onboarding Navigation Menu](../images/menu.png)
 

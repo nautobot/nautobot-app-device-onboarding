@@ -43,7 +43,7 @@ invoke build
 invoke start
 ```
 
-The Nautobot server can now be accessed at [http://localhost:8080](http://localhost:8080) and the live documentation at [http://localhost:8001](http://localhost:8001).
+The Nautobot server can now be accessed at [http://localhost:8080](http://localhost:8080).
 
 To either stop or destroy the development environment use the following options.
 
@@ -168,11 +168,7 @@ This project is set up with a number of **Invoke** tasks consumed as simple CLI 
 
 ### Copy the credentials file for Nautobot
 
-First, you need to create the `development/creds.env` file - it stores a bunch of private information such as passwords and tokens for your local Nautobot install. You can make a copy of the `development/creds.example.env` and modify it to suit you.
-
-```shell
-cp development/creds.example.env development/creds.env
-```
+The `development/dev.env` file stores a bunch of private information such as passwords and tokens for your local Nautobot install. The `development/dev.env` can be used a basis to to customize for your installs.
 
 ### Invoke - Building the Docker Image
 
@@ -234,16 +230,7 @@ Once the containers are fully up, you should be able to open up a web browser, a
 
 ### Invoke - Creating a Superuser
 
-The Nautobot development image will automatically provision a super user when specifying the following variables within `creds.env` which is the default when copying `creds.example.env` to `creds.env`.
-
-- `NAUTOBOT_CREATE_SUPERUSER=true`
-- `NAUTOBOT_SUPERUSER_API_TOKEN=0123456789abcdef0123456789abcdef01234567`
-- `NAUTOBOT_SUPERUSER_PASSWORD=admin`
-
-!!! note
-	The default username is **admin**, but can be overridden by specifying **NAUTOBOT_SUPERUSER_USERNAME**.
-
-If you need to create additional superusers, run the follow commands.
+You will need to create a superuser to login, run the follow commands.
 
 ```bash
 ➜ invoke createsuperuser
@@ -308,6 +295,9 @@ The back-end Django process is setup to automatically reload itself (it only tak
 
 !!! note
 	You may get connection refused while Django reloads, but it should be refreshed fairly quickly.
+
+!!! note
+	Workers do not get automatically restarted and must be restarted manually, if running with docker-compose you can run `docker restart nautobot_device_onboarding_worker_1`.
 
 ### Docker Logs
 
@@ -438,21 +428,6 @@ This is the same as running:
 ```bash
 ➜ invoke cli
 ➜ nautobot-server nbshell
-```
-
-### iPython Shell Plus
-
-Django also has a more advanced shell that uses iPython and that will automatically import all the models:
-
-```bash
-➜ invoke shell-plus
-```
-
-This is the same as running:
-
-```bash
-➜ invoke cli
-➜ nautobot-server shell_plus
 ```
 
 ### Tests
