@@ -15,10 +15,11 @@ In most cases, the user would specify:
 
 - Device Name
 - Site
-- Platform [^1]
-- Transport Port [^1]
+- Platform *
+- Transport Port *
 
-[^1]: Necessary for onboarding NXOS API, Arista EOS, or any other platform not using SSH as a transport
+!!! note
+    * `Platform` and `Transport Port` are necessary for onboarding NXOS API, Arista EOS, or any other platform not using SSH as a transport.
 
 And the Onboarding Plugin would populate the following:
 
@@ -44,16 +45,22 @@ Existing Nautobot users may want to incorporate the Onboarding Plugin as part of
 ## Authors and Maintainers
 
 Authors
-- @mzb
-- @dgarros
+
+@mzb
+
+@dgarros
 
 Maintainers
-- @mzb
-- @glennmatthews
-- @chadell
-- @scetron
 
-## Features Used/Employed
+@mzb
+
+@glennmatthews
+
+@chadell
+
+@scetron
+
+## Nautobot Features Used/Employed
 
 - Data Models
 - NAV Menu Items
