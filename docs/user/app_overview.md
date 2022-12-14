@@ -7,7 +7,7 @@ A plugin for [Nautobot](https://github.com/nautobot/nautobot) to easily onboard 
 
 ## Description/Overview
 
-The `nautobot-device-onboarding` plugin is uses [netmiko](https://github.com/ktbyers/netmiko) and [NAPALM](https://napalm.readthedocs.io/en/latest/) libraries to simplify the onboarding process of a new device into Nautobot down to, in many cases, an *IP Address* and a *Site*. In some cases, the user may also have to specify a specific *Device Platform* and *Device Port*.
+The `nautobot-device-onboarding` plugin uses the [netmiko](https://github.com/ktbyers/netmiko) and [NAPALM](https://napalm.readthedocs.io/en/latest/) libraries to simplify the onboarding process of a new device into Nautobot down to, in many cases, an *IP Address* and a *Site*. In some cases, the user may also have to specify a specific *Device Platform* and *Device Port*.
 
 Regardless, the Onboarding Plugin greatly simplifies the onboarding process by allowing the user to specify a small amount of info and having the plugin populate a much larger amount of device data in Nautobot.
 
@@ -39,7 +39,7 @@ One example of a solution that can retrieve that additional device data and impo
 
 The Onboarding Plugin is meant for new Nautobot users who want to start importing their devices directly rather than from another, existing, source. Even with other sources for device information, they may not include everything that is necessary.
 
-Existing Nautobot users may want to incorporate the Onboarding Plugin as part of onboarding new devices to the platform. 
+Existing Nautobot users may want to incorporate the Onboarding Plugin as part of onboarding new devices to the platform.
 
 ## Authors and Maintainers
 
