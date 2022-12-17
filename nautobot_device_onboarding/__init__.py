@@ -11,10 +11,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+try:
+    from importlib import metadata
+except ImportError:
+    # Python version < 3.8
+    import importlib_metadata as metadata
+
+__version__ = metadata.version(__name__)
 
 from nautobot.extras.plugins import PluginConfig
-
-__version__ = "1.1.2"
 
 
 class OnboardingConfig(PluginConfig):
@@ -23,7 +28,7 @@ class OnboardingConfig(PluginConfig):
     name = "nautobot_device_onboarding"
     verbose_name = "Device Onboarding"
     version = __version__
-    min_version = "1.0.0"
+    min_version = "1.5.0"
     author = "Network to Code"
     author_email = "opensource@networktocode.com"
     description = "A plugin for Nautobot to easily onboard new devices."
