@@ -1,4 +1,5 @@
 """Tables for device onboarding tasks."""
+# pylint: disable=duplicate-code
 
 import django_tables2 as tables
 from nautobot.utilities.tables import BaseTable, ToggleColumn

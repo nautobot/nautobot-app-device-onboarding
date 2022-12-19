@@ -1,4 +1,5 @@
 """Model serializers for the nautobot_device_onboarding REST API."""
+# pylint: disable=duplicate-code
 
 from rest_framework import serializers
 
