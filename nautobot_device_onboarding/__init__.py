@@ -20,7 +20,7 @@ class OnboardingConfig(PluginConfig):
     min_version = "1.0.0"
     author = "Network to Code, LLC"
     author_email = "opensource@networktocode.com"
-    description = "A plugin for Nautobot to easily onboard new devices."
+    description = "Nautobot App that simplifies device onboarding (and re-onboarding) by collecting and populating common device 'facts' into Nautobot."
     base_url = "device-onboarding"
     required_settings = []
     default_settings = {
