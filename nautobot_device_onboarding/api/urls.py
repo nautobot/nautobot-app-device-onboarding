@@ -1,7 +1,7 @@
 """REST API URLs for device onboarding."""
 
 from rest_framework import routers
-from .views import OnboardingTaskView
+from nautobot_device_onboarding.api.views import OnboardingTaskView
 
 router = routers.DefaultRouter()
 

@@ -16,10 +16,10 @@ from nautobot_device_onboarding.models import OnboardingTask
 from nautobot_device_onboarding.filters import OnboardingTaskFilter
 
 # from nautobot_device_onboarding.choices import OnboardingStatusChoices
-from .serializers import OnboardingTaskSerializer
+from nautobot_device_onboarding.api.serializers import OnboardingTaskSerializer
 
 
-class OnboardingTaskView(
+class OnboardingTaskView(  # pylint: disable=too-many-ancestors
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,

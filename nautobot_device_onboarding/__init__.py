@@ -1,8 +1,14 @@
 """Plugin declaration for nautobot_device_onboarding."""
 
-from nautobot.extras.plugins import PluginConfig
+try:
+    from importlib import metadata
+except ImportError:
+    # Python version < 3.8
+    import importlib_metadata as metadata
 
-__version__ = "1.1.2"
+__version__ = metadata.version(__name__)
+
+from nautobot.extras.plugins import PluginConfig
 
 
 class OnboardingConfig(PluginConfig):
@@ -12,7 +18,7 @@ class OnboardingConfig(PluginConfig):
     verbose_name = "Device Onboarding"
     version = __version__
     min_version = "1.0.0"
-    author = "Network to Code"
+    author = "Network to Code, LLC"
     author_email = "opensource@networktocode.com"
     description = "A plugin for Nautobot to easily onboard new devices."
     base_url = "device-onboarding"

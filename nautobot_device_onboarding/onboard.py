@@ -2,7 +2,7 @@
 
 from django.conf import settings
 
-from .netdev_keeper import NetdevKeeper
+from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
@@ -10,69 +10,69 @@ PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 class OnboardingTaskManager:
     """Onboarding Task Manager."""
 
-    def __init__(self, ot):
+    def __init__(self, onboarding_task):
         """Inits class."""
-        self.ot = ot
+        self.onboarding_task = onboarding_task
 
     @property
     def napalm_driver(self):
         """Return napalm driver name."""
-        if self.ot.platform and self.ot.platform.napalm_driver:
-            return self.ot.platform.napalm_driver
+        if self.onboarding_task.platform and self.onboarding_task.platform.napalm_driver:
+            return self.onboarding_task.platform.napalm_driver
 
         return None
 
     @property
     def optional_args(self):
         """Return platform optional args."""
-        if self.ot.platform and self.ot.platform.napalm_args:
-            return self.ot.platform.napalm_args
+        if self.onboarding_task.platform and self.onboarding_task.platform.napalm_args:
+            return self.onboarding_task.platform.napalm_args
 
         return {}
 
     @property
     def ip_address(self):
         """Return ot's ip address."""
-        return self.ot.ip_address
+        return self.onboarding_task.ip_address
 
     @property
     def port(self):
         """Return ot's port."""
-        return self.ot.port
+        return self.onboarding_task.port
 
     @property
     def timeout(self):
         """Return ot's timeout."""
-        return self.ot.timeout
+        return self.onboarding_task.timeout
 
     @property
     def site(self):
         """Return ot's site."""
-        return self.ot.site
+        return self.onboarding_task.site
 
     @property
     def device_type(self):
         """Return ot's device type."""
-        return self.ot.device_type
+        return self.onboarding_task.device_type
 
     @property
     def role(self):
         """Return it's device role."""
-        return self.ot.role
+        return self.onboarding_task.role
 
     @property
     def platform(self):
         """Return ot's device platform."""
-        return self.ot.platform
+        return self.onboarding_task.platform
 
 
-class OnboardingManager:
+class OnboardingManager:  # pylint: disable=too-few-public-methods
     """Onboarding Manager."""
 
-    def __init__(self, ot, username, password, secret):
+    def __init__(self, onboarding_task, username, password, secret):
         """Inits class."""
         # Create instance of Onboarding Task Manager class:
-        otm = OnboardingTaskManager(ot)
+        otm = OnboardingTaskManager(onboarding_task)
 
         self.username = username or settings.NAPALM_USERNAME
         self.password = password or settings.NAPALM_PASSWORD

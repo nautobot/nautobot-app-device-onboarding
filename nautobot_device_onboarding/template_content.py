@@ -1,7 +1,7 @@
 """Onboarding template content."""
 
 from nautobot.extras.plugins import PluginTemplateExtension
-from .models import OnboardingDevice
+from nautobot_device_onboarding.models import OnboardingDevice
 
 
 class DeviceContent(PluginTemplateExtension):  # pylint: disable=abstract-method
