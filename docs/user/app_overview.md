@@ -52,13 +52,7 @@ Authors
 
 Maintainers
 
-@mzb
-
-@glennmatthews
-
-@chadell
-
-@scetron
+@nautobot/plugin-device-onboarding
 
 ## Nautobot Features Used/Employed
 
