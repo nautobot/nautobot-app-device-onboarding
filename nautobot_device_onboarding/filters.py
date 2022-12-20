@@ -6,7 +6,7 @@ from django.db.models import Q
 from nautobot.dcim.models import Site, DeviceRole, Platform
 from nautobot.utilities.filters import NameSlugSearchFilterSet
 
-from .models import OnboardingTask
+from nautobot_device_onboarding.models import OnboardingTask
 
 
 class OnboardingTaskFilter(NameSlugSearchFilterSet):

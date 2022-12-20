@@ -21,7 +21,7 @@ class NautobotKeeperTestCase(TestCase):
     def setUp(self):
         """Create a superuser and token for API calls."""
         self.site1 = Site.objects.create(name="USWEST", slug="uswest")
-        DATA = (
+        data = (
             {
                 "field_type": CustomFieldTypeChoices.TYPE_TEXT,
                 "field_name": "cf_manufacturer",
@@ -72,12 +72,12 @@ class NautobotKeeperTestCase(TestCase):
             },
         )
 
-        for data in DATA:
+        for item in data:
             # Create a custom field
-            cf = CustomField.objects.create(
-                type=data["field_type"], name=data["field_name"], default=data["default_value"], required=False
+            field = CustomField.objects.create(
+                type=item["field_type"], name=item["field_name"], default=item["default_value"], required=False
             )
-            cf.content_types.set([ContentType.objects.get_for_model(data["model"])])
+            field.content_types.set([ContentType.objects.get_for_model(item["model"])])
 
     def test_ensure_device_manufacturer_strict_missing(self):
         """Verify ensure_device_manufacturer function when Manufacturer object is not present."""

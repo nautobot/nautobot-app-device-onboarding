@@ -2,8 +2,8 @@
 from django.urls import path
 from nautobot.extras.views import ObjectChangeLogView
 
-from .models import OnboardingTask
-from .views import (
+from nautobot_device_onboarding.models import OnboardingTask
+from nautobot_device_onboarding.views import (
     OnboardingTaskView,
     OnboardingTaskListView,
     OnboardingTaskCreateView,

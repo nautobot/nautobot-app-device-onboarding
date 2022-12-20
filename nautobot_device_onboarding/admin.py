@@ -1,6 +1,6 @@
 """Administrative capabilities for nautobot_device_onboarding plugin."""
 from django.contrib import admin
-from .models import OnboardingTask
+from nautobot_device_onboarding.models import OnboardingTask
 
 
 @admin.register(OnboardingTask)

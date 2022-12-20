@@ -1,4 +1,5 @@
 """Model serializers for the nautobot_device_onboarding REST API."""
+# pylint: disable=duplicate-code
 
 from rest_framework import serializers
 
@@ -116,8 +117,8 @@ class OnboardingTaskSerializer(serializers.ModelSerializer):
             secret=secret,
         )
 
-        ot = OnboardingTask.objects.create(**validated_data)
+        onboarding_task = OnboardingTask.objects.create(**validated_data)
 
-        enqueue_onboarding_task(ot.id, credentials)
+        enqueue_onboarding_task(onboarding_task.id, credentials)
 
-        return ot
+        return onboarding_task
