@@ -28,10 +28,9 @@ class OnboardingTaskListView(generic.ObjectListView):
     """View for listing all extant OnboardingTasks."""
 
     queryset = OnboardingTask.objects.all().order_by("-label")
-    filterset = OnboardingTaskFilter
+    filterset_class = OnboardingTaskFilter
     filterset_form = OnboardingTaskFilterForm
     table = OnboardingTaskTable
-    template_name = "nautobot_device_onboarding/onboarding_tasks_list.html"
 
 
 class OnboardingTaskCreateView(generic.ObjectEditView):
