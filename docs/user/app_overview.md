@@ -44,15 +44,16 @@ Existing Nautobot users may want to incorporate the Onboarding Plugin as part of
 
 ## Authors and Maintainers
 
-Authors
+### Authors
 
-@mzb
+@mzb and @dgarros
 
-@dgarros
+### Maintainers
 
-Maintainers
-
-@nautobot/plugin-device-onboarding
+- @mzb
+- @glennmatthews
+- @chadell
+- @scetron
 
 ## Nautobot Features Used/Employed
 
