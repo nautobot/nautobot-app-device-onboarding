@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, render
 
 from nautobot.core.views import generic
 
-from nautobot_device_onboarding.filters import OnboardingTaskFilter
+from nautobot_device_onboarding.filters import OnboardingTaskFilterSet
 from nautobot_device_onboarding.forms import OnboardingTaskForm, OnboardingTaskFilterForm, OnboardingTaskFeedCSVForm
 from nautobot_device_onboarding.models import OnboardingTask
 from nautobot_device_onboarding.tables import OnboardingTaskTable, OnboardingTaskFeedBulkTable
@@ -28,9 +28,7 @@ class OnboardingTaskListView(generic.ObjectListView):
     """View for listing all extant OnboardingTasks."""
 
     queryset = OnboardingTask.objects.all().order_by("-label")
-    # Kept here for backwards compatibiltiy with min_version = 1.0.0
-    filterset = OnboardingTaskFilter
-    filterset_class = OnboardingTaskFilter
+    filterset = OnboardingTaskFilterSet
     filterset_form = OnboardingTaskFilterForm
     table = OnboardingTaskTable
 
