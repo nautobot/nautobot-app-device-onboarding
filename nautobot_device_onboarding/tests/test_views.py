@@ -1,33 +1,21 @@
-"""Unit tests for nautobot_device_onboarding views.
-
-(c) 2020-2021 Network To Code
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-  http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
+"""Unit tests for nautobot_device_onboarding views."""
 from nautobot.dcim.models import Site
 from nautobot.utilities.testing import ViewTestCases
 
 from nautobot_device_onboarding.models import OnboardingTask
 
 
-class OnboardingTestCase(
+class OnboardingTestCase(  # pylint: disable=no-member,too-many-ancestors
     ViewTestCases.GetObjectViewTestCase,
     ViewTestCases.ListObjectsViewTestCase,
     ViewTestCases.CreateObjectViewTestCase,
     ViewTestCases.BulkDeleteObjectsViewTestCase,
-    ViewTestCases.BulkImportObjectsViewTestCase,  # pylint: disable=no-member
+    ViewTestCases.BulkImportObjectsViewTestCase,
 ):
     """Test the OnboardingTask views."""
 
     def _get_base_url(self):
-        return "plugins:{}:{}_{{}}".format(self.model._meta.app_label, self.model._meta.model_name)
+        return f"plugins:{self.model._meta.app_label}:{self.model._meta.model_name}_" + "{}"
 
     model = OnboardingTask
 
@@ -54,3 +42,9 @@ class OnboardingTestCase(
 
     def test_has_advanced_tab(self):
         """Overwrite the test as OnboardingTask doesn't have advanced tab."""
+
+    def test_list_objects_unknown_filter_no_strict_filtering(self):
+        """Overwrite the test as strict filtering."""
+
+    def test_list_objects_unknown_filter_strict_filtering(self):
+        """Overwrite the test as strict filtering option yet."""

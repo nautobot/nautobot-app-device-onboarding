@@ -1,16 +1,5 @@
-"""Model serializers for the nautobot_device_onboarding REST API.
-
-(c) 2020-2021 Network To Code
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-  http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
+"""Model serializers for the nautobot_device_onboarding REST API."""
+# pylint: disable=duplicate-code
 
 from rest_framework import serializers
 
@@ -128,8 +117,8 @@ class OnboardingTaskSerializer(serializers.ModelSerializer):
             secret=secret,
         )
 
-        ot = OnboardingTask.objects.create(**validated_data)
+        onboarding_task = OnboardingTask.objects.create(**validated_data)
 
-        enqueue_onboarding_task(ot.id, credentials)
+        enqueue_onboarding_task(onboarding_task.id, credentials)
 
-        return ot
+        return onboarding_task

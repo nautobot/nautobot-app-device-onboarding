@@ -24,15 +24,20 @@ zipp = "^3.4.0"
 nautobot = ">=1.0.0"
 
 [tool.poetry.dev-dependencies]
-invoke = "*"
-black = "*"
-flake8 = "*"
-yamllint = "*"
 bandit = "*"
+black = "*"
+django-debug-toolbar = "*"
+# we need to pin flake8 because of package dependencies that cause it to downgrade and
+# therefore cause issues with linting since older versions do not take .flake8 as config
+flake8 = "^3.9.2"
+invoke = "*"
+pydocstyle = "*"
 pylint = "*"
 pylint-django = "*"
-pydocstyle = "*"
-django-debug-toolbar = "*"
+yamllint = "*"
+Markdown = "*"
+setuptools = "*"
+toml = "*"
 # Rendering docs to HTML
 mkdocs = "1.3.1"
 # Material for MkDocs theme
@@ -69,29 +74,17 @@ exclude = '''
 [tool.pylint.master]
 # Include the pylint_django plugin to avoid spurious warnings about Django patterns
 load-plugins="pylint_django"
-
-# Don't cache data for later comparisons
-persistent="no"
+ignore=".venv"
 
 [tool.pylint.basic]
 # No docstrings required for private methods (Pylint default), or for test_ functions, or for inner Meta classes.
 no-docstring-rgx="^(_|test_|Meta$)"
-# Allow "ot" (OnboardingTask instance) as an acceptable variable name
-good-names="ot,"
 
 [tool.pylint.messages_control]
 # Line length is enforced by Black, so pylint doesn't need to check it.
 # Pylint and Black disagree about how to format multi-line arrays; Black wins.
-# Disabled due to noise: too-few-public-methods, too-many-ancestors, too-many-instance-attributes
 disable = """,
-    line-too-long,
-    bad-continuation,
-    too-few-public-methods,
-    too-many-ancestors,
-    too-many-instance-attributes,
-    duplicate-code,
-    raise-missing-from,
-    super-with-arguments
+    line-too-long
     """
 
 [tool.pylint.miscellaneous]
@@ -101,6 +94,24 @@ notes = """,
     XXX,
     """
 
+[tool.pydocstyle]
+convention = "google"
+inherit = false
+match = "(?!__init__).*\\.py"
+match-dir = "(?!tests|migrations|development)[^\\.].*"
+# D212 is enabled by default in google convention, and complains if we have a docstring like:
+# """
+# My docstring is on the line after the opening quotes instead of on the same line as them.
+# """
+# We've discussed and concluded that we consider this to be a valid style choice.
+add_ignore = "D212"
+
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests"
+]
+addopts = "-vv --doctest-modules"

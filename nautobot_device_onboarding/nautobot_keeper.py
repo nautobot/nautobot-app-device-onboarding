@@ -1,16 +1,4 @@
-"""Nautobot Keeper.
-
-(c) 2020-2021 Network To Code
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-  http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
+"""Nautobot Keeper."""
 
 import logging
 import re
@@ -27,8 +15,8 @@ from nautobot.extras.models import Status
 from nautobot.extras.models.customfields import CustomField
 from nautobot.ipam.models import IPAddress
 
-from .constants import NETMIKO_TO_NAPALM_STATIC
-from .exceptions import OnboardException
+from nautobot_device_onboarding.constants import NETMIKO_TO_NAPALM_STATIC
+from nautobot_device_onboarding.exceptions import OnboardException
 
 logger = logging.getLogger("rq.worker")
 
@@ -37,9 +25,9 @@ PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
 def ensure_default_cf(obj, model):
     """Update objects's default custom fields."""
-    for cf in CustomField.objects.get_for_model(model):
-        if (cf.default is not None) and (cf.name not in obj.cf):
-            obj.cf[cf.name] = cf.default
+    for field in CustomField.objects.get_for_model(model):
+        if (field.default is not None) and (field.name not in obj.cf):
+            obj.cf[field.name] = field.default
 
     try:
         obj.validated_save()
@@ -47,7 +35,7 @@ def ensure_default_cf(obj, model):
         raise OnboardException(
             reason="fail-general",
             message=f"ERROR: {obj} validation error: {err.messages}",
-        )
+        ) from err
 
 
 def object_match(obj, search_array):
@@ -74,20 +62,20 @@ def object_match(obj, search_array):
                     return result
                 except obj.DoesNotExist:
                     pass
-                except obj.MultipleObjectsReturned:
+                except obj.MultipleObjectsReturned as err:
                     raise OnboardException(
                         reason="fail-general",
                         message=f"ERROR multiple objects found in {str(obj)} searching on {str(search_array_element)})",
-                    )
+                    ) from err
         raise
-    except obj.MultipleObjectsReturned:
+    except obj.MultipleObjectsReturned as err:
         raise OnboardException(
             reason="fail-general",
             message=f"ERROR multiple objects found in {str(obj)} searching on {str(search_array_element)})",
-        )
+        ) from err
 
 
-class NautobotKeeper:
+class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
     """Used to manage the information relating to the network device within the Nautobot server."""
 
     def __init__(  # pylint: disable=R0913,R0914
@@ -172,18 +160,18 @@ class NautobotKeeper:
                 "Could not find existing Nautobot device for requested primary IP address (%s)",
                 self.netdev_mgmt_ip_address,
             )
-        except Device.MultipleObjectsReturned:
+        except Device.MultipleObjectsReturned as err:
             raise OnboardException(
                 reason="fail-general",
                 message=f"ERROR multiple devices using same IP in Nautobot: {self.netdev_mgmt_ip_address}",
-            )
+            ) from err
 
     def ensure_device_site(self):
         """Ensure device's site."""
         try:
             self.nb_site = Site.objects.get(slug=self.netdev_nb_site_slug)
-        except Site.DoesNotExist:
-            raise OnboardException(reason="fail-config", message=f"Site not found: {self.netdev_nb_site_slug}")
+        except Site.DoesNotExist as err:
+            raise OnboardException(reason="fail-config", message=f"Site not found: {self.netdev_nb_site_slug}") from err
 
     def ensure_device_manufacturer(
         self,
@@ -206,14 +194,14 @@ class NautobotKeeper:
         try:
             search_array = [{"slug__iexact": nb_manufacturer_slug}]
             self.nb_manufacturer = object_match(Manufacturer, search_array)
-        except Manufacturer.DoesNotExist:
+        except Manufacturer.DoesNotExist as err:
             if create_manufacturer:
                 self.nb_manufacturer = Manufacturer.objects.create(name=self.netdev_vendor, slug=nb_manufacturer_slug)
                 ensure_default_cf(obj=self.nb_manufacturer, model=Manufacturer)
             else:
                 raise OnboardException(
                     reason="fail-config", message=f"ERROR manufacturer not found: {self.netdev_vendor}"
-                )
+                ) from err
 
     def ensure_device_type(
         self,
@@ -274,7 +262,7 @@ class NautobotKeeper:
                     message=f"ERROR device type {self.netdev_model} " f"already exists for vendor {self.netdev_vendor}",
                 )
 
-        except DeviceType.DoesNotExist:
+        except DeviceType.DoesNotExist as err:
             if create_device_type:
                 logger.info("CREATE: device-type: %s", self.netdev_model)
                 self.nb_device_type = DeviceType.objects.create(
@@ -286,7 +274,7 @@ class NautobotKeeper:
             else:
                 raise OnboardException(
                     reason="fail-config", message=f"ERROR device type not found: {self.netdev_model}"
-                )
+                ) from err
 
     def ensure_device_role(
         self,
@@ -303,7 +291,7 @@ class NautobotKeeper:
         """
         try:
             self.nb_device_role = DeviceRole.objects.get(slug=self.netdev_nb_role_slug)
-        except DeviceRole.DoesNotExist:
+        except DeviceRole.DoesNotExist as err:
             if create_device_role:
                 self.nb_device_role = DeviceRole.objects.create(
                     name=self.netdev_nb_role_slug,
@@ -315,7 +303,7 @@ class NautobotKeeper:
             else:
                 raise OnboardException(
                     reason="fail-config", message=f"ERROR device role not found: {self.netdev_nb_role_slug}"
-                )
+                ) from err
 
     def ensure_device_platform(self, create_platform_if_missing=PLUGIN_SETTINGS["create_platform_if_missing"]):
         """Get platform object from Nautobot filtered by platform_slug.
@@ -348,7 +336,7 @@ class NautobotKeeper:
 
             logger.info("PLATFORM: found in Nautobot %s", self.netdev_nb_platform_slug)
 
-        except Platform.DoesNotExist:
+        except Platform.DoesNotExist as err:
             if create_platform_if_missing:
                 platform_to_napalm_nautobot = {
                     platform.slug: platform.napalm_driver
@@ -369,7 +357,7 @@ class NautobotKeeper:
                 raise OnboardException(
                     reason="fail-general",
                     message=f"ERROR platform not found in Nautobot: {self.netdev_nb_platform_slug}",
-                )
+                ) from err
 
     def ensure_device_instance(self, default_status=PLUGIN_SETTINGS["default_device_status"]):
         """Ensure that the device instance exists in Nautobot and is assigned the provided device role or DEFAULT_ROLE.
@@ -402,16 +390,16 @@ class NautobotKeeper:
             ct = ContentType.objects.get_for_model(Device)  # pylint: disable=invalid-name
             try:
                 device_status = Status.objects.get(content_types__in=[ct], name=default_status)
-            except Status.DoesNotExist:
+            except Status.DoesNotExist as err:
                 raise OnboardException(
                     reason="fail-general",
                     message=f"ERROR could not find existing device status: {default_status}",
-                )
-            except Status.MultipleObjectsReturned:
+                ) from err
+            except Status.MultipleObjectsReturned as err:
                 raise OnboardException(
                     reason="fail-general",
                     message=f"ERROR multiple device status using same name: {default_status}",
-                )
+                ) from err
 
             lookup_args = {
                 "name": self.netdev_hostname,
@@ -435,11 +423,11 @@ class NautobotKeeper:
             else:
                 logger.info("GOT/UPDATED device: %s", self.netdev_hostname)
 
-        except Device.MultipleObjectsReturned:
+        except Device.MultipleObjectsReturned as err:
             raise OnboardException(
                 reason="fail-general",
                 message=f"ERROR multiple devices using same name in Nautobot: {self.netdev_hostname}",
-            )
+            ) from err
 
     def ensure_interface(self):
         """Ensures that the interface associated with the mgmt_ipaddr exists and is assigned to the device."""
@@ -457,16 +445,16 @@ class NautobotKeeper:
             default_status_name = PLUGIN_SETTINGS["default_ip_status"]
             try:
                 ip_status = Status.objects.get(content_types__in=[ct], name=default_status_name)
-            except Status.DoesNotExist:
+            except Status.DoesNotExist as err:
                 raise OnboardException(
                     reason="fail-general",
                     message=f"ERROR could not find existing IP Address status: {default_status_name}",
-                )
-            except Status.MultipleObjectsReturned:
+                ) from err
+            except Status.MultipleObjectsReturned as err:
                 raise OnboardException(
                     reason="fail-general",
                     message=f"ERROR multiple IP Address status using same name: {default_status_name}",
-                )
+                ) from err
 
             self.nb_primary_ip, created = IPAddress.objects.get_or_create(
                 address=f"{self.netdev_mgmt_ip_address}/{self.netdev_mgmt_pflen}", defaults={"status": ip_status}
