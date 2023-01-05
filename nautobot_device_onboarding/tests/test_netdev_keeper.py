@@ -1,16 +1,4 @@
-"""Unit tests for nautobot_device_onboarding.netdev_keeper module and its classes.
-
-(c) 2020-2021 Network To Code
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-  http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
+"""Unit tests for nautobot_device_onboarding.netdev_keeper module and its classes."""
 
 from socket import gaierror
 from unittest import mock
@@ -53,7 +41,7 @@ class NetdevKeeperTestCase(TestCase):
         mock_get_hostbyname.return_value = "192.0.2.1"
 
         # FQDN -> IP
-        onboarding_task_fqdn_to_ip(ot=self.onboarding_task4)
+        onboarding_task_fqdn_to_ip(onboarding_task=self.onboarding_task4)
 
         # Run the check to change the IP address
         self.assertEqual(self.onboarding_task4.ip_address, "192.0.2.1")
@@ -66,12 +54,12 @@ class NetdevKeeperTestCase(TestCase):
 
         # Check for bad.local raising an exception
         with self.assertRaises(OnboardException) as exc_info:
-            onboarding_task_fqdn_to_ip(ot=self.onboarding_task5)
+            onboarding_task_fqdn_to_ip(onboarding_task=self.onboarding_task5)
             self.assertEqual(exc_info.exception.message, "ERROR failed to complete DNS lookup: bad.local")
             self.assertEqual(exc_info.exception.reason, "fail-dns")
 
         # Check for exception with prefix address entered
         with self.assertRaises(OnboardException) as exc_info:
-            onboarding_task_fqdn_to_ip(ot=self.onboarding_task7)
+            onboarding_task_fqdn_to_ip(onboarding_task=self.onboarding_task7)
             self.assertEqual(exc_info.exception.reason, "fail-prefix")
             self.assertEqual(exc_info.exception.message, "ERROR appears a prefix was entered: 192.0.2.1/32")

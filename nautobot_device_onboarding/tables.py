@@ -1,19 +1,9 @@
-"""Tables for device onboarding tasks.
+"""Tables for device onboarding tasks."""
+# pylint: disable=duplicate-code
 
-(c) 2020-2021 Network To Code
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-  http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
 import django_tables2 as tables
 from nautobot.utilities.tables import BaseTable, ToggleColumn
-from .models import OnboardingTask
+from nautobot_device_onboarding.models import OnboardingTask
 
 
 class OnboardingTaskTable(BaseTable):
@@ -25,7 +15,7 @@ class OnboardingTaskTable(BaseTable):
     platform = tables.LinkColumn()
     created_device = tables.LinkColumn()
 
-    class Meta(BaseTable.Meta):  # noqa: D106 "Missing docstring in public nested class"
+    class Meta(BaseTable.Meta):  # noqa: D106 pylint: disable=too-few-public-methods
         model = OnboardingTask
         fields = (
             "pk",
@@ -46,7 +36,7 @@ class OnboardingTaskFeedBulkTable(BaseTable):
 
     site = tables.LinkColumn()
 
-    class Meta(BaseTable.Meta):  # noqa: D106 "Missing docstring in public nested class"
+    class Meta(BaseTable.Meta):  # noqa: D106 pylint: disable=too-few-public-methods
         model = OnboardingTask
         fields = (
             "label",

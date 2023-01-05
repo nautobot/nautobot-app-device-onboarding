@@ -1,16 +1,4 @@
-"""Unit tests for nautobot_device_onboarding.onboard module and its classes.
-
-(c) 2020-2021 Network To Code
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-  http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
+"""Unit tests for nautobot_device_onboarding.onboard module and its classes."""
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
@@ -33,7 +21,7 @@ class NautobotKeeperTestCase(TestCase):
     def setUp(self):
         """Create a superuser and token for API calls."""
         self.site1 = Site.objects.create(name="USWEST", slug="uswest")
-        DATA = (
+        data = (
             {
                 "field_type": CustomFieldTypeChoices.TYPE_TEXT,
                 "field_name": "cf_manufacturer",
@@ -84,12 +72,12 @@ class NautobotKeeperTestCase(TestCase):
             },
         )
 
-        for data in DATA:
+        for item in data:
             # Create a custom field
-            cf = CustomField.objects.create(
-                type=data["field_type"], name=data["field_name"], default=data["default_value"], required=False
+            field = CustomField.objects.create(
+                type=item["field_type"], name=item["field_name"], default=item["default_value"], required=False
             )
-            cf.content_types.set([ContentType.objects.get_for_model(data["model"])])
+            field.content_types.set([ContentType.objects.get_for_model(item["model"])])
 
     def test_ensure_device_manufacturer_strict_missing(self):
         """Verify ensure_device_manufacturer function when Manufacturer object is not present."""
