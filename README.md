@@ -1,7 +1,7 @@
 # Nautobot Device Onboarding
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-onboarding/develop/docs/images/icon-NautobotDeviceOnboarding.png" class="logo" height="200px">
+  <img src="https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-onboarding/develop/docs/images/icon-DeviceOnboarding.png" class="logo" height="200px">
   <br>
   <a href="https://github.com/nautobot/nautobot-plugin-device-onboarding/actions"><img src="https://github.com/nautobot/nautobot-plugin-device-onboarding/actions/workflows/ci.yml/badge.svg?branch=develop"></a>
   <a href="https://docs.nautobot.com/projects/device-onboarding/"><img src="https://readthedocs.org/projects/nautobot-plugin-device-onboarding/badge/"></a>
