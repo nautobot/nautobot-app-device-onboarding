@@ -9,7 +9,7 @@ from nautobot.utilities.filters import NameSlugSearchFilterSet
 from nautobot_device_onboarding.models import OnboardingTask
 
 
-class OnboardingTaskFilter(NameSlugSearchFilterSet):
+class OnboardingTaskFilterSet(NameSlugSearchFilterSet):
     """Filter capabilities for OnboardingTask instances."""
 
     q = django_filters.CharFilter(
