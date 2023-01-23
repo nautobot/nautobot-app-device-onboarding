@@ -13,7 +13,7 @@ from rest_framework import mixins, viewsets
 # from nautobot.dcim.models import Device, Site, Platform, DeviceRole
 
 from nautobot_device_onboarding.models import OnboardingTask
-from nautobot_device_onboarding.filters import OnboardingTaskFilter
+from nautobot_device_onboarding.filters import OnboardingTaskFilterSet
 
 # from nautobot_device_onboarding.choices import OnboardingStatusChoices
 from nautobot_device_onboarding.api.serializers import OnboardingTaskSerializer
@@ -32,5 +32,5 @@ class OnboardingTaskView(  # pylint: disable=too-many-ancestors
     """
 
     queryset = OnboardingTask.objects.all()
-    filterset_class = OnboardingTaskFilter
+    filterset_class = OnboardingTaskFilterSet
     serializer_class = OnboardingTaskSerializer
