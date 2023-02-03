@@ -30,7 +30,7 @@ This App is installed in the Nautobot Community Sandbox found over at [demo.naut
 
 ## Documentation
 
-Full web-based HTML documentation for this app can be found over on the [Nautobot Docs](https://nbdocs.pages.dev/) website:
+Full web-based HTML documentation for this app can be found over on the [Nautobot Docs](https://docs.nautobot.com/) website:
 
 - [User Guide](https://docs.nautobot.com/projects/device-onboarding/user/app_overview/) - Overview, Using the App, Getting Started.
 - [Administrator Guide](https://docs.nautobot.com/projects/device-onboarding/admin/install/) - How to Install, Configure, Upgrade, or Uninstall the App.
@@ -48,4 +48,4 @@ Any PRs with fixes or improvements are very welcome!
 
 ## Questions
 
-For any questions or comments, please check the [FAQ](https://docs.nautobot.com/projects/device-onboarding//user/faq/) first. Feel free to also swing by the [Network to Code Slack](https://networktocode.slack.com/) (channel `#nautobot`), sign up [here](http://slack.networktocode.com/) if you don't have an account.
+For any questions or comments, please check the [FAQ](https://docs.nautobot.com/projects/device-onboarding/user/faq/) first. Feel free to also swing by the [Network to Code Slack](https://networktocode.slack.com/) (channel `#nautobot`), sign up [here](http://slack.networktocode.com/) if you don't have an account.
