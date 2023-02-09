@@ -16,5 +16,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_missing_onboardingdevice),
+        migrations.RunPython(create_missing_onboardingdevice, migrations.RunPython.noop),
     ]
