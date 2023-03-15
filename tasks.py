@@ -26,9 +26,9 @@ namespace = Collection("nautobot_device_onboarding")
 namespace.configure(
     {
         "nautobot_device_onboarding": {
-            "nautobot_ver": "1.5.1",
+            "nautobot_ver": "stable",
             "project_name": "nautobot_device_onboarding",
-            "python_ver": "3.7",
+            "python_ver": "3.8",
             "local": False,
             "compose_dir": os.path.join(os.path.dirname(__file__), "development"),
             "compose_files": [

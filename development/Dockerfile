@@ -1,8 +1,8 @@
 # -------------------------------------------------------------------------------------
-# Nautobot Plugin Development Dockerfile Template
-# Version: 1.0.0
+# Nautobot App Developement Dockerfile Template
+# Version: 1.1.0
 #
-# Plugins that need to add additional steps or packages can do in the section below.
+# Apps that need to add additional steps or packages can do in the section below.
 # -------------------------------------------------------------------------------------
 # !!! USE CAUTION WHEN MODIFYING LINES BELOW
 
@@ -29,25 +29,22 @@ ENV NAUTOBOT_ROOT ${NAUTOBOT_ROOT}
 RUN curl -sSL https://install.python-poetry.org | python3 - && \
   poetry config virtualenvs.create false
 
-# --no-root declares not to install the project package since we're wanting to
-# take advantage of caching dependency installation
-# and the project is copied in and installed after this step
-RUN poetry install --no-interaction --no-ansi --no-root
-
-# Copy in the rest of the source code and install local Nautobot plugin
-# Plugin-specific system build/test dependencies.
+# !!! USE CAUTION WHEN MODIFYING LINES ABOVE
+# -------------------------------------------------------------------------------------
+# App-specifc system build/test dependencies.
 # 
 # Example: LDAP requires `libldap2-dev` to be apt-installed before the Python package.
 # -------------------------------------------------------------------------------------
 # --> Start safe to modify section
 
-# Uncomment the line below if you are apt-installing any package.
-# RUN apt update
-# RUN apt install libldap2-dev
+# Uncomment the lines below if you are apt-installing any package.
+# RUN apt-get -y update && apt-get -y install \
+#     libldap2-dev \
+#     && rm -rf /var/lib/apt/lists/*
 
 # --> Stop safe to modify section
 # -------------------------------------------------------------------------------------
-# Install Nautobot Plugin
+# Install Nautobot App
 # -------------------------------------------------------------------------------------
 # !!! USE CAUTION WHEN MODIFYING LINES BELOW
 
@@ -66,11 +63,11 @@ RUN pip show nautobot | grep "^Version: " | sed -e 's/Version: /nautobot==/' > c
 # We can't use the entire freeze as it takes forever to resolve with rigidly fixed non-direct dependencies,
 #   especially those that are only direct to Nautobot but the container included versions slightly mismatch
 RUN poetry export -f requirements.txt --without-hashes --output poetry_freeze_base.txt
-RUN poetry export -f requirements.txt --dev --without-hashes --output poetry_freeze_all.txt
+RUN poetry export -f requirements.txt --with dev --without-hashes --output poetry_freeze_all.txt
 RUN sort poetry_freeze_base.txt poetry_freeze_all.txt | uniq -u > poetry_freeze_dev.txt
 
 # Install all local project as editable, constrained on Nautobot version, to get any additional
-#   direct dependencies of the plugin
+#   direct dependencies of the app
 RUN pip install -c constraints.txt -e .
 
 # Install any dev dependencies frozen from Poetry

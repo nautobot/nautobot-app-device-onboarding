@@ -82,7 +82,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.7"]
+        python-version: ["3.8"]
         nautobot-version: ["1.4.10"]
     env:
       INVOKE_NAUTOBOT_DEVICE_ONBOARDING_PYTHON_VER: "${{ matrix.python-version }}"
@@ -121,19 +121,17 @@ jobs:
       matrix:
         python-version: ["3.7", "3.8", "3.9", "3.10"]
         db-backend: ["postgresql"]
-        # TODO: Change to latest once #63 is fixed
-        nautobot-version: ["1.5.1"]
+        nautobot-version: ["stable"]
         include:
           - python-version: "3.10"
             db-backend: "postgresql"
             nautobot-version: "1.4.10"
-            # TODO: Include the following, once mysql is working on CI
-            # - python-version: "3.7"
-            #   db-backend: "mysql"
-            #   nautobot-version: "1.5.5"
-            # - python-version: "3.10"
-            #   db-backend: "mysql"
-            #   nautobot-version: "latest"
+          - python-version: "3.7"
+            db-backend: "mysql"
+            nautobot-version: "1.4.10"
+          - python-version: "3.10"
+            db-backend: "mysql"
+            nautobot-version: "stable"
     runs-on: "ubuntu-20.04"
     env:
       INVOKE_NAUTOBOT_DEVICE_ONBOARDING_PYTHON_VER: "${{ matrix.python-version }}"
