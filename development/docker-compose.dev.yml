@@ -12,8 +12,6 @@ services:
     volumes:
       - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
       - "../:/source"
-    healthcheck:
-      disable: true
   docs:
     entrypoint: "mkdocs serve -v -a 0.0.0.0:8080"
     ports:
