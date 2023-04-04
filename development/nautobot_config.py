@@ -146,5 +146,5 @@ PLUGINS = NAUTOBOT_APPS
 #     }
 # }
 #
-# Backwarsd compatibility for v1.x
+# Backwards compatibility for v1.x
 # PLUGINS_CONFIG = NAUTOBOT_APPS_CONFIG
