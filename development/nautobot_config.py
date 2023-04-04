@@ -140,7 +140,7 @@ PLUGINS = NAUTOBOT_APPS
 # Nautobot App configuration settings. These settings are used by various plugins that the user may have installed.
 # Each key in the dictionary is the name of an installed plugin and its value is a dictionary of settings.
 # NAUTOBOT_APPS_CONFIG = {
-#     '{{ cookiecutter.nautobot_app_name }}': {
+#     'nautobot_device_onboarding': {
 #         'foo': 'bar',
 #         'buzz': 'bazz'
 #     }
