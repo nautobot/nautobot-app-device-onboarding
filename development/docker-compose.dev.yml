@@ -12,8 +12,6 @@ services:
     volumes:
       - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
       - "../:/source"
-    healthcheck:
-      disable: true
   docs:
     entrypoint: "mkdocs serve -v -a 0.0.0.0:8080"
     ports:
@@ -29,10 +27,10 @@ services:
     volumes:
       - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
       - "../:/source"
-# To expose postgres or redis to the host uncomment the following
-#   db:
-#     ports:
-#       - "5432:5432"
-# redis:
-#   ports:
-#     - "6379:6379"
+  # To expose postgres or redis to the host uncomment the following
+  # db:
+  #   ports:
+  #     - "5432:5432"
+  # redis:
+  #   ports:
+  #     - "6379:6379"
