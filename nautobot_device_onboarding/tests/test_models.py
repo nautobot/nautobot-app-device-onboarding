@@ -89,5 +89,5 @@ class OnboardingDeviceModelTestCase(TestCase):
 
     def test_tasks_labels(self):
         """Verify created tasks are with labels following creation order."""
-        for index, task_object in enumerate(OnboardingTask.objects.order_by("created"), start=1):
+        for index, task_object in enumerate(OnboardingTask.objects.order_by("last_updated"), start=1):
             self.assertEqual(index, task_object.label)
