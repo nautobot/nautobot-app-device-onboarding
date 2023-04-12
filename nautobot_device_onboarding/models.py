@@ -3,6 +3,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.db import models
 from django.urls import reverse
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 from nautobot.core.models import BaseModel
 from nautobot.dcim.models import Device
@@ -34,12 +35,17 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
     status = models.CharField(max_length=255, choices=OnboardingStatusChoices, help_text="Overall status of the task")
 
     failed_reason = models.CharField(
-        max_length=255, choices=OnboardingFailChoices, help_text="Raison why the task failed (optional)", null=True
+        max_length=255, choices=OnboardingFailChoices, help_text="Reason why the task failed (optional)", null=True
     )
 
     message = models.CharField(max_length=511, blank=True)
 
-    port = models.PositiveSmallIntegerField(help_text="Port to use to connect to the device", default=22)
+    port = models.PositiveIntegerField(
+        validators=[MaxValueValidator(65535)],
+        help_text="Port to use to connect to the device",
+        default=22,
+    )
+
     timeout = models.PositiveSmallIntegerField(
         help_text="Timeout period in sec to wait while connecting to the device", default=30
     )
