@@ -41,7 +41,7 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
     message = models.CharField(max_length=511, blank=True)
 
     port = models.PositiveIntegerField(
-        validators=[MinValueValidator(1),MaxValueValidator(65535)],
+        validators=[MinValueValidator(1), MaxValueValidator(65535)],
         help_text="Port to use to connect to the device",
         default=22,
     )

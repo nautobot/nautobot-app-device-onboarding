@@ -7,13 +7,19 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('nautobot_device_onboarding', '0003_onboardingtask_label'),
+        ("nautobot_device_onboarding", "0003_onboardingtask_label"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='onboardingtask',
-            name='port',
-            field=models.PositiveIntegerField(default=22, validators=[django.core.validators.MinValueValidator(1), django.core.validators.MaxValueValidator(65535)]),
+            model_name="onboardingtask",
+            name="port",
+            field=models.PositiveIntegerField(
+                default=22,
+                validators=[
+                    django.core.validators.MinValueValidator(1),
+                    django.core.validators.MaxValueValidator(65535),
+                ],
+            ),
         ),
     ]
