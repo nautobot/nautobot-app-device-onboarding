@@ -1,5 +1,7 @@
 """Unit tests for nautobot_device_onboarding OnboardingDevice model."""
 from django.test import TestCase
+from django.db.utils import DataError
+from django.core.exceptions import ValidationError
 
 from nautobot.dcim.models import Site, DeviceRole, DeviceType, Manufacturer, Device, Interface
 from nautobot.ipam.models import IPAddress
@@ -7,8 +9,6 @@ from nautobot.ipam.models import IPAddress
 from nautobot_device_onboarding.models import OnboardingTask
 from nautobot_device_onboarding.models import OnboardingDevice
 from nautobot_device_onboarding.choices import OnboardingStatusChoices, OnboardingFailChoices
-
-from django.db.utils import DataError
 
 
 class OnboardingDeviceModelTestCase(TestCase):
@@ -77,8 +77,6 @@ class OnboardingDeviceModelTestCase(TestCase):
         )
         task.validated_save()
 
-
-
     def test_onboardingdevice_autocreated(self):
         """Verify that OnboardingDevice is auto-created."""
         onboarding_device = OnboardingDevice.objects.get(device=self.device)
@@ -114,8 +112,9 @@ class OnboardingDeviceModelTestCase(TestCase):
         self.assertRaises(DataError, self.create_onboarding_task, -1)
 
     def test_port_max(self):
-        """Verify task fails when port is over 65535."""
-        self.assertRaises(DataError, self.create_onboarding_task, 65536)
+        """Verify task fails when port is invalid TCP port."""
+        self.assertRaises(ValidationError, self.create_onboarding_task, 0)
+        self.assertRaises(ValidationError, self.create_onboarding_task, 65536)
 
     def test_port_valid(self):
         """Verify task succeeds when port is between 1 and 65535."""
