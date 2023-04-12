@@ -6,7 +6,9 @@ from nautobot.ipam.models import IPAddress
 
 from nautobot_device_onboarding.models import OnboardingTask
 from nautobot_device_onboarding.models import OnboardingDevice
-from nautobot_device_onboarding.choices import OnboardingStatusChoices
+from nautobot_device_onboarding.choices import OnboardingStatusChoices, OnboardingFailChoices
+
+from django.db.utils import DataError
 
 
 class OnboardingDeviceModelTestCase(TestCase):
@@ -17,10 +19,10 @@ class OnboardingDeviceModelTestCase(TestCase):
         self.site = Site.objects.create(name="USWEST", slug="uswest")
         manufacturer = Manufacturer.objects.create(name="Juniper", slug="juniper")
         device_role = DeviceRole.objects.create(name="Firewall", slug="firewall")
-        device_type = DeviceType.objects.create(slug="srx3600", model="SRX3600", manufacturer=manufacturer)
+        self.device_type = DeviceType.objects.create(slug="srx3600", model="SRX3600", manufacturer=manufacturer)
 
         self.device = Device.objects.create(
-            device_type=device_type,
+            device_type=self.device_type,
             name="device1",
             device_role=device_role,
             site=self.site,
@@ -62,6 +64,21 @@ class OnboardingDeviceModelTestCase(TestCase):
             created_device=self.device,
         )
 
+    def create_onboarding_task(self, port):
+        """Helper to create device onboarding task with specific port."""
+        task = OnboardingTask.objects.create(
+            ip_address="10.10.10.10",
+            site=self.site,
+            created_device=self.device,
+            device_type=self.device_type,
+            status=OnboardingStatusChoices.STATUS_FAILED,
+            failed_reason=OnboardingFailChoices.FAIL_GENERAL,
+            port=port,
+        )
+        task.validated_save()
+
+
+
     def test_onboardingdevice_autocreated(self):
         """Verify that OnboardingDevice is auto-created."""
         onboarding_device = OnboardingDevice.objects.get(device=self.device)
@@ -91,3 +108,15 @@ class OnboardingDeviceModelTestCase(TestCase):
         """Verify created tasks are with labels following creation order."""
         for index, task_object in enumerate(OnboardingTask.objects.order_by("created"), start=1):
             self.assertEqual(index, task_object.label)
+
+    def test_port_min(self):
+        """Verify task fails when port is under 1."""
+        self.assertRaises(DataError, self.create_onboarding_task, -1)
+
+    def test_port_max(self):
+        """Verify task fails when port is over 65535."""
+        self.assertRaises(DataError, self.create_onboarding_task, 65536)
+
+    def test_port_valid(self):
+        """Verify task succeeds when port is between 1 and 65535."""
+        self.create_onboarding_task(443)
