@@ -542,7 +542,7 @@ class NautobotKeeperTestCase(TestCase):
         device = Device.objects.get(name="sw1")
 
         self.assertEqual(device.cf["cf_device"], False)
-        self.assertEqual(device.cf["cf_device_null"], None)
+        self.assertEqual(device.cf.get("cf_device_null"), None)
         self.assertEqual(device.platform.cf["cf_platform"], True)
         self.assertEqual(device.device_type.cf["cf_devicetype"], 5)
         self.assertEqual(device.device_role.cf["cf_devicerole"], 10)
