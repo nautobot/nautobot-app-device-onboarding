@@ -18,10 +18,14 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 napalm = ">=2.5.0, <5"
 zipp = "^3.4.0"
-nautobot = "^1.4.0"
+nautobot = "1.5.15"
+nautobot-plugin-nornir = ">=1.0.0"
+nautobot-ssot = {git = "https://github.com/itdependsnetworks/nautobot-plugin-ssot.git", branch = "mixins"}
+nornir-netmiko = "0.1.2"
+ntc-templates = "^3.1.0"
 
 [tool.poetry.dev-dependencies]
 bandit = "*"
