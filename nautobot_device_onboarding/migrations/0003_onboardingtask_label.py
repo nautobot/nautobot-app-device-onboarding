@@ -10,7 +10,6 @@ def create_labels_for_existing_tasks(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("nautobot_device_onboarding", "0002_create_onboardingdevice"),
     ]
