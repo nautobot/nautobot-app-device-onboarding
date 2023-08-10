@@ -47,7 +47,7 @@ class OnboardingTaskFilterSet(NameSlugSearchFilterSet):
         model = OnboardingTask
         fields = ["id", "site", "site_id", "platform", "role", "status", "failed_reason"]
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
         if not value.strip():
             return queryset
