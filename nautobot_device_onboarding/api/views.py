@@ -8,7 +8,7 @@ from rest_framework import mixins, viewsets
 # from rest_framework.decorators import action
 # from rest_framework.response import Response
 
-# from nautobot.utilities.api import IsAuthenticatedOrLoginNotRequired
+# from nautobot.core.api.utils import IsAuthenticatedOrLoginNotRequired
 
 # from nautobot.dcim.models import Device, Site, Platform, DeviceRole
 

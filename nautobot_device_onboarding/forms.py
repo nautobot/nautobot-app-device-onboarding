@@ -3,8 +3,9 @@
 from django import forms
 from django.db import transaction
 
-from nautobot.utilities.forms import BootstrapMixin, CSVModelForm
-from nautobot.dcim.models import Site, Platform, DeviceRole, DeviceType
+from nautobot.core.forms import BootstrapMixin
+from nautobot.dcim.models import Location, Platform, DeviceType
+from nautobot.extras.models import Role
 
 from nautobot_device_onboarding.models import OnboardingTask
 from nautobot_device_onboarding.choices import OnboardingStatusChoices, OnboardingFailChoices
@@ -21,7 +22,7 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
         required=True, label="IP address", help_text="IP Address/DNS Name of the device to onboard"
     )
 
-    site = forms.ModelChoiceField(required=True, queryset=Site.objects.all())
+    location = forms.ModelChoiceField(required=True, queryset=Location.objects.all())
 
     username = forms.CharField(required=False, help_text="Device username (will not be stored in database)")
     password = forms.CharField(
@@ -34,11 +35,11 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
     platform = forms.ModelChoiceField(
         queryset=Platform.objects.all(),
         required=False,
-        to_field_name="slug",
+        to_field_name="name",
         help_text="Device platform. Define ONLY to override auto-recognition of platform.",
     )
     role = forms.ModelChoiceField(
-        queryset=DeviceRole.objects.all(),
+        queryset=Role.objects.all(),
         required=False,
         to_field_name="slug",
         help_text="Device role. Define ONLY to override auto-recognition of role.",
@@ -46,14 +47,14 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
     device_type = forms.ModelChoiceField(
         queryset=DeviceType.objects.all(),
         required=False,
-        to_field_name="slug",
+        to_field_name="name",
         help_text="Device type. Define ONLY to override auto-recognition of type.",
     )
 
     class Meta:  # noqa: D106 "Missing docstring in public nested class"
         model = OnboardingTask
         fields = [
-            "site",
+            "location",
             "ip_address",
             "port",
             "timeout",
@@ -77,9 +78,9 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
 class OnboardingTaskFilterForm(BootstrapMixin, forms.ModelForm):
     """Form for filtering OnboardingTask instances."""
 
-    site = forms.ModelChoiceField(queryset=Site.objects.all(), required=False, to_field_name="slug")
+    location = forms.ModelChoiceField(queryset=Location.objects.all(), required=False)
 
-    platform = forms.ModelChoiceField(queryset=Platform.objects.all(), required=False, to_field_name="slug")
+    platform = forms.ModelChoiceField(queryset=Platform.objects.all(), required=False)
 
     status = forms.ChoiceField(choices=BLANK_CHOICE + OnboardingStatusChoices.CHOICES, required=False)
 
@@ -91,79 +92,79 @@ class OnboardingTaskFilterForm(BootstrapMixin, forms.ModelForm):
 
     class Meta:  # noqa: D106 "Missing docstring in public nested class"
         model = OnboardingTask
-        fields = ["q", "site", "platform", "status", "failed_reason"]
+        fields = ["q", "location", "platform", "status", "failed_reason"]
 
 
-class OnboardingTaskFeedCSVForm(CSVModelForm):
-    """Form for entering CSV to bulk-import OnboardingTask entries."""
+# class OnboardingTaskFeedCSVForm(CSVModelForm):
+#     """Form for entering CSV to bulk-import OnboardingTask entries."""
 
-    site = forms.ModelChoiceField(
-        queryset=Site.objects.all(),
-        required=True,
-        to_field_name="slug",
-        help_text="Slug of parent site",
-        error_messages={
-            "invalid_choice": "Site not found",
-        },
-    )
-    ip_address = forms.CharField(required=True, help_text="IP Address of the onboarded device")
-    username = forms.CharField(required=False, help_text="Username, will not be stored in database")
-    password = forms.CharField(required=False, help_text="Password, will not be stored in database")
-    secret = forms.CharField(required=False, help_text="Secret password, will not be stored in database")
-    platform = forms.ModelChoiceField(
-        queryset=Platform.objects.all(),
-        required=False,
-        to_field_name="slug",
-        help_text="Slug of device platform. Define ONLY to override auto-recognition of platform.",
-        error_messages={
-            "invalid_choice": "Platform not found.",
-        },
-    )
-    port = forms.IntegerField(
-        required=False,
-        help_text="Device PORT (def: 22)",
-    )
+#     site = forms.ModelChoiceField(
+#         queryset=Site.objects.all(),
+#         required=True,
+#         to_field_name="slug",
+#         help_text="Slug of parent site",
+#         error_messages={
+#             "invalid_choice": "Site not found",
+#         },
+#     )
+#     ip_address = forms.CharField(required=True, help_text="IP Address of the onboarded device")
+#     username = forms.CharField(required=False, help_text="Username, will not be stored in database")
+#     password = forms.CharField(required=False, help_text="Password, will not be stored in database")
+#     secret = forms.CharField(required=False, help_text="Secret password, will not be stored in database")
+#     platform = forms.ModelChoiceField(
+#         queryset=Platform.objects.all(),
+#         required=False,
+#         to_field_name="slug",
+#         help_text="Slug of device platform. Define ONLY to override auto-recognition of platform.",
+#         error_messages={
+#             "invalid_choice": "Platform not found.",
+#         },
+#     )
+#     port = forms.IntegerField(
+#         required=False,
+#         help_text="Device PORT (def: 22)",
+#     )
 
-    timeout = forms.IntegerField(
-        required=False,
-        help_text="Device Timeout (sec) (def: 30)",
-    )
+#     timeout = forms.IntegerField(
+#         required=False,
+#         help_text="Device Timeout (sec) (def: 30)",
+#     )
 
-    role = forms.ModelChoiceField(
-        queryset=DeviceRole.objects.all(),
-        required=False,
-        to_field_name="slug",
-        help_text="Slug of device role. Define ONLY to override auto-recognition of role.",
-        error_messages={
-            "invalid_choice": "DeviceRole not found",
-        },
-    )
+#     role = forms.ModelChoiceField(
+#         queryset=DeviceRole.objects.all(),
+#         required=False,
+#         to_field_name="slug",
+#         help_text="Slug of device role. Define ONLY to override auto-recognition of role.",
+#         error_messages={
+#             "invalid_choice": "DeviceRole not found",
+#         },
+#     )
 
-    device_type = forms.ModelChoiceField(
-        queryset=DeviceType.objects.all(),
-        required=False,
-        to_field_name="slug",
-        help_text="Slug of device type. Define ONLY to override auto-recognition of type.",
-        error_messages={
-            "invalid_choice": "DeviceType not found",
-        },
-    )
+#     device_type = forms.ModelChoiceField(
+#         queryset=DeviceType.objects.all(),
+#         required=False,
+#         to_field_name="slug",
+#         help_text="Slug of device type. Define ONLY to override auto-recognition of type.",
+#         error_messages={
+#             "invalid_choice": "DeviceType not found",
+#         },
+#     )
 
-    class Meta:  # noqa: D106 "Missing docstring in public nested class"
-        model = OnboardingTask
-        fields = [
-            "site",
-            "ip_address",
-            "port",
-            "timeout",
-            "platform",
-            "role",
-        ]
+#     class Meta:  # noqa: D106 "Missing docstring in public nested class"
+#         model = OnboardingTask
+#         fields = [
+#             "site",
+#             "ip_address",
+#             "port",
+#             "timeout",
+#             "platform",
+#             "role",
+#         ]
 
-    def save(self, commit=True, **kwargs):
-        """Save the model, and add it and the associated credentials to the onboarding worker queue."""
-        model = super().save(commit=commit, **kwargs)
-        if commit:
-            credentials = Credentials(self.data.get("username"), self.data.get("password"), self.data.get("secret"))
-            transaction.on_commit(lambda: enqueue_onboarding_task(model.pk, credentials))
-        return model
+#     def save(self, commit=True, **kwargs):
+#         """Save the model, and add it and the associated credentials to the onboarding worker queue."""
+#         model = super().save(commit=commit, **kwargs)
+#         if commit:
+#             credentials = Credentials(self.data.get("username"), self.data.get("password"), self.data.get("secret"))
+#             transaction.on_commit(lambda: enqueue_onboarding_task(model.pk, credentials))
+#         return model

@@ -1,6 +1,6 @@
 """Unit tests for nautobot_device_onboarding views."""
 from nautobot.dcim.models import Site
-from nautobot.utilities.testing import ViewTestCases
+from nautobot.core.testing import ViewTestCases
 
 from nautobot_device_onboarding.models import OnboardingTask
 
