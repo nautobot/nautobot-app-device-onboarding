@@ -18,7 +18,7 @@ class OnboardingTaskFilterSet(BaseFilterSet):
         label="Search",
     )
 
-    site = django_filters.ModelMultipleChoiceFilter(
+    location = django_filters.ModelMultipleChoiceFilter(
         field_name="name",
         queryset=Location.objects.all(),
         label="Location (name)",
@@ -50,7 +50,7 @@ class OnboardingTaskFilterSet(BaseFilterSet):
         qs_filter = (
             Q(id__icontains=value)
             | Q(ip_address__icontains=value)
-            | Q(site__name__icontains=value)
+            | Q(location__name__icontains=value)
             | Q(platform__name__icontains=value)
             | Q(created_device__name__icontains=value)
             | Q(status__icontains=value)

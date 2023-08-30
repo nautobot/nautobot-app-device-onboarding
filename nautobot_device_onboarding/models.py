@@ -47,7 +47,7 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
 
     def __str__(self):
         """String representation of an OnboardingTask."""
-        return f"{self.site} | {self.ip_address}"
+        return f"{self.location} | {self.ip_address}"
 
     def get_absolute_url(self):
         """Provide absolute URL to an OnboardingTask."""
