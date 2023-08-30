@@ -46,9 +46,9 @@ class OnboardingTaskManager:
         return self.onboarding_task.timeout
 
     @property
-    def site(self):
-        """Return ot's site."""
-        return self.onboarding_task.site
+    def location(self):
+        """Return ot's location."""
+        return self.onboarding_task.location
 
     @property
     def device_type(self):

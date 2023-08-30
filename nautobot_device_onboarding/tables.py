@@ -11,7 +11,7 @@ class OnboardingTaskTable(BaseTable):
 
     pk = ToggleColumn()
     label = tables.LinkColumn()
-    site = tables.LinkColumn()
+    location = tables.LinkColumn()
     platform = tables.LinkColumn()
     created_device = tables.LinkColumn()
 
@@ -22,7 +22,7 @@ class OnboardingTaskTable(BaseTable):
             "label",
             "created",
             "ip_address",
-            "site",
+            "location",
             "platform",
             "created_device",
             "status",
@@ -34,14 +34,14 @@ class OnboardingTaskTable(BaseTable):
 class OnboardingTaskFeedBulkTable(BaseTable):
     """TODO document me."""
 
-    site = tables.LinkColumn()
+    location = tables.LinkColumn()
 
     class Meta(BaseTable.Meta):  # noqa: D106 pylint: disable=too-few-public-methods
         model = OnboardingTask
         fields = (
             "label",
             "created",
-            "site",
+            "location",
             "platform",
             "ip_address",
             "port",
