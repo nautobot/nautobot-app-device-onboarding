@@ -3,7 +3,8 @@
 
 from rest_framework import serializers
 
-from nautobot.dcim.models import Site, DeviceRole, Platform
+from nautobot.dcim.models import Location, Platform
+from nautobot.extras.models import Role
 
 from nautobot_device_onboarding.models import OnboardingTask
 from nautobot_device_onboarding.utils.credentials import Credentials
@@ -13,13 +14,13 @@ from nautobot_device_onboarding.worker import enqueue_onboarding_task
 class OnboardingTaskSerializer(serializers.ModelSerializer):
     """Serializer for the OnboardingTask model."""
 
-    site = serializers.SlugRelatedField(
+    location = serializers.SlugRelatedField(
         many=False,
         read_only=False,
-        queryset=Site.objects.all(),
+        queryset=Location.objects.all(),
         slug_field="slug",
         required=True,
-        help_text="Nautobot site 'slug' value",
+        help_text="Nautobot Location 'slug' value",
     )
 
     ip_address = serializers.CharField(
@@ -52,7 +53,7 @@ class OnboardingTaskSerializer(serializers.ModelSerializer):
     role = serializers.SlugRelatedField(
         many=False,
         read_only=False,
-        queryset=DeviceRole.objects.all(),
+        queryset=Role.objects.all(),
         slug_field="slug",
         required=False,
         help_text="Nautobot device role 'slug' value",
@@ -88,7 +89,7 @@ class OnboardingTaskSerializer(serializers.ModelSerializer):
         model = OnboardingTask
         fields = [
             "id",
-            "site",
+            "location",
             "ip_address",
             "username",
             "password",

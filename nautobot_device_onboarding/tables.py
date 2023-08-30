@@ -2,7 +2,7 @@
 # pylint: disable=duplicate-code
 
 import django_tables2 as tables
-from nautobot.utilities.tables import BaseTable, ToggleColumn
+from nautobot.core.tables import BaseTable, ToggleColumn
 from nautobot_device_onboarding.models import OnboardingTask
 
 

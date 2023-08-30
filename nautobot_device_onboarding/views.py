@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, render
 from nautobot.core.views import generic
 
 from nautobot_device_onboarding.filters import OnboardingTaskFilterSet
-from nautobot_device_onboarding.forms import OnboardingTaskForm, OnboardingTaskFilterForm, OnboardingTaskFeedCSVForm
+from nautobot_device_onboarding.forms import OnboardingTaskForm, OnboardingTaskFilterForm
 from nautobot_device_onboarding.models import OnboardingTask
 from nautobot_device_onboarding.tables import OnboardingTaskTable, OnboardingTaskFeedBulkTable
 
@@ -51,10 +51,10 @@ class OnboardingTaskBulkDeleteView(generic.BulkDeleteView):
     default_return_url = "plugins:nautobot_device_onboarding:onboardingtask_list"
 
 
-class OnboardingTaskFeedBulkImportView(generic.BulkImportView):
-    """View for bulk-importing a CSV file to create OnboardingTasks."""
+# class OnboardingTaskFeedBulkImportView(generic.BulkImportView):
+#     """View for bulk-importing a CSV file to create OnboardingTasks."""
 
-    queryset = OnboardingTask.objects.all()
-    model_form = OnboardingTaskFeedCSVForm
-    table = OnboardingTaskFeedBulkTable
-    default_return_url = "plugins:nautobot_device_onboarding:onboardingtask_list"
+#     queryset = OnboardingTask.objects.all()
+#     model_form = OnboardingTaskFeedCSVForm
+#     table = OnboardingTaskFeedBulkTable
+#     default_return_url = "plugins:nautobot_device_onboarding:onboardingtask_list"

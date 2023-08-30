@@ -8,7 +8,6 @@ from nautobot_device_onboarding.views import (
     OnboardingTaskListView,
     OnboardingTaskCreateView,
     OnboardingTaskBulkDeleteView,
-    OnboardingTaskFeedBulkImportView,
 )
 
 urlpatterns = [
@@ -16,7 +15,7 @@ urlpatterns = [
     path("<uuid:pk>/", OnboardingTaskView.as_view(), name="onboardingtask"),
     path("add/", OnboardingTaskCreateView.as_view(), name="onboardingtask_add"),
     path("delete/", OnboardingTaskBulkDeleteView.as_view(), name="onboardingtask_bulk_delete"),
-    path("import/", OnboardingTaskFeedBulkImportView.as_view(), name="onboardingtask_import"),
+    # path("import/", OnboardingTaskFeedBulkImportView.as_view(), name="onboardingtask_import"),
     path(
         "<uuid:pk>/changelog/",
         ObjectChangeLogView.as_view(),
