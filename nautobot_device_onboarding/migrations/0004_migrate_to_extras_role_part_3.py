@@ -10,6 +10,9 @@ class Migration(migrations.Migration):
         ("nautobot_device_onboarding", "0004_migrate_to_extras_role_part_2"),
     ]
 
+    run_before = [
+        ("dcim", "0031_remove_device_role_and_rack_role"),
+    ]
 
     operations = [
         migrations.RemoveField(
