@@ -311,7 +311,8 @@ class NautobotKeeperTestCase(TestCase):
         manufacturer = Manufacturer.objects.create(name="Cisco")
 
         role_content_type = ContentType.objects.get_for_model(Device)
-        device_role = Role.objects.create(name="Switch", content_type=role_content_type)
+        device_role = Role.objects.create(name="Switch")
+        device_role.content_types.set(role_content_type)
 
         device_type = DeviceType.objects.create(model="c2960", manufacturer=manufacturer)
 
@@ -381,7 +382,8 @@ class NautobotKeeperTestCase(TestCase):
         manufacturer = Manufacturer.objects.create(name="Cisco")
 
         role_content_type = ContentType.objects.get_for_model(Device)
-        device_role = Role.objects.create(name="Switch", content_type=role_content_type)
+        device_role = Role.objects.create(name="Switch")
+        device_role.content_types.set(role_content_type)
 
         device_type = DeviceType.objects.create(model="c2960", manufacturer=manufacturer)
 

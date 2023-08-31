@@ -1,5 +1,6 @@
 """Unit tests for nautobot_device_onboarding OnboardingDevice model."""
 from django.test import TestCase
+from django.contrib.contenttypes.models import ContentType
 
 from nautobot.dcim.models import Location, DeviceType, Manufacturer, Device, Interface
 from nautobot.extras.models import Role
@@ -17,7 +18,9 @@ class OnboardingDeviceModelTestCase(TestCase):
         """Setup objects for Onboarding Model tests."""
         self.site = Location.objects.create(name="USWEST")
         manufacturer = Manufacturer.objects.create(name="Juniper")
-        device_role = DeviceRole.objects.create(name="Firewall")
+        device_content_type = ContentType.objects.get_for_model(Device)
+        device_role = Role.objects.create(name="Firewall")
+        device_role.content_types.set(device_content_type)
         device_type = DeviceType.objects.create(model="SRX3600", manufacturer=manufacturer)
 
         self.device = Device.objects.create(

@@ -21,7 +21,8 @@ class NetdevKeeperTestCase(TestCase):
         """Create a superuser and token for API calls."""
         role_content_type = ContentType.objects.get_for_model(Device)
         self.site1 = Location.objects.create(name="USWEST")
-        self.device_role1 = Role.objects.create(name="Firewall", content_type=role_content_type)
+        self.device_role1 = Role.objects.create(name="Firewall")
+        self.device_role1.content_types.set(role_content_type)
 
         self.platform1 = Platform.objects.create(name="JunOS", napalm_driver="junos")
         # self.platform2 = Platform.objects.create(name="Cisco NX-OS", slug="cisco-nx-os")
