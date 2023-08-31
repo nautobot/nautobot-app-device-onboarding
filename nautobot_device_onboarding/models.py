@@ -7,7 +7,7 @@ from django.urls import reverse
 from nautobot.core.models import BaseModel
 from nautobot.dcim.models import Device
 from nautobot.extras.models import ChangeLoggedModel
-from nautobot.extras.models.roles import Role
+
 from nautobot.core.models.querysets import RestrictedQuerySet
 
 
@@ -22,12 +22,14 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
 
     created_device = models.ForeignKey(to="dcim.Device", on_delete=models.SET_NULL, blank=True, null=True)
 
-    ip_address = models.CharField(max_length=255, help_text="primary ip address for the device", null=True)
+    ip_address = models.CharField(max_length=255, help_text="primary ip address for the device", blank=True, default="")
 
     location = models.ForeignKey(to="dcim.Location", on_delete=models.SET_NULL, blank=True, null=True)
 
+    role = models.ForeignKey(to="extras.Role", on_delete=models.SET_NULL, blank=True, null=True)
+
     device_type = models.CharField(
-        null=True, max_length=255, help_text="Device Type extracted from the device (optional)"
+        max_length=255, help_text="Device Type extracted from the device (optional)", blank=True, default=""
     )
 
     platform = models.ForeignKey(to="dcim.Platform", on_delete=models.SET_NULL, blank=True, null=True)
