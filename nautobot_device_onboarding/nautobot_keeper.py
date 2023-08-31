@@ -291,16 +291,16 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
             Nautobot.
         """
         try:
-            self.nb_device_role = DeviceRole.objects.get(slug=self.netdev_nb_role_slug)
-        except DeviceRole.DoesNotExist as err:
+            self.nb_device_role = Role.objects.get(slug=self.netdev_nb_role_slug)
+        except Role.DoesNotExist as err:
             if create_device_role:
-                self.nb_device_role = DeviceRole.objects.create(
+                self.nb_device_role = Role.objects.create(
                     name=self.netdev_nb_role_slug,
                     slug=self.netdev_nb_role_slug,
                     color=self.netdev_nb_role_color,
                     vm_role=False,
                 )
-                ensure_default_cf(obj=self.nb_device_role, model=DeviceRole)
+                ensure_default_cf(obj=self.nb_device_role, model=Role)
             else:
                 raise OnboardException(
                     reason="fail-config", message=f"ERROR device role not found: {self.netdev_nb_role_slug}"

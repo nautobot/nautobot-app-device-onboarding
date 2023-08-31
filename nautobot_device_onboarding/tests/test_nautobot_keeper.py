@@ -4,7 +4,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.utils.text import slugify
 from nautobot.dcim.choices import InterfaceTypeChoices
-from nautobot.dcim.models import Site, Manufacturer, DeviceType, DeviceRole, Device, Interface, Platform
+from nautobot.dcim.models import Location, Manufacturer, DeviceType, Device, Interface, Platform
+from nautobot.extras.models import Role
 from nautobot.ipam.models import IPAddress
 from nautobot.extras.choices import CustomFieldTypeChoices
 from nautobot.extras.models import CustomField, Status
@@ -38,7 +39,7 @@ class NautobotKeeperTestCase(TestCase):
                 "field_type": CustomFieldTypeChoices.TYPE_INTEGER,
                 "field_name": "cf_devicerole",
                 "default_value": 10,
-                "model": DeviceRole,
+                "model": Role,
             },
             {
                 "field_type": CustomFieldTypeChoices.TYPE_BOOLEAN,

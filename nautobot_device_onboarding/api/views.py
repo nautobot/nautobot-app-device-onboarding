@@ -10,7 +10,7 @@ from rest_framework import mixins, viewsets
 
 # from nautobot.core.api.utils import IsAuthenticatedOrLoginNotRequired
 
-# from nautobot.dcim.models import Device, Site, Platform, DeviceRole
+# from nautobot.dcim.models import Device, Site, Platform, Role
 
 from nautobot_device_onboarding.models import OnboardingTask
 from nautobot_device_onboarding.filters import OnboardingTaskFilterSet
