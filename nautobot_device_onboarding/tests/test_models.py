@@ -1,7 +1,8 @@
 """Unit tests for nautobot_device_onboarding OnboardingDevice model."""
 from django.test import TestCase
 
-from nautobot.dcim.models import Site, DeviceRole, DeviceType, Manufacturer, Device, Interface
+from nautobot.dcim.models import Location, DeviceType, Manufacturer, Device, Interface
+from nautobot.extras.models import Role
 from nautobot.ipam.models import IPAddress
 
 from nautobot_device_onboarding.models import OnboardingTask
@@ -14,7 +15,7 @@ class OnboardingDeviceModelTestCase(TestCase):
 
     def setUp(self):
         """Setup objects for Onboarding Model tests."""
-        self.site = Site.objects.create(name="USWEST")
+        self.site = Location.objects.create(name="USWEST")
         manufacturer = Manufacturer.objects.create(name="Juniper")
         device_role = DeviceRole.objects.create(name="Firewall")
         device_type = DeviceType.objects.create(model="SRX3600", manufacturer=manufacturer)
@@ -23,7 +24,7 @@ class OnboardingDeviceModelTestCase(TestCase):
             device_type=device_type,
             name="device1",
             device_role=device_role,
-            site=self.site,
+            location=self.site,
         )
 
         intf = Interface.objects.create(name="test_intf", device=self.device)
@@ -36,28 +37,28 @@ class OnboardingDeviceModelTestCase(TestCase):
 
         self.succeeded_task1 = OnboardingTask.objects.create(
             ip_address="10.10.10.10",
-            site=self.site,
+            location=self.site,
             status=OnboardingStatusChoices.STATUS_SUCCEEDED,
             created_device=self.device,
         )
 
         self.succeeded_task2 = OnboardingTask.objects.create(
             ip_address="10.10.10.10",
-            site=self.site,
+            location=self.site,
             status=OnboardingStatusChoices.STATUS_SUCCEEDED,
             created_device=self.device,
         )
 
         self.failed_task1 = OnboardingTask.objects.create(
             ip_address="10.10.10.10",
-            site=self.site,
+            location=self.site,
             status=OnboardingStatusChoices.STATUS_FAILED,
             created_device=self.device,
         )
 
         self.failed_task2 = OnboardingTask.objects.create(
             ip_address="10.10.10.10",
-            site=self.site,
+            location=self.site,
             status=OnboardingStatusChoices.STATUS_FAILED,
             created_device=self.device,
         )

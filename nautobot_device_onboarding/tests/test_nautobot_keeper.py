@@ -21,7 +21,7 @@ class NautobotKeeperTestCase(TestCase):
 
     def setUp(self):
         """Create a superuser and token for API calls."""
-        self.site1 = Site.objects.create(name="USWEST")
+        self.site1 = Location.objects.create(name="USWEST")
         data = (
             {
                 "field_type": CustomFieldTypeChoices.TYPE_TEXT,
@@ -255,7 +255,8 @@ class NautobotKeeperTestCase(TestCase):
     #
     def test_ensure_device_role_assigned(self):
         """Verify ensure_device_role function when Role exist and is already assigned."""
-        device_role = Role.objects.create(name="Firewall")
+        role_content_type = ContentType.objects.get_for_model(Device)
+        device_role = Role.objects.create(name="Firewall", content_type=role_content_type)
 
         onboarding_kwargs = {
             "netdev_hostname": "device1",
@@ -309,7 +310,8 @@ class NautobotKeeperTestCase(TestCase):
         """Verify ensure_device_instance function."""
         manufacturer = Manufacturer.objects.create(name="Cisco")
 
-        device_role = Role.objects.create(name="Switch")
+        role_content_type = ContentType.objects.get_for_model(Device)
+        device_role = Role.objects.create(name="Switch", content_type=role_content_type)
 
         device_type = DeviceType.objects.create(model="c2960", manufacturer=manufacturer)
 
@@ -321,7 +323,7 @@ class NautobotKeeperTestCase(TestCase):
 
         device = Device.objects.create(
             name=device_name,
-            site=self.site1,
+            location=self.site1,
             device_type=device_type,
             device_role=device_role,
             status=planned_status,
@@ -378,7 +380,8 @@ class NautobotKeeperTestCase(TestCase):
         """Verify ensure_interface function when the interface already exist."""
         manufacturer = Manufacturer.objects.create(name="Cisco")
 
-        device_role = Role.objects.create(name="Switch")
+        role_content_type = ContentType.objects.get_for_model(Device)
+        device_role = Role.objects.create(name="Switch", content_type=role_content_type)
 
         device_type = DeviceType.objects.create(model="c2960", manufacturer=manufacturer)
 
@@ -391,7 +394,7 @@ class NautobotKeeperTestCase(TestCase):
 
         device = Device.objects.create(
             name=device_name,
-            site=self.site1,
+            location=self.site1,
             device_type=device_type,
             device_role=device_role,
             status=planned_status,
