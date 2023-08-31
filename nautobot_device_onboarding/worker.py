@@ -66,7 +66,7 @@ def onboard_device(task_id, credentials):  # pylint: disable=too-many-statements
             if OnboardingDevice.objects.filter(device=onboarded_device, enabled=False):
                 onboarding_task.status = OnboardingStatusChoices.STATUS_SKIPPED
 
-                return dict(onboarding_task=True)
+                return {"onboarding_task": True}
 
         except Device.DoesNotExist as err:
             logger.info("Getting device with IP lookup failed: %s", str(err))
@@ -124,7 +124,7 @@ def onboard_device(task_id, credentials):  # pylint: disable=too-many-statements
 
     onboardingtask_results_counter.labels(status=onboarding_task.status).inc()
 
-    return dict(ok=onboarding_status)
+    return {"ok": onboarding_status}
 
 
 def enqueue_onboarding_task(task_id, credentials):
