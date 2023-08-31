@@ -3,8 +3,11 @@
 from socket import gaierror
 from unittest import mock
 
+from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
-from nautobot.dcim.models import Site, DeviceRole, Platform
+
+from nautobot.dcim.models import Device, Location, Platform
+from nautobot.extras.models import Role
 
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.helpers import onboarding_task_fqdn_to_ip
@@ -16,22 +19,23 @@ class NetdevKeeperTestCase(TestCase):
 
     def setUp(self):
         """Create a superuser and token for API calls."""
-        self.site1 = Site.objects.create(name="USWEST")
-        self.device_role1 = DeviceRole.objects.create(name="Firewall")
+        role_content_type = ContentType.objects.get_for_model(Device)
+        self.site1 = Location.objects.create(name="USWEST")
+        self.device_role1 = Role.objects.create(name="Firewall", content_type=role_content_type)
 
-        self.platform1 = Platform.objects.create(name="JunOS"napalm_driver="junos")
+        self.platform1 = Platform.objects.create(name="JunOS", napalm_driver="junos")
         # self.platform2 = Platform.objects.create(name="Cisco NX-OS", slug="cisco-nx-os")
 
         self.onboarding_task4 = OnboardingTask.objects.create(
-            ip_address="ntc123.local", site=self.site1, role=self.device_role1, platform=self.platform1
+            ip_address="ntc123.local", location=self.site1, role=self.device_role1, platform=self.platform1
         )
 
         self.onboarding_task5 = OnboardingTask.objects.create(
-            ip_address="bad.local", site=self.site1, role=self.device_role1, platform=self.platform1
+            ip_address="bad.local", location=self.site1, role=self.device_role1, platform=self.platform1
         )
 
         self.onboarding_task7 = OnboardingTask.objects.create(
-            ip_address="192.0.2.1/32", site=self.site1, role=self.device_role1, platform=self.platform1
+            ip_address="192.0.2.1/32", location=self.site1, role=self.device_role1, platform=self.platform1
         )
 
     @mock.patch("nautobot_device_onboarding.helpers.socket.gethostbyname")
