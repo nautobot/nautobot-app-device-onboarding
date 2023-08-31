@@ -21,7 +21,7 @@ class NautobotKeeperTestCase(TestCase):
 
     def setUp(self):
         """Create a superuser and token for API calls."""
-        self.site1 = Site.objects.create(name="USWEST", slug="uswest")
+        self.site1 = Site.objects.create(name="USWEST")
         data = (
             {
                 "field_type": CustomFieldTypeChoices.TYPE_TEXT,
@@ -88,7 +88,7 @@ class NautobotKeeperTestCase(TestCase):
             "netdev_nb_role_slug": PLUGIN_SETTINGS["default_device_role"],
             "netdev_vendor": "Cisco",
             "netdev_model": "CSR1000v",
-            "netdev_nb_site_slug": self.site1.slug,
+            "netdev_nb_location_slug": self.site1.slug,
         }
 
         nbk = NautobotKeeper(**onboarding_kwargs)
@@ -110,7 +110,7 @@ class NautobotKeeperTestCase(TestCase):
             "netdev_nb_role_slug": PLUGIN_SETTINGS["default_device_role"],
             "netdev_vendor": "Cisco",
             "netdev_model": "CSR1000v",
-            "netdev_nb_site_slug": self.site1.slug,
+            "netdev_nb_location_slug": self.site1.slug,
         }
 
         nbk = NautobotKeeper(**onboarding_kwargs)
@@ -132,11 +132,11 @@ class NautobotKeeperTestCase(TestCase):
             "netdev_nb_role_slug": PLUGIN_SETTINGS["default_device_role"],
             "netdev_vendor": "Cisco",
             "netdev_model": "CSR1000v",
-            "netdev_nb_site_slug": self.site1.slug,
+            "netdev_nb_location_slug": self.site1.slug,
         }
 
         nbk = NautobotKeeper(**onboarding_kwargs)
-        nbk.nb_manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
+        nbk.nb_manufacturer = Manufacturer.objects.create(name="Cisco")
 
         with self.assertRaises(OnboardException) as exc_info:
             nbk.ensure_device_type(create_device_type=False)
@@ -155,11 +155,11 @@ class NautobotKeeperTestCase(TestCase):
             "netdev_nb_role_slug": PLUGIN_SETTINGS["default_device_role"],
             "netdev_vendor": "Cisco",
             "netdev_model": "CSR1000v",
-            "netdev_nb_site_slug": self.site1.slug,
+            "netdev_nb_location_slug": self.site1.slug,
         }
 
         nbk = NautobotKeeper(**onboarding_kwargs)
-        nbk.nb_manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
+        nbk.nb_manufacturer = Manufacturer.objects.create(name="Cisco")
 
         with self.assertRaises(OnboardException) as exc_info:
             nbk.ensure_device_type(create_device_type=False)
@@ -173,16 +173,16 @@ class NautobotKeeperTestCase(TestCase):
     def test_ensure_device_type_strict_present(self):
         """Verify ensure_device_type function when DeviceType object is already present."""
         PLUGIN_SETTINGS["object_match_strategy"] = "strict"
-        manufacturer = Manufacturer.objects.create(name="Juniper", slug="juniper")
+        manufacturer = Manufacturer.objects.create(name="Juniper")
 
-        device_type = DeviceType.objects.create(slug="srx3600", model="SRX3600", manufacturer=manufacturer)
+        device_type = DeviceType.objects.create(model="SRX3600", manufacturer=manufacturer)
 
         onboarding_kwargs = {
             "netdev_hostname": "device2",
             "netdev_nb_role_slug": PLUGIN_SETTINGS["default_device_role"],
             "netdev_vendor": "Juniper",
             "netdev_nb_device_type_slug": device_type.slug,
-            "netdev_nb_site_slug": self.site1.slug,
+            "netdev_nb_location_slug": self.site1.slug,
         }
 
         nbk = NautobotKeeper(**onboarding_kwargs)
@@ -194,16 +194,16 @@ class NautobotKeeperTestCase(TestCase):
     def test_ensure_device_type_loose_present(self):
         """Verify ensure_device_type function when DeviceType object is already present."""
         PLUGIN_SETTINGS["object_match_strategy"] = "loose"
-        manufacturer = Manufacturer.objects.create(name="Juniper", slug="juniper")
+        manufacturer = Manufacturer.objects.create(name="Juniper")
 
-        device_type = DeviceType.objects.create(slug="srx3600", model="SRX3600", manufacturer=manufacturer)
+        device_type = DeviceType.objects.create(model="SRX3600", manufacturer=manufacturer)
 
         onboarding_kwargs = {
             "netdev_hostname": "device2",
             "netdev_nb_role_slug": PLUGIN_SETTINGS["default_device_role"],
             "netdev_vendor": "Juniper",
             "netdev_nb_device_type_slug": device_type.slug,
-            "netdev_nb_site_slug": self.site1.slug,
+            "netdev_nb_location_slug": self.site1.slug,
         }
 
         nbk = NautobotKeeper(**onboarding_kwargs)
@@ -213,7 +213,7 @@ class NautobotKeeperTestCase(TestCase):
         self.assertEqual(nbk.nb_device_type, device_type)
 
     def test_ensure_device_role_not_exist(self):
-        """Verify ensure_device_role function when DeviceRole does not already exist."""
+        """Verify ensure_device_role function when Role does not already exist."""
         test_role_name = "mytestrole"
 
         onboarding_kwargs = {
@@ -221,7 +221,7 @@ class NautobotKeeperTestCase(TestCase):
             "netdev_nb_role_slug": test_role_name,
             "netdev_nb_role_color": PLUGIN_SETTINGS["default_device_role_color"],
             "netdev_vendor": "Cisco",
-            "netdev_nb_site_slug": self.site1.slug,
+            "netdev_nb_location_slug": self.site1.slug,
         }
 
         nbk = NautobotKeeper(**onboarding_kwargs)
@@ -232,19 +232,19 @@ class NautobotKeeperTestCase(TestCase):
             self.assertEqual(exc_info.exception.reason, "fail-config")
 
         nbk.ensure_device_role(create_device_role=True)
-        self.assertIsInstance(nbk.nb_device_role, DeviceRole)
+        self.assertIsInstance(nbk.nb_device_role, Role)
         self.assertEqual(nbk.nb_device_role.slug, slugify(test_role_name))
 
     def test_ensure_device_role_exist(self):
-        """Verify ensure_device_role function when DeviceRole exist but is not assigned to the OT."""
-        device_role = DeviceRole.objects.create(name="Firewall", slug="firewall")
+        """Verify ensure_device_role function when Role exist but is not assigned to the OT."""
+        device_role = Role.objects.create(name="Firewall")
 
         onboarding_kwargs = {
             "netdev_hostname": "device1",
             "netdev_nb_role_slug": device_role.slug,
             "netdev_nb_role_color": PLUGIN_SETTINGS["default_device_role_color"],
             "netdev_vendor": "Cisco",
-            "netdev_nb_site_slug": self.site1.slug,
+            "netdev_nb_location_slug": self.site1.slug,
         }
 
         nbk = NautobotKeeper(**onboarding_kwargs)
@@ -254,15 +254,15 @@ class NautobotKeeperTestCase(TestCase):
 
     #
     def test_ensure_device_role_assigned(self):
-        """Verify ensure_device_role function when DeviceRole exist and is already assigned."""
-        device_role = DeviceRole.objects.create(name="Firewall", slug="firewall")
+        """Verify ensure_device_role function when Role exist and is already assigned."""
+        device_role = Role.objects.create(name="Firewall")
 
         onboarding_kwargs = {
             "netdev_hostname": "device1",
             "netdev_nb_role_slug": device_role.slug,
             "netdev_nb_role_color": PLUGIN_SETTINGS["default_device_role_color"],
             "netdev_vendor": "Cisco",
-            "netdev_nb_site_slug": self.site1.slug,
+            "netdev_nb_location_slug": self.site1.slug,
         }
 
         nbk = NautobotKeeper(**onboarding_kwargs)
@@ -282,7 +282,7 @@ class NautobotKeeperTestCase(TestCase):
             "netdev_nb_role_color": PLUGIN_SETTINGS["default_device_role_color"],
             "netdev_vendor": "Cisco",
             "netdev_model": "CSR1000v",
-            "netdev_nb_site_slug": self.site1.slug,
+            "netdev_nb_location_slug": self.site1.slug,
             "netdev_netmiko_device_type": platform_slug,
             "netdev_serial_number": serial_number,
             "netdev_mgmt_ip_address": "192.0.2.10",
@@ -307,11 +307,11 @@ class NautobotKeeperTestCase(TestCase):
 
     def test_ensure_device_instance_exist(self):
         """Verify ensure_device_instance function."""
-        manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
+        manufacturer = Manufacturer.objects.create(name="Cisco")
 
-        device_role = DeviceRole.objects.create(name="Switch", slug="switch")
+        device_role = Role.objects.create(name="Switch")
 
-        device_type = DeviceType.objects.create(slug="c2960", model="c2960", manufacturer=manufacturer)
+        device_type = DeviceType.objects.create(model="c2960", manufacturer=manufacturer)
 
         device_name = "test_name"
 
@@ -333,7 +333,7 @@ class NautobotKeeperTestCase(TestCase):
             "netdev_nb_role_slug": "switch",
             "netdev_vendor": "Cisco",
             "netdev_model": "c2960",
-            "netdev_nb_site_slug": self.site1.slug,
+            "netdev_nb_location_slug": self.site1.slug,
             "netdev_netmiko_device_type": "cisco_ios",
             "netdev_serial_number": "123456",
             "netdev_mgmt_ip_address": "192.0.2.10",
@@ -360,7 +360,7 @@ class NautobotKeeperTestCase(TestCase):
             "netdev_nb_role_color": PLUGIN_SETTINGS["default_device_role_color"],
             "netdev_vendor": "Cisco",
             "netdev_model": "CSR1000v",
-            "netdev_nb_site_slug": self.site1.slug,
+            "netdev_nb_location_slug": self.site1.slug,
             "netdev_netmiko_device_type": "cisco_ios",
             "netdev_serial_number": "123456",
             "netdev_mgmt_ip_address": "192.0.2.10",
@@ -376,11 +376,11 @@ class NautobotKeeperTestCase(TestCase):
 
     def test_ensure_interface_exist(self):
         """Verify ensure_interface function when the interface already exist."""
-        manufacturer = Manufacturer.objects.create(name="Cisco", slug="cisco")
+        manufacturer = Manufacturer.objects.create(name="Cisco")
 
-        device_role = DeviceRole.objects.create(name="Switch", slug="switch")
+        device_role = Role.objects.create(name="Switch")
 
-        device_type = DeviceType.objects.create(slug="c2960", model="c2960", manufacturer=manufacturer)
+        device_type = DeviceType.objects.create(model="c2960", manufacturer=manufacturer)
 
         device_name = "test_name"
         netdev_mgmt_ifname = "GigaEthernet0"
@@ -405,7 +405,7 @@ class NautobotKeeperTestCase(TestCase):
             "netdev_nb_role_slug": "switch",
             "netdev_vendor": "Cisco",
             "netdev_model": "c2960",
-            "netdev_nb_site_slug": self.site1.slug,
+            "netdev_nb_location_slug": self.site1.slug,
             "netdev_netmiko_device_type": "cisco_ios",
             "netdev_serial_number": "123456",
             "netdev_mgmt_ip_address": "192.0.2.10",
@@ -427,7 +427,7 @@ class NautobotKeeperTestCase(TestCase):
             "netdev_nb_role_color": PLUGIN_SETTINGS["default_device_role_color"],
             "netdev_vendor": "Cisco",
             "netdev_model": "CSR1000v",
-            "netdev_nb_site_slug": self.site1.slug,
+            "netdev_nb_location_slug": self.site1.slug,
             "netdev_netmiko_device_type": "cisco_ios",
             "netdev_serial_number": "123456",
             "netdev_mgmt_ip_address": "192.0.2.10",
@@ -451,7 +451,7 @@ class NautobotKeeperTestCase(TestCase):
             "netdev_nb_role_slug": PLUGIN_SETTINGS["default_device_role"],
             "netdev_vendor": "Cisco",
             "netdev_model": "CSR1000v",
-            "netdev_nb_site_slug": self.site1.slug,
+            "netdev_nb_location_slug": self.site1.slug,
             "netdev_nb_platform_slug": platform_name,
             "netdev_netmiko_device_type": platform_name,
         }
@@ -471,9 +471,9 @@ class NautobotKeeperTestCase(TestCase):
         """Verify ensure_device_platform function when Platform object is present."""
         platform_name = "juniper_junos"
 
-        manufacturer = Manufacturer.objects.create(name="Juniper", slug="juniper")
+        manufacturer = Manufacturer.objects.create(name="Juniper")
 
-        device_type = DeviceType.objects.create(slug="srx3600", model="SRX3600", manufacturer=manufacturer)
+        device_type = DeviceType.objects.create(model="SRX3600", manufacturer=manufacturer)
 
         platform = Platform.objects.create(
             slug=platform_name,
@@ -485,7 +485,7 @@ class NautobotKeeperTestCase(TestCase):
             "netdev_nb_role_slug": PLUGIN_SETTINGS["default_device_role"],
             "netdev_vendor": "Juniper",
             "netdev_nb_device_type_slug": device_type.slug,
-            "netdev_nb_site_slug": self.site1.slug,
+            "netdev_nb_location_slug": self.site1.slug,
             "netdev_nb_platform_slug": platform_name,
         }
 
@@ -507,7 +507,7 @@ class NautobotKeeperTestCase(TestCase):
             "netdev_nb_role_slug": PLUGIN_SETTINGS["default_device_role"],
             "netdev_vendor": "Cisco",
             "netdev_model": "CSR1000v",
-            "netdev_nb_site_slug": self.site1.slug,
+            "netdev_nb_location_slug": self.site1.slug,
             "netdev_netmiko_device_type": "cisco_ios",
         }
 
@@ -528,7 +528,7 @@ class NautobotKeeperTestCase(TestCase):
             "netdev_nb_role_slug": "switch",
             "netdev_vendor": "Cisco",
             "netdev_model": "c2960",
-            "netdev_nb_site_slug": self.site1.slug,
+            "netdev_nb_location_slug": self.site1.slug,
             "netdev_netmiko_device_type": "cisco_ios",
             "netdev_serial_number": "123456",
             "netdev_mgmt_ip_address": "192.0.2.15",
