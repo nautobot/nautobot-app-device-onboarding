@@ -1,5 +1,5 @@
 """Unit tests for nautobot_device_onboarding views."""
-from nautobot.dcim.models import Site
+from nautobot.dcim.models import Location
 from nautobot.core.testing import ViewTestCases
 
 from nautobot_device_onboarding.models import OnboardingTask
@@ -22,9 +22,9 @@ class OnboardingTestCase(  # pylint: disable=no-member,too-many-ancestors
     @classmethod
     def setUpTestData(cls):  # pylint: disable=invalid-name
         """Setup test data."""
-        site = Site.objects.create(name="USWEST")
-        OnboardingTask.objects.create(ip_address="10.10.10.10", site=site)
-        OnboardingTask.objects.create(ip_address="192.168.1.1", site=site)
+        site = Location.objects.create(name="USWEST")
+        OnboardingTask.objects.create(ip_address="10.10.10.10", location=site)
+        OnboardingTask.objects.create(ip_address="192.168.1.1", location=site)
 
         cls.form_data = {
             "site": site.pk,
