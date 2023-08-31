@@ -2,7 +2,6 @@
 
 # from nautobot.extras.plugins import PluginMenuButton, PluginMenuItem
 from nautobot.apps.ui import NavMenuGroup, NavMenuItem, NavMenuTab, NavMenuAddButton
-from nautobot.core.choices import ButtonColorChoices
 
 
 menu_items = (
