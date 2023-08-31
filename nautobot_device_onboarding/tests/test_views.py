@@ -22,7 +22,7 @@ class OnboardingTestCase(  # pylint: disable=no-member,too-many-ancestors
     @classmethod
     def setUpTestData(cls):  # pylint: disable=invalid-name
         """Setup test data."""
-        site = Site.objects.create(name="USWEST", slug="uswest")
+        site = Site.objects.create(name="USWEST")
         OnboardingTask.objects.create(ip_address="10.10.10.10", site=site)
         OnboardingTask.objects.create(ip_address="192.168.1.1", site=site)
 

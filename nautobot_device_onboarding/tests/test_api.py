@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from nautobot.users.models import Token
-from nautobot.dcim.models import Site
+from nautobot.dcim.models import Location
 
 from nautobot_device_onboarding.models import OnboardingTask
 
@@ -25,10 +25,10 @@ class OnboardingTaskTestCase(TestCase):
 
         self.base_url_lookup = "plugins-api:nautobot_device_onboarding-api:onboardingtask"
 
-        self.site1 = Site.objects.create(name="USWEST", slug="uswest")
+        self.site1 = Location.objects.create(name="USWEST")
 
-        self.onboarding_task1 = OnboardingTask.objects.create(ip_address="10.10.10.10", site=self.site1)
-        self.onboarding_task2 = OnboardingTask.objects.create(ip_address="192.168.1.1", site=self.site1)
+        self.onboarding_task1 = OnboardingTask.objects.create(ip_address="10.10.10.10", location=self.site1)
+        self.onboarding_task2 = OnboardingTask.objects.create(ip_address="192.168.1.1", location=self.site1)
 
     def test_list_onboarding_tasks(self):
         """Verify that OnboardingTasks can be listed."""

@@ -83,7 +83,7 @@ class OnboardingTestCase(TestCase):
         """Prepare test objects."""
         PLUGIN_SETTINGS["platform_map"] = {}  # Reset platform map to default
         self.site = Site.objects.create(name="TEST_SITE", slug="test-site")
-        self.eos_platform = Platform.objects.create(name="arista_eos", slug="arista_eos", napalm_driver="eos")
+        self.eos_platform = Platform.objects.create(name="arista_eos"napalm_driver="eos")
 
         self.onboarding_task1 = OnboardingTask.objects.create(ip_address="1.1.1.1", site=self.site)
         self.onboarding_task2 = OnboardingTask.objects.create(
