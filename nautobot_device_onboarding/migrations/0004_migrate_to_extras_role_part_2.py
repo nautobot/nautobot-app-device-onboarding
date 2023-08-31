@@ -13,18 +13,12 @@ def migrate_to_extras_role(apps, schema_editor):
 
         task_object.save()
 
-    
 
 class Migration(migrations.Migration):
 
     dependencies = [
         ("nautobot_device_onboarding", "0004_migrate_to_extras_role_part_1"),
     ]
-
-    run_before = [
-        ("dcim", "0031_remove_device_role_and_rack_role"),
-    ]
-
 
     operations = [
         migrations.RunPython(migrate_to_extras_role, migrations.RunPython.noop),
