@@ -7,7 +7,7 @@ from nautobot.core.views import generic
 from nautobot_device_onboarding.filters import OnboardingTaskFilterSet
 from nautobot_device_onboarding.forms import OnboardingTaskForm, OnboardingTaskFilterForm
 from nautobot_device_onboarding.models import OnboardingTask
-from nautobot_device_onboarding.tables import OnboardingTaskTable, OnboardingTaskFeedBulkTable
+from nautobot_device_onboarding.tables import OnboardingTaskTable
 
 
 class OnboardingTaskView(generic.ObjectView):
