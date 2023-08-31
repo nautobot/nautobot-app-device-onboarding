@@ -7,10 +7,11 @@ import nautobot.extras.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("nautobot_device_onboarding", "0003_onboardingtask_label"),
+        ("nautobot_device_onboarding", "0004_migrate_to_extras_role_part_3"),
         ("dcim", "0034_migrate_region_and_site_data_to_locations"),
         ("extras", "0062_collect_roles_from_related_apps_roles")
     ]
+
 
     operations = [
         migrations.AddField(

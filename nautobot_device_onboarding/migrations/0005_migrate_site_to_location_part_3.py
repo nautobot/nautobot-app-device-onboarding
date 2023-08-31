@@ -7,7 +7,11 @@ import nautobot.extras.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("nautobot_device_onboarding", "0004_migrate_site_to_location_part_2"),
+        ("nautobot_device_onboarding", "0005_migrate_site_to_location_part_2"),
+    ]
+
+    run_before = [
+        ("dcim", "0040_remove_region_and_site"),
     ]
 
     operations = [

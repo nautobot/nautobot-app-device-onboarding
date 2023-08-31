@@ -4,7 +4,7 @@ import nautobot.dcim.models
 import nautobot.extras.models 
 
 
-def migrate_to_location_and_role(apps, schema_editor):
+def migrate_to_location(apps, schema_editor):
     OnboardingTask = apps.get_model("nautobot_device_onboarding", "OnboardingTask")
 
     for task_object in OnboardingTask.objects.all():
@@ -12,7 +12,7 @@ def migrate_to_location_and_role(apps, schema_editor):
         task_object.location = nautobot.dcim.models.Location.objects.get(name="task_object.site")
 
         # get the new Role object from the existing Role and set it
-        task_object.role = nautobot.extras.models.Role.objects.get(name="task_object.role")
+        
 
         task_object.save()
 
@@ -20,9 +20,10 @@ def migrate_to_location_and_role(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("nautobot_device_onboarding", "0004_migrate_site_to_location_part_1"),
+        ("nautobot_device_onboarding", "0005_migrate_site_to_location_part_1"),
+        ("extras", "0062_collect_roles_from_related_apps_roles"),
     ]
 
     operations = [
-        migrations.RunPython(migrate_to_location_and_role, migrations.RunPython.noop),
+        migrations.RunPython(migrate_to_location, migrations.RunPython.noop),
     ]
