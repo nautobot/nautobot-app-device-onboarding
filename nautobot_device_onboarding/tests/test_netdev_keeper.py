@@ -16,10 +16,10 @@ class NetdevKeeperTestCase(TestCase):
 
     def setUp(self):
         """Create a superuser and token for API calls."""
-        self.site1 = Site.objects.create(name="USWEST", slug="uswest")
-        self.device_role1 = DeviceRole.objects.create(name="Firewall", slug="firewall")
+        self.site1 = Site.objects.create(name="USWEST")
+        self.device_role1 = DeviceRole.objects.create(name="Firewall")
 
-        self.platform1 = Platform.objects.create(name="JunOS", slug="junos", napalm_driver="junos")
+        self.platform1 = Platform.objects.create(name="JunOS"napalm_driver="junos")
         # self.platform2 = Platform.objects.create(name="Cisco NX-OS", slug="cisco-nx-os")
 
         self.onboarding_task4 = OnboardingTask.objects.create(

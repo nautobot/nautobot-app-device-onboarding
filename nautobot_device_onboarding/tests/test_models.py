@@ -14,10 +14,10 @@ class OnboardingDeviceModelTestCase(TestCase):
 
     def setUp(self):
         """Setup objects for Onboarding Model tests."""
-        self.site = Site.objects.create(name="USWEST", slug="uswest")
-        manufacturer = Manufacturer.objects.create(name="Juniper", slug="juniper")
-        device_role = DeviceRole.objects.create(name="Firewall", slug="firewall")
-        device_type = DeviceType.objects.create(slug="srx3600", model="SRX3600", manufacturer=manufacturer)
+        self.site = Site.objects.create(name="USWEST")
+        manufacturer = Manufacturer.objects.create(name="Juniper")
+        device_role = DeviceRole.objects.create(name="Firewall")
+        device_type = DeviceType.objects.create(model="SRX3600", manufacturer=manufacturer)
 
         self.device = Device.objects.create(
             device_type=device_type,
