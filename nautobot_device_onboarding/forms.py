@@ -99,7 +99,7 @@ class OnboardingTaskFilterForm(BootstrapMixin, forms.ModelForm):
 #     """Form for entering CSV to bulk-import OnboardingTask entries."""
 
 #     site = forms.ModelChoiceField(
-#         queryset=Site.objects.all(),
+#         queryset=Location.objects.all(),
 #         required=True,
 #         to_field_name="slug",
 #         help_text="Slug of parent site",
@@ -131,12 +131,12 @@ class OnboardingTaskFilterForm(BootstrapMixin, forms.ModelForm):
 #     )
 
 #     role = forms.ModelChoiceField(
-#         queryset=DeviceRole.objects.all(),
+#         queryset=Role.objects.all(),
 #         required=False,
 #         to_field_name="slug",
 #         help_text="Slug of device role. Define ONLY to override auto-recognition of role.",
 #         error_messages={
-#             "invalid_choice": "DeviceRole not found",
+#             "invalid_choice": "Role not found",
 #         },
 #     )
 

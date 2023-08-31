@@ -95,7 +95,7 @@ class OnboardingManager:  # pylint: disable=too-few-public-methods
         onboarding_kwargs = {
             # Kwargs extracted from OnboardingTask:
             "netdev_mgmt_ip_address": otm.ip_address,
-            "netdev_nb_site_slug": otm.site.slug if otm.site else None,
+            "netdev_nb_location_slug": otm.site.location if otm.location else None,
             "netdev_nb_device_type_slug": otm.device_type,
             "netdev_nb_role_slug": otm.role.slug if otm.role else PLUGIN_SETTINGS["default_device_role"],
             "netdev_nb_role_color": PLUGIN_SETTINGS["default_device_role_color"],
