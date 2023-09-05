@@ -2,9 +2,10 @@
 
 from django import forms
 from django.db import transaction
+from django.contrib.contenttypes.models import ContentType
 
 from nautobot.core.forms import BootstrapMixin
-from nautobot.dcim.models import Location, Platform, DeviceType
+from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.models import Role
 
 from nautobot_device_onboarding.models import OnboardingTask
@@ -35,19 +36,20 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
     platform = forms.ModelChoiceField(
         queryset=Platform.objects.all(),
         required=False,
-        to_field_name="name",
+        to_field_name="pk",
         help_text="Device platform. Define ONLY to override auto-recognition of platform.",
     )
-    role = forms.ModelChoiceField(
-        queryset=Role.objects.all(),
-        required=False,
-        to_field_name="slug",
-        help_text="Device role. Define ONLY to override auto-recognition of role.",
-    )
+    # role = forms.ModelChoiceField(
+    #     # queryset=Role.objects.get(content_types__in=[ContentType.objects.get_for_model(Device)]),
+    #     queryset=Role.objects.all(),
+    #     required=False,
+    #     to_field_name="pk",
+    #     help_text="Device role. Define ONLY to override auto-recognition of role.",
+    # )
     device_type = forms.ModelChoiceField(
         queryset=DeviceType.objects.all(),
         required=False,
-        to_field_name="name",
+        to_field_name="pk",
         help_text="Device type. Define ONLY to override auto-recognition of type.",
     )
 
