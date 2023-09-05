@@ -1,5 +1,4 @@
 """Unit tests for nautobot_device_onboarding.netdev_keeper module and its classes."""
-# pylint: disable=no-self-use
 
 from unittest import mock
 

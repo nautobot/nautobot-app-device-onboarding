@@ -375,15 +375,15 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
             )
             lookup_args = {
                 "pk": self.onboarded_device.pk,
-                "defaults": dict(
-                    name=self.netdev_hostname,
-                    device_type=self.nb_device_type,
-                    device_role=self.nb_device_role,
-                    platform=self.nb_platform,
-                    site=self.nb_site,
-                    serial=self.netdev_serial_number,
+                "defaults": {
+                    "name": self.netdev_hostname,
+                    "device_type": self.nb_device_type,
+                    "device_role": self.nb_device_role,
+                    "platform": self.nb_platform,
+                    "site": self.nb_site,
+                    "serial": self.netdev_serial_number,
                     # status= field is not updated in case of already existing devices to prevent changes
-                ),
+                },
             }
         else:
             # Construct lookup arguments if onboarded device does not exist in Nautobot
@@ -403,15 +403,15 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
 
             lookup_args = {
                 "name": self.netdev_hostname,
-                "defaults": dict(
-                    device_type=self.nb_device_type,
-                    device_role=self.nb_device_role,
-                    platform=self.nb_platform,
-                    site=self.nb_site,
-                    serial=self.netdev_serial_number,
+                "defaults": {
+                    "device_type": self.nb_device_type,
+                    "device_role": self.nb_device_role,
+                    "platform": self.nb_platform,
+                    "site": self.nb_site,
+                    "serial": self.netdev_serial_number,
                     # `status` field is defined only for new devices, no update for existing should occur
-                    status=device_status,
-                ),
+                    "status": device_status,
+                },
             }
 
         try:
@@ -433,7 +433,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
         """Ensures that the interface associated with the mgmt_ipaddr exists and is assigned to the device."""
         if self.netdev_mgmt_ifname:
             self.nb_mgmt_ifname, _ = Interface.objects.get_or_create(
-                name=self.netdev_mgmt_ifname, device=self.device, defaults=dict(type=InterfaceTypeChoices.TYPE_OTHER)
+                name=self.netdev_mgmt_ifname, device=self.device, defaults={"type": InterfaceTypeChoices.TYPE_OTHER}
             )
             ensure_default_cf(obj=self.nb_mgmt_ifname, model=Interface)
 

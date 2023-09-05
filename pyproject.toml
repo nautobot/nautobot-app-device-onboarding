@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-device-onboarding"
-version = "1.1.2"
+version = "1.2.0"
 description = "A plugin for Nautobot to easily onboard new devices."
 authors = ["Network to Code, LLC <opensource@networktocode.com>"]
 license = "Apache-2.0"
@@ -18,7 +18,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 napalm = ">=2.5.0, <5"
 zipp = "^3.4.0"
 nautobot = "^1.4.0"
