@@ -5,7 +5,7 @@ This document describes all new features and changes in `nautobot-device-onboard
 
 ## Release Overview
 
-## v1.2.0 (2023-08-1x)
+## v1.2.0 (2023-09-05)
 
 ### Added
 
