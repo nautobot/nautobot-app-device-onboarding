@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="onboardingtask",
             name="role",
-            field=nautobot.extras.models.RoleField(to="extras.Role", on_delete=models.SET_NULL, blank=True, null=True),
+            field=nautobot.extras.models.RoleField(to="dcim.Device", on_delete=models.SET_NULL, blank=True, null=True),
         ),
     ]
 
