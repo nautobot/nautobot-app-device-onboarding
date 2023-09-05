@@ -1,19 +1,23 @@
 """OnboardingTask Django model."""
+from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.db import models
 from django.urls import reverse
 
 from nautobot.core.models import BaseModel
+from nautobot.core.models.fields import ForeignKeyLimitedByContentTypes
 from nautobot.dcim.models import Device
-from nautobot.extras.models import ChangeLoggedModel
+from nautobot.extras.models import RoleField, ChangeLoggedModel
 
 from nautobot.core.models.querysets import RestrictedQuerySet
 
-
-
 from nautobot_device_onboarding.choices import OnboardingStatusChoices, OnboardingFailChoices
 
+
+class targetForeignKeyLimitedByContentTypes(ForeignKeyLimitedByContentTypes):
+    def get_limit_choices_to(self):
+        return {"content_types": ContentType.objects.get_for_model(Device)}
 
 class OnboardingTask(BaseModel, ChangeLoggedModel):
     """The status of each onboarding Task is tracked in the OnboardingTask table."""
@@ -26,7 +30,7 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
 
     location = models.ForeignKey(to="dcim.Location", on_delete=models.SET_NULL, blank=True, null=True)
 
-    role = models.ForeignKey(to="extras.Role", on_delete=models.SET_NULL, blank=True, null=True)
+    role = RoleField(to="dcim.Device", on_delete=models.SET_NULL, blank=True, null=True)
 
     device_type = models.CharField(
         max_length=255, help_text="Device Type extracted from the device (optional)", blank=True, default=""
@@ -44,7 +48,7 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
 
     port = models.PositiveSmallIntegerField(help_text="Port to use to connect to the device", default=22)
     timeout = models.PositiveSmallIntegerField(
-        help_text="Timeout period in sec to wait while connecting to the device", default=30
+        help_text="Timeout period in seconds to wait while connecting to the device", default=30
     )
 
     def __str__(self):
