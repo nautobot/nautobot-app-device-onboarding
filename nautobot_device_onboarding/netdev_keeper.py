@@ -167,12 +167,9 @@ class NetdevKeeper:  # pylint: disable=too-many-instance-attributes
             logger.error("ERROR: %s", str(err))
             raise OnboardException(reason="fail-general", message=f"ERROR: {str(err)}") from err
 
-        else:
-            if guessed_device_type is None:
-                logger.error("ERROR: Could not detect device type with SSHDetect")
-                raise OnboardException(
-                    reason="fail-general", message="ERROR: Could not detect device type with SSHDetect"
-                )
+        if guessed_device_type is None:
+            logger.error("ERROR: Could not detect device type with SSHDetect")
+            raise OnboardException(reason="fail-general", message="ERROR: Could not detect device type with SSHDetect")
 
         return guessed_device_type
 

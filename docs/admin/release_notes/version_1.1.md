@@ -21,16 +21,6 @@ nautobot-device-onboarding now covers onboarding of Cisco Nexus and Arista EOS d
 
 Celery has been introduced to eventually replace RQ for executing background tasks within Nautobot. Plugin's usage of RQ has been migrated to use Celery.
 
-## v1.1.3 (2023-07-26)
-
-### Added
-
-### Changed
-- [#53](https://github.com/nautobot/nautobot-plugin-device-onboarding/pull/53) - Documentation updates
-- [#87](https://github.com/nautobot/nautobot-plugin-device-onboarding/pull/87) - Add OnboardingTask status and failure reason metrics
-
-### Fixed
-- [#75](https://github.com/nautobot/nautobot-plugin-device-onboarding/pull/75) - Fix reverse migration for migrations 0002, 0003
 
 ## v1.1.2 (2022-08-01)
 
