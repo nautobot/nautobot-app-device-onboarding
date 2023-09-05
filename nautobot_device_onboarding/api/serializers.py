@@ -3,6 +3,7 @@
 
 from rest_framework import serializers
 
+from nautobot.core.api.serializers import ValidatedModelSerializer
 from nautobot.dcim.models import Location, Platform
 from nautobot.extras.models import Role
 
@@ -11,7 +12,7 @@ from nautobot_device_onboarding.utils.credentials import Credentials
 from nautobot_device_onboarding.worker import enqueue_onboarding_task
 
 
-class OnboardingTaskSerializer(serializers.ModelSerializer):
+class OnboardingTaskSerializer(ValidatedModelSerializer):
     """Serializer for the OnboardingTask model."""
 
     location = serializers.SlugRelatedField(
