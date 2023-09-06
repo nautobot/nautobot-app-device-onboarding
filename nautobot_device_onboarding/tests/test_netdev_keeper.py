@@ -6,8 +6,8 @@ from unittest import mock
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 
-from nautobot.dcim.models import Device, Location, Platform
-from nautobot.extras.models import Role
+from nautobot.dcim.models import Device, Location, LocationType, Platform
+from nautobot.extras.models import Role, Status
 
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.helpers import onboarding_task_fqdn_to_ip
@@ -20,7 +20,9 @@ class NetdevKeeperTestCase(TestCase):
     def setUp(self):
         """Create a superuser and token for API calls."""
         role_content_type = ContentType.objects.get_for_model(Device)
-        self.site1 = Location.objects.create(name="USWEST")
+        status = Status.objects.get(name="Active")
+        location_type = LocationType.objects.create(name="site")
+        self.site1 = Location.objects.create(name="USWEST", location_type=location_type, status=status)
         self.device_role1 = Role.objects.create(name="Firewall")
         self.device_role1.content_types.set(role_content_type)
 

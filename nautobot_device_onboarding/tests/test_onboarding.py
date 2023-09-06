@@ -5,7 +5,9 @@ from unittest import mock
 
 from django.conf import settings
 from django.test import TestCase
-from nautobot.dcim.models import Location, Platform
+
+from nautobot.dcim.models import Location, LocationType, Platform
+from nautobot.extras.models import Status
 
 from nautobot_device_onboarding.models import OnboardingTask
 from nautobot_device_onboarding.onboard import OnboardingManager
@@ -82,7 +84,9 @@ class OnboardingTestCase(TestCase):
     def setUp(self):
         """Prepare test objects."""
         PLUGIN_SETTINGS["platform_map"] = {}  # Reset platform map to default
-        self.site = Location.objects.create(name="TEST_SITE")
+        status = Status.objects.get(name="Active")
+        location_type = LocationType.objects.create(name="site")
+        self.site = Location.objects.create(name="TEST_SITE", location_type=location_type, status=status)
         self.eos_platform = Platform.objects.create(name="arista_eos", napalm_driver="eos")
 
         self.onboarding_task1 = OnboardingTask.objects.create(ip_address="1.1.1.1", Location=self.site)

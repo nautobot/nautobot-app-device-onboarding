@@ -2,9 +2,10 @@
 from django.test import TestCase
 from django.contrib.contenttypes.models import ContentType
 
-from nautobot.dcim.models import Location, DeviceType, Manufacturer, Device, Interface
+from nautobot.dcim.models import Location, LocationType, DeviceType, Manufacturer, Device, Interface
 from nautobot.extras.models import Role
 from nautobot.ipam.models import IPAddress
+from nautobot.extras.models import Status
 
 from nautobot_device_onboarding.models import OnboardingTask
 from nautobot_device_onboarding.models import OnboardingDevice
@@ -16,7 +17,10 @@ class OnboardingDeviceModelTestCase(TestCase):
 
     def setUp(self):
         """Setup objects for Onboarding Model tests."""
-        self.site = Location.objects.create(name="USWEST")
+        status = Status.objects.get(name="Active")
+        location_type = LocationType.objects.create(name="site")
+
+        self.site = Location.objects.create(name="USWEST", location_type=location_type, status=status)
         manufacturer = Manufacturer.objects.create(name="Juniper")
         device_content_type = ContentType.objects.get_for_model(Device)
         device_role = Role.objects.create(name="Firewall")
