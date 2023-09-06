@@ -4,8 +4,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.utils.text import slugify
 from nautobot.dcim.choices import InterfaceTypeChoices
-from nautobot.dcim.models import Location, Manufacturer, DeviceType, Device, Interface, Platform
-from nautobot.extras.models import Role
+from nautobot.dcim.models import Location, LocationType, Manufacturer, DeviceType, Device, Interface, Platform
+from nautobot.extras.models import Role, Status
 from nautobot.ipam.models import IPAddress
 from nautobot.extras.choices import CustomFieldTypeChoices
 from nautobot.extras.models import CustomField, Status
@@ -21,7 +21,9 @@ class NautobotKeeperTestCase(TestCase):
 
     def setUp(self):
         """Create a superuser and token for API calls."""
-        self.site1 = Location.objects.create(name="USWEST")
+        status = Status.objects.get(name="Active")
+        location_type = LocationType.objects.create(name="site")
+        self.site1 = Location.objects.create(name="USWEST", location_type=location_type, status=status)
         data = (
             {
                 "field_type": CustomFieldTypeChoices.TYPE_TEXT,
@@ -88,7 +90,7 @@ class NautobotKeeperTestCase(TestCase):
             "netdev_nb_role_slug": PLUGIN_SETTINGS["default_device_role"],
             "netdev_vendor": "Cisco",
             "netdev_model": "CSR1000v",
-            "netdev_nb_location_slug": self.site1.slug,
+            "netdev_nb_location_slug": self.site1,
         }
 
         nbk = NautobotKeeper(**onboarding_kwargs)

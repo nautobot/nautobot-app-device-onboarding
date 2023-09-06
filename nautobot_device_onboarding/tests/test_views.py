@@ -1,5 +1,6 @@
 """Unit tests for nautobot_device_onboarding views."""
-from nautobot.dcim.models import Location
+from nautobot.dcim.models import Location, LocationType
+from nautobot.extras.models import Status
 from nautobot.core.testing import ViewTestCases
 
 from nautobot_device_onboarding.models import OnboardingTask
@@ -22,7 +23,9 @@ class OnboardingTestCase(  # pylint: disable=no-member,too-many-ancestors
     @classmethod
     def setUpTestData(cls):  # pylint: disable=invalid-name
         """Setup test data."""
-        site = Location.objects.create(name="USWEST")
+        status = Status.objects.get(name="Active")
+        location_type = LocationType.objects.create(name="site")
+        site = Location.objects.create(name="USWEST", location_type=location_type, status=status)
         OnboardingTask.objects.create(ip_address="10.10.10.10", location=site)
         OnboardingTask.objects.create(ip_address="192.168.1.1", location=site)
 
