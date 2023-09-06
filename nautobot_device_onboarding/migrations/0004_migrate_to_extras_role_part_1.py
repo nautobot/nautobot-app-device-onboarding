@@ -6,6 +6,7 @@ import nautobot.extras.models
 
 class Migration(migrations.Migration):
 
+
     dependencies = [
         ("nautobot_device_onboarding", "0003_onboardingtask_label"),
         ("extras", "0061_role_and_alter_status"),
