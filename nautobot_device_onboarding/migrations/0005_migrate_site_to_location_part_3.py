@@ -1,7 +1,4 @@
-from django.db import migrations, models
-
-import nautobot.dcim.models
-import nautobot.extras.models 
+from django.db import migrations
 
 
 class Migration(migrations.Migration):

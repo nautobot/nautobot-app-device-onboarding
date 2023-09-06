@@ -19,10 +19,10 @@ class Migration(migrations.Migration):
             name="location",
             field=models.ForeignKey(to="dcim.Location", on_delete=models.SET_NULL, blank=True, null=True),
         ),
-        migrations.AlterField(
-            model_name="onboardingtask",
-            name="role",
-            field=nautobot.extras.models.RoleField(to="dcim.Device", on_delete=models.SET_NULL, blank=True, null=True),
-        ),
+        # migrations.AlterField(
+        #     model_name="onboardingtask",
+        #     name="role",
+        #     field=nautobot.extras.models.RoleField(to="dcim.Device", on_delete=models.SET_NULL, blank=True, null=True),
+        # ),
     ]
 
