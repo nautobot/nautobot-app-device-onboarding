@@ -49,7 +49,7 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
     device_type = forms.ModelChoiceField(
         queryset=DeviceType.objects.all(),
         required=False,
-        to_field_name="pk",
+        to_field_name="model",
         help_text="Device type. Define ONLY to override auto-recognition of type.",
     )
 
