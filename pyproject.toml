@@ -22,6 +22,7 @@ python = "^3.7"
 napalm = ">=2.5.0, <5"
 zipp = "^3.4.0"
 nautobot = "^1.4.0"
+nautobot-ssot = {git = "https://github.com/Kircheneer/nautobot-plugin-ssot.git", branch = "lk/base-models"}
 
 [tool.poetry.dev-dependencies]
 bandit = "*"

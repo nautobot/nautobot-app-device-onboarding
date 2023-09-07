@@ -28,7 +28,7 @@ namespace.configure(
         "nautobot_device_onboarding": {
             "nautobot_ver": "stable",
             "project_name": "nautobot_device_onboarding",
-            "python_ver": "3.8",
+            "python_ver": "3.7",
             "local": False,
             "compose_dir": os.path.join(os.path.dirname(__file__), "development"),
             "compose_files": [
