@@ -8,119 +8,133 @@ from nautobot.dcim.models import Location, Platform
 from nautobot.extras.models import Role
 
 from nautobot_device_onboarding.models import OnboardingTask
-from nautobot_device_onboarding.utils.credentials import Credentials
+from nautobot_device_onboarding.utils.credentials import Credentials, onboarding_credentials_serializer
 from nautobot_device_onboarding.worker import enqueue_onboarding_task
 
 
+
 class OnboardingTaskSerializer(ValidatedModelSerializer):
-    """Serializer for the OnboardingTask model."""
+    # """Serializer for the OnboardingTask model."""
 
-    location = serializers.SlugRelatedField(
-        many=False,
-        read_only=False,
-        queryset=Location.objects.all(),
-        slug_field="slug",
-        required=True,
-        help_text="Nautobot Location 'slug' value",
-    )
+    # location = serializers.SlugRelatedField(
+    #     many=False,
+    #     read_only=False,
+    #     queryset=Location.objects.all(),
+    #     slug_field="slug",
+    #     required=True,
+    #     help_text="Nautobot Location 'slug' value",
+    # )
 
-    ip_address = serializers.CharField(
-        required=True,
-        help_text="IP Address to reach device",
-    )
+    # ip_address = serializers.CharField(
+    #     required=True,
+    #     help_text="IP Address to reach device",
+    # )
 
-    username = serializers.CharField(
-        required=False,
-        write_only=True,
-        help_text="Device username",
-    )
+    # username = serializers.CharField(
+    #     required=False,
+    #     write_only=True,
+    #     help_text="Device username",
+    # )
 
-    password = serializers.CharField(
-        required=False,
-        write_only=True,
-        help_text="Device password",
-    )
+    # password = serializers.CharField(
+    #     required=False,
+    #     write_only=True,
+    #     help_text="Device password",
+    # )
 
-    secret = serializers.CharField(
-        required=False,
-        write_only=True,
-        help_text="Device secret password",
-    )
+    # secret = serializers.CharField(
+    #     required=False,
+    #     write_only=True,
+    #     help_text="Device secret password",
+    # )
 
-    port = serializers.IntegerField(required=False, help_text="Device PORT to check for online")
+    # port = serializers.IntegerField(required=False, help_text="Device PORT to check for online")
 
-    timeout = serializers.IntegerField(required=False, help_text="Timeout (sec) for device connect")
+    # timeout = serializers.IntegerField(required=False, help_text="Timeout (sec) for device connect")
 
-    role = serializers.SlugRelatedField(
-        many=False,
-        read_only=False,
-        queryset=Role.objects.all(),
-        slug_field="slug",
-        required=False,
-        help_text="Nautobot device role 'slug' value",
-    )
+    # role = serializers.SlugRelatedField(
+    #     many=False,
+    #     read_only=False,
+    #     queryset=Role.objects.all(),
+    #     slug_field="slug",
+    #     required=False,
+    #     help_text="Nautobot device role 'slug' value",
+    # )
 
-    device_type = serializers.CharField(
-        required=False,
-        help_text="Nautobot device type 'slug' value",
-    )
+    # device_type = serializers.CharField(
+    #     required=False,
+    #     help_text="Nautobot device type 'slug' value",
+    # )
 
-    platform = serializers.SlugRelatedField(
-        many=False,
-        read_only=False,
-        queryset=Platform.objects.all(),
-        slug_field="slug",
-        required=False,
-        help_text="Nautobot Platform 'slug' value",
-    )
+    # platform = serializers.SlugRelatedField(
+    #     many=False,
+    #     read_only=False,
+    #     queryset=Platform.objects.all(),
+    #     slug_field="slug",
+    #     required=False,
+    #     help_text="Nautobot Platform 'slug' value",
+    # )
 
-    created_device = serializers.CharField(
-        required=False,
-        read_only=True,
-        help_text="Created device name",
-    )
+    # created_device = serializers.CharField(
+    #     required=False,
+    #     read_only=True,
+    #     help_text="Created device name",
+    # )
 
-    status = serializers.CharField(required=False, read_only=True, help_text="Onboarding Status")
+    # status = serializers.CharField(required=False, read_only=True, help_text="Onboarding Status")
 
-    failed_reason = serializers.CharField(required=False, read_only=True, help_text="Failure reason")
+    # failed_reason = serializers.CharField(required=False, read_only=True, help_text="Failure reason")
 
-    message = serializers.CharField(required=False, read_only=True, help_text="Status message")
+    # message = serializers.CharField(required=False, read_only=True, help_text="Status message")
+
+    # credentials = serializers.SerializerMethodField()
+
+    # def get_credentials(self, obj):
+    #     print(obj)
+    #     return onboarding_credentials_serializer(obj.credentials)
 
     class Meta:  # noqa: D106 "Missing docstring in public nested class"
         model = OnboardingTask
+        # fields = [
+        #     "id",
+        #     "location",
+        #     "ip_address",
+        #     "username",
+        #     "password",
+        #     "secret",
+        #     "port",
+        #     "timeout",
+        #     "role",
+        #     "device_type",
+        #     "platform",
+        #     "created_device",
+        #     "status",
+        #     "failed_reason",
+        #     "message",
+        # ]
+
         fields = [
-            "id",
-            "location",
-            "ip_address",
-            "username",
-            "password",
-            "secret",
-            "port",
-            "timeout",
-            "role",
-            "device_type",
-            "platform",
-            "created_device",
-            "status",
-            "failed_reason",
-            "message",
-        ]
+                "__all__", 
+                # "credentials",
+                ]
 
-    def create(self, validated_data):
-        """Create an OnboardingTask and enqueue it for processing."""
-        # Fields are string-type so default to empty (instead of None)
-        username = validated_data.pop("username", "")
-        password = validated_data.pop("password", "")
-        secret = validated_data.pop("secret", "")
+        read_only_fields = ["id", "created_device", "status", "failed_reason", "message"]
 
-        credentials = Credentials(
-            username=username,
-            password=password,
-            secret=secret,
-        )
+    # def create(self, validated_data):
+    #     """Create an OnboardingTask and enqueue it for processing."""
+    #     # Fields are string-type so default to empty (instead of None)
+    #     username = validated_data.pop("username", "")
+    #     password = validated_data.pop("password", "")
+    #     secret = validated_data.pop("secret", "")
 
-        onboarding_task = OnboardingTask.objects.create(**validated_data)
+    #     credentials = Credentials(
+    #         username=username,
+    #         password=password,
+    #         secret=secret,
+    #     )
 
-        enqueue_onboarding_task(onboarding_task.id, credentials)
+    #     onboarding_task = OnboardingTask.objects.create(**validated_data)
 
-        return onboarding_task
+    #     enqueue_onboarding_task(onboarding_task.id, credentials)
+
+    #     return onboarding_task
