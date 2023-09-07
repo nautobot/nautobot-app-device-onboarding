@@ -12,17 +12,17 @@ services:
     volumes:
       - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
       - "../:/source"
-  docs:
-    entrypoint: "mkdocs serve -v -a 0.0.0.0:8080"
-    ports:
-      - "8001:8080"
-    volumes:
-      - "../docs:/source/docs:ro"
-      - "../mkdocs.yml:/source/mkdocs.yml:ro"
-    image: "nautobot-device-onboarding/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
-    healthcheck:
-      disable: true
-    tty: true
+  # docs:
+  #   entrypoint: "mkdocs serve -v -a 0.0.0.0:8080"
+  #   ports:
+  #     - "8001:8080"
+  #   volumes:
+  #     - "../docs:/source/docs:ro"
+  #     - "../mkdocs.yml:/source/mkdocs.yml:ro"
+  #   image: "nautobot-device-onboarding/nautobot:${NAUTOBOT_VER}-py${PYTHON_VER}"
+  #   healthcheck:
+  #     disable: true
+  #   tty: true
   worker:
     volumes:
       - "./nautobot_config.py:/opt/nautobot/nautobot_config.py"
