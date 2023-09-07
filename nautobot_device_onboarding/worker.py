@@ -6,6 +6,7 @@ from prometheus_client import Summary
 
 from nautobot.dcim.models import Device
 
+from nautobot_device_onboarding.utils.credentials import Credentials
 from nautobot_device_onboarding.choices import OnboardingFailChoices
 from nautobot_device_onboarding.choices import OnboardingStatusChoices
 from nautobot_device_onboarding.exceptions import OnboardException
@@ -46,9 +47,10 @@ except ImportError:
 @REQUEST_TIME.time()
 def onboard_device(task_id, credentials):  # pylint: disable=too-many-statements, too-many-branches
     """Process a single OnboardingTask instance."""
-    username = credentials.username
-    password = credentials.password
-    secret = credentials.secret
+    credentials = Credentials.nautobot_searialize(credentials)
+    username = credentials.get("username")
+    password = credentials.get("password")
+    secret = credentials.get("secret")
 
     onboarding_task = OnboardingTask.objects.get(id=task_id)
 
@@ -130,7 +132,7 @@ def onboard_device(task_id, credentials):  # pylint: disable=too-many-statements
 def enqueue_onboarding_task(task_id, credentials):
     """Detect worker type and enqueue task."""
     if CELERY_WORKER:
-        onboard_device_worker.delay(task_id, credentials)  # pylint: disable=no-member
+        onboard_device_worker.delay(task_id, credentials.nautobot_serialize())  # pylint: disable=no-member
 
     if not CELERY_WORKER:
         get_queue("default").enqueue(  # pylint: disable=used-before-assignment
