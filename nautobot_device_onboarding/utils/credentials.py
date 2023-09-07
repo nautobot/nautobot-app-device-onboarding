@@ -30,3 +30,11 @@ class Credentials:
             password=data["password"],
             secret=data["secret"],
         )
+
+def onboarding_credentials_serializer(credentials):
+    """Serialize object for Celery."""
+    return {
+        "username": credentials.username,
+        "password": credentials.password,
+        "secret": credentials.secret,
+    }
