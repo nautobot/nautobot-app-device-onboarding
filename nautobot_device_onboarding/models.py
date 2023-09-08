@@ -6,18 +6,32 @@ from django.db import models
 from django.urls import reverse
 
 from nautobot.core.models import BaseModel
-from nautobot.core.models.fields import ForeignKeyLimitedByContentTypes
+from nautobot.core.forms import DynamicModelChoiceField
 from nautobot.dcim.models import Device
-from nautobot.extras.models import RoleField, ChangeLoggedModel
+from nautobot.extras.models import ChangeLoggedModel, RoleField
 
 from nautobot.core.models.querysets import RestrictedQuerySet
 
 from nautobot_device_onboarding.choices import OnboardingStatusChoices, OnboardingFailChoices
 
 
-class targetForeignKeyLimitedByContentTypes(ForeignKeyLimitedByContentTypes):
+class DeviceLimitedRoleField(RoleField):
+    """Role field override. RoleField is a subclass of ForeignKeyLimitedByContentTypes.
+    Our role field must only use roles that have content types that include dcim.Device.
+    """
     def get_limit_choices_to(self):
         return {"content_types": ContentType.objects.get_for_model(Device)}
+    
+    def formfield(self, **kwargs):
+        """Return a prepped formfield for use in model forms."""
+        defaults = {
+            "form_class": DynamicModelChoiceField,
+            "queryset": self.related_model.objects.all(),
+            # label_lower e.g. "dcim.device"
+            "query_params": {"content_types": "dcim.device"},
+        }
+        defaults.update(**kwargs)
+        return super().formfield(**defaults)
 
 class OnboardingTask(BaseModel, ChangeLoggedModel):
     """The status of each onboarding Task is tracked in the OnboardingTask table."""
@@ -30,7 +44,7 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
 
     location = models.ForeignKey(to="dcim.Location", on_delete=models.SET_NULL, blank=True, null=True)
 
-    role = RoleField(to="dcim.Device", on_delete=models.SET_NULL, blank=True, null=True)
+    role = DeviceLimitedRoleField(to="dcim.Device", on_delete=models.SET_NULL, blank=True, null=True)
 
     device_type = models.CharField(
         max_length=255, help_text="Device Type extracted from the device (optional)", blank=True, default=""
