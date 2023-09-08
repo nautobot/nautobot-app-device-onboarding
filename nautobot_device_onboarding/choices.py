@@ -1,6 +1,7 @@
 """ChoiceSet classes for device onboarding."""
 
 from nautobot.core.choices import ChoiceSet
+from nautobot.dcim.models import DeviceType
 
 
 class OnboardingStatusChoices(ChoiceSet):
@@ -39,3 +40,8 @@ class OnboardingFailChoices(ChoiceSet):
         (FAIL_GENERAL, "fail-general"),
         (FAIL_DNS, "fail-dns"),
     )
+
+def DeviceTypeChoiceGenerator():
+    device_types = DeviceType.objects.all()
+    CHOICES = (("", "---------"), *((dt.model, dt.model) for dt in device_types))
+    return CHOICES
