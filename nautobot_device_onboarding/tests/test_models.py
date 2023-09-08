@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from nautobot.dcim.models import Location, LocationType, DeviceType, Manufacturer, Device, Interface
 from nautobot.extras.models import Role
-from nautobot.ipam.models import IPAddress
+from nautobot.ipam.models import IPAddress, Namespace, Prefix
 from nautobot.extras.models import Status
 
 from nautobot_device_onboarding.models import OnboardingTask
@@ -22,21 +22,27 @@ class OnboardingDeviceModelTestCase(TestCase):
 
         self.site = Location.objects.create(name="USWEST", location_type=location_type, status=status)
         manufacturer = Manufacturer.objects.create(name="Juniper")
-        device_content_type = ContentType.objects.get_for_model(Device)
+        device_content_type = ContentType.objects.get_for_model(model=Device)
         device_role = Role.objects.create(name="Firewall")
-        device_role.content_types.set(device_content_type)
+        device_role.content_types.set([device_content_type])
         device_type = DeviceType.objects.create(model="SRX3600", manufacturer=manufacturer)
+
+        
 
         self.device = Device.objects.create(
             device_type=device_type,
             name="device1",
-            device_role=device_role,
+            role=device_role,
             location=self.site,
+            status = status,
         )
 
-        intf = Interface.objects.create(name="test_intf", device=self.device)
+        intf = Interface.objects.create(name="test_intf", device=self.device, status=status)
 
-        primary_ip = IPAddress.objects.create(address="10.10.10.10/32")
+        namespace = Namespace.objects.get(name="Global")
+
+        prefix = Prefix.objects.create(prefix="10.10.10.0/24", namespace=namespace, status=status)
+        primary_ip = IPAddress.objects.create(address="10.10.10.10/32", status=status, type="Host", namespace=namespace)
         intf.ip_addresses.add(primary_ip)
 
         self.device.primary_ip4 = primary_ip
