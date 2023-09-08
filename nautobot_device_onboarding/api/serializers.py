@@ -16,107 +16,10 @@ from nautobot_device_onboarding.worker import enqueue_onboarding_task
 class OnboardingTaskSerializer(ValidatedModelSerializer):
     # """Serializer for the OnboardingTask model."""
 
-    # location = serializers.SlugRelatedField(
-    #     many=False,
-    #     read_only=False,
-    #     queryset=Location.objects.all(),
-    #     slug_field="slug",
-    #     required=True,
-    #     help_text="Nautobot Location 'slug' value",
-    # )
-
-    # ip_address = serializers.CharField(
-    #     required=True,
-    #     help_text="IP Address to reach device",
-    # )
-
-    # username = serializers.CharField(
-    #     required=False,
-    #     write_only=True,
-    #     help_text="Device username",
-    # )
-
-    # password = serializers.CharField(
-    #     required=False,
-    #     write_only=True,
-    #     help_text="Device password",
-    # )
-
-    # secret = serializers.CharField(
-    #     required=False,
-    #     write_only=True,
-    #     help_text="Device secret password",
-    # )
-
-    # port = serializers.IntegerField(required=False, help_text="Device PORT to check for online")
-
-    # timeout = serializers.IntegerField(required=False, help_text="Timeout (sec) for device connect")
-
-    # role = serializers.SlugRelatedField(
-    #     many=False,
-    #     read_only=False,
-    #     queryset=Role.objects.all(),
-    #     slug_field="slug",
-    #     required=False,
-    #     help_text="Nautobot device role 'slug' value",
-    # )
-
-    # device_type = serializers.CharField(
-    #     required=False,
-    #     help_text="Nautobot device type 'slug' value",
-    # )
-
-    # platform = serializers.SlugRelatedField(
-    #     many=False,
-    #     read_only=False,
-    #     queryset=Platform.objects.all(),
-    #     slug_field="slug",
-    #     required=False,
-    #     help_text="Nautobot Platform 'slug' value",
-    # )
-
-    # created_device = serializers.CharField(
-    #     required=False,
-    #     read_only=True,
-    #     help_text="Created device name",
-    # )
-
-    # status = serializers.CharField(required=False, read_only=True, help_text="Onboarding Status")
-
-    # failed_reason = serializers.CharField(required=False, read_only=True, help_text="Failure reason")
-
-    # message = serializers.CharField(required=False, read_only=True, help_text="Status message")
-
-    # credentials = serializers.SerializerMethodField()
-
-    # def get_credentials(self, obj):
-    #     print(obj)
-    #     return onboarding_credentials_serializer(obj.credentials)
-
     class Meta:  # noqa: D106 "Missing docstring in public nested class"
         model = OnboardingTask
-        # fields = [
-        #     "id",
-        #     "location",
-        #     "ip_address",
-        #     "username",
-        #     "password",
-        #     "secret",
-        #     "port",
-        #     "timeout",
-        #     "role",
-        #     "device_type",
-        #     "platform",
-        #     "created_device",
-        #     "status",
-        #     "failed_reason",
-        #     "message",
-        # ]
 
-        fields = [
-                "__all__", 
-                # "credentials",
-                ]
+        fields = "__all__"
 
         read_only_fields = ["id", "created_device", "status", "failed_reason", "message"]
 
