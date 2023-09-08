@@ -44,7 +44,7 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
 
     location = models.ForeignKey(to="dcim.Location", on_delete=models.SET_NULL, blank=True, null=True)
 
-    role = DeviceLimitedRoleField(to="dcim.Device", on_delete=models.SET_NULL, blank=True, null=True)
+    role = DeviceLimitedRoleField(on_delete=models.SET_NULL, blank=True, null=True)
 
     device_type = models.CharField(
         max_length=255, help_text="Device Type extracted from the device (optional)", blank=True, default=""
