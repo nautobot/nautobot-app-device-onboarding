@@ -9,7 +9,7 @@ from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.models import Role
 
 from nautobot_device_onboarding.models import OnboardingTask
-from nautobot_device_onboarding.choices import OnboardingStatusChoices, OnboardingFailChoices
+from nautobot_device_onboarding.choices import OnboardingStatusChoices, OnboardingFailChoices, DeviceTypeChoiceGenerator
 from nautobot_device_onboarding.utils.credentials import Credentials
 from nautobot_device_onboarding.worker import enqueue_onboarding_task
 
@@ -46,10 +46,9 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
     #     to_field_name="pk",
     #     help_text="Device role. Define ONLY to override auto-recognition of role.",
     # )
-    device_type = forms.ModelChoiceField(
-        queryset=DeviceType.objects.all(),
+    device_type = forms.ChoiceField(
+        choices=DeviceTypeChoiceGenerator,
         required=False,
-        to_field_name="model",
         help_text="Device type. Define ONLY to override auto-recognition of type.",
     )
 
