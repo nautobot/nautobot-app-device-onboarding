@@ -47,10 +47,10 @@ except ImportError:
 @REQUEST_TIME.time()
 def onboard_device(task_id, credentials):  # pylint: disable=too-many-statements, too-many-branches
     """Process a single OnboardingTask instance."""
-    credentials = Credentials.nautobot_searialize(credentials)
-    username = credentials.get("username")
-    password = credentials.get("password")
-    secret = credentials.get("secret")
+    credentials = Credentials.nautobot_deserialize(credentials)
+    username = credentials.username
+    password = credentials.password
+    secret = credentials.secret
 
     onboarding_task = OnboardingTask.objects.get(id=task_id)
 
