@@ -9,46 +9,62 @@ from nautobot_device_onboarding.forms import OnboardingTaskForm, OnboardingTaskF
 from nautobot_device_onboarding.models import OnboardingTask
 from nautobot_device_onboarding.tables import OnboardingTaskTable
 
+from nautobot_device_onboarding.api.serializers import OnboardingTaskSerializer
 
-class OnboardingTaskView(generic.ObjectView):
-    """View for presenting a single OnboardingTask."""
+from nautobot.apps.views import NautobotUIViewSet
 
+class OnboardingTaskUIViewSet(NautobotUIViewSet):
+
+    # bulk_update_form_class = forms.YourAppModelBulkEditForm
+    filterset_class = OnboardingTaskFilterSet
+    filterset_form_class = OnboardingTaskFilterForm
+    form_class = OnboardingTaskForm
     queryset = OnboardingTask.objects.all()
-
-    def get(self, request, pk):  # pylint: disable=invalid-name, arguments-differ
-        """Get request."""
-        instance = get_object_or_404(self.queryset, pk=pk)
-
-        return render(
-            request, "nautobot_device_onboarding/onboardingtask.html", {"object": instance, "onboardingtask": instance}
-        )
+    serializer_class = OnboardingTaskSerializer
+    table_class = OnboardingTaskTable
 
 
-class OnboardingTaskListView(generic.ObjectListView):
-    """View for listing all extant OnboardingTasks."""
-
-    queryset = OnboardingTask.objects.all().order_by("-label")
-    filterset = OnboardingTaskFilterSet
-    filterset_form = OnboardingTaskFilterForm
-    table = OnboardingTaskTable
 
 
-class OnboardingTaskCreateView(generic.ObjectEditView):
-    """View for creating a new OnboardingTask."""
+# class OnboardingTaskView(generic.ObjectView):
+#     """View for presenting a single OnboardingTask."""
 
-    model = OnboardingTask
-    queryset = OnboardingTask.objects.all()
-    model_form = OnboardingTaskForm
-    template_name = "nautobot_device_onboarding/onboarding_task_edit.html"
-    default_return_url = "plugins:nautobot_device_onboarding:onboardingtask_list"
+#     queryset = OnboardingTask.objects.all()
+
+#     def get(self, request, pk):  # pylint: disable=invalid-name, arguments-differ
+#         """Get request."""
+#         instance = get_object_or_404(self.queryset, pk=pk)
+
+#         return render(
+#             request, "nautobot_device_onboarding/onboardingtask.html", {"object": instance, "onboardingtask": instance}
+#         )
 
 
-class OnboardingTaskBulkDeleteView(generic.BulkDeleteView):
-    """View for deleting one or more OnboardingTasks."""
+# class OnboardingTaskListView(generic.ObjectListView):
+#     """View for listing all extant OnboardingTasks."""
 
-    queryset = OnboardingTask.objects.filter().exclude(status="running")
-    table = OnboardingTaskTable
-    default_return_url = "plugins:nautobot_device_onboarding:onboardingtask_list"
+#     queryset = OnboardingTask.objects.all().order_by("-label")
+#     filterset = OnboardingTaskFilterSet
+#     filterset_form = OnboardingTaskFilterForm
+#     table = OnboardingTaskTable
+
+
+# class OnboardingTaskCreateView(generic.ObjectEditView):
+#     """View for creating a new OnboardingTask."""
+
+#     model = OnboardingTask
+#     queryset = OnboardingTask.objects.all()
+#     model_form = OnboardingTaskForm
+#     template_name = "nautobot_device_onboarding/onboarding_task_edit.html"
+#     default_return_url = "plugins:nautobot_device_onboarding:onboardingtask_list"
+
+
+# class OnboardingTaskBulkDeleteView(generic.BulkDeleteView):
+#     """View for deleting one or more OnboardingTasks."""
+
+#     queryset = OnboardingTask.objects.filter().exclude(status="running")
+#     table = OnboardingTaskTable
+#     default_return_url = "plugins:nautobot_device_onboarding:onboardingtask_list"
 
 
 # class OnboardingTaskFeedBulkImportView(generic.BulkImportView):
