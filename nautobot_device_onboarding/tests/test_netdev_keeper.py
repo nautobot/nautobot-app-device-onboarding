@@ -24,7 +24,7 @@ class NetdevKeeperTestCase(TestCase):
         location_type = LocationType.objects.create(name="site")
         self.site1 = Location.objects.create(name="USWEST", location_type=location_type, status=status)
         self.device_role1 = Role.objects.create(name="Firewall")
-        self.device_role1.content_types.set(role_content_type)
+        self.device_role1.content_types.set([role_content_type])
 
         self.platform1 = Platform.objects.create(name="JunOS", napalm_driver="junos")
         # self.platform2 = Platform.objects.create(name="Cisco NX-OS", slug="cisco-nx-os")
