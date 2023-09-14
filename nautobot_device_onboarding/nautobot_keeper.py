@@ -190,14 +190,14 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
         # in Nautobot.  We need the ID for this vendor when ensuring the DeviceType
         # instance.
 
-        nb_manufacturer_slug = slugify(self.netdev_vendor)
+        nb_manufacturer = self.netdev_vendor
 
         try:
-            search_array = [{"slug__iexact": nb_manufacturer_slug}]
+            search_array = [{"name__iexact": nb_manufacturer}]
             self.nb_manufacturer = object_match(Manufacturer, search_array)
         except Manufacturer.DoesNotExist as err:
             if create_manufacturer:
-                self.nb_manufacturer = Manufacturer.objects.create(name=self.netdev_vendor, slug=nb_manufacturer_slug)
+                self.nb_manufacturer = Manufacturer.objects.create(name=self.netdev_vendor)
                 ensure_default_cf(obj=self.nb_manufacturer, model=Manufacturer)
             else:
                 raise OnboardException(
