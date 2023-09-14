@@ -65,6 +65,8 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
         help_text="Timeout period in seconds to wait while connecting to the device", default=30
     )
 
+    clone_fields = ["ip_address", "location", "role", "platform", "port", "timeout"]
+
     def __str__(self):
         """String representation of an OnboardingTask."""
         return f"{self.location} | {self.ip_address}"
