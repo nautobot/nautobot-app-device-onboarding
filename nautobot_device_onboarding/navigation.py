@@ -1,7 +1,7 @@
 """Plugin additions to the Nautobot navigation menu."""
 
 # from nautobot.extras.plugins import PluginMenuButton, PluginMenuItem
-from nautobot.apps.ui import NavMenuGroup, NavMenuItem, NavMenuTab, NavMenuAddButton
+from nautobot.apps.ui import NavMenuGroup, NavMenuItem, NavMenuTab, NavMenuAddButton, NavMenuImportButton
 
 
 menu_items = (
@@ -20,7 +20,7 @@ menu_items = (
                         # color=ButtonColorChoices.GREEN,
                         permissions=["nautobot_device_onboarding.add_onboardingtask"],
                     ),
-                    NavMenuAddButton(
+                    NavMenuImportButton(
                         link="plugins:nautobot_device_onboarding:onboardingtask_import",
                         # name="Bulk Onboard",
                         # icon_class="mdi mdi-database-import-outline",
