@@ -299,6 +299,8 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
                     color=self.netdev_nb_role_color,
                     # vm_role=False,
                 )
+                self.nb_device_role.validated_save()
+                self.nb_device_role.content_types.set([ContentType.objects.get_for_model(Device)])
                 ensure_default_cf(obj=self.nb_device_role, model=Role)
             else:
                 raise OnboardException(
