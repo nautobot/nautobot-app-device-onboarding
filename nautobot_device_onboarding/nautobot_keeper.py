@@ -353,6 +353,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
                 self.nb_platform = Platform.objects.create(
                     name=self.netdev_nb_platform_name,
                     napalm_driver=netmiko_to_napalm[self.netdev_netmiko_device_type],
+                    network_driver=self.netdev_netmiko_device_type,
                 )
                 ensure_default_cf(obj=self.nb_platform, model=Platform)
             else:
