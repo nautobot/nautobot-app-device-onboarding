@@ -44,12 +44,12 @@ class OnboardingTaskTestCase(TestCase):
 
     def test_get_onboarding_task(self):
         """Verify that an Onboardingtask can be retrieved."""
-        url = reverse(f"{self.base_url_lookup}-detail", kwargs={"pk": self.onboarding_task1.pk})
+        url = reverse(f"{self.base_url_lookup}-detail", kwargs={"pk": self.onboarding_task1.pk}) + "?depth=1"
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["ip_address"], self.onboarding_task1.ip_address)
-        self.assertEqual(response.data["location"], self.onboarding_task1.site.name)
+        self.assertEqual(response.data["location"]["name"], self.onboarding_task1.location.name)
 
     def test_create_task_missing_mandatory_parameters(self):
         """Verify that the only mandatory POST parameters are ip_address and site."""
@@ -69,14 +69,12 @@ class OnboardingTaskTestCase(TestCase):
 
         response = self.client.post(url, data, format="json")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        for key, value in data.items():
-            self.assertEqual(response.data[key], value)
         self.assertEqual(response.data["port"], 22)  # default value
         self.assertEqual(response.data["timeout"], 30)  # default value
 
         onboarding_task = OnboardingTask.objects.get(pk=response.data["id"])
         self.assertEqual(onboarding_task.ip_address, data["ip_address"])
-        self.assertEqual(onboarding_task.location, self.site1)
+        self.assertEqual(onboarding_task.location.id, self.site1.id)
 
     def test_update_task_forbidden(self):
         """Verify that an OnboardingTask cannot be updated via this API."""
