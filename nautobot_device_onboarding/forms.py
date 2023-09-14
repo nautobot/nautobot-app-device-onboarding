@@ -98,10 +98,7 @@ class OnboardingTaskFilterForm(BootstrapMixin, forms.ModelForm):
 
 
 class OnboardingTaskBulkEditForm(TagsBulkEditFormMixin, NautobotBulkEditForm):
-
-# class OnboardingTaskFeedCSVForm():
     """Form for entering CSV to bulk-import OnboardingTask entries."""
-
     location = forms.ModelChoiceField(
         queryset=Location.objects.all(),
         required=True,
