@@ -82,14 +82,14 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
     def __init__(  # pylint: disable=R0913,R0914
         self,
         netdev_hostname,
-        netdev_nb_role_slug,
+        netdev_nb_role_name,
         netdev_vendor,
-        netdev_nb_location_slug,
-        netdev_nb_device_type_slug=None,
+        netdev_nb_location_name,
+        netdev_nb_device_type_name=None,
         netdev_model=None,
         netdev_nb_role_color=None,
         netdev_mgmt_ip_address=None,
-        netdev_nb_platform_slug=None,
+        netdev_nb_platform_name=None,
         netdev_serial_number=None,
         netdev_mgmt_ifname=None,
         netdev_mgmt_pflen=None,
@@ -101,14 +101,14 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
 
         Args:
             netdev_hostname (str): Nautobot's device name
-            netdev_nb_role_slug (str): Nautobot's device role slug
+            netdev_nb_role_name (str): Nautobot's device role name
             netdev_vendor (str): Device's vendor name
-            netdev_nb_location_slug (str): Device site's slug
-            netdev_nb_device_type_slug (str): Device type's slug
+            netdev_nb_location_name (str): Device site's slug
+            netdev_nb_device_type_name (str): Device type's name
             netdev_model (str): Device's model
             netdev_nb_role_color (str): Nautobot device's role color
             netdev_mgmt_ip_address (str): IPv4 Address of a device
-            netdev_nb_platform_slug (str): Nautobot device's platform slug
+            netdev_nb_platform_name (str): Nautobot device's platform name
             netdev_serial_number (str): Device's serial number
             netdev_mgmt_ifname (str): Device's management interface name
             netdev_mgmt_pflen (str): Device's management IP prefix-len
@@ -117,11 +117,11 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
             driver_addon_result (Any): Attached extended result (future use)
         """
         self.netdev_mgmt_ip_address = netdev_mgmt_ip_address
-        self.netdev_nb_location_slug = netdev_nb_location_slug
-        self.netdev_nb_device_type_slug = netdev_nb_device_type_slug
-        self.netdev_nb_role_slug = netdev_nb_role_slug
+        self.netdev_nb_location_name = netdev_nb_location_name
+        self.netdev_nb_device_type_name = netdev_nb_device_type_name
+        self.netdev_nb_role_name = netdev_nb_role_name
         self.netdev_nb_role_color = netdev_nb_role_color
-        self.netdev_nb_platform_slug = netdev_nb_platform_slug
+        self.netdev_nb_platform_name = netdev_nb_platform_name
 
         self.netdev_hostname = netdev_hostname
         self.netdev_vendor = netdev_vendor
@@ -170,9 +170,9 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
     def ensure_device_site(self):
         """Ensure device's site."""
         try:
-            self.nb_location = Location.objects.get(slug=self.netdev_nb_location_slug)
+            self.nb_location = Location.objects.get(name=self.netdev_nb_location_name)
         except Location.DoesNotExist as err:
-            raise OnboardException(reason="fail-config", message=f"Site not found: {self.netdev_nb_location_slug}") from err
+            raise OnboardException(reason="fail-config", message=f"Site not found: {self.netdev_nb_location_name}") from err
 
     def ensure_device_manufacturer(
         self,
@@ -241,16 +241,16 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
             logger.warning("device model is now: %s", self.netdev_model)
 
         # Use declared device type or auto-discovered model
-        nb_device_type_text = self.netdev_nb_device_type_slug or self.netdev_model
+        nb_device_type_text = self.netdev_nb_device_type_name or self.netdev_model
 
         if not nb_device_type_text:
             raise OnboardException(reason="fail-config", message="ERROR device type not found")
 
-        nb_device_type_slug = slugify(nb_device_type_text)
+        nb_device_type_name = nb_device_type_text
 
         try:
             search_array = [
-                {"slug__iexact": nb_device_type_slug},
+                # {"slug__iexact": nb_device_type_slug},
                 {"model__iexact": self.netdev_model},
                 {"part_number__iexact": self.netdev_model},
             ]
@@ -267,8 +267,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
             if create_device_type:
                 logger.info("CREATE: device-type: %s", self.netdev_model)
                 self.nb_device_type = DeviceType.objects.create(
-                    slug=nb_device_type_slug,
-                    model=nb_device_type_slug.upper(),
+                    model=nb_device_type_name,
                     manufacturer=self.nb_manufacturer,
                 )
                 ensure_default_cf(obj=self.nb_device_type, model=DeviceType)
@@ -291,19 +290,19 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
             Nautobot.
         """
         try:
-            self.nb_device_role = Role.objects.get(slug=self.netdev_nb_role_slug)
+            self.nb_device_role = Role.objects.get(name=self.netdev_nb_role_name)
         except Role.DoesNotExist as err:
             if create_device_role:
                 self.nb_device_role = Role.objects.create(
-                    name=self.netdev_nb_role_slug,
-                    slug=self.netdev_nb_role_slug,
+                    name=self.netdev_nb_role_name,
+                    # slug=self.netdev_nb_role_name,
                     color=self.netdev_nb_role_color,
-                    vm_role=False,
+                    # vm_role=False,
                 )
                 ensure_default_cf(obj=self.nb_device_role, model=Role)
             else:
                 raise OnboardException(
-                    reason="fail-config", message=f"ERROR device role not found: {self.netdev_nb_role_slug}"
+                    reason="fail-config", message=f"ERROR device role not found: {self.netdev_nb_role_name}"
                 ) from err
 
     def ensure_device_platform(self, create_platform_if_missing=PLUGIN_SETTINGS["create_platform_if_missing"]):
@@ -322,25 +321,28 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
         Lookup is performed based on the object's slug field (not the name field)
         """
         try:
-            self.netdev_nb_platform_slug = (
-                self.netdev_nb_platform_slug
+            self.netdev_nb_platform_name = (
+                self.netdev_nb_platform_name
                 or PLUGIN_SETTINGS["platform_map"].get(self.netdev_netmiko_device_type)
                 or self.netdev_netmiko_device_type
             )
 
-            if not self.netdev_nb_platform_slug:
+            if not self.netdev_nb_platform_name:
                 raise OnboardException(
                     reason="fail-config", message=f"ERROR device platform not found: {self.netdev_hostname}"
                 )
 
-            self.nb_platform = Platform.objects.get(slug=self.netdev_nb_platform_slug)
+            self.nb_platform = Platform.objects.get(name=self.netdev_nb_platform_name)
 
-            logger.info("PLATFORM: found in Nautobot %s", self.netdev_nb_platform_slug)
+            if not self.nb_platform:
+                Platform.objects.get(network_driver=self.netdev_nb_platform_name)
+
+            logger.info("PLATFORM: found in Nautobot %s", self.netdev_nb_platform_name)
 
         except Platform.DoesNotExist as err:
             if create_platform_if_missing:
                 platform_to_napalm_nautobot = {
-                    platform.slug: platform.napalm_driver
+                    platform: platform.napalm_driver
                     for platform in Platform.objects.all()
                     if platform.napalm_driver
                 }
@@ -349,15 +351,14 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
                 netmiko_to_napalm = {**NETMIKO_TO_NAPALM_STATIC, **platform_to_napalm_nautobot}
 
                 self.nb_platform = Platform.objects.create(
-                    name=self.netdev_nb_platform_slug,
-                    slug=self.netdev_nb_platform_slug,
+                    name=self.netdev_nb_platform_name,
                     napalm_driver=netmiko_to_napalm[self.netdev_netmiko_device_type],
                 )
                 ensure_default_cf(obj=self.nb_platform, model=Platform)
             else:
                 raise OnboardException(
                     reason="fail-general",
-                    message=f"ERROR platform not found in Nautobot: {self.netdev_nb_platform_slug}",
+                    message=f"ERROR platform not found in Nautobot: {self.netdev_nb_platform_name}",
                 ) from err
 
     def ensure_device_instance(self, default_status=PLUGIN_SETTINGS["default_device_status"]):
