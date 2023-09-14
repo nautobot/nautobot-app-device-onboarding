@@ -87,7 +87,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
         netdev_nb_location_name,
         netdev_nb_device_type_name=None,
         netdev_model=None,
-        netdev_nb_role_color=None,
+        netdev_nb_role_color="9e9e9e",
         netdev_mgmt_ip_address=None,
         netdev_nb_platform_name=None,
         netdev_serial_number=None,
