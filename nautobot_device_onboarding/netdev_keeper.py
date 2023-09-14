@@ -185,7 +185,7 @@ class NetdevKeeper:  # pylint: disable=too-many-instance-attributes
             self.netmiko_device_type = netmiko_device_type
 
             platform_to_napalm_nautobot = {
-                platform.slug: platform.napalm_driver for platform in Platform.objects.all() if platform.napalm_driver
+                platform: platform.napalm_driver for platform in Platform.objects.all() if platform.napalm_driver
             }
 
             # Update Constants if Napalm driver is defined for Nautobot Platform
