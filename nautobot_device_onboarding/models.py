@@ -40,7 +40,7 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
 
     created_device = models.ForeignKey(to="dcim.Device", on_delete=models.SET_NULL, blank=True, null=True)
 
-    ip_address = models.CharField(max_length=255, help_text="primary ip address for the device", blank=True, default="")
+    ip_address = models.CharField(max_length=255, help_text="primary ip address for the device")
 
     location = models.ForeignKey(to="dcim.Location", on_delete=models.SET_NULL, blank=True, null=True)
 
@@ -52,10 +52,10 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
 
     platform = models.ForeignKey(to="dcim.Platform", on_delete=models.SET_NULL, blank=True, null=True)
 
-    status = models.CharField(max_length=255, choices=OnboardingStatusChoices, help_text="Overall status of the task")
+    status = models.CharField(max_length=255, choices=OnboardingStatusChoices, help_text="Overall status of the task", blank=True)
 
     failed_reason = models.CharField(
-        max_length=255, choices=OnboardingFailChoices, help_text="Raison why the task failed (optional)", null=True
+        max_length=255, choices=OnboardingFailChoices, help_text="Raison why the task failed (optional)", blank=True, null=True
     )
 
     message = models.CharField(max_length=511, blank=True)
