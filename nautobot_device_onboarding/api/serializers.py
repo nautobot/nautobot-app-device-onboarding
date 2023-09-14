@@ -21,4 +21,25 @@ class OnboardingTaskSerializer(ValidatedModelSerializer):
 
         fields = "__all__"
 
+        extra_kwargs = {"location":{"required": True}}
+
         read_only_fields = ["id", "created_device", "status", "failed_reason", "message"]
+
+    def create(self, validated_data):
+        """Create an OnboardingTask and enqueue it for processing."""
+        # Fields are string-type so default to empty (instead of None)
+        username = validated_data.pop("username", "")
+        password = validated_data.pop("password", "")
+        secret = validated_data.pop("secret", "")
+
+        credentials = Credentials(
+            username=username,
+            password=password,
+            secret=secret,
+        )
+
+        onboarding_task = OnboardingTask.objects.create(**validated_data)
+
+        enqueue_onboarding_task(onboarding_task.id, credentials)
+
+        return onboarding_task
