@@ -234,11 +234,11 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
         #  if so check to make sure that it is not assigned as a different manufacturer
         # if it doesn't exist, create it if the flag 'create_device_type_if_missing' is defined
 
-        slug = self.netdev_model
-        if self.netdev_model and re.search(r"[^a-zA-Z0-9\-_]+", slug):
-            logger.warning("device model is not sluggable: %s", slug)
-            self.netdev_model = slug.replace(" ", "-")
-            logger.warning("device model is now: %s", self.netdev_model)
+        # slug = self.netdev_model
+        # if self.netdev_model and re.search(r"[^a-zA-Z0-9\-_]+", slug):
+        #     logger.warning("device model is not sluggable: %s", slug)
+        #     self.netdev_model = slug.replace(" ", "-")
+        #     logger.warning("device model is now: %s", self.netdev_model)
 
         # Use declared device type or auto-discovered model
         nb_device_type_text = self.netdev_nb_device_type_name or self.netdev_model
