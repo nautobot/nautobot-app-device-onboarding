@@ -82,6 +82,9 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
 
     objects = RestrictedQuerySet.as_manager()
 
+    class Meta:
+        unique_together = [["label", "ip_address"]]
+
 
 class OnboardingDevice(BaseModel):
     """The status of each Onboarded Device is tracked in the OnboardingDevice table."""
