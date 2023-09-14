@@ -26,4 +26,18 @@ class Migration(migrations.Migration):
             name='ip_address',
             field=models.CharField(blank=True, default='', max_length=255),
         ),
+        migrations.AlterField(
+            model_name='onboardingtask',
+            name='failed_reason',
+            field=models.CharField(blank=True, max_length=255, null=True),
+        ),
+        migrations.AlterUniqueTogether(
+            name='onboardingtask',
+            unique_together={('label', 'ip_address')},
+        ),
+        migrations.AlterField(
+            model_name='onboardingtask',
+            name='status',
+            field=models.CharField(blank=True, max_length=255),
+        ),
     ]
