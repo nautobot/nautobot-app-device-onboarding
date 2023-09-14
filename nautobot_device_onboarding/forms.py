@@ -105,8 +105,8 @@ class OnboardingTaskBulkEditForm(TagsBulkEditFormMixin, NautobotBulkEditForm):
     location = forms.ModelChoiceField(
         queryset=Location.objects.all(),
         required=True,
-        to_field_name="slug",
-        help_text="Slug of parent site",
+        to_field_name="name",
+        help_text="Name of parent site",
         error_messages={
             "invalid_choice": "Site not found",
         },
