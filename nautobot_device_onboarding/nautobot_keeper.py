@@ -407,9 +407,9 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
                 "name": self.netdev_hostname,
                 "defaults": {
                     "device_type": self.nb_device_type,
-                    "device_role": self.nb_device_role,
+                    "role": self.nb_device_role,
                     "platform": self.nb_platform,
-                    "site": self.nb_location,
+                    "location": self.nb_location,
                     "serial": self.netdev_serial_number,
                     # `status` field is defined only for new devices, no update for existing should occur
                     "status": device_status,
