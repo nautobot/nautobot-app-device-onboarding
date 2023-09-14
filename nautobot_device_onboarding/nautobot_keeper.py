@@ -28,7 +28,7 @@ def ensure_default_cf(obj, model):
     """Update objects's default custom fields."""
     for field in CustomField.objects.get_for_model(model):
         if (field.default is not None) and (field.name not in obj.cf):
-            obj.cf[field.name] = field.default
+            obj.cf[field.label] = field.default
 
     try:
         obj.validated_save()
