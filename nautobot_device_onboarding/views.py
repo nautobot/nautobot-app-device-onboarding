@@ -28,6 +28,7 @@ class OnboardingTaskUIViewSet(
     ObjectDestroyViewMixin,
     ObjectNotesViewMixin,
 ):
+    """UI Viewset for Onboarding."""
     bulk_update_form_class = OnboardingTaskBulkEditForm
     filterset_class = OnboardingTaskFilterSet
     filterset_form_class = OnboardingTaskFilterForm
