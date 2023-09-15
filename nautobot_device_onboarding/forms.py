@@ -4,13 +4,14 @@ from django import forms
 from django.db import transaction
 from django.contrib.contenttypes.models import ContentType
 
-from nautobot.core.forms import BootstrapMixin
+from nautobot.apps.forms import DynamicModelChoiceField, DynamicModelMultipleChoiceField
+from nautobot.core.forms import BootstrapMixin, StaticSelect2Multiple
 from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.models import Role
 from nautobot.extras.forms import NautobotBulkEditForm, TagsBulkEditFormMixin
 
 from nautobot_device_onboarding.models import OnboardingTask
-from nautobot_device_onboarding.choices import OnboardingStatusChoices, OnboardingFailChoices, DeviceTypeChoiceGenerator
+from nautobot_device_onboarding.choices import OnboardingStatusChoices, OnboardingFailChoices
 from nautobot_device_onboarding.utils.credentials import Credentials
 from nautobot_device_onboarding.worker import enqueue_onboarding_task
 
@@ -24,7 +25,16 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
         required=True, label="IP address", help_text="IP Address/DNS Name of the device to onboard"
     )
 
-    location = forms.ModelChoiceField(required=True, queryset=Location.objects.all())
+    location = DynamicModelChoiceField(
+        queryset=Location.objects.get_for_model(Device),
+        query_params={"content_type":"dcim.device"},
+        required=True,
+        to_field_name="name",
+        help_text="Name of parent site",
+        error_messages={
+            "invalid_choice": "Site not found",
+        },
+    )
 
     username = forms.CharField(required=False, help_text="Device username (will not be stored in database)")
     password = forms.CharField(
@@ -34,24 +44,33 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
         required=False, widget=forms.PasswordInput, help_text="Device secret (will not be stored in database)"
     )
 
-    platform = forms.ModelChoiceField(
+    platform = DynamicModelChoiceField(
         queryset=Platform.objects.all(),
         required=False,
         to_field_name="pk",
         help_text="Device platform. Define ONLY to override auto-recognition of platform.",
     )
-    # role = forms.ModelChoiceField(
-    #     # queryset=Role.objects.get(content_types__in=[ContentType.objects.get_for_model(Device)]),
-    #     queryset=Role.objects.all(),
-    #     required=False,
-    #     to_field_name="pk",
-    #     help_text="Device role. Define ONLY to override auto-recognition of role.",
-    # )
-    device_type = forms.ChoiceField(
-        choices=DeviceTypeChoiceGenerator,
+    role = DynamicModelChoiceField(
+        queryset=Role.objects.get_for_model(Device),
+        query_params={"content_types":"dcim.device"},
         required=False,
+        help_text="Slug of device role. Define ONLY to override auto-recognition of role.",
+        error_messages={
+            "invalid_choice": "Role not found",
+        },
+    )
+    device_type = DynamicModelChoiceField(
+        queryset=DeviceType.objects.all(),
+        required=False,
+        to_field_name="model",
         help_text="Device type. Define ONLY to override auto-recognition of type.",
     )
+    
+    # forms.ChoiceField(
+    #     choices=DeviceTypeChoiceGenerator,
+    #     required=False,
+    #     help_text="Device type. Define ONLY to override auto-recognition of type.",
+    # )
 
     class Meta:  # noqa: D106 "Missing docstring in public nested class"
         model = OnboardingTask
@@ -85,14 +104,21 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
 class OnboardingTaskFilterForm(BootstrapMixin, forms.ModelForm):
     """Form for filtering OnboardingTask instances."""
 
-    location = forms.ModelChoiceField(queryset=Location.objects.all(), required=False)
+    location = DynamicModelMultipleChoiceField(
+        queryset=Location.objects.get_for_model(Device),
+        query_params={"content_type":"dcim.device"}, 
+        required=False
+    )
 
-    platform = forms.ModelChoiceField(queryset=Platform.objects.all(), required=False)
+    platform = DynamicModelMultipleChoiceField(
+        queryset=Platform.objects.all(), 
+        required=False
+    )
 
-    status = forms.ChoiceField(choices=BLANK_CHOICE + OnboardingStatusChoices.CHOICES, required=False)
+    status = forms.MultipleChoiceField(choices=BLANK_CHOICE + OnboardingStatusChoices.CHOICES, required=False, widget=StaticSelect2Multiple())
 
-    failed_reason = forms.ChoiceField(
-        choices=BLANK_CHOICE + OnboardingFailChoices.CHOICES, required=False, label="Failed Reason"
+    failed_reason = forms.MultipleChoiceField(
+        choices=BLANK_CHOICE + OnboardingFailChoices.CHOICES, required=False, label="Failed Reason", widget=StaticSelect2Multiple()
     )
 
     q = forms.CharField(required=False, label="Search")
@@ -102,10 +128,11 @@ class OnboardingTaskFilterForm(BootstrapMixin, forms.ModelForm):
         fields = ["q", "location", "platform", "status", "failed_reason"]
 
 
-class OnboardingTaskBulkEditForm(TagsBulkEditFormMixin, NautobotBulkEditForm):
+class OnboardingTaskBulkEditForm(TagsBulkEditFormMixin, NautobotBulkEditForm, forms.ModelForm):
     """Form for entering CSV to bulk-import OnboardingTask entries."""
-    location = forms.ModelChoiceField(
-        queryset=Location.objects.all(),
+    location = DynamicModelChoiceField(
+        queryset=Location.objects.get_for_model(Device),
+        query_params={"content_type":"dcim.device"},
         required=True,
         to_field_name="name",
         help_text="Name of parent site",
@@ -117,7 +144,7 @@ class OnboardingTaskBulkEditForm(TagsBulkEditFormMixin, NautobotBulkEditForm):
     username = forms.CharField(required=False, help_text="Username, will not be stored in database")
     password = forms.CharField(required=False, help_text="Password, will not be stored in database")
     secret = forms.CharField(required=False, help_text="Secret password, will not be stored in database")
-    platform = forms.ModelChoiceField(
+    platform = DynamicModelChoiceField(
         queryset=Platform.objects.all(),
         required=False,
         help_text="Slug of device platform. Define ONLY to override auto-recognition of platform.",
@@ -135,8 +162,9 @@ class OnboardingTaskBulkEditForm(TagsBulkEditFormMixin, NautobotBulkEditForm):
         help_text="Device Timeout (sec) (def: 30)",
     )
 
-    role = forms.ModelChoiceField(
-        queryset=Role.objects.all(),
+    role = DynamicModelChoiceField(
+        queryset=Role.objects.get_for_model(Device),
+        query_params={"content_types":"dcim.device"},
         required=False,
         help_text="Slug of device role. Define ONLY to override auto-recognition of role.",
         error_messages={
@@ -156,15 +184,19 @@ class OnboardingTaskBulkEditForm(TagsBulkEditFormMixin, NautobotBulkEditForm):
     class Meta:  # noqa: D106 "Missing docstring in public nested class"
         model = OnboardingTask
         fields = [
-            "site",
+            "location",
             "ip_address",
             "port",
             "timeout",
+            "username",
+            "password",
+            "secret",
             "platform",
             "role",
+            "device_type",
         ]
 
-    def save(self, commit=True, **kwargs):
+    def form_save(self, commit=True, **kwargs):
         """Save the model, and add it and the associated credentials to the onboarding worker queue."""
         model = super().save(commit=commit, **kwargs)
         if commit:
