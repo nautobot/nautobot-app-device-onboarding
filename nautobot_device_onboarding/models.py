@@ -19,9 +19,10 @@ class DeviceLimitedRoleField(RoleField):
     """Role field override. RoleField is a subclass of ForeignKeyLimitedByContentTypes.
     Our role field must only use roles that have content types that include dcim.Device.
     """
+
     def get_limit_choices_to(self):
         return {"content_types": ContentType.objects.get_for_model(Device)}
-    
+
     def formfield(self, **kwargs):
         """Return a prepped formfield for use in model forms."""
         defaults = {
@@ -32,6 +33,7 @@ class DeviceLimitedRoleField(RoleField):
         }
         defaults.update(**kwargs)
         return super().formfield(**defaults)
+
 
 class OnboardingTask(BaseModel, ChangeLoggedModel):
     """The status of each onboarding Task is tracked in the OnboardingTask table."""
@@ -52,10 +54,16 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
 
     platform = models.ForeignKey(to="dcim.Platform", on_delete=models.SET_NULL, blank=True, null=True)
 
-    status = models.CharField(max_length=255, choices=OnboardingStatusChoices, help_text="Overall status of the task", blank=True)
+    status = models.CharField(
+        max_length=255, choices=OnboardingStatusChoices, help_text="Overall status of the task", blank=True
+    )
 
     failed_reason = models.CharField(
-        max_length=255, choices=OnboardingFailChoices, help_text="Raison why the task failed (optional)", blank=True, null=True
+        max_length=255,
+        choices=OnboardingFailChoices,
+        help_text="Raison why the task failed (optional)",
+        blank=True,
+        null=True,
     )
 
     message = models.CharField(max_length=511, blank=True)

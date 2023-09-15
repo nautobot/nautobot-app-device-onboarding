@@ -27,14 +27,12 @@ class OnboardingDeviceModelTestCase(TestCase):
         device_role.content_types.set([device_content_type])
         device_type = DeviceType.objects.create(model="SRX3600", manufacturer=manufacturer)
 
-        
-
         self.device = Device.objects.create(
             device_type=device_type,
             name="device1",
             role=device_role,
             location=self.site,
-            status = status,
+            status=status,
         )
 
         intf = Interface.objects.create(name="test_intf", device=self.device, status=status)

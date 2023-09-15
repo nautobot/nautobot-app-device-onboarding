@@ -6,7 +6,6 @@ import uuid
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -14,7 +13,7 @@ class Migration(migrations.Migration):
     ]
 
     run_before = [
-        ("dcim", "0028_alter_device_and_rack_role_add_new_role"),        
+        ("dcim", "0028_alter_device_and_rack_role_add_new_role"),
     ]
 
     operations = [

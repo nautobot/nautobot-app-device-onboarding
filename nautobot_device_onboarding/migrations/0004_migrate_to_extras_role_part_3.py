@@ -2,7 +2,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("nautobot_device_onboarding", "0004_migrate_to_extras_role_part_2"),
     ]
@@ -22,4 +21,3 @@ class Migration(migrations.Migration):
             new_name="role",
         ),
     ]
-

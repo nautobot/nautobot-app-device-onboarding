@@ -1,13 +1,11 @@
 """Nautobot Keeper."""
 
 import logging
-import re
 import ipaddress
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.utils.text import slugify
 from nautobot.dcim.choices import InterfaceTypeChoices
 from nautobot.dcim.models import Manufacturer, Device, Interface, DeviceType
 from nautobot.extras.models import Role
@@ -173,7 +171,9 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
         try:
             self.nb_location = Location.objects.get(name=self.netdev_nb_location_name)
         except Location.DoesNotExist as err:
-            raise OnboardException(reason="fail-config", message=f"Site not found: {self.netdev_nb_location_name}") from err
+            raise OnboardException(
+                reason="fail-config", message=f"Site not found: {self.netdev_nb_location_name}"
+            ) from err
 
     def ensure_device_manufacturer(
         self,
@@ -339,9 +339,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
         except Platform.DoesNotExist as err:
             if create_platform_if_missing:
                 platform_to_napalm_nautobot = {
-                    platform: platform.napalm_driver
-                    for platform in Platform.objects.all()
-                    if platform.napalm_driver
+                    platform: platform.napalm_driver for platform in Platform.objects.all() if platform.napalm_driver
                 }
 
                 # Update Constants if Napalm driver is defined for Nautobot Platform
@@ -433,12 +431,12 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
         """Ensures that the interface associated with the mgmt_ipaddr exists and is assigned to the device."""
         if self.netdev_mgmt_ifname:
             # TODO: Add option for default interface status
-            try:
-                self.nb_mgmt_ifname, _ = Interface.objects.get_or_create(
-                    name=self.netdev_mgmt_ifname, device=self.device, defaults={"type": InterfaceTypeChoices.TYPE_OTHER, "status":Status.objects.get(name="Active")}
-                )
-            except:
-                breakpoint()
+            self.nb_mgmt_ifname, _ = Interface.objects.get_or_create(
+                name=self.netdev_mgmt_ifname,
+                device=self.device,
+                defaults={"type": InterfaceTypeChoices.TYPE_OTHER, "status": Status.objects.get(name="Active")},
+            )
+            
             ensure_default_cf(obj=self.nb_mgmt_ifname, model=Interface)
 
     def ensure_primary_ip(self):
@@ -459,12 +457,12 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
                     reason="fail-general",
                     message=f"ERROR multiple IP Address status using same name: {default_status_name}",
                 ) from err
-            
+
             # Default to Global Namespace -> TODO: add option to specify default namespace
             namespace = Namespace.objects.get(name="Global")
 
             prefix = ipaddress.ip_interface(f"{self.netdev_mgmt_ip_address}/{self.netdev_mgmt_pflen}")
-                
+
             nautobot_prefix, _ = Prefix.objects.get_or_create(
                 prefix=f"{prefix.network}",
                 namespace=namespace,
@@ -475,7 +473,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
                 address=f"{self.netdev_mgmt_ip_address}/{self.netdev_mgmt_pflen}",
                 parent=nautobot_prefix,
                 defaults={"status": ip_status, "type": "host"},
-            )            
+            )
 
             ensure_default_cf(obj=self.nb_primary_ip, model=IPAddress)
 

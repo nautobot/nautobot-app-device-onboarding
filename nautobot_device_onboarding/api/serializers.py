@@ -27,7 +27,7 @@ class OnboardingTaskSerializer(NotesSerializerMixin, ValidatedModelSerializer):
         required=False,
         write_only=True,
         help_text="Device secret password",
-    )    
+    )
 
     class Meta:  # noqa: D106 "Missing docstring in public nested class"
         model = OnboardingTask
@@ -48,10 +48,10 @@ class OnboardingTaskSerializer(NotesSerializerMixin, ValidatedModelSerializer):
             "status",
             "failed_reason",
             "message",
-            "object_type"
+            "object_type",
         ]
 
-        extra_kwargs = {"location":{"required": True}}
+        extra_kwargs = {"location": {"required": True}}
 
         read_only_fields = ["id", "created_device", "status", "failed_reason", "message", "object_type"]
 
@@ -78,4 +78,3 @@ class OnboardingTaskSerializer(NotesSerializerMixin, ValidatedModelSerializer):
         enqueue_onboarding_task(onboarding_task.id, self.credentials)
 
         return onboarding_task
-
