@@ -87,6 +87,8 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
     class Meta:
         unique_together = [["label", "ip_address"]]
 
+        ordering = ("label",)
+
 
 class OnboardingDevice(BaseModel):
     """The status of each Onboarded Device is tracked in the OnboardingDevice table."""
