@@ -40,9 +40,3 @@ class OnboardingFailChoices(ChoiceSet):
         (FAIL_GENERAL, "fail-general"),
         (FAIL_DNS, "fail-dns"),
     )
-
-
-def DeviceTypeChoiceGenerator():
-    device_types = DeviceType.objects.all()
-    CHOICES = (("", "---------"), *((dt.model, dt.model) for dt in device_types))
-    return CHOICES
