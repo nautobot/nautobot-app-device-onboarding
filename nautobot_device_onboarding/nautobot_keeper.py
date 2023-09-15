@@ -436,7 +436,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
                 device=self.device,
                 defaults={"type": InterfaceTypeChoices.TYPE_OTHER, "status": Status.objects.get(name="Active")},
             )
-            
+
             ensure_default_cf(obj=self.nb_mgmt_ifname, model=Interface)
 
     def ensure_primary_ip(self):

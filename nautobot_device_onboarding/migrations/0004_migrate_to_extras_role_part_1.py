@@ -1,7 +1,5 @@
 from django.db import migrations, models
 
-import nautobot.dcim.models
-import nautobot.extras.models
 import nautobot_device_onboarding
 
 
