@@ -68,6 +68,11 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
             "device_type",
         ]
 
+    def clean(self):
+        super().clean()
+        if not self.cleaned_data.get("device_type"):
+            self.cleaned_data["device_type"] = ""
+
     def save(self, commit=True, **kwargs):
         """Save the model, and add it and the associated credentials to the onboarding worker queue."""
         model = super().save(commit=commit, **kwargs)
