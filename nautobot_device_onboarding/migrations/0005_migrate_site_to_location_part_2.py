@@ -10,13 +10,11 @@ def migrate_to_location(apps, schema_editor):
         task_object.location = location_model.objects.get(name="task_object.site")
 
         # get the new Role object from the existing Role and set it
-        
 
         task_object.save()
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("nautobot_device_onboarding", "0005_migrate_site_to_location_part_1"),
         ("extras", "0062_collect_roles_from_related_apps_roles"),

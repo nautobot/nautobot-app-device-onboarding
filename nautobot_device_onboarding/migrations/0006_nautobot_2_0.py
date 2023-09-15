@@ -4,44 +4,43 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('extras', '0098_rename_data_jobresult_result'),
-        ('nautobot_device_onboarding', '0005_migrate_site_to_location_part_3'),
+        ("extras", "0098_rename_data_jobresult_result"),
+        ("nautobot_device_onboarding", "0005_migrate_site_to_location_part_3"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='onboardingtask',
-            name='created',
+            model_name="onboardingtask",
+            name="created",
             field=models.DateTimeField(auto_now_add=True, null=True),
         ),
         migrations.AlterField(
-            model_name='onboardingtask',
-            name='device_type',
-            field=models.CharField(blank=True, default='', max_length=255),
+            model_name="onboardingtask",
+            name="device_type",
+            field=models.CharField(blank=True, default="", max_length=255),
         ),
         migrations.AlterField(
-            model_name='onboardingtask',
-            name='ip_address',
+            model_name="onboardingtask",
+            name="ip_address",
             field=models.CharField(max_length=255),
         ),
         migrations.AlterField(
-            model_name='onboardingtask',
-            name='failed_reason',
+            model_name="onboardingtask",
+            name="failed_reason",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AlterUniqueTogether(
-            name='onboardingtask',
-            unique_together={('label', 'ip_address')},
+            name="onboardingtask",
+            unique_together={("label", "ip_address")},
         ),
         migrations.AlterField(
-            model_name='onboardingtask',
-            name='status',
+            model_name="onboardingtask",
+            name="status",
             field=models.CharField(blank=True, max_length=255),
         ),
         migrations.AlterModelOptions(
-            name='onboardingtask',
-            options={'ordering': ('label',)},
+            name="onboardingtask",
+            options={"ordering": ("label",)},
         ),
     ]

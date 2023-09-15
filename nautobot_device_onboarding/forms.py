@@ -2,7 +2,6 @@
 
 from django import forms
 from django.db import transaction
-from django.contrib.contenttypes.models import ContentType
 
 from nautobot.apps.forms import DynamicModelChoiceField, DynamicModelMultipleChoiceField
 from nautobot.core.forms import BootstrapMixin, StaticSelect2Multiple
@@ -27,7 +26,7 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
 
     location = DynamicModelChoiceField(
         queryset=Location.objects.get_for_model(Device),
-        query_params={"content_type":"dcim.device"},
+        query_params={"content_type": "dcim.device"},
         required=True,
         to_field_name="name",
         help_text="Name of parent site",
@@ -52,7 +51,7 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
     )
     role = DynamicModelChoiceField(
         queryset=Role.objects.get_for_model(Device),
-        query_params={"content_types":"dcim.device"},
+        query_params={"content_types": "dcim.device"},
         required=False,
         help_text="Slug of device role. Define ONLY to override auto-recognition of role.",
         error_messages={
@@ -65,7 +64,7 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
         to_field_name="model",
         help_text="Device type. Define ONLY to override auto-recognition of type.",
     )
-    
+
     # forms.ChoiceField(
     #     choices=DeviceTypeChoiceGenerator,
     #     required=False,
@@ -105,20 +104,20 @@ class OnboardingTaskFilterForm(BootstrapMixin, forms.ModelForm):
     """Form for filtering OnboardingTask instances."""
 
     location = DynamicModelMultipleChoiceField(
-        queryset=Location.objects.get_for_model(Device),
-        query_params={"content_type":"dcim.device"}, 
-        required=False
+        queryset=Location.objects.get_for_model(Device), query_params={"content_type": "dcim.device"}, required=False
     )
 
-    platform = DynamicModelMultipleChoiceField(
-        queryset=Platform.objects.all(), 
-        required=False
-    )
+    platform = DynamicModelMultipleChoiceField(queryset=Platform.objects.all(), required=False)
 
-    status = forms.MultipleChoiceField(choices=BLANK_CHOICE + OnboardingStatusChoices.CHOICES, required=False, widget=StaticSelect2Multiple())
+    status = forms.MultipleChoiceField(
+        choices=BLANK_CHOICE + OnboardingStatusChoices.CHOICES, required=False, widget=StaticSelect2Multiple()
+    )
 
     failed_reason = forms.MultipleChoiceField(
-        choices=BLANK_CHOICE + OnboardingFailChoices.CHOICES, required=False, label="Failed Reason", widget=StaticSelect2Multiple()
+        choices=BLANK_CHOICE + OnboardingFailChoices.CHOICES,
+        required=False,
+        label="Failed Reason",
+        widget=StaticSelect2Multiple(),
     )
 
     q = forms.CharField(required=False, label="Search")
@@ -130,9 +129,10 @@ class OnboardingTaskFilterForm(BootstrapMixin, forms.ModelForm):
 
 class OnboardingTaskBulkEditForm(TagsBulkEditFormMixin, NautobotBulkEditForm, forms.ModelForm):
     """Form for entering CSV to bulk-import OnboardingTask entries."""
+
     location = DynamicModelChoiceField(
         queryset=Location.objects.get_for_model(Device),
-        query_params={"content_type":"dcim.device"},
+        query_params={"content_type": "dcim.device"},
         required=True,
         to_field_name="name",
         help_text="Name of parent site",
@@ -164,7 +164,7 @@ class OnboardingTaskBulkEditForm(TagsBulkEditFormMixin, NautobotBulkEditForm, fo
 
     role = DynamicModelChoiceField(
         queryset=Role.objects.get_for_model(Device),
-        query_params={"content_types":"dcim.device"},
+        query_params={"content_types": "dcim.device"},
         required=False,
         help_text="Slug of device role. Define ONLY to override auto-recognition of role.",
         error_messages={

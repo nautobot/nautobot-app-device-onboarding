@@ -2,7 +2,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("nautobot_device_onboarding", "0005_migrate_site_to_location_part_2"),
     ]

@@ -21,7 +21,7 @@ class NautobotKeeperTestCase(TestCase):
     def setUp(self):
         """Create a superuser and token for API calls."""
         role_content_type = ContentType.objects.get_for_model(Device)
-        
+
         device_role = Role.objects.create(name="Switch")
         device_role.content_types.set([role_content_type])
 
@@ -412,10 +412,14 @@ class NautobotKeeperTestCase(TestCase):
         active_status = Status.objects.get(
             content_types__in=[ContentType.objects.get_for_model(Interface)], name="Active"
         )
-        
+
         # TODO: Update to take from plugin default interface status setting
-        intf = Interface.objects.create(name=netdev_mgmt_ifname, device=device, type=InterfaceTypeChoices.TYPE_OTHER, 
-            status=active_status,)
+        intf = Interface.objects.create(
+            name=netdev_mgmt_ifname,
+            device=device,
+            type=InterfaceTypeChoices.TYPE_OTHER,
+            status=active_status,
+        )
 
         onboarding_kwargs = {
             "netdev_hostname": device_name,

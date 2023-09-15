@@ -24,7 +24,6 @@ class OnboardingTaskFilterSet(BaseFilterSet):
         label="Location (name)",
     )
 
-
     platform = django_filters.ModelMultipleChoiceFilter(
         field_name="platform__name",
         queryset=Platform.objects.all(),

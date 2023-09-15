@@ -2,7 +2,6 @@ from django.db import migrations
 
 
 def migrate_to_extras_role(apps, schema_editor):
-
     OnboardingTask = apps.get_model("nautobot_device_onboarding", "OnboardingTask")
     role_model = apps.get_model("extras", "Role")
 
@@ -14,7 +13,6 @@ def migrate_to_extras_role(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("nautobot_device_onboarding", "0004_migrate_to_extras_role_part_1"),
     ]
@@ -22,4 +20,3 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunPython(migrate_to_extras_role, migrations.RunPython.noop),
     ]
-

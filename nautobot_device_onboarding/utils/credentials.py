@@ -31,6 +31,7 @@ class Credentials:
             secret=data["secret"],
         )
 
+
 def onboarding_credentials_serializer(credentials):
     """Serialize object for Celery."""
     return {
