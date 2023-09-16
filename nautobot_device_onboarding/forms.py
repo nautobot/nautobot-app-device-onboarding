@@ -87,6 +87,7 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
         ]
 
     def clean(self):
+        """Update clean to make Null a blank string."""
         super().clean()
         if not self.cleaned_data.get("device_type"):
             self.cleaned_data["device_type"] = ""

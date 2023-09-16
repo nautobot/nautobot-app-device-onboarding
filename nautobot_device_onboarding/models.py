@@ -16,11 +16,14 @@ from nautobot_device_onboarding.choices import OnboardingStatusChoices, Onboardi
 
 
 class DeviceLimitedRoleField(RoleField):
-    """Role field override. RoleField is a subclass of ForeignKeyLimitedByContentTypes.
+    """Role field subclass.
+    
+    RoleField is a subclass of ForeignKeyLimitedByContentTypes.
     Our role field must only use roles that have content types that include dcim.Device.
     """
 
     def get_limit_choices_to(self):
+        """Used to limit choices to the Device Field."""
         return {"content_types": ContentType.objects.get_for_model(Device)}
 
     def formfield(self, **kwargs):
@@ -93,6 +96,7 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
     objects = RestrictedQuerySet.as_manager()
 
     class Meta:
+        """Class Meta."""
         unique_together = [["label", "ip_address"]]
 
         ordering = ("label",)
