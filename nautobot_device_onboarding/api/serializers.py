@@ -1,7 +1,9 @@
 """Model serializers for the nautobot_device_onboarding REST API."""
 # pylint: disable=duplicate-code
 from rest_framework import serializers
+
 from nautobot.core.api.serializers import NotesSerializerMixin, ValidatedModelSerializer
+from nautobot.dcim.models import Location
 
 from nautobot_device_onboarding.models import OnboardingTask
 from nautobot_device_onboarding.utils.credentials import Credentials
@@ -27,6 +29,12 @@ class OnboardingTaskSerializer(NotesSerializerMixin, ValidatedModelSerializer):
         required=False,
         write_only=True,
         help_text="Device secret password",
+    )
+
+    location = serializers.SlugRelatedField(
+        queryset=Location.objects.all(),
+        required=True,
+        slug_field="name",
     )
 
     class Meta:  # noqa: D106 "Missing docstring in public nested class"

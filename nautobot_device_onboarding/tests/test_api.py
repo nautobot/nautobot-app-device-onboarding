@@ -49,7 +49,7 @@ class OnboardingTaskTestCase(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["ip_address"], self.onboarding_task1.ip_address)
-        self.assertEqual(response.data["location"]["name"], self.onboarding_task1.location.name)
+        self.assertEqual(response.data["location"], self.onboarding_task1.location.name)
 
     def test_create_task_missing_mandatory_parameters(self):
         """Verify that the only mandatory POST parameters are ip_address and site."""
