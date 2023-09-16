@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from nautobot.dcim.models import Location, LocationType, DeviceType, Manufacturer, Device, Interface
 from nautobot.extras.models import Role
-from nautobot.ipam.models import IPAddress, Namespace
+from nautobot.ipam.models import IPAddress, Namespace, Prefix
 from nautobot.extras.models import Status
 
 from nautobot_device_onboarding.models import OnboardingTask
@@ -38,6 +38,8 @@ class OnboardingDeviceModelTestCase(TestCase):
         intf = Interface.objects.create(name="test_intf", device=self.device, status=status)
 
         namespace = Namespace.objects.get(name="Global")
+
+        Prefix.objects.create(prefix="10.10.10.0/24", namespace=namespace, status=status)
 
         primary_ip = IPAddress.objects.create(address="10.10.10.10/32", status=status, type="Host", namespace=namespace)
         intf.ip_addresses.add(primary_ip)
