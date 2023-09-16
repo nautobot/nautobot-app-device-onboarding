@@ -13,6 +13,7 @@ from nautobot_device_onboarding.api.serializers import OnboardingTaskSerializer
 
 class OnboardingTaskViewSet(NautobotModelViewSet):
     """API Viewset."""
+
     queryset = OnboardingTask.objects.all()
     filterset_class = OnboardingTaskFilterSet
     serializer_class = OnboardingTaskSerializer
