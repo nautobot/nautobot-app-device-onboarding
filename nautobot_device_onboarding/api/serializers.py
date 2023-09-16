@@ -9,7 +9,7 @@ from nautobot_device_onboarding.worker import enqueue_onboarding_task
 
 
 class OnboardingTaskSerializer(NotesSerializerMixin, ValidatedModelSerializer):
-    # """Serializer for the OnboardingTask model."""
+    """Serializer for the OnboardingTask model."""
 
     username = serializers.CharField(
         required=False,
@@ -56,6 +56,7 @@ class OnboardingTaskSerializer(NotesSerializerMixin, ValidatedModelSerializer):
         read_only_fields = ["id", "created_device", "status", "failed_reason", "message", "object_type"]
 
     def validate(self, data):
+        """Custom Validate class to remove credential fields."""
         attrs = data.copy()
         username = attrs.pop("username", "")
         password = attrs.pop("password", "")
