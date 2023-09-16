@@ -17,7 +17,7 @@ from nautobot_device_onboarding.choices import OnboardingStatusChoices, Onboardi
 
 class DeviceLimitedRoleField(RoleField):
     """Role field subclass.
-    
+
     RoleField is a subclass of ForeignKeyLimitedByContentTypes.
     Our role field must only use roles that have content types that include dcim.Device.
     """
@@ -97,6 +97,7 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
 
     class Meta:
         """Class Meta."""
+
         unique_together = [["label", "ip_address"]]
 
         ordering = ("label",)
