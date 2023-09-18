@@ -27,10 +27,9 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
         queryset=Location.objects.get_for_model(Device),
         query_params={"content_type": "dcim.device"},
         required=True,
-        to_field_name="name",
-        help_text="Name of parent site",
+        help_text="Name of parent Location for the onboarded device",
         error_messages={
-            "invalid_choice": "Site not found",
+            "invalid_choice": "Location not found",
         },
     )
 
