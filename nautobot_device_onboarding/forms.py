@@ -97,8 +97,7 @@ class OnboardingTaskFilterForm(BootstrapMixin, forms.ModelForm):
     """Form for filtering OnboardingTask instances."""
 
     location = DynamicModelMultipleChoiceField(
-        queryset=Location.objects.all(), 
-        query_params={"content_type": "dcim.device"}, required=False
+        queryset=Location.objects.all(), query_params={"content_type": "dcim.device"}, required=False
     )
 
     platform = DynamicModelMultipleChoiceField(queryset=Platform.objects.all(), required=False)
@@ -119,4 +118,3 @@ class OnboardingTaskFilterForm(BootstrapMixin, forms.ModelForm):
     class Meta:  # noqa: D106 "Missing docstring in public nested class"
         model = OnboardingTask
         fields = ["q", "location", "platform", "status", "failed_reason"]
-
