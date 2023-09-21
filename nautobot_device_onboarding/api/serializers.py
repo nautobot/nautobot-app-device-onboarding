@@ -80,8 +80,6 @@ class OnboardingTaskSerializer(NotesSerializerMixin, ValidatedModelSerializer):
 
     def create(self, validated_data):
         """Create an OnboardingTask and enqueue it for processing."""
-        # Fields are string-type so default to empty (instead of None)
-
         onboarding_task = OnboardingTask.objects.create(**validated_data)
 
         enqueue_onboarding_task(onboarding_task.id, self.credentials)
