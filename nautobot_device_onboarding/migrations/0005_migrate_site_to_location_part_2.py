@@ -8,9 +8,6 @@ def migrate_to_location(apps, schema_editor):
     for task_object in OnboardingTask.objects.all():
         # get the new Location object from the site and set it
         task_object.location = location_model.objects.get(name="task_object.site")
-
-        # get the new Role object from the existing Role and set it
-
         task_object.save()
 
 
