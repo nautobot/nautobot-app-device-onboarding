@@ -19,16 +19,10 @@ menu_items = (
                         buttons=(
                             NavMenuAddButton(
                                 link="plugins:nautobot_device_onboarding:onboardingtask_add",
-                                # name="Onboard",
-                                # icon_class="mdi mdi-plus-thick",
-                                # color=ButtonColorChoices.GREEN,
                                 permissions=["nautobot_device_onboarding.add_onboardingtask"],
                             ),
                             NavMenuImportButton(
                                 link="plugins:nautobot_device_onboarding:onboardingtask_import",
-                                # name="Bulk Onboard",
-                                # icon_class="mdi mdi-database-import-outline",
-                                # color=ButtonColorChoices.BLUE,
                                 permissions=["nautobot_device_onboarding.add_onboardingtask"],
                             ),
                         ),
