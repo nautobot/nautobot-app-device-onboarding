@@ -245,7 +245,6 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
 
         try:
             search_array = [
-                # {"slug__iexact": nb_device_type_slug},
                 {"model__iexact": nb_device_type_name},
                 {"part_number__iexact": self.netdev_model},
             ]
@@ -290,9 +289,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
             if create_device_role:
                 self.nb_device_role = Role.objects.create(
                     name=self.netdev_nb_role_name,
-                    # slug=self.netdev_nb_role_name,
                     color=self.netdev_nb_role_color,
-                    # vm_role=False,
                 )
                 self.nb_device_role.validated_save()
                 self.nb_device_role.content_types.set([ContentType.objects.get_for_model(Device)])
