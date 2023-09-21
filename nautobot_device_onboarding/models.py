@@ -31,7 +31,6 @@ class DeviceLimitedRoleField(RoleField):
         defaults = {
             "form_class": DynamicModelChoiceField,
             "queryset": self.related_model.objects.all(),
-            # label_lower e.g. "dcim.device"
             "query_params": {"content_types": "dcim.device"},
         }
         defaults.update(**kwargs)
