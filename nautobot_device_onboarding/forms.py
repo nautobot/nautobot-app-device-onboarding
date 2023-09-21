@@ -5,7 +5,7 @@ from django.db import transaction
 
 from nautobot.apps.forms import DynamicModelChoiceField, DynamicModelMultipleChoiceField
 from nautobot.core.forms import BootstrapMixin, StaticSelect2Multiple
-from nautobot.dcim.models import Device, DeviceType, Location, Platform
+from nautobot.dcim.models import DeviceType, Location, Platform
 from nautobot.extras.models import Role
 
 from nautobot_device_onboarding.models import OnboardingTask
@@ -24,7 +24,7 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
     )
 
     location = DynamicModelChoiceField(
-        queryset=Location.objects.get_for_model(Device),
+        queryset=Location.objects.all(),
         query_params={"content_type": "dcim.device"},
         required=True,
         help_text="Name of parent Location for the onboarded device",
@@ -48,7 +48,7 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
         help_text="Device platform. Define ONLY to override auto-recognition of platform.",
     )
     role = DynamicModelChoiceField(
-        queryset=Role.objects.get_for_model(Device),
+        queryset=Role.objects.all(),
         query_params={"content_types": "dcim.device"},
         required=False,
         help_text="Slug of device role. Define ONLY to override auto-recognition of role.",
@@ -103,7 +103,8 @@ class OnboardingTaskFilterForm(BootstrapMixin, forms.ModelForm):
     """Form for filtering OnboardingTask instances."""
 
     location = DynamicModelMultipleChoiceField(
-        queryset=Location.objects.get_for_model(Device), query_params={"content_type": "dcim.device"}, required=False
+        queryset=Location.objects.all(), 
+        query_params={"content_type": "dcim.device"}, required=False
     )
 
     platform = DynamicModelMultipleChoiceField(queryset=Platform.objects.all(), required=False)
