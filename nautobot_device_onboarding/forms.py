@@ -63,12 +63,6 @@ class OnboardingTaskForm(BootstrapMixin, forms.ModelForm):
         help_text="Device type. Define ONLY to override auto-recognition of type.",
     )
 
-    # forms.ChoiceField(
-    #     choices=DeviceTypeChoiceGenerator,
-    #     required=False,
-    #     help_text="Device type. Define ONLY to override auto-recognition of type.",
-    # )
-
     class Meta:  # noqa: D106 "Missing docstring in public nested class"
         model = OnboardingTask
         fields = [
