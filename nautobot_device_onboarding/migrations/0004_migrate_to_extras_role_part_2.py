@@ -7,8 +7,9 @@ def migrate_to_extras_role(apps, schema_editor):
 
     for task_object in OnboardingTask.objects.all():
         # get the new Role object from the existing Role and set it
-        task_object.new_role = role_model.objects.get(name="task_object.role")
-        task_object.save()
+        if task_object.role:
+            task_object.new_role = role_model.objects.get(name=task_object.role.name)
+            task_object.save()
 
 
 class Migration(migrations.Migration):

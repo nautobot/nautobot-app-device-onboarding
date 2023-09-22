@@ -6,7 +6,7 @@ import nautobot_device_onboarding
 class Migration(migrations.Migration):
     dependencies = [
         ("nautobot_device_onboarding", "0003_onboardingtask_label"),
-        ("extras", "0061_role_and_alter_status"),
+        ("dcim", "0029_device_and_rack_roles_data_migrations"),
     ]
 
     operations = [
