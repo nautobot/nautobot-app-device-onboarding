@@ -65,7 +65,7 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
         choices=OnboardingFailChoices,
         help_text="Reason why the task failed (optional)",
         blank=True,
-        default=""
+        default="",
     )
 
     message = models.CharField(max_length=511, blank=True)
