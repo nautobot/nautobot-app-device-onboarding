@@ -1,4 +1,5 @@
 """Filtering logic for OnboardingTask instances."""
+# pylint: disable=unsupported-binary-operation
 
 import django_filters
 from django.db.models import Q
