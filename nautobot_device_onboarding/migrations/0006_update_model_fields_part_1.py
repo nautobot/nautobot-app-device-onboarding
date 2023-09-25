@@ -4,24 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('nautobot_device_onboarding', '0005_migrate_site_to_location_part_3'),
-        
+        ("nautobot_device_onboarding", "0005_migrate_site_to_location_part_3"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='onboardingtask',
-            options={'ordering': ('label',)},
+            name="onboardingtask",
+            options={"ordering": ("label",)},
         ),
         migrations.AlterField(
-            model_name='onboardingtask',
-            name='created',
+            model_name="onboardingtask",
+            name="created",
             field=models.DateTimeField(auto_now_add=True, null=True),
         ),
-        
-
     ]
-
-

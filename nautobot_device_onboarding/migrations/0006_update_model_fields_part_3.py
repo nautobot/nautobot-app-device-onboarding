@@ -4,32 +4,28 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('nautobot_device_onboarding', '0006_update_model_fields_part_2'),
+        ("nautobot_device_onboarding", "0006_update_model_fields_part_2"),
     ]
 
     operations = [
-         migrations.AlterField(
-            model_name='onboardingtask',
-            name='failed_reason',
-            field=models.CharField(blank=True, default='', max_length=255),
+        migrations.AlterField(
+            model_name="onboardingtask",
+            name="failed_reason",
+            field=models.CharField(blank=True, default="", max_length=255),
         ),
         migrations.AlterField(
-            model_name='onboardingtask',
-            name='ip_address',
-            field=models.CharField(default='127.0.0.1', max_length=255),
+            model_name="onboardingtask",
+            name="ip_address",
+            field=models.CharField(default="127.0.0.1", max_length=255),
         ),
         migrations.AlterField(
-            model_name='onboardingtask',
-            name='status',
-            field=models.CharField(blank=True, default='', max_length=255),
+            model_name="onboardingtask",
+            name="status",
+            field=models.CharField(blank=True, default="", max_length=255),
         ),
         migrations.AlterUniqueTogether(
-            name='onboardingtask',
-            unique_together={('label', 'ip_address')},
+            name="onboardingtask",
+            unique_together={("label", "ip_address")},
         ),
-
     ]
-
-
