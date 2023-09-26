@@ -27,7 +27,7 @@ class OnboardingTaskUIViewSet(
     ObjectChangeLogViewMixin,
     ObjectDestroyViewMixin,
     ObjectNotesViewMixin,
-):
+):  # pylint: disable=abstract-method
     """UI Viewset for Onboarding."""
 
     filterset_class = OnboardingTaskFilterSet
@@ -37,3 +37,4 @@ class OnboardingTaskUIViewSet(
     serializer_class = OnboardingTaskSerializer
     table_class = OnboardingTaskTable
     action_buttons = ["add", "export", "import"]
+    # pylint disable=abstract-method

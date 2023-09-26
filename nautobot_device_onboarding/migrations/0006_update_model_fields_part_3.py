@@ -16,11 +16,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterField(
             model_name="onboardingtask",
-            name="ip_address",
-            field=models.CharField(default="127.0.0.1", max_length=255),
-        ),
-        migrations.AlterField(
-            model_name="onboardingtask",
             name="status",
             field=models.CharField(blank=True, default="", max_length=255),
         ),

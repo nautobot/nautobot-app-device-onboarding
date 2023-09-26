@@ -44,7 +44,10 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
 
     created_device = models.ForeignKey(to="dcim.Device", on_delete=models.SET_NULL, blank=True, null=True)
 
-    ip_address = models.CharField(max_length=255, help_text="primary ip address for the device", default="127.0.0.1")
+    ip_address = models.CharField(
+        max_length=255,
+        help_text="primary ip address for the device",
+    )
 
     location = models.ForeignKey(to="dcim.Location", on_delete=models.SET_NULL, blank=True, null=True)
 
@@ -81,7 +84,7 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
         """String representation of an OnboardingTask."""
         return f"{self.location} | {self.ip_address}"
 
-    def get_absolute_url(self):
+    def get_absolute_url(self):  # pylint: disable=arguments-differ
         """Provide absolute URL to an OnboardingTask."""
         return reverse("plugins:nautobot_device_onboarding:onboardingtask", kwargs={"pk": self.pk})
 
