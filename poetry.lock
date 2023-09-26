@@ -47,14 +47,14 @@ tests = ["mypy (>=0.800)", "pytest", "pytest-asyncio"]
 
 [[package]]
 name = "astroid"
-version = "2.15.7"
+version = "2.15.8"
 description = "An abstract syntax tree for Python with inference support."
 category = "dev"
 optional = false
 python-versions = ">=3.7.2"
 files = [
-    {file = "astroid-2.15.7-py3-none-any.whl", hash = "sha256:958f280532e36ca84a13023f15cb1556fb6792d193acb87e1f3ca536b6fa6bd2"},
-    {file = "astroid-2.15.7.tar.gz", hash = "sha256:c522f2832a900e27a7d284b9b6ef670d2495f760ede3c8c0b004a5641d3c5987"},
+    {file = "astroid-2.15.8-py3-none-any.whl", hash = "sha256:1aa149fc5c6589e3d0ece885b4491acd80af4f087baafa3fb5203b113e68cd3c"},
+    {file = "astroid-2.15.8.tar.gz", hash = "sha256:6c107453dffee9055899705de3c9ead36e74119cee151e5a9aaf7f0b0e020a6a"},
 ]
 
 [package.dependencies]
@@ -1052,6 +1052,21 @@ files = [
 Django = ">=2.2"
 
 [[package]]
+name = "emoji"
+version = "2.8.0"
+description = "Emoji for Python"
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+files = [
+    {file = "emoji-2.8.0-py2.py3-none-any.whl", hash = "sha256:a8468fd836b7ecb6d1eac054c9a591701ce0ccd6c6f7779ad71b66f76664df90"},
+    {file = "emoji-2.8.0.tar.gz", hash = "sha256:8d8b5dec3c507444b58890e598fc895fcec022b3f5acb49497c6ccc5208b8b00"},
+]
+
+[package.extras]
+dev = ["coverage", "coveralls", "pytest"]
+
+[[package]]
 name = "flake8"
 version = "3.9.2"
 description = "the modular source code checker: pep8 pyflakes and co"
@@ -1924,14 +1939,14 @@ typing-extensions = ">=4.3.0"
 
 [[package]]
 name = "nautobot"
-version = "2.0.0rc2"
+version = "2.0.0rc3"
 description = "Source of truth and network automation platform."
 category = "main"
 optional = false
 python-versions = ">=3.8,<3.12"
 files = [
-    {file = "nautobot-2.0.0rc2-py3-none-any.whl", hash = "sha256:0012663d52d4c12ae1327f8e8fef150654f67483ccc3c9c4fc7e3b039a05afb9"},
-    {file = "nautobot-2.0.0rc2.tar.gz", hash = "sha256:404a14977ba8e1097c3f6aaf34d21880ea66770e26ac2dc794a5310d8174a552"},
+    {file = "nautobot-2.0.0rc3-py3-none-any.whl", hash = "sha256:0fd9f843cba7920aa6fdb5533318b621b312d83565e2964592b80ac84c53ce63"},
+    {file = "nautobot-2.0.0rc3.tar.gz", hash = "sha256:9388c55318df0e58418810a56d50c5cdecb78fccb6971ec830e04563e5e3edb5"},
 ]
 
 [package.dependencies]
@@ -1957,7 +1972,8 @@ django-webserver = ">=1.2.0,<1.3.0"
 djangorestframework = ">=3.14.0,<3.15.0"
 drf-react-template-framework = ">=0.0.17,<0.0.18"
 drf-spectacular = {version = "0.26.3", extras = ["sidecar"]}
-GitPython = ">=3.1.32,<3.2.0"
+emoji = ">=2.8.0,<2.9.0"
+GitPython = ">=3.1.36,<3.2.0"
 graphene-django = ">=2.16.0,<2.17.0"
 graphene-django-optimizer = ">=0.8.0,<0.9.0"
 Jinja2 = ">=3.1.2,<3.2.0"
@@ -1970,6 +1986,7 @@ packaging = ">=23.1,<23.2"
 Pillow = ">=10.0.0,<10.1.0"
 prometheus-client = ">=0.17.1,<0.18.0"
 psycopg2-binary = ">=2.9.6,<2.10.0"
+python-slugify = ">=8.0.1,<8.1.0"
 pyuwsgi = ">=2.0.21,<2.1.0"
 PyYAML = ">=6.0,<6.1"
 social-auth-app-django = ">=5.2.0,<5.3.0"
@@ -2649,6 +2666,24 @@ files = [
 six = ">=1.5"
 
 [[package]]
+name = "python-slugify"
+version = "8.0.1"
+description = "A Python slugify application that also handles Unicode"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "python-slugify-8.0.1.tar.gz", hash = "sha256:ce0d46ddb668b3be82f4ed5e503dbc33dd815d83e2eb6824211310d3fb172a27"},
+    {file = "python_slugify-8.0.1-py2.py3-none-any.whl", hash = "sha256:70ca6ea68fe63ecc8fa4fcf00ae651fc8a5d02d93dcd12ae6d4fc7ca46c4d395"},
+]
+
+[package.dependencies]
+text-unidecode = ">=1.3"
+
+[package.extras]
+unidecode = ["Unidecode (>=1.1.1)"]
+
+[[package]]
 name = "python3-openid"
 version = "3.2.0"
 description = "OpenID support for modern servers and consumers."
@@ -2809,14 +2844,14 @@ pyyaml = "*"
 
 [[package]]
 name = "redis"
-version = "5.0.0"
+version = "5.0.1"
 description = "Python client for Redis database and key-value store"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "redis-5.0.0-py3-none-any.whl", hash = "sha256:06570d0b2d84d46c21defc550afbaada381af82f5b83e5b3777600e05d8e2ed0"},
-    {file = "redis-5.0.0.tar.gz", hash = "sha256:5cea6c0d335c9a7332a460ed8729ceabb4d0c489c7285b0a86dbbf8a017bd120"},
+    {file = "redis-5.0.1-py3-none-any.whl", hash = "sha256:ed4802971884ae19d640775ba3b03aa2e7bd5e8fb8dfaed2decce4d0fc48391f"},
+    {file = "redis-5.0.1.tar.gz", hash = "sha256:0dab495cd5753069d3bc650a0dde8a8f9edde16fc5691b689a566eda58100d0f"},
 ]
 
 [package.dependencies]
@@ -3566,4 +3601,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "440d66740584cdc5bf66362b310a9f3cd5e0c50a3e93da8bba7550af2e5b7ee1"
+content-hash = "4d18f0b83307679a2b994095fa7844d6365468d7e45994ddf9a36e67234cdf9e"
