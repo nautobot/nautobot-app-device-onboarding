@@ -26,10 +26,10 @@ class OnboardingTaskTestCase(TestCase):
 
         self.base_url_lookup = "plugins-api:nautobot_device_onboarding-api:onboardingtask"
 
-        status = Status.objects.get(name="Active")
+        active = Status.objects.get(name="Active")
         location_type = LocationType.objects.create(name="site")
 
-        self.site1 = Location.objects.create(name="USWEST", location_type=location_type, status=status)
+        self.site1 = Location.objects.create(name="USWEST", location_type=location_type, status=active)
 
         self.onboarding_task1 = OnboardingTask.objects.create(ip_address="10.10.10.10", location=self.site1)
         self.onboarding_task2 = OnboardingTask.objects.create(ip_address="192.168.1.1", location=self.site1)

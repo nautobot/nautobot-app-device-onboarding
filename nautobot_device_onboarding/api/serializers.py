@@ -70,7 +70,7 @@ class OnboardingTaskSerializer(NotesSerializerMixin, ValidatedModelSerializer):
         password = attrs.pop("password", "")
         secret = attrs.pop("secret", "")
 
-        self.credentials = Credentials(
+        self.credentials = Credentials(  # pylint: disable=attribute-defined-outside-init
             username=username,
             password=password,
             secret=secret,
