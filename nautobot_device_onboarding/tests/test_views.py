@@ -31,6 +31,7 @@ class OnboardingTestCase(  # pylint: disable=no-member,too-many-ancestors
         site = Location.objects.create(name="USWEST", location_type=location_type, status=status)
         OnboardingTask.objects.create(ip_address="10.10.10.10", location=site)
         OnboardingTask.objects.create(ip_address="192.168.1.1", location=site)
+        OnboardingTask.objects.create(ip_address="172.16.128.1", location=site)
 
         cls.form_data = {
             "location": site.pk,
