@@ -1,10 +1,12 @@
 """REST API URLs for device onboarding."""
 
-from rest_framework import routers
-from nautobot_device_onboarding.api.views import OnboardingTaskView
+from nautobot.apps.api import OrderedDefaultRouter
 
-router = routers.DefaultRouter()
+from nautobot_device_onboarding.api import views
 
-router.register(r"onboarding", OnboardingTaskView)
+router = OrderedDefaultRouter()
+router.register("onboarding", views.OnboardingTaskViewSet)
 
+
+app_name = "nautobot_device_onboarding-api"
 urlpatterns = router.urls

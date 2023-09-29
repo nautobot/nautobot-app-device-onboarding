@@ -1,6 +1,6 @@
 """ChoiceSet classes for device onboarding."""
 
-from nautobot.utilities.choices import ChoiceSet
+from nautobot.core.choices import ChoiceSet
 
 
 class OnboardingStatusChoices(ChoiceSet):

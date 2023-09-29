@@ -1,8 +1,11 @@
 """Unit tests for nautobot_device_onboarding OnboardingDevice model."""
 from django.test import TestCase
+from django.contrib.contenttypes.models import ContentType
 
-from nautobot.dcim.models import Site, DeviceRole, DeviceType, Manufacturer, Device, Interface
-from nautobot.ipam.models import IPAddress
+from nautobot.dcim.models import Location, LocationType, DeviceType, Manufacturer, Device, Interface
+from nautobot.extras.models import Role
+from nautobot.ipam.models import IPAddress, Namespace, Prefix
+from nautobot.extras.models import Status
 
 from nautobot_device_onboarding.models import OnboardingTask
 from nautobot_device_onboarding.models import OnboardingDevice
@@ -14,21 +17,31 @@ class OnboardingDeviceModelTestCase(TestCase):
 
     def setUp(self):
         """Setup objects for Onboarding Model tests."""
-        self.site = Site.objects.create(name="USWEST", slug="uswest")
-        manufacturer = Manufacturer.objects.create(name="Juniper", slug="juniper")
-        device_role = DeviceRole.objects.create(name="Firewall", slug="firewall")
-        device_type = DeviceType.objects.create(slug="srx3600", model="SRX3600", manufacturer=manufacturer)
+        status = Status.objects.get(name="Active")
+        location_type = LocationType.objects.create(name="site")
+
+        self.site = Location.objects.create(name="USWEST", location_type=location_type, status=status)
+        manufacturer = Manufacturer.objects.create(name="Juniper")
+        device_content_type = ContentType.objects.get_for_model(model=Device)
+        device_role = Role.objects.create(name="Firewall")
+        device_role.content_types.set([device_content_type])
+        device_type = DeviceType.objects.create(model="SRX3600", manufacturer=manufacturer)
 
         self.device = Device.objects.create(
             device_type=device_type,
             name="device1",
-            device_role=device_role,
-            site=self.site,
+            role=device_role,
+            location=self.site,
+            status=status,
         )
 
-        intf = Interface.objects.create(name="test_intf", device=self.device)
+        intf = Interface.objects.create(name="test_intf", device=self.device, status=status)
 
-        primary_ip = IPAddress.objects.create(address="10.10.10.10/32")
+        namespace = Namespace.objects.get(name="Global")
+
+        Prefix.objects.create(prefix="10.10.10.0/24", namespace=namespace, status=status)
+
+        primary_ip = IPAddress.objects.create(address="10.10.10.10/32", status=status, type="Host", namespace=namespace)
         intf.ip_addresses.add(primary_ip)
 
         self.device.primary_ip4 = primary_ip
@@ -36,28 +49,28 @@ class OnboardingDeviceModelTestCase(TestCase):
 
         self.succeeded_task1 = OnboardingTask.objects.create(
             ip_address="10.10.10.10",
-            site=self.site,
+            location=self.site,
             status=OnboardingStatusChoices.STATUS_SUCCEEDED,
             created_device=self.device,
         )
 
         self.succeeded_task2 = OnboardingTask.objects.create(
             ip_address="10.10.10.10",
-            site=self.site,
+            location=self.site,
             status=OnboardingStatusChoices.STATUS_SUCCEEDED,
             created_device=self.device,
         )
 
         self.failed_task1 = OnboardingTask.objects.create(
             ip_address="10.10.10.10",
-            site=self.site,
+            location=self.site,
             status=OnboardingStatusChoices.STATUS_FAILED,
             created_device=self.device,
         )
 
         self.failed_task2 = OnboardingTask.objects.create(
             ip_address="10.10.10.10",
-            site=self.site,
+            location=self.site,
             status=OnboardingStatusChoices.STATUS_FAILED,
             created_device=self.device,
         )

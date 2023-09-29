@@ -82,8 +82,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.8"]
-        nautobot-version: ["1.4.10"]
+        python-version: ["3.10"]
+        nautobot-version: ["2.0.0"]
     env:
       INVOKE_NAUTOBOT_DEVICE_ONBOARDING_PYTHON_VER: "${{ matrix.python-version }}"
       INVOKE_NAUTOBOT_DEVICE_ONBOARDING_NAUTOBOT_VER: "${{ matrix.nautobot-version }}"
@@ -119,19 +119,9 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.10"]
         db-backend: ["postgresql"]
-        nautobot-version: ["stable"]
-        include:
-          - python-version: "3.10"
-            db-backend: "postgresql"
-            nautobot-version: "1.4.10"
-          - python-version: "3.8"
-            db-backend: "mysql"
-            nautobot-version: "1.5.5"
-          - python-version: "3.10"
-            db-backend: "mysql"
-            nautobot-version: "latest"
+        nautobot-version: ["2.0.0"]
 
     runs-on: "ubuntu-20.04"
     env:
@@ -178,7 +168,7 @@ jobs:
       - name: "Set up Python"
         uses: "actions/setup-python@v2"
         with:
-          python-version: "3.9"
+          python-version: "3.10"
       - name: "Install Python Packages"
         run: "pip install poetry"
       - name: "Set env"
@@ -207,7 +197,7 @@ jobs:
       - name: "Set up Python"
         uses: "actions/setup-python@v2"
         with:
-          python-version: "3.9"
+          python-version: "3.10"
       - name: "Install Python Packages"
         run: "pip install poetry"
       - name: "Set env"

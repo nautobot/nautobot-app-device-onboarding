@@ -46,9 +46,9 @@ class OnboardingTaskManager:
         return self.onboarding_task.timeout
 
     @property
-    def site(self):
-        """Return ot's site."""
-        return self.onboarding_task.site
+    def location(self):
+        """Return ot's location."""
+        return self.onboarding_task.location
 
     @property
     def device_type(self):
@@ -95,11 +95,11 @@ class OnboardingManager:  # pylint: disable=too-few-public-methods
         onboarding_kwargs = {
             # Kwargs extracted from OnboardingTask:
             "netdev_mgmt_ip_address": otm.ip_address,
-            "netdev_nb_site_slug": otm.site.slug if otm.site else None,
-            "netdev_nb_device_type_slug": otm.device_type,
-            "netdev_nb_role_slug": otm.role.slug if otm.role else PLUGIN_SETTINGS["default_device_role"],
+            "netdev_nb_location_name": otm.location.name if otm.location else None,
+            "netdev_nb_device_type_name": otm.device_type,
+            "netdev_nb_role_name": otm.role.name if otm.role else PLUGIN_SETTINGS["default_device_role"],
             "netdev_nb_role_color": PLUGIN_SETTINGS["default_device_role_color"],
-            "netdev_nb_platform_slug": otm.platform.slug if otm.platform else None,
+            "netdev_nb_platform_name": otm.platform.name if otm.platform else None,
             # Kwargs discovered on the Onboarded Device:
             "netdev_hostname": netdev_dict["netdev_hostname"],
             "netdev_vendor": netdev_dict["netdev_vendor"],
