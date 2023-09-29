@@ -1,15 +1,40 @@
 """OnboardingTask Django model."""
+from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.db import models
 from django.urls import reverse
 
 from nautobot.core.models import BaseModel
+from nautobot.core.forms import DynamicModelChoiceField
 from nautobot.dcim.models import Device
-from nautobot.extras.models import ChangeLoggedModel
-from nautobot.utilities.querysets import RestrictedQuerySet
+from nautobot.extras.models import ChangeLoggedModel, RoleField
+
+from nautobot.core.models.querysets import RestrictedQuerySet
 
 from nautobot_device_onboarding.choices import OnboardingStatusChoices, OnboardingFailChoices
+
+
+class DeviceLimitedRoleField(RoleField):
+    """Role field subclass.
+
+    RoleField is a subclass of ForeignKeyLimitedByContentTypes.
+    Our role field must only use roles that have content types that include dcim.Device.
+    """
+
+    def get_limit_choices_to(self):
+        """Used to limit choices to the Device Field."""
+        return {"content_types": ContentType.objects.get_for_model(Device)}
+
+    def formfield(self, **kwargs):
+        """Return a prepped formfield for use in model forms."""
+        defaults = {
+            "form_class": DynamicModelChoiceField,
+            "queryset": self.related_model.objects.all(),
+            "query_params": {"content_types": "dcim.device"},
+        }
+        defaults.update(**kwargs)
+        return super().formfield(**defaults)
 
 
 class OnboardingTask(BaseModel, ChangeLoggedModel):
@@ -19,36 +44,47 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
 
     created_device = models.ForeignKey(to="dcim.Device", on_delete=models.SET_NULL, blank=True, null=True)
 
-    ip_address = models.CharField(max_length=255, help_text="primary ip address for the device", null=True)
+    ip_address = models.CharField(
+        max_length=255,
+        help_text="primary ip address for the device",
+    )
 
-    site = models.ForeignKey(to="dcim.Site", on_delete=models.SET_NULL, blank=True, null=True)
+    location = models.ForeignKey(to="dcim.Location", on_delete=models.SET_NULL, blank=True, null=True)
 
-    role = models.ForeignKey(to="dcim.DeviceRole", on_delete=models.SET_NULL, blank=True, null=True)
+    role = DeviceLimitedRoleField(on_delete=models.SET_NULL, blank=True, null=True)
 
     device_type = models.CharField(
-        null=True, max_length=255, help_text="Device Type extracted from the device (optional)"
+        max_length=255, help_text="Device Type extracted from the device (optional)", blank=True, default=""
     )
 
     platform = models.ForeignKey(to="dcim.Platform", on_delete=models.SET_NULL, blank=True, null=True)
 
-    status = models.CharField(max_length=255, choices=OnboardingStatusChoices, help_text="Overall status of the task")
+    status = models.CharField(
+        max_length=255, choices=OnboardingStatusChoices, help_text="Overall status of the task", blank=True, default=""
+    )
 
     failed_reason = models.CharField(
-        max_length=255, choices=OnboardingFailChoices, help_text="Raison why the task failed (optional)", null=True
+        max_length=255,
+        choices=OnboardingFailChoices,
+        help_text="Reason why the task failed (optional)",
+        blank=True,
+        default="",
     )
 
     message = models.CharField(max_length=511, blank=True)
 
     port = models.PositiveSmallIntegerField(help_text="Port to use to connect to the device", default=22)
     timeout = models.PositiveSmallIntegerField(
-        help_text="Timeout period in sec to wait while connecting to the device", default=30
+        help_text="Timeout period in seconds to wait while connecting to the device", default=30
     )
+
+    clone_fields = ["ip_address", "location", "role", "platform", "port", "timeout"]
 
     def __str__(self):
         """String representation of an OnboardingTask."""
-        return f"{self.site} | {self.ip_address}"
+        return f"{self.location} | {self.ip_address}"
 
-    def get_absolute_url(self):
+    def get_absolute_url(self):  # pylint: disable=arguments-differ
         """Provide absolute URL to an OnboardingTask."""
         return reverse("plugins:nautobot_device_onboarding:onboardingtask", kwargs={"pk": self.pk})
 
@@ -60,6 +96,13 @@ class OnboardingTask(BaseModel, ChangeLoggedModel):
         super().save(*args, **kwargs)
 
     objects = RestrictedQuerySet.as_manager()
+
+    class Meta:
+        """Class Meta."""
+
+        unique_together = [["label", "ip_address"]]
+
+        ordering = ("label",)
 
 
 class OnboardingDevice(BaseModel):

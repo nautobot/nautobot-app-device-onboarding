@@ -1,10 +1,13 @@
 """Unit tests for nautobot_device_onboarding.netdev_keeper module and its classes."""
-
 from unittest import mock
 
 from django.conf import settings
 from django.test import TestCase
-from nautobot.dcim.models import Site, Platform
+from django.contrib.contenttypes.models import ContentType
+
+
+from nautobot.dcim.models import Device, Location, LocationType, Platform
+from nautobot.extras.models import Status
 
 from nautobot_device_onboarding.models import OnboardingTask
 from nautobot_device_onboarding.onboard import OnboardingManager
@@ -81,12 +84,15 @@ class OnboardingTestCase(TestCase):
     def setUp(self):
         """Prepare test objects."""
         PLUGIN_SETTINGS["platform_map"] = {}  # Reset platform map to default
-        self.site = Site.objects.create(name="TEST_SITE", slug="test-site")
-        self.eos_platform = Platform.objects.create(name="arista_eos", slug="arista_eos", napalm_driver="eos")
+        status = Status.objects.get(name="Active")
+        location_type = LocationType.objects.create(name="site")
+        location_type.content_types.set([ContentType.objects.get_for_model(Device)])
+        self.site = Location.objects.create(name="TEST_SITE", location_type=location_type, status=status)
+        self.eos_platform = Platform.objects.create(name="arista_eos", napalm_driver="eos")
 
-        self.onboarding_task1 = OnboardingTask.objects.create(ip_address="1.1.1.1", site=self.site)
+        self.onboarding_task1 = OnboardingTask.objects.create(ip_address="1.1.1.1", location=self.site)
         self.onboarding_task2 = OnboardingTask.objects.create(
-            ip_address="2.2.2.2", site=self.site, platform=self.eos_platform, port=443
+            ip_address="2.2.2.2", location=self.site, platform=self.eos_platform, port=443
         )
 
         # Patch socket as it would be able to verify connectivity

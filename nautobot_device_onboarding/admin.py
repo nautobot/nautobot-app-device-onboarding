@@ -11,7 +11,7 @@ class OnboardingTaskAdmin(admin.ModelAdmin):
         "pk",
         "created_device",
         "ip_address",
-        "site",
+        "location",
         "role",
         "device_type",
         "platform",

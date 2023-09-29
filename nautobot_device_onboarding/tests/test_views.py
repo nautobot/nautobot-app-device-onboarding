@@ -1,6 +1,9 @@
 """Unit tests for nautobot_device_onboarding views."""
-from nautobot.dcim.models import Site
-from nautobot.utilities.testing import ViewTestCases
+from django.contrib.contenttypes.models import ContentType
+
+from nautobot.dcim.models import Device, Location, LocationType
+from nautobot.extras.models import Status
+from nautobot.core.testing import ViewTestCases
 
 from nautobot_device_onboarding.models import OnboardingTask
 
@@ -22,22 +25,26 @@ class OnboardingTestCase(  # pylint: disable=no-member,too-many-ancestors
     @classmethod
     def setUpTestData(cls):  # pylint: disable=invalid-name
         """Setup test data."""
-        site = Site.objects.create(name="USWEST", slug="uswest")
-        OnboardingTask.objects.create(ip_address="10.10.10.10", site=site)
-        OnboardingTask.objects.create(ip_address="192.168.1.1", site=site)
+        status = Status.objects.get(name="Active")
+        location_type = LocationType.objects.create(name="site")
+        location_type.content_types.set([ContentType.objects.get_for_model(Device)])
+        site = Location.objects.create(name="USWEST", location_type=location_type, status=status)
+        OnboardingTask.objects.create(ip_address="10.10.10.10", location=site)
+        OnboardingTask.objects.create(ip_address="192.168.1.1", location=site)
+        OnboardingTask.objects.create(ip_address="172.16.128.1", location=site)
 
         cls.form_data = {
-            "site": site.pk,
+            "location": site.pk,
             "ip_address": "192.0.2.99",
             "port": 22,
             "timeout": 30,
         }
 
         cls.csv_data = (
-            "site,ip_address",
-            "uswest,10.10.10.10",
-            "uswest,10.10.10.20",
-            "uswest,10.10.10.30",
+            "ip_address,location",
+            "10.10.10.10,USWEST",
+            "10.10.10.20,USWEST",
+            "10.10.10.30,USWEST",
         )
 
     def test_has_advanced_tab(self):
