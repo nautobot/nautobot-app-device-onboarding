@@ -17,7 +17,7 @@ class OnboardingConfig(PluginConfig):
     name = "nautobot_device_onboarding"
     verbose_name = "Device Onboarding"
     version = __version__
-    min_version = "2.0.0-rc.2"
+    min_version = "2.0.0-rc.4"
     max_version = "2.9"
     author = "Network to Code, LLC"
     author_email = "opensource@networktocode.com"
