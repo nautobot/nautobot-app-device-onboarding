@@ -10,11 +10,10 @@ def create_missing_onboardingdevice(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("nautobot_device_onboarding", "0001_initial"),
     ]
 
     operations = [
-        migrations.RunPython(create_missing_onboardingdevice),
+        migrations.RunPython(create_missing_onboardingdevice, migrations.RunPython.noop),
     ]

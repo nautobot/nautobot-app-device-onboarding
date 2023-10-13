@@ -1,4 +1,4 @@
-# nautobot-device-onboarding v1.0 Release Notes
+# v1.0 Release Notes
 
 ## v1.0
 

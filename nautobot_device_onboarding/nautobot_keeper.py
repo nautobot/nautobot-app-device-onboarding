@@ -1,34 +1,22 @@
-"""Nautobot Keeper.
-
-(c) 2020-2021 Network To Code
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-  http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
+"""Nautobot Keeper."""
 
 import logging
-import re
+import ipaddress
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from django.utils.text import slugify
 from nautobot.dcim.choices import InterfaceTypeChoices
-from nautobot.dcim.models import Manufacturer, Device, Interface, DeviceType, DeviceRole
+from nautobot.dcim.models import Manufacturer, Device, Interface, DeviceType
+from nautobot.extras.models import Role
 from nautobot.dcim.models import Platform
-from nautobot.dcim.models import Site
+from nautobot.dcim.models import Location
 from nautobot.extras.models import Status
 from nautobot.extras.models.customfields import CustomField
-from nautobot.ipam.models import IPAddress
+from nautobot.ipam.models import IPAddress, Prefix, Namespace
 
-from .constants import NETMIKO_TO_NAPALM_STATIC
-from .exceptions import OnboardException
+from nautobot_device_onboarding.constants import NETMIKO_TO_NAPALM_STATIC
+from nautobot_device_onboarding.exceptions import OnboardException
 
 logger = logging.getLogger("rq.worker")
 
@@ -37,9 +25,9 @@ PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
 def ensure_default_cf(obj, model):
     """Update objects's default custom fields."""
-    for cf in CustomField.objects.get_for_model(model):
-        if (cf.default is not None) and (cf.name not in obj.cf):
-            obj.cf[cf.name] = cf.default
+    for field in CustomField.objects.get_for_model(model):
+        if (field.default is not None) and (field.label not in obj.cf):
+            obj.cf[field.label] = field.default
 
     try:
         obj.validated_save()
@@ -47,7 +35,7 @@ def ensure_default_cf(obj, model):
         raise OnboardException(
             reason="fail-general",
             message=f"ERROR: {obj} validation error: {err.messages}",
-        )
+        ) from err
 
 
 def object_match(obj, search_array):
@@ -74,33 +62,33 @@ def object_match(obj, search_array):
                     return result
                 except obj.DoesNotExist:
                     pass
-                except obj.MultipleObjectsReturned:
+                except obj.MultipleObjectsReturned as err:
                     raise OnboardException(
                         reason="fail-general",
                         message=f"ERROR multiple objects found in {str(obj)} searching on {str(search_array_element)})",
-                    )
+                    ) from err
         raise
-    except obj.MultipleObjectsReturned:
+    except obj.MultipleObjectsReturned as err:
         raise OnboardException(
             reason="fail-general",
             message=f"ERROR multiple objects found in {str(obj)} searching on {str(search_array_element)})",
-        )
+        ) from err
 
 
-class NautobotKeeper:
+class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
     """Used to manage the information relating to the network device within the Nautobot server."""
 
     def __init__(  # pylint: disable=R0913,R0914
         self,
         netdev_hostname,
-        netdev_nb_role_slug,
+        netdev_nb_role_name,
         netdev_vendor,
-        netdev_nb_site_slug,
-        netdev_nb_device_type_slug=None,
+        netdev_nb_location_name,
+        netdev_nb_device_type_name=None,
         netdev_model=None,
-        netdev_nb_role_color=None,
+        netdev_nb_role_color="9e9e9e",
         netdev_mgmt_ip_address=None,
-        netdev_nb_platform_slug=None,
+        netdev_nb_platform_name=None,
         netdev_serial_number=None,
         netdev_mgmt_ifname=None,
         netdev_mgmt_pflen=None,
@@ -112,14 +100,14 @@ class NautobotKeeper:
 
         Args:
             netdev_hostname (str): Nautobot's device name
-            netdev_nb_role_slug (str): Nautobot's device role slug
+            netdev_nb_role_name (str): Nautobot's device role name
             netdev_vendor (str): Device's vendor name
-            netdev_nb_site_slug (str): Device site's slug
-            netdev_nb_device_type_slug (str): Device type's slug
+            netdev_nb_location_name (str): Device site's slug
+            netdev_nb_device_type_name (str): Device type's name
             netdev_model (str): Device's model
             netdev_nb_role_color (str): Nautobot device's role color
             netdev_mgmt_ip_address (str): IPv4 Address of a device
-            netdev_nb_platform_slug (str): Nautobot device's platform slug
+            netdev_nb_platform_name (str): Nautobot device's platform name
             netdev_serial_number (str): Device's serial number
             netdev_mgmt_ifname (str): Device's management interface name
             netdev_mgmt_pflen (str): Device's management IP prefix-len
@@ -128,11 +116,11 @@ class NautobotKeeper:
             driver_addon_result (Any): Attached extended result (future use)
         """
         self.netdev_mgmt_ip_address = netdev_mgmt_ip_address
-        self.netdev_nb_site_slug = netdev_nb_site_slug
-        self.netdev_nb_device_type_slug = netdev_nb_device_type_slug
-        self.netdev_nb_role_slug = netdev_nb_role_slug
+        self.netdev_nb_location_name = netdev_nb_location_name
+        self.netdev_nb_device_type_name = netdev_nb_device_type_name
+        self.netdev_nb_role_name = netdev_nb_role_name
         self.netdev_nb_role_color = netdev_nb_role_color
-        self.netdev_nb_platform_slug = netdev_nb_platform_slug
+        self.netdev_nb_platform_name = netdev_nb_platform_name
 
         self.netdev_hostname = netdev_hostname
         self.netdev_vendor = netdev_vendor
@@ -147,7 +135,7 @@ class NautobotKeeper:
 
         # these attributes are nautobot model instances as discovered/created
         # through the course of processing.
-        self.nb_site = None
+        self.nb_location = None
         self.nb_manufacturer = None
         self.nb_device_type = None
         self.nb_device_role = None
@@ -172,18 +160,20 @@ class NautobotKeeper:
                 "Could not find existing Nautobot device for requested primary IP address (%s)",
                 self.netdev_mgmt_ip_address,
             )
-        except Device.MultipleObjectsReturned:
+        except Device.MultipleObjectsReturned as err:
             raise OnboardException(
                 reason="fail-general",
                 message=f"ERROR multiple devices using same IP in Nautobot: {self.netdev_mgmt_ip_address}",
-            )
+            ) from err
 
     def ensure_device_site(self):
         """Ensure device's site."""
         try:
-            self.nb_site = Site.objects.get(slug=self.netdev_nb_site_slug)
-        except Site.DoesNotExist:
-            raise OnboardException(reason="fail-config", message=f"Site not found: {self.netdev_nb_site_slug}")
+            self.nb_location = Location.objects.get(name=self.netdev_nb_location_name)
+        except Location.DoesNotExist as err:
+            raise OnboardException(
+                reason="fail-config", message=f"Site not found: {self.netdev_nb_location_name}"
+            ) from err
 
     def ensure_device_manufacturer(
         self,
@@ -201,19 +191,19 @@ class NautobotKeeper:
         # in Nautobot.  We need the ID for this vendor when ensuring the DeviceType
         # instance.
 
-        nb_manufacturer_slug = slugify(self.netdev_vendor)
+        nb_manufacturer = self.netdev_vendor
 
         try:
-            search_array = [{"slug__iexact": nb_manufacturer_slug}]
+            search_array = [{"name__iexact": nb_manufacturer}]
             self.nb_manufacturer = object_match(Manufacturer, search_array)
-        except Manufacturer.DoesNotExist:
+        except Manufacturer.DoesNotExist as err:
             if create_manufacturer:
-                self.nb_manufacturer = Manufacturer.objects.create(name=self.netdev_vendor, slug=nb_manufacturer_slug)
+                self.nb_manufacturer = Manufacturer.objects.create(name=self.netdev_vendor)
                 ensure_default_cf(obj=self.nb_manufacturer, model=Manufacturer)
             else:
                 raise OnboardException(
                     reason="fail-config", message=f"ERROR manufacturer not found: {self.netdev_vendor}"
-                )
+                ) from err
 
     def ensure_device_type(
         self,
@@ -245,24 +235,17 @@ class NautobotKeeper:
         #  if so check to make sure that it is not assigned as a different manufacturer
         # if it doesn't exist, create it if the flag 'create_device_type_if_missing' is defined
 
-        slug = self.netdev_model
-        if self.netdev_model and re.search(r"[^a-zA-Z0-9\-_]+", slug):
-            logger.warning("device model is not sluggable: %s", slug)
-            self.netdev_model = slug.replace(" ", "-")
-            logger.warning("device model is now: %s", self.netdev_model)
-
         # Use declared device type or auto-discovered model
-        nb_device_type_text = self.netdev_nb_device_type_slug or self.netdev_model
+        nb_device_type_text = self.netdev_nb_device_type_name or self.netdev_model
 
         if not nb_device_type_text:
             raise OnboardException(reason="fail-config", message="ERROR device type not found")
 
-        nb_device_type_slug = slugify(nb_device_type_text)
+        nb_device_type_name = nb_device_type_text
 
         try:
             search_array = [
-                {"slug__iexact": nb_device_type_slug},
-                {"model__iexact": self.netdev_model},
+                {"model__iexact": nb_device_type_name},
                 {"part_number__iexact": self.netdev_model},
             ]
 
@@ -274,19 +257,18 @@ class NautobotKeeper:
                     message=f"ERROR device type {self.netdev_model} " f"already exists for vendor {self.netdev_vendor}",
                 )
 
-        except DeviceType.DoesNotExist:
+        except DeviceType.DoesNotExist as err:
             if create_device_type:
                 logger.info("CREATE: device-type: %s", self.netdev_model)
                 self.nb_device_type = DeviceType.objects.create(
-                    slug=nb_device_type_slug,
-                    model=nb_device_type_slug.upper(),
+                    model=nb_device_type_name,
                     manufacturer=self.nb_manufacturer,
                 )
                 ensure_default_cf(obj=self.nb_device_type, model=DeviceType)
             else:
                 raise OnboardException(
                     reason="fail-config", message=f"ERROR device type not found: {self.netdev_model}"
-                )
+                ) from err
 
     def ensure_device_role(
         self,
@@ -302,20 +284,20 @@ class NautobotKeeper:
             Nautobot.
         """
         try:
-            self.nb_device_role = DeviceRole.objects.get(slug=self.netdev_nb_role_slug)
-        except DeviceRole.DoesNotExist:
+            self.nb_device_role = Role.objects.get(name=self.netdev_nb_role_name)
+        except Role.DoesNotExist as err:
             if create_device_role:
-                self.nb_device_role = DeviceRole.objects.create(
-                    name=self.netdev_nb_role_slug,
-                    slug=self.netdev_nb_role_slug,
+                self.nb_device_role = Role.objects.create(
+                    name=self.netdev_nb_role_name,
                     color=self.netdev_nb_role_color,
-                    vm_role=False,
                 )
-                ensure_default_cf(obj=self.nb_device_role, model=DeviceRole)
+                self.nb_device_role.validated_save()
+                self.nb_device_role.content_types.set([ContentType.objects.get_for_model(Device)])
+                ensure_default_cf(obj=self.nb_device_role, model=Role)
             else:
                 raise OnboardException(
-                    reason="fail-config", message=f"ERROR device role not found: {self.netdev_nb_role_slug}"
-                )
+                    reason="fail-config", message=f"ERROR device role not found: {self.netdev_nb_role_name}"
+                ) from err
 
     def ensure_device_platform(self, create_platform_if_missing=PLUGIN_SETTINGS["create_platform_if_missing"]):
         """Get platform object from Nautobot filtered by platform_slug.
@@ -333,43 +315,44 @@ class NautobotKeeper:
         Lookup is performed based on the object's slug field (not the name field)
         """
         try:
-            self.netdev_nb_platform_slug = (
-                self.netdev_nb_platform_slug
+            self.netdev_nb_platform_name = (
+                self.netdev_nb_platform_name
                 or PLUGIN_SETTINGS["platform_map"].get(self.netdev_netmiko_device_type)
                 or self.netdev_netmiko_device_type
             )
 
-            if not self.netdev_nb_platform_slug:
+            if not self.netdev_nb_platform_name:
                 raise OnboardException(
                     reason="fail-config", message=f"ERROR device platform not found: {self.netdev_hostname}"
                 )
 
-            self.nb_platform = Platform.objects.get(slug=self.netdev_nb_platform_slug)
+            self.nb_platform = Platform.objects.get(name=self.netdev_nb_platform_name)
 
-            logger.info("PLATFORM: found in Nautobot %s", self.netdev_nb_platform_slug)
+            if not self.nb_platform:
+                Platform.objects.get(network_driver=self.netdev_nb_platform_name)
 
-        except Platform.DoesNotExist:
+            logger.info("PLATFORM: found in Nautobot %s", self.netdev_nb_platform_name)
+
+        except Platform.DoesNotExist as err:
             if create_platform_if_missing:
                 platform_to_napalm_nautobot = {
-                    platform.slug: platform.napalm_driver
-                    for platform in Platform.objects.all()
-                    if platform.napalm_driver
+                    platform: platform.napalm_driver for platform in Platform.objects.all() if platform.napalm_driver
                 }
 
                 # Update Constants if Napalm driver is defined for Nautobot Platform
                 netmiko_to_napalm = {**NETMIKO_TO_NAPALM_STATIC, **platform_to_napalm_nautobot}
 
                 self.nb_platform = Platform.objects.create(
-                    name=self.netdev_nb_platform_slug,
-                    slug=self.netdev_nb_platform_slug,
+                    name=self.netdev_nb_platform_name,
                     napalm_driver=netmiko_to_napalm[self.netdev_netmiko_device_type],
+                    network_driver=self.netdev_netmiko_device_type,
                 )
                 ensure_default_cf(obj=self.nb_platform, model=Platform)
             else:
                 raise OnboardException(
                     reason="fail-general",
-                    message=f"ERROR platform not found in Nautobot: {self.netdev_nb_platform_slug}",
-                )
+                    message=f"ERROR platform not found in Nautobot: {self.netdev_nb_platform_name}",
+                ) from err
 
     def ensure_device_instance(self, default_status=PLUGIN_SETTINGS["default_device_status"]):
         """Ensure that the device instance exists in Nautobot and is assigned the provided device role or DEFAULT_ROLE.
@@ -387,43 +370,43 @@ class NautobotKeeper:
             )
             lookup_args = {
                 "pk": self.onboarded_device.pk,
-                "defaults": dict(
-                    name=self.netdev_hostname,
-                    device_type=self.nb_device_type,
-                    device_role=self.nb_device_role,
-                    platform=self.nb_platform,
-                    site=self.nb_site,
-                    serial=self.netdev_serial_number,
-                    # status= field is not updated in case of already existing devices to prevent changes
-                ),
+                "defaults": {
+                    "name": self.netdev_hostname,
+                    "device_type": self.nb_device_type,
+                    "device_role": self.nb_device_role,
+                    "platform": self.nb_platform,
+                    "site": self.nb_location,
+                    "serial": self.netdev_serial_number,
+                    # "status":  field is not updated in case of already existing devices to prevent changes
+                },
             }
         else:
             # Construct lookup arguments if onboarded device does not exist in Nautobot
             ct = ContentType.objects.get_for_model(Device)  # pylint: disable=invalid-name
             try:
                 device_status = Status.objects.get(content_types__in=[ct], name=default_status)
-            except Status.DoesNotExist:
+            except Status.DoesNotExist as err:
                 raise OnboardException(
                     reason="fail-general",
                     message=f"ERROR could not find existing device status: {default_status}",
-                )
-            except Status.MultipleObjectsReturned:
+                ) from err
+            except Status.MultipleObjectsReturned as err:
                 raise OnboardException(
                     reason="fail-general",
                     message=f"ERROR multiple device status using same name: {default_status}",
-                )
+                ) from err
 
             lookup_args = {
                 "name": self.netdev_hostname,
-                "defaults": dict(
-                    device_type=self.nb_device_type,
-                    device_role=self.nb_device_role,
-                    platform=self.nb_platform,
-                    site=self.nb_site,
-                    serial=self.netdev_serial_number,
+                "defaults": {
+                    "device_type": self.nb_device_type,
+                    "role": self.nb_device_role,
+                    "platform": self.nb_platform,
+                    "location": self.nb_location,
+                    "serial": self.netdev_serial_number,
                     # `status` field is defined only for new devices, no update for existing should occur
-                    status=device_status,
-                ),
+                    "status": device_status,
+                },
             }
 
         try:
@@ -435,18 +418,22 @@ class NautobotKeeper:
             else:
                 logger.info("GOT/UPDATED device: %s", self.netdev_hostname)
 
-        except Device.MultipleObjectsReturned:
+        except Device.MultipleObjectsReturned as err:
             raise OnboardException(
                 reason="fail-general",
                 message=f"ERROR multiple devices using same name in Nautobot: {self.netdev_hostname}",
-            )
+            ) from err
 
     def ensure_interface(self):
         """Ensures that the interface associated with the mgmt_ipaddr exists and is assigned to the device."""
         if self.netdev_mgmt_ifname:
+            # TODO: Add option for default interface status
             self.nb_mgmt_ifname, _ = Interface.objects.get_or_create(
-                name=self.netdev_mgmt_ifname, device=self.device, defaults=dict(type=InterfaceTypeChoices.TYPE_OTHER)
+                name=self.netdev_mgmt_ifname,
+                device=self.device,
+                defaults={"type": InterfaceTypeChoices.TYPE_OTHER, "status": Status.objects.get(name="Active")},
             )
+
             ensure_default_cf(obj=self.nb_mgmt_ifname, model=Interface)
 
     def ensure_primary_ip(self):
@@ -457,20 +444,34 @@ class NautobotKeeper:
             default_status_name = PLUGIN_SETTINGS["default_ip_status"]
             try:
                 ip_status = Status.objects.get(content_types__in=[ct], name=default_status_name)
-            except Status.DoesNotExist:
+            except Status.DoesNotExist as err:
                 raise OnboardException(
                     reason="fail-general",
                     message=f"ERROR could not find existing IP Address status: {default_status_name}",
-                )
-            except Status.MultipleObjectsReturned:
+                ) from err
+            except Status.MultipleObjectsReturned as err:
                 raise OnboardException(
                     reason="fail-general",
                     message=f"ERROR multiple IP Address status using same name: {default_status_name}",
-                )
+                ) from err
 
-            self.nb_primary_ip, created = IPAddress.objects.get_or_create(
-                address=f"{self.netdev_mgmt_ip_address}/{self.netdev_mgmt_pflen}", defaults={"status": ip_status}
+            # Default to Global Namespace -> TODO: add option to specify default namespace
+            namespace = Namespace.objects.get(name="Global")
+
+            prefix = ipaddress.ip_interface(f"{self.netdev_mgmt_ip_address}/{self.netdev_mgmt_pflen}")
+
+            nautobot_prefix, _ = Prefix.objects.get_or_create(
+                prefix=f"{prefix.network}",
+                namespace=namespace,
+                type="Network",
+                defaults={"status": ip_status},
             )
+            self.nb_primary_ip, created = IPAddress.objects.get_or_create(
+                address=f"{self.netdev_mgmt_ip_address}/{self.netdev_mgmt_pflen}",
+                parent=nautobot_prefix,
+                defaults={"status": ip_status, "type": "host"},
+            )
+
             ensure_default_cf(obj=self.nb_primary_ip, model=IPAddress)
 
             if created or self.nb_primary_ip not in self.nb_mgmt_ifname.ip_addresses.all():

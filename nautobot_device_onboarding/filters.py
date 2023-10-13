@@ -1,27 +1,17 @@
-"""Filtering logic for OnboardingTask instances.
-
-(c) 2020-2021 Network To Code
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-  http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
+"""Filtering logic for OnboardingTask instances."""
+# pylint: disable=unsupported-binary-operation
 
 import django_filters
 from django.db.models import Q
 
-from nautobot.dcim.models import Site, DeviceRole, Platform
-from nautobot.utilities.filters import NameSlugSearchFilterSet
+from nautobot.dcim.models import Location, Platform
+from nautobot.extras.models import Role
+from nautobot.core.filters import BaseFilterSet
 
-from .models import OnboardingTask
+from nautobot_device_onboarding.models import OnboardingTask
 
 
-class OnboardingTaskFilter(NameSlugSearchFilterSet):
+class OnboardingTaskFilterSet(BaseFilterSet):
     """Filter capabilities for OnboardingTask instances."""
 
     q = django_filters.CharFilter(
@@ -29,44 +19,38 @@ class OnboardingTaskFilter(NameSlugSearchFilterSet):
         label="Search",
     )
 
-    site = django_filters.ModelMultipleChoiceFilter(
-        field_name="site__slug",
-        queryset=Site.objects.all(),
-        to_field_name="slug",
-        label="Site (slug)",
-    )
-
-    site_id = django_filters.ModelMultipleChoiceFilter(
-        queryset=Site.objects.all(),
-        label="Site (ID)",
+    location = django_filters.ModelMultipleChoiceFilter(
+        field_name="name",
+        queryset=Location.objects.all(),
+        label="Location (name)",
     )
 
     platform = django_filters.ModelMultipleChoiceFilter(
-        field_name="platform__slug",
+        field_name="platform__name",
         queryset=Platform.objects.all(),
-        to_field_name="slug",
-        label="Platform (slug)",
+        to_field_name="name",
+        label="Platform (name)",
     )
 
     role = django_filters.ModelMultipleChoiceFilter(
-        field_name="role__slug",
-        queryset=DeviceRole.objects.all(),
-        to_field_name="slug",
-        label="Device Role (slug)",
+        field_name="role__name",
+        queryset=Role.objects.all(),
+        to_field_name="name",
+        label="Device Role (name)",
     )
 
     class Meta:  # noqa: D106 "Missing docstring in public nested class"
         model = OnboardingTask
-        fields = ["id", "site", "site_id", "platform", "role", "status", "failed_reason"]
+        fields = ["id", "location", "platform", "role", "status", "failed_reason"]
 
-    def search(self, queryset, name, value):  # pylint: disable=unused-argument, no-self-use
+    def search(self, queryset, name, value):  # pylint: disable=unused-argument
         """Perform the filtered search."""
         if not value.strip():
             return queryset
         qs_filter = (
             Q(id__icontains=value)
             | Q(ip_address__icontains=value)
-            | Q(site__name__icontains=value)
+            | Q(location__name__icontains=value)
             | Q(platform__name__icontains=value)
             | Q(created_device__name__icontains=value)
             | Q(status__icontains=value)

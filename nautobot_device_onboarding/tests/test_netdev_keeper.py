@@ -1,22 +1,13 @@
-"""Unit tests for nautobot_device_onboarding.netdev_keeper module and its classes.
-
-(c) 2020-2021 Network To Code
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-  http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
+"""Unit tests for nautobot_device_onboarding.netdev_keeper module and its classes."""
 
 from socket import gaierror
 from unittest import mock
 
+from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
-from nautobot.dcim.models import Site, DeviceRole, Platform
+
+from nautobot.dcim.models import Device, Location, LocationType, Platform
+from nautobot.extras.models import Role, Status
 
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.helpers import onboarding_task_fqdn_to_ip
@@ -28,22 +19,26 @@ class NetdevKeeperTestCase(TestCase):
 
     def setUp(self):
         """Create a superuser and token for API calls."""
-        self.site1 = Site.objects.create(name="USWEST", slug="uswest")
-        self.device_role1 = DeviceRole.objects.create(name="Firewall", slug="firewall")
+        role_content_type = ContentType.objects.get_for_model(Device)
+        status = Status.objects.get(name="Active")
+        location_type = LocationType.objects.create(name="site")
+        self.site1 = Location.objects.create(name="USWEST", location_type=location_type, status=status)
+        self.device_role1 = Role.objects.create(name="Firewall")
+        self.device_role1.content_types.set([role_content_type])
 
-        self.platform1 = Platform.objects.create(name="JunOS", slug="junos", napalm_driver="junos")
+        self.platform1 = Platform.objects.create(name="JunOS", napalm_driver="junos")
         # self.platform2 = Platform.objects.create(name="Cisco NX-OS", slug="cisco-nx-os")
 
         self.onboarding_task4 = OnboardingTask.objects.create(
-            ip_address="ntc123.local", site=self.site1, role=self.device_role1, platform=self.platform1
+            ip_address="ntc123.local", location=self.site1, role=self.device_role1, platform=self.platform1
         )
 
         self.onboarding_task5 = OnboardingTask.objects.create(
-            ip_address="bad.local", site=self.site1, role=self.device_role1, platform=self.platform1
+            ip_address="bad.local", location=self.site1, role=self.device_role1, platform=self.platform1
         )
 
         self.onboarding_task7 = OnboardingTask.objects.create(
-            ip_address="192.0.2.1/32", site=self.site1, role=self.device_role1, platform=self.platform1
+            ip_address="192.0.2.1/32", location=self.site1, role=self.device_role1, platform=self.platform1
         )
 
     @mock.patch("nautobot_device_onboarding.helpers.socket.gethostbyname")
@@ -53,7 +48,7 @@ class NetdevKeeperTestCase(TestCase):
         mock_get_hostbyname.return_value = "192.0.2.1"
 
         # FQDN -> IP
-        onboarding_task_fqdn_to_ip(ot=self.onboarding_task4)
+        onboarding_task_fqdn_to_ip(onboarding_task=self.onboarding_task4)
 
         # Run the check to change the IP address
         self.assertEqual(self.onboarding_task4.ip_address, "192.0.2.1")
@@ -66,12 +61,12 @@ class NetdevKeeperTestCase(TestCase):
 
         # Check for bad.local raising an exception
         with self.assertRaises(OnboardException) as exc_info:
-            onboarding_task_fqdn_to_ip(ot=self.onboarding_task5)
+            onboarding_task_fqdn_to_ip(onboarding_task=self.onboarding_task5)
             self.assertEqual(exc_info.exception.message, "ERROR failed to complete DNS lookup: bad.local")
             self.assertEqual(exc_info.exception.reason, "fail-dns")
 
         # Check for exception with prefix address entered
         with self.assertRaises(OnboardException) as exc_info:
-            onboarding_task_fqdn_to_ip(ot=self.onboarding_task7)
+            onboarding_task_fqdn_to_ip(onboarding_task=self.onboarding_task7)
             self.assertEqual(exc_info.exception.reason, "fail-prefix")
             self.assertEqual(exc_info.exception.message, "ERROR appears a prefix was entered: 192.0.2.1/32")

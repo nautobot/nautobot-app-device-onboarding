@@ -1,18 +1,12 @@
-"""Plugin declaration for nautobot_device_onboarding.
+"""Plugin declaration for nautobot_device_onboarding."""
 
-(c) 2020-2021 Network To Code
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-  http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
+try:
+    from importlib import metadata
+except ImportError:
+    # Python version < 3.8
+    import importlib_metadata as metadata
 
-__version__ = "1.1.0"
+__version__ = metadata.version(__name__)
 
 from nautobot.extras.plugins import PluginConfig
 
@@ -23,10 +17,11 @@ class OnboardingConfig(PluginConfig):
     name = "nautobot_device_onboarding"
     verbose_name = "Device Onboarding"
     version = __version__
-    min_version = "1.0.0"
-    author = "Network to Code"
+    min_version = "2.0.0-rc.4"
+    max_version = "2.9"
+    author = "Network to Code, LLC"
     author_email = "opensource@networktocode.com"
-    description = "A plugin for Nautobot to easily onboard new devices."
+    description = "Nautobot App that simplifies device onboarding (and re-onboarding) by collecting and populating common device 'facts' into Nautobot."
     base_url = "device-onboarding"
     required_settings = []
     default_settings = {

@@ -1,42 +1,17 @@
-"""Model serializers for the nautobot_device_onboarding REST API.
-
-(c) 2020-2021 Network To Code
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-  http://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
-
+"""Model serializers for the nautobot_device_onboarding REST API."""
+# pylint: disable=duplicate-code
 from rest_framework import serializers
 
-from nautobot.dcim.models import Site, DeviceRole, Platform
+from nautobot.core.api.serializers import NotesSerializerMixin, ValidatedModelSerializer
+from nautobot.dcim.models import Location
 
 from nautobot_device_onboarding.models import OnboardingTask
 from nautobot_device_onboarding.utils.credentials import Credentials
 from nautobot_device_onboarding.worker import enqueue_onboarding_task
 
 
-class OnboardingTaskSerializer(serializers.ModelSerializer):
+class OnboardingTaskSerializer(NotesSerializerMixin, ValidatedModelSerializer):
     """Serializer for the OnboardingTask model."""
-
-    site = serializers.SlugRelatedField(
-        many=False,
-        read_only=False,
-        queryset=Site.objects.all(),
-        slug_field="slug",
-        required=True,
-        help_text="Nautobot site 'slug' value",
-    )
-
-    ip_address = serializers.CharField(
-        required=True,
-        help_text="IP Address to reach device",
-    )
 
     username = serializers.CharField(
         required=False,
@@ -56,50 +31,18 @@ class OnboardingTaskSerializer(serializers.ModelSerializer):
         help_text="Device secret password",
     )
 
-    port = serializers.IntegerField(required=False, help_text="Device PORT to check for online")
-
-    timeout = serializers.IntegerField(required=False, help_text="Timeout (sec) for device connect")
-
-    role = serializers.SlugRelatedField(
-        many=False,
-        read_only=False,
-        queryset=DeviceRole.objects.all(),
-        slug_field="slug",
-        required=False,
-        help_text="Nautobot device role 'slug' value",
+    location = serializers.SlugRelatedField(
+        queryset=Location.objects.all(),
+        required=True,
+        slug_field="name",
     )
-
-    device_type = serializers.CharField(
-        required=False,
-        help_text="Nautobot device type 'slug' value",
-    )
-
-    platform = serializers.SlugRelatedField(
-        many=False,
-        read_only=False,
-        queryset=Platform.objects.all(),
-        slug_field="slug",
-        required=False,
-        help_text="Nautobot Platform 'slug' value",
-    )
-
-    created_device = serializers.CharField(
-        required=False,
-        read_only=True,
-        help_text="Created device name",
-    )
-
-    status = serializers.CharField(required=False, read_only=True, help_text="Onboarding Status")
-
-    failed_reason = serializers.CharField(required=False, read_only=True, help_text="Failure reason")
-
-    message = serializers.CharField(required=False, read_only=True, help_text="Status message")
 
     class Meta:  # noqa: D106 "Missing docstring in public nested class"
         model = OnboardingTask
+
         fields = [
             "id",
-            "site",
+            "location",
             "ip_address",
             "username",
             "password",
@@ -113,23 +56,32 @@ class OnboardingTaskSerializer(serializers.ModelSerializer):
             "status",
             "failed_reason",
             "message",
+            "object_type",
         ]
 
-    def create(self, validated_data):
-        """Create an OnboardingTask and enqueue it for processing."""
-        # Fields are string-type so default to empty (instead of None)
-        username = validated_data.pop("username", "")
-        password = validated_data.pop("password", "")
-        secret = validated_data.pop("secret", "")
+        extra_kwargs = {"location": {"required": True}}
 
-        credentials = Credentials(
+        read_only_fields = ["id", "created_device", "status", "failed_reason", "message", "object_type"]
+
+    def validate(self, data):
+        """Custom Validate class to remove credential fields."""
+        attrs = data.copy()
+        username = attrs.pop("username", "")
+        password = attrs.pop("password", "")
+        secret = attrs.pop("secret", "")
+
+        self.credentials = Credentials(  # pylint: disable=attribute-defined-outside-init
             username=username,
             password=password,
             secret=secret,
         )
 
-        ot = OnboardingTask.objects.create(**validated_data)
+        return super().validate(attrs)
 
-        enqueue_onboarding_task(ot.id, credentials)
+    def create(self, validated_data):
+        """Create an OnboardingTask and enqueue it for processing."""
+        onboarding_task = OnboardingTask.objects.create(**validated_data)
 
-        return ot
+        enqueue_onboarding_task(onboarding_task.id, self.credentials)
+
+        return onboarding_task
