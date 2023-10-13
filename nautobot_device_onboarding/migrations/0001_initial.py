@@ -12,10 +12,6 @@ class Migration(migrations.Migration):
         ("dcim", "0004_initial_part_4"),
     ]
 
-    run_before = [
-        ("dcim", "0028_alter_device_and_rack_role_add_new_role"),
-    ]
-
     operations = [
         migrations.CreateModel(
             name="OnboardingTask",
