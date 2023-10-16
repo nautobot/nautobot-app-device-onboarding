@@ -20,5 +20,12 @@ class Migration(migrations.Migration):
             name="label",
             field=models.PositiveIntegerField(default=0, editable=False),
         ),
+        migrations.AlterModelOptions(
+            name="onboardingtask",
+            options={
+                "ordering": ("label",),
+                "unique_together": {("label", "ip_address")},
+            },
+        ),
         migrations.RunPython(create_labels_for_existing_tasks, migrations.RunPython.noop),
     ]
