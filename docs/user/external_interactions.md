@@ -2,16 +2,19 @@
 
 This document describes external dependencies and prerequisites for this App to operate, including system requirements, API endpoints, interconnection or integrations to other applications or services, and similar topics.
 
-!!! warning "Developer Note - Remove Me!"
-    Optional page, remove if not applicable.
-
 ## External System Integrations
 
 ### From the App to Other Systems
 
-### From Other Systems to the App
+The App uses [netmiko](https://github.com/ktbyers/netmiko) and [NAPALM](https://napalm.readthedocs.io/en/latest/) libraries to connect to network devices. 
 
 ## Nautobot REST API endpoints
 
-!!! warning "Developer Note - Remove Me!"
-    API documentation in this doc - including python request examples, curl examples, postman collections referred etc.
+The plugin includes 4 API endpoints to manage the onboarding tasks:
+
+```shell
+GET        /api/plugins​/device-onboarding​/onboarding​/       Check status of all onboarding tasks.
+POST    ​   /api/plugins​/device-onboarding​/onboarding​/       Onboard a new device
+GET     ​   /api/plugins​/device-onboarding​/onboarding​/{id}​/  Check the status of a specific onboarding task
+DELETE    ​ /api/plugins​/device-onboarding​/onboarding​/{id}​/  Delete a specific onboarding task
+```

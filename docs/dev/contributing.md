@@ -1,7 +1,6 @@
 # Contributing to the App
 
-!!! warning "Developer Note - Remove Me!"
-    Information on how to contribute fixes, functionality, or documentation changes back to the project.
+Pull requests are welcome and automatically built and tested against multiple version of Python and multiple version of Nautobot through GitHub Actions.
 
 The project is packaged with a light [development environment](dev_environment.md) based on `docker-compose` to help with the local development of the project and to run tests.
 
@@ -15,10 +14,8 @@ Documentation is built using [mkdocs](https://www.mkdocs.org/). The [Docker base
 
 ## Branching Policy
 
-!!! warning "Developer Note - Remove Me!"
-    What branching policy is used for this project and where contributions should be made.
+Please fork the release and add a new branch to your fork. Make changes to your branch in your fork and submit PRs from there.
 
 ## Release Policy
 
-!!! warning "Developer Note - Remove Me!"
-    How new versions are released.
+New versions are released as bug fixes and features are introduced. We will make sure to release new versions to support the latest Nautobot versions as necessary.

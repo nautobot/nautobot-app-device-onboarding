@@ -29,10 +29,11 @@ Using **Invoke** these configuration options can be overridden using [several me
 
 This project is managed by [Python Poetry](https://python-poetry.org/) and has a few requirements to setup your development environment:
 
-1. Install Poetry, see the [Poetry Documentation](https://python-poetry.org/docs/#installation) for your operating system.
+1. Install Poetry, see the [Poetry documentation](https://python-poetry.org/docs/#installation) for your operating system.
 2. Install Docker, see the [Docker documentation](https://docs.docker.com/get-docker/) for your operating system.
+3. Install Docker-compose, see the [Docker-compose documentation](https://github.com/docker/compose) for your operation system.
 
-Once you have Poetry and Docker installed you can run the following commands (in the root of the repository) to install all other development dependencies in an isolated Python virtual environment:
+Once you have Poetry, Docker, and Docker-compose installed you can run the following commands (in the root of the repository) to install all other development dependencies in an isolated Python virtual environment:
 
 ```shell
 poetry shell
@@ -301,6 +302,9 @@ The back-end Django process is setup to automatically reload itself (it only tak
 
 !!! note
 	You may get connection refused while Django reloads, but it should be refreshed fairly quickly.
+
+!!! note
+	Workers do not get automatically restarted and must be restarted manually, if running with docker-compose you can run `docker restart nautobot_device_onboarding_worker_1`.
 
 ### Docker Logs
 
