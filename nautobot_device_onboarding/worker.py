@@ -1,7 +1,9 @@
 """Worker code for processing inbound OnboardingTasks."""
 import logging
 
+from django.db import transaction
 from django.core.exceptions import ValidationError
+
 from prometheus_client import Summary
 
 from nautobot.dcim.models import Device
@@ -132,7 +134,10 @@ def onboard_device(task_id, credentials):  # pylint: disable=too-many-statements
 def enqueue_onboarding_task(task_id, credentials):
     """Detect worker type and enqueue task."""
     if CELERY_WORKER:
-        onboard_device_worker.delay(task_id, credentials.nautobot_serialize())  # pylint: disable=no-member
+        # on commit
+        transaction.on_commit(
+            lambda: onboard_device_worker.delay(task_id, credentials.nautobot_serialize())
+        )
 
     if not CELERY_WORKER:
         get_queue("default").enqueue(  # pylint: disable=used-before-assignment
