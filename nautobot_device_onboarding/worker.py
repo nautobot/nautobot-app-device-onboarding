@@ -135,7 +135,9 @@ def enqueue_onboarding_task(task_id, credentials):
     """Detect worker type and enqueue task."""
     if CELERY_WORKER:
         # on commit
-        transaction.on_commit(lambda: onboard_device_worker.delay(task_id, credentials.nautobot_serialize()))
+        transaction.on_commit(
+            lambda: onboard_device_worker.delay(task_id, credentials.nautobot_serialize())  # pylint: disable=no-member
+        )
 
     if not CELERY_WORKER:
         get_queue("default").enqueue(  # pylint: disable=used-before-assignment
