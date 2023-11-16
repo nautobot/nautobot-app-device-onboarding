@@ -20,8 +20,9 @@ class OnboardingTaskFilterSet(BaseFilterSet):
     )
 
     location = django_filters.ModelMultipleChoiceFilter(
-        field_name="name",
+        field_name="location__name",
         queryset=Location.objects.all(),
+        to_field_name="name",
         label="Location (name)",
     )
 
