@@ -4,8 +4,7 @@ import uuid
 
 from django.db import migrations, models
 import django.db.models.deletion
-
-import nautobot_device_onboarding.models
+from nautobot.extras.models import RoleField
 
 
 class Migration(migrations.Migration):
@@ -84,7 +83,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "role",
-                    nautobot_device_onboarding.models.DeviceLimitedRoleField(
+                    RoleField(
                         blank=True,
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
