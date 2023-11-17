@@ -20,21 +20,21 @@ class OnboardingTaskFilterSet(BaseFilterSet):
     )
 
     location = django_filters.ModelMultipleChoiceFilter(
-        field_name="location__name",
+        field_name="location",
         queryset=Location.objects.all(),
         to_field_name="name",
         label="Location (name)",
     )
 
     platform = django_filters.ModelMultipleChoiceFilter(
-        field_name="platform__name",
+        field_name="platform",
         queryset=Platform.objects.all(),
         to_field_name="name",
         label="Platform (name)",
     )
 
     role = django_filters.ModelMultipleChoiceFilter(
-        field_name="role__name",
+        field_name="role",
         queryset=Role.objects.all(),
         to_field_name="name",
         label="Device Role (name)",
