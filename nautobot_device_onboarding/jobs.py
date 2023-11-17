@@ -13,6 +13,13 @@ PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
 
 class OnboardingTask(Job):
+
+    class Meta:
+        """Meta object boilerplate for onboarding."""
+
+        name = "Perform Device Onboarding"
+        description = "Login to a device and populate Nautobot device object."
+        has_sensitive_variables = False
     location = ObjectVar(model=Location, query_params={"": ""}, required=False, description="")
     ip_address = IPAddressVar(description="", label="")
     port = IntegerVar(description="")
