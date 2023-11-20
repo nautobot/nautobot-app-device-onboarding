@@ -385,7 +385,7 @@ namespace.configure(
     {
         "nautobot_device_onboarding": {
             ...
-            "python_ver": "3.7",
+            "python_ver": "3.8",
 	    ...
         }
     }
@@ -404,7 +404,7 @@ namespace.configure(
     {
         "nautobot_device_onboarding": {
             ...
-            "nautobot_ver": "1.0.2",
+            "nautobot_ver": "2.0.3",
 	    ...
         }
     }
