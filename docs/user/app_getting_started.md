@@ -1,12 +1,14 @@
 # Getting Started with the App
 
-A step-by-step tutorial on how to get the App going and how to use it.
+This document provides a step-by-step tutorial on how to get the App going and how to use it.
 
 ## Install the App
 
 To install the App, please follow the instructions detailed in the [Installation Guide](../admin/install.md).
 
-## Prerequisites
+## First steps with the App
+
+### Prerequisites
 
 You will need:
 
@@ -19,7 +21,7 @@ The device must be reachable from the Nautobot and Nautobot worker instances (us
 
 Sites are the only other Nautobot prerequisite for the plugin to onboard a device.
 
-## Onboarding a Device
+### Onboarding a Device
 
 Navigate to the Device Onboarding plugin: Plugins > Onboarding Tasks. Clicking the plus button takes you directly to the Onboarding form.
 
@@ -39,5 +41,6 @@ Fill in the form with your device's data, then click the create button to start 
 
 The Nautobot worker will initiate an onboarding task and will reach out to the device and attempt to onboard it.
 
+## What are the next steps?
 
-
+You can check out the [Use Cases](app_use_cases.md) section for more examples.

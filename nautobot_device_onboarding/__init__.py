@@ -1,29 +1,24 @@
 """Plugin declaration for nautobot_device_onboarding."""
-
-try:
-    from importlib import metadata
-except ImportError:
-    # Python version < 3.8
-    import importlib_metadata as metadata
+# Metadata is inherited from Nautobot. If not including Nautobot in the environment, this should be added
+from importlib import metadata
 
 __version__ = metadata.version(__name__)
 
-from nautobot.extras.plugins import PluginConfig
+from nautobot.extras.plugins import NautobotAppConfig
 
 
-class OnboardingConfig(PluginConfig):
+class NautobotDeviceOnboardingConfig(NautobotAppConfig):
     """Plugin configuration for the nautobot_device_onboarding plugin."""
 
     name = "nautobot_device_onboarding"
     verbose_name = "Device Onboarding"
     version = __version__
-    min_version = "2.0.0-rc.4"
-    max_version = "2.9"
     author = "Network to Code, LLC"
-    author_email = "opensource@networktocode.com"
     description = "Nautobot App that simplifies device onboarding (and re-onboarding) by collecting and populating common device 'facts' into Nautobot."
-    base_url = "device-onboarding"
+    base_url = "nautobot-device-onboarding"
     required_settings = []
+    min_version = "2.0.0"
+    max_version = "2.9999"
     default_settings = {
         "create_platform_if_missing": True,
         "create_manufacturer_if_missing": True,
@@ -47,4 +42,4 @@ class OnboardingConfig(PluginConfig):
     caching_config = {}
 
 
-config = OnboardingConfig  # pylint:disable=invalid-name
+config = NautobotDeviceOnboardingConfig  # pylint:disable=invalid-name

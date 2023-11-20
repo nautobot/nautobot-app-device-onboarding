@@ -1,11 +1,15 @@
 # Uninstall the App from Nautobot
 
-## Uninstall Guide
-
-Remove the configuration you added in `nautobot_config.py` from `PLUGINS` & `PLUGINS_CONFIG`.
+Here you will find any steps necessary to cleanly remove the App from your Nautobot environment.
 
 ## Database Cleanup
 
-Drop all tables from the plugin: `nautobot_plugin_device_onboarding*`.
+Prior to removing the plugin from the `nautobot_config.py`, run the following command to roll back any migration specific to this plugin.
 
-Any cleanup operations to ensure the database is clean after the app is removed.
+```shell
+nautobot-server migrate nautobot_plugin_device_onboarding zero
+```
+
+## Remove App configuration
+
+Remove the configuration you added in `nautobot_config.py` from `PLUGINS` & `PLUGINS_CONFIG`.
