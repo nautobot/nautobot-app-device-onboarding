@@ -1,6 +1,6 @@
 """Device Onboarding Jobs."""
 from django.conf import settings
-from nautobot.apps.jobs import Job, ObjectVar, IntegerVar, IPAddressVar
+from nautobot.apps.jobs import Job, ObjectVar, IntegerVar, StringVar
 from nautobot.core.celery import register_jobs
 from nautobot.dcim.models import Location, DeviceType, Platform
 from nautobot.extras.models import Role, SecretsGroup
@@ -15,8 +15,8 @@ PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 class OnboardingTask(Job):
     """Nautobot Job for onboarding a new device."""
 
-    location = ObjectVar(model=Location, query_params={"": ""}, required=False, description="")
-    ip_address = IPAddressVar(description="", label="")
+    location = ObjectVar(model=Location, required=False, description="")
+    ip_address = StringVar(description="", label="")
     port = IntegerVar(description="")
     timeout = IntegerVar(description="")
     credentials = ObjectVar(model=SecretsGroup, query_params={"": ""}, required=False, description="")
