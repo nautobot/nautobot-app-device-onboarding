@@ -414,7 +414,7 @@ namespace.configure(
     {
         "nautobot_device_onboarding": {
             ...
-            "nautobot_ver": "2.0.0",
+            "nautobot_ver": "2.0.3",
 	    ...
         }
     }
