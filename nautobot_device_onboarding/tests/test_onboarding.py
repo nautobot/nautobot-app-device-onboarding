@@ -1,16 +1,15 @@
 """Unit tests for nautobot_device_onboarding.netdev_keeper module and its classes."""
-from unittest import mock
+# from unittest import mock
 
 from django.conf import settings
-from django.test import TestCase
-from django.contrib.contenttypes.models import ContentType
+
+# from django.test import TestCase
+# from django.contrib.contenttypes.models import ContentType
 
 
-from nautobot.dcim.models import Device, Location, LocationType, Platform
-from nautobot.extras.models import Status
+# from nautobot.dcim.models import Device, Location, LocationType, Platform
+# from nautobot.extras.models import Status
 
-# from nautobot_device_onboarding.models import OnboardingTask
-# from nautobot_device_onboarding.onboard import OnboardingManager
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
