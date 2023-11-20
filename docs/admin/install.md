@@ -1,8 +1,10 @@
 # Installing the App in Nautobot
 
+Here you will find detailed instructions on how to **install** and **configure** the App within your Nautobot environment.
+
 ## Prerequisites
 
-- The plugin is compatible with Nautobot 1.2.0 and higher.
+- The plugin is compatible with Nautobot 2.0.0 and higher.
 - Databases supported: PostgreSQL, MySQL
 
 !!! note
@@ -55,7 +57,7 @@ PLUGINS = ["nautobot_device_onboarding"]
 # }
 ```
 
-Once the Nautobot configuration is updated, run the Post Upgrade command (`nautobot-server post_upgrade`) to run migrations and clear any cache.
+Once the Nautobot configuration is updated, run the Post Upgrade command (`nautobot-server post_upgrade`) to run migrations and clear any cache:
 
 ```shell
 nautobot-server post_upgrade

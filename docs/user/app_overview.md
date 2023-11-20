@@ -1,6 +1,8 @@
 # App Overview
 
-A plugin for [Nautobot](https://github.com/nautobot/nautobot) to easily onboard new devices.
+This document provides an overview of the App including critical information and import considerations when applying it to your Nautobot environment.
+
+This [Nautobot](https://github.com/nautobot/nautobot) App allows to easily onboard new devices.
 
 !!! note
     Throughout this documentation, the terms "app" and "plugin" will be used interchangeably.
