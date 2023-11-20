@@ -6,6 +6,7 @@ import ipaddress
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from nautobot.apps.choices import PrefixTypeChoices
 from nautobot.dcim.choices import InterfaceTypeChoices
 from nautobot.dcim.models import Manufacturer, Device, Interface, DeviceType
 from nautobot.extras.models import Role
@@ -463,7 +464,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
             nautobot_prefix, _ = Prefix.objects.get_or_create(
                 prefix=f"{prefix.network}",
                 namespace=namespace,
-                type="Network",
+                type=PrefixTypeChoices.TYPE_NETWORK,
                 defaults={"status": ip_status},
             )
             self.nb_primary_ip, created = IPAddress.objects.get_or_create(
