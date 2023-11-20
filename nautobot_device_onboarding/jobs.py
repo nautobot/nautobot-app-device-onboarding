@@ -13,12 +13,7 @@ PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
 
 class OnboardingTask(Job):
-    class Meta:
-        """Meta object boilerplate for onboarding."""
-
-        name = "Perform Device Onboarding"
-        description = "Login to a device and populate Nautobot device object."
-        has_sensitive_variables = False
+    """Nautobot Job for onboarding a new device."""
 
     location = ObjectVar(model=Location, query_params={"": ""}, required=False, description="")
     ip_address = IPAddressVar(description="", label="")
@@ -29,18 +24,32 @@ class OnboardingTask(Job):
     role = ObjectVar(model=Role, query_params={"": ""}, required=False, description="")
     device_type = ObjectVar(model=DeviceType, required=False, description="")
 
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Meta object boilerplate for onboarding."""
+
+        name = "Perform Device Onboarding"
+        description = "Login to a device and populate Nautobot device object."
+        has_sensitive_variables = False
+
+    def __init__(self, *args, **kwargs):
+        """Overload init to instantiate class attributes per W0201."""
+        self.username = None
+        self.password = None
+        self.secret = None
+        super().__init__(*args, **kwargs)
+
     def run(self, *args, **data):
         """Process a single Onboarding Task instance."""
         self.logger.info("START: onboard device")
-        credentials = self._parse_credentials(data["credentials"])
+        self._parse_credentials(data["credentials"])
         platform = data["platform"]
         netdev = NetdevKeeper(
             hostname=data["ip_address"],
             port=data["port"],
             timeout=data["timeout"],
-            username=credentials["username"],
-            password=credentials["password"],
-            secret=credentials["secret"],
+            username=self.username,
+            password=self.password,
+            secret=self.secret,
             napalm_driver=platform.napalm_driver if platform and platform.napalm_driver else None,
             optional_args=platform.napalm_args if platform and platform.napalm_args else settings.NAPALM_ARGS,
         )
@@ -72,18 +81,16 @@ class OnboardingTask(Job):
 
     def _parse_credentials(self, credentials):
         """Parse and return dictionary of credentials."""
-
         if credentials:
-            self.username = (credentials.secrets.get(secret_type=SecretsGroupSecretTypeChoices.TYPE_USERNAME),)
-            self.password = (credentials.secrets.get(secret_type=SecretsGroupSecretTypeChoices.TYPE_PASSWORD),)
-            self.secret = (None,)
+            self.username = credentials.secrets.get(secret_type=SecretsGroupSecretTypeChoices.TYPE_USERNAME)
+            self.password = credentials.secrets.get(secret_type=SecretsGroupSecretTypeChoices.TYPE_PASSWORD)
             secret = credentials.secrets.filter(secret_type=SecretsGroupSecretTypeChoices.TYPE_SECRET)
             if secret.exists():
                 self.secret = secret.first()
         else:
-            self.username = (settings.NAPALM_USERNAME,)
-            self.password = (settings.NAPALM_PASSWORD,)
-            self.secret = (settings.NAPALM_ARGS.get("secret", None),)
+            self.username = settings.NAPALM_USERNAME
+            self.password = settings.NAPALM_PASSWORD
+            self.secret = settings.NAPALM_ARGS.get("secret", None)
 
 
 register_jobs(OnboardingTask)
