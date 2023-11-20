@@ -93,7 +93,7 @@ A new device can be onboarded via :
 During a successful onboarding process, a new device will be created in Nautobot with its management interface and its primary IP assigned. The management interface will be discovered on the device based on the IP address provided.
 
 !!! note
-    By default, the app is using the credentials defined in the main `nautobot_config.py` for Napalm (`NAPALM_USERNAME`/`NAPALM_PASSWORD`/`DEVICE_SECRET`). It's possible to define specific credentials for each onboarding job execution.
+    By default, the app is using the credentials defined in the main `nautobot_config.py` for Napalm (`NAPALM_USERNAME`/`NAPALM_PASSWORD`/`NAPALM_ARGS`). It's possible to define specific credentials for each onboarding job execution.
 
 ### Onboard a Cisco NXOS Device Running the `nxapi` Feature
 
