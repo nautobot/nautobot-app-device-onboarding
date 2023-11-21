@@ -1,6 +1,6 @@
 from django.db import migrations, models
 
-import nautobot_device_onboarding
+from nautobot.extras.models import RoleField
 
 
 class Migration(migrations.Migration):
@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="onboardingtask",
             name="new_role",
-            field=nautobot_device_onboarding.models.DeviceLimitedRoleField(
+            field=RoleField(
                 blank=True, null=True, on_delete=models.SET_NULL, related_name="onboarding_tasks", to="extras.role"
             ),
         ),
