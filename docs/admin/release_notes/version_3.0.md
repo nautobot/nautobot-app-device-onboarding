@@ -1,7 +1,7 @@
 # v3.0 Release Notes
 
 !!! warning
-    Nautobot Device Onboarding v2.0.0-2.0.2 contains a vulnerability where the credentials used to log into a device may be visible in clear text on the Job Results page under the Additional Data tab. It is recommended to review all OnbaordingTasks from the affected releases, delete any affeccted JobResults, and upgrade to v3.0.0. For more information please see the full write up on the issue which is available as [a security advisory](https://github.com/nautobot/nautobot-plugin-device-onboarding/security/advisories/GHSA-qf3c-rw9f-jh7v) on the repo. Nautobot Device Onboarding app versions v2.0.0-2.0.2 have been removed for PyPI to ensure all gaps are closed. v2.0.3 is published with disabled functionality and banner message encouraging to upgrade to v3.0.0.
+    Nautobot Device Onboarding v2.0.0-2.0.2 contains a vulnerability where the credentials used to log into a device may be visible in clear text on the Job Results page under the Additional Data tab. It is recommended to review all OnbaordingTasks from the affected releases, delete any affeccted JobResults, and upgrade to v3.0.0. For more information please see the full write up on the issue which is available as [a security advisory](https://github.com/nautobot/nautobot-plugin-device-onboarding/security/advisories/GHSA-qf3c-rw9f-jh7v) on the repo. Nautobot Device Onboarding app versions v2.0.0-2.0.2 have been removed for PyPI to ensure all gaps are closed. v2.0.3 is published with disabled functionality and banner message encouraging to upgrade to v3.0.0. [CVE-2023-48700](https://www.cve.org/CVERecord?id=CVE-2023-48700) has been issued for this vulnerability.
 
 ## Release Overview
 
