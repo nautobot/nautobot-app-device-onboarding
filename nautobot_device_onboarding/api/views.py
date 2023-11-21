@@ -26,5 +26,7 @@ class OnboardingTaskViewSet(NautobotModelViewSet):
         """Override the update method to disallow put/patch."""
         return Response(
             status=status.HTTP_405_METHOD_NOT_ALLOWED,
-            data={"reason": "All functionality has been disabled, upgrade to v3.0.0 or later."},
+            data={
+                "reason": "All Device Onboarding functionality has been disabled, please upgrade to v3.0.0 or later."
+            },
         )

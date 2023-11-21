@@ -76,9 +76,3 @@ class OnboardingTaskSerializer(NotesSerializerMixin, ValidatedModelSerializer):
         )
 
         return super().validate(attrs)
-
-    def create(self, validated_data):
-        """Create an OnboardingTask and enqueue it for processing."""
-        raise Exception(  # pylint: disable=broad-exception-raised
-            "All functionality for Device Onboarding has been disabled, please upgrade to v3.0.0 or later."
-        )
