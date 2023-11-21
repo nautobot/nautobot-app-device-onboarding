@@ -21,7 +21,7 @@ Regardless, the Onboarding Plugin greatly simplifies the onboarding process by a
 
 Device Onboarding is a Job that allows you to provide a few required pieces of information and onboard the device.
 
-![job input](./docs/images/do_job_inputs.png)
+![job input](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-onboarding/develop/docs/images/do_job_inputs.png)
 
 ## Try it out!
 

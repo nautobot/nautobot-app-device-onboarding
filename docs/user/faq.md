@@ -1,5 +1,11 @@
 # Frequently Asked Questions
 
+## Why does my Location or Role not appear on the job form?
+
+Locations are related to the LocationType object and the LocationType has an attribute for ContentTypes that are meant to limit what types of object that can be associated to a location. Validate the desired Location you are attempting to use is using a LocationType that has `dcim.Device` in the list of allowed ContentTypes.
+
+Similarly to Location, Roles are also scoped to ContentTypes however this is controlled via an attribute directly on the Role model and not through an additional model as Location + LocationType is done. The required ContentType is also `dcim.Device`.
+
 ## What are the use cases for Onboarding Extensions?
 
 See dedicated FAQ for device [onboarding extensions](../dev/onboarding_extensions.md).
@@ -16,19 +22,22 @@ You need to disable automatic platform detection, specify the device platform ty
 # configuration.py
 # If need you can override the default settings
 PLUGINS_CONFIG = {
-  "nautobot_device_onboarding": {
+    "nautobot_device_onboarding": {
         "create_platform_if_missing": True,
         "create_manufacturer_if_missing": True,
         "create_device_type_if_missing": True,
         "create_device_role_if_missing": True,
         "default_device_role": "network",
-  }
+    }
 }
 ```
 
 ## How can I update the default credentials used to connect to a device?
 
-By default, the plugin uses the credentials defined in the main `nautobot_config.py` for NAPALM (`NAPALM_USERNAME`/`NAPALM_PASSWORD`/`DEVICE_SECRET`). You can update the default credentials in `nautobot_config.py ` or you can provide specific one for each onboarding job via a SecretsGroup.
+By default, the plugin uses the credentials defined in the main `nautobot_config.py` for NAPALM (`NAPALM_USERNAME`/`NAPALM_PASSWORD`/`DEVICE_ARGS`). You can update the default credentials in `nautobot_config.py ` or you can provide specific one for each onboarding job via a SecretsGroup. If using SecretsGroup the Access Type for the associated Secrets must be `Generic` and at minimum associated Secrets for `Username` & `Password` are required with `Secret` being optional.
+
+!!! warning
+    If an enable secret is required for the remote device it must be set using above patters.
 
 ## How can I update the optional arguments for NAPALM?
 
