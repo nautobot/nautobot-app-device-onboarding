@@ -124,6 +124,4 @@ nav:
       - Code Reference:
           - "dev/code_reference/index.md"
           - Package: "dev/code_reference/package.md"
-          - API: "dev/code_reference/api.md"
-          - Models: "dev/code_reference/models.md"
   - Nautobot Docs Home ↗︎: "https://docs.nautobot.com"
