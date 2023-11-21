@@ -49,7 +49,7 @@ class OnboardingTask(Job):
         """Meta object boilerplate for onboarding."""
 
         name = "Perform Device Onboarding"
-        description = "Login to a device and populate Nautobot device object."
+        description = "Login to a device(s) and populate Nautobot Device object(s)."
         has_sensitive_variables = False
 
     def __init__(self, *args, **kwargs):
