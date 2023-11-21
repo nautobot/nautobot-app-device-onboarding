@@ -1,6 +1,6 @@
 ---
 dev_addr: "127.0.0.1:8001"
-edit_uri: "edit/develop/docs"
+edit_uri: "edit/main/nautobot-plugin-device-onboarding/docs"
 site_dir: "nautobot_device_onboarding/static/nautobot_device_onboarding/docs"
 site_name: "Device Onboarding Documentation"
 site_url: "https://docs.nautobot.com/projects/device-onboarding/en/latest/"
@@ -14,13 +14,17 @@ theme:
     - "django"
     - "yaml"
   features:
-    - "navigation.tracking"
+    - "content.action.edit"
+    - "content.action.view"
+    - "content.code.copy"
+    - "navigation.footer"
+    - "navigation.indexes"
     - "navigation.tabs"
     - "navigation.tabs.sticky"
-    - "search.suggest"
+    - "navigation.tracking"
     - "search.highlight"
     - "search.share"
-    - "navigation.indexes"
+    - "search.suggest"
   favicon: "assets/favicon.ico"
   logo: "assets/nautobot_logo.svg"
   palette:
@@ -107,6 +111,7 @@ nav:
       - Compatibility Matrix: "admin/compatibility_matrix.md"
       - Release Notes:
           - "admin/release_notes/index.md"
+          - v3.0: "admin/release_notes/version_3.0.md"
           - v2.0: "admin/release_notes/version_2.0.md"
           - v1.2: "admin/release_notes/version_1.2.md"
           - v1.1: "admin/release_notes/version_1.1.md"
@@ -118,6 +123,5 @@ nav:
       - Development Environment: "dev/dev_environment.md"
       - Code Reference:
           - "dev/code_reference/index.md"
-          - Models: "dev/code_reference/models.md"
-          - API: "dev/code_reference/api.md"
+          - Package: "dev/code_reference/package.md"
   - Nautobot Docs Home ↗︎: "https://docs.nautobot.com"
