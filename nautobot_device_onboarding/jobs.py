@@ -19,7 +19,7 @@ class OnboardingTask(Job):
     location = ObjectVar(
         model=Location,
         query_params={"content_type": "dcim.device"},
-        description="Name of parent Location for the onboarded device.",
+        description="Assigned Location for the onboarded device.",
     )
     ip_address = StringVar(
         description="IP Address/DNS Name of the device to onboard, specify in a comma separate list for multiple devices.",
