@@ -147,6 +147,7 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
     def _parse_credentials(self, credentials):
         """Parse and return dictionary of credentials."""
         if credentials:
+            self.logger.info("Attempting to parse credentials from selected SecretGroup")
             try:
                 self.username = credentials.get_secret_value(
                     access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
@@ -170,6 +171,7 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
                 raise OnboardException("fail-credentials - Unable to parse selected credentials.") from err
 
         else:
+            self.logger.info("Using napalm credentials configured in nautobot_config.py")
             self.username = settings.NAPALM_USERNAME
             self.password = settings.NAPALM_PASSWORD
             self.secret = settings.NAPALM_ARGS.get("secret", None)
