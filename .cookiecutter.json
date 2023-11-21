@@ -10,7 +10,7 @@
         "project_slug": "nautobot-plugin-device-onboarding",
         "repo_url": "https://github.com/nautobot/nautobot-plugin-device-onboarding",
         "base_url": "nautobot-device-onboarding",
-        "min_nautobot_version": "2.0.0",
+        "min_nautobot_version": "2.0.3",
         "max_nautobot_version": "2.9999",
         "camel_name": "NautobotDeviceOnboarding",
         "project_short_description": "Device Onboarding",

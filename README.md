@@ -13,14 +13,15 @@
 
 ## Overview
 
-The `nautobot-device-onboarding` plugin is using the [netmiko](https://github.com/ktbyers/netmiko) and [NAPALM](https://napalm.readthedocs.io/en/latest/) libraries to simplify the onboarding process of a new device into Nautobot down to, in many cases, an *IP Address* and a *Site*. In some cases, the user may also have to specify a specific *Device Platform* and *Device Port*.
+The `nautobot-device-onboarding` plugin is using the [netmiko](https://github.com/ktbyers/netmiko) and [NAPALM](https://napalm.readthedocs.io/en/latest/) libraries to simplify the onboarding process of a new device into Nautobot down to, in many cases, an *IP Address* and a *Location*. In some cases, the user may also have to specify a specific *Device Platform* and *Device Port*.
 
-Regardless, the Onboarding Plugin greatly simplifies the onboarding process
-by allowing the user to specify a small amount of info and having the plugin populate a much larger amount of device data in Nautobot.
+Regardless, the Onboarding Plugin greatly simplifies the onboarding process by allowing the user to specify a small amount of info and having the app populate a much larger amount of device data in Nautobot.
 
 ### Screenshots
 
-![Overview](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-onboarding/develop/docs/images/onboarding_tasks_view.png)
+Device Onboarding is a Job that allows you to provide a few required pieces of information and onboard the device.
+
+![job input](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-onboarding/develop/docs/images/do_job_inputs.png)
 
 ## Try it out!
 

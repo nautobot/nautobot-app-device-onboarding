@@ -111,6 +111,7 @@ nav:
       - Compatibility Matrix: "admin/compatibility_matrix.md"
       - Release Notes:
           - "admin/release_notes/index.md"
+          - v3.0: "admin/release_notes/version_3.0.md"
           - v2.0: "admin/release_notes/version_2.0.md"
           - v1.2: "admin/release_notes/version_1.2.md"
           - v1.1: "admin/release_notes/version_1.1.md"
@@ -123,6 +124,4 @@ nav:
       - Code Reference:
           - "dev/code_reference/index.md"
           - Package: "dev/code_reference/package.md"
-          - API: "dev/code_reference/api.md"
-          - Models: "dev/code_reference/models.md"
   - Nautobot Docs Home ↗︎: "https://docs.nautobot.com"
