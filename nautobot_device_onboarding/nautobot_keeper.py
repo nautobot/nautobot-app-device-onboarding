@@ -34,8 +34,7 @@ def ensure_default_cf(obj, model):
         obj.validated_save()
     except ValidationError as err:
         raise OnboardException(
-            reason="fail-general",
-            message=f"ERROR: {obj} validation error: {err.messages}",
+            f"fail-general - ERROR: {obj} validation error: {err.messages}",
         ) from err
 
 
@@ -65,14 +64,12 @@ def object_match(obj, search_array):
                     pass
                 except obj.MultipleObjectsReturned as err:
                     raise OnboardException(
-                        reason="fail-general",
-                        message=f"ERROR multiple objects found in {str(obj)} searching on {str(search_array_element)})",
+                        f"fail-general - ERROR multiple objects found in {str(obj)} searching on {str(search_array_element)})",
                     ) from err
         raise
     except obj.MultipleObjectsReturned as err:
         raise OnboardException(
-            reason="fail-general",
-            message=f"ERROR multiple objects found in {str(obj)} searching on {str(search_array_element)})",
+            f"fail-general - ERROR multiple objects found in {str(obj)} searching on {str(search_array_element)})",
         ) from err
 
 
@@ -163,8 +160,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
             )
         except Device.MultipleObjectsReturned as err:
             raise OnboardException(
-                reason="fail-general",
-                message=f"ERROR multiple devices using same IP in Nautobot: {self.netdev_mgmt_ip_address}",
+                f"fail-general - ERROR multiple devices using same IP in Nautobot: {self.netdev_mgmt_ip_address}",
             ) from err
 
     def ensure_device_site(self):
@@ -172,9 +168,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
         try:
             self.nb_location = Location.objects.get(name=self.netdev_nb_location_name)
         except Location.DoesNotExist as err:
-            raise OnboardException(
-                reason="fail-config", message=f"Site not found: {self.netdev_nb_location_name}"
-            ) from err
+            raise OnboardException(f"fail-config - Site not found: {self.netdev_nb_location_name}") from err
 
     def ensure_device_manufacturer(
         self,
@@ -202,9 +196,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
                 self.nb_manufacturer = Manufacturer.objects.create(name=self.netdev_vendor)
                 ensure_default_cf(obj=self.nb_manufacturer, model=Manufacturer)
             else:
-                raise OnboardException(
-                    reason="fail-config", message=f"ERROR manufacturer not found: {self.netdev_vendor}"
-                ) from err
+                raise OnboardException(f"fail-config - ERROR manufacturer not found: {self.netdev_vendor}") from err
 
     def ensure_device_type(
         self,
@@ -240,7 +232,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
         nb_device_type_text = self.netdev_nb_device_type_name or self.netdev_model
 
         if not nb_device_type_text:
-            raise OnboardException(reason="fail-config", message="ERROR device type not found")
+            raise OnboardException("fail-config - ERROR device type not found")
 
         nb_device_type_name = nb_device_type_text
 
@@ -254,8 +246,8 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
 
             if self.nb_device_type.manufacturer.id != self.nb_manufacturer.id:
                 raise OnboardException(
-                    reason="fail-config",
-                    message=f"ERROR device type {self.netdev_model} " f"already exists for vendor {self.netdev_vendor}",
+                    f"fail-config - ERROR device type {self.netdev_model} "
+                    f"already exists for vendor {self.netdev_vendor}",
                 )
 
         except DeviceType.DoesNotExist as err:
@@ -267,9 +259,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
                 )
                 ensure_default_cf(obj=self.nb_device_type, model=DeviceType)
             else:
-                raise OnboardException(
-                    reason="fail-config", message=f"ERROR device type not found: {self.netdev_model}"
-                ) from err
+                raise OnboardException(f"fail-config - ERROR device type not found: {self.netdev_model}") from err
 
     def ensure_device_role(
         self,
@@ -297,7 +287,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
                 ensure_default_cf(obj=self.nb_device_role, model=Role)
             else:
                 raise OnboardException(
-                    reason="fail-config", message=f"ERROR device role not found: {self.netdev_nb_role_name}"
+                    f"fail-config - ERROR device role not found: {self.netdev_nb_role_name}"
                 ) from err
 
     def ensure_device_platform(self, create_platform_if_missing=PLUGIN_SETTINGS["create_platform_if_missing"]):
@@ -323,9 +313,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
             )
 
             if not self.netdev_nb_platform_name:
-                raise OnboardException(
-                    reason="fail-config", message=f"ERROR device platform not found: {self.netdev_hostname}"
-                )
+                raise OnboardException(f"fail-config - ERROR device platform not found: {self.netdev_hostname}")
 
             self.nb_platform = Platform.objects.get(name=self.netdev_nb_platform_name)
 
@@ -351,8 +339,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
                 ensure_default_cf(obj=self.nb_platform, model=Platform)
             else:
                 raise OnboardException(
-                    reason="fail-general",
-                    message=f"ERROR platform not found in Nautobot: {self.netdev_nb_platform_name}",
+                    f"fail-general - ERROR platform not found in Nautobot: {self.netdev_nb_platform_name}",
                 ) from err
 
     def ensure_device_instance(self, default_status=PLUGIN_SETTINGS["default_device_status"]):
@@ -388,13 +375,11 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
                 device_status = Status.objects.get(content_types__in=[ct], name=default_status)
             except Status.DoesNotExist as err:
                 raise OnboardException(
-                    reason="fail-general",
-                    message=f"ERROR could not find existing device status: {default_status}",
+                    f"fail-general - ERROR could not find existing device status: {default_status}",
                 ) from err
             except Status.MultipleObjectsReturned as err:
                 raise OnboardException(
-                    reason="fail-general",
-                    message=f"ERROR multiple device status using same name: {default_status}",
+                    f"fail-general - ERROR multiple device status using same name: {default_status}",
                 ) from err
 
             lookup_args = {
@@ -421,8 +406,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
 
         except Device.MultipleObjectsReturned as err:
             raise OnboardException(
-                reason="fail-general",
-                message=f"ERROR multiple devices using same name in Nautobot: {self.netdev_hostname}",
+                f"fail-general - ERROR multiple devices using same name in Nautobot: {self.netdev_hostname}",
             ) from err
 
     def ensure_interface(self):
@@ -447,13 +431,11 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
                 ip_status = Status.objects.get(content_types__in=[ct], name=default_status_name)
             except Status.DoesNotExist as err:
                 raise OnboardException(
-                    reason="fail-general",
-                    message=f"ERROR could not find existing IP Address status: {default_status_name}",
+                    f"fail-general - ERROR could not find existing IP Address status: {default_status_name}",
                 ) from err
             except Status.MultipleObjectsReturned as err:
                 raise OnboardException(
-                    reason="fail-general",
-                    message=f"ERROR multiple IP Address status using same name: {default_status_name}",
+                    f"fail-general - ERROR multiple IP Address status using same name: {default_status_name}",
                 ) from err
 
             # Default to Global Namespace -> TODO: add option to specify default namespace
