@@ -3,7 +3,6 @@
 
 # Swap files
 *.swp
-dist
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -304,6 +303,7 @@ development/*.txt
 invoke.yml
 
 # Docs
-docs/README.md
-docs/CHANGELOG.md
 public
+/compose.yaml
+/dump.sql
+/nautobot_device_onboarding/static/nautobot_device_onboarding/docs

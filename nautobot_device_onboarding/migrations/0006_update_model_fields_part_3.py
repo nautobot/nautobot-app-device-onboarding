@@ -19,8 +19,4 @@ class Migration(migrations.Migration):
             name="status",
             field=models.CharField(blank=True, default="", max_length=255),
         ),
-        migrations.AlterUniqueTogether(
-            name="onboardingtask",
-            unique_together={("label", "ip_address")},
-        ),
     ]

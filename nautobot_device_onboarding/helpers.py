@@ -8,7 +8,7 @@ from netaddr.core import AddrFormatError
 from nautobot_device_onboarding.exceptions import OnboardException
 
 
-def onboarding_task_fqdn_to_ip(onboarding_task):
+def onboarding_task_fqdn_to_ip(address):
     """Method to assure OT has FQDN resolved to IP address and rewritten into OT.
 
     If it is a DNS name, attempt to resolve the DNS address and assign the IP address to the
@@ -25,20 +25,15 @@ def onboarding_task_fqdn_to_ip(onboarding_task):
     """
     try:
         # If successful, this is an IP address and can pass
-        netaddr.IPAddress(onboarding_task.ip_address)
+        return netaddr.IPAddress(address)
     # Raise an Exception for Prefix values
     except ValueError as err:
-        raise OnboardException(
-            reason="fail-general", message=f"ERROR appears a prefix was entered: {onboarding_task.ip_address}"
-        ) from err
+        raise OnboardException(f"fail-general - ERROR appears a prefix was entered: {address}") from err
     # An AddrFormatError exception means that there is not an IP address in the field, and should continue on
     except AddrFormatError:
         try:
             # Perform DNS Lookup
-            onboarding_task.ip_address = socket.gethostbyname(onboarding_task.ip_address)
-            onboarding_task.save()
+            return socket.gethostbyname(address)
         except socket.gaierror as err:
             # DNS Lookup has failed, Raise an exception for unable to complete DNS lookup
-            raise OnboardException(
-                reason="fail-dns", message=f"ERROR failed to complete DNS lookup: {onboarding_task.ip_address}"
-            ) from err
+            raise OnboardException(f"fail-dns - ERROR failed to complete DNS lookup: {address}") from err
