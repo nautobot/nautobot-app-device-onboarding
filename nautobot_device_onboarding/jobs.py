@@ -22,7 +22,7 @@ class OnboardingTask(Job):
         description="Assigned Location for the onboarded device.",
     )
     ip_address = StringVar(
-        description="IP Address/DNS Name of the device to onboard, specify in a comma separate list for multiple devices.",
+        description="IP Address/DNS Name of the device to onboard, specify in a comma separated list for multiple devices.",
         label="IP Address/FQDN",
     )
     port = IntegerVar(default=22)
