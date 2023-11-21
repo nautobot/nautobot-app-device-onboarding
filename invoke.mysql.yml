@@ -1,7 +1,7 @@
 ---
 nautobot_device_onboarding:
   project_name: "nautobot-device-onboarding"
-  nautobot_ver: "2.0.0"
+  nautobot_ver: "2.0.3"
   local: false
   python_ver: "3.11"
   compose_dir: "development"

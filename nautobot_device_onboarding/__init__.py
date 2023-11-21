@@ -17,7 +17,7 @@ class NautobotDeviceOnboardingConfig(NautobotAppConfig):
     description = "Nautobot App that simplifies device onboarding (and re-onboarding) by collecting and populating common device 'facts' into Nautobot."
     base_url = "nautobot-device-onboarding"
     required_settings = []
-    min_version = "2.0.0"
+    min_version = "2.0.3"
     max_version = "2.9999"
     default_settings = {
         "create_platform_if_missing": True,
