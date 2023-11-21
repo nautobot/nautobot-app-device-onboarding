@@ -28,7 +28,7 @@ class OnboardingTask(Job):
     port = IntegerVar(default=22)
     timeout = IntegerVar(default=30)
     credentials = ObjectVar(
-        model=SecretsGroup, required=False, description="SecretGroup for Device connection credentials."
+        model=SecretsGroup, required=False, description="SecretsGroup for Device connection credentials."
     )
     platform = ObjectVar(
         model=Platform,
