@@ -101,8 +101,7 @@ class NautobotKeeperTestCase(TestCase):
 
         with self.assertRaises(OnboardException) as exc_info:
             nbk.ensure_device_manufacturer(create_manufacturer=False)
-            self.assertEqual(exc_info.exception.message, "ERROR manufacturer not found: Cisco")
-            self.assertEqual(exc_info.exception.reason, "fail-config")
+            self.assertEqual(str(exc_info), "fail-config - ERROR manufacturer not found: Cisco")
 
         nbk.ensure_device_manufacturer(create_manufacturer=True)
         self.assertIsInstance(nbk.nb_manufacturer, Manufacturer)
@@ -123,8 +122,7 @@ class NautobotKeeperTestCase(TestCase):
 
         with self.assertRaises(OnboardException) as exc_info:
             nbk.ensure_device_manufacturer(create_manufacturer=False)
-            self.assertEqual(exc_info.exception.message, "ERROR manufacturer not found: Cisco")
-            self.assertEqual(exc_info.exception.reason, "fail-config")
+            self.assertEqual(str(exc_info), "fail-config - ERROR manufacturer not found: Cisco")
 
         nbk.ensure_device_manufacturer(create_manufacturer=True)
         self.assertIsInstance(nbk.nb_manufacturer, Manufacturer)
@@ -146,8 +144,7 @@ class NautobotKeeperTestCase(TestCase):
 
         with self.assertRaises(OnboardException) as exc_info:
             nbk.ensure_device_type(create_device_type=False)
-            self.assertEqual(exc_info.exception.message, "ERROR device type not found: CSR1000v")
-            self.assertEqual(exc_info.exception.reason, "fail-config")
+            self.assertEqual(str(exc_info), "fail-config - ERROR device type not found: CSR1000v")
 
         nbk.ensure_device_type(create_device_type=True)
         self.assertIsInstance(nbk.nb_device_type, DeviceType)
@@ -169,8 +166,7 @@ class NautobotKeeperTestCase(TestCase):
 
         with self.assertRaises(OnboardException) as exc_info:
             nbk.ensure_device_type(create_device_type=False)
-            self.assertEqual(exc_info.exception.message, "ERROR device type not found: CSR1000v")
-            self.assertEqual(exc_info.exception.reason, "fail-config")
+            self.assertEqual(str(exc_info), "fail-config - ERROR device type not found: CSR1000v")
 
         nbk.ensure_device_type(create_device_type=True)
         self.assertIsInstance(nbk.nb_device_type, DeviceType)
@@ -234,8 +230,7 @@ class NautobotKeeperTestCase(TestCase):
 
         with self.assertRaises(OnboardException) as exc_info:
             nbk.ensure_device_role(create_device_role=False)
-            self.assertEqual(exc_info.exception.message, f"ERROR device role not found: {test_role_name}")
-            self.assertEqual(exc_info.exception.reason, "fail-config")
+            self.assertEqual(str(exc_info), f"fail-config - ERROR device role not found: {test_role_name}")
 
         nbk.ensure_device_role(create_device_role=True)
         self.assertIsInstance(nbk.nb_device_role, Role)
@@ -480,8 +475,7 @@ class NautobotKeeperTestCase(TestCase):
 
         with self.assertRaises(OnboardException) as exc_info:
             nbk.ensure_device_platform(create_platform_if_missing=False)
-            self.assertEqual(exc_info.exception.message, f"ERROR device platform not found: {platform_name}")
-            self.assertEqual(exc_info.exception.reason, "fail-config")
+            self.assertEqual(str(exc_info), f"fail-config - ERROR device platform not found: {platform_name}")
 
         nbk.ensure_device_platform(create_platform_if_missing=True)
         self.assertIsInstance(nbk.nb_platform, Platform)
