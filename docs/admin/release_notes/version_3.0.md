@@ -19,3 +19,4 @@
 ### Removed
 
 - [#124](https://github.com/nautobot/nautobot-plugin-device-onboarding/pull/124) - Removed all models, UI Views, and API Views from app
+- [#124](https://github.com/nautobot/nautobot-plugin-device-onboarding/pull/124) - All data for instances of `OnboardingTask` & `OnboardingDevice` will be removed on upgrade, affected `JobResults` from tasks created while on affected versions should be reviewed & deleted.
