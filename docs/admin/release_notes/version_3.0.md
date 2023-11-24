@@ -5,6 +5,12 @@
 
 ## Release Overview
 
+## v3.0.1 2023-11-24
+
+### Fixed
+
+- [#128](https://github.com/nautobot/nautobot-plugin-device-onboarding/issues/128) - Failures when onboarding via IP Address
+
 ## v3.0.0 2023-11-21
 
 ### Changed
