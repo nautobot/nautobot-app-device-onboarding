@@ -25,7 +25,8 @@ def onboarding_task_fqdn_to_ip(address):
     """
     try:
         # If successful, this is an IP address and can pass
-        return netaddr.IPAddress(address)
+        netaddr.IPAddress(address)
+        return address
     # Raise an Exception for Prefix values
     except ValueError as err:
         raise OnboardException(f"fail-general - ERROR appears a prefix was entered: {address}") from err
