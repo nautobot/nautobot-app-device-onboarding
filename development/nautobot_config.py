@@ -133,9 +133,12 @@ PLUGINS = ["nautobot_device_onboarding"]
 
 # Apps configuration settings. These settings are used by various Apps that the user may have installed.
 # Each key in the dictionary is the name of an installed App and its value is a dictionary of settings.
-# PLUGINS_CONFIG = {
-#     'nautobot_device_onboarding': {
-#         'foo': 'bar',
-#         'buzz': 'bazz'
-#     }
-# }
+PLUGINS_CONFIG = {
+    'nautobot_device_onboarding': {
+        "sync_all_interface_details": True,
+    }
+}
+
+NAPALM_USERNAME = os.getenv('NAPALM_USERNAME')
+NAPALM_PASSWORD = os.getenv('NAPALM_PASSWORD')
+DEVICE_SECRET = os.getenv('DEVICE_SECRET')

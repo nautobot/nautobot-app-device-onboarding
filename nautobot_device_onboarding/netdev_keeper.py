@@ -6,18 +6,14 @@ import socket
 
 from django.conf import settings
 from napalm import get_network_driver
-from napalm.base.exceptions import ConnectionException, CommandErrorException
+from napalm.base.exceptions import CommandErrorException, ConnectionException
 from napalm.base.netmiko_helpers import netmiko_args
-from netmiko import SSHDetect
-from netmiko import NetMikoAuthenticationException
-from netmiko import NetMikoTimeoutException
-from paramiko.ssh_exception import SSHException
-
 from nautobot.dcim.models import Platform
-
-from nautobot_device_onboarding.onboarding.onboarding import StandaloneOnboarding
 from nautobot_device_onboarding.constants import NETMIKO_TO_NAPALM_STATIC
 from nautobot_device_onboarding.exceptions import OnboardException
+from nautobot_device_onboarding.onboarding.onboarding import StandaloneOnboarding
+from netmiko import NetMikoAuthenticationException, NetMikoTimeoutException, SSHDetect
+from paramiko.ssh_exception import SSHException
 
 logger = logging.getLogger("rq.worker")
 
@@ -97,6 +93,7 @@ class NetdevKeeper:  # pylint: disable=too-many-instance-attributes
 
         self.facts = None
         self.ip_ifs = None
+        self.interface_data = None
         self.netmiko_device_type = None
         self.onboarding_class = StandaloneOnboarding
         self.driver_addon_result = None
@@ -246,6 +243,13 @@ class NetdevKeeper:  # pylint: disable=too-many-instance-attributes
 
             logger.info("COLLECT: device interface IPs")
             self.ip_ifs = napalm_device.get_interfaces_ip()
+            logger.info("%s", self.ip_ifs)
+
+            logger.info("COLLECT: DEVICE INTERFACE DETAILS")
+            self.interface_data = {
+                "details": napalm_device.get_interfaces(),
+                "ip_ifs": self.ip_ifs,
+            }
 
             module_name = PLUGIN_SETTINGS["onboarding_extensions_map"].get(self.napalm_driver)
 
@@ -291,6 +295,7 @@ class NetdevKeeper:  # pylint: disable=too-many-instance-attributes
             "netdev_netmiko_device_type": self.netmiko_device_type,
             "onboarding_class": self.onboarding_class,
             "driver_addon_result": self.driver_addon_result,
+            "netdev_interface_data": self.interface_data,
         }
 
         return netdev_dict

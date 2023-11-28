@@ -1,27 +1,31 @@
 """Nautobot Keeper."""
 
-import logging
 import ipaddress
+import logging
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from nautobot.apps.choices import PrefixTypeChoices
 from nautobot.dcim.choices import InterfaceTypeChoices
-from nautobot.dcim.models import Manufacturer, Device, Interface, DeviceType
-from nautobot.extras.models import Role
-from nautobot.dcim.models import Platform
-from nautobot.dcim.models import Location
-from nautobot.extras.models import Status
+from nautobot.dcim.models import Device, DeviceType, Interface, Location, Manufacturer, Platform
+from nautobot.extras.models import Role, Status
 from nautobot.extras.models.customfields import CustomField
-from nautobot.ipam.models import IPAddress, Prefix, Namespace
-
+from nautobot.ipam.models import IPAddress, Namespace, Prefix
 from nautobot_device_onboarding.constants import NETMIKO_TO_NAPALM_STATIC
 from nautobot_device_onboarding.exceptions import OnboardException
 
 logger = logging.getLogger("rq.worker")
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
+
+
+def parse_napalm_ip(ip_obj):
+    """Parse interface ip from napalm to string."""
+    prefix_strings = []
+    for host, mask in ip_obj.items():
+        prefix_strings.append(f"{host}/{mask['prefix_length']}")
+    return prefix_strings
 
 
 def ensure_default_cf(obj, model):
@@ -93,6 +97,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
         netdev_netmiko_device_type=None,
         onboarding_class=None,
         driver_addon_result=None,
+        netdev_interface_data=None
     ):
         """Create an instance and initialize the managed attributes that are used throughout the onboard processing.
 
@@ -112,6 +117,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
             netdev_netmiko_device_type (str): Device's Netmiko device type
             onboarding_class (Object): Onboarding Class (future use)
             driver_addon_result (Any): Attached extended result (future use)
+            netdev_interface_data: Results from get_interface napalm getter.
         """
         self.netdev_mgmt_ip_address = netdev_mgmt_ip_address
         self.netdev_nb_location_name = netdev_nb_location_name
@@ -130,6 +136,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
 
         self.onboarding_class = onboarding_class
         self.driver_addon_result = driver_addon_result
+        self.netdev_interface_data = netdev_interface_data
 
         # these attributes are nautobot model instances as discovered/created
         # through the course of processing.
@@ -143,6 +150,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
         self.onboarded_device = None
         self.nb_mgmt_ifname = None
         self.nb_primary_ip = None
+        
 
     def ensure_onboarded_device(self):
         """Lookup if the device already exists in the Nautobot.
@@ -421,6 +429,63 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
 
             ensure_default_cf(obj=self.nb_mgmt_ifname, model=Interface)
 
+    def sync_interface(self, interface):
+        """Ensures that the interface associated with the mgmt_ipaddr exists and is assigned to the device."""
+        ifname, _ = Interface.objects.get_or_create(
+            name=interface,
+            device=self.device,
+            defaults={"type": InterfaceTypeChoices.TYPE_OTHER, "status": Status.objects.get(name="Active")},
+        )
+
+        ensure_default_cf(obj=ifname, model=Interface)
+
+    def sync_interface_ips(self, ip_prefix, interface):
+        """Ensure mgmt_ipaddr exists in IPAM, has the device interface, and is assigned as the primary IP address."""
+        ct = ContentType.objects.get_for_model(IPAddress)  # pylint: disable=invalid-name
+        default_status_name = PLUGIN_SETTINGS["default_ip_status"]
+        try:
+            ip_status = Status.objects.get(content_types__in=[ct], name=default_status_name)
+        except Status.DoesNotExist as err:
+            raise OnboardException(
+                f"fail-general - ERROR could not find existing IP Address status: {default_status_name}",
+            ) from err
+        except Status.MultipleObjectsReturned as err:
+            raise OnboardException(
+                f"fail-general - ERROR multiple IP Address status using same name: {default_status_name}",
+            ) from err
+
+        # Default to Global Namespace -> TODO: add option to specify default namespace
+        namespace = Namespace.objects.get(name="Global")
+
+        # prefix = ipaddress.ip_interface(f"{self.netdev_mgmt_ip_address}/{self.netdev_mgmt_pflen}")
+        prefix = ipaddress.ip_interface(ip_prefix)
+
+        nautobot_prefix, _ = Prefix.objects.get_or_create(
+            prefix=f"{prefix.network}",
+            namespace=namespace,
+            type=PrefixTypeChoices.TYPE_NETWORK,
+            defaults={"status": ip_status},
+        )
+        current_ip, created = IPAddress.objects.get_or_create(
+            address=ip_prefix,
+            parent=nautobot_prefix,
+            defaults={"status": ip_status, "type": "host"},
+        )
+
+        ensure_default_cf(obj=current_ip, model=IPAddress)
+        current_interface = Interface.objects.get(device=self.device, name=interface)
+
+        if created or current_ip not in current_interface.ip_addresses.all():
+            logger.info("ASSIGN: IP address %s to %s", current_ip.address, current_interface.name)
+            current_interface.ip_addresses.add(current_ip)
+            current_interface.full_clean()
+            current_interface.save()
+
+        # Ensure the IP is assigned to the device
+        # self.device.primary_ip4 = self.nb_primary_ip
+        self.device.full_clean()
+        self.device.save()
+
     def ensure_primary_ip(self):
         """Ensure mgmt_ipaddr exists in IPAM, has the device interface, and is assigned as the primary IP address."""
         # see if the primary IP address exists in IPAM
@@ -468,6 +533,24 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
             self.device.full_clean()
             self.device.save()
 
+    def ensure_all_interfaces(self):
+        if self.netdev_interface_data:
+            for device_interface, interface_details in self.netdev_interface_data['details'].items():
+                self.sync_interface(device_interface)
+                current_int = Interface.objects.get(
+                    name=device_interface,
+                    device=self.device,
+                )
+                current_int.mtu = interface_details["mtu"]
+                current_int.enabled = interface_details["is_enabled"]
+                current_int.description = interface_details["description"]
+                current_int.mac_address = interface_details["mac_address"]
+                current_int.save()
+                if self.netdev_interface_data['ip_ifs'].get(device_interface):
+                    prefix_str = parse_napalm_ip(self.netdev_interface_data['ip_ifs'][device_interface].get("ipv4"))
+                    # {'GigabitEthernet0/0': {'ipv4': {'10.1.1.9': {'prefix_length': 24}}}}
+                    self.sync_interface_ips(ip_prefix=prefix_str[0], interface=device_interface)
+
     def ensure_device(self):
         """Ensure that the device represented by the DevNetKeeper exists in the Nautobot system."""
         self.ensure_onboarded_device()
@@ -481,3 +564,6 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
         if PLUGIN_SETTINGS["create_management_interface_if_missing"]:
             self.ensure_interface()
             self.ensure_primary_ip()
+
+        if PLUGIN_SETTINGS["sync_all_interface_details"]:
+            self.ensure_all_interfaces()

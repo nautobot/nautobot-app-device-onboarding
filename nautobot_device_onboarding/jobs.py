@@ -1,15 +1,13 @@
 """Device Onboarding Jobs."""
 from django.conf import settings
-from nautobot.apps.jobs import Job, ObjectVar, IntegerVar, StringVar, BooleanVar
+from nautobot.apps.jobs import BooleanVar, IntegerVar, Job, ObjectVar, StringVar
 from nautobot.core.celery import register_jobs
-from nautobot.dcim.models import Location, DeviceType, Platform
-from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation
+from nautobot.dcim.models import DeviceType, Location, Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
-
+from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.helpers import onboarding_task_fqdn_to_ip
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
-
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
@@ -136,6 +134,7 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
             "netdev_netmiko_device_type": netdev_dict["netdev_netmiko_device_type"],
             "onboarding_class": netdev_dict["onboarding_class"],
             "driver_addon_result": netdev_dict["driver_addon_result"],
+            "netdev_interface_data": netdev_dict["netdev_interface_data"],
         }
         onboarding_cls = netdev_dict["onboarding_class"]()
         onboarding_cls.credentials = {"username": self.username, "password": self.password, "secret": self.secret}
