@@ -87,7 +87,7 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
         self.logger.info("START: onboarding devices")
         # allows for itteration without having to spawn multiple jobs
         # Later refactor to use nautobot-plugin-nornir
-        for address in data["ip_address"].split(","):
+        for address in data["ip_address"].relace(" ", "").split(","):
             try:
                 self._onboard(address=address)
             except OnboardException as err:
