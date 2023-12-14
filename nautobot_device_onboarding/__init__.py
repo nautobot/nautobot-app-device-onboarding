@@ -34,6 +34,8 @@ class NautobotDeviceOnboardingConfig(NautobotAppConfig):
         "skip_device_type_on_update": False,
         "skip_manufacturer_on_update": False,
         "platform_map": {},
+        "assign_secrets_group": False,
+        "set_management_only_interface": False,
         "onboarding_extensions_map": {
             "ios": "nautobot_device_onboarding.onboarding_extensions.ios",
         },

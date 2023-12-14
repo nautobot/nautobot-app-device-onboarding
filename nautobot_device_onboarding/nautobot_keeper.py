@@ -93,6 +93,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
         netdev_netmiko_device_type=None,
         onboarding_class=None,
         driver_addon_result=None,
+        netdev_nb_credentials=None,
     ):
         """Create an instance and initialize the managed attributes that are used throughout the onboard processing.
 
@@ -112,6 +113,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
             netdev_netmiko_device_type (str): Device's Netmiko device type
             onboarding_class (Object): Onboarding Class (future use)
             driver_addon_result (Any): Attached extended result (future use)
+            netdev_nb_credentials (Object): Device's secrets group object
         """
         self.netdev_mgmt_ip_address = netdev_mgmt_ip_address
         self.netdev_nb_location_name = netdev_nb_location_name
@@ -119,6 +121,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
         self.netdev_nb_role_name = netdev_nb_role_name
         self.netdev_nb_role_color = netdev_nb_role_color
         self.netdev_nb_platform_name = netdev_nb_platform_name
+        self.netdev_nb_credentials = netdev_nb_credentials
 
         self.netdev_hostname = netdev_hostname
         self.netdev_vendor = netdev_vendor
@@ -412,12 +415,21 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
     def ensure_interface(self):
         """Ensures that the interface associated with the mgmt_ipaddr exists and is assigned to the device."""
         if self.netdev_mgmt_ifname:
+            mgmt_only_setting = PLUGIN_SETTINGS["set_management_only_interface"]
+
             # TODO: Add option for default interface status
             self.nb_mgmt_ifname, _ = Interface.objects.get_or_create(
                 name=self.netdev_mgmt_ifname,
                 device=self.device,
-                defaults={"type": InterfaceTypeChoices.TYPE_OTHER, "status": Status.objects.get(name="Active")},
+                defaults={
+                    "type": InterfaceTypeChoices.TYPE_OTHER,
+                    "status": Status.objects.get(name="Active"),
+                    "mgmt_only": mgmt_only_setting,
+                },
             )
+            if mgmt_only_setting:
+                self.nb_mgmt_ifname.mgmt_only = mgmt_only_setting
+                self.nb_mgmt_ifname.validated_save()
 
             ensure_default_cf(obj=self.nb_mgmt_ifname, model=Interface)
 
@@ -468,6 +480,12 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
             self.device.full_clean()
             self.device.save()
 
+    def ensure_secret_group(self):
+        """Optionally assign secret group from onboarding to created/updated device"""
+        if PLUGIN_SETTINGS["assign_secrets_group"]:
+            self.device.secrets_group = self.netdev_nb_credentials
+            self.device.validated_save()
+
     def ensure_device(self):
         """Ensure that the device represented by the DevNetKeeper exists in the Nautobot system."""
         self.ensure_onboarded_device()
@@ -481,3 +499,6 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
         if PLUGIN_SETTINGS["create_management_interface_if_missing"]:
             self.ensure_interface()
             self.ensure_primary_ip()
+
+        if PLUGIN_SETTINGS["assign_secrets_group"]:
+            self.ensure_secret_group()
