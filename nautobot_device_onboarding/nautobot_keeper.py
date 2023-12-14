@@ -481,7 +481,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
             self.device.save()
 
     def ensure_secret_group(self):
-        """Optionally assign secret group from onboarding to created/updated device"""
+        """Optionally assign secret group from onboarding to created/updated device."""
         if PLUGIN_SETTINGS["assign_secrets_group"]:
             self.device.secrets_group = self.netdev_nb_credentials
             self.device.validated_save()
