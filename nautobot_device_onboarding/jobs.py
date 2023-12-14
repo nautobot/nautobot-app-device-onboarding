@@ -72,6 +72,7 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
         self.location = None
         self.device_type = None
         self.role = None
+        self.credentials = None
         super().__init__(*args, **kwargs)
 
     def run(self, *args, **data):
@@ -83,6 +84,7 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
         self.location = data["location"]
         self.device_type = data["device_type"]
         self.role = data["role"]
+        self.credentials = data["credentials"]
 
         self.logger.info("START: onboarding devices")
         # allows for itteration without having to spawn multiple jobs
@@ -126,6 +128,7 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
             "netdev_nb_role_name": self.role.name if self.role else PLUGIN_SETTINGS["default_device_role"],
             "netdev_nb_role_color": PLUGIN_SETTINGS["default_device_role_color"],
             "netdev_nb_platform_name": self.platform.name if self.platform else None,
+            "netdev_nb_credentials": self.credentials if PLUGIN_SETTINGS["assign_secrets_group"] else None,
             # Kwargs discovered on the Onboarded Device:
             "netdev_hostname": netdev_dict["netdev_hostname"],
             "netdev_vendor": netdev_dict["netdev_vendor"],
