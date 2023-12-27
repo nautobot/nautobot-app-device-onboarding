@@ -361,9 +361,9 @@ Once the dependencies are resolved, stop the existing containers, rebuild the Do
 ➜ invoke start
 ```
 
-### Installing Additional Nautobot Plugins
+### Installing Additional Nautobot Apps
 
-Let's say for example you want the new plugin you're creating to integrate into Slack. To do this, you will want to integrate into the existing Nautobot ChatOps Plugin.
+Let's say for example you want the new plugin you're creating to integrate into Slack. To do this, you will want to integrate into the existing Nautobot ChatOps App.
 
 ```bash
 ➜ poetry shell

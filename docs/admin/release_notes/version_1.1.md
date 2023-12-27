@@ -7,19 +7,19 @@ This document describes all new features and changes in `nautobot-device-onboard
 
 ### Added
 
-#### Assign default custom fields values to new objects ([#13](https://github.com/nautobot/nautobot-plugin-device-onboarding/pull/13))
+#### Assign default custom fields values to new objects ([#13](https://github.com/nautobot/nautobot-app-device-onboarding/pull/13))
 
 While new objects are created during onboarding a device, they will inherit model's default custom fields.
 
-#### Documentation updates ([#19](https://github.com/nautobot/nautobot-plugin-device-onboarding/pull/19))
+#### Documentation updates ([#19](https://github.com/nautobot/nautobot-app-device-onboarding/pull/19))
 
 nautobot-device-onboarding now covers onboarding of Cisco Nexus and Arista EOS devices. Documentation was reviewed and updated.
 
 ### Changed
 
-#### Support for Nautobot 1.1.0 (Celery) ([#18](https://github.com/nautobot/nautobot-plugin-device-onboarding/pull/18))
+#### Support for Nautobot 1.1.0 (Celery) ([#18](https://github.com/nautobot/nautobot-app-device-onboarding/pull/18))
 
-Celery has been introduced to eventually replace RQ for executing background tasks within Nautobot. Plugin's usage of RQ has been migrated to use Celery.
+Celery has been introduced to eventually replace RQ for executing background tasks within Nautobot. App's usage of RQ has been migrated to use Celery.
 
 
 ## v1.1.2 (2022-08-01)
@@ -30,7 +30,7 @@ Celery has been introduced to eventually replace RQ for executing background tas
 
 ### Fixed
 
-- [#45](https://github.com/nautobot/nautobot-plugin-device-onboarding/pull/45) - Update Plugin Dependencies. Fix importing issue with Netmiko 4.x, enable Napalm 4.
+- [#45](https://github.com/nautobot/nautobot-app-device-onboarding/pull/45) - Update App Dependencies. Fix importing issue with Netmiko 4.x, enable Napalm 4.
 
 ## v1.1.1 (2021-09-08)
 
@@ -38,7 +38,7 @@ Celery has been introduced to eventually replace RQ for executing background tas
 
 ### Changed
 
-- [#23](https://github.com/nautobot/nautobot-plugin-device-onboarding/pull/23) - Label attribute for sorting and identifying OnboaringTasks.
+- [#23](https://github.com/nautobot/nautobot-app-device-onboarding/pull/23) - Label attribute for sorting and identifying OnboaringTasks.
 
 ### Fixed
 
@@ -47,12 +47,12 @@ Celery has been introduced to eventually replace RQ for executing background tas
 
 ### Added
 
-- [#13](https://github.com/nautobot/nautobot-plugin-device-onboarding/pull/13) - Assign default custom fields values to new objects
-- [#18](https://github.com/nautobot/nautobot-plugin-device-onboarding/pull/18) - Support for Nautobot 1.1.0 (Celery)
-- [#19](https://github.com/nautobot/nautobot-plugin-device-onboarding/pull/19) - Documentation updates
+- [#13](https://github.com/nautobot/nautobot-app-device-onboarding/pull/13) - Assign default custom fields values to new objects
+- [#18](https://github.com/nautobot/nautobot-app-device-onboarding/pull/18) - Support for Nautobot 1.1.0 (Celery)
+- [#19](https://github.com/nautobot/nautobot-app-device-onboarding/pull/19) - Documentation updates
 
 ### Changed
 
 ### Fixed
 
-- [#14](https://github.com/nautobot/nautobot-plugin-device-onboarding/issues/14) - Error 'ipv4' when onboarding Juniper device
+- [#14](https://github.com/nautobot/nautobot-app-device-onboarding/issues/14) - Error 'ipv4' when onboarding Juniper device

@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "nautobot-device-onboarding"
 version = "3.0.1"
-description = "A plugin for Nautobot to easily onboard new devices."
+description = "A app for Nautobot to easily onboard new devices."
 authors = ["Network to Code, LLC <info@networktocode.com>"]
 license = "Apache-2.0"
 readme = "README.md"
-homepage = "https://github.com/nautobot/nautobot-plugin-device-onboarding"
-repository = "https://github.com/nautobot/nautobot-plugin-device-onboarding"
-keywords = ["nautobot", "nautobot-plugin"]
+homepage = "https://github.com/nautobot/nautobot-app-device-onboarding"
+repository = "https://github.com/nautobot/nautobot-app-device-onboarding"
+keywords = ["nautobot", "nautobot-plugin", "nautobot-app"]
 classifiers = [
     "Intended Audience :: Developers",
     "Development Status :: 5 - Production/Stable",
