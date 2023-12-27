@@ -1,4 +1,4 @@
-"""Plugin declaration for nautobot_device_onboarding."""
+"""App declaration for nautobot_device_onboarding."""
 # Metadata is inherited from Nautobot. If not including Nautobot in the environment, this should be added
 from importlib import metadata
 
@@ -8,7 +8,7 @@ from nautobot.extras.plugins import NautobotAppConfig
 
 
 class NautobotDeviceOnboardingConfig(NautobotAppConfig):
-    """Plugin configuration for the nautobot_device_onboarding plugin."""
+    """App configuration for the nautobot_device_onboarding app."""
 
     name = "nautobot_device_onboarding"
     verbose_name = "Device Onboarding"
