@@ -88,7 +88,10 @@ A Platform that will work with Arista EOS devices must have specific values for 
 A new device can be onboarded via :
 
 - A job execution. 
-- An API, via a `POST` to `/api/extras/jobs/{id}/run`
+- An API, via a `POST` to `/api/extras/jobs/Perform%20Device%20Onboarding/run` or `/api/extras/jobs/{id}/run` 
+
+!!! note
+    The Device Onboarding Job's ID (UUID) will be different per deployment. 
 
 During a successful onboarding process, a new device will be created in Nautobot with its management interface and its primary IP assigned. The management interface will be discovered on the device based on the IP address provided.
 
@@ -112,6 +115,33 @@ When onboarding an Arista EOS device, there are a few requirements:
 
 ### Consult the Status of Onboarding Tasks
 
-The status of the onboarding process for each device is maintained is a dedicated table in Nautobot and can be retrieved:
+The status of onboarding jobs can be viewed via the corresponding Job-Results under the Jobs page in Nautobot. 
 - Via the UI via Job-Results
 - Via the API via Job-Results
+
+# API
+
+!!! note
+    In V3.0, with the move of the app to a job, the dedicated API views have been removed. This also removes API documentation from the built in Swagger API documentation.
+
+To run an onboarding task Job via the api:
+
+
+Post to `/api/extras/jobs/Perform%20Device%20Onboarding/run/` with the relevent onboarding data: 
+
+```bash
+curl -X "POST" <nautobot URL>/api/extras/jobs/Perform%20Device%20Onboarding/run/ -H "Content-Type: application/json" -H "Authorization: Token $NAUTOBOT_TOKEN" -d '{"data": {"location": "<valid location UUID>", "ip_address": "<reachable IP to onboard>", "port": 22, "timeout": 30}}
+```
+
+Required Fields:
+    location: Location UUID
+    ip_address: String of IP or CSV of IPs
+    port: Integer
+    timeout: Integer
+
+Optional Fields:
+    credentials: Secret Group UUID
+    platform: Platform UUID
+    role: Role UUID
+    device_type: Device Type UUID
+    continue_on_failure: Boolean
