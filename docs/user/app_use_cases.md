@@ -88,10 +88,10 @@ A Platform that will work with Arista EOS devices must have specific values for 
 A new device can be onboarded via :
 
 - A job execution. 
-- An API, via a `POST` to `/api/extras/jobs/Perform%20Device%20Onboarding/run` or `/api/extras/jobs/{id}/run` 
+- API, via a `POST` to `/api/extras/jobs/Perform%20Device%20Onboarding/run` or `/api/extras/jobs/{id}/run` 
 
 !!! note
-    The Device Onboarding Job's ID (UUID) will be different per deployment. 
+    The Device Onboarding Job's ID (UUID) will be different per Nautobot instance. 
 
 During a successful onboarding process, a new device will be created in Nautobot with its management interface and its primary IP assigned. The management interface will be discovered on the device based on the IP address provided.
 
@@ -115,9 +115,7 @@ When onboarding an Arista EOS device, there are a few requirements:
 
 ### Consult the Status of Onboarding Tasks
 
-The status of onboarding jobs can be viewed via the corresponding Job-Results under the Jobs page in Nautobot. 
-- Via the UI via Job-Results
-- Via the API via Job-Results
+The status of onboarding jobs can be viewed via the UI (Jobs > Job Results) or retrieved via API (`/api/extras/job-results/`) with each process corresponding to an individual Job-Result object.
 
 # API
 
