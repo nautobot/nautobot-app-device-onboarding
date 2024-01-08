@@ -1,9 +1,9 @@
 # Nautobot Device Onboarding
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-onboarding/develop/docs/images/icon-DeviceOnboarding.png" class="logo" height="200px">
+  <img src="https://raw.githubusercontent.com/nautobot/nautobot-app-device-onboarding/develop/docs/images/icon-DeviceOnboarding.png" class="logo" height="200px">
   <br>
-  <a href="https://github.com/nautobot/nautobot-plugin-device-onboarding/actions"><img src="https://github.com/nautobot/nautobot-plugin-device-onboarding/actions/workflows/ci.yml/badge.svg?branch=develop"></a>
+  <a href="https://github.com/nautobot/nautobot-app-device-onboarding/actions"><img src="https://github.com/nautobot/nautobot-app-device-onboarding/actions/workflows/ci.yml/badge.svg?branch=develop"></a>
   <a href="https://docs.nautobot.com/projects/device-onboarding/"><img src="https://readthedocs.org/projects/nautobot-plugin-device-onboarding/badge/"></a>
   <a href="https://pypi.org/project/nautobot-device-onboarding/"><img src="https://img.shields.io/pypi/v/nautobot-device-onboarding"></a>
   <a href="https://pypi.org/project/nautobot-device-onboarding/"><img src="https://img.shields.io/pypi/dm/nautobot-device-onboarding"></a>
@@ -15,13 +15,13 @@
 
 The `nautobot-device-onboarding` plugin is using the [netmiko](https://github.com/ktbyers/netmiko) and [NAPALM](https://napalm.readthedocs.io/en/latest/) libraries to simplify the onboarding process of a new device into Nautobot down to, in many cases, an *IP Address* and a *Location*. In some cases, the user may also have to specify a specific *Device Platform* and *Device Port*.
 
-Regardless, the Onboarding Plugin greatly simplifies the onboarding process by allowing the user to specify a small amount of info and having the app populate a much larger amount of device data in Nautobot.
+Regardless, the Onboarding App greatly simplifies the onboarding process by allowing the user to specify a small amount of info and having the app populate a much larger amount of device data in Nautobot.
 
 ### Screenshots
 
 Device Onboarding is a Job that allows you to provide a few required pieces of information and onboard the device.
 
-![job input](https://raw.githubusercontent.com/nautobot/nautobot-plugin-device-onboarding/develop/docs/images/do_job_inputs.png)
+![job input](https://raw.githubusercontent.com/nautobot/nautobot-app-device-onboarding/develop/docs/images/do_job_inputs.png)
 
 ## Try it out!
 
@@ -41,7 +41,7 @@ Full web-based HTML documentation for this app can be found over on the [Nautobo
 
 ### Contributing to the Docs
 
-You can find all the Markdown source for the App documentation under the [docs](https://github.com/nautobot/nautobot-plugin-device-onboarding/tree/develop/docs) folder in this repository. For simple edits, a Markdown capable editor is sufficient - clone the repository and edit away.
+You can find all the Markdown source for the App documentation under the [docs](https://github.com/nautobot/nautobot-app-device-onboarding/tree/develop/docs) folder in this repository. For simple edits, a Markdown capable editor is sufficient - clone the repository and edit away.
 
 If you need to view the fully generated documentation site, you can build it with [mkdocs](https://www.mkdocs.org/). A container hosting the docs will be started using the invoke commands (details in the [Development Environment Guide](https://docs.nautobot.com/projects/device-onboarding/en/latest/dev/dev_environment/#docker-development-environment)) on [http://localhost:8001](http://localhost:8001). As your changes are saved, the live docs will be automatically reloaded.
 
