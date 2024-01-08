@@ -42,7 +42,7 @@ One example of a solution that can retrieve that additional device data and impo
 
 The Onboarding App is meant for new Nautobot users who want to start importing their devices directly rather than from another, existing, source. Even with other sources for device information, they may not include everything that is necessary.
 
-Existing Nautobot users may want to incorporate the Onboarding Plugin as part of onboarding new devices to the platform.
+Existing Nautobot users may want to incorporate the Onboarding App as part of onboarding new devices to the platform.
 
 ## Authors and Maintainers
 

@@ -1,4 +1,4 @@
-"""Constants for nautobot_device_onboarding plugin."""
+"""Constants for nautobot_device_onboarding app."""
 
 NETMIKO_TO_NAPALM_STATIC = {
     "cisco_ios": "ios",
