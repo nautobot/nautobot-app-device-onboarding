@@ -1,18 +1,23 @@
 """Device Onboarding Jobs."""
 from django.conf import settings
+from django.templatetags.static import static
 from nautobot.apps.jobs import Job, ObjectVar, IntegerVar, StringVar, BooleanVar
 from nautobot.core.celery import register_jobs
 from nautobot.dcim.models import Location, DeviceType, Platform
-from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation
+from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.helpers import onboarding_task_fqdn_to_ip
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
-
+from nautobot_device_onboarding.diffsync.adapters.onboarding_adapters import OnboardingNautobotAdapter, OnboardingNetworkAdapter
+from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import NetworkImporterNautobotAdapter, NetworkImporterNetworkAdapter
+from nautobot_ssot.jobs.base import DataSource
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
+
+name = "Device Onboarding/Network Importer"
 
 class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
     """Nautobot Job for onboarding a new device."""
@@ -180,4 +185,108 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
             self.secret = settings.NAPALM_ARGS.get("secret", None)
 
 
-register_jobs(OnboardingTask)
+class SSOTDeviceOnboarding(DataSource):
+    """Job for syncing basic device info from a network into Nautobot."""
+
+    class Meta:
+        """Metadata about this Job."""
+
+        name = "Sync Devices"
+        description = "Synchronize basic device information into Nautobot"
+
+    debug = BooleanVar(description="Enable for more verbose logging.")
+
+    location = ObjectVar(
+        model=Location,
+        query_params={"content_type": "dcim.device"},
+        description="Assigned Location for the onboarded device(s)",
+    )
+    ip_addresses = StringVar(
+        description="IP Address/DNS Name of the device to onboard, specify in a comma separated list for multiple devices.",
+        label="IP Address/FQDN",
+    )
+    port = IntegerVar(default=22)
+    timeout = IntegerVar(default=30)
+    credentials = ObjectVar(
+        model=SecretsGroup, required=False, description="SecretsGroup for Device connection credentials."
+    )
+    platform = ObjectVar(
+        model=Platform,
+        required=False,
+        description="Device platform. Define ONLY to override auto-recognition of platform.",
+    )
+    role = ObjectVar(
+        model=Role,
+        query_params={"content_types": "dcim.device"},
+        required=False,
+        description="Device role. Define ONLY to override auto-recognition of role.",
+    )
+    device_type = ObjectVar(
+        model=DeviceType,
+        label="Device Type",
+        required=False,
+        description="Device type. Define ONLY to override auto-recognition of type.",
+    )
+    continue_on_failure = BooleanVar(
+        label="Continue On Failure",
+        default=True,
+        description="If an exception occurs, log the exception and continue to next device.",
+    )
+
+    def load_source_adapter(self):
+        """Load onboarding network adapter."""
+        self.logger.info("Loading device data from network devices...")
+        self.source_adapter = OnboardingNetworkAdapter(job=self, sync=self.sync)
+        self.source_adapter.load()
+
+    def load_target_adapter(self):
+        """Load onboarding nautobot adapter."""
+        self.logger.info("Loading device data from Nautobot...")
+        self.target_adapter = OnboardingNautobotAdapter(job=self, sync=self.sync)
+        self.target_adapter.load()
+
+    def run(self, 
+            dryrun, 
+            memory_profiling, 
+            location,
+            ip_addresses,
+            port,
+            timeout,
+            credentials,
+            platform,
+            role,
+            device_type,
+            continue_on_failure,
+            *args, 
+            **kwargs
+            ):  # pylint:disable=arguments-differ
+        """Run sync."""
+        self.dryrun = dryrun
+        self.memory_profiling = memory_profiling
+        self.location = location,
+        self.ip_addresses=ip_addresses,
+        self.port = port,
+        self.timeout = timeout,
+        self.credentials = credentials,
+        self.platform = platform,
+        self.role = role,
+        self.device_type = device_type,
+        self.continue_on_failure = continue_on_failure
+        super().run(dryrun, memory_profiling, *args, **kwargs)
+
+class SSOTNetworkImporter(DataSource):
+    """Job syncing extended device attributes into Nautobot."""
+
+    debug = BooleanVar(description="Enable for more verbose logging.")
+
+    class Meta:
+        """Metadata about this Job."""
+
+        name = "Sync Network Data"
+        description = "Synchronize extended device attribute information into Nautobot; "\
+                      "including Interfaces, IPAddresses, Prefixes, Vlans and Cables."
+    
+
+
+jobs = [OnboardingTask, SSOTDeviceOnboarding, SSOTNetworkImporter]
+register_jobs(*jobs)
