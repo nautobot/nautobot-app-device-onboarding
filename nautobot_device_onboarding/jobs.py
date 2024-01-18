@@ -4,6 +4,7 @@ from django.templatetags.static import static
 from nautobot.apps.jobs import Job, ObjectVar, IntegerVar, StringVar, BooleanVar
 from nautobot.core.celery import register_jobs
 from nautobot.dcim.models import Location, DeviceType, Platform
+from nautobot.ipam.models import Namespace
 from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 
@@ -201,77 +202,66 @@ class SSOTDeviceOnboarding(DataSource):
         query_params={"content_type": "dcim.device"},
         description="Assigned Location for the onboarded device(s)",
     )
+    namespace = ObjectVar(
+        model=Namespace,
+        description="Namespace IP Addresses belong to."
+    )
     ip_addresses = StringVar(
-        description="IP Address/DNS Name of the device to onboard, specify in a comma separated list for multiple devices.",
-        label="IP Address/FQDN",
+        description="IP Address of the device to onboard, specify in a comma separated list for multiple devices.",
+        label="IPv4 Addresses",
+    )
+    role = ObjectVar(
+        model=Role,
+        query_params={"content_types": "dcim.device"},
+        required=True,
+        description="Role to be applied to all onboarded devices",
+    )
+    status = ObjectVar(
+        model=Status,
+        query_params={"content_types": "dcim.device"},
+        required=True,
+        description="Status to be applied to all onboarded devices",
     )
     port = IntegerVar(default=22)
     timeout = IntegerVar(default=30)
     credentials = ObjectVar(
-        model=SecretsGroup, required=False, description="SecretsGroup for Device connection credentials."
+        model=SecretsGroup, required=True, description="SecretsGroup for Device connection credentials."
     )
     platform = ObjectVar(
         model=Platform,
         required=False,
         description="Device platform. Define ONLY to override auto-recognition of platform.",
     )
-    role = ObjectVar(
-        model=Role,
-        query_params={"content_types": "dcim.device"},
-        required=False,
-        description="Device role. Define ONLY to override auto-recognition of role.",
-    )
-    device_type = ObjectVar(
-        model=DeviceType,
-        label="Device Type",
-        required=False,
-        description="Device type. Define ONLY to override auto-recognition of type.",
-    )
-    continue_on_failure = BooleanVar(
-        label="Continue On Failure",
+    skip_device_type_update = BooleanVar(
+        label="Skip Device Type Update",
         default=True,
-        description="If an exception occurs, log the exception and continue to next device.",
+        description="If a device exists in Nautobot, do not update its associated device type.",
     )
 
     def load_source_adapter(self):
         """Load onboarding network adapter."""
-        self.logger.info("Loading device data from network devices...")
         self.source_adapter = OnboardingNetworkAdapter(job=self, sync=self.sync)
         self.source_adapter.load()
 
     def load_target_adapter(self):
-        """Load onboarding nautobot adapter."""
-        self.logger.info("Loading device data from Nautobot...")
+        """Load onboarding Nautobot adapter."""
         self.target_adapter = OnboardingNautobotAdapter(job=self, sync=self.sync)
         self.target_adapter.load()
 
-    def run(self, 
-            dryrun, 
-            memory_profiling, 
-            location,
-            ip_addresses,
-            port,
-            timeout,
-            credentials,
-            platform,
-            role,
-            device_type,
-            continue_on_failure,
-            *args, 
-            **kwargs
-            ):  # pylint:disable=arguments-differ
+    def run(self, dryrun, memory_profiling, *args, **kwargs):  # pylint:disable=arguments-differ
         """Run sync."""
+
         self.dryrun = dryrun
         self.memory_profiling = memory_profiling
-        self.location = location,
-        self.ip_addresses=ip_addresses,
-        self.port = port,
-        self.timeout = timeout,
-        self.credentials = credentials,
-        self.platform = platform,
-        self.role = role,
-        self.device_type = device_type,
-        self.continue_on_failure = continue_on_failure
+        self.location = kwargs["location"]
+        self.ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
+        self.role = kwargs["role"]
+        self.status = kwargs["status"]
+        self.port = kwargs["port"]
+        self.timeout = kwargs["timeout"]
+        self.credentials = kwargs["credentials"]
+        self.platform = kwargs["platform"]
+        self.skip_device_type_update = kwargs["skip_device_type_update"]
         super().run(dryrun, memory_profiling, *args, **kwargs)
 
 class SSOTNetworkImporter(DataSource):
@@ -288,5 +278,5 @@ class SSOTNetworkImporter(DataSource):
     
 
 
-jobs = [OnboardingTask, SSOTDeviceOnboarding, SSOTNetworkImporter]
+jobs = [OnboardingTask, SSOTDeviceOnboarding]
 register_jobs(*jobs)
