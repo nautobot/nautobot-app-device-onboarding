@@ -1,9 +1,12 @@
 """DiffSync adapters."""
 
-from diffsync import DiffSync
-from nautobot_ssot.contrib import NautobotAdapter
+import netaddr
+from nautobot.dcim.choices import InterfaceTypeChoices
+from nautobot.dcim.models import Device
 from nautobot_device_onboarding.diffsync.models import onboarding_models
-import netaddr 
+from nautobot_ssot.contrib import NautobotAdapter
+
+from diffsync import DiffSync
 
 #######################################
 # FOR TESTING ONLY - TO BE REMOVED    #
@@ -12,44 +15,61 @@ mock_data = {
     "10.1.1.8": {
         "hostname": "demo-cisco-xe",
         "serial_number": "9ABUXU580QS",
-        "device_type": "CSR1000V",
+        "device_type": "CSR1000V2",
         "mgmt_ip_address": "10.1.1.8",
+        "mgmt_interface": "GigabitEthernet1",
+        "manufacturer": "Cisco",
+        "platform": "IOS",
+        "network_driver": "cisco_ios",
+        "prefix": "10.0.0.0/8"
     }
 }
 #######################################
 #######################################
 
+
 class OnboardingNautobotAdapter(NautobotAdapter):
     """Adapter for loading Nautobot data."""
 
-    device_type = onboarding_models.OnboardingDeviceType
+    manufacturer = onboarding_models.OnboardingManufacturer
+    platform = onboarding_models.OnboardingPlatform
     device = onboarding_models.OnboardingDevice
+    device_type = onboarding_models.OnboardingDeviceType
     interface = onboarding_models.OnboardingInterface
+    ip_address = onboarding_models.OnboardingIPAddress
 
-    top_level = ["device_type", "device"]
+    top_level = ["manufacturer", "platform", "device_type", "device"]
+
+    def _load_objects(self, diffsync_model):
+        """Given a diffsync model class, load a list of models from the database and return them."""
+        parameter_names = self._get_parameter_names(diffsync_model)
+        if diffsync_model._model == Device:
+            for database_object in diffsync_model._get_queryset(filter=self.job.ip_addresses):
+                self._load_single_object(database_object, diffsync_model, parameter_names)
+        else:
+            for database_object in diffsync_model._get_queryset():
+                self._load_single_object(database_object, diffsync_model, parameter_names)
+
 
 class OnboardingNetworkAdapter(DiffSync):
     """Adapter for loading device data from a network."""
 
-    device_type = onboarding_models.OnboardingDeviceType
+    manufacturer = onboarding_models.OnboardingManufacturer
+    platform = onboarding_models.OnboardingPlatform
     device = onboarding_models.OnboardingDevice
+    device_type = onboarding_models.OnboardingDeviceType
     interface = onboarding_models.OnboardingInterface
+    ip_address = onboarding_models.OnboardingIPAddress
 
-    top_level = ["device_type", "device"]
+    top_level = ["manufacturer", "platform", "device_type", "device"]
 
-    def __init__(
-            self, 
-            job: object, 
-            sync: object,
-            *args, 
-            **kwargs
-        ):
+    def __init__(self, job, sync, *args, **kwargs):
         """Initialize the NautobotDiffSync."""
         super().__init__(*args, **kwargs)
         self.job = job
         self.sync = sync
 
-    def _validate_ip_addresses(self, ip_addresses: list):
+    def _validate_ip_addresses(self, ip_addresses):
         """Validate the format of each IP Address in a list of IP Addresses."""
         # Validate IP Addresses
         validation_successful = True
@@ -65,36 +85,96 @@ class OnboardingNetworkAdapter(DiffSync):
             raise netaddr.AddrConversionError
 
     def load_devices(self):
-        """Query devices and load device data into a DiffSync model."""
+        """Load device data into a DiffSync model."""
 
         # PROVIDE TO JOB: ip4address, port, timeout, secrets_group, platform (optional)
-        #TODO: Call onboarding job to query devices
+        # TODO: CHECK FOR FAILED CONNECTIONS AND DO NOT LOAD DATA, LOG FAILED IPs
+        # TODO: Call onboarding job to query devices
 
         for ip_address in mock_data:
             if self.job.debug:
                 self.job.logger.debug(f"loading device data for {ip_address}")
             onboarding_device = self.device(
                 diffsync=self,
-                primary_ip4__host=ip_address,
-                location__name=self.job.location.name,
-                role__name=self.job.role.name,
                 device_type__model=mock_data[ip_address]["device_type"],
+                location__name=self.job.location.name,
+                name=mock_data[ip_address]["hostname"],
+                platform__name=mock_data[ip_address]["platform"],
+                primary_ip4__host=ip_address,
+                role__name=self.job.role.name,
+                status__name=self.job.device_status.name,
+                secrets_group__name=self.job.secrets_group.name,
             )
             self.add(onboarding_device)
+            self.load_interface(onboarding_device, mock_data, ip_address)
 
     def load_device_types(self):
-        """Query devices and load device type data into a DiffSync model."""
+        """Load device type data into a DiffSync model."""
         for ip_address in mock_data:
             if self.job.debug:
                 self.job.logger.debug(f"loading device_type data for {ip_address}")
             onboarding_device_type = self.device_type(
                 diffsync=self,
-                model = mock_data[ip_address]["device_type"]
+                model=mock_data[ip_address]["device_type"],
+                manufacturer__name=mock_data[ip_address]["manufacturer"],
             )
             self.add(onboarding_device_type)
-            
+
+    def load_interface(self, onboarding_device, device_data, ip_address):
+        """Load interface data into a DiffSync model."""
+        if self.job.debug:
+            self.job.logger.debug(f"loading interface data for {ip_address}")
+        onboarding_interface = self.interface(
+            diffsync=self,
+            name=device_data[ip_address]["mgmt_interface"],
+            device__name=device_data[ip_address]["hostname"],
+            status__name=self.job.interface_status.name,
+            type=InterfaceTypeChoices.TYPE_OTHER,
+        )
+        self.add(onboarding_interface)
+        onboarding_device.add_child(onboarding_interface)
+        self.load_ip_address(onboarding_interface, mock_data, ip_address)
+
+    def load_ip_address(self, onboarding_interface, device_data, ip_address):
+        """Load ip address data into a DiffSync model."""
+        if self.job.debug:
+            self.job.logger.debug(f"loading ip address data for {ip_address}")
+        onboarding_ip_address = self.ip_address(
+            diffsync=self,
+            parent__network=device_data[ip_address]["prefix"],
+            host=ip_address,
+        )
+        self.add(onboarding_ip_address)
+        onboarding_interface.add_child(onboarding_ip_address)
+
+    def load_manufacturers(self):
+        """Load manufacturer data into a DiffSync model."""
+        for ip_address in mock_data:
+            if self.job.debug:
+                self.job.logger.debug(f"loading manufacturer data for {ip_address}")
+            onboarding_manufacturer = self.manufacturer(
+                diffsync=self,
+                name=mock_data[ip_address]["manufacturer"],
+            )
+            self.add(onboarding_manufacturer)
+
+    def load_platforms(self):
+        """Load platform data into a DiffSync model."""
+        for ip_address in mock_data:
+            if self.job.debug:
+                self.job.logger.debug(f"loading platform data for {ip_address}")
+            onboarding_platform = self.platform(
+                diffsync=self,
+                name=mock_data[ip_address]["platform"],
+                manufacturer__name=mock_data[ip_address]["manufacturer"],
+                network_driver=mock_data[ip_address]["network_driver"],
+            )
+            self.add(onboarding_platform)
+
     def load(self):
         """Load device data."""
         self._validate_ip_addresses(self.job.ip_addresses)
-        self.load_devices()
+        self.load_manufacturers()
+        self.load_platforms()
         self.load_device_types()
+        self.load_devices()

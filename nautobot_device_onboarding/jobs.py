@@ -14,6 +14,7 @@ from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
 from nautobot_device_onboarding.diffsync.adapters.onboarding_adapters import OnboardingNautobotAdapter, OnboardingNetworkAdapter
 from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import NetworkImporterNautobotAdapter, NetworkImporterNetworkAdapter
 from nautobot_ssot.jobs.base import DataSource
+from diffsync.enum import DiffSyncFlags
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
@@ -189,13 +190,18 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
 class SSOTDeviceOnboarding(DataSource):
     """Job for syncing basic device info from a network into Nautobot."""
 
+    def __init__(self):
+        """Initialize SSOTDeviceOnboarding."""
+        super().__init__()
+        self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
+
     class Meta:
         """Metadata about this Job."""
 
         name = "Sync Devices"
         description = "Synchronize basic device information into Nautobot"
 
-    debug = BooleanVar(description="Enable for more verbose logging.")
+    debug = BooleanVar(description="Enable for more verbose logging.", default=False)
 
     location = ObjectVar(
         model=Location,
@@ -204,7 +210,7 @@ class SSOTDeviceOnboarding(DataSource):
     )
     namespace = ObjectVar(
         model=Namespace,
-        description="Namespace IP Addresses belong to."
+        description="Namespace ip addresses belong to."
     )
     ip_addresses = StringVar(
         description="IP Address of the device to onboard, specify in a comma separated list for multiple devices.",
@@ -216,26 +222,27 @@ class SSOTDeviceOnboarding(DataSource):
         required=True,
         description="Role to be applied to all onboarded devices",
     )
-    status = ObjectVar(
+    device_status = ObjectVar(
         model=Status,
         query_params={"content_types": "dcim.device"},
         required=True,
         description="Status to be applied to all onboarded devices",
     )
+    interface_status = ObjectVar(
+        model=Status,
+        query_params={"content_types": "dcim.interface"},
+        required=True,
+        description="Status to be applied to all onboarded device interfaces",
+    )
     port = IntegerVar(default=22)
     timeout = IntegerVar(default=30)
-    credentials = ObjectVar(
-        model=SecretsGroup, required=True, description="SecretsGroup for Device connection credentials."
+    secrets_group = ObjectVar(
+        model=SecretsGroup, required=True, description="SecretsGroup for device connection credentials."
     )
     platform = ObjectVar(
         model=Platform,
         required=False,
         description="Device platform. Define ONLY to override auto-recognition of platform.",
-    )
-    skip_device_type_update = BooleanVar(
-        label="Skip Device Type Update",
-        default=True,
-        description="If a device exists in Nautobot, do not update its associated device type.",
     )
 
     def load_source_adapter(self):
@@ -253,15 +260,16 @@ class SSOTDeviceOnboarding(DataSource):
 
         self.dryrun = dryrun
         self.memory_profiling = memory_profiling
+        self.debug = kwargs["debug"]
         self.location = kwargs["location"]
         self.ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
         self.role = kwargs["role"]
-        self.status = kwargs["status"]
+        self.device_status = kwargs["device_status"]
+        self.interface_status = kwargs["interface_status"]
         self.port = kwargs["port"]
         self.timeout = kwargs["timeout"]
-        self.credentials = kwargs["credentials"]
+        self.secrets_group = kwargs["secrets_group"]
         self.platform = kwargs["platform"]
-        self.skip_device_type_update = kwargs["skip_device_type_update"]
         super().run(dryrun, memory_profiling, *args, **kwargs)
 
 class SSOTNetworkImporter(DataSource):
@@ -275,8 +283,7 @@ class SSOTNetworkImporter(DataSource):
         name = "Sync Network Data"
         description = "Synchronize extended device attribute information into Nautobot; "\
                       "including Interfaces, IPAddresses, Prefixes, Vlans and Cables."
-    
-
+        
 
 jobs = [OnboardingTask, SSOTDeviceOnboarding]
 register_jobs(*jobs)
