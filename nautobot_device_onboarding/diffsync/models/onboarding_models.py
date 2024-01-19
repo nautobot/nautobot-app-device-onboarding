@@ -58,6 +58,7 @@ class OnboardingDevice(NautobotModel):
         else:
             return cls._model.objects.all()
 
+
 class OnboardingDeviceType(NautobotModel):
     _modelname = "device_type"
     _model = DeviceType
@@ -72,6 +73,7 @@ class OnboardingInterface(NautobotModel):
     _model = Interface
     _identifiers = ("name", "device__name")
     _attributes = (
+        "mgmt_only",
         "status__name",
         "type",
     )
@@ -80,6 +82,7 @@ class OnboardingInterface(NautobotModel):
     name: str
     device__name: str
 
+    mgmt_only: Optional[bool]
     status__name: Optional[str]
     type: Optional[str]
 
@@ -89,10 +92,19 @@ class OnboardingInterface(NautobotModel):
 class OnboardingIPAddress(NautobotModel):
     _modelname = "ip_address"
     _model = IPAddress
-    _identifiers = ("parent__network", "host")
+    _identifiers = (
+        "parent__namespace__name", 
+        "parent__network",
+        "parent__prefix_length",
+        "host",
+        "mask_length",
+        )
 
+    parent__namespace__name: str
     parent__network: str
+    parent__prefix_length: int
     host: str
+    mask_length: int
 
 
 class OnboardingManufacturer(NautobotModel):

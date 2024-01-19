@@ -8,6 +8,8 @@ from nautobot_ssot.contrib import NautobotAdapter
 
 from diffsync import DiffSync
 
+from nautobot.extras.models.jobs import Job as JobModel
+
 #######################################
 # FOR TESTING ONLY - TO BE REMOVED    #
 #######################################
@@ -21,7 +23,9 @@ mock_data = {
         "manufacturer": "Cisco",
         "platform": "IOS",
         "network_driver": "cisco_ios",
-        "prefix": "10.0.0.0/8"
+        "prefix": "10.0.0.0", # this is the network field on the Prefix model
+        "prefix_length": 8,
+        "mask_length": 24,
     }
 }
 #######################################
@@ -91,6 +95,11 @@ class OnboardingNetworkAdapter(DiffSync):
         # TODO: CHECK FOR FAILED CONNECTIONS AND DO NOT LOAD DATA, LOG FAILED IPs
         # TODO: Call onboarding job to query devices
 
+        command_getter_job = JobModel.objects.get(name="Command Getter for Device Onboarding").job_task
+        result = command_getter_job.s()
+        result.apply_async(args=self.job.job_result.task_args, kwargs=self.job.job_result.task_kwargs, **self.job.job_result.celery_kwargs)
+
+
         for ip_address in mock_data:
             if self.job.debug:
                 self.job.logger.debug(f"loading device data for {ip_address}")
@@ -101,7 +110,7 @@ class OnboardingNetworkAdapter(DiffSync):
                 name=mock_data[ip_address]["hostname"],
                 platform__name=mock_data[ip_address]["platform"],
                 primary_ip4__host=ip_address,
-                role__name=self.job.role.name,
+                role__name=self.job.device_role.name,
                 status__name=self.job.device_status.name,
                 secrets_group__name=self.job.secrets_group.name,
             )
@@ -130,6 +139,7 @@ class OnboardingNetworkAdapter(DiffSync):
             device__name=device_data[ip_address]["hostname"],
             status__name=self.job.interface_status.name,
             type=InterfaceTypeChoices.TYPE_OTHER,
+            mgmt_only=self.job.management_only_interface,
         )
         self.add(onboarding_interface)
         onboarding_device.add_child(onboarding_interface)
@@ -141,8 +151,11 @@ class OnboardingNetworkAdapter(DiffSync):
             self.job.logger.debug(f"loading ip address data for {ip_address}")
         onboarding_ip_address = self.ip_address(
             diffsync=self,
+            parent__namespace__name=self.job.namespace.name,
             parent__network=device_data[ip_address]["prefix"],
+            parent__prefix_length=device_data[ip_address]["prefix_length"],
             host=ip_address,
+            mask_length=device_data[ip_address]["mask_length"],
         )
         self.add(onboarding_ip_address)
         onboarding_interface.add_child(onboarding_ip_address)
