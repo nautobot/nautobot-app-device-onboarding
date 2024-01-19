@@ -8,3 +8,8 @@ NETMIKO_TO_NAPALM_STATIC = {
     "juniper_junos": "junos",
     "cisco_xr": "iosxr",
 }
+
+PLATFORM_COMMAND_MAP = {
+    "cisco_ios": ["show version", "show inventory", "show interfaces"],
+    "cisco_nxos": ["show version", "show inventory", "show interface"],
+}

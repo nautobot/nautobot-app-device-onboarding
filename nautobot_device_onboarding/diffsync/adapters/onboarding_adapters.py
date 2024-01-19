@@ -23,7 +23,7 @@ mock_data = {
         "manufacturer": "Cisco",
         "platform": "IOS",
         "network_driver": "cisco_ios",
-        "prefix": "10.0.0.0", # this is the network field on the Prefix model
+        "prefix": "10.0.0.0",  # this is the network field on the Prefix model
         "prefix_length": 8,
         "mask_length": 24,
     }
@@ -97,8 +97,11 @@ class OnboardingNetworkAdapter(DiffSync):
 
         command_getter_job = JobModel.objects.get(name="Command Getter for Device Onboarding").job_task
         result = command_getter_job.s()
-        result.apply_async(args=self.job.job_result.task_args, kwargs=self.job.job_result.task_kwargs, **self.job.job_result.celery_kwargs)
-
+        result.apply_async(
+            args=self.job.job_result.task_args,
+            kwargs=self.job.job_result.task_kwargs,
+            **self.job.job_result.celery_kwargs,
+        )
 
         for ip_address in mock_data:
             if self.job.debug:

@@ -1,50 +1,41 @@
 """Device Onboarding Jobs."""
+from diffsync.enum import DiffSyncFlags
 from django.conf import settings
 from django.templatetags.static import static
-from nautobot.apps.jobs import Job, ObjectVar, IntegerVar, StringVar, BooleanVar
+from nautobot.apps.jobs import BooleanVar, IntegerVar, Job, ObjectVar, StringVar
 from nautobot.core.celery import register_jobs
-from nautobot.dcim.models import Location, DeviceType, Platform
-from nautobot.ipam.models import Namespace
-from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status
+from nautobot.dcim.models import DeviceType, Location, Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
-
+from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status
+from nautobot.ipam.models import Namespace
+from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
+    NetworkImporterNautobotAdapter,
+    NetworkImporterNetworkAdapter,
+)
+from nautobot_device_onboarding.diffsync.adapters.onboarding_adapters import (
+    OnboardingNautobotAdapter,
+    OnboardingNetworkAdapter,
+)
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.helpers import onboarding_task_fqdn_to_ip
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
-from nautobot_device_onboarding.diffsync.adapters.onboarding_adapters import OnboardingNautobotAdapter, OnboardingNetworkAdapter
-from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import NetworkImporterNautobotAdapter, NetworkImporterNetworkAdapter
+from nautobot_device_onboarding.nornir_plays.command_getter import netmiko_send_commands
+from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
+from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
 from nautobot_ssot.jobs.base import DataSource
-from diffsync.enum import DiffSyncFlags
-
-from django.conf import settings
-from nautobot.apps.jobs import Job, ObjectVar, IntegerVar, StringVar, BooleanVar
-from nautobot.core.celery import register_jobs
-from nautobot.dcim.models import Location, DeviceType, Platform
-from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation
-from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
-from netmiko import SSHDetect
 from nornir import InitNornir
-
-from nornir_netmiko.tasks import netmiko_send_command
+from nornir.core.inventory import ConnectionOptions, Defaults, Groups, Host, Hosts, Inventory
 from nornir.core.plugins.inventory import InventoryPluginRegister
 from nornir.core.task import Result, Task
-from nornir.core.inventory import (
-    Inventory,
-    ConnectionOptions,
-    Defaults,
-    Groups,
-    Host,
-    Hosts,
-)
+from nornir_netmiko.tasks import netmiko_send_command
 
-from nautobot_device_onboarding.exceptions import OnboardException
-from nautobot_device_onboarding.helpers import onboarding_task_fqdn_to_ip
-from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
+InventoryPluginRegister.register("empty-inventory", EmptyInventory)
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
 
 name = "Device Onboarding/Network Importer"
+
 
 class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
     """Nautobot Job for onboarding a new device."""
@@ -226,23 +217,23 @@ class SSOTDeviceOnboarding(DataSource):
         name = "Sync Devices"
         description = "Synchronize basic device information into Nautobot"
 
-    debug = BooleanVar( default=False, description="Enable for more verbose logging.",)
+    debug = BooleanVar(
+        default=False,
+        description="Enable for more verbose logging.",
+    )
 
     location = ObjectVar(
         model=Location,
         query_params={"content_type": "dcim.device"},
         description="Assigned Location for the onboarded device(s)",
     )
-    namespace = ObjectVar(
-        model=Namespace,
-        description="Namespace ip addresses belong to."
-    )
+    namespace = ObjectVar(model=Namespace, description="Namespace ip addresses belong to.")
     ip_addresses = StringVar(
         description="IP Address of the device to onboard, specify in a comma separated list for multiple devices.",
         label="IPv4 Addresses",
     )
     management_only_interface = BooleanVar(
-        default=False, 
+        default=False,
         label="Set Management Only",
         description="If True, interfaces that are created or updated will be set to management only. If False, the interface will be set to not be management only.",
     )
@@ -274,7 +265,7 @@ class SSOTDeviceOnboarding(DataSource):
         required=False,
         description="Device platform. Define ONLY to override auto-recognition of platform.",
     )
-    
+
     def load_source_adapter(self):
         """Load onboarding network adapter."""
         self.source_adapter = OnboardingNetworkAdapter(job=self, sync=self.sync)
@@ -304,6 +295,7 @@ class SSOTDeviceOnboarding(DataSource):
         self.platform = kwargs["platform"]
         super().run(dryrun, memory_profiling, *args, **kwargs)
 
+
 class SSOTNetworkImporter(DataSource):
     """Job syncing extended device attributes into Nautobot."""
 
@@ -313,21 +305,15 @@ class SSOTNetworkImporter(DataSource):
         """Metadata about this Job."""
 
         name = "Sync Network Data"
-        description = "Synchronize extended device attribute information into Nautobot; "\
-                      "including Interfaces, IPAddresses, Prefixes, Vlans and Cables."
-        
+        description = (
+            "Synchronize extended device attribute information into Nautobot; "
+            "including Interfaces, IPAddresses, Prefixes, Vlans and Cables."
+        )
 
-PLATFORM_COMMAND_MAP = {
-            "cisco_ios": ["show version", "show inventory", "show interfaces"],
-            "cisco_nxos": ["show version", "show inventory", "show interface"],
-        }
-
-def netmiko_send_commands(task: Task):
-    platform = task.host.platform or 'default'
-    for command in PLATFORM_COMMAND_MAP.get(platform):
-        task.run(task=netmiko_send_command, command_string=command, use_textfsm=True)
 
 class CommandGetterDO(Job):
+    """Simple Job to Execute Show Command."""
+
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta object boilerplate for onboarding."""
 
@@ -336,21 +322,8 @@ class CommandGetterDO(Job):
         has_sensitive_variables = False
         hidden = False
 
-    class EmptyInventory:
-            """Creates an empty Nornir Inventory to be populated later."""
-            def __init__(self, *args, **kwargs):
-                pass
-
-            def load(self) -> Inventory:
-                """Create a default empty inventory."""
-                hosts = Hosts()
-                defaults = Defaults(data={})
-                groups = Groups()
-                return Inventory(hosts=hosts, groups=groups, defaults=defaults)
-            
-    InventoryPluginRegister.register("empty-inventory", EmptyInventory)
-
     def __init__(self, *args, **kwargs):
+        """Initialize Command Getter Job."""
         self.username = None
         self.password = None
         self.secret = None
@@ -361,61 +334,14 @@ class CommandGetterDO(Job):
         self.timeout = None
         super().__init__(*args, **kwargs)
 
-    def _parse_credentials(self, credentials):
-            """Parse and return dictionary of credentials."""
-            if credentials:
-                self.logger.info("Attempting to parse credentials from selected SecretGroup")
-                try:
-                    self.username = credentials.get_secret_value(
-                        access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
-                        secret_type=SecretsGroupSecretTypeChoices.TYPE_USERNAME,
-                    )
-                    self.password = credentials.get_secret_value(
-                        access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
-                        secret_type=SecretsGroupSecretTypeChoices.TYPE_PASSWORD,
-                    )
-                    try:
-                        self.secret = credentials.get_secret_value(
-                            access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
-                            secret_type=SecretsGroupSecretTypeChoices.TYPE_SECRET,
-                        )  
-                    except Exception as e:
-                        self.secret = None
-                except Exception as err:
-                    self.logger.exception(f"Unable to use SecretsGroup selected, ensure Access Type is set to Generic & at minimum Username & Password types are set.", {e}
-                    )
-                    raise OnboardException("fail-credentials - Unable to parse selected credentials.") from err
-
-            else:
-                self.logger.info("Using napalm credentials configured in nautobot_config.py")
-                self.username = settings.NAPALM_USERNAME
-                self.password = settings.NAPALM_PASSWORD
-                self.secret = settings.NAPALM_ARGS.get("secret", None)
-
-    def guess_netmiko_device_type(self, hostname, username, password):
-            """Guess the device type of host, based on Netmiko."""
-            guessed_device_type = None
-
-            netmiko_optional_args = {}
-
-            remote_device = {
-                "device_type": "autodetect",
-                "host": hostname,
-                "username": username,
-                "password": password,
-                **netmiko_optional_args,
-            }
-
-            try:
-                guesser = SSHDetect(**remote_device)
-                guessed_device_type = guesser.autodetect()
-
-            except Exception as err:
-                print(err)
-            return guessed_device_type   
-                
     def run(self):
-        mock_job_data = {"ip4address": "174.51.52.76,10.1.1.1", "platform": "cisco_ios", "secrets_group": SecretsGroup.objects.get(name="Cisco Devices"), "port": 8922,"timeout": 30}
+        mock_job_data = {
+            "ip4address": "174.51.52.76,10.1.1.1",
+            "platform": "cisco_ios",
+            "secrets_group": SecretsGroup.objects.get(name="Cisco Devices"),
+            "port": 8922,
+            "timeout": 30,
+        }
 
         """Process onboarding task from ssot-ni job."""
         self.ip4address = mock_job_data["ip4address"]
@@ -427,50 +353,44 @@ class CommandGetterDO(Job):
         # Initiate Nornir instance with empty inventory
         try:
             with InitNornir(inventory={"plugin": "empty-inventory"}) as nr:
-               
-                # Parse credentials from SecretsGroup
-                self._parse_credentials(mock_job_data["secrets_group"])
-            
-                # Build Nornir Inventory
                 ip_address = mock_job_data["ip4address"].split(",")
                 self.platform = mock_job_data.get("platform", None)
-                for h in ip_address:
-                    if not self.platform:
-                        self.platform = self.guess_netmiko_device_type(h, self.username, self.password)
+                inventory_constructed = _set_inventory(ip_address, self.platform, self.port, self.secrets_group)
+                nr.inventory.hosts.update(inventory_constructed)
+                self.logger.info(nr.inventory.hosts)
 
-                    host = Host(
-                        name=h,
-                        hostname=h,
-                        port=mock_job_data["port"],
-                        username=self.username,
-                        password=self.password,
-                        platform=self.platform,
-                        connection_options={
-                            "netmiko": ConnectionOptions(
-                                hostname=h,
-                                port=mock_job_data["port"],
-                                username=self.username,
-                                password=self.password,
-                                platform=self.platform,
-                            )
-                        },
-                    )
-                    nr.inventory.hosts.update({h: host})
-                self.logger.info(nr.inventory.hosts) 
-
-                self.logger.info(f"Inventory built for {len(ip_address)} devices") 
+                self.logger.info("Inventory built for %s devices", len(ip_address))
 
                 results = nr.run(task=netmiko_send_commands)
-                
+
                 for agg_result in results:
                     for r in results[agg_result]:
-                        self.logger.info(f"host: {r.host}")
-                        self.logger.info(f"result: {r.result}")
-            
+                        self.logger.info("host: %s", r.host)
+                        self.logger.info("result: %s", r.result)
+
         except Exception as err:
-            self.logger.info(f"Error: {err}")
+            self.logger.info("Error: %s", err)
             return err
-        return {"addtional_data": "working"}
+        # return {
+        #         "10.1.1.8": {
+        #             "command_output_results": True,
+        #             "hostname": "demo-cisco-xe",
+        #             "serial_number": "9ABUXU580QS",
+        #             "device_type": "CSR1000V2",
+        #             "mgmt_ip_address": "10.1.1.8",
+        #             "mgmt_interface": "GigabitEthernet1",
+        #             "manufacturer": "Cisco",
+        #             "platform": "IOS",
+        #             "network_driver": "cisco_ios",
+        #             "prefix": "10.0.0.0", # this is the network field on the Prefix model
+        #             "prefix_length": 8,
+        #             "mask_length": 24,
+        #         },
+        #         "10.1.1.9": {
+        #             "command_output_results": False,
+        #         }
+        #     }
+        return {"additonal_data": "This worked"}
 
 
 jobs = [OnboardingTask, SSOTDeviceOnboarding, CommandGetterDO]

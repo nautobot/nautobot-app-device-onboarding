@@ -3,8 +3,7 @@
 from typing import List, Optional
 
 import netaddr
-from nautobot.dcim.models import (Device, DeviceType, Interface, Manufacturer,
-                                  Platform)
+from nautobot.dcim.models import Device, DeviceType, Interface, Manufacturer, Platform
 from nautobot.ipam.models import IPAddress, Prefix
 from nautobot_ssot.contrib import NautobotModel
 
@@ -93,12 +92,12 @@ class OnboardingIPAddress(NautobotModel):
     _modelname = "ip_address"
     _model = IPAddress
     _identifiers = (
-        "parent__namespace__name", 
+        "parent__namespace__name",
         "parent__network",
         "parent__prefix_length",
         "host",
         "mask_length",
-        )
+    )
 
     parent__namespace__name: str
     parent__network: str
