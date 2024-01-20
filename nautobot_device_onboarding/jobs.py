@@ -1,4 +1,6 @@
 """Device Onboarding Jobs."""
+import logging
+
 from diffsync.enum import DiffSyncFlags
 from django.conf import settings
 from django.templatetags.static import static
@@ -21,6 +23,8 @@ from nautobot_device_onboarding.helpers import onboarding_task_fqdn_to_ip
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
 from nautobot_device_onboarding.nornir_plays.command_getter import netmiko_send_commands
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
+from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
+from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
 from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
 from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
@@ -33,6 +37,9 @@ InventoryPluginRegister.register("empty-inventory", EmptyInventory)
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
+NORNIR_SETTINGS = settings.PLUGINS_CONFIG["nautobot_plugin_nornir"]
+
+LOGGER = logging.getLogger(__name__)
 
 name = "Device Onboarding/Network Importer"
 
@@ -336,10 +343,11 @@ class CommandGetterDO(Job):
 
     def run(self):
         mock_job_data = {
-            "ip4address": "174.51.52.76,10.1.1.1",
+            "ip4address": "10.1.1.8",
             "platform": "cisco_ios",
-            "secrets_group": SecretsGroup.objects.get(name="Cisco Devices"),
-            "port": 8922,
+            # "secrets_group": SecretsGroup.objects.get(name="Cisco Devices"),
+            "secrets_group": None,
+            "port": 22,
             "timeout": 30,
         }
 
@@ -352,45 +360,29 @@ class CommandGetterDO(Job):
 
         # Initiate Nornir instance with empty inventory
         try:
-            with InitNornir(inventory={"plugin": "empty-inventory"}) as nr:
+            logger = NornirLogger(self.job_result, log_level=0)
+            compiled_results = {}
+            with InitNornir(
+                runner=NORNIR_SETTINGS.get("runner"),
+                logging={"enabled": False},
+                inventory={"plugin": "empty-inventory",},
+            ) as nornir_obj:
+                nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
                 ip_address = mock_job_data["ip4address"].split(",")
                 self.platform = mock_job_data.get("platform", None)
                 inventory_constructed = _set_inventory(ip_address, self.platform, self.port, self.secrets_group)
-                nr.inventory.hosts.update(inventory_constructed)
-                self.logger.info(nr.inventory.hosts)
+                nr_with_processors.inventory.hosts.update(inventory_constructed)
 
-                self.logger.info("Inventory built for %s devices", len(ip_address))
+                #### Remove before final merge ####
+                for host, data in nr_with_processors.inventory.hosts.items():
+                    self.logger.info("%s;\n%s", host, data.dict())
+                #### End ####
 
-                results = nr.run(task=netmiko_send_commands)
-
-                for agg_result in results:
-                    for r in results[agg_result]:
-                        self.logger.info("host: %s", r.host)
-                        self.logger.info("result: %s", r.result)
-
+                nr_with_processors.run(task=netmiko_send_commands)
         except Exception as err:
             self.logger.info("Error: %s", err)
             return err
-        # return {
-        #         "10.1.1.8": {
-        #             "command_output_results": True,
-        #             "hostname": "demo-cisco-xe",
-        #             "serial_number": "9ABUXU580QS",
-        #             "device_type": "CSR1000V2",
-        #             "mgmt_ip_address": "10.1.1.8",
-        #             "mgmt_interface": "GigabitEthernet1",
-        #             "manufacturer": "Cisco",
-        #             "platform": "IOS",
-        #             "network_driver": "cisco_ios",
-        #             "prefix": "10.0.0.0", # this is the network field on the Prefix model
-        #             "prefix_length": 8,
-        #             "mask_length": 24,
-        #         },
-        #         "10.1.1.9": {
-        #             "command_output_results": False,
-        #         }
-        #     }
-        return {"additonal_data": "This worked"}
+        return compiled_results
 
 
 jobs = [OnboardingTask, SSOTDeviceOnboarding, CommandGetterDO]
