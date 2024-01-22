@@ -49,21 +49,51 @@ class ProcessorDO(BaseLoggingProcessor):
         else:
             self.logger.info(
                 f"Task Name: {task.name} Task Result: {result.result}", extra={"object": task.host}
-            )
+            )        
+
         self.data[task.name][host.name] = {
             "completed": True,
-            "result": result.result,
+            "failed": result.failed,
         }
 
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Processor for Logging on SubTask Completed."""
         self.logger.info(f"Subtask completed {task.name}.", extra={"object": task.host})
-        self.data[task.name][host.name] = {
-            "failed": result.failed,
-            "result": result.result,
-        }
+        
+        formatted_data = self.format_onboarding_ios(host, result)
+        host_ip = host.name
+
+        if host.name not in self.data:
+            self.data[host.name] = formatted_data
+        else:
+            for key, value in formatted_data.items():
+                self.data[host_ip][key] = value
+            
+
     def subtask_instance_started(self, task: Task, host: Host) -> None:
         """Processor for Logging on SubTask Start."""
         self.logger.info(f"Subtask starting {task.name}.", extra={"object": task.host})
-        self.data[task.name] = {}
-        self.data[task.name][host.name] = {"started": True}
+        
+    def format_onboarding_ios(self, host: Host, result: MultiResult):
+        primary_ip4 = host.name
+        formatted_data = {}
+       
+        for r in result:
+            if r.name == "show inventory":
+                device_type = r.result[0].get("pid")
+                formatted_data["device_type"] = device_type
+            elif r.name == "show version":
+                hostname = r.result[0].get("hostname")
+                serial = r.result[0].get("serial")
+                formatted_data["hostname"] = hostname 
+                formatted_data["serial"] = serial[0]
+            elif r.name == "show interfaces":
+                show_interfaces = r.result
+                for interface in show_interfaces:
+                    if interface.get("ip_address") == primary_ip4:
+                        mask_length = interface.get("prefix_length")
+                        interface_name = interface.get("interface")
+                        formatted_data["mask_length"] = mask_length
+                        formatted_data["interface_name"] = interface_name
+                        
+        return formatted_data
