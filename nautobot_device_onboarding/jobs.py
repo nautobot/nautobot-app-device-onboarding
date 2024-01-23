@@ -262,6 +262,12 @@ class SSOTDeviceOnboarding(DataSource):
         required=True,
         description="Status to be applied to all onboarded device interfaces",
     )
+    ip_address_status = ObjectVar(
+        model=Status,
+        query_params={"content_types": "ipam.ipaddress"},
+        required=True,
+        description="Status to be applied to all onboarded ip addresses.",
+    )
     port = IntegerVar(default=22)
     timeout = IntegerVar(default=30)
     secrets_group = ObjectVar(
@@ -296,6 +302,7 @@ class SSOTDeviceOnboarding(DataSource):
         self.device_role = kwargs["device_role"]
         self.device_status = kwargs["device_status"]
         self.interface_status = kwargs["interface_status"]
+        self.ip_address_status = kwargs["ip_address_status"]
         self.port = kwargs["port"]
         self.timeout = kwargs["timeout"]
         self.secrets_group = kwargs["secrets_group"]
