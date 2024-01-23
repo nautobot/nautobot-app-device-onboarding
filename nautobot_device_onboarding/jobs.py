@@ -228,7 +228,6 @@ class SSOTDeviceOnboarding(DataSource):
         default=False,
         description="Enable for more verbose logging.",
     )
-
     location = ObjectVar(
         model=Location,
         query_params={"content_type": "dcim.device"},
@@ -313,8 +312,21 @@ class SSOTDeviceOnboarding(DataSource):
         self.timeout = kwargs["timeout"]
         self.secrets_group = kwargs["secrets_group"]
         self.platform = kwargs["platform"]
-        super().run(dryrun, memory_profiling, *args, **kwargs)
 
+        print(self.job_result.as_dict())
+
+        kwargs["location"] = kwargs["location"].id
+        kwargs["namespace"] = kwargs["namespace"].id
+        kwargs["device_role"] = kwargs["device_role"].id
+        kwargs["device_status"] = kwargs["device_status"].id
+        kwargs["interface_status"] = kwargs["interface_status"].id
+        kwargs["ip_address_status"] = kwargs["ip_address_status"].id
+        kwargs["secrets_group"] = kwargs["secrets_group"].id
+        kwargs["platform"] = self.platform = kwargs["platform"].id if kwargs["platform"] else ""
+
+        self.job_result.task_kwargs = kwargs
+    
+        super().run(dryrun, memory_profiling, *args, **kwargs)
 
 class SSOTNetworkImporter(DataSource):
     """Job syncing extended device attributes into Nautobot."""
@@ -342,33 +354,98 @@ class CommandGetterDO(Job):
         has_sensitive_variables = False
         hidden = False
 
-    def __init__(self, *args, **kwargs):
-        """Initialize Command Getter Job."""
-        self.username = None
-        self.password = None
-        self.secret = None
-        self.secrets_group = None
-        self.ip4address = None
-        self.platform = None
-        self.port = None
-        self.timeout = None
-        super().__init__(*args, **kwargs)
+    # def __init__(self, *args, **kwargs):
+    #     """Initialize Command Getter Job."""
+    #     self.username = None
+    #     self.password = None
+    #     self.secret = None
+    #     self.secrets_group = None
+    #     self.ip4address = None
+    #     self.platform = None
+    #     self.port = None
+    #     self.timeout = None
+    #     super().__init__(*args, **kwargs)
+        
+    debug = BooleanVar(
+        default=False,
+        description="Enable for more verbose logging.",
+    )
+    location = ObjectVar(
+        model=Location,
+        query_params={"content_type": "dcim.device"},
+        description="Assigned Location for the onboarded device(s)",
+    )
+    namespace = ObjectVar(model=Namespace, description="Namespace ip addresses belong to.")
+    ip_addresses = StringVar(
+        description="IP Address of the device to onboard, specify in a comma separated list for multiple devices.",
+        label="IPv4 Addresses",
+    )
+    management_only_interface = BooleanVar(
+        default=False,
+        label="Set Management Only",
+        description="If True, interfaces that are created or updated will be set to management only. If False, the interface will be set to not be management only.",
+    )
+    update_devices_without_primary_ip = BooleanVar(
+        default=False,
+        description="If a device at the specified location already exists in Nautobot but is "
+                    "missing a primary ip address, update it with the sync." 
+    ) 
+    device_role = ObjectVar(
+        model=Role,
+        query_params={"content_types": "dcim.device"},
+        required=True,
+        description="Role to be applied to all onboarded devices",
+    )
+    device_status = ObjectVar(
+        model=Status,
+        query_params={"content_types": "dcim.device"},
+        required=True,
+        description="Status to be applied to all onboarded devices",
+    )
+    interface_status = ObjectVar(
+        model=Status,
+        query_params={"content_types": "dcim.interface"},
+        required=True,
+        description="Status to be applied to all onboarded device interfaces",
+    )
+    ip_address_status = ObjectVar(
+        model=Status,
+        query_params={"content_types": "ipam.ipaddress"},
+        required=True,
+        description="Status to be applied to all onboarded ip addresses.",
+    )
+    port = IntegerVar(default=22)
+    timeout = IntegerVar(default=30)
+    secrets_group = ObjectVar(
+        model=SecretsGroup, required=True, description="SecretsGroup for device connection credentials."
+    )
+    platform = ObjectVar(
+        model=Platform,
+        required=False,
+        description="Device platform. Define ONLY to override auto-recognition of platform.",
+    )
 
-    def run(self):
-        mock_job_data = {
-            "ip4address": "174.51.52.76",
-            "platform": "cisco_nxos",
-            "secrets_group": SecretsGroup.objects.get(name="NW_CREDS"),
-            "port": 8022,
-            "timeout": 30,
-        }
+    def run(self, *args, **kwargs):
+        # mock_job_data = {
+        #     "ip4address": "174.51.52.76",
+        #     "platform": "cisco_nxos",
+        #     "secrets_group": SecretsGroup.objects.get(name="NW_CREDS"),
+        #     "port": 8022,
+        #     "timeout": 30,
+        # }
 
         """Process onboarding task from ssot-ni job."""
-        self.ip4address = mock_job_data["ip4address"]
-        self.secrets_group = mock_job_data["secrets_group"]
-        self.platform = mock_job_data["platform"]
-        self.port = mock_job_data["port"]
-        self.timeout = mock_job_data["timeout"]
+        # self.ip4address = mock_job_data["ip4address"]
+        # self.secrets_group = mock_job_data["secrets_group"]
+        # self.platform = mock_job_data["platform"]
+        # self.port = mock_job_data["port"]
+        # self.timeout = mock_job_data["timeout"]
+
+        self.ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
+        self.port = kwargs["port"]
+        self.timeout = kwargs["timeout"]
+        self.secrets_group = kwargs["secrets_group"]
+        self.platform = kwargs["platform"]
 
         # Initiate Nornir instance with empty inventory
         try:
@@ -380,8 +457,7 @@ class CommandGetterDO(Job):
                 inventory={"plugin": "empty-inventory",},
             ) as nornir_obj:
                 nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
-                ip_address = mock_job_data["ip4address"].split(",")
-                self.platform = mock_job_data.get("platform", None)
+                ip_address = self.ip_addresses
                 inventory_constructed = _set_inventory(ip_address, self.platform, self.port, self.secrets_group)
                 nr_with_processors.inventory.hosts.update(inventory_constructed)
 

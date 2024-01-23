@@ -120,7 +120,7 @@ class OnboardingNautobotAdapter(DiffSync):
 class OnboardingNetworkAdapter(DiffSync):
     """Adapter for loading device data from a network."""
 
-    device_data = mock_data
+    device_data = None
 
     manufacturer = onboarding_models.OnboardingManufacturer
     platform = onboarding_models.OnboardingPlatform
@@ -162,6 +162,8 @@ class OnboardingNetworkAdapter(DiffSync):
         job_result = JobResult.objects.get(id=str(task_result_id))
         self.job.logger.warning(job_result.result)
         self.job.logger.warning(task_result_id)
+        self.job.logger.warning(self.job.job_result.task_kwargs)
+        self.job.logger.warning(self.job.job_result.task_args)
 
     def load_devices(self):
         """Load device data into a DiffSync model."""
@@ -230,7 +232,7 @@ class OnboardingNetworkAdapter(DiffSync):
     def load(self):
         """Load network data."""
         self._validate_ip_addresses(self.job.ip_addresses)
-        # self.execute_command_getter()
+        self.execute_command_getter()
         self.load_manufacturers()
         self.load_platforms()
         self.load_device_types()
