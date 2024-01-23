@@ -1,10 +1,11 @@
 """Processor used by Device Onboarding to catch unknown errors."""
 
+from typing import Dict
 from nornir.core.inventory import Host
 from nornir.core.task import AggregatedResult, MultiResult, Task
 from nornir_nautobot.exceptions import NornirNautobotException
 from nornir_nautobot.plugins.processors import BaseLoggingProcessor
-
+from nautobot_device_onboarding.nornir_plays.formatter import format_ob_data_ios, format_ob_data_nxos
 
 class ProcessorDO(BaseLoggingProcessor):
     """Processor class for Device Onboarding jobs."""
@@ -12,7 +13,7 @@ class ProcessorDO(BaseLoggingProcessor):
     def __init__(self, logger, command_outputs):
         """Set logging facility."""
         self.logger = logger
-        self.data = command_outputs
+        self.data: Dict = command_outputs
 
     def task_started(self, task: Task) -> None:
         self.data[task.name] = {}
@@ -50,8 +51,8 @@ class ProcessorDO(BaseLoggingProcessor):
             self.logger.info(
                 f"Task Name: {task.name} Task Result: {result.result}", extra={"object": task.host}
             )        
-
-        self.data[task.name][host.name] = {
+        
+        self.data[host.name] = {
             "completed": True,
             "failed": result.failed,
         }
@@ -59,41 +60,25 @@ class ProcessorDO(BaseLoggingProcessor):
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Processor for Logging on SubTask Completed."""
         self.logger.info(f"Subtask completed {task.name}.", extra={"object": task.host})
-        
-        formatted_data = self.format_onboarding_ios(host, result)
-        host_ip = host.name
-
+        self.logger.info(f"Subtask result {result.result}.", extra={"object": task.host})
         if host.name not in self.data:
-            self.data[host.name] = formatted_data
+            self.data[host.name] = {
+                "platform": host.platform,
+                "manufacturer": host.platform.split("_")[0].title() if host.platform else "PLACEHOLDER",
+            }
+
+        if host.platform == "cisco_ios":
+            formatted_data = format_ob_data_ios(host, result)
+        elif host.platform == "cisco_nxos":
+            formatted_data = format_ob_data_nxos(host, result)
         else:
-            for key, value in formatted_data.items():
-                self.data[host_ip][key] = value
-            
+            formatted_data = {}
+
+        self.data[host.name].update(formatted_data)
+
+
 
     def subtask_instance_started(self, task: Task, host: Host) -> None:
         """Processor for Logging on SubTask Start."""
         self.logger.info(f"Subtask starting {task.name}.", extra={"object": task.host})
         
-    def format_onboarding_ios(self, host: Host, result: MultiResult):
-        primary_ip4 = host.name
-        formatted_data = {}
-       
-        for r in result:
-            if r.name == "show inventory":
-                device_type = r.result[0].get("pid")
-                formatted_data["device_type"] = device_type
-            elif r.name == "show version":
-                hostname = r.result[0].get("hostname")
-                serial = r.result[0].get("serial")
-                formatted_data["hostname"] = hostname 
-                formatted_data["serial"] = serial[0]
-            elif r.name == "show interfaces":
-                show_interfaces = r.result
-                for interface in show_interfaces:
-                    if interface.get("ip_address") == primary_ip4:
-                        mask_length = interface.get("prefix_length")
-                        interface_name = interface.get("interface")
-                        formatted_data["mask_length"] = mask_length
-                        formatted_data["interface_name"] = interface_name
-                        
-        return formatted_data

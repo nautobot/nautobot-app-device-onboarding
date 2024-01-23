@@ -343,11 +343,10 @@ class CommandGetterDO(Job):
 
     def run(self):
         mock_job_data = {
-            "ip4address": "10.1.1.8",
-            "platform": "cisco_ios",
-            # "secrets_group": SecretsGroup.objects.get(name="Cisco Devices"),
-            "secrets_group": None,
-            "port": 22,
+            "ip4address": "174.51.52.76",
+            "platform": "cisco_nxos",
+            "secrets_group": SecretsGroup.objects.get(name="NW_CREDS"),
+            "port": 8022,
             "timeout": 30,
         }
 
@@ -379,6 +378,7 @@ class CommandGetterDO(Job):
                 #### End ####
 
                 nr_with_processors.run(task=netmiko_send_commands)
+                
         except Exception as err:
             self.logger.info("Error: %s", err)
             return err
