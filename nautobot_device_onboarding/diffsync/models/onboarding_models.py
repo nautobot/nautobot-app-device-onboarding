@@ -17,13 +17,13 @@ from diffsync import DiffSyncModel
 class OnboardingDevice(DiffSyncModel):
     _modelname = "device"
     # _model = Device
-    _identifiers = ("location__name", "name")
+    _identifiers = ("location__name", "name", "serial",)
     _attributes = (
         "device_type__model",
+        "mask_length",
         "primary_ip4__host",
         "primary_ip4__status__name",
         "prefix_length",
-        "mask_length",
         "platform__name",
         "role__name",
         "secrets_group__name",
@@ -33,12 +33,13 @@ class OnboardingDevice(DiffSyncModel):
 
     name: str
     location__name: str
+    serial: Optional[str]
 
+    device_type__model: Optional[str]
+    mask_length: Optional[int]
     primary_ip4__host: Optional[str]
     primary_ip4__status__name: Optional[str]
     prefix_length: Optional[int]
-    mask_length: Optional[int]
-    device_type__model: Optional[str]
     platform__name: Optional[str]
     role__name: Optional[str]
     secrets_group__name: Optional[str]
@@ -46,6 +47,44 @@ class OnboardingDevice(DiffSyncModel):
 
     interfaces: Optional[list]
     device_type: List["OnboardingDeviceType"] = []
+
+    @classmethod
+    def _get_or_create_device(cls, platform, diffsync, ids, attrs):
+        """Attempt to get a Device, create a new one if necessary."""
+        device = None
+        try:
+            # Only Devices with a primary ip address are loaded from Nautobot when syncing. 
+            # If a device is found in Nautobot with a matching name and location as the
+            # device being created, but does not have a primary ip address, it will need 
+            # to be updated or skipped based on user preference.
+
+            device = Device.objects.get(name=ids["name"], location=diffsync.job.location)
+            if diffsync.job.update_devices_without_primary_ip:
+                diffsync.job.logger.warning(
+                    f"Device {ids['name']} already exists in Nautobot but does not have a primary "
+                    "IP Address, this device will be udpated.")
+                # attrs.update(ids)
+                diffsync.job.logger.warning(attrs)
+                #TODO: update matched device!
+            else:
+                diffsync.job.logger.warning(
+                    f"Device {ids['name']} already exists in Nautobot but does not have a primary "
+                    "IP Address, this device will be skipped.")
+                return device
+            
+        except ObjectDoesNotExist:
+            # Create Device
+            device = Device.objects.create(
+                location=diffsync.job.location,
+                status=diffsync.job.device_status,
+                role=diffsync.job.device_role,
+                device_type=DeviceType.objects.get(model=attrs["device_type__model"]),
+                name=ids["name"],
+                platform=platform,
+                secrets_group=diffsync.job.secrets_group,
+                serial=attrs["serial"]
+            )
+        return device
 
     @classmethod
     def _get_or_create_ip_address(cls, diffsync, attrs):
@@ -87,7 +126,7 @@ class OnboardingDevice(DiffSyncModel):
                     parent=prefix,
                 )
         return ip_address
-
+    
     @classmethod
     def _get_or_create_interface(cls, diffsync, device, attrs):
         """Attempt to get a Device Interface, create a new one if necessary."""
@@ -110,7 +149,6 @@ class OnboardingDevice(DiffSyncModel):
                 diffsync.job.logger.error(f"Device Interface could not be created, {err}")
         return device_interface
 
-
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create a new nautobot device using data scraped from a device."""
@@ -120,28 +158,15 @@ class OnboardingDevice(DiffSyncModel):
             platform = diffsync.job.platform
         else:
             platform = Platform.objects.get(name=attrs["platform__name"])
-
-        try:
-            device = Device.objects.get(**ids)
-
-        except ObjectDoesNotExist:
-            # Create Device
-            device = Device.objects.create(
-                location=diffsync.job.location,
-                status=diffsync.job.device_status,
-                role=diffsync.job.device_role,
-                device_type=DeviceType.objects.get(model=attrs["device_type__model"]),
-                name=ids["name"],
-                platform=platform,
-                secrets_group=diffsync.job.secrets_group,
-            )
-
+        
+        # Get or create Device, Interface and IP Address
+        device = cls._get_or_create_device(platform, diffsync, ids, attrs)
         ip_address = cls._get_or_create_ip_address(diffsync=diffsync, attrs=attrs)
         interface = cls._get_or_create_interface(diffsync=diffsync, device=device, attrs=attrs)
         interface.ip_addresses.add(ip_address)
         interface.validated_save()
 
-        # Assign primary IP Address to device
+        # Assign primary IP Address to Device
         try:
             device.primary_ip4 = ip_address
             device.validated_save()
@@ -154,8 +179,9 @@ class OnboardingDevice(DiffSyncModel):
 
     def update(self, attrs):
         """Update an existing nautobot device using data scraped from a device."""
-
         device = Device.objects.get(name=self.name, location__name=self.location__name)
+        self._update_device_attributes(device=device, attrs=attrs)
+
         if self.diffsync.job.debug:
             self.diffsync.job.logger.debug(f"Updating device with attrs: {attrs}")
         if attrs.get("device_type__model"):
@@ -170,11 +196,14 @@ class OnboardingDevice(DiffSyncModel):
             device.secrets_group = SecretsGroup.objects.get(name=attrs.get("secrets_group__name"))
         if attrs.get("primary_ip4__status__name"):
             device.primary_ip.status.name = Status.objects.get(name=attrs.get("primary_ip4__status__name"))
+        if attrs.get("serial"):
+            device.primary_ip.serial = attrs.get("serial")
 
         if attrs.get("interfaces"):
             interface = self._get_or_create_interface(diffsync=self.diffsync, device=device, attrs=attrs)
-            # If the primary ip address is being updated, the mask length must be included
+            # Update both the interface and primary ip address
             if attrs.get("primary_ip4__host"):
+                # If the primary ip address is being updated, the mask length must be included
                 if not attrs.get("mask_length"):
                     attrs["mask_length"] = device.primary_ip4.mask_length
                 ip_address = self._get_or_create_ip_address(diffsync=self.diffsync, attrs=attrs)
@@ -183,6 +212,7 @@ class OnboardingDevice(DiffSyncModel):
                 # set the new ip address as the device primary ip address
                 device.primary_ip4 = ip_address
                 interface.validated_save()
+            # Update the interface only
             else:
                 # Check for a device with a matching IP Address and remove it before assigning 
                 # the IP Address to the new interface
@@ -198,8 +228,8 @@ class OnboardingDevice(DiffSyncModel):
                 except ObjectDoesNotExist:
                     interface.ip_addresses.add(device.primary_ip4)
                     interface.validated_save()
+        # Update the primary ip address only
         else:
-            # update the primary ip address when the interface has not changed
             if attrs.get("primary_ip4__host"):
                 if not attrs.get("mask_length"):
                     attrs["mask_length"] = device.primary_ip4.mask_length
@@ -209,6 +239,7 @@ class OnboardingDevice(DiffSyncModel):
                         ip_addresses__in=[device.primary_ip4]
                     )
                 interface.ip_addresses.remove(device.primary_ip4) #TODO: This is not removing the IP from the interface as expected
+                interface.validated_save()
                 interface.ip_addresses.add(ip_address)
                 interface.validated_save()
                 device.primary_ip4 = ip_address
@@ -223,9 +254,12 @@ class OnboardingDeviceType(NautobotModel):
     _modelname = "device_type"
     _model = DeviceType
     _identifiers = ("model", "manufacturer__name")
+    _attributes = ("part_number",)
 
     model: str
     manufacturer__name: str
+
+    part_number: str
 
 
 class OnboardingManufacturer(NautobotModel):

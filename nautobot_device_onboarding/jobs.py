@@ -244,6 +244,11 @@ class SSOTDeviceOnboarding(DataSource):
         label="Set Management Only",
         description="If True, interfaces that are created or updated will be set to management only. If False, the interface will be set to not be management only.",
     )
+    update_devices_without_primary_ip = BooleanVar(
+        default=False,
+        description="If a device at the specified location already exists in Nautobot but is "
+                    "missing a primary ip address, update it with the sync." 
+    ) 
     device_role = ObjectVar(
         model=Role,
         query_params={"content_types": "dcim.device"},
@@ -299,6 +304,7 @@ class SSOTDeviceOnboarding(DataSource):
         self.namespace = kwargs["namespace"]
         self.ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
         self.management_only_interface = kwargs["management_only_interface"]
+        self.update_devices_without_primary_ip = kwargs["update_devices_without_primary_ip"]
         self.device_role = kwargs["device_role"]
         self.device_status = kwargs["device_status"]
         self.interface_status = kwargs["interface_status"]

@@ -1,8 +1,10 @@
 """DiffSync adapters."""
 
+import time
 import netaddr
 from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
 from nautobot.extras.models.jobs import Job as JobModel
+from nautobot.extras.models.jobs import JobResult
 from nautobot_device_onboarding.diffsync.models import onboarding_models
 
 from diffsync import DiffSync
@@ -10,18 +12,18 @@ from diffsync import DiffSync
 #######################################
 # FOR TESTING ONLY - TO BE REMOVED    #
 #######################################
-# mock_data = {
-#     "10.1.1.8": {
-#         "hostname": "demo-cisco-xe",
-#         "serial_number": "9ABUXU580QS",
-#         "device_type": "CSR1000V2",
-#         "mgmt_interface": "GigabitEthernet3",
-#         "manufacturer": "Cisco",
-#         "platform": "IOS",
-#         "network_driver": "cisco_ios",
-#         "mask_length": 24,
-#     }
-# }
+mock_data = {
+    "10.1.1.11": {
+        "hostname": "demo-cisco-xe",
+        "serial": "9ABUXU580QS",
+        "device_type": "CSR1000V2",
+        "mgmt_interface": "GigabitEthernet1",
+        "manufacturer": "Cisco",
+        "platform": "IOS",
+        "network_driver": "cisco_ios",
+        "mask_length": 24,
+    }
+}
 #######################################
 #######################################
 
@@ -72,6 +74,7 @@ class OnboardingNautobotAdapter(DiffSync):
             onboarding_device_type = self.device_type(
                 diffsync=self,
                 model=device_type.model,
+                part_number=device_type.model,
                 manufacturer__name=device_type.manufacturer.name,
             )
             self.add(onboarding_device_type)
@@ -100,6 +103,7 @@ class OnboardingNautobotAdapter(DiffSync):
                 secrets_group__name=device.secrets_group.name if device.secrets_group else "",
                 interfaces=interface_list,
                 mask_length=device.primary_ip4.mask_length if device.primary_ip4 else "",
+                serial=device.serial,
             )
             self.add(onboarding_device)
             if self.job.debug:
@@ -116,7 +120,7 @@ class OnboardingNautobotAdapter(DiffSync):
 class OnboardingNetworkAdapter(DiffSync):
     """Adapter for loading device data from a network."""
 
-    device_data = None
+    device_data = mock_data
 
     manufacturer = onboarding_models.OnboardingManufacturer
     platform = onboarding_models.OnboardingPlatform
@@ -149,12 +153,15 @@ class OnboardingNetworkAdapter(DiffSync):
     def execute_command_getter(self):
         command_getter_job = JobModel.objects.get(name="Command Getter for Device Onboarding").job_task
         result = command_getter_job.s()
-        result.apply_async(
+        task_result_id = result.apply_async(
             args=self.job.job_result.task_args,
             kwargs=self.job.job_result.task_kwargs,
             **self.job.job_result.celery_kwargs,
         )
-        self.device_data = result
+        time.sleep(15)
+        job_result = JobResult.objects.get(id=str(task_result_id))
+        self.job.logger.warning(job_result.result)
+        self.job.logger.warning(task_result_id)
 
     def load_devices(self):
         """Load device data into a DiffSync model."""
@@ -178,6 +185,7 @@ class OnboardingNetworkAdapter(DiffSync):
                 secrets_group__name=self.job.secrets_group.name,
                 interfaces=[self.device_data[ip_address]["mgmt_interface"]],
                 mask_length=self.device_data[ip_address]["mask_length"],
+                serial=self.device_data[ip_address]["serial"],
             )
             self.add(onboarding_device)
 
@@ -189,6 +197,7 @@ class OnboardingNetworkAdapter(DiffSync):
             onboarding_device_type = self.device_type(
                 diffsync=self,
                 model=self.device_data[ip_address]["device_type"],
+                part_number=self.device_data[ip_address]["device_type"],
                 manufacturer__name=self.device_data[ip_address]["manufacturer"],
             )
             self.add(onboarding_device_type)
@@ -221,7 +230,7 @@ class OnboardingNetworkAdapter(DiffSync):
     def load(self):
         """Load network data."""
         self._validate_ip_addresses(self.job.ip_addresses)
-        self.execute_command_getter()
+        # self.execute_command_getter()
         self.load_manufacturers()
         self.load_platforms()
         self.load_device_types()
