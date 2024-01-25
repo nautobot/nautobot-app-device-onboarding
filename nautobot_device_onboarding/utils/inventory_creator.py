@@ -35,7 +35,7 @@ def _parse_credentials(credentials):
     return (username, password, secret)
 
 
-def guess_netmiko_device_type(hostname, username, password):
+def guess_netmiko_device_type(hostname, username, password, port):
     """Guess the device type of host, based on Netmiko."""
     guessed_device_type = None
 
@@ -46,6 +46,7 @@ def guess_netmiko_device_type(hostname, username, password):
         "host": hostname,
         "username": username,
         "password": password,
+        "port": port
         **netmiko_optional_args,
     }
 
@@ -63,8 +64,10 @@ def _set_inventory(ips, platform, port, secrets_group):
     inv = {}
     username, password, secret = _parse_credentials(secrets_group)
     for host_ip in ips:
-        if not platform:
-            platform = guess_netmiko_device_type(host_ip, username, password)
+        if platform:
+            platform = platform.network_driver
+        else:
+            platform = guess_netmiko_device_type(host_ip, username, password, port)
 
         host = Host(
             name=host_ip,

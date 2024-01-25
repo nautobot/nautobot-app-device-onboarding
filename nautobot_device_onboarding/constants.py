@@ -12,4 +12,5 @@ NETMIKO_TO_NAPALM_STATIC = {
 PLATFORM_COMMAND_MAP = {
     "cisco_ios": ["show version", "show inventory", "show interfaces"],
     "cisco_nxos": ["show version", "show inventory", "show interface"],
+    "cisco_xe": ["show version", "show inventory", "show interfaces"],
 }

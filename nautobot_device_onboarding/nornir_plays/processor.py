@@ -69,6 +69,8 @@ class ProcessorDO(BaseLoggingProcessor):
 
         if host.platform == "cisco_ios":
             formatted_data = format_ob_data_ios(host, result)
+        elif host.platform == "cisco_xe":
+            formatted_data = format_ob_data_ios(host, result)
         elif host.platform == "cisco_nxos":
             formatted_data = format_ob_data_nxos(host, result)
         else:
