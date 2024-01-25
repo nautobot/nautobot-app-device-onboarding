@@ -3,10 +3,10 @@
 import time
 
 import netaddr
+from nautobot.extras.models import JobResult, Job
 from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
-from nautobot.extras.models.jobs import Job as JobModel
-from nautobot.extras.models.jobs import JobResult
 from nautobot_device_onboarding.diffsync.models import onboarding_models
+from nautobot.apps.choices import JobResultStatusChoices
 
 import diffsync
 
@@ -14,7 +14,7 @@ import diffsync
 # FOR TESTING ONLY - TO BE REMOVED    #
 #######################################
 mock_data = {
-    "10.1.1.15": {
+    "10.1.1.8": {
         "hostname": "demo-cisco-xe1",
         "serial": "9ABUXU581111",
         "device_type": "CSR1000V17",
@@ -24,7 +24,7 @@ mock_data = {
         "network_driver": "cisco_ios",
         "mask_length": 16,
     },
-    "200.1.1.13": {
+    "10.1.1.9": {
         "hostname": "demo-cisco-xe2",
         "serial": "9ABUXU5882222",
         "device_type": "CSR1000V2",
@@ -172,23 +172,22 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                     "does not have a network driver, please update the Platform."
                 )
                 raise Exception("Platform.network_driver missing")
-        try:
-            command_getter_job = JobModel.objects.get(name="Command Getter for Device Onboarding").job_task
-            result = command_getter_job.s()
-            task_result_id = result.apply_async(
-                args=self.job.job_result.task_args,
-                kwargs=self.job.job_result.task_kwargs,
-                **self.job.job_result.celery_kwargs,
-            )
-            time.sleep(15)
-            job_result = JobResult.objects.get(id=str(task_result_id))
-            self.job.logger.warning(job_result.result)
-            self.job.logger.warning(task_result_id)
-            self.job.logger.warning(self.job.job_result.task_kwargs)
-            self.job.logger.warning(self.job.job_result.task_args)
-        except JobResult.DoesNotExist:
-            self.logger.error("The CommandGetterDO job failed to return the expected result")
-            raise JobResult.DoesNotExist
+            
+        command_getter_job = Job.objects.get(name="Command Getter for Device Onboarding")
+        result = JobResult.enqueue_job(
+            job_model=command_getter_job,
+            user=self.job.user,
+            celery_kwargs=self.job.job_result.celery_kwargs,
+            *self.job.job_result.task_args,
+            **self.job.job_result.task_kwargs
+        )
+        while True:
+            if result.status not in JobResultStatusChoices.READY_STATES:
+                time.sleep(5)
+                result.refresh_from_db()
+            else:
+                break
+        self.device_data = result.result
 
     def load_manufacturers(self):
         """Load manufacturer data into a DiffSync model."""
