@@ -1,34 +1,45 @@
 """DiffSync adapters."""
 
 import time
+
 import netaddr
 from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
 from nautobot.extras.models.jobs import Job as JobModel
 from nautobot.extras.models.jobs import JobResult
 from nautobot_device_onboarding.diffsync.models import onboarding_models
 
-from diffsync import DiffSync
+import diffsync
 
 #######################################
 # FOR TESTING ONLY - TO BE REMOVED    #
 #######################################
 mock_data = {
-    "10.1.1.11": {
-        "hostname": "demo-cisco-xe",
-        "serial": "9ABUXU580QS",
+    "10.1.1.15": {
+        "hostname": "demo-cisco-xe1",
+        "serial": "9ABUXU581111",
+        "device_type": "CSR1000V17",
+        "mgmt_interface": "GigabitEthernet20",
+        "manufacturer": "Cisco",
+        "platform": "IOS-test",
+        "network_driver": "cisco_ios",
+        "mask_length": 16,
+    },
+    "200.1.1.13": {
+        "hostname": "demo-cisco-xe2",
+        "serial": "9ABUXU5882222",
         "device_type": "CSR1000V2",
-        "mgmt_interface": "GigabitEthernet1",
+        "mgmt_interface": "GigabitEthernet16",
         "manufacturer": "Cisco",
         "platform": "IOS",
         "network_driver": "cisco_ios",
         "mask_length": 24,
-    }
+    },
 }
 #######################################
 #######################################
 
 
-class OnboardingNautobotAdapter(DiffSync):
+class OnboardingNautobotAdapter(diffsync.DiffSync):
     """Adapter for loading Nautobot data."""
 
     manufacturer = onboarding_models.OnboardingManufacturer
@@ -85,10 +96,13 @@ class OnboardingNautobotAdapter(DiffSync):
         if self.job.debug:
             self.job.logger.debug(f"Loading Device data from Nautobot...")
 
-        for device in Device.objects.filter(primary_ip4__host__in=self.job.ip_addresses):
+        # for device in Device.objects.filter(primary_ip4__host__in=self.job.ip_addresses):
+        for device in Device.objects.all():
             interface_list = list()
+            # Only interfaces with the device's primeary ip should be considered for diff calculations
             for interface in device.interfaces.all():
-                interface_list.append(interface.name)
+                if device.primary_ip4 in interface.ip_addresses.all():
+                    interface_list.append(interface.name)
 
             onboarding_device = self.device(
                 diffsync=self,
@@ -102,12 +116,12 @@ class OnboardingNautobotAdapter(DiffSync):
                 status__name=device.status.name,
                 secrets_group__name=device.secrets_group.name if device.secrets_group else "",
                 interfaces=interface_list,
-                mask_length=device.primary_ip4.mask_length if device.primary_ip4 else "",
+                mask_length=device.primary_ip4.mask_length if device.primary_ip4 else None,
                 serial=device.serial,
             )
             self.add(onboarding_device)
             if self.job.debug:
-                self.job.logger.debug(f"Platform: {device.name} loaded.")
+                self.job.logger.debug(f"Device: {device.name} loaded.")
 
     def load(self):
         """Load nautobot data."""
@@ -117,7 +131,7 @@ class OnboardingNautobotAdapter(DiffSync):
         self.load_devices()
 
 
-class OnboardingNetworkAdapter(DiffSync):
+class OnboardingNetworkAdapter(diffsync.DiffSync):
     """Adapter for loading device data from a network."""
 
     device_data = None
@@ -151,19 +165,76 @@ class OnboardingNetworkAdapter(DiffSync):
             raise netaddr.AddrConversionError
 
     def execute_command_getter(self):
-        command_getter_job = JobModel.objects.get(name="Command Getter for Device Onboarding").job_task
-        result = command_getter_job.s()
-        task_result_id = result.apply_async(
-            args=self.job.job_result.task_args,
-            kwargs=self.job.job_result.task_kwargs,
-            **self.job.job_result.celery_kwargs,
-        )
-        time.sleep(15)
-        job_result = JobResult.objects.get(id=str(task_result_id))
-        self.job.logger.warning(job_result.result)
-        self.job.logger.warning(task_result_id)
-        self.job.logger.warning(self.job.job_result.task_kwargs)
-        self.job.logger.warning(self.job.job_result.task_args)
+        if self.job.platform:
+            if not self.job.platform.network_driver:
+                self.job.logger.error(
+                    f"The selected platform, {self.job.platform} "
+                    "does not have a network driver, please update the Platform."
+                )
+                raise Exception("Platform.network_driver missing")
+        try:
+            command_getter_job = JobModel.objects.get(name="Command Getter for Device Onboarding").job_task
+            result = command_getter_job.s()
+            task_result_id = result.apply_async(
+                args=self.job.job_result.task_args,
+                kwargs=self.job.job_result.task_kwargs,
+                **self.job.job_result.celery_kwargs,
+            )
+            time.sleep(15)
+            job_result = JobResult.objects.get(id=str(task_result_id))
+            self.job.logger.warning(job_result.result)
+            self.job.logger.warning(task_result_id)
+            self.job.logger.warning(self.job.job_result.task_kwargs)
+            self.job.logger.warning(self.job.job_result.task_args)
+        except JobResult.DoesNotExist:
+            self.logger.error("The CommandGetterDO job failed to return the expected result")
+            raise JobResult.DoesNotExist
+
+    def load_manufacturers(self):
+        """Load manufacturer data into a DiffSync model."""
+        for ip_address in self.device_data:
+            if self.job.debug:
+                self.job.logger.debug(f"loading manufacturer data for {ip_address}")
+            onboarding_manufacturer = self.manufacturer(
+                diffsync=self,
+                name=self.device_data[ip_address]["manufacturer"],
+            )
+            try:
+                self.add(onboarding_manufacturer)
+            except diffsync.ObjectAlreadyExists:
+                pass
+
+    def load_platforms(self):
+        """Load platform data into a DiffSync model."""
+        for ip_address in self.device_data:
+            if self.job.debug:
+                self.job.logger.debug(f"loading platform data for {ip_address}")
+            onboarding_platform = self.platform(
+                diffsync=self,
+                name=self.device_data[ip_address]["platform"],
+                manufacturer__name=self.device_data[ip_address]["manufacturer"],
+                network_driver=self.device_data[ip_address]["network_driver"],
+            )
+            try:
+                self.add(onboarding_platform)
+            except diffsync.ObjectAlreadyExists:
+                pass
+
+    def load_device_types(self):
+        """Load device type data into a DiffSync model."""
+        for ip_address in self.device_data:
+            if self.job.debug:
+                self.job.logger.debug(f"loading device_type data for {ip_address}")
+            onboarding_device_type = self.device_type(
+                diffsync=self,
+                model=self.device_data[ip_address]["device_type"],
+                part_number=self.device_data[ip_address]["device_type"],
+                manufacturer__name=self.device_data[ip_address]["manufacturer"],
+            )
+            try:
+                self.add(onboarding_device_type)
+            except diffsync.ObjectAlreadyExists:
+                pass
 
     def load_devices(self):
         """Load device data into a DiffSync model."""
@@ -189,45 +260,17 @@ class OnboardingNetworkAdapter(DiffSync):
                 mask_length=self.device_data[ip_address]["mask_length"],
                 serial=self.device_data[ip_address]["serial"],
             )
-            self.add(onboarding_device)
-
-    def load_device_types(self):
-        """Load device type data into a DiffSync model."""
-        for ip_address in self.device_data:
-            if self.job.debug:
-                self.job.logger.debug(f"loading device_type data for {ip_address}")
-            onboarding_device_type = self.device_type(
-                diffsync=self,
-                model=self.device_data[ip_address]["device_type"],
-                part_number=self.device_data[ip_address]["device_type"],
-                manufacturer__name=self.device_data[ip_address]["manufacturer"],
-            )
-            self.add(onboarding_device_type)
-
-    def load_manufacturers(self):
-        """Load manufacturer data into a DiffSync model."""
-        for ip_address in self.device_data:
-            if self.job.debug:
-                self.job.logger.debug(f"loading manufacturer data for {ip_address}")
-            onboarding_manufacturer = self.manufacturer(
-                diffsync=self,
-                name=self.device_data[ip_address]["manufacturer"],
-            )
-            self.add(onboarding_manufacturer)
-
-    def load_platforms(self):
-        """Load platform data into a DiffSync model."""
-        for ip_address in self.device_data:
-            if self.job.debug:
-                self.job.logger.debug(f"loading platform data for {ip_address}")
-            onboarding_platform = self.platform(
-                diffsync=self,
-                name=self.device_data[ip_address]["platform"],
-                manufacturer__name=self.device_data[ip_address]["manufacturer"],
-                network_driver=self.device_data[ip_address]["network_driver"],
-            )
-            self.add(onboarding_platform)
-
+            try:
+                self.add(onboarding_device)
+                if self.job.debug:
+                    self.job.logger.debug(f"Device: {self.device_data[ip_address]['hostname']} loaded.")
+            except diffsync.ObjectAlreadyExists:
+                self.job.logger.error(
+                    f"Device: {self.device_data[ip_address]['hostname']} has already been loaded! "
+                    f"Duplicate devices will not be synced. "
+                    f"[Serial Number: {self.device_data[ip_address]['serial']}, "
+                    f"IP Address: {ip_address}]"
+                )
 
     def load(self):
         """Load network data."""

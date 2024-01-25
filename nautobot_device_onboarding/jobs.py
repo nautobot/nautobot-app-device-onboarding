@@ -235,9 +235,11 @@ class SSOTDeviceOnboarding(DataSource):
     )
     namespace = ObjectVar(model=Namespace, description="Namespace ip addresses belong to.")
     ip_addresses = StringVar(
-        description="IP Address of the device to onboard, specify in a comma separated list for multiple devices.",
-        label="IPv4 Addresses",
+        description="IP address of the device to onboard, specify in a comma separated list for multiple devices.",
+        label="IPv4 addresses",
     )
+    port = IntegerVar(default=22)
+    timeout = IntegerVar(default=30)
     management_only_interface = BooleanVar(
         default=False,
         label="Set Management Only",
@@ -245,35 +247,34 @@ class SSOTDeviceOnboarding(DataSource):
     )
     update_devices_without_primary_ip = BooleanVar(
         default=False,
-        description="If a device at the specified location already exists in Nautobot but is "
-                    "missing a primary ip address, update it with the sync." 
+        description="If a device at the specified location already exists in Nautobot but the primary ip address "
+                    "does not match an ip address entered, update this device with the sync." 
     ) 
     device_role = ObjectVar(
         model=Role,
         query_params={"content_types": "dcim.device"},
         required=True,
-        description="Role to be applied to all onboarded devices",
+        description="Role to be applied to all new onboarded devices",
     )
     device_status = ObjectVar(
         model=Status,
         query_params={"content_types": "dcim.device"},
         required=True,
-        description="Status to be applied to all onboarded devices",
+        description="Status to be applied to all new onboarded devices",
     )
     interface_status = ObjectVar(
         model=Status,
         query_params={"content_types": "dcim.interface"},
         required=True,
-        description="Status to be applied to all onboarded device interfaces",
+        description="Status to be applied to all new onboarded device interfaces",
     )
     ip_address_status = ObjectVar(
+        label="IP address status",
         model=Status,
         query_params={"content_types": "ipam.ipaddress"},
         required=True,
-        description="Status to be applied to all onboarded ip addresses.",
+        description="Status to be applied to all new onboarded IP addresses.",
     )
-    port = IntegerVar(default=22)
-    timeout = IntegerVar(default=30)
     secrets_group = ObjectVar(
         model=SecretsGroup, required=True, description="SecretsGroup for device connection credentials."
     )
@@ -313,19 +314,21 @@ class SSOTDeviceOnboarding(DataSource):
         self.secrets_group = kwargs["secrets_group"]
         self.platform = kwargs["platform"]
 
-        print(self.job_result.as_dict())
-
-        kwargs["location"] = kwargs["location"].id
-        kwargs["namespace"] = kwargs["namespace"].id
-        kwargs["device_role"] = kwargs["device_role"].id
-        kwargs["device_status"] = kwargs["device_status"].id
-        kwargs["interface_status"] = kwargs["interface_status"].id
-        kwargs["ip_address_status"] = kwargs["ip_address_status"].id
-        kwargs["secrets_group"] = kwargs["secrets_group"].id
-        kwargs["platform"] = self.platform = kwargs["platform"].id if kwargs["platform"] else ""
+        nautobot_object_models = [
+            "location", 
+            "namespace", 
+            "device_role", 
+            "device_status", 
+            "interface_status", 
+            "ip_address_status", 
+            "secrets_group",
+            "platform",
+            ]
+        # Convert model instances into IDs, necessary for sending form inputs to the worker for use in other jobs
+        for model in nautobot_object_models:
+            kwargs[model] = kwargs[model].id if kwargs[model] else None
 
         self.job_result.task_kwargs = kwargs
-    
         super().run(dryrun, memory_profiling, *args, **kwargs)
 
 class SSOTNetworkImporter(DataSource):
@@ -387,32 +390,33 @@ class CommandGetterDO(Job):
     )
     update_devices_without_primary_ip = BooleanVar(
         default=False,
-        description="If a device at the specified location already exists in Nautobot but is "
-                    "missing a primary ip address, update it with the sync." 
+        description="If a device at the specified location already exists in Nautobot but the primary ip address "
+                    "does not match an ip address entered, update this device with the sync." 
     ) 
     device_role = ObjectVar(
         model=Role,
         query_params={"content_types": "dcim.device"},
         required=True,
-        description="Role to be applied to all onboarded devices",
+        description="Role to be applied to all new onboarded devices",
     )
     device_status = ObjectVar(
         model=Status,
         query_params={"content_types": "dcim.device"},
         required=True,
-        description="Status to be applied to all onboarded devices",
+        description="Status to be applied to all new onboarded devices",
     )
     interface_status = ObjectVar(
         model=Status,
         query_params={"content_types": "dcim.interface"},
         required=True,
-        description="Status to be applied to all onboarded device interfaces",
+        description="Status to be applied to all new onboarded device interfaces",
     )
     ip_address_status = ObjectVar(
+        label="IP address status",
         model=Status,
         query_params={"content_types": "ipam.ipaddress"},
         required=True,
-        description="Status to be applied to all onboarded ip addresses.",
+        description="Status to be applied to all new onboarded IP addresses.",
     )
     port = IntegerVar(default=22)
     timeout = IntegerVar(default=30)
