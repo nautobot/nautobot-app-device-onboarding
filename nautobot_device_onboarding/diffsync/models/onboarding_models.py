@@ -3,7 +3,6 @@
 import ipaddress
 from typing import List, Optional
 
-import netaddr
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
 from nautobot.apps.choices import InterfaceTypeChoices, PrefixTypeChoices
 from nautobot.dcim.models import Device, DeviceType, Interface, Manufacturer, Platform
@@ -16,7 +15,6 @@ from diffsync import DiffSyncModel
 
 class OnboardingDevice(DiffSyncModel):
     _modelname = "device"
-    # _model = Device
     _identifiers = (
         "location__name",
         "name",
@@ -37,7 +35,7 @@ class OnboardingDevice(DiffSyncModel):
 
     name: str
     location__name: str
-    serial: Optional[str]
+    serial: str
 
     device_type__model: Optional[str]
     mask_length: Optional[int]
@@ -50,7 +48,6 @@ class OnboardingDevice(DiffSyncModel):
     status__name: Optional[str]
 
     interfaces: Optional[list]
-    device_type: List["OnboardingDeviceType"] = []
 
     @classmethod
     def _get_or_create_device(cls, platform, diffsync, ids, attrs):
@@ -59,8 +56,8 @@ class OnboardingDevice(DiffSyncModel):
         try:
             # Only Devices with a primary ip address are loaded from Nautobot when syncing.
             # If a device is found in Nautobot with a matching name and location as the
-            # device being created, but does not have a primary ip address, it will need
-            # to be updated or skipped based on user preference.
+            # device being created, but the primary ip address doesn't match an ip address entered, 
+            # the matching device will be updated or skipped based on user preference.
 
             device = Device.objects.get(
                 name=ids["name"],
@@ -162,7 +159,7 @@ class OnboardingDevice(DiffSyncModel):
 
     @classmethod
     def _update_device_with_attrs(cls, device, platform, ids, attrs, diffsync):
-        """Update a Nautobot device instance with all the values in the diffsync model ids and attrs."""
+        """Update a Nautobot device instance."""
         device.location = diffsync.job.location
         device.status = diffsync.job.device_status
         device.role = diffsync.job.device_role
@@ -202,30 +199,11 @@ class OnboardingDevice(DiffSyncModel):
         else:
             diffsync.job.logger.error(f"Failed create or update Device: {ids['name']}")
 
-        return DiffSyncModel.create(diffsync=diffsync, ids=ids, attrs=attrs)
+        return super().create(diffsync=diffsync, ids=ids, attrs=attrs)
 
     def update(self, attrs):
         """Update an existing nautobot device using data scraped from a device."""
         device = Device.objects.get(name=self.name, location__name=self.location__name)
-
-        # Update the interface management only setting to reflect the form input
-        try:
-            interface = Interface.objects.get(
-                device=device,
-                ip_addresses__in=[device.primary_ip4],
-                name=self.get_attrs()["interfaces"][0],
-            )
-            if interface.mgmt_only is not self.diffsync.job.management_only_interface:
-                interface.mgmt_only = self.diffsync.job.management_only_interface
-                interface.validated_save()
-                self.diffsync.job.logger.info(
-                    f"Device: {device.name}, Interface: {interface.name}, "
-                    f"Management Only set to {self.diffsync.job.management_only_interface}"
-                )
-        except Exception as err:
-            self.diffsync.job.logger.error(
-                f"Unable to update the management only setting on device {device.name}, {err}"
-            )
 
         if self.diffsync.job.debug:
             self.diffsync.job.logger.debug(f"Updating {device.name} with attrs: {attrs}")
@@ -239,8 +217,6 @@ class OnboardingDevice(DiffSyncModel):
             device.status = Status.objects.get(name=attrs.get("status__name"))
         if attrs.get("secrets_group__name"):
             device.secrets_group = SecretsGroup.objects.get(name=attrs.get("secrets_group__name"))
-        if attrs.get("primary_ip4__status__name"):
-            device.primary_ip.status.name = Status.objects.get(name=attrs.get("primary_ip4__status__name"))
         if attrs.get("serial"):
             device.primary_ip.serial = attrs.get("serial")
 
@@ -280,8 +256,10 @@ class OnboardingDevice(DiffSyncModel):
                     interface.validated_save()
         else:
             # Update the primary ip address only
-            # The OnboardingNautobotAdapter filters out devices without a primary ip4,
-            # so this will not be called unless the adapter is changed to include all devices
+
+            # The OnboardingNautobotAdapter only loads devices with primary ips matching those
+            # entered for onboarding. This will not be called unless the adapter is changed to 
+            # include all devices
             if attrs.get("primary_ip4__host"):
                 if not attrs.get("mask_length"):
                     attrs["mask_length"] = device.primary_ip4.mask_length
