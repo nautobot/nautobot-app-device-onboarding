@@ -4,11 +4,11 @@ import logging
 from diffsync.enum import DiffSyncFlags
 from django.conf import settings
 from django.templatetags.static import static
-from nautobot.apps.jobs import BooleanVar, IntegerVar, Job, ObjectVar, StringVar
+from nautobot.apps.jobs import BooleanVar, IntegerVar, Job, ObjectVar, StringVar, MultiObjectVar
 from nautobot.core.celery import register_jobs
-from nautobot.dcim.models import DeviceType, Location, Platform
+from nautobot.dcim.models import DeviceType, Location, Platform, Device
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
-from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status
+from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status, Tag
 from nautobot.ipam.models import Namespace
 from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
     NetworkImporterNautobotAdapter,
@@ -334,7 +334,10 @@ class SSOTDeviceOnboarding(DataSource):
 class SSOTNetworkImporter(DataSource):
     """Job syncing extended device attributes into Nautobot."""
 
-    debug = BooleanVar(description="Enable for more verbose logging.")
+    def __init__(self):
+        """Initialize SSOTDeviceOnboarding."""
+        super().__init__()
+        self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
 
     class Meta:
         """Metadata about this Job."""
@@ -344,6 +347,68 @@ class SSOTNetworkImporter(DataSource):
             "Synchronize extended device attribute information into Nautobot; "
             "including Interfaces, IPAddresses, Prefixes, Vlans and Cables."
         )
+
+    debug = BooleanVar(description="Enable for more verbose logging.")
+
+    devices = MultiObjectVar(
+        model=Device,
+        required=False,
+        description="Device(s) to update.",
+    )
+    location = ObjectVar(
+        model=Location,
+        query_params={"content_type": "dcim.device"},
+        required=False,
+        description="Only update devices at a specific location.",
+    )
+    device_role = ObjectVar(
+        model=Role,
+        query_params={"content_types": "dcim.device"},
+        required=False,
+        description="Only update devices with the selected role.",
+    )
+    tag = ObjectVar(
+        model=Tag,
+        query_params={"content_types": "dcim.device"},
+        required=False,
+        description="Only update devices with the selected tag.",
+    )
+
+    def load_source_adapter(self):
+        """Load onboarding network adapter."""
+        self.source_adapter = NetworkImporterNetworkAdapter(job=self, sync=self.sync)
+        self.source_adapter.load()
+
+    def load_target_adapter(self):
+        """Load onboarding Nautobot adapter."""
+        self.target_adapter = NetworkImporterNautobotAdapter(job=self, sync=self.sync)
+        self.target_adapter.load()
+
+    def run(self, dryrun, memory_profiling, *args, **kwargs):  # pylint:disable=arguments-differ
+        """Run sync."""
+
+        self.dryrun = dryrun
+        self.memory_profiling = memory_profiling
+        self.debug = kwargs["debug"]
+        self.location = kwargs["location"]
+        self.devices = kwargs["devices"]
+        self.device_role = kwargs["device_role"]
+        self.tag = kwargs["tag"]
+
+        nautobot_object_models = [
+            "location", 
+            "devices", 
+            "device_role", 
+            "device_role", 
+            "tag", 
+            ]
+        # Convert model instances into IDs, necessary for sending form inputs to the worker for use in other jobs
+        # TODO: MultiObjectVars need to be converted to ids for transver to the command getter
+        # for model in nautobot_object_models:
+        #     kwargs[model] = kwargs[model].id if kwargs[model] else None
+
+        self.job_result.task_kwargs = kwargs
+        super().run(dryrun, memory_profiling, *args, **kwargs)
 
 
 class CommandGetterDO(Job):
@@ -454,5 +519,5 @@ class CommandGetterDO(Job):
         return compiled_results
 
 
-jobs = [OnboardingTask, SSOTDeviceOnboarding, CommandGetterDO]
+jobs = [OnboardingTask, SSOTDeviceOnboarding, SSOTNetworkImporter, CommandGetterDO]
 register_jobs(*jobs)
