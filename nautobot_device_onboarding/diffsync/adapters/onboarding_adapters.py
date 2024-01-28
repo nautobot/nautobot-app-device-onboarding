@@ -73,7 +73,7 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
                 name=platform.name,
                 network_driver=platform.network_driver,
                 manufacturer__name=platform.manufacturer.name,
-            )
+            ) # type: ignore
             self.add(onboarding_platform)
             if self.job.debug:
                 self.job.logger.debug(f"Platform: {platform.name} loaded.")
@@ -87,7 +87,7 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
                 model=device_type.model,
                 part_number=device_type.model,
                 manufacturer__name=device_type.manufacturer.name,
-            )
+            ) # type: ignore
             self.add(onboarding_device_type)
             if self.job.debug:
                 self.job.logger.debug(f"DeviceType: {device_type.model} loaded.")
@@ -118,7 +118,7 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
                 interfaces=interface_list,
                 mask_length=device.primary_ip4.mask_length if device.primary_ip4 else None,
                 serial=device.serial,
-            )
+            ) # type: ignore
             self.add(onboarding_device)
             if self.job.debug:
                 self.job.logger.debug(f"Device: {device.name} loaded.")
@@ -188,6 +188,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
             else:
                 break
         self.device_data = result.result
+        self.job.logger.debug(f"Command Getter Job Result: {self.device_data}")
 
     def load_manufacturers(self):
         """Load manufacturer data into a DiffSync model."""
@@ -197,7 +198,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
             onboarding_manufacturer = self.manufacturer(
                 diffsync=self,
                 name=self.device_data[ip_address]["manufacturer"],
-            )
+            ) # type: ignore
             try:
                 self.add(onboarding_manufacturer)
             except diffsync.ObjectAlreadyExists:
@@ -213,7 +214,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 name=self.device_data[ip_address]["platform"],
                 manufacturer__name=self.device_data[ip_address]["manufacturer"],
                 network_driver=self.device_data[ip_address]["network_driver"],
-            )
+            ) # type: ignore
             try:
                 self.add(onboarding_platform)
             except diffsync.ObjectAlreadyExists:
@@ -229,7 +230,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 model=self.device_data[ip_address]["device_type"],
                 part_number=self.device_data[ip_address]["device_type"],
                 manufacturer__name=self.device_data[ip_address]["manufacturer"],
-            )
+            ) # type: ignore
             try:
                 self.add(onboarding_device_type)
             except diffsync.ObjectAlreadyExists:
@@ -258,7 +259,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 interfaces=[self.device_data[ip_address]["mgmt_interface"]],
                 mask_length=self.device_data[ip_address]["mask_length"],
                 serial=self.device_data[ip_address]["serial"],
-            )
+            ) # type: ignore
             try:
                 self.add(onboarding_device)
                 if self.job.debug:

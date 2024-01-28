@@ -356,18 +356,6 @@ class CommandGetterDO(Job):
         description = "Login to a device(s) and run commands."
         has_sensitive_variables = False
         hidden = False
-
-    # def __init__(self, *args, **kwargs):
-    #     """Initialize Command Getter Job."""
-    #     self.username = None
-    #     self.password = None
-    #     self.secret = None
-    #     self.secrets_group = None
-    #     self.ip4address = None
-    #     self.platform = None
-    #     self.port = None
-    #     self.timeout = None
-    #     super().__init__(*args, **kwargs)
         
     debug = BooleanVar(
         default=False,
@@ -430,20 +418,8 @@ class CommandGetterDO(Job):
     )
 
     def run(self, *args, **kwargs):
-        # mock_job_data = {
-        #     "ip4address": "174.51.52.76",
-        #     "platform": "cisco_nxos",
-        #     "secrets_group": SecretsGroup.objects.get(name="NW_CREDS"),
-        #     "port": 8022,
-        #     "timeout": 30,
-        # }
 
         """Process onboarding task from ssot-ni job."""
-        # self.ip4address = mock_job_data["ip4address"]
-        # self.secrets_group = mock_job_data["secrets_group"]
-        # self.platform = mock_job_data["platform"]
-        # self.port = mock_job_data["port"]
-        # self.timeout = mock_job_data["timeout"]
 
         self.ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
         self.port = kwargs["port"]
