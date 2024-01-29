@@ -71,8 +71,8 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
             onboarding_platform = self.platform(
                 diffsync=self,
                 name=platform.name,
-                network_driver=platform.network_driver,
-                manufacturer__name=platform.manufacturer.name,
+                network_driver=platform.network_driver if platform.network_driver else "",
+                manufacturer__name=platform.manufacturer.name if platform.manufacturer else None,
             ) # type: ignore
             self.add(onboarding_platform)
             if self.job.debug:
@@ -188,7 +188,9 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
             else:
                 break
         self.device_data = result.result
-        self.job.logger.debug(f"Command Getter Job Result: {self.device_data}")
+        if self.job.debug:
+            self.job.logger.debug(f"Command Getter Job Result: {self.device_data}")
+    
 
     def load_manufacturers(self):
         """Load manufacturer data into a DiffSync model."""

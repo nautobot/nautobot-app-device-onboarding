@@ -481,7 +481,15 @@ class CommandGetterDO(Job):
         required=False,
         description="Device platform. Define ONLY to override auto-recognition of platform.",
     )
-
+    def process_command_getter_result(self, command_result, ip_addresses):
+        """Process the data returned from CommandGetterDO"""
+        processed_device_data = {}
+        for ip_address in ip_addresses:
+            processed_device_data[ip_address] = command_result[ip_address]
+            if self.debug:
+                self.logger.debug(f"Processed CommandGetterDO return for {ip_address}: {command_result[ip_address]}")
+        return processed_device_data
+    
     def run(self, *args, **kwargs):
 
         """Process onboarding task from ssot-ni job."""
@@ -505,18 +513,18 @@ class CommandGetterDO(Job):
                 ip_address = self.ip_addresses
                 inventory_constructed = _set_inventory(ip_address, self.platform, self.port, self.secrets_group)
                 nr_with_processors.inventory.hosts.update(inventory_constructed)
+                nr_with_processors.run(task=netmiko_send_commands)
+                final_result = self.process_command_getter_result(compiled_results, self.ip_addresses)
 
                 #### Remove before final merge ####
                 for host, data in nr_with_processors.inventory.hosts.items():
                     self.logger.info("%s;\n%s", host, data.dict())
                 #### End ####
-
-                nr_with_processors.run(task=netmiko_send_commands)
-                
+                    
         except Exception as err:
             self.logger.info("Error: %s", err)
             return err
-        return compiled_results
+        return final_result
 
 
 jobs = [OnboardingTask, SSOTDeviceOnboarding, SSOTNetworkImporter, CommandGetterDO]

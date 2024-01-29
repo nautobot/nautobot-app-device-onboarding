@@ -18,15 +18,17 @@ class ProcessorDO(BaseLoggingProcessor):
 
     def task_started(self, task: Task) -> None:
         self.data[task.name] = {}
-        self.data[task.name]["started"] = True
+        #self.data[task.name]["started"] = True
+        self.logger.info(f"Task Name: {task.name} started")
 
     def task_completed(self, task: Task, result: AggregatedResult) -> None:
-        self.data[task.name]["completed"] = True
+        #self.data[task.name]["completed"] = True
+        self.logger.info(f"Task Name: {task.name} completed")
 
     def task_instance_started(self, task: Task, host: Host) -> None:
         """Processor for Logging on Task Start."""
         self.logger.info(f"Starting {task.name}.", extra={"object": task.host})
-        self.data[task.name][host.name] = {"started": True}
+        self.data[task.name][host.name] = {}
 
     def task_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Nornir processor task completion for OS upgrades.
@@ -51,23 +53,32 @@ class ProcessorDO(BaseLoggingProcessor):
         else:
             self.logger.info(f"Task Name: {task.name} Task Result: {result.result}", extra={"object": task.host})
 
-        self.data[task.name][host.name] = {
-            "completed": True,
-            "failed": result.failed,
-        }
+        # self.data[task.name][host.name] = {
+        #     "completed": True,
+        #     "failed": result.failed,
+        # }
 
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Processor for Logging on SubTask Completed."""
         self.logger.info(f"Subtask completed {task.name}.", extra={"object": task.host})
         self.logger.info(f"Subtask result {result.result}.", extra={"object": task.host})
+        
         self.data[task.name][host.name] = {
             "failed": result.failed,
             "subtask_result": result.result,
         }
-        if host.name not in self.data:
+        self.logger.info(f" self.data: {self.data}")
+
+        if self.data[task.name][host.name].get("failed"):
+            self.data[host.name] = {
+                "failed": True,
+                "subtask_result": result.result,
+            }
+        elif host.name not in self.data:
             self.data[host.name] = {
                 "platform": host.platform,
                 "manufacturer": host.platform.split("_")[0].title() if host.platform else "PLACEHOLDER",
+                "network_driver": host.platform,
             }
 
         if host.platform in ["cisco_ios", "cisco_xe"]:
@@ -84,4 +95,4 @@ class ProcessorDO(BaseLoggingProcessor):
         """Processor for Logging on SubTask Start."""
         self.logger.info(f"Subtask starting {task.name}.", extra={"object": task.host})
         self.data[task.name] = {}
-        self.data[task.name][host.name] = {"started": True}
+        #self.data[task.name][host.name] = {"started": True}
