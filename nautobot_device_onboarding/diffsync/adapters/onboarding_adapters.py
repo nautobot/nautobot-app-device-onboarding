@@ -164,6 +164,25 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
         else:
             raise netaddr.AddrConversionError
 
+    def _handle_failed_connections(self, device_data):
+        """
+        Handle result data from failed device connections.
+
+        If a device fails to return expected data, log the result
+        and remove it from the data to be loaded into the diffsync store.
+        """
+        failed_ip_addresses = []
+
+        for ip_address in device_data:
+            if device_data[ip_address].get("failed"):
+                self.job.logger.error(f"Failed to connect to {ip_address}. This device will not be onboarded.")
+                if self.job.debug:
+                    self.job.logger.debug(device_data[ip_address].get("subtask_result"))
+                failed_ip_addresses.append(ip_address)
+        for ip_address in failed_ip_addresses:
+            del device_data[ip_address]
+        self.device_data = device_data
+
     def execute_command_getter(self):
         if self.job.platform:
             if not self.job.platform.network_driver:
@@ -187,9 +206,9 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 result.refresh_from_db()
             else:
                 break
-        self.device_data = result.result
         if self.job.debug:
-            self.job.logger.debug(f"Command Getter Job Result: {self.device_data}")
+            self.job.logger.debug(f"Command Getter Job Result: {result.result}")
+        self._handle_failed_connections(device_data=result.result)
     
 
     def load_manufacturers(self):
