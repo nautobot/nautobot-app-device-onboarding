@@ -1,4 +1,5 @@
 """Custom logger to support writing to console and db."""
+
 import logging
 from typing import Any
 

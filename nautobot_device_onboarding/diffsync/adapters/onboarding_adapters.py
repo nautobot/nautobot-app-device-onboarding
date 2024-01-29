@@ -2,13 +2,13 @@
 
 import time
 
-import netaddr
-from nautobot.extras.models import JobResult, Job
-from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
-from nautobot_device_onboarding.diffsync.models import onboarding_models
-from nautobot.apps.choices import JobResultStatusChoices
-
 import diffsync
+import netaddr
+from nautobot.apps.choices import JobResultStatusChoices
+from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
+from nautobot.extras.models import Job, JobResult
+
+from nautobot_device_onboarding.diffsync.models import onboarding_models
 
 #######################################
 # FOR TESTING ONLY - TO BE REMOVED    #
@@ -56,6 +56,7 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
         self.sync = sync
 
     def load_manufacturers(self):
+        """Load manufacturer data from Nautobot."""
         for manufacturer in Manufacturer.objects.all():
             if self.job.debug:
                 self.job.logger.debug(f"Loading Manufacturer data from Nautobot...")
@@ -65,6 +66,7 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
                 self.job.logger.debug(f"Manufacturer: {manufacturer.name} loaded.")
 
     def load_platforms(self):
+        """Load platform data from Nautobot."""
         if self.job.debug:
             self.job.logger.debug(f"Loading Platform data from Nautobot...")
         for platform in Platform.objects.all():
@@ -73,12 +75,13 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
                 name=platform.name,
                 network_driver=platform.network_driver if platform.network_driver else "",
                 manufacturer__name=platform.manufacturer.name if platform.manufacturer else None,
-            ) # type: ignore
+            )  # type: ignore
             self.add(onboarding_platform)
             if self.job.debug:
                 self.job.logger.debug(f"Platform: {platform.name} loaded.")
 
     def load_device_types(self):
+        """Load device type data from Nautobot."""
         if self.job.debug:
             self.job.logger.debug(f"Loading DeviceType data from Nautobot...")
         for device_type in DeviceType.objects.all():
@@ -87,12 +90,13 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
                 model=device_type.model,
                 part_number=device_type.model,
                 manufacturer__name=device_type.manufacturer.name,
-            ) # type: ignore
+            )  # type: ignore
             self.add(onboarding_device_type)
             if self.job.debug:
                 self.job.logger.debug(f"DeviceType: {device_type.model} loaded.")
 
     def load_devices(self):
+        """Load device data from Nautobot."""
         if self.job.debug:
             self.job.logger.debug(f"Loading Device data from Nautobot...")
 
@@ -118,7 +122,7 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
                 interfaces=interface_list,
                 mask_length=device.primary_ip4.mask_length if device.primary_ip4 else None,
                 serial=device.serial,
-            ) # type: ignore
+            )  # type: ignore
             self.add(onboarding_device)
             if self.job.debug:
                 self.job.logger.debug(f"Device: {device.name} loaded.")
@@ -184,6 +188,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
         self.device_data = device_data
 
     def execute_command_getter(self):
+        """Start the CommandGetterDO job to query devices for data."""
         if self.job.platform:
             if not self.job.platform.network_driver:
                 self.job.logger.error(
@@ -191,15 +196,12 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                     "does not have a network driver, please update the Platform."
                 )
                 raise Exception("Platform.network_driver missing")
-            
+
         command_getter_job = Job.objects.get(name="Command Getter for Device Onboarding")
         job_kwargs = self.job.prepare_job_kwargs(self.job.job_result.task_kwargs)
         kwargs = self.job.serialize_data(job_kwargs)
         result = JobResult.enqueue_job(
-            job_model=command_getter_job,
-            user=self.job.user,
-            celery_kwargs=self.job.job_result.celery_kwargs,
-            **kwargs
+            job_model=command_getter_job, user=self.job.user, celery_kwargs=self.job.job_result.celery_kwargs, **kwargs
         )
         while True:
             if result.status not in JobResultStatusChoices.READY_STATES:
@@ -210,7 +212,6 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
         if self.job.debug:
             self.job.logger.debug(f"Command Getter Job Result: {result.result}")
         self._handle_failed_connections(device_data=result.result)
-    
 
     def load_manufacturers(self):
         """Load manufacturer data into a DiffSync model."""
@@ -220,7 +221,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
             onboarding_manufacturer = self.manufacturer(
                 diffsync=self,
                 name=self.device_data[ip_address]["manufacturer"],
-            ) # type: ignore
+            )  # type: ignore
             try:
                 self.add(onboarding_manufacturer)
             except diffsync.ObjectAlreadyExists:
@@ -236,7 +237,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 name=self.device_data[ip_address]["platform"],
                 manufacturer__name=self.device_data[ip_address]["manufacturer"],
                 network_driver=self.device_data[ip_address]["network_driver"],
-            ) # type: ignore
+            )  # type: ignore
             try:
                 self.add(onboarding_platform)
             except diffsync.ObjectAlreadyExists:
@@ -252,7 +253,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 model=self.device_data[ip_address]["device_type"],
                 part_number=self.device_data[ip_address]["device_type"],
                 manufacturer__name=self.device_data[ip_address]["manufacturer"],
-            ) # type: ignore
+            )  # type: ignore
             try:
                 self.add(onboarding_device_type)
             except diffsync.ObjectAlreadyExists:
@@ -260,10 +261,6 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
 
     def load_devices(self):
         """Load device data into a DiffSync model."""
-
-        # PROVIDE TO JOB: ip4address, port, timeout, secrets_group, platform (optional)
-        # TODO: CHECK FOR FAILED CONNECTIONS AND DO NOT LOAD DATA, LOG FAILED IPs
-
         for ip_address in self.device_data:
             if self.job.debug:
                 self.job.logger.debug(f"loading device data for {ip_address}")
@@ -281,7 +278,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 interfaces=[self.device_data[ip_address]["mgmt_interface"]],
                 mask_length=self.device_data[ip_address]["mask_length"],
                 serial=self.device_data[ip_address]["serial"],
-            ) # type: ignore
+            )  # type: ignore
             try:
                 self.add(onboarding_device)
                 if self.job.debug:

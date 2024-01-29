@@ -1,4 +1,5 @@
 """Empty Nornir Inventory Plugin."""
+
 from nornir.core.inventory import Defaults, Groups, Hosts, Inventory
 
 

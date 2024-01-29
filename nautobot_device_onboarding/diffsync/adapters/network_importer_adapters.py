@@ -1,9 +1,9 @@
 """DiffSync adapters."""
 
-from nautobot_ssot.contrib import NautobotAdapter
-from nautobot_device_onboarding.diffsync.models import network_importer_models
 import diffsync
+from nautobot_ssot.contrib import NautobotAdapter
 
+from nautobot_device_onboarding.diffsync.models import network_importer_models
 
 #######################################
 # FOR TESTING ONLY - TO BE REMOVED    #
@@ -28,7 +28,7 @@ mock_data = {
                 "mgmt_only": False,
                 "ip_addresses": [],
             },
-        }
+        },
     },
 }
 #######################################
@@ -41,14 +41,16 @@ class FilteredNautobotAdapter(NautobotAdapter):
 
     Must be used with FilteredNautobotModel.
     """
-        
+
     def _load_objects(self, diffsync_model):
         """Given a diffsync model class, load a list of models from the database and return them."""
         parameter_names = self._get_parameter_names(diffsync_model)
         for database_object in diffsync_model._get_queryset(diffsync=self):
-            self.job.logger.debug(f"LOADING: Database Object: {database_object}, "
-                                  f"Model Name: {diffsync_model._modelname}, "
-                                  f"Parameter Names: {parameter_names}")
+            self.job.logger.debug(
+                f"LOADING: Database Object: {database_object}, "
+                f"Model Name: {diffsync_model._modelname}, "
+                f"Parameter Names: {parameter_names}"
+            )
             self._load_single_object(database_object, diffsync_model, parameter_names)
 
 
@@ -79,7 +81,9 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
     device_data = mock_data
 
     def load_devices(self):
+        """Load device data from network devices."""
         pass
 
     def load(self):
+        """Load network data."""
         self.load_devices()

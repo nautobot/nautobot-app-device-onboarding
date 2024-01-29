@@ -1,10 +1,12 @@
 """Processor used by Device Onboarding to catch unknown errors."""
 
 from typing import Dict
+
 from nornir.core.inventory import Host
 from nornir.core.task import AggregatedResult, MultiResult, Task
 from nornir_nautobot.exceptions import NornirNautobotException
 from nornir_nautobot.plugins.processors import BaseLoggingProcessor
+
 from nautobot_device_onboarding.utils.formatter import format_ob_data_ios, format_ob_data_nxos
 
 
@@ -17,12 +19,14 @@ class ProcessorDO(BaseLoggingProcessor):
         self.data: Dict = command_outputs
 
     def task_started(self, task: Task) -> None:
+        """Boilerplate Nornir processor for task_started."""
         self.data[task.name] = {}
-        #self.data[task.name]["started"] = True
+        # self.data[task.name]["started"] = True
         self.logger.info(f"Task Name: {task.name} started")
 
     def task_completed(self, task: Task, result: AggregatedResult) -> None:
-        #self.data[task.name]["completed"] = True
+        """Boilerplate Nornir processor for task_instance_completed."""
+        # self.data[task.name]["completed"] = True
         self.logger.info(f"Task Name: {task.name} completed")
 
     def task_instance_started(self, task: Task, host: Host) -> None:
@@ -46,7 +50,7 @@ class ProcessorDO(BaseLoggingProcessor):
         if result.failed:
             for level_1_result in result:
                 if hasattr(level_1_result, "exception") and hasattr(level_1_result.exception, "result"):
-                    for level_2_result in level_1_result.exception.result: # type: ignore
+                    for level_2_result in level_1_result.exception.result:  # type: ignore
                         if isinstance(level_2_result.exception, NornirNautobotException):
                             return
             self.logger.critical(f"{task.name} failed: {result.exception}", extra={"object": task.host})
@@ -62,7 +66,7 @@ class ProcessorDO(BaseLoggingProcessor):
         """Processor for Logging on SubTask Completed."""
         self.logger.info(f"Subtask completed {task.name}.", extra={"object": task.host})
         self.logger.info(f"Subtask result {result.result}.", extra={"object": task.host})
-        
+
         self.data[task.name][host.name] = {
             "failed": result.failed,
             "subtask_result": result.result,
@@ -95,4 +99,4 @@ class ProcessorDO(BaseLoggingProcessor):
         """Processor for Logging on SubTask Start."""
         self.logger.info(f"Subtask starting {task.name}.", extra={"object": task.host})
         self.data[task.name] = {}
-        #self.data[task.name][host.name] = {"started": True}
+        # self.data[task.name][host.name] = {"started": True}

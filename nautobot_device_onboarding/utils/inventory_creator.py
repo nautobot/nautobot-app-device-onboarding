@@ -2,9 +2,10 @@
 
 from django.conf import settings
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
-from nautobot_device_onboarding.exceptions import OnboardException
 from netmiko import SSHDetect
 from nornir.core.inventory import ConnectionOptions, Host
+
+from nautobot_device_onboarding.exceptions import OnboardException
 
 
 def _parse_credentials(credentials):
@@ -46,8 +47,7 @@ def guess_netmiko_device_type(hostname, username, password, port):
         "host": hostname,
         "username": username,
         "password": password,
-        "port": port
-        **netmiko_optional_args,
+        "port": port**netmiko_optional_args,
     }
 
     try:

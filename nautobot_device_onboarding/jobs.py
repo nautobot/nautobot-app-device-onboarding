@@ -1,15 +1,23 @@
 """Device Onboarding Jobs."""
+
 import logging
 
 from diffsync.enum import DiffSyncFlags
 from django.conf import settings
 from django.templatetags.static import static
-from nautobot.apps.jobs import BooleanVar, IntegerVar, Job, ObjectVar, StringVar, MultiObjectVar
+from nautobot.apps.jobs import BooleanVar, IntegerVar, Job, MultiObjectVar, ObjectVar, StringVar
 from nautobot.core.celery import register_jobs
-from nautobot.dcim.models import DeviceType, Location, Platform, Device
+from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status, Tag
 from nautobot.ipam.models import Namespace
+from nautobot_ssot.jobs.base import DataSource
+from nornir import InitNornir
+from nornir.core.inventory import ConnectionOptions, Defaults, Groups, Host, Hosts, Inventory
+from nornir.core.plugins.inventory import InventoryPluginRegister
+from nornir.core.task import Result, Task
+from nornir_netmiko.tasks import netmiko_send_command
+
 from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
     NetworkImporterNautobotAdapter,
     NetworkImporterNetworkAdapter,
@@ -26,12 +34,6 @@ from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInvento
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
 from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
-from nautobot_ssot.jobs.base import DataSource
-from nornir import InitNornir
-from nornir.core.inventory import ConnectionOptions, Defaults, Groups, Host, Hosts, Inventory
-from nornir.core.plugins.inventory import InventoryPluginRegister
-from nornir.core.task import Result, Task
-from nornir_netmiko.tasks import netmiko_send_command
 
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
 
@@ -143,9 +145,9 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
             password=self.password,
             secret=self.secret,
             napalm_driver=self.platform.napalm_driver if self.platform and self.platform.napalm_driver else None,
-            optional_args=self.platform.napalm_args
-            if self.platform and self.platform.napalm_args
-            else settings.NAPALM_ARGS,
+            optional_args=(
+                self.platform.napalm_args if self.platform and self.platform.napalm_args else settings.NAPALM_ARGS
+            ),
         )
         netdev.get_onboarding_facts()
         netdev_dict = netdev.get_netdev_dict()
@@ -248,8 +250,8 @@ class SSOTDeviceOnboarding(DataSource):
     update_devices_without_primary_ip = BooleanVar(
         default=False,
         description="If a device at the specified location already exists in Nautobot but the primary ip address "
-                    "does not match an ip address entered, update this device with the sync." 
-    ) 
+        "does not match an ip address entered, update this device with the sync.",
+    )
     device_role = ObjectVar(
         model=Role,
         query_params={"content_types": "dcim.device"},
@@ -295,28 +297,27 @@ class SSOTDeviceOnboarding(DataSource):
         self.target_adapter.load()
 
     def run(
-            self, 
-            dryrun,
-            memory_profiling,
-            debug,
-            location,
-            namespace,
-            ip_addresses,
-            management_only_interface,
-            update_devices_without_primary_ip,
-            device_role,
-            device_status,
-            interface_status,
-            ip_address_status,
-            port,
-            timeout,
-            secrets_group,
-            platform,
-            *args, 
-            **kwargs
-        ):  # pylint:disable=arguments-differ
+        self,
+        dryrun,
+        memory_profiling,
+        debug,
+        location,
+        namespace,
+        ip_addresses,
+        management_only_interface,
+        update_devices_without_primary_ip,
+        device_role,
+        device_status,
+        interface_status,
+        ip_address_status,
+        port,
+        timeout,
+        secrets_group,
+        platform,
+        *args,
+        **kwargs,
+    ):  # pylint:disable=arguments-differ
         """Run sync."""
-
         self.dryrun = dryrun
         self.memory_profiling = memory_profiling
         self.debug = debug
@@ -351,6 +352,7 @@ class SSOTDeviceOnboarding(DataSource):
             "platform": platform,
         }
         super().run(dryrun, memory_profiling, *args, **kwargs)
+
 
 class SSOTNetworkImporter(DataSource):
     """Job syncing extended device attributes into Nautobot."""
@@ -405,18 +407,9 @@ class SSOTNetworkImporter(DataSource):
         self.target_adapter.load()
 
     def run(
-            self, 
-            dryrun,
-            memory_profiling, 
-            debug,
-            location,
-            devices,
-            device_role,
-            tag,
-            *args, 
-            **kwargs):  # pylint:disable=arguments-differ
+        self, dryrun, memory_profiling, debug, location, devices, device_role, tag, *args, **kwargs
+    ):  # pylint:disable=arguments-differ
         """Run sync."""
-
         self.dryrun = dryrun
         self.memory_profiling = memory_profiling
         self.debug = debug
@@ -448,24 +441,23 @@ class CommandGetterDO(Job):
         hidden = False
 
     debug = BooleanVar()
-    ip_addresses = StringVar() 
+    ip_addresses = StringVar()
     port = IntegerVar()
     timeout = IntegerVar()
     secrets_group = ObjectVar(model=SecretsGroup)
-    platform = ObjectVar(model=Platform)
+    platform = ObjectVar(model=Platform, required=False)
 
-    def process_command_getter_result(self, command_result, ip_addresses):
-        """Process the data returned from CommandGetterDO"""
+    def _process_result(self, command_result, ip_addresses):
+        """Process the data returned from devices."""
         processed_device_data = {}
         for ip_address in ip_addresses:
             processed_device_data[ip_address] = command_result[ip_address]
             if self.debug:
                 self.logger.debug(f"Processed CommandGetterDO return for {ip_address}: {command_result[ip_address]}")
         return processed_device_data
-    
+
     def run(self, *args, **kwargs):
         """Process onboarding task from ssot-ni job."""
-
         self.ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
         self.port = kwargs["port"]
         self.timeout = kwargs["timeout"]
@@ -479,20 +471,22 @@ class CommandGetterDO(Job):
             with InitNornir(
                 runner=NORNIR_SETTINGS.get("runner"),
                 logging={"enabled": False},
-                inventory={"plugin": "empty-inventory",},
+                inventory={
+                    "plugin": "empty-inventory",
+                },
             ) as nornir_obj:
                 nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
                 ip_address = self.ip_addresses
                 inventory_constructed = _set_inventory(ip_address, self.platform, self.port, self.secrets_group)
                 nr_with_processors.inventory.hosts.update(inventory_constructed)
                 nr_with_processors.run(task=netmiko_send_commands)
-                final_result = self.process_command_getter_result(compiled_results, self.ip_addresses)
+                final_result = self._process_result(compiled_results, self.ip_addresses)
 
                 #### Remove before final merge ####
                 for host, data in nr_with_processors.inventory.hosts.items():
                     self.logger.info("%s;\n%s", host, data.dict())
                 #### End ####
-                    
+
         except Exception as err:
             self.logger.info("Error: %s", err)
             return err

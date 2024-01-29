@@ -3,6 +3,7 @@
 import ipaddress
 from typing import List, Optional
 
+from diffsync import DiffSyncModel
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
 from nautobot.apps.choices import InterfaceTypeChoices, PrefixTypeChoices
 from nautobot.dcim.models import Device, DeviceType, Interface, Manufacturer, Platform
@@ -10,10 +11,10 @@ from nautobot.extras.models import Role, SecretsGroup, Status
 from nautobot.ipam.models import IPAddress, Prefix
 from nautobot_ssot.contrib import NautobotModel
 
-from diffsync import DiffSyncModel
-
 
 class OnboardingDevice(DiffSyncModel):
+    """Diffsync model for device data."""
+
     _modelname = "device"
     _identifiers = (
         "location__name",
@@ -56,7 +57,7 @@ class OnboardingDevice(DiffSyncModel):
         try:
             # Only Devices with a primary ip address are loaded from Nautobot when syncing.
             # If a device is found in Nautobot with a matching name and location as the
-            # device being created, but the primary ip address doesn't match an ip address entered, 
+            # device being created, but the primary ip address doesn't match an ip address entered,
             # the matching device will be updated or skipped based on user preference.
 
             device = Device.objects.get(
@@ -258,7 +259,7 @@ class OnboardingDevice(DiffSyncModel):
             # Update the primary ip address only
 
             # The OnboardingNautobotAdapter only loads devices with primary ips matching those
-            # entered for onboarding. This will not be called unless the adapter is changed to 
+            # entered for onboarding. This will not be called unless the adapter is changed to
             # include all devices
             if attrs.get("primary_ip4__host"):
                 if not attrs.get("mask_length"):
@@ -278,6 +279,8 @@ class OnboardingDevice(DiffSyncModel):
 
 
 class OnboardingDeviceType(NautobotModel):
+    """Diffsync model for device type data."""
+
     _modelname = "device_type"
     _model = DeviceType
     _identifiers = ("model", "manufacturer__name")
@@ -290,6 +293,8 @@ class OnboardingDeviceType(NautobotModel):
 
 
 class OnboardingManufacturer(NautobotModel):
+    """Diffsync model for manufacturer data."""
+
     _modelname = "manufacturer"
     _model = Manufacturer
     _identifiers = ("name",)
@@ -298,6 +303,8 @@ class OnboardingManufacturer(NautobotModel):
 
 
 class OnboardingPlatform(NautobotModel):
+    """Diffsync model for platform data."""
+
     _modelname = "platform"
     _model = Platform
     _identifiers = ("name",)

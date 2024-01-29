@@ -1,10 +1,11 @@
 """Diffsync models."""
 
-from nautobot_ssot.contrib import NautobotModel
+from typing import List, Optional
+
+from diffsync import DiffSync
 from nautobot.dcim.models import Device, Interface
 from nautobot.ipam.models import IPAddress
-from typing import List, Optional
-from diffsync import DiffSync
+from nautobot_ssot.contrib import NautobotModel
 
 
 class FilteredNautobotModel(NautobotModel):
@@ -27,18 +28,20 @@ class FilteredNautobotModel(NautobotModel):
     @classmethod
     def get_queryset(cls, diffsync: "DiffSync"):
         """Get the queryset used to load the models data from Nautobot."""
-        # Replace return with a filtered queryset. 
+        # Replace return with a filtered queryset.
         # Access the job form inputs with diffsync ex: diffsync.job.location.name
         return cls._model.objects.all()
 
 
 class NetworkImporterDevice(FilteredNautobotModel):
+    """Diffsync model for device data."""
+
     _modelname = "device"
     _model = Device
     _identifiers = (
-    "location__name",
-    "name",
-    "serial",
+        "location__name",
+        "name",
+        "serial",
     )
     _children = {"interface": "interfaces"}
 
@@ -71,11 +74,13 @@ class NetworkImporterDevice(FilteredNautobotModel):
 
 
 class NetworkImporterInterface(FilteredNautobotModel):
+    """Diffsync model for interface data."""
+
     _modelname = "interface"
     _model = Interface
     _identifiers = (
-    "device__name",
-    "name",
+        "device__name",
+        "name",
     )
     _children = {"ip_address": "ip_addresses"}
     device__name: str
@@ -85,6 +90,8 @@ class NetworkImporterInterface(FilteredNautobotModel):
 
 
 class NetworkImporterIPAddress(FilteredNautobotModel):
+    """Diffsync model for ip address data."""
+
     _modelname = "ip_address"
     _model = IPAddress
     _identifiers = (

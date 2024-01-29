@@ -1,3 +1,6 @@
+"""Formatter."""
+
+
 def format_ob_data_ios(host, result):
     """Format the data for onboarding IOS devices."""
     primary_ip4 = host.name
