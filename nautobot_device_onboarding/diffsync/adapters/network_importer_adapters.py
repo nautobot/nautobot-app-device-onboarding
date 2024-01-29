@@ -5,6 +5,36 @@ from nautobot_device_onboarding.diffsync.models import network_importer_models
 import diffsync
 
 
+#######################################
+# FOR TESTING ONLY - TO BE REMOVED    #
+#######################################
+mock_data = {
+    "demo-cisco-xe1": {
+        "serial": "9ABUXU581111",
+        "interfaces": {
+            "GigabitEthernet1": {
+                "mgmt_only": True,
+                "ip_addresses": ["10.1.1.8"],
+            },
+            "GigabitEthernet2": {
+                "mgmt_only": False,
+                "ip_addresses": ["10.1.1.9"],
+            },
+            "GigabitEthernet3": {
+                "mgmt_only": False,
+                "ip_addresses": ["10.1.1.10, 10.1.1.11"],
+            },
+            "GigabitEthernet4": {
+                "mgmt_only": False,
+                "ip_addresses": [],
+            },
+        }
+    },
+}
+#######################################
+######################################
+
+
 class FilteredNautobotAdapter(NautobotAdapter):
     """
     Allow for filtering of data loaded from Nautobot into DiffSync models.
@@ -29,7 +59,7 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
     interface = network_importer_models.NetworkImporterInterface
     ip_address = network_importer_models.NetworkImporterIPAddress
 
-    top_level = ["ip_address", "interface", "device"]
+    top_level = ["device"]
 
 
 class NetworkImporterNetworkAdapter(diffsync.DiffSync):
@@ -45,7 +75,8 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
     interface = network_importer_models.NetworkImporterInterface
     ip_address = network_importer_models.NetworkImporterIPAddress
 
-    top_level = ["ip_address", "interface", "device"]
+    top_level = ["device"]
+    device_data = mock_data
 
     def load_devices(self):
         pass

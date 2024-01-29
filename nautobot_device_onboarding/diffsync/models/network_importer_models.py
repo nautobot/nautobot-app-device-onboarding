@@ -40,10 +40,13 @@ class NetworkImporterDevice(FilteredNautobotModel):
     "name",
     "serial",
     )
+    _children = {"interface": "interfaces"}
 
     name: str
     location__name: str
     serial: str
+
+    interfaces: List["NetworkImporterInterface"] = []
 
     @classmethod
     def _get_queryset(cls, diffsync: "DiffSync"):
@@ -74,9 +77,12 @@ class NetworkImporterInterface(FilteredNautobotModel):
     "device__name",
     "name",
     )
-
+    _children = {"ip_address": "ip_addresses"}
     device__name: str
     name: str
+
+    ip_addresses: List["NetworkImporterIPAddress"] = []
+
 
 class NetworkImporterIPAddress(FilteredNautobotModel):
     _modelname = "ip_address"

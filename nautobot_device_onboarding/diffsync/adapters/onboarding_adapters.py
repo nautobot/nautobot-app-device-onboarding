@@ -193,12 +193,13 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 raise Exception("Platform.network_driver missing")
             
         command_getter_job = Job.objects.get(name="Command Getter for Device Onboarding")
+        job_kwargs = self.job.prepare_job_kwargs(self.job.job_result.task_kwargs)
+        kwargs = self.job.serialize_data(job_kwargs)
         result = JobResult.enqueue_job(
             job_model=command_getter_job,
             user=self.job.user,
             celery_kwargs=self.job.job_result.celery_kwargs,
-            *self.job.job_result.task_args,
-            **self.job.job_result.task_kwargs
+            **kwargs
         )
         while True:
             if result.status not in JobResultStatusChoices.READY_STATES:
