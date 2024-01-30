@@ -39,7 +39,7 @@ NORNIR_SETTINGS = settings.PLUGINS_CONFIG["nautobot_plugin_nornir"]
 
 LOGGER = logging.getLogger(__name__)
 
-name = "Device Onboarding/Network Importer"
+name = "Device Onboarding/Network Importer" # pylint: disable=invalid-name
 
 
 class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
@@ -208,7 +208,7 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
             self.secret = settings.NAPALM_ARGS.get("secret", None)
 
 
-class SSOTDeviceOnboarding(DataSource):
+class SSOTDeviceOnboarding(DataSource): # pylint: disable=too-many-instance-attributes
     """Job for syncing basic device info from a network into Nautobot."""
 
     def __init__(self):
@@ -216,7 +216,7 @@ class SSOTDeviceOnboarding(DataSource):
         super().__init__()
         self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
 
-    class Meta:
+    class Meta: # pylint: disable=too-few-public-methods
         """Metadata about this Job."""
 
         name = "Sync Devices"
@@ -312,7 +312,7 @@ class SSOTDeviceOnboarding(DataSource):
         platform,
         *args,
         **kwargs,
-    ):  # pylint:disable=arguments-differ
+    ):  # pylint:disable=arguments-differ, too-many-arguments, too-many-locals
         """Run sync."""
         self.dryrun = dryrun
         self.memory_profiling = memory_profiling
@@ -350,7 +350,7 @@ class SSOTDeviceOnboarding(DataSource):
         super().run(dryrun, memory_profiling, *args, **kwargs)
 
 
-class SSOTNetworkImporter(DataSource):
+class SSOTNetworkImporter(DataSource): # pylint: disable=too-many-instance-attributes
     """Job syncing extended device attributes into Nautobot."""
 
     def __init__(self):
@@ -358,7 +358,7 @@ class SSOTNetworkImporter(DataSource):
         super().__init__()
         self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
 
-    class Meta:
+    class Meta: # pylint: disable=too-few-public-methods
         """Metadata about this Job."""
 
         name = "Sync Network Data"
@@ -404,7 +404,7 @@ class SSOTNetworkImporter(DataSource):
 
     def run(
         self, dryrun, memory_profiling, debug, location, devices, device_role, tag, *args, **kwargs
-    ):  # pylint:disable=arguments-differ
+    ):  # pylint:disable=arguments-differ, disable=too-many-arguments
         """Run sync."""
         self.dryrun = dryrun
         self.memory_profiling = memory_profiling
@@ -483,7 +483,7 @@ class CommandGetterDO(Job):
                     self.logger.info("%s;\n%s", host, data.dict())
                 # End #
 
-        except Exception as err:
+        except Exception as err: # pylint: disable=broad-exception-caught
             self.logger.info("Error: %s", err)
             return err
         return final_result

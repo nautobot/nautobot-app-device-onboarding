@@ -42,13 +42,13 @@ class FilteredNautobotAdapter(NautobotAdapter):
     Must be used with FilteredNautobotModel.
     """
 
-    def _load_objects(self, diffsync_model):
+    def _load_objects(self, diffsync_model): # pylint: disable=protected-access
         """Given a diffsync model class, load a list of models from the database and return them."""
         parameter_names = self._get_parameter_names(diffsync_model)
-        for database_object in diffsync_model._get_queryset(diffsync=self):
+        for database_object in diffsync_model._get_queryset(diffsync=self): # pylint: disable=protected-access
             self.job.logger.debug(
                 f"LOADING: Database Object: {database_object}, "
-                f"Model Name: {diffsync_model._modelname}, "
+                f"Model Name: {diffsync_model._modelname}, " # pylint: disable=protected-access
                 f"Parameter Names: {parameter_names}"
             )
             self._load_single_object(database_object, diffsync_model, parameter_names)
@@ -82,7 +82,6 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
 
     def load_devices(self):
         """Load device data from network devices."""
-        pass
 
     def load(self):
         """Load network data."""

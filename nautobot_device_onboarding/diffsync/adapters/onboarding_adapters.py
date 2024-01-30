@@ -102,7 +102,7 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
 
         # for device in Device.objects.filter(primary_ip4__host__in=self.job.ip_addresses):
         for device in Device.objects.all():
-            interface_list = list()
+            interface_list = []
             # Only interfaces with the device's primeary ip should be considered for diff calculations
             for interface in device.interfaces.all():
                 if device.primary_ip4 in interface.ip_addresses.all():
@@ -165,8 +165,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 validation_successful = False
         if validation_successful:
             return True
-        else:
-            raise netaddr.AddrConversionError
+        raise netaddr.AddrConversionError
 
     def _handle_failed_connections(self, device_data):
         """
@@ -179,9 +178,9 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
 
         for ip_address in device_data:
             if device_data[ip_address].get("failed"):
-                self.job.logger.error(f"Failed to connect to {ip_address}. This device will not be onboarded.")
+                self.job.logger.error(f"Connection or data error for {ip_address}. This device will not be onboarded.")
                 if self.job.debug:
-                    self.job.logger.debug(device_data[ip_address].get("subtask_result"))
+                    self.job.logger.error(device_data[ip_address].get("subtask_result"))
                 failed_ip_addresses.append(ip_address)
         for ip_address in failed_ip_addresses:
             del device_data[ip_address]
@@ -195,7 +194,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                     f"The selected platform, {self.job.platform} "
                     "does not have a network driver, please update the Platform."
                 )
-                raise Exception("Platform.network_driver missing")
+                raise Exception("Platform.network_driver missing") # pylint: disable=broad-exception-raised
 
         command_getter_job = Job.objects.get(name="Command Getter for Device Onboarding")
         job_kwargs = self.job.prepare_job_kwargs(self.job.job_result.task_kwargs)
