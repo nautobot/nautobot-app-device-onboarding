@@ -65,8 +65,7 @@ def _set_inventory(host_ip, platform, port, secrets_group):
     inv = {}
     username, password, secret = _parse_credentials(secrets_group)
     if platform:
-        p = Platform.objects.get(name=platform)
-        platform = p.network_driver
+        platform = platform.network_driver
     else:
         platform = guess_netmiko_device_type(host_ip, username, password, port)
 
