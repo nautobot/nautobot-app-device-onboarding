@@ -252,13 +252,13 @@ class SSOTDeviceOnboarding(DataSource):
         model=Role,
         query_params={"content_types": "dcim.device"},
         required=True,
-        description="Role to be applied to all synced devices",
+        description="Role to be applied to all synced devices.",
     )
     device_status = ObjectVar(
         model=Status,
         query_params={"content_types": "dcim.device"},
         required=True,
-        description="Status to be applied to all synced devices",
+        description="Status to be applied to all synced devices.",
     )
     interface_status = ObjectVar(
         model=Status,
