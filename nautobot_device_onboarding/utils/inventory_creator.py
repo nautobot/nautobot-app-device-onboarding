@@ -1,11 +1,11 @@
 """Inventory Creator and Helpers."""
 
 from django.conf import settings
+from nautobot.dcim.models import Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
+from nautobot_device_onboarding.exceptions import OnboardException
 from netmiko import SSHDetect
 from nornir.core.inventory import ConnectionOptions, Host
-
-from nautobot_device_onboarding.exceptions import OnboardException
 
 
 def _parse_credentials(credentials):
@@ -60,32 +60,32 @@ def guess_netmiko_device_type(hostname, username, password, port):
     return guessed_device_type
 
 
-def _set_inventory(ips, platform, port, secrets_group):
+def _set_inventory(host_ip, platform, port, secrets_group):
     """Construct Nornir Inventory."""
     inv = {}
     username, password, secret = _parse_credentials(secrets_group)
-    for host_ip in ips:
-        if platform:
-            platform = platform.network_driver
-        else:
-            platform = guess_netmiko_device_type(host_ip, username, password, port)
+    if platform:
+        p = Platform.objects.get(name=platform)
+        platform = p.network_driver
+    else:
+        platform = guess_netmiko_device_type(host_ip, username, password, port)
 
-        host = Host(
-            name=host_ip,
-            hostname=host_ip,
-            port=port,
-            username=username,
-            password=password,
-            platform=platform,
-            connection_options={
-                "netmiko": ConnectionOptions(
-                    hostname=host_ip,
-                    port=port,
-                    username=username,
-                    password=password,
-                    platform=platform,
-                )
-            },
-        )
-        inv.update({host_ip: host})
+    host = Host(
+        name=host_ip,
+        hostname=host_ip,
+        port=int(port),
+        username=username,
+        password=password,
+        platform=platform,
+        connection_options={
+            "netmiko": ConnectionOptions(
+                hostname=host_ip,
+                port=int(port),
+                username=username,
+                password=password,
+                platform=platform,
+            )
+        },
+    )
+    inv.update({host_ip: host})
     return inv
