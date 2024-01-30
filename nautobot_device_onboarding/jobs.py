@@ -2,7 +2,6 @@
 
 import logging
 
-from diffsync.enum import DiffSyncFlags
 from django.conf import settings
 from nautobot.apps.jobs import BooleanVar, IntegerVar, Job, MultiObjectVar, ObjectVar, StringVar
 from nautobot.core.celery import register_jobs
@@ -14,6 +13,7 @@ from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
 from nornir.core.plugins.inventory import InventoryPluginRegister
 
+from diffsync.enum import DiffSyncFlags
 from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
     NetworkImporterNautobotAdapter,
     NetworkImporterNetworkAdapter,
@@ -39,7 +39,7 @@ NORNIR_SETTINGS = settings.PLUGINS_CONFIG["nautobot_plugin_nornir"]
 
 LOGGER = logging.getLogger(__name__)
 
-name = "Device Onboarding/Network Importer" # pylint: disable=invalid-name
+name = "Device Onboarding/Network Importer"  # pylint: disable=invalid-name
 
 
 class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
@@ -208,7 +208,7 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
             self.secret = settings.NAPALM_ARGS.get("secret", None)
 
 
-class SSOTDeviceOnboarding(DataSource): # pylint: disable=too-many-instance-attributes
+class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-attributes
     """Job for syncing basic device info from a network into Nautobot."""
 
     def __init__(self):
@@ -216,7 +216,7 @@ class SSOTDeviceOnboarding(DataSource): # pylint: disable=too-many-instance-attr
         super().__init__()
         self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
 
-    class Meta: # pylint: disable=too-few-public-methods
+    class Meta:  # pylint: disable=too-few-public-methods
         """Metadata about this Job."""
 
         name = "Sync Devices"
@@ -350,7 +350,7 @@ class SSOTDeviceOnboarding(DataSource): # pylint: disable=too-many-instance-attr
         super().run(dryrun, memory_profiling, *args, **kwargs)
 
 
-class SSOTNetworkImporter(DataSource): # pylint: disable=too-many-instance-attributes
+class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attributes
     """Job syncing extended device attributes into Nautobot."""
 
     def __init__(self):
@@ -358,7 +358,7 @@ class SSOTNetworkImporter(DataSource): # pylint: disable=too-many-instance-attri
         super().__init__()
         self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
 
-    class Meta: # pylint: disable=too-few-public-methods
+    class Meta:  # pylint: disable=too-few-public-methods
         """Metadata about this Job."""
 
         name = "Sync Network Data"
@@ -483,7 +483,7 @@ class CommandGetterDO(Job):
                     self.logger.info("%s;\n%s", host, data.dict())
                 # End #
 
-        except Exception as err: # pylint: disable=broad-exception-caught
+        except Exception as err:  # pylint: disable=broad-exception-caught
             self.logger.info("Error: %s", err)
             return err
         return final_result

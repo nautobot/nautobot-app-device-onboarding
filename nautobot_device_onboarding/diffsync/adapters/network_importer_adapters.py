@@ -1,8 +1,8 @@
 """DiffSync adapters."""
 
-import diffsync
 from nautobot_ssot.contrib import NautobotAdapter
 
+import diffsync
 from nautobot_device_onboarding.diffsync.models import network_importer_models
 
 #######################################
@@ -42,13 +42,13 @@ class FilteredNautobotAdapter(NautobotAdapter):
     Must be used with FilteredNautobotModel.
     """
 
-    def _load_objects(self, diffsync_model): # pylint: disable=protected-access
+    def _load_objects(self, diffsync_model):  # pylint: disable=protected-access
         """Given a diffsync model class, load a list of models from the database and return them."""
         parameter_names = self._get_parameter_names(diffsync_model)
-        for database_object in diffsync_model._get_queryset(diffsync=self): # pylint: disable=protected-access
+        for database_object in diffsync_model._get_queryset(diffsync=self):  # pylint: disable=protected-access
             self.job.logger.debug(
                 f"LOADING: Database Object: {database_object}, "
-                f"Model Name: {diffsync_model._modelname}, " # pylint: disable=protected-access
+                f"Model Name: {diffsync_model._modelname}, "  # pylint: disable=protected-access
                 f"Parameter Names: {parameter_names}"
             )
             self._load_single_object(database_object, diffsync_model, parameter_names)

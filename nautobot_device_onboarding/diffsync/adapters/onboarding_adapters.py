@@ -2,12 +2,12 @@
 
 import time
 
-import diffsync
 import netaddr
 from nautobot.apps.choices import JobResultStatusChoices
 from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
 from nautobot.extras.models import Job, JobResult
 
+import diffsync
 from nautobot_device_onboarding.diffsync.models import onboarding_models
 
 #######################################
@@ -194,7 +194,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                     f"The selected platform, {self.job.platform} "
                     "does not have a network driver, please update the Platform."
                 )
-                raise Exception("Platform.network_driver missing") # pylint: disable=broad-exception-raised
+                raise Exception("Platform.network_driver missing")  # pylint: disable=broad-exception-raised
 
         command_getter_job = Job.objects.get(name="Command Getter for Device Onboarding")
         job_kwargs = self.job.prepare_job_kwargs(self.job.job_result.task_kwargs)

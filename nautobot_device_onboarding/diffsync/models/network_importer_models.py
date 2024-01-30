@@ -2,10 +2,11 @@
 
 from typing import List
 
-from diffsync import DiffSync
 from nautobot.dcim.models import Device, Interface
 from nautobot.ipam.models import IPAddress
 from nautobot_ssot.contrib import NautobotModel
+
+from diffsync import DiffSync
 
 
 class FilteredNautobotModel(NautobotModel):
