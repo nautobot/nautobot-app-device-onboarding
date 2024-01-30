@@ -1,6 +1,6 @@
 """Diffsync models."""
 
-from typing import List, Optional
+from typing import List
 
 from diffsync import DiffSync
 from nautobot.dcim.models import Device, Interface

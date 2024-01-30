@@ -59,7 +59,7 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
         """Load manufacturer data from Nautobot."""
         for manufacturer in Manufacturer.objects.all():
             if self.job.debug:
-                self.job.logger.debug(f"Loading Manufacturer data from Nautobot...")
+                self.job.logger.debug("Loading Manufacturer data from Nautobot...")
             onboarding_manufacturer = self.manufacturer(diffsync=self, name=manufacturer.name)
             self.add(onboarding_manufacturer)
             if self.job.debug:
@@ -68,7 +68,7 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
     def load_platforms(self):
         """Load platform data from Nautobot."""
         if self.job.debug:
-            self.job.logger.debug(f"Loading Platform data from Nautobot...")
+            self.job.logger.debug("Loading Platform data from Nautobot...")
         for platform in Platform.objects.all():
             onboarding_platform = self.platform(
                 diffsync=self,
@@ -83,7 +83,7 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
     def load_device_types(self):
         """Load device type data from Nautobot."""
         if self.job.debug:
-            self.job.logger.debug(f"Loading DeviceType data from Nautobot...")
+            self.job.logger.debug("Loading DeviceType data from Nautobot...")
         for device_type in DeviceType.objects.all():
             onboarding_device_type = self.device_type(
                 diffsync=self,
@@ -98,7 +98,7 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
     def load_devices(self):
         """Load device data from Nautobot."""
         if self.job.debug:
-            self.job.logger.debug(f"Loading Device data from Nautobot...")
+            self.job.logger.debug("Loading Device data from Nautobot...")
 
         # for device in Device.objects.filter(primary_ip4__host__in=self.job.ip_addresses):
         for device in Device.objects.all():

@@ -1,7 +1,7 @@
 """Diffsync models."""
 
 import ipaddress
-from typing import List, Optional
+from typing import Optional
 
 from diffsync import DiffSyncModel
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
@@ -111,7 +111,7 @@ class OnboardingDevice(DiffSyncModel):
                     namespace=diffsync.job.namespace,
                     status=diffsync.job.ip_address_status,
                 )
-            except ValidationError as err:
+            except ValidationError:
                 diffsync.job.logger.warning(
                     f"No suitable parent Prefix exists for IP {attrs['primary_ip4__host']} in "
                     f"Namespace {diffsync.job.namespace.name}, a new Prefix will be created."

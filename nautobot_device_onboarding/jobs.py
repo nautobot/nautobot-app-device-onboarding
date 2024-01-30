@@ -4,7 +4,6 @@ import logging
 
 from diffsync.enum import DiffSyncFlags
 from django.conf import settings
-from django.templatetags.static import static
 from nautobot.apps.jobs import BooleanVar, IntegerVar, Job, MultiObjectVar, ObjectVar, StringVar
 from nautobot.core.celery import register_jobs
 from nautobot.dcim.models import Device, DeviceType, Location, Platform
@@ -13,10 +12,7 @@ from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, 
 from nautobot.ipam.models import Namespace
 from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
-from nornir.core.inventory import ConnectionOptions, Defaults, Groups, Host, Hosts, Inventory
 from nornir.core.plugins.inventory import InventoryPluginRegister
-from nornir.core.task import Result, Task
-from nornir_netmiko.tasks import netmiko_send_command
 
 from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
     NetworkImporterNautobotAdapter,
@@ -233,11 +229,11 @@ class SSOTDeviceOnboarding(DataSource):
     location = ObjectVar(
         model=Location,
         query_params={"content_type": "dcim.device"},
-        description="Assigned Location for the onboarded device(s)",
+        description="Assigned Location for all synced device(s)",
     )
     namespace = ObjectVar(model=Namespace, description="Namespace ip addresses belong to.")
     ip_addresses = StringVar(
-        description="IP address of the device to onboard, specify in a comma separated list for multiple devices.",
+        description="IP address of the device to sync, specify in a comma separated list for multiple devices.",
         label="IPv4 addresses",
     )
     port = IntegerVar(default=22)
@@ -245,7 +241,7 @@ class SSOTDeviceOnboarding(DataSource):
     management_only_interface = BooleanVar(
         default=False,
         label="Set Management Only",
-        description="If True, interfaces that are created or updated will be set to management only. If False, the interface will be set to not be management only.",
+        description="If True, new interfaces that are created will be set to management only. If False, new interfaces will be set to not be management only.",
     )
     update_devices_without_primary_ip = BooleanVar(
         default=False,
@@ -256,26 +252,26 @@ class SSOTDeviceOnboarding(DataSource):
         model=Role,
         query_params={"content_types": "dcim.device"},
         required=True,
-        description="Role to be applied to all new onboarded devices",
+        description="Role to be applied to all synced devices",
     )
     device_status = ObjectVar(
         model=Status,
         query_params={"content_types": "dcim.device"},
         required=True,
-        description="Status to be applied to all new onboarded devices",
+        description="Status to be applied to all synced devices",
     )
     interface_status = ObjectVar(
         model=Status,
         query_params={"content_types": "dcim.interface"},
         required=True,
-        description="Status to be applied to all new onboarded device interfaces",
+        description="Status to be applied to all new synced device interfaces. This value does not update with additional syncs.",
     )
     ip_address_status = ObjectVar(
         label="IP address status",
         model=Status,
         query_params={"content_types": "ipam.ipaddress"},
         required=True,
-        description="Status to be applied to all new onboarded IP addresses.",
+        description="Status to be applied to all new synced IP addresses. This value does not update with additional syncs.",
     )
     secrets_group = ObjectVar(
         model=SecretsGroup, required=True, description="SecretsGroup for device connection credentials."
@@ -342,7 +338,7 @@ class SSOTDeviceOnboarding(DataSource):
             "ip_addresses": ip_addresses,
             "management_only_interface": management_only_interface,
             "update_devices_without_primary_ip": update_devices_without_primary_ip,
-            "update_devices_without_primary_ip": device_role,
+            "device_role": device_role,
             "device_status": device_status,
             "interface_status": interface_status,
             "ip_address_status": ip_address_status,
@@ -482,10 +478,10 @@ class CommandGetterDO(Job):
                 nr_with_processors.run(task=netmiko_send_commands)
                 final_result = self._process_result(compiled_results, self.ip_addresses)
 
-                #### Remove before final merge ####
+                # Remove before final merge #
                 for host, data in nr_with_processors.inventory.hosts.items():
                     self.logger.info("%s;\n%s", host, data.dict())
-                #### End ####
+                # End #
 
         except Exception as err:
             self.logger.info("Error: %s", err)

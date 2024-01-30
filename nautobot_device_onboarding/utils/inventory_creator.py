@@ -25,7 +25,7 @@ def _parse_credentials(credentials):
                     access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
                     secret_type=SecretsGroupSecretTypeChoices.TYPE_SECRET,
                 )
-            except:
+            except Exception:
                 secret = None
         except Exception as err:
             raise OnboardException("fail-credentials - Unable to parse selected credentials.") from err
@@ -40,14 +40,14 @@ def guess_netmiko_device_type(hostname, username, password, port):
     """Guess the device type of host, based on Netmiko."""
     guessed_device_type = None
 
-    netmiko_optional_args = {}
+    netmiko_optional_args = {"port": port}
 
     remote_device = {
         "device_type": "autodetect",
         "host": hostname,
         "username": username,
         "password": password,
-        "port": port**netmiko_optional_args,
+        **netmiko_optional_args,
     }
 
     try:
