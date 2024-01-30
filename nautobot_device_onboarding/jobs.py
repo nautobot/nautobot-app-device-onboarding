@@ -1,17 +1,45 @@
 """Device Onboarding Jobs."""
-from django.conf import settings
-from nautobot.apps.jobs import Job, ObjectVar, IntegerVar, StringVar, BooleanVar
-from nautobot.core.celery import register_jobs
-from nautobot.dcim.models import Location, DeviceType, Platform
-from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation
-from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 
+import logging
+
+from django.conf import settings
+from nautobot.apps.jobs import BooleanVar, IntegerVar, Job, MultiObjectVar, ObjectVar, StringVar
+from nautobot.core.celery import register_jobs
+from nautobot.dcim.models import Device, DeviceType, Location, Platform
+from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
+from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status, Tag
+from nautobot.ipam.models import Namespace
+from nautobot_ssot.jobs.base import DataSource
+from nornir import InitNornir
+from nornir.core.plugins.inventory import InventoryPluginRegister
+
+from diffsync.enum import DiffSyncFlags
+from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
+    NetworkImporterNautobotAdapter,
+    NetworkImporterNetworkAdapter,
+)
+from nautobot_device_onboarding.diffsync.adapters.onboarding_adapters import (
+    OnboardingNautobotAdapter,
+    OnboardingNetworkAdapter,
+)
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.helpers import onboarding_task_fqdn_to_ip
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
+from nautobot_device_onboarding.nornir_plays.command_getter import netmiko_send_commands
+from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
+from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
+from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
+from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
 
+InventoryPluginRegister.register("empty-inventory", EmptyInventory)
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
+
+NORNIR_SETTINGS = settings.PLUGINS_CONFIG["nautobot_plugin_nornir"]
+
+LOGGER = logging.getLogger(__name__)
+
+name = "Device Onboarding/Network Importer"  # pylint: disable=invalid-name
 
 
 class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
@@ -113,9 +141,9 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
             password=self.password,
             secret=self.secret,
             napalm_driver=self.platform.napalm_driver if self.platform and self.platform.napalm_driver else None,
-            optional_args=self.platform.napalm_args
-            if self.platform and self.platform.napalm_args
-            else settings.NAPALM_ARGS,
+            optional_args=(
+                self.platform.napalm_args if self.platform and self.platform.napalm_args else settings.NAPALM_ARGS
+            ),
         )
         netdev.get_onboarding_facts()
         netdev_dict = netdev.get_netdev_dict()
@@ -180,4 +208,286 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
             self.secret = settings.NAPALM_ARGS.get("secret", None)
 
 
-register_jobs(OnboardingTask)
+class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-attributes
+    """Job for syncing basic device info from a network into Nautobot."""
+
+    def __init__(self):
+        """Initialize SSOTDeviceOnboarding."""
+        super().__init__()
+        self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Metadata about this Job."""
+
+        name = "Sync Devices"
+        description = "Synchronize basic device information into Nautobot"
+
+    debug = BooleanVar(
+        default=False,
+        description="Enable for more verbose logging.",
+    )
+    location = ObjectVar(
+        model=Location,
+        query_params={"content_type": "dcim.device"},
+        description="Assigned Location for all synced device(s)",
+    )
+    namespace = ObjectVar(model=Namespace, description="Namespace ip addresses belong to.")
+    ip_addresses = StringVar(
+        description="IP address of the device to sync, specify in a comma separated list for multiple devices.",
+        label="IPv4 addresses",
+    )
+    port = IntegerVar(default=22)
+    timeout = IntegerVar(default=30)
+    management_only_interface = BooleanVar(
+        default=False,
+        label="Set Management Only",
+        description="If True, new interfaces that are created will be set to management only. If False, new interfaces will be set to not be management only.",
+    )
+    update_devices_without_primary_ip = BooleanVar(
+        default=False,
+        description="If a device at the specified location already exists in Nautobot but the primary ip address "
+        "does not match an ip address entered, update this device with the sync.",
+    )
+    device_role = ObjectVar(
+        model=Role,
+        query_params={"content_types": "dcim.device"},
+        required=True,
+        description="Role to be applied to all synced devices.",
+    )
+    device_status = ObjectVar(
+        model=Status,
+        query_params={"content_types": "dcim.device"},
+        required=True,
+        description="Status to be applied to all synced devices.",
+    )
+    interface_status = ObjectVar(
+        model=Status,
+        query_params={"content_types": "dcim.interface"},
+        required=True,
+        description="Status to be applied to all new synced device interfaces. This value does not update with additional syncs.",
+    )
+    ip_address_status = ObjectVar(
+        label="IP address status",
+        model=Status,
+        query_params={"content_types": "ipam.ipaddress"},
+        required=True,
+        description="Status to be applied to all new synced IP addresses. This value does not update with additional syncs.",
+    )
+    secrets_group = ObjectVar(
+        model=SecretsGroup, required=True, description="SecretsGroup for device connection credentials."
+    )
+    platform = ObjectVar(
+        model=Platform,
+        required=False,
+        description="Device platform. Define ONLY to override auto-recognition of platform.",
+    )
+
+    def load_source_adapter(self):
+        """Load onboarding network adapter."""
+        self.source_adapter = OnboardingNetworkAdapter(job=self, sync=self.sync)
+        self.source_adapter.load()
+
+    def load_target_adapter(self):
+        """Load onboarding Nautobot adapter."""
+        self.target_adapter = OnboardingNautobotAdapter(job=self, sync=self.sync)
+        self.target_adapter.load()
+
+    def run(
+        self,
+        dryrun,
+        memory_profiling,
+        debug,
+        location,
+        namespace,
+        ip_addresses,
+        management_only_interface,
+        update_devices_without_primary_ip,
+        device_role,
+        device_status,
+        interface_status,
+        ip_address_status,
+        port,
+        timeout,
+        secrets_group,
+        platform,
+        *args,
+        **kwargs,
+    ):  # pylint:disable=arguments-differ, too-many-arguments, too-many-locals
+        """Run sync."""
+        self.dryrun = dryrun
+        self.memory_profiling = memory_profiling
+        self.debug = debug
+        self.location = location
+        self.namespace = namespace
+        self.ip_addresses = ip_addresses.replace(" ", "").split(",")
+        self.management_only_interface = management_only_interface
+        self.update_devices_without_primary_ip = update_devices_without_primary_ip
+        self.device_role = device_role
+        self.device_status = device_status
+        self.interface_status = interface_status
+        self.ip_address_status = ip_address_status
+        self.port = port
+        self.timeout = timeout
+        self.secrets_group = secrets_group
+        self.platform = platform
+
+        self.job_result.task_kwargs = {
+            "debug": debug,
+            "location": location,
+            "namespace": namespace,
+            "ip_addresses": ip_addresses,
+            "management_only_interface": management_only_interface,
+            "update_devices_without_primary_ip": update_devices_without_primary_ip,
+            "device_role": device_role,
+            "device_status": device_status,
+            "interface_status": interface_status,
+            "ip_address_status": ip_address_status,
+            "port": port,
+            "timeout": timeout,
+            "secrets_group": secrets_group,
+            "platform": platform,
+        }
+        super().run(dryrun, memory_profiling, *args, **kwargs)
+
+
+class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attributes
+    """Job syncing extended device attributes into Nautobot."""
+
+    def __init__(self):
+        """Initialize SSOTDeviceOnboarding."""
+        super().__init__()
+        self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Metadata about this Job."""
+
+        name = "Sync Network Data"
+        description = (
+            "Synchronize extended device attribute information into Nautobot; "
+            "including Interfaces, IPAddresses, Prefixes, Vlans and Cables."
+        )
+
+    debug = BooleanVar(description="Enable for more verbose logging.")
+    devices = MultiObjectVar(
+        model=Device,
+        required=False,
+        description="Device(s) to update.",
+    )
+    location = ObjectVar(
+        model=Location,
+        query_params={"content_type": "dcim.device"},
+        required=False,
+        description="Only update devices at a specific location.",
+    )
+    device_role = ObjectVar(
+        model=Role,
+        query_params={"content_types": "dcim.device"},
+        required=False,
+        description="Only update devices with the selected role.",
+    )
+    tag = ObjectVar(
+        model=Tag,
+        query_params={"content_types": "dcim.device"},
+        required=False,
+        description="Only update devices with the selected tag.",
+    )
+
+    def load_source_adapter(self):
+        """Load onboarding network adapter."""
+        self.source_adapter = NetworkImporterNetworkAdapter(job=self, sync=self.sync)
+        self.source_adapter.load()
+
+    def load_target_adapter(self):
+        """Load onboarding Nautobot adapter."""
+        self.target_adapter = NetworkImporterNautobotAdapter(job=self, sync=self.sync)
+        self.target_adapter.load()
+
+    def run(
+        self, dryrun, memory_profiling, debug, location, devices, device_role, tag, *args, **kwargs
+    ):  # pylint:disable=arguments-differ, disable=too-many-arguments
+        """Run sync."""
+        self.dryrun = dryrun
+        self.memory_profiling = memory_profiling
+        self.debug = debug
+        self.location = location
+        self.devices = devices
+        self.device_role = device_role
+        self.tag = tag
+
+        self.job_result.task_kwargs = {
+            "debug": debug,
+            "location": location,
+            "devices": devices,
+            "device_role": device_role,
+            "tag": tag,
+        }
+
+        super().run(dryrun, memory_profiling, *args, **kwargs)
+
+
+class CommandGetterDO(Job):
+    """Simple Job to Execute Show Command."""
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Meta object boilerplate for onboarding."""
+
+        name = "Command Getter for Device Onboarding"
+        description = "Login to a device(s) and run commands."
+        has_sensitive_variables = False
+        hidden = False
+
+    debug = BooleanVar()
+    ip_addresses = StringVar()
+    port = IntegerVar()
+    timeout = IntegerVar()
+    secrets_group = ObjectVar(model=SecretsGroup)
+    platform = ObjectVar(model=Platform, required=False)
+
+    def _process_result(self, command_result, ip_addresses):
+        """Process the data returned from devices."""
+        processed_device_data = {}
+        for ip_address in ip_addresses:
+            processed_device_data[ip_address] = command_result[ip_address]
+            if self.debug:
+                self.logger.debug(f"Processed CommandGetterDO return for {ip_address}: {command_result[ip_address]}")
+        return processed_device_data
+
+    def run(self, *args, **kwargs):
+        """Process onboarding task from ssot-ni job."""
+        self.ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
+        self.port = kwargs["port"]
+        self.timeout = kwargs["timeout"]
+        self.secrets_group = kwargs["secrets_group"]
+        self.platform = kwargs["platform"]
+
+        # Initiate Nornir instance with empty inventory
+        try:
+            logger = NornirLogger(self.job_result, log_level=0)
+            compiled_results = {}
+            with InitNornir(
+                runner=NORNIR_SETTINGS.get("runner"),
+                logging={"enabled": False},
+                inventory={
+                    "plugin": "empty-inventory",
+                },
+            ) as nornir_obj:
+                nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
+                ip_address = self.ip_addresses
+                inventory_constructed = _set_inventory(ip_address, self.platform, self.port, self.secrets_group)
+                nr_with_processors.inventory.hosts.update(inventory_constructed)
+                nr_with_processors.run(task=netmiko_send_commands)
+                final_result = self._process_result(compiled_results, self.ip_addresses)
+
+                # Remove before final merge #
+                for host, data in nr_with_processors.inventory.hosts.items():
+                    self.logger.info("%s;\n%s", host, data.dict())
+                # End #
+
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            self.logger.info("Error: %s", err)
+            return err
+        return final_result
+
+
+jobs = [OnboardingTask, SSOTDeviceOnboarding, SSOTNetworkImporter, CommandGetterDO]
+register_jobs(*jobs)

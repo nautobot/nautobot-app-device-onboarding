@@ -6,18 +6,15 @@ import socket
 
 from django.conf import settings
 from napalm import get_network_driver
-from napalm.base.exceptions import ConnectionException, CommandErrorException
+from napalm.base.exceptions import CommandErrorException, ConnectionException
 from napalm.base.netmiko_helpers import netmiko_args
-from netmiko import SSHDetect
-from netmiko import NetMikoAuthenticationException
-from netmiko import NetMikoTimeoutException
+from nautobot.dcim.models import Platform
+from netmiko import NetMikoAuthenticationException, NetMikoTimeoutException, SSHDetect
 from paramiko.ssh_exception import SSHException
 
-from nautobot.dcim.models import Platform
-
-from nautobot_device_onboarding.onboarding.onboarding import StandaloneOnboarding
 from nautobot_device_onboarding.constants import NETMIKO_TO_NAPALM_STATIC
 from nautobot_device_onboarding.exceptions import OnboardException
+from nautobot_device_onboarding.onboarding.onboarding import StandaloneOnboarding
 
 logger = logging.getLogger("rq.worker")
 

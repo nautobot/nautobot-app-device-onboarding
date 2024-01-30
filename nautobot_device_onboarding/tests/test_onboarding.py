@@ -1,4 +1,5 @@
 """Unit tests for nautobot_device_onboarding.netdev_keeper module and its classes."""
+
 # from unittest import mock
 
 from django.conf import settings
