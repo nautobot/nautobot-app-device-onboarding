@@ -57,4 +57,35 @@ def format_ob_data_nxos(host, result):
                     formatted_data["mgmt_interface"] = interface_name
                     break
 
+
+def format_ob_data_junos(host, result):
+    """Format the data for onboarding Juniper JUNOS devices."""
+    primary_ip4 = host.name
+    formatted_data = {}
+
+    for r in result:
+        if r.name == "show version":
+            device_type = r.result[0].get("model")
+            formatted_data["device_type"] = device_type
+            hostname = r.result[0].get("hostname")
+            serial = "USASR24490"
+            # serial = r.result[0].get("serial")
+            formatted_data["hostname"] = hostname
+            if serial:
+                formatted_data["serial"] = serial
+            else:
+                formatted_data["serial"] = ""
+        elif r.name == "show interfaces":
+            show_interfaces = r.result
+            print(f"show interfaces {show_interfaces}")
+            for interface in show_interfaces:
+                if interface.get("local") == primary_ip4:
+                    print(interface.get("destination"))
+                    mask_length = interface.get("destination").split("/")[1]
+                    print(f"interface mask {mask_length}")
+                    interface_name = interface.get("interface")
+                    formatted_data["mask_length"] = mask_length
+                    formatted_data["mgmt_interface"] = interface_name
+                    break
+
     return formatted_data

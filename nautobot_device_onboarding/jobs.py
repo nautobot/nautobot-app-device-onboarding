@@ -472,7 +472,9 @@ class CommandGetterDO(Job):
             ) as nornir_obj:
                 nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
                 for entered_ip in self.ip_addresses:
-                    single_host_inventory_constructed = _set_inventory(entered_ip, self.platform, self.port, self.secrets_group)
+                    single_host_inventory_constructed = _set_inventory(
+                        entered_ip, self.platform, self.port, self.secrets_group
+                    )
                     nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
                 nr_with_processors.run(task=netmiko_send_commands)
                 final_result = self._process_result(compiled_results, self.ip_addresses)
