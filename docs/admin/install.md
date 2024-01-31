@@ -28,7 +28,7 @@ NAPALM_ARGS = {"secret": "<enable secret pwd>"}
 ## Install Guide
 
 !!! note
-    App can be installed manually or using Python's `pip`. See the [nautobot documentation](https://nautobot.readthedocs.io/en/latest/plugins/#install-the-package) for more details. The pip package name for this plugin is [`nautobot-device-onboarding`](https://pypi.org/project/nautobot-device-onboarding/).
+    Apps can be installed manually or using Python's `pip`. See the [nautobot documentation](https://nautobot.readthedocs.io/en/latest/plugins/#install-the-package) for more details. The pip package name for this app is [`nautobot-device-onboarding`](https://pypi.org/project/nautobot-device-onboarding/).
 
 The app is available as a Python package via PyPI and can be installed with `pip`:
 
@@ -78,44 +78,10 @@ sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
 
 Although the plugin can run without providing any settings, the plugin behavior can be controlled with the following list of settings defined in `nautobot_config.py`:
 
-- `create_platform_if_missing` boolean (default True). If True, a new platform object will be created if the platform discovered by netmiko do not already exist and is in the list of supported platforms (`cisco_ios`, `cisco_nxos`, `arista_eos`, `juniper_junos`, `cisco_xr`)
-- `create_device_type_if_missing` boolean (default True), If True, a new device type object will be created if the model discovered by Napalm do not match an existing device type.
-- `create_manufacturer_if_missing` boolean (default True), If True, a new manufacturer object will be created if the manufacturer discovered by Napalm is do not match an existing manufacturer, this option is only valid if `create_device_type_if_missing` is True as well.
-- `create_device_role_if_missing` boolean (default True), If True, a new device role object will be created if the device role provided was not provided as part of the onboarding and if the `default_device_role` do not already exist.
-- `create_management_interface_if_missing` boolean (default True), If True, add management interface and IP address to the device. If False no management interfaces will be created, nor will the IP address be added to Nautobot, while the device will still get added.
-- `default_device_status` string (default "Active"), status assigned to a new device by default.
-- `default_ip_status` string (default "Active"), status assigned to a new device management IP.
-- `default_device_role` string (default "network")
-- `default_device_role_color` string (default FF0000), color assigned to the device role if it needs to be created.
-- `default_management_interface` string (default "PLACEHOLDER"), name of the management interface that will be created, if one can't be identified on the device.
-- `default_management_prefix_length` integer ( default 0), length of the prefix that will be used for the management IP address, if the IP can't be found.
-- `skip_device_type_on_update` boolean (default False), If True, an existing Nautobot device will not get its device type updated. If False, device type will be updated with one discovered on a device.
-- `skip_manufacturer_on_update` boolean (default False), If True, an existing Nautobot device will not get its manufacturer updated. If False, manufacturer will be updated with one discovered on a device.
-- `assign_secrets_group` boolean (default False), If True, the credentials used to connect to the device will be assigned as the secrets group for the device upon creation. If False, no secrets group will be assigned.
-- `set_management_only_interface` boolean (default False), If True, the interface that is created or updated will be set to management only. If False, the interface will be set to not be management only.
-- `platform_map` (dictionary), mapping of an **auto-detected** Netmiko platform to the **Nautobot slug** name of your Platform. The dictionary should be in the format:
-    ```python
-    {
-      <Netmiko Platform>: <Nautobot Slug>
-    }
-    ```
-- `onboarding_extensions_map` (dictionary), mapping of a NAPALM driver name to the loadable Python module used as an onboarding extension. The dictionary should be in the format:
-    ```python
-    {
-      <Napalm Driver Name>: <Loadable Python Module>
-    }
-    ```
-- `object_match_strategy` (string), defines the method for searching models. There are currently two strategies, strict and loose. Strict has to be a direct match, normally using a slug. Loose allows a range of search criteria to match a single object. If multiple objects are returned an error is raised.
+The app behavior can be controlled with the following list of settings:
 
-Modify `nautobot_config.py` with settings of your choice. Example settings are shown below:
-
-```python
-# Example settings In your nautobot_config.py
-PLUGINS_CONFIG = {
-  "nautobot_device_onboarding": {
-    "default_ip_status": "Active",
-    "default_device_role": "leaf",
-    "skip_device_type_on_update": True,
-  }
-}
-```
+| Key     | Example | Default | Description                          |
+| ------- | ------ | -------- | ------------------------------------- |
+| `enable_backup` | `True` | `True` | A boolean to represent whether or not to run backup configurations within the app. |
+| `platform_slug_map` | `{"cisco_wlc": "cisco_aireos"}` | `None` | A dictionary in which the key is the platform slug and the value is what netutils uses in any "network_os" parameter. |
+| `per_feature_bar_width` | `0.15` | `0.15` | The width of the table bar within the overview report |
