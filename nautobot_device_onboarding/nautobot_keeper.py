@@ -297,8 +297,7 @@ class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
         """Get platform object from Nautobot filtered by platform_slug.
 
         Args:
-            platform_slug (string): slug of a platform object present in Nautobot, object will be created if not present
-            and create_platform_if_missing is enabled
+            create_platform_if_missing (bool): Flag to indicate if we need to create the platform, if not already present
 
         Return:
             nautobot.dcim.models.Platform object

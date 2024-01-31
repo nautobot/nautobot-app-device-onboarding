@@ -50,8 +50,7 @@ Existing Nautobot users may want to incorporate the Onboarding App as part of on
 
 @mzb and @dgarros
 
-!!! warning "Developer Note - Remove Me!"
-    What is shown today in the Installed Apps page in Nautobot. What parts of Nautobot does it interact with, what does it add etc. ?
+### Maintainers
 
 - @mzb
 - @glennmatthews
