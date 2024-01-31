@@ -92,7 +92,7 @@ class ProcessorDO(BaseLoggingProcessor):
             formatted_data = format_ob_data_junos(host, result)
         else:
             formatted_data = {}
-            self.logger.info(f"No formatter for {host.platform}.", extra={"object": task.host})
+            self.logger.info(f"No formatter for platform: {host.platform}.", extra={"object": task.host})
 
         self.data[host.name].update(formatted_data)
 
