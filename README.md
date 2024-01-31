@@ -1,10 +1,10 @@
 # Nautobot Device Onboarding
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/nautobot/nautobot-app-device-onboarding/develop/docs/images/icon-nautobot-device-onboarding.png" class="logo" height="200px">
+  <img src="https://raw.githubusercontent.com/nautobot/nautobot-app-device-onboarding/develop/docs/images/icon-DeviceOnboarding.png" class="logo" height="200px">
   <br>
-  <a href="https://github.com/nautobot/nautobot-app-device-onboarding/actions"><img src="https://github.com/nautobot/nautobot-app-device-onboarding/actions/workflows/ci.yml/badge.svg?branch=main"></a>
-  <a href="https://docs.nautobot.com/projects/device-onboarding/en/latest"><img src="https://readthedocs.org/projects/nautobot-app-device-onboarding/badge/"></a>
+  <a href="https://github.com/nautobot/nautobot-app-device-onboarding/actions"><img src="https://github.com/nautobot/nautobot-app-device-onboarding/actions/workflows/ci.yml/badge.svg?branch=develop"></a>
+  <a href="https://docs.nautobot.com/projects/device-onboarding/en/latest/"><img src="https://readthedocs.org/projects/nautobot-plugin-device-onboarding/badge/"></a>
   <a href="https://pypi.org/project/nautobot-device-onboarding/"><img src="https://img.shields.io/pypi/v/nautobot-device-onboarding"></a>
   <a href="https://pypi.org/project/nautobot-device-onboarding/"><img src="https://img.shields.io/pypi/dm/nautobot-device-onboarding"></a>
   <br>
@@ -21,11 +21,7 @@ Regardless, the Onboarding App greatly simplifies the onboarding process by allo
 
 Device Onboarding is a Job that allows you to provide a few required pieces of information and onboard the device.
 
-> Developer Note: Place the files in the `docs/images/` folder and link them using only full URLs from GitHub, for example: `![Overview](https://raw.githubusercontent.com/nautobot/nautobot-app-device-onboarding/develop/docs/images/app-overview.png)`. This absolute static linking is required to ensure the README renders properly in GitHub, the docs site, and any other external sites like PyPI.
-
-More screenshots can be found in the [Using the App](https://docs.nautobot.com/projects/device-onboarding/en/latest/user/app_use_cases/) page in the documentation. Here's a quick overview of some of the app's added functionality:
-
-![](https://raw.githubusercontent.com/nautobot/nautobot-app-device-onboarding/develop/docs/images/placeholder.png)
+![job input](https://raw.githubusercontent.com/nautobot/nautobot-app-device-onboarding/develop/docs/images/do_job_inputs.png)
 
 ## Try it out!
 
