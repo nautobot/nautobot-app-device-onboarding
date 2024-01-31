@@ -1,10 +1,10 @@
 ---
 dev_addr: "127.0.0.1:8001"
-edit_uri: "edit/main/nautobot-plugin-device-onboarding/docs"
+edit_uri: "edit/main/nautobot-app-device-onboarding/docs"
 site_dir: "nautobot_device_onboarding/static/nautobot_device_onboarding/docs"
 site_name: "Device Onboarding Documentation"
 site_url: "https://docs.nautobot.com/projects/device-onboarding/en/latest/"
-repo_url: "https://github.com/nautobot/nautobot-plugin-device-onboarding"
+repo_url: "https://github.com/nautobot/nautobot-app-device-onboarding"
 copyright: "Copyright &copy; The Authors"
 theme:
   name: "material"

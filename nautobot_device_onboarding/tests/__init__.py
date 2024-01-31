@@ -1,1 +1,1 @@
-"""Unit tests for nautobot_device_onboarding plugin."""
+"""Unit tests for nautobot_device_onboarding app."""
