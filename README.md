@@ -1,10 +1,10 @@
 # Nautobot Device Onboarding
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/nautobot/nautobot-app-device-onboarding/develop/docs/images/icon-DeviceOnboarding.png" class="logo" height="200px">
+  <img src="https://raw.githubusercontent.com/nautobot/nautobot-app-device-onboarding/develop/docs/images/icon-nautobot-device-onboarding.png" class="logo" height="200px">
   <br>
-  <a href="https://github.com/nautobot/nautobot-app-device-onboarding/actions"><img src="https://github.com/nautobot/nautobot-app-device-onboarding/actions/workflows/ci.yml/badge.svg?branch=develop"></a>
-  <a href="https://docs.nautobot.com/projects/device-onboarding/"><img src="https://readthedocs.org/projects/nautobot-plugin-device-onboarding/badge/"></a>
+  <a href="https://github.com/nautobot/nautobot-app-device-onboarding/actions"><img src="https://github.com/nautobot/nautobot-app-device-onboarding/actions/workflows/ci.yml/badge.svg?branch=main"></a>
+  <a href="https://docs.nautobot.com/projects/device-onboarding/en/latest"><img src="https://readthedocs.org/projects/nautobot-app-device-onboarding/badge/"></a>
   <a href="https://pypi.org/project/nautobot-device-onboarding/"><img src="https://img.shields.io/pypi/v/nautobot-device-onboarding"></a>
   <a href="https://pypi.org/project/nautobot-device-onboarding/"><img src="https://img.shields.io/pypi/dm/nautobot-device-onboarding"></a>
   <br>
@@ -21,7 +21,11 @@ Regardless, the Onboarding App greatly simplifies the onboarding process by allo
 
 Device Onboarding is a Job that allows you to provide a few required pieces of information and onboard the device.
 
-![job input](https://raw.githubusercontent.com/nautobot/nautobot-app-device-onboarding/develop/docs/images/do_job_inputs.png)
+> Developer Note: Place the files in the `docs/images/` folder and link them using only full URLs from GitHub, for example: `![Overview](https://raw.githubusercontent.com/nautobot/nautobot-app-device-onboarding/develop/docs/images/app-overview.png)`. This absolute static linking is required to ensure the README renders properly in GitHub, the docs site, and any other external sites like PyPI.
+
+More screenshots can be found in the [Using the App](https://docs.nautobot.com/projects/device-onboarding/en/latest/user/app_use_cases/) page in the documentation. Here's a quick overview of some of the app's added functionality:
+
+![](https://raw.githubusercontent.com/nautobot/nautobot-app-device-onboarding/develop/docs/images/placeholder.png)
 
 ## Try it out!
 
@@ -41,7 +45,7 @@ Full web-based HTML documentation for this app can be found over on the [Nautobo
 
 ### Contributing to the Docs
 
-You can find all the Markdown source for the App documentation under the [docs](https://github.com/nautobot/nautobot-app-device-onboarding/tree/develop/docs) folder in this repository. For simple edits, a Markdown capable editor is sufficient - clone the repository and edit away.
+You can find all the Markdown source for the App documentation under the [`docs`](https://github.com/nautobot/nautobot-app-device-onboarding/tree/develop/docs) folder in this repository. For simple edits, a Markdown capable editor is sufficient: clone the repository and edit away.
 
 If you need to view the fully generated documentation site, you can build it with [mkdocs](https://www.mkdocs.org/). A container hosting the docs will be started using the invoke commands (details in the [Development Environment Guide](https://docs.nautobot.com/projects/device-onboarding/en/latest/dev/dev_environment/#docker-development-environment)) on [http://localhost:8001](http://localhost:8001). As your changes are saved, the live docs will be automatically reloaded.
 
