@@ -57,7 +57,6 @@ def format_ob_data_nxos(host, result):
                     formatted_data["mgmt_interface"] = interface_name
                     break
 
-
 def format_ob_data_junos(host, result):
     """Format the data for onboarding Juniper JUNOS devices."""
     primary_ip4 = host.name
