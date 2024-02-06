@@ -7,7 +7,7 @@ from nornir.core.task import AggregatedResult, MultiResult, Task
 from nornir_nautobot.exceptions import NornirNautobotException
 from nornir_nautobot.plugins.processors import BaseLoggingProcessor
 
-from nautobot_device_onboarding.utils.formatter import format_ob_data_ios, format_ob_data_nxos
+from nautobot_device_onboarding.utils.formatter import format_ob_data_ios, format_ob_data_junos, format_ob_data_nxos
 
 
 class ProcessorDO(BaseLoggingProcessor):
@@ -71,7 +71,6 @@ class ProcessorDO(BaseLoggingProcessor):
             "failed": result.failed,
             "subtask_result": result.result,
         }
-        self.logger.info(f" self.data: {self.data}")
 
         if self.data[task.name][host.name].get("failed"):
             self.data[host.name] = {
@@ -89,9 +88,11 @@ class ProcessorDO(BaseLoggingProcessor):
             formatted_data = format_ob_data_ios(host, result)
         elif host.platform == "cisco_nxos":
             formatted_data = format_ob_data_nxos(host, result)
+        elif host.platform == "juniper_junos":
+            formatted_data = format_ob_data_junos(host, result)
         else:
             formatted_data = {}
-            self.logger.info(f"No formatter for {host.platform}.", extra={"object": task.host})
+            self.logger.info(f"No formatter for platform: {host.platform}.", extra={"object": task.host})
 
         self.data[host.name].update(formatted_data)
 

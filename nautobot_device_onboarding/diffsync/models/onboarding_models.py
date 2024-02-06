@@ -3,14 +3,13 @@
 import ipaddress
 from typing import Optional
 
+from diffsync import DiffSyncModel
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
 from nautobot.apps.choices import InterfaceTypeChoices, PrefixTypeChoices
 from nautobot.dcim.models import Device, DeviceType, Interface, Manufacturer, Platform
 from nautobot.extras.models import Role, SecretsGroup, Status
 from nautobot.ipam.models import IPAddress, Prefix
 from nautobot_ssot.contrib import NautobotModel
-
-from diffsync import DiffSyncModel
 
 
 class OnboardingDevice(DiffSyncModel):
