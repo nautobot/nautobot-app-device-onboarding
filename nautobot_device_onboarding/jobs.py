@@ -10,6 +10,10 @@ from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status, Tag
 from nautobot.ipam.models import Namespace
+from nautobot_ssot.jobs.base import DataSource
+from nornir import InitNornir
+from nornir.core.plugins.inventory import InventoryPluginRegister
+
 from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
     NetworkImporterNautobotAdapter,
     NetworkImporterNetworkAdapter,
@@ -26,9 +30,6 @@ from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInvento
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
 from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
-from nautobot_ssot.jobs.base import DataSource
-from nornir import InitNornir
-from nornir.core.plugins.inventory import InventoryPluginRegister
 
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
 
@@ -352,10 +353,10 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
 class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attributes
     """Job syncing extended device attributes into Nautobot."""
 
-    def __init__(self):
-        """Initialize SSOTDeviceOnboarding."""
-        super().__init__()
-        self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
+    # def __init__(self):
+    #     """Initialize SSOTDeviceOnboarding."""
+    #     super().__init__()
+    #     self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Metadata about this Job."""
@@ -367,6 +368,9 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         )
 
     debug = BooleanVar(description="Enable for more verbose logging.")
+    namespace = ObjectVar(
+        model=Namespace, required=True, description="The namespace for all IP addresses created or updated in the sync."
+    )
     devices = MultiObjectVar(
         model=Device,
         required=False,
@@ -402,12 +406,13 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         self.target_adapter.load()
 
     def run(
-        self, dryrun, memory_profiling, debug, location, devices, device_role, tag, *args, **kwargs
+        self, dryrun, memory_profiling, debug, namespace, location, devices, device_role, tag, *args, **kwargs
     ):  # pylint:disable=arguments-differ, disable=too-many-arguments
         """Run sync."""
         self.dryrun = dryrun
         self.memory_profiling = memory_profiling
         self.debug = debug
+        self.namespace = namespace
         self.location = location
         self.devices = devices
         self.device_role = device_role
@@ -488,7 +493,8 @@ class CommandGetterDO(Job):
             self.logger.info("Error: %s", err)
             return err
         return final_result
-    
+
+
 class CommandGetterNetworkImporter(Job):
     """Simple Job to Execute Show Command."""
 
@@ -531,7 +537,9 @@ class CommandGetterNetworkImporter(Job):
         for ip_address in ip_addresses:
             processed_device_data[ip_address] = command_result[ip_address]
             if self.debug:
-                self.logger.debug(f"Processed CommandGetterNetworkImporter return for {ip_address}: {command_result[ip_address]}")
+                self.logger.debug(
+                    f"Processed CommandGetterNetworkImporter return for {ip_address}: {command_result[ip_address]}"
+                )
         return processed_device_data
 
     def run(self, *args, **kwargs):
@@ -555,7 +563,7 @@ class CommandGetterNetworkImporter(Job):
             ) as nornir_obj:
                 nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
                 nr_with_processors.run(task=netmiko_send_commands)
-                
+
                 final_result = self._process_result(compiled_results, self.ip_addresses)
 
                 # Remove before final merge #
@@ -569,5 +577,5 @@ class CommandGetterNetworkImporter(Job):
         return final_result
 
 
-jobs = [OnboardingTask, SSOTDeviceOnboarding, SSOTNetworkImporter, CommandGetterDO, CommandGetterNetworkImporter]
+jobs = [OnboardingTask, SSOTDeviceOnboarding, CommandGetterDO, CommandGetterNetworkImporter]
 register_jobs(*jobs)

@@ -3,9 +3,10 @@
 from django.conf import settings
 from nautobot.dcim.models import Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
-from nautobot_device_onboarding.exceptions import OnboardException
 from netmiko import SSHDetect
 from nornir.core.inventory import ConnectionOptions, Host
+
+from nautobot_device_onboarding.exceptions import OnboardException
 
 
 def _parse_credentials(credentials):

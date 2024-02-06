@@ -7,7 +7,7 @@ from nornir.core.task import AggregatedResult, MultiResult, Task
 from nornir_nautobot.exceptions import NornirNautobotException
 from nornir_nautobot.plugins.processors import BaseLoggingProcessor
 
-from nautobot_device_onboarding.utils.formatter import format_ob_data_ios, format_ob_data_nxos, format_ob_data_junos
+from nautobot_device_onboarding.utils.formatter import format_ob_data_ios, format_ob_data_junos, format_ob_data_nxos
 
 
 class ProcessorDO(BaseLoggingProcessor):
