@@ -1,3 +1,4 @@
+# pylint: disable=attribute-defined-outside-init
 """Device Onboarding Jobs."""
 
 import logging
@@ -537,7 +538,7 @@ class CommandGetterNetworkImporter(Job):
         for ip_address in ip_addresses:
             processed_device_data[ip_address] = command_result[ip_address]
             if self.debug:
-                self.logger.debug(
+                self.logger.debug(  # pylint: disable=logging-fstring-interpolation
                     f"Processed CommandGetterNetworkImporter return for {ip_address}: {command_result[ip_address]}"
                 )
         return processed_device_data
