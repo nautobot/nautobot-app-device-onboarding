@@ -1,7 +1,6 @@
 """Inventory Creator and Helpers."""
 
 from django.conf import settings
-from nautobot.dcim.models import Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from netmiko import SSHDetect
 from nornir.core.inventory import ConnectionOptions, Host
@@ -36,6 +35,7 @@ def _parse_credentials(credentials):
         secret = settings.NAPALM_ARGS.get("secret", None)
     return (username, password, secret)
 
+
 def guess_netmiko_device_type(hostname, username, password, port):
     """Guess the device type of host, based on Netmiko."""
     guessed_device_type = None
@@ -58,6 +58,7 @@ def guess_netmiko_device_type(hostname, username, password, port):
         print(err)
     print(f"************************Guessed device type: {guessed_device_type}")
     return guessed_device_type
+
 
 def _set_inventory(host_ip, platform, port, secrets_group):
     """Construct Nornir Inventory."""

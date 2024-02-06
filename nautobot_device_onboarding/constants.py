@@ -14,3 +14,4 @@ PLATFORM_COMMAND_MAP = {
     "cisco_nxos": ["show version", "show inventory", "show interface"],
     "cisco_xe": ["show version", "show inventory", "show interfaces"],
     "juniper_junos": ["show version", "show interfaces", "show chassis hardware"],
+}

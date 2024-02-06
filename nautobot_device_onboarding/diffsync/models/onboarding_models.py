@@ -2,6 +2,7 @@
 
 import ipaddress
 from typing import Optional
+
 from diffsync import DiffSyncModel
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
 from nautobot.apps.choices import InterfaceTypeChoices, PrefixTypeChoices
