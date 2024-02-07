@@ -1,15 +1,15 @@
 """Diffsync models."""
 
-import ipaddress
 from typing import Optional
 
 from diffsync import DiffSyncModel
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
-from nautobot.apps.choices import InterfaceTypeChoices, PrefixTypeChoices
+from nautobot.apps.choices import InterfaceTypeChoices
 from nautobot.dcim.models import Device, DeviceType, Interface, Manufacturer, Platform
 from nautobot.extras.models import Role, SecretsGroup, Status
-from nautobot.ipam.models import IPAddress, Prefix
 from nautobot_ssot.contrib import NautobotModel
+
+from nautobot_device_onboarding.utils import diffsync_utils
 
 
 class OnboardingDevice(DiffSyncModel):
@@ -95,49 +95,6 @@ class OnboardingDevice(DiffSyncModel):
         return device
 
     @classmethod
-    def _get_or_create_ip_address(cls, diffsync, attrs):
-        """Attempt to get a Nautobot IP Address, create a new one if necessary."""
-        ip_address = None
-        try:
-            ip_address = IPAddress.objects.get(
-                host=attrs["primary_ip4__host"],
-                mask_length=attrs["mask_length"],
-                parent__namespace=diffsync.job.namespace,
-            )
-        except ObjectDoesNotExist:
-            try:
-                ip_address = IPAddress.objects.create(
-                    address=f"{attrs['primary_ip4__host']}/{attrs['mask_length']}",
-                    namespace=diffsync.job.namespace,
-                    status=diffsync.job.ip_address_status,
-                )
-            except ValidationError:
-                diffsync.job.logger.warning(
-                    f"No suitable parent Prefix exists for IP {attrs['primary_ip4__host']} in "
-                    f"Namespace {diffsync.job.namespace.name}, a new Prefix will be created."
-                )
-                # TODO: Test this implementation of new_prefix
-                new_prefix = ipaddress.ip_interface(f"{attrs['primary_ip4__host']}/{attrs['mask_length']}").network
-                try:
-                    prefix = Prefix.objects.get(
-                        prefix=f"{new_prefix.network}",
-                        namespace=diffsync.job.namespace,
-                    )
-                except ObjectDoesNotExist:
-                    prefix = Prefix.objects.create(
-                        prefix=f"{new_prefix.network}",
-                        namespace=diffsync.job.namespace,
-                        type=PrefixTypeChoices.TYPE_NETWORK,
-                        status=diffsync.job.ip_address_status,
-                    )
-                ip_address, _ = IPAddress.objects.get_or_create(
-                    address=f"{attrs['primary_ip4__host']}/{attrs['mask_length']}",
-                    status=diffsync.job.ip_address_status,
-                    parent=prefix,
-                )
-        return ip_address
-
-    @classmethod
     def _get_or_create_interface(cls, diffsync, device, attrs):
         """Attempt to get a Device Interface, create a new one if necessary."""
         device_interface = None
@@ -185,7 +142,14 @@ class OnboardingDevice(DiffSyncModel):
         # Get or create Device, Interface and IP Address
         device = cls._get_or_create_device(platform, diffsync, ids, attrs)
         if device:
-            ip_address = cls._get_or_create_ip_address(diffsync=diffsync, attrs=attrs)
+            ip_address = diffsync_utils.get_or_create_ip_address(
+                host=attrs["primary_ip4__host"],
+                mask_length=attrs["mask_length"],
+                namespace=diffsync.job.namespace,
+                default_ip_status=diffsync.job.ip_address_status,
+                default_prefix_status=diffsync.job.ip_address_status,
+                job=diffsync.job,
+            )
             interface = cls._get_or_create_interface(diffsync=diffsync, device=device, attrs=attrs)
             interface.ip_addresses.add(ip_address)
             interface.validated_save()
@@ -229,7 +193,15 @@ class OnboardingDevice(DiffSyncModel):
                 # If the primary ip address is being updated, the mask length must be included
                 if not attrs.get("mask_length"):
                     attrs["mask_length"] = device.primary_ip4.mask_length
-                ip_address = self._get_or_create_ip_address(diffsync=self.diffsync, attrs=attrs)
+
+                ip_address = diffsync_utils.get_or_create_ip_address(
+                    host=attrs["primary_ip4__host"],
+                    mask_length=attrs["mask_length"],
+                    namespace=self.diffsync.job.namespace,
+                    default_ip_status=self.diffsync.job.ip_address_status,
+                    default_prefix_status=self.diffsync.job.ip_address_status,
+                    job=self.diffsync.job,
+                )
                 interface.ip_addresses.add(ip_address)
                 interface.validated_save()
                 # set the new ip address as the device primary ip address
@@ -265,7 +237,15 @@ class OnboardingDevice(DiffSyncModel):
             if attrs.get("primary_ip4__host"):
                 if not attrs.get("mask_length"):
                     attrs["mask_length"] = device.primary_ip4.mask_length
-                ip_address = self._get_or_create_ip_address(diffsync=self.diffsync, attrs=attrs)
+
+                ip_address = diffsync_utils.get_or_create_ip_address(
+                    host=attrs["primary_ip4__host"],
+                    mask_length=attrs["mask_length"],
+                    namespace=self.diffsync.job.namespace,
+                    default_ip_status=self.diffsync.job.ip_address_status,
+                    default_prefix_status=self.diffsync.job.ip_address_status,
+                    job=self.diffsync.job,
+                )
                 interface = Interface.objects.get(
                     device=device, ip_addresses__in=[device.primary_ip4], name=self.get_attrs()["interfaces"][0]
                 )

@@ -8,7 +8,6 @@ from django.conf import settings
 from nautobot.apps.jobs import BooleanVar, IntegerVar, Job, MultiObjectVar, ObjectVar, StringVar
 from nautobot.core.celery import register_jobs
 from nautobot.dcim.models import Device, DeviceType, Location, Platform
-from nautobot.ipam.models import Prefix
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status, Tag
 from nautobot.ipam.models import Namespace
@@ -355,11 +354,6 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
 class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attributes
     """Job syncing extended device attributes into Nautobot."""
 
-    # def __init__(self):
-    #     """Initialize SSOTDeviceOnboarding."""
-    #     super().__init__()
-    #     self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
-
     class Meta:  # pylint: disable=too-few-public-methods
         """Metadata about this Job."""
 
@@ -372,6 +366,20 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
     debug = BooleanVar(description="Enable for more verbose logging.")
     namespace = ObjectVar(
         model=Namespace, required=True, description="The namespace for all IP addresses created or updated in the sync."
+    )
+    ip_address_status = ObjectVar(
+        label="IP address status",
+        model=Status,
+        query_params={"content_types": "ipam.ipaddress"},
+        required=True,
+        description="Status to be applied to all synced IP addresses. This will update existing IP address statuses",
+    )
+    default_prefix_status = ObjectVar(
+        label="Prefix status",
+        model=Status,
+        query_params={"content_types": "ipam.prefix"},
+        required=True,
+        description="Status to be applied to all new created prefixes. This value does not update with additional syncs.",
     )
     devices = MultiObjectVar(
         model=Device,
@@ -408,13 +416,27 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         self.target_adapter.load()
 
     def run(
-        self, dryrun, memory_profiling, debug, namespace, location, devices, device_role, tag, *args, **kwargs
+        self, 
+        dryrun, 
+        memory_profiling, 
+        debug, 
+        namespace,
+        ip_address_status,
+        default_prefix_status, 
+        location, 
+        devices, 
+        device_role, 
+        tag, 
+        *args, 
+        **kwargs
     ):  # pylint:disable=arguments-differ, disable=too-many-arguments
         """Run sync."""
         self.dryrun = dryrun
         self.memory_profiling = memory_profiling
         self.debug = debug
         self.namespace = namespace
+        self.ip_address_status = ip_address_status
+        self.default_prefix_status = default_prefix_status
         self.location = location
         self.devices = devices
         self.device_role = device_role

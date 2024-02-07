@@ -14,7 +14,7 @@ from nautobot_device_onboarding.diffsync.models import onboarding_models
 # FOR TESTING ONLY - TO BE REMOVED    #
 #######################################
 mock_data = {
-    "10.1.1.8": {
+    "10.1.1.11": {
         "hostname": "demo-cisco-xe1",
         "serial": "9ABUXU581111",
         "device_type": "CSR1000V17",
@@ -24,11 +24,11 @@ mock_data = {
         "network_driver": "cisco_ios",
         "mask_length": 16,
     },
-    "10.1.1.9": {
+    "10.1.1.10": {
         "hostname": "demo-cisco-xe2",
         "serial": "9ABUXU5882222",
         "device_type": "CSR1000V2",
-        "mgmt_interface": "GigabitEthernet16",
+        "mgmt_interface": "GigabitEthernet5",
         "manufacturer": "Cisco",
         "platform": "IOS",
         "network_driver": "cisco_ios",
@@ -100,8 +100,7 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
         if self.job.debug:
             self.job.logger.debug("Loading Device data from Nautobot...")
 
-        # for device in Device.objects.filter(primary_ip4__host__in=self.job.ip_addresses):
-        for device in Device.objects.all():
+        for device in Device.objects.filter(primary_ip4__host__in=self.job.ip_addresses):
             interface_list = []
             # Only interfaces with the device's primeary ip should be considered for diff calculations
             for interface in device.interfaces.all():
