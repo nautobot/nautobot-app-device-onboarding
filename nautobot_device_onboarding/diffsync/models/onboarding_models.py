@@ -116,7 +116,8 @@ class OnboardingDevice(DiffSyncModel):
                     f"No suitable parent Prefix exists for IP {attrs['primary_ip4__host']} in "
                     f"Namespace {diffsync.job.namespace.name}, a new Prefix will be created."
                 )
-                new_prefix = ipaddress.ip_interface(f"{attrs['primary_ip4__host']}/{attrs['mask_length']}")
+                # TODO: Test this implementation of new_prefix
+                new_prefix = ipaddress.ip_interface(f"{attrs['primary_ip4__host']}/{attrs['mask_length']}").network
                 try:
                     prefix = Prefix.objects.get(
                         prefix=f"{new_prefix.network}",

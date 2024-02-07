@@ -8,6 +8,7 @@ from django.conf import settings
 from nautobot.apps.jobs import BooleanVar, IntegerVar, Job, MultiObjectVar, ObjectVar, StringVar
 from nautobot.core.celery import register_jobs
 from nautobot.dcim.models import Device, DeviceType, Location, Platform
+from nautobot.ipam.models import Prefix
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status, Tag
 from nautobot.ipam.models import Namespace
@@ -578,5 +579,5 @@ class CommandGetterNetworkImporter(Job):
         return final_result
 
 
-jobs = [OnboardingTask, SSOTDeviceOnboarding, CommandGetterDO, CommandGetterNetworkImporter]
+jobs = [OnboardingTask, SSOTDeviceOnboarding, SSOTNetworkImporter, CommandGetterDO, CommandGetterNetworkImporter]
 register_jobs(*jobs)
