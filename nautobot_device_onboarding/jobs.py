@@ -594,25 +594,33 @@ class CommandGetterNetworkImporter(Job):
                     },
                 },
             ) as nornir_obj:
-                
-                result = nornir_obj.run(task=netmiko_send_command, command_string="show interfaces", use_textfsm=True)
-                # for _, data in nornir_obj.inventory.hosts.items():
-                #     platform = data.dict().get("platform")
-                #     interfaces = nornir_obj.run(task=netmiko_send_command, command_string="show interfaces", use_textfsm=True)
-                #     vlans = nornir_obj.run(task=netmiko_send_command, command_string="show vlan", use_textfsm=True)
+                commands = ["show interfaces", "show vlan"]
+                all_results = {}
+                formatted_data = {}
 
-            for _, data in nornir_obj.inventory.hosts.items():
-                ip_address = data.dict().get("hostname")
-                formatted_data = {ip_address: {}}
+                for command in commands:
+                    command_result = nornir_obj.run(task=netmiko_send_command, command_string=command, use_textfsm=True)
 
-                print(f"Data Dict: {data.dict()}")
-                print(f"Result: {result[list(result.keys())[0]].result}")
+                    for host_name, result in command_result.items():
+                        if host_name not in all_results:
+                            all_results[host_name] = {"interfaces": {}}
+
+                        if command == "show interfaces":
+                            for interface_info in result.result:
+                                interface_name = interface_info.get("interface")
+                                mtu = interface_info.get("mtu")
+                                # Store the interface name and MTU
+                                all_results[host_name]["interfaces"][interface_name] = {"mtu": mtu}
+                        elif command == "show vlan":
+                            # Example: Process "show vlan" command result differently
+                            # Update `all_results` accordingly based on your needs
+                            pass
 
         except Exception as err:  # pylint: disable=broad-exception-caught
             self.logger.info("Error: %s", err)
             return err
 
-        return formatted_data
+        return all_results
 
 
 jobs = [OnboardingTask, SSOTDeviceOnboarding, SSOTNetworkImporter, CommandGetterDO, CommandGetterNetworkImporter]
