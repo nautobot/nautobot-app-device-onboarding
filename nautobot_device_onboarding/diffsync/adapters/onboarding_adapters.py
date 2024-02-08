@@ -212,7 +212,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
         self._handle_failed_connections(device_data=result.result)
 
     def load_manufacturers(self):
-        """Load manufacturer data into a DiffSync model."""
+        """Load manufacturers into the DiffSync store."""
         for ip_address in self.device_data:
             if self.job.debug:
                 self.job.logger.debug(f"loading manufacturer data for {ip_address}")
@@ -226,7 +226,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 pass
 
     def load_platforms(self):
-        """Load platform data into a DiffSync model."""
+        """Load platforms into the DiffSync store."""
         for ip_address in self.device_data:
             if self.job.debug:
                 self.job.logger.debug(f"loading platform data for {ip_address}")
@@ -242,7 +242,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 pass
 
     def load_device_types(self):
-        """Load device type data into a DiffSync model."""
+        """Load device types into the DiffSync store."""
         for ip_address in self.device_data:
             if self.job.debug:
                 self.job.logger.debug(f"loading device_type data for {ip_address}")
@@ -258,7 +258,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 pass
 
     def load_devices(self):
-        """Load device data into a DiffSync model."""
+        """Load devices into the DiffSync store."""
         for ip_address in self.device_data:
             if self.job.debug:
                 self.job.logger.debug(f"loading device data for {ip_address}")

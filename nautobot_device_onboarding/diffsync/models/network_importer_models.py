@@ -5,12 +5,14 @@ from typing import List, Optional
 
 from diffsync import DiffSync, DiffSyncModel
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from nautobot.dcim.models import Device, Interface
+from nautobot.dcim.models import Device, Interface, Location
 from nautobot.extras.models import Status
-from nautobot.ipam.models import IPAddressToInterface, IPAddress
+from nautobot.ipam.models import IPAddressToInterface, IPAddress, VLAN
 from nautobot_ssot.contrib import NautobotModel
 
 from nautobot_device_onboarding.utils import diffsync_utils
+
+from nautobot.dcim.choices import InterfaceModeChoices
 
 
 class FilteredNautobotModel(NautobotModel):
@@ -57,20 +59,27 @@ class NetworkImporterDevice(FilteredNautobotModel):
     @classmethod
     def _get_queryset(cls, diffsync: "DiffSync"):
         """Get the queryset used to load the models data from Nautobot."""
-        filter = {}
+        # TODO: this fitter has been moved to the job, remove if not used
+        # filter = {}
 
-        if diffsync.job.devices:
-            filter["id__in"] = [device.id for device in diffsync.job.devices]
-        if diffsync.job.location:
-            filter["location"] = diffsync.job.location
-        if diffsync.job.device_role:
-            filter["role"] = diffsync.job.device_role
-        if diffsync.job.tag:
-            filter["tags"] = diffsync.job.tag
-        filtered_qs = cls._model.objects.filter(**filter)
+        # if diffsync.job.devices:
+        #     filter["id__in"] = [device.id for device in diffsync.job.devices]
+        # if diffsync.job.location:
+        #     filter["location"] = diffsync.job.location
+        # if diffsync.job.device_role:
+        #     filter["role"] = diffsync.job.device_role
+        # if diffsync.job.tag:
+        #     filter["tags"] = diffsync.job.tag
+        # filtered_qs = cls._model.objects.filter(**filter)
 
-        if filter:
-            return filtered_qs
+        # if filter:
+        #     return filtered_qs
+        # else:
+        #     diffsync.job.logger.error("No device filter options were provided, no devices will be synced.")
+        #     return cls._model.objects.none()
+
+        if diffsync.job.filtered_devices:
+            return diffsync.job.filtered_devices
         else:
             diffsync.job.logger.error("No device filter options were provided, no devices will be synced.")
             return cls._model.objects.none()
@@ -92,7 +101,7 @@ class NetworkImporterDevice(FilteredNautobotModel):
 
     def delete(self):
         """Delete the ORM object corresponding to this diffsync object."""
-        self.job.logger.error(f"{self} will not be deleted.")
+        self.diffsync.job.logger.error(f"{self} will not be deleted.")
         return super().delete()
 
 
@@ -114,8 +123,8 @@ class NetworkImporterInterface(FilteredNautobotModel):
         # "lag__name",
         "mode",
         "mgmt_only",
-        # tagged vlan,
-        # untagged vlans,
+        # "tagged_vlans",
+        "untagged_vlan__name",
     )
 
     device__name: str
@@ -129,6 +138,7 @@ class NetworkImporterInterface(FilteredNautobotModel):
     # lag__name: Optional[str]
     mode: Optional[str]
     mgmt_only: Optional[bool]
+    untagged_vlan__name: Optional[str]
 
 
 class NetworkImporterIPAddress(DiffSyncModel):
@@ -215,6 +225,33 @@ class NetworkImporterIPAddressToInterface(FilteredNautobotModel):
             return None
 
 
-# TODO: Vlan Model
+class NetworkImporterVLAN(DiffSyncModel):
+    """Shared data model representing a VLAN."""
+
+    _model = VLAN
+    _modelname = "vlan"
+    _identifiers = ("vid", "name", "location__name")
+
+    vid: int
+    name: str
+    location__name: str
+
+    @classmethod
+    def create(cls, diffsync, ids, attrs):
+        try:
+            vlan = VLAN(
+                name=ids["name"],
+                vid=ids["vid"],
+                location=Location.objects.get(
+                    name=ids["location__name"]
+                ),  # TODO: This will fail if multiple locaitons are returned.
+                status=Status.objects.get(name="Active"),  # TODO: this can't be hardcoded, add a form input
+            )
+            vlan.validated_save()
+        except ValidationError as err:
+            diffsync.job.logger.error(f"VLAN {vlan} failed to create, {err}")
+
+        return super().create(diffsync, ids, attrs)
+
 
 # TODO: Cable Model

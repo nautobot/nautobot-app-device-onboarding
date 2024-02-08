@@ -362,6 +362,11 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
 class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attributes
     """Job syncing extended device attributes into Nautobot."""
 
+    def __init__(self):
+        """Initialize SSOTNetworkImporter."""
+        super().__init__()
+        self.filtered_devices = None
+
     class Meta:  # pylint: disable=too-few-public-methods
         """Metadata about this Job."""
 
@@ -450,8 +455,22 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         self.device_role = device_role
         self.tag = tag
 
+        # Filter devices based on form input
+        device_filter = {}
+        if self.devices:
+            device_filter["id__in"] = [device.id for device in devices]
+        if self.location:
+            device_filter["location"] = location
+        if self.device_role:
+            device_filter["role"] = device_role
+        if self.tag:
+            device_filter["tags"] = tag
+        self.filtered_devices = Device.objects.filter(**device_filter)
+
         self.job_result.task_kwargs = {
             "debug": debug,
+            "ip_address_status": ip_address_status,
+            "default_prefix_status": default_prefix_status,
             "location": location,
             "devices": devices,
             "device_role": device_role,
@@ -578,7 +597,7 @@ class CommandGetterNetworkImporter(Job):
                     f"Processed CommandGetterNetworkImporter return for {ip_address}: {command_result[ip_address]}"
                 )
         return processed_device_data
-    
+
     def run(self, *args, **kwargs):
         """Process onboarding task from ssot-ni job."""
         try:
