@@ -38,6 +38,7 @@ from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
 from nautobot_device_onboarding.utils.helper import get_job_filter
 from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
+from nautobot_device_onboarding.utils.formatter import normalize_interface_name
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
@@ -475,7 +476,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
             "devices": devices,
             "device_role": device_role,
             "tag": tag,
-            "sync_vlans": sync_vlans
+            "sync_vlans": sync_vlans,
         }
 
         super().run(dryrun, memory_profiling, *args, **kwargs)
@@ -550,6 +551,43 @@ class CommandGetterDO(Job):
 class CommandGetterNetworkImporter(Job):
     """Simple Job to Execute Show Command."""
 
+    mock_job_data = {
+        "demo-cisco-xe1": {
+            "serial": "9ABUXU581111",
+            "interfaces": {
+                "GigabitEthernet1": {
+                    "type": "100base-tx",
+                    "ip_addresses": [
+                        {"host": "10.1.1.8", "mask_length": 32},
+                    ],
+                    "mac_address": "d8b1.905c.5170",
+                    "mtu": "1500",
+                    "description": "",
+                    "enabled": True,
+                    "802.1Q_mode": "tagged",
+                    "lag": "",
+                    "untagged_vlan": {"name": "vlan60", "id": "60"},
+                    "tagged_vlans": [{"name": "vlan40", "id": "40"}, {"name": "vlan50", "id": "50"}],
+                },
+                "GigabitEthernet2": {
+                    "mgmt_only": False,
+                    "status": "Active",
+                    "type": "100base-tx",
+                    "ip_addresses": [
+                        {"host": "10.1.1.9", "mask_length": 24},
+                    ],
+                    "mac_address": "d8b1.905c.6130",
+                    "mtu": "1500",
+                    "description": "uplink Po1",
+                    "enabled": True,
+                    "802.1Q_mode": "",
+                    "lag": "Po1",
+                    "untagged_vlan": "",
+                    "tagged_vlans": [],
+                },
+            },
+        }
+    }
     debug = BooleanVar(description="Enable for more verbose logging.")
     namespace = ObjectVar(
         model=Namespace, required=True, description="The namespace for all IP addresses created or updated in the sync."
@@ -588,17 +626,6 @@ class CommandGetterNetworkImporter(Job):
         has_sensitive_variables = False
         hidden = False
 
-    def _process_result(self, command_result, ip_addresses):
-        """Process the data returned from devices."""
-        processed_device_data = {}
-        for ip_address in ip_addresses:
-            processed_device_data[ip_address] = command_result[ip_address]
-            if self.debug:
-                self.logger.debug(  # pylint: disable=logging-fstring-interpolation
-                    f"Processed CommandGetterNetworkImporter return for {ip_address}: {command_result[ip_address]}"
-                )
-        return processed_device_data
-
     def run(self, *args, **kwargs):
         """Process onboarding task from ssot-ni job."""
         try:
@@ -614,27 +641,70 @@ class CommandGetterNetworkImporter(Job):
                     },
                 },
             ) as nornir_obj:
-                commands = ["show interfaces", "show vlan"]
+                commands = ["show version", "show interfaces", "show vlan", "show interfaces switchport"]
                 all_results = {}
                 formatted_data = {}
 
                 for command in commands:
                     command_result = nornir_obj.run(task=netmiko_send_command, command_string=command, use_textfsm=True)
-
+                    #all_results = format_ni_data_cisco_ios(command=command,command_result=command_result)
                     for host_name, result in command_result.items():
                         if host_name not in all_results:
-                            all_results[host_name] = {"interfaces": {}}
+                            all_results[host_name] = {"interfaces": {}, "serial": ""}
 
-                        if command == "show interfaces":
+                        if command == "show version":
+                            serial_info = result.result[0]
+                            serial_number = serial_info.get("serial")
+                            all_results[host_name]["serial"] = serial_number[0]
+                        elif command == "show interfaces":
+                            self.logger.info(f"Interfaces: {result.result}")
                             for interface_info in result.result:
+                                #interface_name = normalize_interface_name(interface_info.get("interface"))
                                 interface_name = interface_info.get("interface")
+                                media_type = interface_info.get("media_type")
+                                hardware_type = interface_info.get("hardware_type")
                                 mtu = interface_info.get("mtu")
-                                # Store the interface name and MTU
-                                all_results[host_name]["interfaces"][interface_name] = {"mtu": mtu}
+                                description = interface_info.get("description")
+                                mac_address = interface_info.get("mac_address")
+                                link_status = interface_info.get("link_status")
+                                ip_address = interface_info.get("ip_address")
+                                mask_length = interface_info.get("prefix_length")
+                                
+                                if link_status == "up":
+                                    link_status = True
+                                else:
+                                    link_status = False
+                                # TODO: Map other types
+                                type = "other"
+                                if hardware_type == "EtherChannel":
+                                    type = "lag"
+                                elif hardware_type == "Ethernet SVI":
+                                    type = "virtual"
+                                elif media_type == "10/100/1000BaseTX":
+                                    type = "100base-tx"
+                                else:
+                                    type = "other"
+                                
+                                all_results[host_name]["interfaces"][interface_name] = {
+                                    "mtu": mtu,
+                                    "type": type,
+                                    "media_type": media_type,
+                                    "hardware_type": hardware_type,
+                                    "description": description,
+                                    "mac_address": mac_address,
+                                    "enabled": link_status,
+                                    "ip_addresses": [{"host": ip_address, "mask_length": mask_length}]
+                                }
                         elif command == "show vlan":
-                            # Example: Process "show vlan" command result differently
-                            # Update `all_results` accordingly based on your needs
-                            pass
+                            self.logger.info(f"Vlan: {result.result}")
+                        elif command == "show interfaces switchport":
+                            for interface_info in result.result:
+                                #interface_name = normalize_interface_name(interface_info.get("interface"))
+                                self.logger.info(f"Interfaces switchport: {result.result}")
+                                interface_mode = interface_info.get("admin_mode")
+                                access_vlan = interface_info.get("access_vlan")
+                                
+                           
 
         except Exception as err:  # pylint: disable=broad-exception-caught
             self.logger.info("Error: %s", err)
