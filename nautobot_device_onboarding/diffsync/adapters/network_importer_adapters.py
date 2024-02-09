@@ -1,15 +1,11 @@
 """DiffSync adapters."""
 
-import ipaddress
-
 import diffsync
 from diffsync.enum import DiffSyncModelFlags
-from nautobot.ipam.models import IPAddress
+from nautobot.dcim.models import Interface
+from nautobot.ipam.models import VLAN, IPAddress
 from nautobot_ssot.contrib import NautobotAdapter
 from netaddr import EUI, mac_unix_expanded
-from nautobot.dcim.models import Device
-from nautobot.ipam.models import VLAN
-from django.core.exceptions import ObjectDoesNotExist
 
 from nautobot_device_onboarding.diffsync.models import network_importer_models
 
@@ -31,10 +27,10 @@ mock_data = {
                 "mtu": "1500",
                 "description": "",
                 "enabled": True,
-                "802.1Q_mode": "tagged-all",
+                "802.1Q_mode": "tagged",
                 "lag": "",
                 "untagged_vlan": {"name": "vlan60", "id": "60"},
-                "tagged_vlans": [{"name": "vlan40", "id": "40"}, {"name": "vlan50", "id": "50"}],
+                "tagged_vlans": [{"name": "vlan40", "id": "40"}],
             },
             "GigabitEthernet2": {
                 "mgmt_only": False,
@@ -48,7 +44,7 @@ mock_data = {
                 "description": "uplink Po1",
                 "enabled": True,
                 "802.1Q_mode": "",
-                "lag": "Po1",
+                "lag": "Po2",
                 "untagged_vlan": "",
                 "tagged_vlans": [],
             },
@@ -64,10 +60,10 @@ mock_data = {
                 "mtu": "1500",
                 "description": "",
                 "enabled": True,
-                "802.1Q_mode": "",
-                "lag": "",
+                "802.1Q_mode": "tagged",
+                "lag": "Po1",
                 "untagged_vlan": "",
-                "tagged_vlans": [],
+                "tagged_vlans": [{"name": "vlan40", "id": "40"}, {"name": "vlan50", "id": "50"}],
             },
             "GigabitEthernet4": {
                 "mgmt_only": False,
@@ -90,7 +86,21 @@ mock_data = {
                 "status": "Active",
                 "type": "lag",
                 "ip_addresses": [],
-                "mac_address": "d8b1.905c.8130",
+                "mac_address": "d8b1.905c.8131",
+                "mtu": "1500",
+                "description": "",
+                "enabled": True,
+                "802.1Q_mode": "",
+                "lag": "",
+                "untagged_vlan": "",
+                "tagged_vlans": [],
+            },
+            "Po2": {
+                "mgmt_only": False,
+                "status": "Active",
+                "type": "lag",
+                "ip_addresses": [],
+                "mac_address": "d8b1.905c.8132",
                 "mtu": "1500",
                 "description": "",
                 "enabled": True,
@@ -128,8 +138,17 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
     ip_address = network_importer_models.NetworkImporterIPAddress
     ipaddress_to_interface = network_importer_models.NetworkImporterIPAddressToInterface
     vlan = network_importer_models.NetworkImporterVLAN
+    tagged_vlans_to_interface = network_importer_models.NetworkImporterTaggedVlansToInterface
+    lag_to_interface = network_importer_models.NetworkImporterLagToInterface
 
-    top_level = ["ip_address", "vlan", "device", "ipaddress_to_interface"]
+    top_level = [
+        "ip_address",
+        "vlan",
+        "device",
+        "ipaddress_to_interface",
+        "tagged_vlans_to_interface",
+        "lag_to_interface",
+    ]
 
     def load_param_mac_address(self, parameter_name, database_object):
         """Convert interface mac_address to string"""
@@ -174,6 +193,35 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
                     "Vlans must have a unique combinaation of id, name and location."
                 )
 
+    def load_tagged_vlans_to_interface(self):
+        """Load a model representing tagged vlan assignments to the Diffsync store."""
+        for interface in Interface.objects.filter(device__in=self.job.filtered_devices):
+            tagged_vlans = []
+            for vlan in interface.tagged_vlans.all():
+                vlan_dict = {}
+                vlan_dict["name"] = vlan.name
+                vlan_dict["id"] = str(vlan.vid)
+                tagged_vlans.append(vlan_dict)
+
+            network_tagged_vlans_to_interface = self.tagged_vlans_to_interface(
+                diffsync=self,
+                device__name=interface.device.name,
+                name=interface.name,
+                tagged_vlans=tagged_vlans,
+            )
+            self.add(network_tagged_vlans_to_interface)
+
+    def load_lag_to_interface(self):
+        """Load a model representing lag assignments to the Diffsync store."""
+        for interface in Interface.objects.filter(device__in=self.job.filtered_devices):
+            network_lag_to_interface = self.lag_to_interface(
+                diffsync=self,
+                device__name=interface.device.name,
+                name=interface.name,
+                lag__interface__name=interface.lag.name if interface.lag else None,
+            )
+            self.add(network_lag_to_interface)
+
     def load(self):
         """Generic implementation of the load function."""
         if not hasattr(self, "top_level") or not self.top_level:
@@ -183,12 +231,15 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
             if model_name is "ip_address":
                 self.load_ip_addresses()
             elif model_name is "vlan":
-                self.load_vlans()
+                if self.job.sync_vlans:
+                    self.load_vlans()
+            elif model_name is "tagged_vlans_to_interface":
+                if self.job.sync_vlans:
+                    self.load_tagged_vlans_to_interface()
+            elif model_name is "lag_to_interface":
+                self.load_lag_to_interface()
             else:
                 diffsync_model = self._get_diffsync_class(model_name)
-
-                # This function directly mutates the diffsync store, i.e. it will create and load the objects
-                # for this specific model class as well as its children without returning anything.
                 self._load_objects(diffsync_model)
 
 
@@ -212,8 +263,17 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
     ip_address = network_importer_models.NetworkImporterIPAddress
     ipaddress_to_interface = network_importer_models.NetworkImporterIPAddressToInterface
     vlan = network_importer_models.NetworkImporterVLAN
+    tagged_vlans_to_interface = network_importer_models.NetworkImporterTaggedVlansToInterface
+    lag_to_interface = network_importer_models.NetworkImporterLagToInterface
 
-    top_level = ["ip_address", "vlan", "device", "ipaddress_to_interface"]
+    top_level = [
+        "ip_address",
+        "vlan",
+        "device",
+        "ipaddress_to_interface",
+        "tagged_vlans_to_interface",
+        "lag_to_interface",
+    ]
 
     device_data = mock_data
 
@@ -248,10 +308,11 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
             enabled=interface_data["enabled"],
             mode=interface_data["802.1Q_mode"],
             mgmt_only=interface_data["mgmt_only"],
-            lag=interface_data["lag"],
             untagged_vlan__name=interface_data["untagged_vlan"]["name"] if interface_data["untagged_vlan"] else None,
         )
         self.add(network_interface)
+        if self.job.debug:
+            self.job.logger.debug(f"Interface {network_interface} loaded.")
         return network_interface
 
     def load_ip_addresses(self):
@@ -270,11 +331,52 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
                     try:
                         network_ip_address.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
                         self.add(network_ip_address)
+                        if self.job.debug:
+                            self.job.logger.debug(f"{network_ip_address} loaded.")
                     except diffsync.exceptions.ObjectAlreadyExists:
                         self.job.warning(
                             f"{network_ip_address} is already loaded to the "
                             "DiffSync store. This is a duplicate IP Address."
                         )
+
+    def load_vlans(self):
+        """Load vlans into the Diffsync store."""
+        location_names = {}
+        for device in self.job.filtered_devices:
+            location_names[device.name] = device.location.name
+
+        for hostname, device_data in self.device_data.items():
+            for interface_name, interface_data in device_data["interfaces"].items():
+                # add tagged vlans
+                for tagged_vlan in interface_data["tagged_vlans"]:
+                    network_vlan = self.vlan(
+                        diffsync=self,
+                        name=tagged_vlan["name"],
+                        vid=tagged_vlan["id"],
+                        location__name=location_names.get(hostname, ""),
+                    )
+                    try:
+                        network_vlan.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
+                        self.add(network_vlan)
+                        if self.job.debug:
+                            self.job.logger.debug(f"tagged vlan {network_vlan} loaded.")
+                    except diffsync.exceptions.ObjectAlreadyExists:
+                        pass
+                # check for untagged vlan and add if necessary
+                if interface_data["untagged_vlan"]:
+                    network_vlan = self.vlan(
+                        diffsync=self,
+                        name=interface_data["untagged_vlan"]["name"],
+                        vid=interface_data["untagged_vlan"]["id"],
+                        location__name=location_names.get(hostname, ""),
+                    )
+                    try:
+                        network_vlan.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
+                        self.add(network_vlan)
+                        if self.job.debug:
+                            self.job.logger.debug(f"untagged vlan {network_vlan} loaded.")
+                    except diffsync.exceptions.ObjectAlreadyExists:
+                        pass
 
     def load_ip_address_to_interfaces(self):
         """Load ip address interface assignments into the Diffsync store."""
@@ -292,44 +394,38 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
                     if self.job.debug:
                         self.job.logger.debug(f"{network_ip_address_to_interface} loaded.")
 
-    def load_vlans(self):
-        """Load vlans into the Diffsync store."""
-        location_names = {}
-        for device in self.job.filtered_devices:
-            location_names[device.name] = device.location.name
-
+    def load_tagged_vlans_to_interface(self):
         for hostname, device_data in self.device_data.items():
             for interface_name, interface_data in device_data["interfaces"].items():
-                # add untagged vlans
-                for tagged_vlan in interface_data["tagged_vlans"]:
-                    network_vlan = self.vlan(
-                        diffsync=self,
-                        name=tagged_vlan["name"],
-                        vid=tagged_vlan["id"],
-                        location__name=location_names.get(hostname, ""),
-                    )
-                    try:
-                        network_vlan.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
-                        self.add(network_vlan)
-                    except diffsync.exceptions.ObjectAlreadyExists:
-                        pass
-                # check for untagged vlan and add if necessary
-                if interface_data["untagged_vlan"]:
-                    network_vlan = self.vlan(
-                        diffsync=self,
-                        name=interface_data["untagged_vlan"]["name"],
-                        vid=interface_data["untagged_vlan"]["id"],
-                        location__name=location_names.get(hostname, ""),
-                    )
-                    try:
-                        network_vlan.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
-                        self.add(network_vlan)
-                    except diffsync.exceptions.ObjectAlreadyExists:
-                        pass
+                network_tagged_vlans_to_interface = self.tagged_vlans_to_interface(
+                    diffsync=self,
+                    device__name=hostname,
+                    name=interface_name,
+                    tagged_vlans=interface_data["tagged_vlans"],
+                )
+                self.add(network_tagged_vlans_to_interface)
+
+    def load_lag_to_interface(self):
+        for hostname, device_data in self.device_data.items():
+            for interface_name, interface_data in device_data["interfaces"].items():
+                network_lag_to_interface = self.lag_to_interface(
+                    diffsync=self,
+                    device__name=hostname,
+                    name=interface_name,
+                    lag__interface__name=interface_data["lag"] if interface_data["lag"] else None,
+                )
+                self.add(network_lag_to_interface)
 
     def load(self):
         """Load network data."""
+        #TODO: Function for comparing incoming hostnames to nautobot hostnames loaded for sync. 
+        # remove missing hostnames from nautobot side of the sync (self.job.filtered_devices).
+
         self.load_ip_addresses()
-        self.load_vlans()
+        if self.job.sync_vlans:
+            self.load_vlans()
         self.load_devices()
         self.load_ip_address_to_interfaces()
+        if self.job.sync_vlans:
+            self.load_tagged_vlans_to_interface()
+        self.load_lag_to_interface()

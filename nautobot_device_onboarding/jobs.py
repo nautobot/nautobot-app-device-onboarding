@@ -11,11 +11,16 @@ from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status, Tag
 from nautobot.ipam.models import Namespace
+from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
+from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
 from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
-from nornir.core.task import Result, Task
 from nornir.core.plugins.inventory import InventoryPluginRegister
+from nornir.core.task import Result, Task
+from nornir_nautobot.exceptions import NornirNautobotException
+from nornir_netmiko import netmiko_send_command
 
+from nautobot_device_onboarding.constants import PLATFORM_COMMAND_MAP
 from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
     NetworkImporterNautobotAdapter,
     NetworkImporterNetworkAdapter,
@@ -31,15 +36,8 @@ from nautobot_device_onboarding.nornir_plays.command_getter import netmiko_send_
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
-from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
 from nautobot_device_onboarding.utils.helper import get_job_filter
-from nautobot_device_onboarding.constants import PLATFORM_COMMAND_MAP
-
-from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
-from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
-from nornir_nautobot.exceptions import NornirNautobotException
-
-from nornir_netmiko import netmiko_send_command
+from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
@@ -377,6 +375,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         )
 
     debug = BooleanVar(description="Enable for more verbose logging.")
+    sync_vlans = BooleanVar(default=True, description="Sync VLANs and interface VLAN assignments.")
     namespace = ObjectVar(
         model=Namespace, required=True, description="The namespace for all IP addresses created or updated in the sync."
     )
@@ -388,11 +387,10 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         description="Status to be applied to all synced IP addresses. This will update existing IP address statuses",
     )
     default_prefix_status = ObjectVar(
-        label="Prefix status",
         model=Status,
         query_params={"content_types": "ipam.prefix"},
         required=True,
-        description="Status to be applied to all new created prefixes. This value does not update with additional syncs.",
+        description="Status to be applied to all new created prefixes. Prefix status does not update with additional syncs.",
     )
     devices = MultiObjectVar(
         model=Device,
@@ -439,6 +437,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         location,
         devices,
         device_role,
+        sync_vlans,
         tag,
         *args,
         **kwargs,
@@ -454,6 +453,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         self.devices = devices
         self.device_role = device_role
         self.tag = tag
+        self.sync_vlans = sync_vlans
 
         # Filter devices based on form input
         device_filter = {}
@@ -475,6 +475,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
             "devices": devices,
             "device_role": device_role,
             "tag": tag,
+            "sync_vlans": sync_vlans
         }
 
         super().run(dryrun, memory_profiling, *args, **kwargs)
