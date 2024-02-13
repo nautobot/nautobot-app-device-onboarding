@@ -1,5 +1,6 @@
 """Formatter."""
 
+from nautobot_device_onboarding.constants import CISCO_INTERFACE_ABBREVIATIONS, CISCO_TO_NAUTOBOT_INTERFACE_TYPE, TAGGED_INTERFACE_TYPES
 
 def format_ob_data_ios(host, result):
     """Format the data for onboarding IOS devices."""
@@ -92,17 +93,21 @@ def format_ob_data_junos(host, result):
     return formatted_data
 
 def normalize_interface_name(interface_name):
-    if interface_name.startswith("Gi"):
-        return "GigabitEthernet" + interface_name[2:]
-    elif interface_name.startswith("Fa"):
-        return "FastEthernet" + interface_name[2:]
-    elif interface_name.startswith("Te"):
-        return "TenGigabitEthernet" + interface_name[2:]
-    elif interface_name.startswith("Fo"):
-        return "FortyGigabitEthernet" + interface_name[2:]
-    elif interface_name.startswith("Ap"):
-        return "AppGigabitEthernet" + interface_name[2:]
+    for interface_abbreviation, interface_full in CISCO_INTERFACE_ABBREVIATIONS.items():
+        if interface_name.startswith(interface_abbreviation):
+            interface_name = interface_name.replace(interface_abbreviation, interface_full, 1)
+            break
     return interface_name
+
+def normalize_interface_type(interface_type):
+    if interface_type in CISCO_TO_NAUTOBOT_INTERFACE_TYPE:
+        return CISCO_TO_NAUTOBOT_INTERFACE_TYPE[interface_type]
+    return "other"
+
+def normalize_tagged_interface(tagged_interface):
+    if tagged_interface in TAGGED_INTERFACE_TYPES:
+        return TAGGED_INTERFACE_TYPES[tagged_interface]
+    return ""
 
 def format_ni_data_cisco_ios(command,command_result):
     all_results = {}
