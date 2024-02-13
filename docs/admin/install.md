@@ -28,7 +28,7 @@ NAPALM_ARGS = {"secret": "<enable secret pwd>"}
 ## Install Guide
 
 !!! note
-    App can be installed manually or using Python's `pip`. See the [nautobot documentation](https://nautobot.readthedocs.io/en/latest/plugins/#install-the-package) for more details. The pip package name for this plugin is [`nautobot-device-onboarding`](https://pypi.org/project/nautobot-device-onboarding/).
+    Apps can be installed manually or using Python's `pip`. See the [nautobot documentation](https://nautobot.readthedocs.io/en/latest/plugins/#install-the-package) for more details. The pip package name for this app is [`nautobot-device-onboarding`](https://pypi.org/project/nautobot-device-onboarding/).
 
 The app is available as a Python package via PyPI and can be installed with `pip`:
 
@@ -76,7 +76,7 @@ sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
 
 ## App Configuration
 
-Although the plugin can run without providing any settings, the plugin behavior can be controlled with the following list of settings defined in `nautobot_config.py`:
+Although the app can run without providing any settings, the app behavior can be controlled with the following list of settings defined in `nautobot_config.py`:
 
 - `create_platform_if_missing` boolean (default True). If True, a new platform object will be created if the platform discovered by netmiko do not already exist and is in the list of supported platforms (`cisco_ios`, `cisco_nxos`, `arista_eos`, `juniper_junos`, `cisco_xr`)
 - `create_device_type_if_missing` boolean (default True), If True, a new device type object will be created if the model discovered by Napalm do not match an existing device type.
