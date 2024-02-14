@@ -550,44 +550,6 @@ class CommandGetterDO(Job):
 
 class CommandGetterNetworkImporter(Job):
     """Simple Job to Execute Show Command."""
-
-    mock_job_data = {
-        "demo-cisco-xe1": {
-            "serial": "9ABUXU581111",
-            "interfaces": {
-                "GigabitEthernet1": {
-                    "type": "100base-tx",
-                    "ip_addresses": [
-                        {"host": "10.1.1.8", "mask_length": 32},
-                    ],
-                    "mac_address": "d8b1.905c.5170",
-                    "mtu": "1500",
-                    "description": "",
-                    "enabled": True,
-                    "802.1Q_mode": "tagged",
-                    "lag": "",
-                    "untagged_vlan": {"name": "vlan60", "id": "60"},
-                    "tagged_vlans": [{"name": "vlan40", "id": "40"}, {"name": "vlan50", "id": "50"}],
-                },
-                "GigabitEthernet2": {
-                    "mgmt_only": False,
-                    "status": "Active",
-                    "type": "100base-tx",
-                    "ip_addresses": [
-                        {"host": "10.1.1.9", "mask_length": 24},
-                    ],
-                    "mac_address": "d8b1.905c.6130",
-                    "mtu": "1500",
-                    "description": "uplink Po1",
-                    "enabled": True,
-                    "802.1Q_mode": "",
-                    "lag": "Po1",
-                    "untagged_vlan": "",
-                    "tagged_vlans": [],
-                },
-            },
-        }
-    }
     debug = BooleanVar(description="Enable for more verbose logging.")
     namespace = ObjectVar(
         model=Namespace, required=True, description="The namespace for all IP addresses created or updated in the sync."
@@ -643,22 +605,27 @@ class CommandGetterNetworkImporter(Job):
             ) as nornir_obj:
                 commands = ["show version", "show interfaces", "show vlan", "show interfaces switchport"]
                 all_results = {}
-                formatted_data = {}
+                
 
                 for command in commands:
                     command_result = nornir_obj.run(task=netmiko_send_command, command_string=command, use_textfsm=True)
-                    #all_results = format_ni_data_cisco_ios(command=command,command_result=command_result)
                     for host_name, result in command_result.items():
+                        if command_result.failed:
+                            failed_results = {host_name : { "Failed": True, "subtask_result": result.result }}
+                            return failed_results
                         if host_name not in all_results:
                             all_results[host_name] = {"interfaces": {}, "serial": ""}
 
                         if command == "show version":
+                            self.logger.info(f"Show version: {result.result}")
                             serial_info = result.result[0]
+                            self.logger.info(f"Serial Info: {serial_info}")
                             serial_number = serial_info.get("serial")
                             all_results[host_name]["serial"] = serial_number[0]
                         elif command == "show interfaces":
                             self.logger.info(f"Interfaces: {result.result}")
                             for interface_info in result.result:
+                                self.logger.info(f"Interface Info: {interface_info}")
                                 interface_name = interface_info.get("interface")
                                 media_type = interface_info.get("media_type")
                                 hardware_type = interface_info.get("hardware_type")
@@ -688,6 +655,7 @@ class CommandGetterNetworkImporter(Job):
                             vlan_id_name_map = {}
                             self.logger.info(f"Vlan: {result.result}")
                             for vlan_info in result.result:
+                                self.logger.info(f"Vlan info: {vlan_info}")
                                 vlan_id = vlan_info.get("vlan_id")
                                 vlan_name = vlan_info.get("vlan_name")
                                 vlan_id_name_map[vlan_id] = vlan_name
@@ -696,6 +664,7 @@ class CommandGetterNetworkImporter(Job):
                         elif command == "show interfaces switchport":
                             self.logger.info(f"Interfaces Switchport: {result.result}")
                             for interface_info in result.result:
+                                self.logger.info(f"Interface Info: {interface_info}")
                                 interface_name = normalize_interface_name(interface_info.get("interface"))
                                 self.logger.info(f"Interface Name: {interface_name}")
                                 interface_mode = normalize_tagged_interface(interface_info.get("admin_mode"))
@@ -710,7 +679,6 @@ class CommandGetterNetworkImporter(Job):
                                     all_results[host_name]["interfaces"][interface_name]["mode"] = interface_mode
                                     all_results[host_name]["interfaces"][interface_name]["access_vlan"] = {"vlan_id": access_vlan, "vlan_name": vlan_id_name_map.get(access_vlan, "")}
                                     
-                                    # Prepare tagged VLANs info
                                     tagged_vlans_info = [{"vlan_id": vlan_id, "vlan_name": vlan_id_name_map.get(vlan_id, "Unknown VLAN")} for vlan_id in tagged_vlans_list if vlan_id in vlan_id_name_map]
                                     self.logger.info(f"tagged_vlans_info: {tagged_vlans_info}")
                                     all_results[host_name]["interfaces"][interface_name]["tagged_vlans"] = tagged_vlans_info
