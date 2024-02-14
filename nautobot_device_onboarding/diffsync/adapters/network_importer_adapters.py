@@ -154,7 +154,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
         self.job = job
         self.sync = sync
 
-    device_data = mock_data
+    device_data = None
 
     device = network_importer_models.NetworkImporterDevice
     interface = network_importer_models.NetworkImporterInterface
@@ -173,8 +173,24 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
         "lag_to_interface",
     ]
 
-    # TODO: call command getter job instead of using mock data
-    device_data = mock_data.network_importer_mock_data
+    # def _handle_failed_connections(self, device_data):
+    #     """
+    #     Handle result data from failed device connections.
+
+    #     If a device fails to return expected data, log the result
+    #     and remove it from the data to be loaded into the diffsync store.
+    #     """
+    #     failed_ip_addresses = []
+
+    #     for ip_address in device_data:
+    #         if device_data[ip_address].get("failed"):
+    #             self.job.logger.error(f"Connection or data error for {ip_address}. This device will not be onboarded.")
+    #             if self.job.debug:
+    #                 self.job.logger.error(device_data[ip_address].get("subtask_result"))
+    #             failed_ip_addresses.append(ip_address)
+    #     for ip_address in failed_ip_addresses:
+    #         del device_data[ip_address]
+    #     self.device_data = device_data
 
     def execute_command_getter(self):
         """Start the CommandGetterDO job to query devices for data."""
@@ -192,7 +208,9 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
                 break
         if self.job.debug:
             self.job.logger.debug(f"Command Getter Job Result: {result.result}")
-        self._handle_failed_connections(device_data=result.result)
+        # TODO: Handle failed connections
+        # self._handle_failed_connections(device_data=result.result)
+        self.device_data = result.result
 
     def _process_mac_address(self, mac_address):
         """Convert a mac address to match the value stored by Nautobot."""
