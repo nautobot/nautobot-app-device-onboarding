@@ -1,20 +1,17 @@
 """DiffSync adapters."""
 
+import time
+
 import diffsync
 from diffsync.enum import DiffSyncModelFlags
+from nautobot.apps.choices import JobResultStatusChoices
 from nautobot.dcim.models import Interface
+from nautobot.extras.models import Job, JobResult
 from nautobot.ipam.models import VLAN, IPAddress
 from nautobot_ssot.contrib import NautobotAdapter
 from netaddr import EUI, mac_unix_expanded
 
 from nautobot_device_onboarding.diffsync.models import network_importer_models
-from nautobot_device_onboarding.diffsync import mock_data
-
-import time
-
-import diffsync
-from nautobot.apps.choices import JobResultStatusChoices
-from nautobot.extras.models import Job, JobResult
 
 
 class FilteredNautobotAdapter(NautobotAdapter):
@@ -52,7 +49,7 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
     ]
 
     def load_param_mac_address(self, parameter_name, database_object):
-        """Convert interface mac_address to string"""
+        """Convert interface mac_address to string."""
         return str(database_object.mac_address)
 
     def load_ip_addresses(self):
@@ -126,15 +123,15 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
             raise ValueError("'top_level' needs to be set on the class.")
 
         for model_name in self.top_level:
-            if model_name is "ip_address":
+            if model_name == "ip_address":
                 self.load_ip_addresses()
-            elif model_name is "vlan":
+            elif model_name == "vlan":
                 if self.job.sync_vlans:
                     self.load_vlans()
-            elif model_name is "tagged_vlans_to_interface":
+            elif model_name == "tagged_vlans_to_interface":
                 if self.job.sync_vlans:
                     self.load_tagged_vlans_to_interface()
-            elif model_name is "lag_to_interface":
+            elif model_name == "lag_to_interface":
                 self.load_lag_to_interface()
             else:
                 diffsync_model = self._get_diffsync_class(model_name)
@@ -330,6 +327,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
                         self.job.logger.debug(f"{network_ip_address_to_interface} loaded.")
 
     def load_tagged_vlans_to_interface(self):
+        """Load tagged vlan to interface assignments into the Diffsync store."""
         for hostname, device_data in self.device_data.items():
             for interface_name, interface_data in device_data["interfaces"].items():
                 network_tagged_vlans_to_interface = self.tagged_vlans_to_interface(
@@ -341,6 +339,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
                 self.add(network_tagged_vlans_to_interface)
 
     def load_lag_to_interface(self):
+        """Load lag interface assignments into the Diffsync store."""
         for hostname, device_data in self.device_data.items():
             for interface_name, interface_data in device_data["interfaces"].items():
                 network_lag_to_interface = self.lag_to_interface(
@@ -353,7 +352,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
 
     def load(self):
         """Load network data."""
-        #TODO: Function for comparing incoming hostnames to nautobot hostnames loaded for sync. 
+        # TODO: Function for comparing incoming hostnames to nautobot hostnames loaded for sync.
         # remove missing hostnames from nautobot side of the sync (self.job.filtered_devices).
 
         self.execute_command_getter()

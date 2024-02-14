@@ -33,19 +33,17 @@ CISCO_INTERFACE_ABBREVIATIONS = {
 CISCO_TO_NAUTOBOT_INTERFACE_TYPE = {
     "Fast Ethernet": "100base-tx",
     "EtherChannel": "lag",
-    "Gigabit Ethernet" : "1000base-tx",
+    "Gigabit Ethernet": "1000base-tx",
     "Ten Gigabit Ethernet": "10gbase-t",
     "Twenty Five Gigabit Ethernet": "25gbase-t",
     "Forty Gigabit Ethernet": "40gbase-t",
     "AppGigabitEthernet": "40gbase-t",
     "Port-channel": "lag",
     "Ethernet SVI": "virtual",
-
 }
 
 TAGGED_INTERFACE_TYPES = {
     "static access": "access",
     "dynamic auto": "trunk-all",
     "trunk": "trunk",
-
 }

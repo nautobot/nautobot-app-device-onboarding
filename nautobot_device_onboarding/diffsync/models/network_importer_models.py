@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 from diffsync import DiffSync, DiffSyncModel
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
 from nautobot.dcim.choices import InterfaceTypeChoices
 from nautobot.dcim.models import Device, Interface, Location
 from nautobot.extras.models import Status
@@ -197,13 +197,26 @@ class NetworkImporterVLAN(DiffSyncModel):
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create a new VLAN"""
+        location = None
+        try:
+            location = Location.objects.get(name=ids["location__name"])
+        except ObjectDoesNotExist:
+            diffsync.job.logger.warning(
+                f"While creating VLAN {ids['vid']} - {ids['name']}, "
+                f"unable to find a Location with name: {ids['location__name']}. "
+                "This VLAN will be created without a Location"
+            )
+        except MultipleObjectsReturned:
+            diffsync.job.logger.warning(
+                f"While creating VLAN {ids['vid']} - {ids['name']}, "
+                f"Multiple Locations were found with name: {ids['location__name']}. "
+                "This VLAN will be created without a Location"
+            )
         try:
             vlan = VLAN(
                 name=ids["name"],
                 vid=ids["vid"],
-                location=Location.objects.get(
-                    name=ids["location__name"]
-                ),  # TODO: This will fail if multiple locations are returned.
+                location=location,
                 status=Status.objects.get(name="Active"),  # TODO: this can't be hardcoded, add a form input
             )
             vlan.validated_save()
@@ -225,7 +238,7 @@ class NetworkImporterTaggedVlansToInterface(DiffSyncModel):
 
     tagged_vlans: Optional[list]
 
-    #TODO: move the create and update method locgic to a single utility function
+    # TODO: move the create and update method logic to a single utility function
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Assign tagged vlans to an interface."""
@@ -289,11 +302,11 @@ class NetworkImporterLagToInterface(DiffSyncModel):
 
     lag__interface__name: Optional[str]
 
-    #TODO: move the create and update method locgic to a single utility function
+    # TODO: move the create and update method locgic to a single utility function
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Assign tagged vlans to an interface."""
-        if attrs["lag__interface__name"]: # Prevent the sync from attempting to assign lag interface names of 'None'
+        if attrs["lag__interface__name"]:  # Prevent the sync from attempting to assign lag interface names of 'None'
             interface = Interface.objects.get(device__name=ids["device__name"], name=ids["name"])
             try:
                 lag_interface = Interface.objects.get(

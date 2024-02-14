@@ -1,6 +1,11 @@
 """Formatter."""
 
-from nautobot_device_onboarding.constants import CISCO_INTERFACE_ABBREVIATIONS, CISCO_TO_NAUTOBOT_INTERFACE_TYPE, TAGGED_INTERFACE_TYPES
+from nautobot_device_onboarding.constants import (
+    CISCO_INTERFACE_ABBREVIATIONS,
+    CISCO_TO_NAUTOBOT_INTERFACE_TYPE,
+    TAGGED_INTERFACE_TYPES,
+)
+
 
 def format_ob_data_ios(host, result):
     """Format the data for onboarding IOS devices."""
@@ -92,6 +97,7 @@ def format_ob_data_junos(host, result):
 
     return formatted_data
 
+
 def normalize_interface_name(interface_name):
     for interface_abbreviation, interface_full in CISCO_INTERFACE_ABBREVIATIONS.items():
         if interface_name.startswith(interface_abbreviation):
@@ -99,19 +105,22 @@ def normalize_interface_name(interface_name):
             break
     return interface_name
 
+
 def normalize_interface_type(interface_type):
     if interface_type in CISCO_TO_NAUTOBOT_INTERFACE_TYPE:
         return CISCO_TO_NAUTOBOT_INTERFACE_TYPE[interface_type]
     return "other"
+
 
 def normalize_tagged_interface(tagged_interface):
     if tagged_interface in TAGGED_INTERFACE_TYPES:
         return TAGGED_INTERFACE_TYPES[tagged_interface]
     return ""
 
-def format_ni_data_cisco_ios(command,command_result):
+
+def format_ni_data_cisco_ios(command, command_result):
     all_results = {}
-    #command = ["show version", "show interfaces", "show vlan", "show interfaces switchport"]
+    # command = ["show version", "show interfaces", "show vlan", "show interfaces switchport"]
     for host_name, result in command_result.items():
         if host_name not in all_results:
             all_results[host_name] = {"interfaces": {}, "serial": ""}
@@ -130,12 +139,12 @@ def format_ni_data_cisco_ios(command,command_result):
                 description = interface_info.get("description")
                 mac_address = interface_info.get("mac_address")
                 link_status = interface_info.get("link_status")
-                
+
                 if link_status == "up":
                     link_status = True
                 else:
                     link_status = False
-                
+
                 type = "other"
                 if hardware_type == "EtherChannel":
                     type = "lag"
@@ -145,7 +154,7 @@ def format_ni_data_cisco_ios(command,command_result):
                     type = "100base-tx"
                 else:
                     type = "other"
-                
+
                 all_results[host_name]["interfaces"][interface_name] = {
                     "mtu": mtu,
                     "type": type,

@@ -1,5 +1,4 @@
-
-#TODO: move this data to testing folder for use in tests
+# TODO: move this data to testing folder for use in tests
 
 network_importer_mock_data = {
     "demo-cisco-xe1": {

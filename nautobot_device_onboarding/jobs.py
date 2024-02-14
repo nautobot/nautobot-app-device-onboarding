@@ -36,9 +36,13 @@ from nautobot_device_onboarding.nornir_plays.command_getter import netmiko_send_
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
+from nautobot_device_onboarding.utils.formatter import (
+    normalize_interface_name,
+    normalize_interface_type,
+    normalize_tagged_interface,
+)
 from nautobot_device_onboarding.utils.helper import get_job_filter
 from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
-from nautobot_device_onboarding.utils.formatter import normalize_interface_name, normalize_interface_type, normalize_tagged_interface
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
@@ -609,6 +613,7 @@ class CommandGetterNetworkImporter(Job):
 
                 for command in commands:
                     command_result = nornir_obj.run(task=netmiko_send_command, command_string=command, use_textfsm=True)
+                    # all_results = format_ni_data_cisco_ios(command=command,command_result=command_result)
                     for host_name, result in command_result.items():
                         if command_result.failed:
                             failed_results = {host_name : { "Failed": True, "subtask_result": result.result }}
@@ -635,21 +640,21 @@ class CommandGetterNetworkImporter(Job):
                                 link_status = interface_info.get("link_status")
                                 ip_address = interface_info.get("ip_address")
                                 mask_length = interface_info.get("prefix_length")
-                                
+
                                 if link_status == "up":
                                     link_status = True
                                 else:
                                     link_status = False
-                                
+
                                 type = normalize_interface_type(hardware_type)
-                                
+
                                 all_results[host_name]["interfaces"][interface_name] = {
                                     "mtu": mtu,
                                     "type": type,
                                     "description": description,
                                     "mac_address": mac_address,
                                     "enabled": link_status,
-                                    "ip_addresses": [{"host": ip_address, "mask_length": mask_length}]
+                                    "ip_addresses": [{"host": ip_address, "mask_length": mask_length}],
                                 }
                         elif command == "show vlan":
                             vlan_id_name_map = {}
@@ -670,21 +675,28 @@ class CommandGetterNetworkImporter(Job):
                                 interface_mode = normalize_tagged_interface(interface_info.get("admin_mode"))
                                 access_vlan = interface_info.get("access_vlan")
                                 tagged_vlans = interface_info.get("trunking_vlans", [])
-                                tagged_vlans_list = tagged_vlans[0].split(',')
+                                tagged_vlans_list = tagged_vlans[0].split(",")
                                 self.logger.info(f"tagged_vlans: {tagged_vlans}")
-                               
-            
-                                
+
                                 if interface_name in all_results[host_name]["interfaces"]:
                                     all_results[host_name]["interfaces"][interface_name]["mode"] = interface_mode
-                                    all_results[host_name]["interfaces"][interface_name]["access_vlan"] = {"vlan_id": access_vlan, "vlan_name": vlan_id_name_map.get(access_vlan, "")}
-                                    
-                                    tagged_vlans_info = [{"vlan_id": vlan_id, "vlan_name": vlan_id_name_map.get(vlan_id, "Unknown VLAN")} for vlan_id in tagged_vlans_list if vlan_id in vlan_id_name_map]
+                                    all_results[host_name]["interfaces"][interface_name]["access_vlan"] = {
+                                        "vlan_id": access_vlan,
+                                        "vlan_name": vlan_id_name_map.get(access_vlan, ""),
+                                    }
+
+                                    # Prepare tagged VLANs info
+                                    tagged_vlans_info = [
+                                        {"vlan_id": vlan_id, "vlan_name": vlan_id_name_map.get(vlan_id, "Unknown VLAN")}
+                                        for vlan_id in tagged_vlans_list
+                                        if vlan_id in vlan_id_name_map
+                                    ]
                                     self.logger.info(f"tagged_vlans_info: {tagged_vlans_info}")
-                                    all_results[host_name]["interfaces"][interface_name]["tagged_vlans"] = tagged_vlans_info
+                                    all_results[host_name]["interfaces"][interface_name][
+                                        "tagged_vlans"
+                                    ] = tagged_vlans_info
                             else:
                                 self.logger.info(f"Interface {interface_name} not found in interfaces list.")
-                                   
 
         except Exception as err:  # pylint: disable=broad-exception-caught
             self.logger.info("Error: %s", err)
