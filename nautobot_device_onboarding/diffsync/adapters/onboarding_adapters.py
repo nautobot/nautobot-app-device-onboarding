@@ -10,34 +10,6 @@ from nautobot.extras.models import Job, JobResult
 
 from nautobot_device_onboarding.diffsync.models import onboarding_models
 
-#######################################
-# FOR TESTING ONLY - TO BE REMOVED    #
-#######################################
-mock_data = {
-    "10.1.1.11": {
-        "hostname": "demo-cisco-xe1",
-        "serial": "9ABUXU581111",
-        "device_type": "CSR1000V17",
-        "mgmt_interface": "GigabitEthernet20",
-        "manufacturer": "Cisco",
-        "platform": "IOS-test",
-        "network_driver": "cisco_ios",
-        "mask_length": 16,
-    },
-    "10.1.1.10": {
-        "hostname": "demo-cisco-xe2",
-        "serial": "9ABUXU5882222",
-        "device_type": "CSR1000V2",
-        "mgmt_interface": "GigabitEthernet5",
-        "manufacturer": "Cisco",
-        "platform": "IOS",
-        "network_driver": "cisco_ios",
-        "mask_length": 24,
-    },
-}
-#######################################
-#######################################
-
 
 class OnboardingNautobotAdapter(diffsync.DiffSync):
     """Adapter for loading Nautobot data."""

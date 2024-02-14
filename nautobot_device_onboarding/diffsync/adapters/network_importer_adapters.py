@@ -8,112 +8,13 @@ from nautobot_ssot.contrib import NautobotAdapter
 from netaddr import EUI, mac_unix_expanded
 
 from nautobot_device_onboarding.diffsync.models import network_importer_models
+from nautobot_device_onboarding.diffsync import mock_data
 
-#######################################
-# FOR TESTING ONLY - TO BE REMOVED    #
-#######################################
-mock_data = {
-    "demo-cisco-xe1": {
-        "serial": "9ABUXU581111",
-        "interfaces": {
-            "GigabitEthernet1": {
-                "mgmt_only": True,
-                "status": "Active",
-                "type": "100base-tx",
-                "ip_addresses": [
-                    {"host": "10.1.1.8", "mask_length": 32},
-                ],
-                "mac_address": "d8b1.905c.5170",
-                "mtu": "1500",
-                "description": "",
-                "enabled": True,
-                "802.1Q_mode": "tagged",
-                "lag": "",
-                "untagged_vlan": {"name": "vlan60", "id": "60"},
-                "tagged_vlans": [{"name": "vlan40", "id": "40"}],
-            },
-            "GigabitEthernet2": {
-                "mgmt_only": False,
-                "status": "Active",
-                "type": "100base-tx",
-                "ip_addresses": [
-                    {"host": "10.1.1.9", "mask_length": 24},
-                ],
-                "mac_address": "d8b1.905c.6130",
-                "mtu": "1500",
-                "description": "uplink Po1",
-                "enabled": True,
-                "802.1Q_mode": "",
-                "lag": "Po2",
-                "untagged_vlan": "",
-                "tagged_vlans": [],
-            },
-            "GigabitEthernet3": {
-                "mgmt_only": False,
-                "status": "Active",
-                "type": "100base-tx",
-                "ip_addresses": [
-                    {"host": "10.1.1.10", "mask_length": 24},
-                    {"host": "10.1.1.11", "mask_length": 22},
-                ],
-                "mac_address": "d8b1.905c.6130",
-                "mtu": "1500",
-                "description": "",
-                "enabled": True,
-                "802.1Q_mode": "tagged",
-                "lag": "Po1",
-                "untagged_vlan": "",
-                "tagged_vlans": [{"name": "vlan40", "id": "40"}, {"name": "vlan50", "id": "50"}],
-            },
-            "GigabitEthernet4": {
-                "mgmt_only": False,
-                "status": "Active",
-                "type": "100base-tx",
-                "ip_addresses": [
-                    {"host": "10.1.1.12", "mask_length": 20},
-                ],
-                "mac_address": "d8b1.905c.7130",
-                "mtu": "1500",
-                "description": "",
-                "enabled": True,
-                "802.1Q_mode": "",
-                "lag": "",
-                "untagged_vlan": "",
-                "tagged_vlans": [],
-            },
-            "Po1": {
-                "mgmt_only": False,
-                "status": "Active",
-                "type": "lag",
-                "ip_addresses": [],
-                "mac_address": "d8b1.905c.8131",
-                "mtu": "1500",
-                "description": "",
-                "enabled": True,
-                "802.1Q_mode": "",
-                "lag": "",
-                "untagged_vlan": "",
-                "tagged_vlans": [],
-            },
-            "Po2": {
-                "mgmt_only": False,
-                "status": "Active",
-                "type": "lag",
-                "ip_addresses": [],
-                "mac_address": "d8b1.905c.8132",
-                "mtu": "1500",
-                "description": "",
-                "enabled": True,
-                "802.1Q_mode": "",
-                "lag": "",
-                "untagged_vlan": "",
-                "tagged_vlans": [],
-            },
-        },
-    },
-}
-#######################################
-######################################
+import time
+
+import diffsync
+from nautobot.apps.choices import JobResultStatusChoices
+from nautobot.extras.models import Job, JobResult
 
 
 class FilteredNautobotAdapter(NautobotAdapter):
@@ -171,7 +72,7 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
                 if self.job.debug:
                     self.job.logger.debug(f"{network_ip_address} loaded.")
             except diffsync.exceptions.ObjectAlreadyExists:
-                self.job.warning(
+                self.job.logger.warning(
                     f"{network_ip_address} is already loaded to the " "DiffSync store. This is a duplicate IP Address."
                 )
 
@@ -188,10 +89,7 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
                 network_vlan.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
                 self.add(network_vlan)
             except diffsync.exceptions.ObjectAlreadyExists:
-                self.job.warning(
-                    f"VLAN {vlan} is already loaded to the DiffSync store. "
-                    "Vlans must have a unique combinaation of id, name and location."
-                )
+                pass
 
     def load_tagged_vlans_to_interface(self):
         """Load a model representing tagged vlan assignments to the Diffsync store."""
@@ -275,7 +173,26 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
         "lag_to_interface",
     ]
 
-    device_data = mock_data
+    # TODO: call command getter job instead of using mock data
+    device_data = mock_data.network_importer_mock_data
+
+    def execute_command_getter(self):
+        """Start the CommandGetterDO job to query devices for data."""
+        command_getter_job = Job.objects.get(name="Command Getter for Network Importer")
+        job_kwargs = self.job.prepare_job_kwargs(self.job.job_result.task_kwargs)
+        kwargs = self.job.serialize_data(job_kwargs)
+        result = JobResult.enqueue_job(
+            job_model=command_getter_job, user=self.job.user, celery_kwargs=self.job.job_result.celery_kwargs, **kwargs
+        )
+        while True:
+            if result.status not in JobResultStatusChoices.READY_STATES:
+                time.sleep(5)
+                result.refresh_from_db()
+            else:
+                break
+        if self.job.debug:
+            self.job.logger.debug(f"Command Getter Job Result: {result.result}")
+        self._handle_failed_connections(device_data=result.result)
 
     def _process_mac_address(self, mac_address):
         """Convert a mac address to match the value stored by Nautobot."""
@@ -334,7 +251,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
                         if self.job.debug:
                             self.job.logger.debug(f"{network_ip_address} loaded.")
                     except diffsync.exceptions.ObjectAlreadyExists:
-                        self.job.warning(
+                        self.job.logger.warning(
                             f"{network_ip_address} is already loaded to the "
                             "DiffSync store. This is a duplicate IP Address."
                         )
@@ -421,6 +338,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
         #TODO: Function for comparing incoming hostnames to nautobot hostnames loaded for sync. 
         # remove missing hostnames from nautobot side of the sync (self.job.filtered_devices).
 
+        self.execute_command_getter()
         self.load_ip_addresses()
         if self.job.sync_vlans:
             self.load_vlans()
