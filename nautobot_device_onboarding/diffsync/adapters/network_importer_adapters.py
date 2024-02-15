@@ -142,6 +142,7 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
 
 class MacUnixExpandedUppercase(mac_unix_expanded):
     """Mac Unix Expanded Uppercase."""
+
     word_fmt = "%.2X"
 
 

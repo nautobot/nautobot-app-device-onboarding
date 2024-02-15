@@ -293,6 +293,7 @@ class NetworkImporterTaggedVlansToInterface(DiffSyncModel):
 
 class NetworkImporterLagToInterface(DiffSyncModel):
     """Shared data model representing a LagToInterface."""
+
     _modelname = "lag_to_interface"
     _identifiers = ("device__name", "name")
     _attributes = ("lag__interface__name",)

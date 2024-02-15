@@ -16,6 +16,7 @@ from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInv
 from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
 from nornir.core.plugins.inventory import InventoryPluginRegister
+
 # from nornir.core.task import Result, Task
 # from nornir_nautobot.exceptions import NornirNautobotException
 from nornir_netmiko import netmiko_send_command
@@ -554,6 +555,7 @@ class CommandGetterDO(Job):
 
 class CommandGetterNetworkImporter(Job):
     """Simple Job to Execute Show Command."""
+
     debug = BooleanVar(description="Enable for more verbose logging.")
     namespace = ObjectVar(
         model=Namespace, required=True, description="The namespace for all IP addresses created or updated in the sync."
@@ -615,7 +617,7 @@ class CommandGetterNetworkImporter(Job):
                     # all_results = format_ni_data_cisco_ios(command=command,command_result=command_result)
                     for host_name, result in command_result.items():
                         if command_result.failed:
-                            failed_results = {host_name : { "Failed": True, "subtask_result": result.result }}
+                            failed_results = {host_name: {"Failed": True, "subtask_result": result.result}}
                             return failed_results
                         if host_name not in all_results:
                             all_results[host_name] = {"interfaces": {}, "serial": ""}
