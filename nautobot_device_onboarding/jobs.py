@@ -543,11 +543,6 @@ class CommandGetterDO(Job):
                 nr_with_processors.run(task=netmiko_send_commands)
                 final_result = self._process_result(compiled_results, self.ip_addresses)
 
-                # Remove before final merge #
-                for host, data in nr_with_processors.inventory.hosts.items():
-                    self.logger.info("%s;\n%s", host, data.dict())
-                # End #
-
         except Exception as err:  # pylint: disable=broad-exception-caught
             self.logger.error("Error: %s", err)
             return err
