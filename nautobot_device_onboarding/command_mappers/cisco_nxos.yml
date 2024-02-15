@@ -5,13 +5,13 @@ device_onboarding:
     command: "show version"
   serial:
     command: "show version"
-    jpath: "[*].serial[0]"
+    jpath: "[*].serial"
   device_type:
-    command: "show inventory"
-    jpath: "[?name=='Chassis'].pid"
+    command: "show version"
+    jpath: "[*].platform"
   mgmt_interface:
-    command: "show interfaces"
+    command: "show interface"
     jpath: "[?ip_address=='{{ host_info }}'].interface"
   mask_length:
-    command: "show interfaces"
+    command: "show interface"
     jpath: "[?ip_address=='{{ host_info }}'].prefix_length"

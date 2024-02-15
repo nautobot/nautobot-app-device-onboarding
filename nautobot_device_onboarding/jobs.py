@@ -11,9 +11,6 @@ from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status, Tag
 from nautobot.ipam.models import Namespace
-
-# from nautobot_device_onboarding.constants import PLATFORM_COMMAND_MAP
-from nautobot_device_onboarding.constants import PLATFORM_COMMAND_MAP
 from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
     NetworkImporterNautobotAdapter,
     NetworkImporterNetworkAdapter,
@@ -28,12 +25,13 @@ from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
 from nautobot_device_onboarding.nornir_plays.command_getter import netmiko_send_commands
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
-from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO, ProcessorDONew
-from nautobot_device_onboarding.utils.formatter import (
-    normalize_interface_name,
-    normalize_interface_type,
-    normalize_tagged_interface,
-)
+from nautobot_device_onboarding.nornir_plays.processor import ProcessorDONew
+
+# from nautobot_device_onboarding.utils.formatter import (
+#     normalize_interface_name,
+#     normalize_interface_type,
+#     normalize_tagged_interface,
+# )
 from nautobot_device_onboarding.utils.helper import get_job_filter
 from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
@@ -41,11 +39,6 @@ from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInv
 from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
 from nornir.core.plugins.inventory import InventoryPluginRegister
-from nornir.core.task import Result, Task
-from nornir_nautobot.exceptions import NornirNautobotException
-
-# from nornir.core.task import Result, Task
-# from nornir_nautobot.exceptions import NornirNautobotException
 from nornir_netmiko import netmiko_send_command
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
@@ -54,7 +47,7 @@ InventoryPluginRegister.register("empty-inventory", EmptyInventory)
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
 LOGGER = logging.getLogger(__name__)
-COMMANDS = []
+# COMMANDS = []
 name = "Device Onboarding/Network Importer"  # pylint: disable=invalid-name
 
 
@@ -508,15 +501,6 @@ class CommandGetterDO(Job):
     secrets_group = ObjectVar(model=SecretsGroup)
     platform = ObjectVar(model=Platform, required=False)
 
-    # def _process_result(self, command_result, ip_addresses):
-    #     """Process the data returned from devices."""
-    #     processed_device_data = {}
-    #     for ip_address in ip_addresses:
-    #         processed_device_data[ip_address] = command_result[ip_address]
-    #         if self.debug:
-    #             self.logger.debug(f"Processed CommandGetterDO return for {ip_address}: {command_result[ip_address]}")
-    #     return processed_device_data
-
     def run(self, *args, **kwargs):
         """Process onboarding task from ssot-ni job."""
         self.ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
@@ -543,7 +527,6 @@ class CommandGetterDO(Job):
                     )
                     nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
                 nr_with_processors.run(task=netmiko_send_commands)
-                # final_result = self._process_result(compiled_results, self.ip_addresses)
         except Exception as err:  # pylint: disable=broad-exception-caught
             self.logger.info("Error: %s", err)
             return err
