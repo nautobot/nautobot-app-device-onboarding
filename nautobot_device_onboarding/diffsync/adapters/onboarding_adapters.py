@@ -150,8 +150,6 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
         for ip_address in device_data:
             if device_data[ip_address].get("failed"):
                 self.job.logger.error(f"Connection or data error for {ip_address}. This device will not be onboarded.")
-                if self.job.debug:
-                    self.job.logger.error(device_data[ip_address].get("subtask_result"))
                 failed_ip_addresses.append(ip_address)
         for ip_address in failed_ip_addresses:
             del device_data[ip_address]
