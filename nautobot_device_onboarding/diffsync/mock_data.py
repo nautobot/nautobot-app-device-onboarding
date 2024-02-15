@@ -1,3 +1,5 @@
+"""Mock Data for use with Diffsync."""
+
 # TODO: move this data to testing folder for use in tests
 
 network_importer_mock_data = {

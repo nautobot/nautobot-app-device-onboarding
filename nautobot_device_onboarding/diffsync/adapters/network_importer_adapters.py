@@ -50,6 +50,8 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
 
     def load_param_mac_address(self, parameter_name, database_object):
         """Convert interface mac_address to string."""
+        if self.job.debug:
+            self.job.logger.debug(f"Converting {parameter_name}: {database_object.mac_address}")
         return str(database_object.mac_address)
 
     def load_ip_addresses(self):
@@ -138,7 +140,8 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
                 self._load_objects(diffsync_model)
 
 
-class mac_unix_expanded_uppercase(mac_unix_expanded):
+class MacUnixExpandedUppercase(mac_unix_expanded):
+    """Mac Unix Expanded Uppercase."""
     word_fmt = "%.2X"
 
 
@@ -211,7 +214,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
 
     def _process_mac_address(self, mac_address):
         """Convert a mac address to match the value stored by Nautobot."""
-        return str(EUI(mac_address, version=48, dialect=mac_unix_expanded_uppercase))
+        return str(EUI(mac_address, version=48, dialect=MacUnixExpandedUppercase))
 
     def load_devices(self):
         """Load devices into the DiffSync store."""
@@ -252,6 +255,8 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
         for hostname, device_data in self.device_data.items():
             for interface_name, interface_data in device_data["interfaces"].items():
                 for ip_address in interface_data["ip_addresses"]:
+                    if self.job.debug:
+                        self.job.logger.debug(f"Loading {ip_address} from {interface_name} on {hostname}")
                     network_ip_address = self.ip_address(
                         diffsync=self,
                         host=ip_address["host"],
@@ -280,6 +285,8 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
         for hostname, device_data in self.device_data.items():
             for interface_name, interface_data in device_data["interfaces"].items():
                 # add tagged vlans
+                if self.job.debug:
+                    self.job.logger.debug(f"Loading tagged vlans for {interface_name}")
                 for tagged_vlan in interface_data["tagged_vlans"]:
                     network_vlan = self.vlan(
                         diffsync=self,

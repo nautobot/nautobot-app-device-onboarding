@@ -196,7 +196,7 @@ class NetworkImporterVLAN(DiffSyncModel):
 
     @classmethod
     def create(cls, diffsync, ids, attrs):
-        """Create a new VLAN"""
+        """Create a new VLAN."""
         location = None
         try:
             location = Location.objects.get(name=ids["location__name"])
@@ -265,6 +265,7 @@ class NetworkImporterTaggedVlansToInterface(DiffSyncModel):
         return super().create(diffsync, ids, attrs)
 
     def update(self, attrs):
+        """Update tagged vlans."""
         interface = Interface.objects.get(**self.get_identifiers())
         interface.tagged_vlans.clear()
 
@@ -291,8 +292,7 @@ class NetworkImporterTaggedVlansToInterface(DiffSyncModel):
 
 
 class NetworkImporterLagToInterface(DiffSyncModel):
-    """Shared data model representing a LagToInterface"""
-
+    """Shared data model representing a LagToInterface."""
     _modelname = "lag_to_interface"
     _identifiers = ("device__name", "name")
     _attributes = ("lag__interface__name",)
@@ -305,7 +305,7 @@ class NetworkImporterLagToInterface(DiffSyncModel):
     # TODO: move the create and update method locgic to a single utility function
     @classmethod
     def create(cls, diffsync, ids, attrs):
-        """Assign tagged vlans to an interface."""
+        """Assign a lag to an interface."""
         if attrs["lag__interface__name"]:  # Prevent the sync from attempting to assign lag interface names of 'None'
             interface = Interface.objects.get(device__name=ids["device__name"], name=ids["name"])
             try:
@@ -327,6 +327,7 @@ class NetworkImporterLagToInterface(DiffSyncModel):
         return super().create(diffsync, ids, attrs)
 
     def update(self, attrs):
+        """Update and interface lag."""
         interface = Interface.objects.get(**self.get_identifiers())
         try:
             lag_interface = Interface.objects.get(

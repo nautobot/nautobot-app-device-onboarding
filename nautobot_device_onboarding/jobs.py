@@ -16,11 +16,11 @@ from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInv
 from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
 from nornir.core.plugins.inventory import InventoryPluginRegister
-from nornir.core.task import Result, Task
-from nornir_nautobot.exceptions import NornirNautobotException
+# from nornir.core.task import Result, Task
+# from nornir_nautobot.exceptions import NornirNautobotException
 from nornir_netmiko import netmiko_send_command
 
-from nautobot_device_onboarding.constants import PLATFORM_COMMAND_MAP
+# from nautobot_device_onboarding.constants import PLATFORM_COMMAND_MAP
 from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
     NetworkImporterNautobotAdapter,
     NetworkImporterNetworkAdapter,
@@ -94,7 +94,7 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
         description="If an exception occurs, log the exception and continue to next device.",
     )
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta object boilerplate for onboarding."""
 
         name = "Perform Device Onboarding"
@@ -228,7 +228,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
         super().__init__()
         self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Metadata about this Job."""
 
         name = "Sync Devices"
@@ -324,7 +324,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
         platform,
         *args,
         **kwargs,
-    ):  # pylint:disable=arguments-differ, too-many-arguments, too-many-locals
+    ):
         """Run sync."""
         self.dryrun = dryrun
         self.memory_profiling = memory_profiling
@@ -370,7 +370,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         super().__init__()
         self.filtered_devices = None
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Metadata about this Job."""
 
         name = "Sync Network Data"
@@ -446,7 +446,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         tag,
         *args,
         **kwargs,
-    ):  # pylint:disable=arguments-differ, disable=too-many-arguments
+    ):
         """Run sync."""
         self.dryrun = dryrun
         self.memory_profiling = memory_profiling
@@ -489,7 +489,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
 class CommandGetterDO(Job):
     """Simple Job to Execute Show Command."""
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta object boilerplate for onboarding."""
 
         name = "Command Getter for Device Onboarding"
@@ -584,7 +584,7 @@ class CommandGetterNetworkImporter(Job):
     port = IntegerVar(default=22)
     timeout = IntegerVar(default=30)
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta object boilerplate for onboarding."""
 
         name = "Command Getter for Network Importer"
@@ -609,7 +609,6 @@ class CommandGetterNetworkImporter(Job):
             ) as nornir_obj:
                 commands = ["show version", "show interfaces", "show vlan", "show interfaces switchport"]
                 all_results = {}
-                
 
                 for command in commands:
                     command_result = nornir_obj.run(task=netmiko_send_command, command_string=command, use_textfsm=True)
@@ -632,7 +631,7 @@ class CommandGetterNetworkImporter(Job):
                             for interface_info in result.result:
                                 self.logger.info(f"Interface Info: {interface_info}")
                                 interface_name = interface_info.get("interface")
-                                media_type = interface_info.get("media_type")
+                                # media_type = interface_info.get("media_type")
                                 hardware_type = interface_info.get("hardware_type")
                                 mtu = interface_info.get("mtu")
                                 description = interface_info.get("description")
@@ -646,11 +645,11 @@ class CommandGetterNetworkImporter(Job):
                                 else:
                                     link_status = False
 
-                                type = normalize_interface_type(hardware_type)
+                                interface_type = normalize_interface_type(hardware_type)
 
                                 all_results[host_name]["interfaces"][interface_name] = {
                                     "mtu": mtu,
-                                    "type": type,
+                                    "type": interface_type,
                                     "description": description,
                                     "mac_address": mac_address,
                                     "enabled": link_status,
