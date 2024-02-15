@@ -508,10 +508,17 @@ class CommandGetterDO(Job):
     def _process_result(self, command_result, ip_addresses):
         """Process the data returned from devices."""
         processed_device_data = {}
+        print(command_result)
         for ip_address in ip_addresses:
-            processed_device_data[ip_address] = command_result[ip_address]
-            if self.debug:
-                self.logger.debug(f"Processed CommandGetterDO return for {ip_address}: {command_result[ip_address]}")
+            if command_result.get(ip_address):
+                processed_device_data[ip_address] = command_result[ip_address]
+                if self.debug:
+                    self.logger.debug(f"Processed CommandGetterDO return for {ip_address}: {command_result[ip_address]}")
+
+                if command_result[ip_address]["failed"]:
+                    print("inside if")
+                    processed_device_data[ip_address]["failed"] = True
+                
         return processed_device_data
 
     def run(self, *args, **kwargs):
@@ -548,7 +555,7 @@ class CommandGetterDO(Job):
                 # End #
 
         except Exception as err:  # pylint: disable=broad-exception-caught
-            self.logger.info("Error: %s", err)
+            self.logger.error("Error: %s", err)
             return err
         return final_result
 
