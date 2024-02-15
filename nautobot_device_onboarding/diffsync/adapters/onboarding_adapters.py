@@ -10,34 +10,6 @@ from nautobot.extras.models import Job, JobResult
 
 from nautobot_device_onboarding.diffsync.models import onboarding_models
 
-#######################################
-# FOR TESTING ONLY - TO BE REMOVED    #
-#######################################
-mock_data = {
-    "10.1.1.8": {
-        "hostname": "demo-cisco-xe1",
-        "serial": "9ABUXU581111",
-        "device_type": "CSR1000V17",
-        "mgmt_interface": "GigabitEthernet20",
-        "manufacturer": "Cisco",
-        "platform": "IOS-test",
-        "network_driver": "cisco_ios",
-        "mask_length": 16,
-    },
-    "10.1.1.9": {
-        "hostname": "demo-cisco-xe2",
-        "serial": "9ABUXU5882222",
-        "device_type": "CSR1000V2",
-        "mgmt_interface": "GigabitEthernet16",
-        "manufacturer": "Cisco",
-        "platform": "IOS",
-        "network_driver": "cisco_ios",
-        "mask_length": 24,
-    },
-}
-#######################################
-#######################################
-
 
 class OnboardingNautobotAdapter(diffsync.DiffSync):
     """Adapter for loading Nautobot data."""
@@ -100,8 +72,7 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
         if self.job.debug:
             self.job.logger.debug("Loading Device data from Nautobot...")
 
-        # for device in Device.objects.filter(primary_ip4__host__in=self.job.ip_addresses):
-        for device in Device.objects.all():
+        for device in Device.objects.filter(primary_ip4__host__in=self.job.ip_addresses):
             interface_list = []
             # Only interfaces with the device's primeary ip should be considered for diff calculations
             for interface in device.interfaces.all():
@@ -179,8 +150,6 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
         for ip_address in device_data:
             if device_data[ip_address].get("failed"):
                 self.job.logger.error(f"Connection or data error for {ip_address}. This device will not be onboarded.")
-                if self.job.debug:
-                    self.job.logger.error(device_data[ip_address].get("subtask_result"))
                 failed_ip_addresses.append(ip_address)
         for ip_address in failed_ip_addresses:
             del device_data[ip_address]
@@ -213,7 +182,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
         self._handle_failed_connections(device_data=result.result)
 
     def load_manufacturers(self):
-        """Load manufacturer data into a DiffSync model."""
+        """Load manufacturers into the DiffSync store."""
         for ip_address in self.device_data:
             if self.job.debug:
                 self.job.logger.debug(f"loading manufacturer data for {ip_address}")
@@ -227,7 +196,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 pass
 
     def load_platforms(self):
-        """Load platform data into a DiffSync model."""
+        """Load platforms into the DiffSync store."""
         for ip_address in self.device_data:
             if self.job.debug:
                 self.job.logger.debug(f"loading platform data for {ip_address}")
@@ -243,7 +212,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 pass
 
     def load_device_types(self):
-        """Load device type data into a DiffSync model."""
+        """Load device types into the DiffSync store."""
         for ip_address in self.device_data:
             if self.job.debug:
                 self.job.logger.debug(f"loading device_type data for {ip_address}")
@@ -259,7 +228,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 pass
 
     def load_devices(self):
-        """Load device data into a DiffSync model."""
+        """Load devices into the DiffSync store."""
         for ip_address in self.device_data:
             if self.job.debug:
                 self.job.logger.debug(f"loading device data for {ip_address}")

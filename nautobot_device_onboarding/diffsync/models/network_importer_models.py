@@ -1,17 +1,21 @@
 """Diffsync models."""
 
-from typing import List
+from typing import List, Optional
 
-from nautobot.dcim.models import Device, Interface
-from nautobot.ipam.models import IPAddress
+from diffsync import DiffSync, DiffSyncModel
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
+from nautobot.dcim.choices import InterfaceTypeChoices
+from nautobot.dcim.models import Device, Interface, Location
+from nautobot.extras.models import Status
+from nautobot.ipam.models import VLAN, IPAddress, IPAddressToInterface
 from nautobot_ssot.contrib import NautobotModel
 
-from diffsync import DiffSync
+from nautobot_device_onboarding.utils import diffsync_utils
 
 
 class FilteredNautobotModel(NautobotModel):
     """
-    Allow for filtering of data loaded from Nautobot into DiffSync models.
+    Allow Nautobot data to be filtered by the Job form inputs.
 
     Must be used with FilteredNautobotAdapter.
     """
@@ -35,19 +39,17 @@ class FilteredNautobotModel(NautobotModel):
 
 
 class NetworkImporterDevice(FilteredNautobotModel):
-    """Diffsync model for device data."""
+    """Shared data model representing a Device."""
 
     _modelname = "device"
     _model = Device
     _identifiers = (
-        "location__name",
         "name",
         "serial",
     )
     _children = {"interface": "interfaces"}
 
     name: str
-    location__name: str
     serial: str
 
     interfaces: List["NetworkImporterInterface"] = []
@@ -55,27 +57,35 @@ class NetworkImporterDevice(FilteredNautobotModel):
     @classmethod
     def _get_queryset(cls, diffsync: "DiffSync"):
         """Get the queryset used to load the models data from Nautobot."""
-        filter = {}
-
-        if diffsync.job.devices:
-            filter["id__in"] = [device.id for device in diffsync.job.devices]
-        if diffsync.job.location:
-            filter["location"] = diffsync.job.location
-        if diffsync.job.device_role:
-            filter["role"] = diffsync.job.device_role
-        if diffsync.job.tag:
-            filter["tags"] = diffsync.job.tag
-        filtered_qs = cls._model.objects.filter(**filter)
-
-        if filter:
-            return filtered_qs
+        if diffsync.job.filtered_devices:
+            return diffsync.job.filtered_devices
         else:
             diffsync.job.logger.error("No device filter options were provided, no devices will be synced.")
             return cls._model.objects.none()
 
+    @classmethod
+    def create(cls, diffsync, ids, attrs):
+        """
+        Do not create new devices.
+
+        Network devices need to exist in Nautobot prior to syncing data and
+        need to be included in the queryset generated based on job form inputs.
+        """
+        diffsync.job.logger.error(
+            f"Network device {ids} is not included in the Nautobot devices "
+            "selected for syncing. This device either does not exist in Nautobot "
+            "or was not included based on filter criteria provided on the job form."
+        )
+        return None
+
+    def delete(self):
+        """Delete the ORM object corresponding to this diffsync object."""
+        self.diffsync.job.logger.error(f"{self} will not be deleted.")
+        return super().delete()
+
 
 class NetworkImporterInterface(FilteredNautobotModel):
-    """Diffsync model for interface data."""
+    """Shared data model representing an Interface."""
 
     _modelname = "interface"
     _model = Interface
@@ -83,22 +93,260 @@ class NetworkImporterInterface(FilteredNautobotModel):
         "device__name",
         "name",
     )
-    _children = {"ip_address": "ip_addresses"}
+    _attributes = (
+        "status__name",
+        "type",
+        "mac_address",
+        "mtu",
+        # "parent_interface__name",
+        "mode",
+        "mgmt_only",
+        "untagged_vlan__name",
+    )
+
     device__name: str
     name: str
 
-    ip_addresses: List["NetworkImporterIPAddress"] = []
+    status__name: Optional[str]
+    type: Optional[str]
+    mac_address: Optional[str]
+    mtu: Optional[str]
+    parent_interface__name: Optional[str]
+    lag__name: Optional[str]
+    mode: Optional[str]
+    mgmt_only: Optional[bool]
+    untagged_vlan__name: Optional[str]
 
 
-class NetworkImporterIPAddress(FilteredNautobotModel):
-    """Diffsync model for ip address data."""
+class NetworkImporterIPAddress(DiffSyncModel):
+    """Shared data model representing an IPAddress."""
 
     _modelname = "ip_address"
-    _model = IPAddress
-    _identifiers = (
-        "parent__namespace__name",
-        "host",
-    )
+    _identifiers = ("host",)
+    _attributes = ("type", "ip_version", "mask_length", "status__name")
 
-    parent__namespace__name: str
     host: str
+
+    mask_length: int
+    type: str
+    ip_version: int
+    status__name: str
+
+    @classmethod
+    def create(cls, diffsync, ids, attrs):
+        """Create a new IPAddressToInterface object."""
+        diffsync_utils.get_or_create_ip_address(
+            host=ids["host"],
+            mask_length=attrs["mask_length"],
+            namespace=diffsync.job.namespace,
+            default_ip_status=diffsync.job.ip_address_status,
+            default_prefix_status=diffsync.job.default_prefix_status,
+            job=diffsync.job,
+        )
+        return super().create(diffsync, ids, attrs)
+
+    def update(self, attrs):
+        """Update an existing IPAddressToInterface object."""
+        ip_address = IPAddress.objects.get(**self.get_identifiers())
+
+        if self.diffsync.job.debug:
+            self.diffsync.job.logger.debug(f"Updating {self} with attrs: {attrs}")
+        if attrs.get("mask_length"):
+            ip_address.mask_length = attrs["mask_length"]
+        if attrs.get("status__name"):
+            ip_address.status = Status.objects.get(name=attrs["status__name"])
+            try:
+                ip_address.validated_save()
+            except ValidationError as err:
+                self.job.logger.error(f"{self} failed to update, {err}")
+
+        return super().update(attrs)
+
+
+class NetworkImporterIPAddressToInterface(FilteredNautobotModel):
+    """Shared data model representing an IPAddressToInterface."""
+
+    _model = IPAddressToInterface
+    _modelname = "ipaddress_to_interface"
+    _identifiers = ("interface__device__name", "interface__name", "ip_address__host")
+    _attributes = ("ip_address__mask_length",)
+
+    interface__device__name: str
+    interface__name: str
+    ip_address__host: str
+    ip_address__mask_length: str
+
+    @classmethod
+    def _get_queryset(cls, diffsync: "DiffSync"):
+        """Get the queryset used to load the models data from Nautobot."""
+        return IPAddressToInterface.objects.filter(interface__device__in=diffsync.job.filtered_devices)
+
+
+class NetworkImporterVLAN(DiffSyncModel):
+    """Shared data model representing a VLAN."""
+
+    _model = VLAN
+    _modelname = "vlan"
+    _identifiers = ("vid", "name", "location__name")
+
+    vid: int
+    name: str
+    location__name: str
+
+    @classmethod
+    def create(cls, diffsync, ids, attrs):
+        """Create a new VLAN."""
+        location = None
+        try:
+            location = Location.objects.get(name=ids["location__name"])
+        except ObjectDoesNotExist:
+            diffsync.job.logger.warning(
+                f"While creating VLAN {ids['vid']} - {ids['name']}, "
+                f"unable to find a Location with name: {ids['location__name']}. "
+                "This VLAN will be created without a Location"
+            )
+        except MultipleObjectsReturned:
+            diffsync.job.logger.warning(
+                f"While creating VLAN {ids['vid']} - {ids['name']}, "
+                f"Multiple Locations were found with name: {ids['location__name']}. "
+                "This VLAN will be created without a Location"
+            )
+        try:
+            vlan = VLAN(
+                name=ids["name"],
+                vid=ids["vid"],
+                location=location,
+                status=Status.objects.get(name="Active"),  # TODO: this can't be hardcoded, add a form input
+            )
+            vlan.validated_save()
+        except ValidationError as err:
+            diffsync.job.logger.error(f"VLAN {vlan} failed to create, {err}")
+
+        return super().create(diffsync, ids, attrs)
+
+
+class NetworkImporterTaggedVlansToInterface(DiffSyncModel):
+    """Shared data model representing a TaggedVlanToInterface."""
+
+    _modelname = "tagged_vlans_to_interface"
+    _identifiers = ("device__name", "name")
+    _attributes = ("tagged_vlans",)
+
+    device__name: str
+    name: str
+
+    tagged_vlans: Optional[list]
+
+    # TODO: move the create and update method logic to a single utility function
+    @classmethod
+    def create(cls, diffsync, ids, attrs):
+        """Assign tagged vlans to an interface."""
+        interface = Interface.objects.get(device__name=ids["device__name"], name=ids["name"])
+
+        for network_vlan in attrs["tagged_vlans"]:
+            try:
+                nautobot_vlan = VLAN.objects.get(
+                    name=network_vlan["name"], vid=network_vlan["id"], location=interface.device.location
+                )
+                interface.tagged_vlans.add(nautobot_vlan)
+            except ObjectDoesNotExist:
+                diffsync.job.logger.error(
+                    f"Failed to assign tagged vlan to {interface}, unable to locate a vlan "
+                    f"with attributes [name: {network_vlan['name']}, vid: {network_vlan['id']} "
+                    f"location: {interface.device.location}]"
+                )
+        try:
+            interface.validated_save()
+        except ValidationError as err:
+            diffsync.job.logger.error(
+                f"Failed to assign tagged vlans {attrs['tagged_vlans']} to {interface} on {interface.device}, {err}"
+            )
+        return super().create(diffsync, ids, attrs)
+
+    def update(self, attrs):
+        """Update tagged vlans."""
+        interface = Interface.objects.get(**self.get_identifiers())
+        interface.tagged_vlans.clear()
+
+        for network_vlan in attrs["tagged_vlans"]:
+            try:
+                nautobot_vlan = VLAN.objects.get(
+                    name=network_vlan["name"], vid=network_vlan["id"], location=interface.device.location
+                )
+                interface.tagged_vlans.add(nautobot_vlan)
+            except ObjectDoesNotExist:
+                self.diffsync.job.logger.error(
+                    f"Failed to assign tagged vlan to {interface}, unable to locate a vlan "
+                    f"with attributes [name: {network_vlan['name']}, vid: {network_vlan['id']} "
+                    f"location: {interface.device.location}]"
+                )
+        try:
+            interface.validated_save()
+        except ValidationError as err:
+            self.diffsync.job.logger.error(
+                f"Failed to assign tagged vlans {attrs['tagged_vlans']} to {interface} on {interface.device}, {err}"
+            )
+
+        return super().update(attrs)
+
+
+class NetworkImporterLagToInterface(DiffSyncModel):
+    """Shared data model representing a LagToInterface."""
+
+    _modelname = "lag_to_interface"
+    _identifiers = ("device__name", "name")
+    _attributes = ("lag__interface__name",)
+
+    device__name: str
+    name: str
+
+    lag__interface__name: Optional[str]
+
+    # TODO: move the create and update method locgic to a single utility function
+    @classmethod
+    def create(cls, diffsync, ids, attrs):
+        """Assign a lag to an interface."""
+        if attrs["lag__interface__name"]:  # Prevent the sync from attempting to assign lag interface names of 'None'
+            interface = Interface.objects.get(device__name=ids["device__name"], name=ids["name"])
+            try:
+                lag_interface = Interface.objects.get(
+                    name=attrs["lag__interface__name"], device=interface.device, type=InterfaceTypeChoices.TYPE_LAG
+                )
+                interface.lag = lag_interface
+                interface.validated_save()
+            except ObjectDoesNotExist:
+                diffsync.job.logger.error(
+                    f"Failed to assign lag to {interface}, unable to locate a lag interface "
+                    f"with attributes [name: {attrs['lag__interface__name']}, device: {interface.device.name} "
+                    f"type: {InterfaceTypeChoices.TYPE_LAG}]"
+                )
+            except ValidationError as err:
+                diffsync.job.logger.error(
+                    f"Failed to assign lag {lag_interface} to {interface} on {interface.device}, {err}"
+                )
+        return super().create(diffsync, ids, attrs)
+
+    def update(self, attrs):
+        """Update and interface lag."""
+        interface = Interface.objects.get(**self.get_identifiers())
+        try:
+            lag_interface = Interface.objects.get(
+                name=attrs["lag__interface__name"], device=interface.device, type=InterfaceTypeChoices.TYPE_LAG
+            )
+            interface.lag = lag_interface
+            interface.validated_save()
+        except ObjectDoesNotExist:
+            self.diffsync.job.logger.error(
+                f"Failed to assign lag to {interface}, unable to locate a lag interface "
+                f"with attributes [name: {attrs['lag__interface__name']}, device: {interface.device.name} "
+                f"type: {InterfaceTypeChoices.TYPE_LAG}]"
+            )
+        except ValidationError as err:
+            self.diffsync.job.logger.error(
+                f"Failed to assign lag {lag_interface} to {interface} on {interface.device}, {err}"
+            )
+
+        return super().update(attrs)
+
+
+# TODO: Cable Model

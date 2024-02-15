@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-device-onboarding"
-version = "3.0.2a1"
+version = "3.0.2a2"
 description = "A app for Nautobot to easily onboard new devices."
 authors = ["Network to Code, LLC <info@networktocode.com>"]
 license = "Apache-2.0"
@@ -95,10 +95,20 @@ no-docstring-rgx="^(_|test_|Meta$)"
 # Line length is enforced by Black, so pylint doesn't need to check it.
 # Pylint and Black disagree about how to format multi-line arrays; Black wins.
 disable = """,
+    arguments-differ,
     line-too-long,
     duplicate-code,
-    too-many-lines,
+    logging-fstring-interpolation,
+    too-few-public-methods,
     too-many-ancestors,
+    too-many-arguments,
+    too-many-branches,
+    too-many-lines,
+    too-many-locals,
+    too-many-public-methods,
+    too-many-statements,
+    unused-argument,
+    unused-import,
     """
 
 [tool.pylint.miscellaneous]

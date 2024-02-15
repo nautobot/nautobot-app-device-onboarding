@@ -57,10 +57,10 @@ class ProcessorDO(BaseLoggingProcessor):
         else:
             self.logger.info(f"Task Name: {task.name} Task Result: {result.result}", extra={"object": task.host})
 
-        # self.data[task.name][host.name] = {
-        #     "completed": True,
-        #     "failed": result.failed,
-        # }
+        self.data[task.name][host.name] = {
+            "completed": True,
+            "failed": result.failed,
+        }
 
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Processor for Logging on SubTask Completed."""

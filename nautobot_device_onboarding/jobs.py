@@ -11,9 +11,12 @@ from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status, Tag
 from nautobot.ipam.models import Namespace
+from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
+from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
 from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
 from nornir.core.plugins.inventory import InventoryPluginRegister
+from nornir_netmiko import netmiko_send_command
 
 from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
     NetworkImporterNautobotAdapter,
@@ -30,16 +33,21 @@ from nautobot_device_onboarding.nornir_plays.command_getter import netmiko_send_
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
+from nautobot_device_onboarding.utils.formatter import (
+    normalize_interface_name,
+    normalize_interface_type,
+    normalize_tagged_interface,
+)
+from nautobot_device_onboarding.utils.helper import get_job_filter
 from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
 
+InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
-NORNIR_SETTINGS = settings.PLUGINS_CONFIG["nautobot_plugin_nornir"]
-
 LOGGER = logging.getLogger(__name__)
-
+COMMANDS = []
 name = "Device Onboarding/Network Importer"  # pylint: disable=invalid-name
 
 
@@ -83,7 +91,7 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
         description="If an exception occurs, log the exception and continue to next device.",
     )
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta object boilerplate for onboarding."""
 
         name = "Perform Device Onboarding"
@@ -217,7 +225,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
         super().__init__()
         self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Metadata about this Job."""
 
         name = "Sync Devices"
@@ -313,7 +321,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
         platform,
         *args,
         **kwargs,
-    ):  # pylint:disable=arguments-differ, too-many-arguments, too-many-locals
+    ):
         """Run sync."""
         self.dryrun = dryrun
         self.memory_profiling = memory_profiling
@@ -354,12 +362,12 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
 class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attributes
     """Job syncing extended device attributes into Nautobot."""
 
-    # def __init__(self):
-    #     """Initialize SSOTDeviceOnboarding."""
-    #     super().__init__()
-    #     self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
+    def __init__(self):
+        """Initialize SSOTNetworkImporter."""
+        super().__init__()
+        self.filtered_devices = None
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Metadata about this Job."""
 
         name = "Sync Network Data"
@@ -369,8 +377,22 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         )
 
     debug = BooleanVar(description="Enable for more verbose logging.")
+    sync_vlans = BooleanVar(default=True, description="Sync VLANs and interface VLAN assignments.")
     namespace = ObjectVar(
         model=Namespace, required=True, description="The namespace for all IP addresses created or updated in the sync."
+    )
+    ip_address_status = ObjectVar(
+        label="IP address status",
+        model=Status,
+        query_params={"content_types": "ipam.ipaddress"},
+        required=True,
+        description="Status to be applied to all synced IP addresses. This will update existing IP address statuses",
+    )
+    default_prefix_status = ObjectVar(
+        model=Status,
+        query_params={"content_types": "ipam.prefix"},
+        required=True,
+        description="Status to be applied to all new created prefixes. Prefix status does not update with additional syncs.",
     )
     devices = MultiObjectVar(
         model=Device,
@@ -407,24 +429,55 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         self.target_adapter.load()
 
     def run(
-        self, dryrun, memory_profiling, debug, namespace, location, devices, device_role, tag, *args, **kwargs
-    ):  # pylint:disable=arguments-differ, disable=too-many-arguments
+        self,
+        dryrun,
+        memory_profiling,
+        debug,
+        namespace,
+        ip_address_status,
+        default_prefix_status,
+        location,
+        devices,
+        device_role,
+        sync_vlans,
+        tag,
+        *args,
+        **kwargs,
+    ):
         """Run sync."""
         self.dryrun = dryrun
         self.memory_profiling = memory_profiling
         self.debug = debug
         self.namespace = namespace
+        self.ip_address_status = ip_address_status
+        self.default_prefix_status = default_prefix_status
         self.location = location
         self.devices = devices
         self.device_role = device_role
         self.tag = tag
+        self.sync_vlans = sync_vlans
+
+        # Filter devices based on form input
+        device_filter = {}
+        if self.devices:
+            device_filter["id__in"] = [device.id for device in devices]
+        if self.location:
+            device_filter["location"] = location
+        if self.device_role:
+            device_filter["role"] = device_role
+        if self.tag:
+            device_filter["tags"] = tag
+        self.filtered_devices = Device.objects.filter(**device_filter)
 
         self.job_result.task_kwargs = {
             "debug": debug,
+            "ip_address_status": ip_address_status,
+            "default_prefix_status": default_prefix_status,
             "location": location,
             "devices": devices,
             "device_role": device_role,
             "tag": tag,
+            "sync_vlans": sync_vlans,
         }
 
         super().run(dryrun, memory_profiling, *args, **kwargs)
@@ -433,7 +486,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
 class CommandGetterDO(Job):
     """Simple Job to Execute Show Command."""
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta object boilerplate for onboarding."""
 
         name = "Command Getter for Device Onboarding"
@@ -452,9 +505,14 @@ class CommandGetterDO(Job):
         """Process the data returned from devices."""
         processed_device_data = {}
         for ip_address in ip_addresses:
-            processed_device_data[ip_address] = command_result[ip_address]
-            if self.debug:
-                self.logger.debug(f"Processed CommandGetterDO return for {ip_address}: {command_result[ip_address]}")
+            if command_result.get(ip_address):
+                processed_device_data[ip_address] = command_result[ip_address]
+                if self.debug:
+                    self.logger.debug(
+                        f"Processed CommandGetterDO return for {ip_address}: {command_result[ip_address]}"
+                    )
+            else:
+                processed_device_data[ip_address] = {"failed": True}
         return processed_device_data
 
     def run(self, *args, **kwargs):
@@ -485,13 +543,8 @@ class CommandGetterDO(Job):
                 nr_with_processors.run(task=netmiko_send_commands)
                 final_result = self._process_result(compiled_results, self.ip_addresses)
 
-                # Remove before final merge #
-                for host, data in nr_with_processors.inventory.hosts.items():
-                    self.logger.info("%s;\n%s", host, data.dict())
-                # End #
-
         except Exception as err:  # pylint: disable=broad-exception-caught
-            self.logger.info("Error: %s", err)
+            self.logger.error("Error: %s", err)
             return err
         return final_result
 
@@ -500,6 +553,9 @@ class CommandGetterNetworkImporter(Job):
     """Simple Job to Execute Show Command."""
 
     debug = BooleanVar(description="Enable for more verbose logging.")
+    namespace = ObjectVar(
+        model=Namespace, required=True, description="The namespace for all IP addresses created or updated in the sync."
+    )
     devices = MultiObjectVar(
         model=Device,
         required=False,
@@ -523,8 +579,10 @@ class CommandGetterNetworkImporter(Job):
         required=False,
         description="Only update devices with the selected tag.",
     )
+    port = IntegerVar(default=22)
+    timeout = IntegerVar(default=30)
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta:
         """Meta object boilerplate for onboarding."""
 
         name = "Command Getter for Network Importer"
@@ -532,51 +590,114 @@ class CommandGetterNetworkImporter(Job):
         has_sensitive_variables = False
         hidden = False
 
-    def _process_result(self, command_result, ip_addresses):
-        """Process the data returned from devices."""
-        processed_device_data = {}
-        for ip_address in ip_addresses:
-            processed_device_data[ip_address] = command_result[ip_address]
-            if self.debug:
-                self.logger.debug(  # pylint: disable=logging-fstring-interpolation
-                    f"Processed CommandGetterNetworkImporter return for {ip_address}: {command_result[ip_address]}"
-                )
-        return processed_device_data
-
     def run(self, *args, **kwargs):
         """Process onboarding task from ssot-ni job."""
-        self.ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
-        self.port = kwargs["port"]
-        self.timeout = kwargs["timeout"]
-        self.secrets_group = kwargs["secrets_group"]
-        self.platform = kwargs["platform"]
-
-        # Initiate Nornir instance with empty inventory
         try:
-            logger = NornirLogger(self.job_result, log_level=0)
-            compiled_results = {}
+            qs = get_job_filter(kwargs)
             with InitNornir(
                 runner=NORNIR_SETTINGS.get("runner"),
                 logging={"enabled": False},
                 inventory={
                     "plugin": "nautobot-inventory",
+                    "options": {
+                        "credentials_class": NORNIR_SETTINGS.get("credentials"),
+                        "queryset": qs,
+                    },
                 },
             ) as nornir_obj:
-                nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
-                nr_with_processors.run(task=netmiko_send_commands)
+                commands = ["show version", "show interfaces", "show vlan", "show interfaces switchport"]
+                all_results = {}
 
-                final_result = self._process_result(compiled_results, self.ip_addresses)
+                for command in commands:
+                    command_result = nornir_obj.run(task=netmiko_send_command, command_string=command, use_textfsm=True)
+                    # TODO: Move this to a formatter
+                    for host_name, result in command_result.items():
+                        if command_result.failed:
+                            failed_results = {host_name: {"Failed": True, "subtask_result": result.result}}
+                            return failed_results
+                        if host_name not in all_results:
+                            all_results[host_name] = {"interfaces": {}, "serial": ""}
 
-                # Remove before final merge #
-                for host, data in nr_with_processors.inventory.hosts.items():
-                    self.logger.info("%s;\n%s", host, data.dict())
-                # End #
+                        if command == "show version":
+                            self.logger.info(f"Show version: {result.result}")
+                            serial_info = result.result[0]
+                            self.logger.info(f"Serial Info: {serial_info}")
+                            serial_number = serial_info.get("serial")
+                            all_results[host_name]["serial"] = serial_number[0]
+                        elif command == "show interfaces":
+                            self.logger.info(f"Interfaces: {result.result}")
+                            for interface_info in result.result:
+                                self.logger.info(f"Interface Info: {interface_info}")
+                                interface_name = interface_info.get("interface")
+                                # media_type = interface_info.get("media_type")
+                                hardware_type = interface_info.get("hardware_type")
+                                mtu = interface_info.get("mtu")
+                                description = interface_info.get("description")
+                                mac_address = interface_info.get("mac_address")
+                                link_status = interface_info.get("link_status")
+                                ip_address = interface_info.get("ip_address")
+                                mask_length = interface_info.get("prefix_length")
+
+                                link_status = bool(link_status == "up")
+
+                                interface_type = normalize_interface_type(hardware_type)
+
+                                all_results[host_name]["interfaces"][interface_name] = {
+                                    "mtu": mtu,
+                                    "type": interface_type,
+                                    "description": description,
+                                    "mac_address": mac_address,
+                                    "enabled": link_status,
+                                    "ip_addresses": [{"host": ip_address, "mask_length": mask_length}],
+                                }
+                        elif command == "show vlan":
+                            vlan_id_name_map = {}
+                            self.logger.info(f"Vlan: {result.result}")
+                            for vlan_info in result.result:
+                                self.logger.info(f"Vlan info: {vlan_info}")
+                                vlan_id = vlan_info.get("vlan_id")
+                                vlan_name = vlan_info.get("vlan_name")
+                                vlan_id_name_map[vlan_id] = vlan_name
+                            self.logger.info(f"Vlan ID Name Map: {vlan_id_name_map}")
+
+                        elif command == "show interfaces switchport":
+                            self.logger.info(f"Interfaces Switchport: {result.result}")
+                            for interface_info in result.result:
+                                self.logger.info(f"Interface Info: {interface_info}")
+                                interface_name = normalize_interface_name(interface_info.get("interface"))
+                                self.logger.info(f"Interface Name: {interface_name}")
+                                interface_mode = normalize_tagged_interface(interface_info.get("admin_mode"))
+                                access_vlan = interface_info.get("access_vlan")
+                                tagged_vlans = interface_info.get("trunking_vlans", [])
+                                tagged_vlans_list = tagged_vlans[0].split(",")
+                                self.logger.info(f"tagged_vlans: {tagged_vlans}")
+
+                                if interface_name in all_results[host_name]["interfaces"]:
+                                    all_results[host_name]["interfaces"][interface_name]["mode"] = interface_mode
+                                    all_results[host_name]["interfaces"][interface_name]["access_vlan"] = {
+                                        "vlan_id": access_vlan,
+                                        "vlan_name": vlan_id_name_map.get(access_vlan, ""),
+                                    }
+
+                                    # Prepare tagged VLANs info
+                                    tagged_vlans_info = [
+                                        {"vlan_id": vlan_id, "vlan_name": vlan_id_name_map.get(vlan_id, "Unknown VLAN")}
+                                        for vlan_id in tagged_vlans_list
+                                        if vlan_id in vlan_id_name_map
+                                    ]
+                                    self.logger.info(f"tagged_vlans_info: {tagged_vlans_info}")
+                                    all_results[host_name]["interfaces"][interface_name][
+                                        "tagged_vlans"
+                                    ] = tagged_vlans_info
+                                else:
+                                    self.logger.info(f"Interface {interface_name} not found in interfaces list.")
 
         except Exception as err:  # pylint: disable=broad-exception-caught
             self.logger.info("Error: %s", err)
             return err
-        return final_result
+
+        return all_results
 
 
-jobs = [OnboardingTask, SSOTDeviceOnboarding, CommandGetterDO, CommandGetterNetworkImporter]
+jobs = [OnboardingTask, SSOTDeviceOnboarding, SSOTNetworkImporter, CommandGetterDO, CommandGetterNetworkImporter]
 register_jobs(*jobs)

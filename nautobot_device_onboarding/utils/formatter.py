@@ -1,5 +1,11 @@
 """Formatter."""
 
+from nautobot_device_onboarding.constants import (
+    CISCO_INTERFACE_ABBREVIATIONS,
+    CISCO_TO_NAUTOBOT_INTERFACE_TYPE,
+    TAGGED_INTERFACE_TYPES,
+)
+
 
 def format_ob_data_ios(host, result):
     """Format the data for onboarding IOS devices."""
@@ -56,6 +62,7 @@ def format_ob_data_nxos(host, result):
                     formatted_data["mask_length"] = mask_length
                     formatted_data["mgmt_interface"] = interface_name
                     break
+    return formatted_data
 
 
 def format_ob_data_junos(host, result):
@@ -89,3 +96,26 @@ def format_ob_data_junos(host, result):
                     break
 
     return formatted_data
+
+
+def normalize_interface_name(interface_name):
+    """Normalize interface names."""
+    for interface_abbreviation, interface_full in CISCO_INTERFACE_ABBREVIATIONS.items():
+        if interface_name.startswith(interface_abbreviation):
+            interface_name = interface_name.replace(interface_abbreviation, interface_full, 1)
+            break
+    return interface_name
+
+
+def normalize_interface_type(interface_type):
+    """Normalize interface types."""
+    if interface_type in CISCO_TO_NAUTOBOT_INTERFACE_TYPE:
+        return CISCO_TO_NAUTOBOT_INTERFACE_TYPE[interface_type]
+    return "other"
+
+
+def normalize_tagged_interface(tagged_interface):
+    """Normalize tagged interface types."""
+    if tagged_interface in TAGGED_INTERFACE_TYPES:
+        return TAGGED_INTERFACE_TYPES[tagged_interface]
+    return ""
