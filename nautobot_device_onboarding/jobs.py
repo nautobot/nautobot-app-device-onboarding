@@ -11,17 +11,9 @@ from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status, Tag
 from nautobot.ipam.models import Namespace
-from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
-from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
-from nautobot_ssot.jobs.base import DataSource
-from nornir import InitNornir
-from nornir.core.plugins.inventory import InventoryPluginRegister
-
-# from nornir.core.task import Result, Task
-# from nornir_nautobot.exceptions import NornirNautobotException
-from nornir_netmiko import netmiko_send_command
 
 # from nautobot_device_onboarding.constants import PLATFORM_COMMAND_MAP
+from nautobot_device_onboarding.constants import PLATFORM_COMMAND_MAP
 from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
     NetworkImporterNautobotAdapter,
     NetworkImporterNetworkAdapter,
@@ -36,7 +28,7 @@ from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
 from nautobot_device_onboarding.nornir_plays.command_getter import netmiko_send_commands
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
-from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
+from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO, ProcessorDONew
 from nautobot_device_onboarding.utils.formatter import (
     normalize_interface_name,
     normalize_interface_type,
@@ -44,6 +36,17 @@ from nautobot_device_onboarding.utils.formatter import (
 )
 from nautobot_device_onboarding.utils.helper import get_job_filter
 from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
+from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
+from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
+from nautobot_ssot.jobs.base import DataSource
+from nornir import InitNornir
+from nornir.core.plugins.inventory import InventoryPluginRegister
+from nornir.core.task import Result, Task
+from nornir_nautobot.exceptions import NornirNautobotException
+
+# from nornir.core.task import Result, Task
+# from nornir_nautobot.exceptions import NornirNautobotException
+from nornir_netmiko import netmiko_send_command
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
@@ -533,13 +536,14 @@ class CommandGetterDO(Job):
                     "plugin": "empty-inventory",
                 },
             ) as nornir_obj:
-                nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
+                nr_with_processors = nornir_obj.with_processors([ProcessorDONew(logger, compiled_results)])
                 for entered_ip in self.ip_addresses:
                     single_host_inventory_constructed = _set_inventory(
                         entered_ip, self.platform, self.port, self.secrets_group
                     )
                     nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
-                nr_with_processors.run(task=netmiko_send_commands)
+                nr_result_temp = nr_with_processors.run(task=netmiko_send_commands)
+                print(nr_result_temp)
                 final_result = self._process_result(compiled_results, self.ip_addresses)
 
                 # Remove before final merge #

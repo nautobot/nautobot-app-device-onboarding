@@ -1,4 +1,64 @@
 """Formatter."""
+import os
+
+import yaml
+from django.template import engines
+from jdiff import extract_data_from_json
+from jinja2 import FileSystemLoader
+from jinja2.sandbox import SandboxedEnvironment
+
+DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "command_mappers"))
+
+
+def load_yaml_datafile(filename, config=None):
+    """Get the contents of the given YAML data file.
+
+    Args:
+        filename (str): Filename within the 'data' directory.
+        config (dict): Data for Jinja2 templating.
+    """
+    file_path = os.path.join(DATA_DIR, filename)
+    if not os.path.isfile(file_path):
+        raise RuntimeError(f"No data file found at {file_path}")
+    if not config:
+        config = {}
+    jinja_env = SandboxedEnvironment(
+        loader=FileSystemLoader(DATA_DIR), autoescape=True, trim_blocks=True, lstrip_blocks=False
+    )
+    jinja_env.filters = engines["jinja"].env.filters
+    template = jinja_env.get_template(filename)
+    print(template)
+    populated = template.render(config)
+    return yaml.safe_load(populated)
+
+
+def format_ob_data(host, multi_result):
+    """_summary_
+
+    Args:
+        host (_type_): _description_
+        result (_type_): _description_
+    
+    result is a MultiResult Nornir Object for a single host.
+    """
+    default_dict = {
+        "hostname": "",
+        "serial": "",
+        "device_type": "",
+        "mgmt_interface": "",
+        "manufacturer": "",
+        "platform": "",
+        "network_driver": "",
+        "mask_length": 0,
+    }
+    host_platform = host.platform
+    if host_platform == "cisco_xe":
+        host_platform = "cisco_ios"
+    command_jpaths = load_yaml_datafile(f"{host_platform}.yml", config={})
+    for default_dict_field, command_info in command_jpaths['device_onboarding'].items():
+        extracted_value = extract_data_from_json(multi_result.result, command_info['jpath'], exclude=None)
+        default_dict[default_dict_field] = extracted_value
+    return default_dict
 
 from nautobot_device_onboarding.constants import (
     CISCO_INTERFACE_ABBREVIATIONS,
@@ -64,6 +124,7 @@ def format_ob_data_nxos(host, result):
                     break
     return formatted_data
 
+    return formatted_data
 
 def format_ob_data_junos(host, result):
     """Format the data for onboarding Juniper JUNOS devices."""
