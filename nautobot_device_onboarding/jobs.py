@@ -11,15 +11,6 @@ from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status, Tag
 from nautobot.ipam.models import Namespace
-from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
-from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
-from nautobot_ssot.jobs.base import DataSource
-from nornir import InitNornir
-from nornir.core.plugins.inventory import InventoryPluginRegister
-
-# from nornir.core.task import Result, Task
-# from nornir_nautobot.exceptions import NornirNautobotException
-from nornir_netmiko import netmiko_send_command
 
 # from nautobot_device_onboarding.constants import PLATFORM_COMMAND_MAP
 from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
@@ -44,6 +35,15 @@ from nautobot_device_onboarding.utils.formatter import (
 )
 from nautobot_device_onboarding.utils.helper import get_job_filter
 from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
+from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
+from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
+from nautobot_ssot.jobs.base import DataSource
+from nornir import InitNornir
+from nornir.core.plugins.inventory import InventoryPluginRegister
+
+# from nornir.core.task import Result, Task
+# from nornir_nautobot.exceptions import NornirNautobotException
+from nornir_netmiko import netmiko_send_command
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
@@ -508,17 +508,13 @@ class CommandGetterDO(Job):
     def _process_result(self, command_result, ip_addresses):
         """Process the data returned from devices."""
         processed_device_data = {}
-        print(command_result)
         for ip_address in ip_addresses:
             if command_result.get(ip_address):
                 processed_device_data[ip_address] = command_result[ip_address]
                 if self.debug:
                     self.logger.debug(f"Processed CommandGetterDO return for {ip_address}: {command_result[ip_address]}")
-
-                if command_result[ip_address]["failed"]:
-                    print("inside if")
-                    processed_device_data[ip_address]["failed"] = True
-                
+            else:
+                processed_device_data[ip_address] = {"failed": True}
         return processed_device_data
 
     def run(self, *args, **kwargs):
