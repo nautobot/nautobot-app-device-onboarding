@@ -3,7 +3,7 @@
 from typing import Dict
 
 from nautobot_device_onboarding.utils.formatter import (
-    format_ob_data,
+    extract_show_data,
     format_ob_data_ios,
     format_ob_data_junos,
     format_ob_data_nxos,
@@ -165,14 +165,15 @@ class ProcessorDONew(BaseLoggingProcessor):
         self.logger.info(f"subtask_instance_completed Subtask completed {task.name}.", extra={"object": task.host})
         self.logger.info(f"subtask_instance_completed Subtask result {result.result}.", extra={"object": task.host})
 
-        self.data[host.name][task.name].update({
+        self.data[host.name].update({
             "failed": result.failed,
-            "subtask_result": result.result,
+            # "subtask_result": result.result,
             })
-
-        formatted_data = format_ob_data(host, result)
-        print(formatted_data)
-        self.data[host.name][task.name] = formatted_data
+        formatted_data = extract_show_data(host, result)
+        print(f"current formated data = {formatted_data}")
+        for k, v in formatted_data.items():
+            self.data[host.name][k] = v
+        # self.data[host.name].update(formatted_data)
 
     def subtask_instance_started(self, task: Task, host: Host) -> None:  # show command start
         """Processor for Logging on SubTask Start."""
@@ -182,4 +183,4 @@ class ProcessorDONew(BaseLoggingProcessor):
                 "manufacturer": host.platform.split("_")[0].title() if host.platform else "PLACEHOLDER",
                 "network_driver": host.platform,
             }
-        self.data[host.name].update({task.name:{}})
+        # self.data[host.name].update({task.name:{}})

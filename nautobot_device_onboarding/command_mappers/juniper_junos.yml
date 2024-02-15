@@ -1,0 +1,51 @@
+---
+# Temporary idea that could be via datasources eventually.
+device_onboarding:
+  required_fields:
+    hostname:
+      command: "show version"
+      your_key: "name"
+    serial:
+      command: "show version"
+      your_key: "serial"
+    device_type:
+      command: "show version"
+      your_key: "model"
+    mgmt_interface:
+      command: "show interfaces"
+      your_key: "interface"
+    mask_length:
+      command: "show interfaces"
+      your_key: "('destination').split("/")[1]"
+      # your_key: "{{destination | ipaddressip_network .split("/")[1] }}"
+
+# device_onboarding:
+#   - model: "dcim.Device"
+#     your_key: "{{ serial }}"
+#     model_key: "serial"
+#     source:
+#       parser: "ntc-templates"
+#       arg: "show version"
+#   - model: "dcim.Interface"
+#     your_key: "ethernet"
+#     model_key: "type"
+#     source:
+#       parser: "constant"
+#   - model: "dcim.Device"
+#     your_key: "{{ osversion }}"
+#     model_key: "cf_software_version"
+#     source:
+#       parser: "ntc-templates"
+#       arg: "show version"
+
+
+# @kens_magic
+# def device_serial():
+#     pass
+
+
+# def load():
+#     for device in devices:
+#         serial = device_serial()
+
+

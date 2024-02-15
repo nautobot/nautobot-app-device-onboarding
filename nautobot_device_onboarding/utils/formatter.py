@@ -27,12 +27,12 @@ def load_yaml_datafile(filename, config=None):
     )
     jinja_env.filters = engines["jinja"].env.filters
     template = jinja_env.get_template(filename)
-    print(template)
     populated = template.render(config)
+    print(populated)
     return yaml.safe_load(populated)
 
 
-def format_ob_data(host, multi_result):
+def extract_show_data(host, multi_result):
     """_summary_
 
     Args:
@@ -41,24 +41,18 @@ def format_ob_data(host, multi_result):
     
     result is a MultiResult Nornir Object for a single host.
     """
-    default_dict = {
-        "hostname": "",
-        "serial": "",
-        "device_type": "",
-        "mgmt_interface": "",
-        "manufacturer": "",
-        "platform": "",
-        "network_driver": "",
-        "mask_length": 0,
-    }
     host_platform = host.platform
     if host_platform == "cisco_xe":
         host_platform = "cisco_ios"
-    command_jpaths = load_yaml_datafile(f"{host_platform}.yml", config={})
+    command_jpaths = load_yaml_datafile(f"{host_platform}.yml", config={"host_info": host})
+    result_dict = {}
     for default_dict_field, command_info in command_jpaths['device_onboarding'].items():
-        extracted_value = extract_data_from_json(multi_result.result, command_info['jpath'], exclude=None)
-        default_dict[default_dict_field] = extracted_value
-    return default_dict
+        if command_info["command"] == multi_result[0].name:
+            extracted_value = extract_data_from_json(multi_result[0].result, command_info['jpath'])
+            if isinstance(extracted_value, list) and len(extracted_value) == 1:
+                extracted_value = extracted_value[0]
+            result_dict[default_dict_field] = extracted_value
+    return result_dict
 
 from nautobot_device_onboarding.constants import (
     CISCO_INTERFACE_ABBREVIATIONS,

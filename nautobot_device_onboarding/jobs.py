@@ -508,14 +508,14 @@ class CommandGetterDO(Job):
     secrets_group = ObjectVar(model=SecretsGroup)
     platform = ObjectVar(model=Platform, required=False)
 
-    def _process_result(self, command_result, ip_addresses):
-        """Process the data returned from devices."""
-        processed_device_data = {}
-        for ip_address in ip_addresses:
-            processed_device_data[ip_address] = command_result[ip_address]
-            if self.debug:
-                self.logger.debug(f"Processed CommandGetterDO return for {ip_address}: {command_result[ip_address]}")
-        return processed_device_data
+    # def _process_result(self, command_result, ip_addresses):
+    #     """Process the data returned from devices."""
+    #     processed_device_data = {}
+    #     for ip_address in ip_addresses:
+    #         processed_device_data[ip_address] = command_result[ip_address]
+    #         if self.debug:
+    #             self.logger.debug(f"Processed CommandGetterDO return for {ip_address}: {command_result[ip_address]}")
+    #     return processed_device_data
 
     def run(self, *args, **kwargs):
         """Process onboarding task from ssot-ni job."""
@@ -542,19 +542,12 @@ class CommandGetterDO(Job):
                         entered_ip, self.platform, self.port, self.secrets_group
                     )
                     nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
-                nr_result_temp = nr_with_processors.run(task=netmiko_send_commands)
-                print(nr_result_temp)
-                final_result = self._process_result(compiled_results, self.ip_addresses)
-
-                # Remove before final merge #
-                for host, data in nr_with_processors.inventory.hosts.items():
-                    self.logger.info("%s;\n%s", host, data.dict())
-                # End #
-
+                nr_with_processors.run(task=netmiko_send_commands)
+                # final_result = self._process_result(compiled_results, self.ip_addresses)
         except Exception as err:  # pylint: disable=broad-exception-caught
             self.logger.info("Error: %s", err)
             return err
-        return final_result
+        return compiled_results
 
 
 class CommandGetterNetworkImporter(Job):

@@ -1,0 +1,19 @@
+---
+# Temporary idea that could be via datasources eventually.
+device_onboarding:
+  required_fields:
+    hostname:
+      command: "show version"
+      your_key: "hostname"
+    serial:
+      command: "show version"
+      your_key: "serial"
+    device_type:
+      command: "show version"
+      your_key: "platform"
+    mgmt_interface:
+      command: "show interfaces"
+      your_key: "interface"
+    mask_length:
+      command: "show interfaces"
+      your_key: "prefix_length"
