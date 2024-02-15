@@ -11,8 +11,13 @@ from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status, Tag
 from nautobot.ipam.models import Namespace
+from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
+from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
+from nautobot_ssot.jobs.base import DataSource
+from nornir import InitNornir
+from nornir.core.plugins.inventory import InventoryPluginRegister
+from nornir_netmiko import netmiko_send_command
 
-# from nautobot_device_onboarding.constants import PLATFORM_COMMAND_MAP
 from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
     NetworkImporterNautobotAdapter,
     NetworkImporterNetworkAdapter,
@@ -35,15 +40,6 @@ from nautobot_device_onboarding.utils.formatter import (
 )
 from nautobot_device_onboarding.utils.helper import get_job_filter
 from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
-from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
-from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
-from nautobot_ssot.jobs.base import DataSource
-from nornir import InitNornir
-from nornir.core.plugins.inventory import InventoryPluginRegister
-
-# from nornir.core.task import Result, Task
-# from nornir_nautobot.exceptions import NornirNautobotException
-from nornir_netmiko import netmiko_send_command
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
@@ -512,7 +508,9 @@ class CommandGetterDO(Job):
             if command_result.get(ip_address):
                 processed_device_data[ip_address] = command_result[ip_address]
                 if self.debug:
-                    self.logger.debug(f"Processed CommandGetterDO return for {ip_address}: {command_result[ip_address]}")
+                    self.logger.debug(
+                        f"Processed CommandGetterDO return for {ip_address}: {command_result[ip_address]}"
+                    )
             else:
                 processed_device_data[ip_address] = {"failed": True}
         return processed_device_data
@@ -617,7 +615,7 @@ class CommandGetterNetworkImporter(Job):
 
                 for command in commands:
                     command_result = nornir_obj.run(task=netmiko_send_command, command_string=command, use_textfsm=True)
-                    # all_results = format_ni_data_cisco_ios(command=command,command_result=command_result)
+                    #TODO: Move this to a formatter
                     for host_name, result in command_result.items():
                         if command_result.failed:
                             failed_results = {host_name: {"Failed": True, "subtask_result": result.result}}

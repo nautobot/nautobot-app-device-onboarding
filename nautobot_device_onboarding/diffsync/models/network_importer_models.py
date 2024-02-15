@@ -1,6 +1,5 @@
 """Diffsync models."""
 
-from dataclasses import dataclass
 from typing import List, Optional
 
 from diffsync import DiffSync, DiffSyncModel
