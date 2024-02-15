@@ -642,10 +642,7 @@ class CommandGetterNetworkImporter(Job):
                                 ip_address = interface_info.get("ip_address")
                                 mask_length = interface_info.get("prefix_length")
 
-                                if link_status == "up":
-                                    link_status = True
-                                else:
-                                    link_status = False
+                                link_status = bool(link_status == "up") 
 
                                 interface_type = normalize_interface_type(hardware_type)
 
@@ -696,8 +693,8 @@ class CommandGetterNetworkImporter(Job):
                                     all_results[host_name]["interfaces"][interface_name][
                                         "tagged_vlans"
                                     ] = tagged_vlans_info
-                            else:
-                                self.logger.info(f"Interface {interface_name} not found in interfaces list.")
+                                else:
+                                    self.logger.info(f"Interface {interface_name} not found in interfaces list.")
 
         except Exception as err:  # pylint: disable=broad-exception-caught
             self.logger.info("Error: %s", err)
