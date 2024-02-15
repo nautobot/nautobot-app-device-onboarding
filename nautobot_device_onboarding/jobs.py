@@ -610,7 +610,7 @@ class CommandGetterNetworkImporter(Job):
 
                 for command in commands:
                     command_result = nornir_obj.run(task=netmiko_send_command, command_string=command, use_textfsm=True)
-                    #TODO: Move this to a formatter
+                    # TODO: Move this to a formatter
                     for host_name, result in command_result.items():
                         if command_result.failed:
                             failed_results = {host_name: {"Failed": True, "subtask_result": result.result}}
