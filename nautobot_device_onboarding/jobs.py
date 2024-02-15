@@ -642,7 +642,7 @@ class CommandGetterNetworkImporter(Job):
                                 ip_address = interface_info.get("ip_address")
                                 mask_length = interface_info.get("prefix_length")
 
-                                link_status = bool(link_status == "up") 
+                                link_status = bool(link_status == "up")
 
                                 interface_type = normalize_interface_type(hardware_type)
 
