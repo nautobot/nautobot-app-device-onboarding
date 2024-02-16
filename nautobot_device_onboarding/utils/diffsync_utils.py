@@ -4,7 +4,6 @@ import ipaddress
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from nautobot.apps.choices import PrefixTypeChoices
-from nautobot.extras.models import Status
 from nautobot.ipam.models import IPAddress, Prefix
 
 
@@ -35,7 +34,7 @@ def get_or_create_prefix(host, mask_length, default_status, namespace, job=None)
 def get_or_create_ip_address(host, mask_length, namespace, default_ip_status, default_prefix_status, job=None):
     """Attempt to get a Nautobot IPAddress, create a new one if necessary."""
     ip_address = None
-    default_status = Status.objects.get(name="Active")
+
     try:
         ip_address = IPAddress.objects.get(
             host=host,
