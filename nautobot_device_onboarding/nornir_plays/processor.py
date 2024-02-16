@@ -53,7 +53,7 @@ class ProcessorDO(BaseLoggingProcessor):
                 "failed": result.failed,
             }
         )
-        formatted_data = extract_show_data(host, result)
+        formatted_data = extract_show_data(host, result, task.parent_task.params['command_getter_job'])
         # revist should be able to just update self.data with full formatted_data
         for k, v in formatted_data.items():
             self.data[host.name][k] = v

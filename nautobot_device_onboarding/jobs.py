@@ -26,16 +26,18 @@ from nautobot_device_onboarding.nornir_plays.command_getter import netmiko_send_
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
-from nautobot_device_onboarding.utils.helper import get_job_filter
+from nautobot_device_onboarding.utils.helper import add_platform_parsing_info, get_job_filter
 from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
 from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
-from nornir.core.plugins.inventory import InventoryPluginRegister
+from nornir.core.plugins.inventory import InventoryPluginRegister, TransformFunctionRegister
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
+TransformFunctionRegister.register("transform_to_add_command_parser_info", add_platform_parsing_info)
+
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
@@ -518,7 +520,7 @@ class CommandGetterDO(Job):
                         entered_ip, self.platform, self.port, self.secrets_group
                     )
                     nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
-                nr_with_processors.run(task=netmiko_send_commands)
+                nr_with_processors.run(task=netmiko_send_commands, command_getter_job="device_onboarding")
         except Exception as err:  # pylint: disable=broad-exception-caught
             self.logger.error("Error: %s", err)
             return err
@@ -581,12 +583,11 @@ class CommandGetterNetworkImporter(Job):
                         "credentials_class": NORNIR_SETTINGS.get("credentials"),
                         "queryset": qs,
                     },
-                    # need to figure out how to inject the platform_yaml_data here into data
+                    "transform_function": "transform_to_add_command_parser_info",
                 },
             ) as nornir_obj:
-                # commands = ["show version", "show interfaces", "show vlan", "show interfaces switchport"]
                 nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
-                nr_with_processors.run(task=netmiko_send_commands)
+                nr_with_processors.run(task=netmiko_send_commands, command_getter_job="network_importer")
         except Exception as err:  # pylint: disable=broad-exception-caught
             self.logger.info("Error: %s", err)
             return err

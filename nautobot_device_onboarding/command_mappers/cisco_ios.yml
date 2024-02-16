@@ -16,7 +16,11 @@ device_onboarding:
   mask_length:
     command: "show interfaces"
     jpath: "[?ip_address=='{{ host_info }}'].prefix_length"
-
+network_importer:
+  use_textfsm: true
+  hostname:
+    jpath: "[*].hostname"
+    command: "show version"
 
     # commands = ["show version", "show interfaces", "show vlan", "show interfaces switchport"]
     # all_results = {}

@@ -32,7 +32,7 @@ def load_yaml_datafile(filename, config=None):
     return yaml.safe_load(populated)
 
 
-def extract_show_data(host, multi_result):
+def extract_show_data(host, multi_result, command_getter_type):
     """Take a result of show command and extra specific needed data.
 
     Args:
@@ -45,7 +45,7 @@ def extract_show_data(host, multi_result):
     command_jpaths = host.data["platform_parsing_info"]
 
     result_dict = {}
-    for default_dict_field, command_info in command_jpaths["device_onboarding"].items():
+    for default_dict_field, command_info in command_jpaths[command_getter_type].items():
         if not default_dict_field == "use_textfsm":
             if command_info["command"] == multi_result[0].name:
                 extracted_value = extract_data_from_json(multi_result[0].result, command_info["jpath"])

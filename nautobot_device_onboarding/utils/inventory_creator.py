@@ -2,19 +2,10 @@
 
 from django.conf import settings
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
+from nautobot_device_onboarding.exceptions import OnboardException
+from nautobot_device_onboarding.utils.helper import _get_platform_parsing_info
 from netmiko import SSHDetect
 from nornir.core.inventory import ConnectionOptions, Host
-
-from nautobot_device_onboarding.exceptions import OnboardException
-from nautobot_device_onboarding.utils.formatter import load_yaml_datafile
-
-
-def _get_platform_parsing_info(host_platform, data):
-    """Open and load yaml file."""
-    if host_platform == "cisco_xe":
-        host_platform = "cisco_ios"
-    yaml_parsing_info = load_yaml_datafile(f"{host_platform}.yml", config=data)
-    return yaml_parsing_info
 
 
 def _parse_credentials(credentials):
@@ -77,7 +68,6 @@ def _set_inventory(host_ip, platform, port, secrets_group):
         platform = platform.network_driver
     else:
         platform = guess_netmiko_device_type(host_ip, username, password, port)
-
     parsing_info = _get_platform_parsing_info(platform, data={"host_info": host_ip})
 
     host = Host(
