@@ -2,8 +2,6 @@
 
 import time
 
-import diffsync
-from diffsync.enum import DiffSyncModelFlags
 from nautobot.apps.choices import JobResultStatusChoices
 from nautobot.dcim.models import Interface
 from nautobot.extras.models import Job, JobResult
@@ -11,6 +9,8 @@ from nautobot.ipam.models import VLAN, IPAddress
 from nautobot_ssot.contrib import NautobotAdapter
 from netaddr import EUI, mac_unix_expanded
 
+import diffsync
+from diffsync.enum import DiffSyncModelFlags
 from nautobot_device_onboarding.diffsync.models import network_importer_models
 
 

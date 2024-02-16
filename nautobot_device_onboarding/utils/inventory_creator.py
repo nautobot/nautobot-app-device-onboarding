@@ -2,10 +2,11 @@
 
 from django.conf import settings
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
-from nautobot_device_onboarding.exceptions import OnboardException
-from nautobot_device_onboarding.utils.formatter import load_yaml_datafile
 from netmiko import SSHDetect
 from nornir.core.inventory import ConnectionOptions, Host
+
+from nautobot_device_onboarding.exceptions import OnboardException
+from nautobot_device_onboarding.utils.formatter import load_yaml_datafile
 
 
 def _get_platform_parsing_info(host_platform, data):
@@ -95,7 +96,7 @@ def _set_inventory(host_ip, platform, port, secrets_group):
                 platform=platform,
             )
         },
-        data={"platform_parsing_info": parsing_info}
+        data={"platform_parsing_info": parsing_info},
     )
     inv.update({host_ip: host})
 

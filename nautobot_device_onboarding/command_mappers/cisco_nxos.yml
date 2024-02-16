@@ -1,5 +1,6 @@
 ---
 device_onboarding:
+  use_textfsm: true
   hostname:
     jpath: "[*].hostname"
     command: "show version"

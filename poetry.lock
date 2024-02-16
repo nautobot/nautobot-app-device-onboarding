@@ -124,6 +124,7 @@ tests-no-zope = ["attrs[tests-mypy]", "cloudpickle", "hypothesis", "pympler", "p
 name = "autopep8"
 version = "2.0.0"
 description = "A tool that automatically formats Python code to conform to the PEP 8 style guide"
+category = "main"
 optional = false
 python-versions = "*"
 files = [
@@ -1063,6 +1064,7 @@ hiredis = ["redis[hiredis] (>=3,!=4.0.0,!=4.0.1)"]
 name = "django-silk"
 version = "5.1.0"
 description = "Silky smooth profiling for the Django Framework"
+category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
@@ -1347,6 +1349,7 @@ test = ["black", "coverage[toml]", "ddt (>=1.1.1,!=1.4.3)", "mock", "mypy", "pre
 name = "gprof2dot"
 version = "2022.7.29"
 description = "Generate a dot graph from the output of several profilers."
+category = "main"
 optional = false
 python-versions = ">=2.7"
 files = [
@@ -2896,7 +2899,7 @@ files = [
 name = "pycodestyle"
 version = "2.9.1"
 description = "Python style guide checker"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6"
 files = [
@@ -4080,7 +4083,7 @@ files = [
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -4405,4 +4408,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "840fb06383c6c52bb58febbaf5a3d2487b8f46c0f82bb966cb62b6f8b83d3663"
+content-hash = "ff0b9f5780232b35c98dca2dcfb617b37c2c4f9faca60df0d21ef7400144a830"

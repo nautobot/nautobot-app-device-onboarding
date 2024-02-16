@@ -2,12 +2,12 @@
 
 import time
 
-import diffsync
 import netaddr
 from nautobot.apps.choices import JobResultStatusChoices
 from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
 from nautobot.extras.models import Job, JobResult
 
+import diffsync
 from nautobot_device_onboarding.diffsync.models import onboarding_models
 
 
