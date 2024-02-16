@@ -3,6 +3,7 @@
 
 import logging
 
+from diffsync.enum import DiffSyncFlags
 from django.conf import settings
 from nautobot.apps.jobs import BooleanVar, IntegerVar, Job, MultiObjectVar, ObjectVar, StringVar
 from nautobot.core.celery import register_jobs
@@ -10,13 +11,6 @@ from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status, Tag
 from nautobot.ipam.models import Namespace
-from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
-from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
-from nautobot_ssot.jobs.base import DataSource
-from nornir import InitNornir
-from nornir.core.plugins.inventory import InventoryPluginRegister
-
-from diffsync.enum import DiffSyncFlags
 from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
     NetworkImporterNautobotAdapter,
     NetworkImporterNetworkAdapter,
@@ -34,6 +28,15 @@ from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
 from nautobot_device_onboarding.utils.helper import get_job_filter
 from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
+from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
+from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
+from nautobot_ssot.jobs.base import DataSource
+from nornir import InitNornir
+from nornir.core.plugins.inventory import InventoryPluginRegister
+
+# from nornir.core.task import Result, Task
+# from nornir_nautobot.exceptions import NornirNautobotException
+from nornir_netmiko import netmiko_send_command
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
@@ -521,7 +524,7 @@ class CommandGetterDO(Job):
                     nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
                 nr_with_processors.run(task=netmiko_send_commands)
         except Exception as err:  # pylint: disable=broad-exception-caught
-            self.logger.info("Error: %s", err)
+            self.logger.error("Error: %s", err)
             return err
         return compiled_results
 
