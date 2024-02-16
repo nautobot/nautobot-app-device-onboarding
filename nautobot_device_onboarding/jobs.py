@@ -34,10 +34,6 @@ from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
 from nornir.core.plugins.inventory import InventoryPluginRegister
 
-# from nornir.core.task import Result, Task
-# from nornir_nautobot.exceptions import NornirNautobotException
-from nornir_netmiko import netmiko_send_command
-
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
 
