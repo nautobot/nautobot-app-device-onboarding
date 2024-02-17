@@ -1,9 +1,9 @@
 ---
 device_onboarding:
-  use_textfsm: true
+  use_textfsm: false
   hostname:
+    command: "show hostname | json"
     jpath: "[*].hostname"
-    command: "show hostname"
   serial:
     command: "show version"
     jpath: "[*].serial_number"
