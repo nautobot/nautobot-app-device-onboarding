@@ -1,8 +1,8 @@
 ---
 device_onboarding:
-  use_textfsm: false
+  use_textfsm: true
   hostname:
-    command: "show hostname | json"
+    command: "show hostname"
     jpath: "[*].hostname"
   serial:
     command: "show version"
@@ -16,3 +16,4 @@ device_onboarding:
   mask_length:
     command: "show ip interface brief"
     jpath: "[?interface=='Management1'].ip_address"
+    post_processor: "{{ obj[0] | ipaddress_interface('netmask') | netmask_to_cidr }}"

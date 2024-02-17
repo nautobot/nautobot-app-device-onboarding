@@ -2,12 +2,12 @@
 
 import time
 
+import diffsync
 import netaddr
 from nautobot.apps.choices import JobResultStatusChoices
 from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
 from nautobot.extras.models import Job, JobResult
 
-import diffsync
 from nautobot_device_onboarding.diffsync.models import onboarding_models
 
 
@@ -186,10 +186,9 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
     def _check_data_type(self, data):
         """Verify the data returned from CommandGetter is not a string."""
         data_type_check_result = True
-        if type(data) == str:
+        if isinstance(data, str):
             data_type_check_result = False
         return data_type_check_result
-
 
     def load_manufacturers(self):
         """Load manufacturers into the DiffSync store."""
@@ -292,5 +291,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
             self.load_device_types()
             self.load_devices()
         else:
-            self.job.logger.error("Data returned from CommandGetter is not the correct type. "
-                                  " No devices will be onboarded, check the CommandGetter job logs.")
+            self.job.logger.error(
+                "Data returned from CommandGetter is not the correct type. "
+                " No devices will be onboarded, check the CommandGetter job logs."
+            )
