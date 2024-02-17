@@ -176,11 +176,11 @@ device_onboarding_mock_data = {
         "hostname": "demo-cisco-xe1",
         "serial": "9ABUXU581111",
         "device_type": "CSR1000V17",
-        "mgmt_interface": "GigabitEthernet20",
+        # "mgmt_interface": "GigabitEthernet20",
         "manufacturer": "Cisco",
         "platform": "IOS-test",
         "network_driver": "cisco_ios",
-        "mask_length": 16,
+        # "mask_length": 16,
     },
     "10.1.1.10": {
         "hostname": "demo-cisco-xe2",

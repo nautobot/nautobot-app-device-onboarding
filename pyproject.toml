@@ -32,7 +32,8 @@ zipp = "^3.4.0"
 nautobot = "^2.1.1"
 nautobot-ssot = "^2.2.0"
 nautobot-plugin-nornir = "2.0.0"
-ntc-templates = "4.2.0"
+jdiff = "^0.0.6"
+ntc-templates = "^4.3.0"
 
 
 [tool.poetry.group.dev.dependencies]
