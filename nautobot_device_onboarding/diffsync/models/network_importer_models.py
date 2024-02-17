@@ -2,14 +2,18 @@
 
 from typing import List, Optional
 
-from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
+from diffsync import DiffSync, DiffSyncModel
+from django.core.exceptions import (
+    MultipleObjectsReturned,
+    ObjectDoesNotExist,
+    ValidationError,
+)
 from nautobot.dcim.choices import InterfaceTypeChoices
 from nautobot.dcim.models import Device, Interface, Location
 from nautobot.extras.models import Status
 from nautobot.ipam.models import VLAN, IPAddress, IPAddressToInterface
 from nautobot_ssot.contrib import NautobotModel
 
-from diffsync import DiffSync, DiffSyncModel
 from nautobot_device_onboarding.utils import diffsync_utils
 
 
