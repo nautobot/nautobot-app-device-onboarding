@@ -18,93 +18,10 @@ device_onboarding:
     jpath: "[?ip_address=='{{ host_info }}'].prefix_length"
 network_importer:
   use_textfsm: true
-  hostname:
-    jpath: "[*].hostname"
+  serial:
     command: "show version"
-
-    # commands = ["show version", "show interfaces", "show vlan", "show interfaces switchport"]
-    # all_results = {}
-
-    # for command in commands:
-    #     command_result = nornir_obj.run(task=netmiko_send_command, command_string=command, use_textfsm=True)
-    #     # all_results = format_ni_data_cisco_ios(command=command,command_result=command_result)
-    #     for host_name, result in command_result.items():
-    #         if command_result.failed:
-    #             failed_results = {host_name: {"Failed": True, "subtask_result": result.result}}
-    #             return failed_results
-    #         if host_name not in all_results:
-    #             all_results[host_name] = {"interfaces": {}, "serial": ""}
-
-    #         if command == "show version":
-    #             self.logger.info(f"Show version: {result.result}")
-    #             serial_info = result.result[0]
-    #             self.logger.info(f"Serial Info: {serial_info}")
-    #             serial_number = serial_info.get("serial")
-    #             all_results[host_name]["serial"] = serial_number[0]
-    #         elif command == "show interfaces":
-    #             self.logger.info(f"Interfaces: {result.result}")
-    #             for interface_info in result.result:
-    #                 self.logger.info(f"Interface Info: {interface_info}")
-    #                 interface_name = interface_info.get("interface")
-    #                 # media_type = interface_info.get("media_type")
-    #                 hardware_type = interface_info.get("hardware_type")
-    #                 mtu = interface_info.get("mtu")
-    #                 description = interface_info.get("description")
-    #                 mac_address = interface_info.get("mac_address")
-    #                 link_status = interface_info.get("link_status")
-    #                 ip_address = interface_info.get("ip_address")
-    #                 mask_length = interface_info.get("prefix_length")
-
-    #                 link_status = bool(link_status == "up")
-
-    #                 interface_type = normalize_interface_type(hardware_type)
-
-    #                 all_results[host_name]["interfaces"][interface_name] = {
-    #                     "mtu": mtu,
-    #                     "type": interface_type,
-    #                     "description": description,
-    #                     "mac_address": mac_address,
-    #                     "enabled": link_status,
-    #                     "ip_addresses": [{"host": ip_address, "mask_length": mask_length}],
-    #                 }
-    #         elif command == "show vlan":
-    #             vlan_id_name_map = {}
-    #             self.logger.info(f"Vlan: {result.result}")
-    #             for vlan_info in result.result:
-    #                 self.logger.info(f"Vlan info: {vlan_info}")
-    #                 vlan_id = vlan_info.get("vlan_id")
-    #                 vlan_name = vlan_info.get("vlan_name")
-    #                 vlan_id_name_map[vlan_id] = vlan_name
-    #             self.logger.info(f"Vlan ID Name Map: {vlan_id_name_map}")
-
-    #         elif command == "show interfaces switchport":
-    #             self.logger.info(f"Interfaces Switchport: {result.result}")
-    #             for interface_info in result.result:
-    #                 self.logger.info(f"Interface Info: {interface_info}")
-    #                 interface_name = normalize_interface_name(interface_info.get("interface"))
-    #                 self.logger.info(f"Interface Name: {interface_name}")
-    #                 interface_mode = normalize_tagged_interface(interface_info.get("admin_mode"))
-    #                 access_vlan = interface_info.get("access_vlan")
-    #                 tagged_vlans = interface_info.get("trunking_vlans", [])
-    #                 tagged_vlans_list = tagged_vlans[0].split(",")
-    #                 self.logger.info(f"tagged_vlans: {tagged_vlans}")
-
-    #                 if interface_name in all_results[host_name]["interfaces"]:
-    #                     all_results[host_name]["interfaces"][interface_name]["mode"] = interface_mode
-    #                     all_results[host_name]["interfaces"][interface_name]["access_vlan"] = {
-    #                         "vlan_id": access_vlan,
-    #                         "vlan_name": vlan_id_name_map.get(access_vlan, ""),
-    #                     }
-
-    #                     # Prepare tagged VLANs info
-    #                     tagged_vlans_info = [
-    #                         {"vlan_id": vlan_id, "vlan_name": vlan_id_name_map.get(vlan_id, "Unknown VLAN")}
-    #                         for vlan_id in tagged_vlans_list
-    #                         if vlan_id in vlan_id_name_map
-    #                     ]
-    #                     self.logger.info(f"tagged_vlans_info: {tagged_vlans_info}")
-    #                     all_results[host_name]["interfaces"][interface_name][
-    #                         "tagged_vlans"
-    #                     ] = tagged_vlans_info
-    #                 else:
-    #                     self.logger.info(f"Interface {interface_name} not found in interfaces list.")
+    jpath: "[*].serial[0]"
+  interfaces:
+    command: "show interfaces"
+    jpath: "[*].[$interface$,link_status,protocol_status,hardware_type,mac_address,ip_address,prefix_length,mtu]"
+    post_processor: "{{ obj }}"
