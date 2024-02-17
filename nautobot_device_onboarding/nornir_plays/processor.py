@@ -2,11 +2,12 @@
 
 from typing import Dict
 
-from nautobot_device_onboarding.utils.formatter import extract_show_data
 from nornir.core.inventory import Host
 from nornir.core.task import MultiResult, Task
 from nornir_nautobot.exceptions import NornirNautobotException
 from nornir_nautobot.plugins.processors import BaseLoggingProcessor
+
+from nautobot_device_onboarding.utils.formatter import extract_show_data
 
 
 class ProcessorDO(BaseLoggingProcessor):
@@ -53,7 +54,7 @@ class ProcessorDO(BaseLoggingProcessor):
                 "failed": result.failed,
             }
         )
-        formatted_data = extract_show_data(host, result, task.parent_task.params['command_getter_job'])
+        formatted_data = extract_show_data(host, result, task.parent_task.params["command_getter_job"])
         # revist should be able to just update self.data with full formatted_data
         for k, v in formatted_data.items():
             self.data[host.name][k] = v

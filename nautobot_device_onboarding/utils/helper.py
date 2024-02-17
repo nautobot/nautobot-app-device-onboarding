@@ -2,8 +2,9 @@
 
 from nautobot.dcim.filters import DeviceFilterSet
 from nautobot.dcim.models import Device
-from nautobot_device_onboarding.utils.formatter import load_yaml_datafile
 from nornir_nautobot.exceptions import NornirNautobotException
+
+from nautobot_device_onboarding.utils.formatter import load_yaml_datafile
 
 FIELDS_PK = {
     "location",
@@ -50,15 +51,15 @@ def get_job_filter(data=None):
     return devices_filtered.qs
 
 
-def _get_platform_parsing_info(host_platform, data):
+def _get_platform_parsing_info(host_platform):
     """Open and load yaml file."""
     if host_platform == "cisco_xe":
         host_platform = "cisco_ios"
-    yaml_parsing_info = load_yaml_datafile(f"{host_platform}.yml", config=data)
+    yaml_parsing_info = load_yaml_datafile(f"{host_platform}.yml")
     return yaml_parsing_info
 
 
 def add_platform_parsing_info(host):
     """This nornir transform function adds platform parsing info."""
-    parsing_info = _get_platform_parsing_info(host.platform, data={"host_info": host})
+    parsing_info = _get_platform_parsing_info(host.platform)
     host.data.update({"platform_parsing_info": parsing_info})
