@@ -9,8 +9,8 @@ device_onboarding:
     command: "show version"
     jpath: "[*].serial[0]"
   device_type:
-    command: "show inventory"
-    jpath: "[?name=='Chassis'].pid"
+    command: "show version"
+    jpath: "[*].hardware[0]"
   mgmt_interface:
     command: "show interfaces"
     jpath: "[?ip_address=='{{ host_info }}'].interface"

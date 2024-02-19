@@ -281,7 +281,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
     def load(self):
         """Load network data."""
         self._validate_ip_addresses(self.job.ip_addresses)
-        # self.execute_command_getter()
+        self.execute_command_getter()
         data_type_check = self._check_data_type(self.device_data)
         if data_type_check:
             self.load_manufacturers()

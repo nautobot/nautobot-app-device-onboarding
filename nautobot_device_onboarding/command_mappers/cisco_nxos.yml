@@ -12,7 +12,7 @@ device_onboarding:
     jpath: "[*].platform"
   mgmt_interface:
     command: "show interface"
-    jpath: "[?ip_address=='{{ host_info }}'].interface"
+    jpath: "[?ip_address=='{{ host_info }}'].interface || [`mgmt0`]"
   mask_length:
     command: "show interface"
-    jpath: "[?ip_address=='{{ host_info }}'].prefix_length"
+    jpath: "[?ip_address=='{{ host_info }}'].prefix_length || [`31`]"
