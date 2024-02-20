@@ -3,11 +3,7 @@
 from typing import Optional
 
 from diffsync import DiffSyncModel
-from django.core.exceptions import (
-    MultipleObjectsReturned,
-    ObjectDoesNotExist,
-    ValidationError,
-)
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
 from nautobot.apps.choices import InterfaceTypeChoices
 from nautobot.dcim.models import Device, DeviceType, Interface, Manufacturer, Platform
 from nautobot.extras.models import Role, SecretsGroup, Status

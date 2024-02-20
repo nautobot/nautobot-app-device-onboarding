@@ -8,14 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from nautobot.apps.choices import PrefixTypeChoices
 from nautobot.dcim.choices import InterfaceTypeChoices
-from nautobot.dcim.models import (
-    Device,
-    DeviceType,
-    Interface,
-    Location,
-    Manufacturer,
-    Platform,
-)
+from nautobot.dcim.models import Device, DeviceType, Interface, Location, Manufacturer, Platform
 from nautobot.extras.models import Role, Status
 from nautobot.extras.models.customfields import CustomField
 from nautobot.ipam.models import IPAddress, Namespace, Prefix

@@ -5,36 +5,17 @@ import logging
 
 from diffsync.enum import DiffSyncFlags
 from django.conf import settings
-from nautobot.apps.jobs import (
-    BooleanVar,
-    IntegerVar,
-    Job,
-    MultiObjectVar,
-    ObjectVar,
-    StringVar,
-)
+from nautobot.apps.jobs import BooleanVar, IntegerVar, Job, MultiObjectVar, ObjectVar, StringVar
 from nautobot.core.celery import register_jobs
 from nautobot.dcim.models import Device, DeviceType, Location, Platform
-from nautobot.extras.choices import (
-    SecretsGroupAccessTypeChoices,
-    SecretsGroupSecretTypeChoices,
-)
-from nautobot.extras.models import (
-    Role,
-    SecretsGroup,
-    SecretsGroupAssociation,
-    Status,
-    Tag,
-)
+from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
+from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status, Tag
 from nautobot.ipam.models import Namespace
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
 from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
-from nornir.core.plugins.inventory import (
-    InventoryPluginRegister,
-    TransformFunctionRegister,
-)
+from nornir.core.plugins.inventory import InventoryPluginRegister, TransformFunctionRegister
 
 from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
     NetworkImporterNautobotAdapter,
@@ -51,10 +32,7 @@ from nautobot_device_onboarding.nornir_plays.command_getter import netmiko_send_
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
-from nautobot_device_onboarding.utils.helper import (
-    add_platform_parsing_info,
-    get_job_filter,
-)
+from nautobot_device_onboarding.utils.helper import add_platform_parsing_info, get_job_filter
 from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
@@ -382,7 +360,9 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
     def __init__(self):
         """Initialize SSOTNetworkImporter."""
         super().__init__()
-        self.filtered_devices = None
+        self.filtered_devices = None  # Queryset of devices based on form inputs
+        self.command_getter_result = None  # Dict result from CommandGetter job
+        self.devices_to_load = None  # Queryset consisting of devices that responded
 
     class Meta:
         """Metadata about this Job."""

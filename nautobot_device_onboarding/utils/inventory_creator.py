@@ -1,10 +1,7 @@
 """Inventory Creator and Helpers."""
 
 from django.conf import settings
-from nautobot.extras.choices import (
-    SecretsGroupAccessTypeChoices,
-    SecretsGroupSecretTypeChoices,
-)
+from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from netmiko import SSHDetect
 from nornir.core.inventory import ConnectionOptions, Host
 

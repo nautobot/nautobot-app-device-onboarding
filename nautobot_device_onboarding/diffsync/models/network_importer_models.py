@@ -3,11 +3,7 @@
 from typing import List, Optional
 
 from diffsync import DiffSync, DiffSyncModel
-from django.core.exceptions import (
-    MultipleObjectsReturned,
-    ObjectDoesNotExist,
-    ValidationError,
-)
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
 from nautobot.dcim.choices import InterfaceTypeChoices
 from nautobot.dcim.models import Device, Interface, Location
 from nautobot.extras.models import Status
@@ -60,9 +56,13 @@ class NetworkImporterDevice(FilteredNautobotModel):
 
     @classmethod
     def _get_queryset(cls, diffsync: "DiffSync"):
-        """Get the queryset used to load the models data from Nautobot."""
+        """Get the queryset used to load the models data from Nautobot.
+
+        job.command_getter_result contains the result from the CommandGetter job.
+        Only devices that actually responded with data should be considered for the sync.
+        """
         if diffsync.job.filtered_devices:
-            return diffsync.job.filtered_devices
+            return diffsync.job.devices_to_load
         else:
             diffsync.job.logger.error("No device filter options were provided, no devices will be synced.")
             return cls._model.objects.none()
@@ -83,9 +83,9 @@ class NetworkImporterDevice(FilteredNautobotModel):
         return None
 
     def delete(self):
-        """Delete the ORM object corresponding to this diffsync object."""
+        """Prevent device deletion."""
         self.diffsync.job.logger.error(f"{self} will not be deleted.")
-        return super().delete()
+        return None
 
 
 class NetworkImporterInterface(FilteredNautobotModel):
@@ -151,18 +151,22 @@ class NetworkImporterIPAddress(DiffSyncModel):
 
     def update(self, attrs):
         """Update an existing IPAddressToInterface object."""
-        ip_address = IPAddress.objects.get(**self.get_identifiers())
-
+        try:
+            ip_address = IPAddress.objects.get(host=self.host, parent__namespace=self.diffsync.job.namespace)
+        except ObjectDoesNotExist as err:
+            self.job.logger.error(f"{self} failed to update, {err}")
         if self.diffsync.job.debug:
             self.diffsync.job.logger.debug(f"Updating {self} with attrs: {attrs}")
         if attrs.get("mask_length"):
             ip_address.mask_length = attrs["mask_length"]
         if attrs.get("status__name"):
             ip_address.status = Status.objects.get(name=attrs["status__name"])
-            try:
-                ip_address.validated_save()
-            except ValidationError as err:
-                self.job.logger.error(f"{self} failed to update, {err}")
+        if attrs.get("ip_version"):
+            ip_address.status = attrs["ip_version"]
+        try:
+            ip_address.validated_save()
+        except ValidationError as err:
+            self.job.logger.error(f"{self} failed to update, {err}")
 
         return super().update(attrs)
 
@@ -173,17 +177,15 @@ class NetworkImporterIPAddressToInterface(FilteredNautobotModel):
     _model = IPAddressToInterface
     _modelname = "ipaddress_to_interface"
     _identifiers = ("interface__device__name", "interface__name", "ip_address__host")
-    _attributes = ("ip_address__mask_length",)
 
     interface__device__name: str
     interface__name: str
     ip_address__host: str
-    ip_address__mask_length: str
 
     @classmethod
     def _get_queryset(cls, diffsync: "DiffSync"):
         """Get the queryset used to load the models data from Nautobot."""
-        return IPAddressToInterface.objects.filter(interface__device__in=diffsync.job.filtered_devices)
+        return IPAddressToInterface.objects.filter(interface__device__in=diffsync.job.devices_to_load)
 
 
 class NetworkImporterVLAN(DiffSyncModel):

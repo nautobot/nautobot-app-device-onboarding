@@ -4,11 +4,13 @@ import time
 
 import diffsync
 import netaddr
+from django.core.exceptions import ValidationError
 from nautobot.apps.choices import JobResultStatusChoices
 from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
 from nautobot.extras.models import Job, JobResult
 
 from nautobot_device_onboarding.diffsync.models import onboarding_models
+from nautobot_device_onboarding.utils import diffsync_utils
 
 
 class OnboardingNautobotAdapter(diffsync.DiffSync):
@@ -62,7 +64,7 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
                 model=device_type.model,
                 part_number=device_type.model,
                 manufacturer__name=device_type.manufacturer.name,
-            )  # type: ignore
+            )
             self.add(onboarding_device_type)
             if self.job.debug:
                 self.job.logger.debug(f"DeviceType: {device_type.model} loaded.")
@@ -149,7 +151,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
 
         for ip_address in device_data:
             if device_data[ip_address].get("failed"):
-                self.job.logger.error(f"Connection or data error for {ip_address}. This device will not be onboarded.")
+                self.job.logger.error(f"Connection or data error for {ip_address}. " "This device will not be synced.")
                 failed_ip_addresses.append(ip_address)
         for ip_address in failed_ip_addresses:
             del device_data[ip_address]
@@ -179,14 +181,17 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 break
         if self.job.debug:
             self.job.logger.debug(f"Command Getter Job Result: {result.result}")
-        self._handle_failed_connections(device_data=result.result)
-
-    def _check_data_type(self, data):
-        """Verify the data returned from CommandGetter is not a string."""
-        data_type_check_result = True
-        if isinstance(data, str):
-            data_type_check_result = False
-        return data_type_check_result
+        data_type_check = diffsync_utils.check_data_type(result.result)
+        if self.job.debug:
+            self.job.logger.debug(f"CommandGetter data type check resut: {data_type_check}")
+        if data_type_check:
+            self._handle_failed_connections(device_data=result.result)
+        else:
+            self.job.logger.error(
+                "Data returned from CommandGetter is not the correct type. "
+                "No devices will be onboarded, check the CommandGetter job logs."
+            )
+            raise ValidationError("Unexpected data returend from CommandGetter.")
 
     def load_manufacturers(self):
         """Load manufacturers into the DiffSync store."""
@@ -282,14 +287,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
         """Load network data."""
         self._validate_ip_addresses(self.job.ip_addresses)
         self.execute_command_getter()
-        data_type_check = self._check_data_type(self.device_data)
-        if data_type_check:
-            self.load_manufacturers()
-            self.load_platforms()
-            self.load_device_types()
-            self.load_devices()
-        else:
-            self.job.logger.error(
-                "Data returned from CommandGetter is not the correct type. "
-                " No devices will be onboarded, check the CommandGetter job logs."
-            )
+        self.load_manufacturers()
+        self.load_platforms()
+        self.load_device_types()
+        self.load_devices()

@@ -11,7 +11,7 @@ network_importer_mock_data = {
                 "status": "Active",
                 "type": "100base-tx",
                 "ip_addresses": [
-                    {"host": "10.1.1.8", "mask_length": 32},
+                    {"host": "10.1.1.8", "mask_length": 16},
                 ],
                 "mac_address": "d8b1.905c.7130",
                 "mtu": "1500",
@@ -102,14 +102,14 @@ network_importer_mock_data = {
         },
     },
     "demo-cisco-xe2": {
-        "serial": "9ABUXU581234",
+        "serial": "9ABUXU5882222",
         "interfaces": {
             "GigabitEthernet1": {
                 "mgmt_only": True,
                 "status": "Active",
                 "type": "100base-tx",
                 "ip_addresses": [
-                    {"host": "10.1.1.8", "mask_length": 32},
+                    {"host": "10.1.2.8", "mask_length": 24},
                 ],
                 "mac_address": "d8b1.905c.5170",
                 "mtu": "1500",
@@ -125,14 +125,14 @@ network_importer_mock_data = {
                 "status": "Active",
                 "type": "100base-tx",
                 "ip_addresses": [
-                    {"host": "10.1.1.9", "mask_length": 24},
+                    {"host": "10.1.2.9", "mask_length": 24},
                 ],
                 "mac_address": "d8b1.905c.5171",
                 "mtu": "1500",
                 "description": "uplink Po1",
                 "enabled": True,
                 "802.1Q_mode": "",
-                "lag": "Po2",
+                "lag": "Po1",
                 "untagged_vlan": "",
                 "tagged_vlans": [],
             },
@@ -141,8 +141,8 @@ network_importer_mock_data = {
                 "status": "Active",
                 "type": "100base-tx",
                 "ip_addresses": [
-                    {"host": "10.1.1.10", "mask_length": 24},
-                    {"host": "10.1.1.11", "mask_length": 22},
+                    {"host": "10.1.2.10", "mask_length": 24},
+                    {"host": "10.1.2.11", "mask_length": 22},
                 ],
                 "mac_address": "d8b1.905c.5172",
                 "mtu": "1500",
@@ -153,7 +153,7 @@ network_importer_mock_data = {
                 "untagged_vlan": "",
                 "tagged_vlans": [{"name": "vlan40", "id": "40"}, {"name": "vlan50", "id": "50"}],
             },
-            "Po2": {
+            "Po1": {
                 "mgmt_only": False,
                 "status": "Active",
                 "type": "lag",
@@ -176,7 +176,7 @@ device_onboarding_mock_data = {
         "hostname": "demo-cisco-xe1",
         "serial": "9ABUXU581111",
         "device_type": "CSR1000V17",
-        "mgmt_interface": "GigabitEthernet20",
+        "mgmt_interface": "GigabitEthernet1",
         "manufacturer": "Cisco",
         "platform": "IOS-test",
         "network_driver": "cisco_ios",
@@ -186,7 +186,7 @@ device_onboarding_mock_data = {
         "hostname": "demo-cisco-xe2",
         "serial": "9ABUXU5882222",
         "device_type": "CSR1000V2",
-        "mgmt_interface": "GigabitEthernet5",
+        "mgmt_interface": "GigabitEthernet1",
         "manufacturer": "Cisco",
         "platform": "IOS",
         "network_driver": "cisco_ios",

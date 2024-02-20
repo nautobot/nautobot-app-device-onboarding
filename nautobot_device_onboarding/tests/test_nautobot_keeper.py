@@ -4,15 +4,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from nautobot.dcim.choices import InterfaceTypeChoices
-from nautobot.dcim.models import (
-    Device,
-    DeviceType,
-    Interface,
-    Location,
-    LocationType,
-    Manufacturer,
-    Platform,
-)
+from nautobot.dcim.models import Device, DeviceType, Interface, Location, LocationType, Manufacturer, Platform
 from nautobot.extras.choices import CustomFieldTypeChoices
 from nautobot.extras.models import CustomField, Role, Status
 from nautobot.extras.models.secrets import SecretsGroup
