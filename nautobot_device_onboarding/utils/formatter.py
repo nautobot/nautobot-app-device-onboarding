@@ -1,6 +1,5 @@
 """Formatter."""
 
-import json
 import os
 
 import yaml
@@ -49,7 +48,7 @@ def extract_show_data(host, multi_result, command_getter_type):
                 extracted_value = extract_data_from_json(multi_result[0].result, j2_rendered_jpath)
                 if command_info.get("post_processor"):
                     transform_template = jinja_env.from_string(command_info["post_processor"])
-                    extracted_processed = json.loads(transform_template.render(obj=extracted_value))
+                    extracted_processed = transform_template.render(obj=extracted_value)
                 else:
                     if isinstance(extracted_value, list) and len(extracted_value) == 1:
                         extracted_processed = extracted_value[0]
