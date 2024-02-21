@@ -1,6 +1,6 @@
 """Command Getter."""
 
-from nornir.core.task import Task
+from nornir.core.task import Result, Task
 from nornir_netmiko.tasks import netmiko_send_command
 
 
@@ -16,6 +16,12 @@ def _get_commands_to_run(yaml_parsed_info, command_getter_job):
 
 def netmiko_send_commands(task: Task, command_getter_job: str):
     """Run commands specified in PLATFORM_COMMAND_MAP."""
+    if not task.host.platform:
+            return Result(
+        host=task.host,
+        result=f"{task.host.name} has no platform set.",
+        failed=True
+    )
     commands = _get_commands_to_run(task.host.data["platform_parsing_info"], command_getter_job)
     for command in commands:
         command_use_textfsm = task.host.data["platform_parsing_info"][command_getter_job]["use_textfsm"]
