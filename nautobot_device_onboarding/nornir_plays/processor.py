@@ -2,12 +2,11 @@
 
 from typing import Dict
 
+from nautobot_device_onboarding.utils.formatter import extract_show_data
 from nornir.core.inventory import Host
 from nornir.core.task import MultiResult, Task
 from nornir_nautobot.exceptions import NornirNautobotException
 from nornir_nautobot.plugins.processors import BaseLoggingProcessor
-
-from nautobot_device_onboarding.utils.formatter import extract_show_data
 
 
 class ProcessorDO(BaseLoggingProcessor):
@@ -17,6 +16,10 @@ class ProcessorDO(BaseLoggingProcessor):
         """Set logging facility."""
         self.logger = logger
         self.data: Dict = command_outputs
+
+    def task_instance_started(self, task: Task, host: Host) -> None:
+        if not self.data.get(host.name):
+            self.data[host.name] = {}
 
     def task_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Nornir processor task completion for OS upgrades.
@@ -42,6 +45,12 @@ class ProcessorDO(BaseLoggingProcessor):
             self.logger.info(
                 f"task_instance_completed Task Name: {task.name} Task Result: {result.result}",
                 extra={"object": task.host},
+            )
+        if result.name == "netmiko_send_commands":
+            self.data[host.name].update(
+                {
+                    "failed": result.failed,
+                }
             )
 
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:

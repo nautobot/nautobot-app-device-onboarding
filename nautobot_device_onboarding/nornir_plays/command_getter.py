@@ -17,6 +17,7 @@ def _get_commands_to_run(yaml_parsed_info, command_getter_job):
 def netmiko_send_commands(task: Task, command_getter_job: str):
     """Run commands specified in PLATFORM_COMMAND_MAP."""
     if not task.host.platform:
+        print("before returnf")
         return Result(
             host=task.host,
             result=f"{task.host.name} has no platform set.",
