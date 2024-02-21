@@ -2,11 +2,12 @@
 
 from typing import Dict
 
-from nautobot_device_onboarding.utils.formatter import extract_show_data
 from nornir.core.inventory import Host
 from nornir.core.task import MultiResult, Task
 from nornir_nautobot.exceptions import NornirNautobotException
 from nornir_nautobot.plugins.processors import BaseLoggingProcessor
+
+from nautobot_device_onboarding.utils.formatter import extract_show_data
 
 
 class ProcessorDO(BaseLoggingProcessor):
@@ -54,7 +55,7 @@ class ProcessorDO(BaseLoggingProcessor):
             )
             if result.failed:
                 self.logger.warning(f"Task Failed! Result {result.result}.", extra={"object": task.host})
-
+                self.data[host.name]["failed_reason"] = result.result
 
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Processor for Logging on SubTask Completed."""

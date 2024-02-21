@@ -18,11 +18,10 @@ def load_yaml_datafile(filename):
         filename (str): Filename within the 'data' directory.
     """
     file_path = os.path.join(DATA_DIR, filename)
-    if not os.path.isfile(file_path):
-        raise RuntimeError(f"No data file found at {file_path}")
-    with open(file_path, "r", encoding="utf-8") as yaml_file:
-        data = yaml.safe_load(yaml_file)
-    return data
+    if os.path.isfile(file_path):
+        with open(file_path, "r", encoding="utf-8") as yaml_file:
+            data = yaml.safe_load(yaml_file)
+        return data
 
 
 def extract_show_data(host, multi_result, command_getter_type):

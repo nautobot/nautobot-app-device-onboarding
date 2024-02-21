@@ -151,10 +151,15 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
 
         for ip_address in device_data:
             if device_data[ip_address].get("failed"):
-                self.job.logger.error(f"Connection or data error for {ip_address}. " "This device will not be synced.")
+                self.job.logger.error(
+                    f"{ip_address}: Connection or data error, this device will not be synced. "
+                    f"{device_data[ip_address].get('failed_reason')}"
+                )
                 failed_ip_addresses.append(ip_address)
         for ip_address in failed_ip_addresses:
             del device_data[ip_address]
+        if failed_ip_addresses:
+            self.job.logger.warning(f"Failed IP Addresses: {failed_ip_addresses}")
         self.device_data = device_data
 
     def execute_command_getter(self):
@@ -208,7 +213,9 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 except diffsync.ObjectAlreadyExists:
                     pass
             except KeyError as err:
-                self.job.logger.error(f"{ip_address}:  Manufacturer due to missing key in returned data, {err}")
+                self.job.logger.error(
+                    f"{ip_address}: Unable to load Manufacturer due to missing key in returned data, {err}"
+                )
 
     def load_platforms(self):
         """Load platforms into the DiffSync store."""
@@ -227,7 +234,9 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 except diffsync.ObjectAlreadyExists:
                     pass
             except KeyError as err:
-                self.job.logger.error(f"{ip_address}:  Platform due to missing key in returned data, {err}")
+                self.job.logger.error(
+                    f"{ip_address}: Unable to load Platform due to missing key in returned data, {err}"
+                )
 
     def load_device_types(self):
         """Load device types into the DiffSync store."""
@@ -246,7 +255,9 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 except diffsync.ObjectAlreadyExists:
                     pass
             except KeyError as err:
-                self.job.logger.error(f"{ip_address}:  DeviceType due to missing key in returned data, {err}")
+                self.job.logger.error(
+                    f"{ip_address}: Unable to load DeviceType due to missing key in returned data, {err}"
+                )
 
     def load_devices(self):
         """Load devices into the DiffSync store."""
