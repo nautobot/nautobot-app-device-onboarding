@@ -13,10 +13,10 @@ device_onboarding:
     jpath: "[*].hardware[0]"
   mgmt_interface:
     command: "show interfaces"
-    jpath: "[?ip_address=='{{ host_info }}'].interface"
+    jpath: "[?ip_address=='{{ obj }}'].interface"
   mask_length:
     command: "show interfaces"
-    jpath: "[?ip_address=='{{ host_info }}'].prefix_length"
+    jpath: "[?ip_address=='{{ obj }}'].prefix_length"
 network_importer:
   use_textfsm: true
   serial:
@@ -25,4 +25,3 @@ network_importer:
   interfaces:
     command: "show interfaces"
     jpath: "[*].[$interface$,link_status,protocol_status,hardware_type,mac_address,ip_address,prefix_length,mtu]"
-    post_processor: "{{ obj }}"
