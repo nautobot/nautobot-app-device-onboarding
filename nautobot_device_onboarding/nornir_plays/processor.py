@@ -52,6 +52,9 @@ class ProcessorDO(BaseLoggingProcessor):
                     "failed": result.failed,
                 }
             )
+            if result.failed:
+                self.logger.warning(f"Task Failed! Result {result.result}.", extra={"object": task.host})
+
 
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Processor for Logging on SubTask Completed."""
