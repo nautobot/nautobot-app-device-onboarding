@@ -69,7 +69,10 @@ def _set_inventory(host_ip, platform, port, secrets_group):
         platform = platform.network_driver
     else:
         platform = guess_netmiko_device_type(host_ip, username, password, port)
-    parsing_info = _get_platform_parsing_info(platform)
+    if platform
+        parsing_info = _get_platform_parsing_info(platform)
+    else:
+        parsing_info = {}
     print(parsing_info)
     print(type(parsing_info))
 
