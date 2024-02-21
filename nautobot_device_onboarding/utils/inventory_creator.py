@@ -2,10 +2,11 @@
 
 from django.conf import settings
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
-from nautobot_device_onboarding.exceptions import OnboardException
-from nautobot_device_onboarding.utils.helper import _get_platform_parsing_info
 from netmiko import SSHDetect
 from nornir.core.inventory import ConnectionOptions, Host
+
+from nautobot_device_onboarding.exceptions import OnboardException
+from nautobot_device_onboarding.utils.helper import _get_platform_parsing_info
 
 
 def _parse_credentials(credentials):

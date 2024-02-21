@@ -216,11 +216,16 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
 
         for hostname in device_data:
             if device_data[hostname].get("failed"):
-                self.job.logger.error(f"Connection or data error for {hostname}. " "This device will not be synced.")
+                self.job.logger.error(
+                    f"{hostname}: Connection or data error, this device will not be synced. "
+                    f"{device_data[hostname].get('failed_reason')}"
+                )
                 failed_device_connections.append(hostname)
         for hostname in failed_device_connections:
             del device_data[hostname]
-        self.job.command_getter_result = device_data
+        if failed_device_connections:
+            self.job.logger.warning(f"Failed devices: {failed_device_connections}")
+        self.device_data = device_data
         self.job.devices_to_load = diffsync_utils.generate_device_querset_from_command_getter_result(device_data)
 
     def execute_command_getter(self):
