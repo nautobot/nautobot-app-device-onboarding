@@ -2,17 +2,18 @@
 device_onboarding:
   use_textfsm: true
   hostname:
-    jpath: "[*].hostname"
     command: "show version"
+    jpath: "[*].hostname"
   serial:
     command: "show version"
-    jpath: "[*].serial[0]"
+    jpath: "[*].serial_number"
   device_type:
-    command: "show inventory"
-    jpath: "[?name=='Chassis'].pid"
+    command: "show version"
+    jpath: "[*].model"
   mgmt_interface:
     command: "show interfaces"
-    jpath: "[?ip_address=='{{ host_info }}'].interface"
+    jpath: "[?local=='{{ host_info }}'].interface"
   mask_length:
     command: "show interfaces"
-    jpath: "[?ip_address=='{{ host_info }}'].prefix_length"
+    jpath: "[?local=='{{ host_info }}'].destination"
+    post_processor: "{{ obj[0] | ipaddress_interface('netmask') | netmask_to_cidr }}"
