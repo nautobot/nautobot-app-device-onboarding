@@ -32,4 +32,4 @@ def netmiko_send_commands(task: Task, command_getter_job: str):
     commands = _get_commands_to_run(task.host.data["platform_parsing_info"], command_getter_job)
     for command in commands:
         command_use_textfsm = task.host.data["platform_parsing_info"][command_getter_job]["use_textfsm"]
-        task.run(task=netmiko_send_command, name=command, command_string=command, use_textfsm=command_use_textfsm)
+        task.run(task=netmiko_send_command, name=command, command_string=command, use_textfsm=command_use_textfsm, read_timeout=60)
