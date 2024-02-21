@@ -25,4 +25,4 @@ network_importer:
   interfaces:
     command: "show interfaces"
     jpath: "[*].[$interface$,link_status,protocol_status,hardware_type,mac_address,ip_address,prefix_length,mtu]"
-    post_processor: "{{ obj | tojson }}"
+    post_processor: "{{ obj }}"
