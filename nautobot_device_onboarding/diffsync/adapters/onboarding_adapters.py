@@ -4,11 +4,13 @@ import time
 
 import diffsync
 import netaddr
+from django.core.exceptions import ValidationError
 from nautobot.apps.choices import JobResultStatusChoices
 from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
 from nautobot.extras.models import Job, JobResult
 
 from nautobot_device_onboarding.diffsync.models import onboarding_models
+from nautobot_device_onboarding.utils import diffsync_utils
 
 
 class OnboardingNautobotAdapter(diffsync.DiffSync):
@@ -62,7 +64,7 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
                 model=device_type.model,
                 part_number=device_type.model,
                 manufacturer__name=device_type.manufacturer.name,
-            )  # type: ignore
+            )
             self.add(onboarding_device_type)
             if self.job.debug:
                 self.job.logger.debug(f"DeviceType: {device_type.model} loaded.")
@@ -138,9 +140,9 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
             return True
         raise netaddr.AddrConversionError
 
-    def _handle_failed_connections(self, device_data):
+    def _handle_failed_devices(self, device_data):
         """
-        Handle result data from failed device connections.
+        Handle result data from failed devices.
 
         If a device fails to return expected data, log the result
         and remove it from the data to be loaded into the diffsync store.
@@ -149,10 +151,15 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
 
         for ip_address in device_data:
             if device_data[ip_address].get("failed"):
-                self.job.logger.error(f"Connection or data error for {ip_address}. This device will not be onboarded.")
+                self.job.logger.error(
+                    f"{ip_address}: Connection or data error, this device will not be synced. "
+                    f"{device_data[ip_address].get('failed_reason')}"
+                )
                 failed_ip_addresses.append(ip_address)
         for ip_address in failed_ip_addresses:
             del device_data[ip_address]
+        if failed_ip_addresses:
+            self.job.logger.warning(f"Failed IP Addresses: {failed_ip_addresses}")
         self.device_data = device_data
 
     def execute_command_getter(self):
@@ -179,85 +186,113 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 break
         if self.job.debug:
             self.job.logger.debug(f"Command Getter Job Result: {result.result}")
-        self._handle_failed_connections(device_data=result.result)
+        data_type_check = diffsync_utils.check_data_type(result.result)
+        if self.job.debug:
+            self.job.logger.debug(f"CommandGetter data type check resut: {data_type_check}")
+        if data_type_check:
+            self._handle_failed_devices(device_data=result.result)
+        else:
+            self.job.logger.error(
+                "Data returned from CommandGetter is not the correct type. "
+                "No devices will be onboarded, check the CommandGetter job logs."
+            )
+            raise ValidationError("Unexpected data returend from CommandGetter.")
 
     def load_manufacturers(self):
         """Load manufacturers into the DiffSync store."""
         for ip_address in self.device_data:
-            if self.job.debug:
-                self.job.logger.debug(f"loading manufacturer data for {ip_address}")
-            onboarding_manufacturer = self.manufacturer(
-                diffsync=self,
-                name=self.device_data[ip_address]["manufacturer"],
-            )  # type: ignore
             try:
-                self.add(onboarding_manufacturer)
-            except diffsync.ObjectAlreadyExists:
-                pass
+                if self.job.debug:
+                    self.job.logger.debug(f"loading manufacturer data for {ip_address}")
+                onboarding_manufacturer = self.manufacturer(
+                    diffsync=self,
+                    name=self.device_data[ip_address]["manufacturer"],
+                )  # type: ignore
+                try:
+                    self.add(onboarding_manufacturer)
+                except diffsync.ObjectAlreadyExists:
+                    pass
+            except KeyError as err:
+                self.job.logger.error(
+                    f"{ip_address}: Unable to load Manufacturer due to missing key in returned data, {err}"
+                )
 
     def load_platforms(self):
         """Load platforms into the DiffSync store."""
         for ip_address in self.device_data:
-            if self.job.debug:
-                self.job.logger.debug(f"loading platform data for {ip_address}")
-            onboarding_platform = self.platform(
-                diffsync=self,
-                name=self.device_data[ip_address]["platform"],
-                manufacturer__name=self.device_data[ip_address]["manufacturer"],
-                network_driver=self.device_data[ip_address]["network_driver"],
-            )  # type: ignore
             try:
-                self.add(onboarding_platform)
-            except diffsync.ObjectAlreadyExists:
-                pass
+                if self.job.debug:
+                    self.job.logger.debug(f"loading platform data for {ip_address}")
+                onboarding_platform = self.platform(
+                    diffsync=self,
+                    name=self.device_data[ip_address]["platform"],
+                    manufacturer__name=self.device_data[ip_address]["manufacturer"],
+                    network_driver=self.device_data[ip_address]["network_driver"],
+                )  # type: ignore
+                try:
+                    self.add(onboarding_platform)
+                except diffsync.ObjectAlreadyExists:
+                    pass
+            except KeyError as err:
+                self.job.logger.error(
+                    f"{ip_address}: Unable to load Platform due to missing key in returned data, {err}"
+                )
 
     def load_device_types(self):
         """Load device types into the DiffSync store."""
         for ip_address in self.device_data:
-            if self.job.debug:
-                self.job.logger.debug(f"loading device_type data for {ip_address}")
-            onboarding_device_type = self.device_type(
-                diffsync=self,
-                model=self.device_data[ip_address]["device_type"],
-                part_number=self.device_data[ip_address]["device_type"],
-                manufacturer__name=self.device_data[ip_address]["manufacturer"],
-            )  # type: ignore
             try:
-                self.add(onboarding_device_type)
-            except diffsync.ObjectAlreadyExists:
-                pass
+                if self.job.debug:
+                    self.job.logger.debug(f"loading device_type data for {ip_address}")
+                onboarding_device_type = self.device_type(
+                    diffsync=self,
+                    model=self.device_data[ip_address]["device_type"],
+                    part_number=self.device_data[ip_address]["device_type"],
+                    manufacturer__name=self.device_data[ip_address]["manufacturer"],
+                )  # type: ignore
+                try:
+                    self.add(onboarding_device_type)
+                except diffsync.ObjectAlreadyExists:
+                    pass
+            except KeyError as err:
+                self.job.logger.error(
+                    f"{ip_address}: Unable to load DeviceType due to missing key in returned data, {err}"
+                )
 
     def load_devices(self):
         """Load devices into the DiffSync store."""
         for ip_address in self.device_data:
-            if self.job.debug:
-                self.job.logger.debug(f"loading device data for {ip_address}")
-            onboarding_device = self.device(
-                diffsync=self,
-                device_type__model=self.device_data[ip_address]["device_type"],
-                location__name=self.job.location.name,
-                name=self.device_data[ip_address]["hostname"],
-                platform__name=self.device_data[ip_address]["platform"],
-                primary_ip4__host=ip_address,
-                primary_ip4__status__name=self.job.ip_address_status.name,
-                role__name=self.job.device_role.name,
-                status__name=self.job.device_status.name,
-                secrets_group__name=self.job.secrets_group.name,
-                interfaces=[self.device_data[ip_address]["mgmt_interface"]],
-                mask_length=self.device_data[ip_address]["mask_length"],
-                serial=self.device_data[ip_address]["serial"],
-            )  # type: ignore
             try:
-                self.add(onboarding_device)
                 if self.job.debug:
-                    self.job.logger.debug(f"Device: {self.device_data[ip_address]['hostname']} loaded.")
-            except diffsync.ObjectAlreadyExists:
-                self.job.logger.error(
-                    f"Device: {self.device_data[ip_address]['hostname']} has already been loaded! "
-                    f"Duplicate devices will not be synced. "
-                    f"[Serial Number: {self.device_data[ip_address]['serial']}, "
-                    f"IP Address: {ip_address}]"
-                )
+                    self.job.logger.debug(f"loading device data for {ip_address}")
+                onboarding_device = self.device(
+                    diffsync=self,
+                    device_type__model=self.device_data[ip_address]["device_type"],
+                    location__name=self.job.location.name,
+                    name=self.device_data[ip_address]["hostname"],
+                    platform__name=self.device_data[ip_address]["platform"],
+                    primary_ip4__host=ip_address,
+                    primary_ip4__status__name=self.job.ip_address_status.name,
+                    role__name=self.job.device_role.name,
+                    status__name=self.job.device_status.name,
+                    secrets_group__name=self.job.secrets_group.name,
+                    interfaces=[self.device_data[ip_address]["mgmt_interface"]],
+                    mask_length=self.device_data[ip_address]["mask_length"],
+                    serial=self.device_data[ip_address]["serial"],
+                )  # type: ignore
+                try:
+                    self.add(onboarding_device)
+                    if self.job.debug:
+                        self.job.logger.debug(f"Device: {self.device_data[ip_address]['hostname']} loaded.")
+                except diffsync.ObjectAlreadyExists:
+                    self.job.logger.error(
+                        f"Device: {self.device_data[ip_address]['hostname']} has already been loaded! "
+                        f"Duplicate devices will not be synced. "
+                        f"[Serial Number: {self.device_data[ip_address]['serial']}, "
+                        f"IP Address: {ip_address}]"
+                    )
+            except KeyError as err:
+                self.job.logger.error(f"{ip_address}: Unable to load Device due to missing key in returned data, {err}")
 
     def load(self):
         """Load network data."""

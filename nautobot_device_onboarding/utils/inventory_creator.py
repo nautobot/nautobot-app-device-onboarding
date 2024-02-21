@@ -6,6 +6,7 @@ from netmiko import SSHDetect
 from nornir.core.inventory import ConnectionOptions, Host
 
 from nautobot_device_onboarding.exceptions import OnboardException
+from nautobot_device_onboarding.utils.helper import _get_platform_parsing_info
 
 
 def _parse_credentials(credentials):
@@ -68,6 +69,12 @@ def _set_inventory(host_ip, platform, port, secrets_group):
         platform = platform.network_driver
     else:
         platform = guess_netmiko_device_type(host_ip, username, password, port)
+    if platform:
+        parsing_info = _get_platform_parsing_info(platform)
+    else:
+        parsing_info = {}
+    print(parsing_info)
+    print(type(parsing_info))
 
     host = Host(
         name=host_ip,
@@ -85,6 +92,7 @@ def _set_inventory(host_ip, platform, port, secrets_group):
                 platform=platform,
             )
         },
+        data={"platform_parsing_info": parsing_info},
     )
     inv.update({host_ip: host})
 

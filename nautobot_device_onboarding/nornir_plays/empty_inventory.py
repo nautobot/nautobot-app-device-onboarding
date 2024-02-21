@@ -4,7 +4,7 @@ from nornir.core.inventory import Defaults, Groups, Hosts, Inventory
 
 
 class EmptyInventory:
-    """Creates an empty Nornir Inventory to be populated later."""
+    """Creates an empty Nornir inventory."""
 
     def load(self) -> Inventory:
         """Create a default empty inventory."""

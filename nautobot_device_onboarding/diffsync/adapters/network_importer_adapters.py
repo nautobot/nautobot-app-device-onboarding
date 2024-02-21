@@ -4,6 +4,7 @@ import time
 
 import diffsync
 from diffsync.enum import DiffSyncModelFlags
+from django.core.exceptions import ValidationError
 from nautobot.apps.choices import JobResultStatusChoices
 from nautobot.dcim.models import Interface
 from nautobot.extras.models import Job, JobResult
@@ -12,6 +13,7 @@ from nautobot_ssot.contrib import NautobotAdapter
 from netaddr import EUI, mac_unix_expanded
 
 from nautobot_device_onboarding.diffsync.models import network_importer_models
+from nautobot_device_onboarding.utils import diffsync_utils
 
 
 class FilteredNautobotAdapter(NautobotAdapter):
@@ -55,8 +57,20 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
         return str(database_object.mac_address)
 
     def load_ip_addresses(self):
-        """Load IP addresses into the DiffSync store."""
-        for ip_address in IPAddress.objects.filter(parent__namespace__name=self.job.namespace.name):
+        """Load IP addresses into the DiffSync store.
+
+        Only IP Addresses that were returned by the CommandGetter job should be loaded.
+        """
+        ip_address_hosts = set()
+        for _, device_data in self.job.command_getter_result.items():
+            for _, interface_data in device_data["interfaces"].items():
+                for ip_address in interface_data["ip_addresses"]:
+                    ip_address_hosts.add(ip_address["host"])
+
+        for ip_address in IPAddress.objects.filter(
+            host__in=ip_address_hosts,
+            parent__namespace__name=self.job.namespace.name,
+        ):
             network_ip_address = self.ip_address(
                 diffsync=self,
                 host=ip_address.host,
@@ -72,11 +86,15 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
                     self.job.logger.debug(f"{network_ip_address} loaded.")
             except diffsync.exceptions.ObjectAlreadyExists:
                 self.job.logger.warning(
-                    f"{network_ip_address} is already loaded to the " "DiffSync store. This is a duplicate IP Address."
+                    f"{network_ip_address} is already loaded to the DiffSync store. This is a duplicate IP Address."
                 )
 
     def load_vlans(self):
-        """Load vlans into the Diffsync store."""
+        """
+        Load Vlans into the Diffsync store.
+
+        Only Vlans that were returned by the CommandGetter job should be loaded.
+        """
         for vlan in VLAN.objects.all():
             network_vlan = self.vlan(
                 diffsync=self,
@@ -87,12 +105,17 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
             try:
                 network_vlan.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
                 self.add(network_vlan)
+                if self.job.debug:
+                    self.job.logger.debug(f"Vlan {network_vlan} loaded.")
             except diffsync.exceptions.ObjectAlreadyExists:
                 pass
 
     def load_tagged_vlans_to_interface(self):
-        """Load a model representing tagged vlan assignments to the Diffsync store."""
-        for interface in Interface.objects.filter(device__in=self.job.filtered_devices):
+        """Load a model representing tagged vlan assignments to the Diffsync store.
+
+        Only Vlan assignments that were returned by the CommandGetter job should be loaded.
+        """
+        for interface in Interface.objects.filter(device__in=self.job.devices_to_load):
             tagged_vlans = []
             for vlan in interface.tagged_vlans.all():
                 vlan_dict = {}
@@ -106,18 +129,28 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
                 name=interface.name,
                 tagged_vlans=tagged_vlans,
             )
+            network_tagged_vlans_to_interface.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
             self.add(network_tagged_vlans_to_interface)
+            if self.job.debug:
+                self.job.logger.debug(f"Vlan to interface: {network_tagged_vlans_to_interface} loaded.")
 
     def load_lag_to_interface(self):
-        """Load a model representing lag assignments to the Diffsync store."""
-        for interface in Interface.objects.filter(device__in=self.job.filtered_devices):
+        """
+        Load a model representing lag assignments to the Diffsync store.
+
+        Only Lag assignments that were returned by the CommandGetter job should be loaded.
+        """
+        for interface in Interface.objects.filter(device__in=self.job.devices_to_load):
             network_lag_to_interface = self.lag_to_interface(
                 diffsync=self,
                 device__name=interface.device.name,
                 name=interface.name,
-                lag__interface__name=interface.lag.name if interface.lag else None,
+                lag__interface__name=interface.lag.name if interface.lag else "",
             )
+            network_lag_to_interface.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
             self.add(network_lag_to_interface)
+            if self.job.debug:
+                self.job.logger.debug(f"Lag to interface {network_lag_to_interface} loaded.")
 
     def load(self):
         """Generic implementation of the load function."""
@@ -155,8 +188,6 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
         self.job = job
         self.sync = sync
 
-    device_data = None
-
     device = network_importer_models.NetworkImporterDevice
     interface = network_importer_models.NetworkImporterInterface
     ip_address = network_importer_models.NetworkImporterIPAddress
@@ -174,24 +205,28 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
         "lag_to_interface",
     ]
 
-    # def _handle_failed_connections(self, device_data):
-    #     """
-    #     Handle result data from failed device connections.
+    def _handle_failed_devices(self, device_data):
+        """
+        Handle result data from failed devices.
 
-    #     If a device fails to return expected data, log the result
-    #     and remove it from the data to be loaded into the diffsync store.
-    #     """
-    #     failed_ip_addresses = []
+        If a device fails to return expected data, log the result
+        and remove it from the data to be loaded into the diffsync store.
+        """
+        failed_devices = []
 
-    #     for ip_address in device_data:
-    #         if device_data[ip_address].get("failed"):
-    #             self.job.logger.error(f"Connection or data error for {ip_address}. This device will not be onboarded.")
-    #             if self.job.debug:
-    #                 self.job.logger.error(device_data[ip_address].get("subtask_result"))
-    #             failed_ip_addresses.append(ip_address)
-    #     for ip_address in failed_ip_addresses:
-    #         del device_data[ip_address]
-    #     self.device_data = device_data
+        for hostname in device_data:
+            if device_data[hostname].get("failed"):
+                self.job.logger.error(
+                    f"{hostname}: Connection or data error, this device will not be synced. "
+                    f"{device_data[hostname].get('failed_reason')}"
+                )
+                failed_devices.append(hostname)
+        for hostname in failed_devices:
+            del device_data[hostname]
+        if failed_devices:
+            self.job.logger.warning(f"Failed devices: {failed_devices}")
+        self.job.command_getter_result = device_data
+        self.job.devices_to_load = diffsync_utils.generate_device_querset_from_command_getter_result(device_data)
 
     def execute_command_getter(self):
         """Start the CommandGetterDO job to query devices for data."""
@@ -209,9 +244,18 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
                 break
         if self.job.debug:
             self.job.logger.debug(f"Command Getter Job Result: {result.result}")
-        # TODO: Handle failed connections
-        # self._handle_failed_connections(device_data=result.result)
-        self.device_data = result.result
+        # verify data returned is a dict
+        data_type_check = diffsync_utils.check_data_type(result.result)
+        if self.job.debug:
+            self.job.logger.debug(f"CommandGetter data type check resut: {data_type_check}")
+        if data_type_check:
+            self._handle_failed_devices(device_data=result.result)
+        else:
+            self.job.logger.error(
+                "Data returned from CommandGetter is not the correct type. "
+                "No devices will be onboarded, check the CommandGetter job logs."
+            )
+            raise ValidationError("Unexpected data returend from CommandGetter.")
 
     def _process_mac_address(self, mac_address):
         """Convert a mac address to match the value stored by Nautobot."""
@@ -219,7 +263,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
 
     def load_devices(self):
         """Load devices into the DiffSync store."""
-        for hostname, device_data in self.device_data.items():
+        for hostname, device_data in self.job.command_getter_result.items():
             network_device = self.device(diffsync=self, name=hostname, serial=device_data["serial"])
             self.add(network_device)
             if self.job.debug:
@@ -253,7 +297,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
 
     def load_ip_addresses(self):
         """Load IP addresses into the DiffSync store."""
-        for hostname, device_data in self.device_data.items():
+        for hostname, device_data in self.job.command_getter_result.items():
             for interface_name, interface_data in device_data["interfaces"].items():
                 for ip_address in interface_data["ip_addresses"]:
                     if self.job.debug:
@@ -267,7 +311,6 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
                         status__name=self.job.ip_address_status.name,
                     )
                     try:
-                        network_ip_address.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
                         self.add(network_ip_address)
                         if self.job.debug:
                             self.job.logger.debug(f"{network_ip_address} loaded.")
@@ -280,14 +323,12 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
     def load_vlans(self):
         """Load vlans into the Diffsync store."""
         location_names = {}
-        for device in self.job.filtered_devices:
+        for device in self.job.devices_to_load:
             location_names[device.name] = device.location.name
 
-        for hostname, device_data in self.device_data.items():
-            for interface_name, interface_data in device_data["interfaces"].items():
+        for hostname, device_data in self.job.command_getter_result.items():
+            for _, interface_data in device_data["interfaces"].items():
                 # add tagged vlans
-                if self.job.debug:
-                    self.job.logger.debug(f"Loading tagged vlans for {interface_name}")
                 for tagged_vlan in interface_data["tagged_vlans"]:
                     network_vlan = self.vlan(
                         diffsync=self,
@@ -296,10 +337,9 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
                         location__name=location_names.get(hostname, ""),
                     )
                     try:
-                        network_vlan.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
                         self.add(network_vlan)
                         if self.job.debug:
-                            self.job.logger.debug(f"tagged vlan {network_vlan} loaded.")
+                            self.job.logger.debug(f"Tagged Vlan {network_vlan} loaded.")
                     except diffsync.exceptions.ObjectAlreadyExists:
                         pass
                 # check for untagged vlan and add if necessary
@@ -311,16 +351,15 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
                         location__name=location_names.get(hostname, ""),
                     )
                     try:
-                        network_vlan.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
                         self.add(network_vlan)
                         if self.job.debug:
-                            self.job.logger.debug(f"untagged vlan {network_vlan} loaded.")
+                            self.job.logger.debug(f"Untagged Vlan {network_vlan} loaded.")
                     except diffsync.exceptions.ObjectAlreadyExists:
                         pass
 
     def load_ip_address_to_interfaces(self):
         """Load ip address interface assignments into the Diffsync store."""
-        for hostname, device_data in self.device_data.items():
+        for hostname, device_data in self.job.command_getter_result.items():
             for interface_name, interface_data in device_data["interfaces"].items():
                 for ip_address in interface_data["ip_addresses"]:
                     network_ip_address_to_interface = self.ipaddress_to_interface(
@@ -332,11 +371,11 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
                     )
                     self.add(network_ip_address_to_interface)
                     if self.job.debug:
-                        self.job.logger.debug(f"{network_ip_address_to_interface} loaded.")
+                        self.job.logger.debug(f"IP Address to interface {network_ip_address_to_interface} loaded.")
 
     def load_tagged_vlans_to_interface(self):
         """Load tagged vlan to interface assignments into the Diffsync store."""
-        for hostname, device_data in self.device_data.items():
+        for hostname, device_data in self.job.command_getter_result.items():
             for interface_name, interface_data in device_data["interfaces"].items():
                 network_tagged_vlans_to_interface = self.tagged_vlans_to_interface(
                     diffsync=self,
@@ -345,24 +384,25 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
                     tagged_vlans=interface_data["tagged_vlans"],
                 )
                 self.add(network_tagged_vlans_to_interface)
+                if self.job.debug:
+                    self.job.logger.debug(f"Tagged Vlan to interface {network_tagged_vlans_to_interface} loaded.")
 
     def load_lag_to_interface(self):
         """Load lag interface assignments into the Diffsync store."""
-        for hostname, device_data in self.device_data.items():
+        for hostname, device_data in self.job.command_getter_result.items():
             for interface_name, interface_data in device_data["interfaces"].items():
                 network_lag_to_interface = self.lag_to_interface(
                     diffsync=self,
                     device__name=hostname,
                     name=interface_name,
-                    lag__interface__name=interface_data["lag"] if interface_data["lag"] else None,
+                    lag__interface__name=interface_data["lag"] if interface_data["lag"] else "",
                 )
                 self.add(network_lag_to_interface)
+                if self.job.debug:
+                    self.job.logger.debug(f"Lag to interface {network_lag_to_interface} loaded.")
 
     def load(self):
         """Load network data."""
-        # TODO: Function for comparing incoming hostnames to nautobot hostnames loaded for sync.
-        # remove missing hostnames from nautobot side of the sync (self.job.filtered_devices).
-
         self.execute_command_getter()
         self.load_ip_addresses()
         if self.job.sync_vlans:

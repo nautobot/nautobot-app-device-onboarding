@@ -4,7 +4,29 @@ import ipaddress
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from nautobot.apps.choices import PrefixTypeChoices
+from nautobot.dcim.models import Device
 from nautobot.ipam.models import IPAddress, Prefix
+
+
+def generate_device_querset_from_command_getter_result(command_getter_result):
+    """Generate a Nautobot device queryset based on data returned from CommandGetter."""
+    devices_to_sync_hostnames = []
+    devices_to_sync_serial_numbers = []
+    for hostname, device_data in command_getter_result.items():
+        devices_to_sync_hostnames.append(hostname)
+        devices_to_sync_serial_numbers.append(device_data["serial"])
+    device_queryset = Device.objects.filter(name__in=devices_to_sync_hostnames).filter(
+        serial__in=devices_to_sync_serial_numbers
+    )
+    return device_queryset
+
+
+def check_data_type(data):
+    """Verify data is of type dict."""
+    data_type_check_result = True
+    if not isinstance(data, dict):
+        data_type_check_result = False
+    return data_type_check_result
 
 
 def get_or_create_prefix(host, mask_length, default_status, namespace, job=None):
