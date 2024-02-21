@@ -3,7 +3,7 @@ device_onboarding:
   use_textfsm: false
   hostname:
     command: "show version | display json"
-    jpath: "'software-information'[0]."host-name"[0].data"
+    jpath: "'software-information'[0].'host-name'[0].data"
   serial:
     command: "show version | display json"
     jpath: "'chassis-inventory'[0].'chassis'[0].'serial-number'[0].data"
