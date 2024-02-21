@@ -22,10 +22,10 @@ def get_django_env():
     """
     # Use a custom Jinja2 environment instead of Django's to avoid HTML escaping
     j2_env = {
-            "undefined": "jinja2.StrictUndefined",
-            "trim_blocks": True,
-            "lstrip_blocks": False,
-        }
+        "undefined": "jinja2.StrictUndefined",
+        "trim_blocks": True,
+        "lstrip_blocks": False,
+    }
     if isinstance(j2_env["undefined"], str):
         j2_env["undefined"] = import_string(j2_env["undefined"])
     jinja_env = SandboxedEnvironment(**j2_env)
@@ -109,7 +109,9 @@ def extract_show_data(host, multi_result, command_getter_type):
                 j2_rendered_jpath = render_jinja_template(obj=host.name, template=command_info["jpath"])
                 extracted_value = extract_data_from_json(multi_result[0].result, j2_rendered_jpath)
                 if command_info.get("post_processor"):
-                    extracted_processed = render_jinja_template(obj=extracted_value, template=command_info["post_processor"])
+                    extracted_processed = render_jinja_template(
+                        obj=extracted_value, template=command_info["post_processor"]
+                    )
                 else:
                     extracted_processed = extracted_value
                     if isinstance(extracted_value, list) and len(extracted_value) == 1:
