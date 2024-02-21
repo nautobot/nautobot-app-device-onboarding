@@ -205,14 +205,14 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
         "lag_to_interface",
     ]
 
-    def _handle_failed_connections(self, device_data):
+    def _handle_failed_devices(self, device_data):
         """
-        Handle result data from failed device connections.
+        Handle result data from failed devices.
 
         If a device fails to return expected data, log the result
         and remove it from the data to be loaded into the diffsync store.
         """
-        failed_device_connections = []
+        failed_devices = []
 
         for hostname in device_data:
             if device_data[hostname].get("failed"):
@@ -220,12 +220,12 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
                     f"{hostname}: Connection or data error, this device will not be synced. "
                     f"{device_data[hostname].get('failed_reason')}"
                 )
-                failed_device_connections.append(hostname)
-        for hostname in failed_device_connections:
+                failed_devices.append(hostname)
+        for hostname in failed_devices:
             del device_data[hostname]
-        if failed_device_connections:
-            self.job.logger.warning(f"Failed devices: {failed_device_connections}")
-        self.device_data = device_data
+        if failed_devices:
+            self.job.logger.warning(f"Failed devices: {failed_devices}")
+        self.job.command_getter_result = device_data
         self.job.devices_to_load = diffsync_utils.generate_device_querset_from_command_getter_result(device_data)
 
     def execute_command_getter(self):
@@ -249,7 +249,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
         if self.job.debug:
             self.job.logger.debug(f"CommandGetter data type check resut: {data_type_check}")
         if data_type_check:
-            self._handle_failed_connections(device_data=result.result)
+            self._handle_failed_devices(device_data=result.result)
         else:
             self.job.logger.error(
                 "Data returned from CommandGetter is not the correct type. "

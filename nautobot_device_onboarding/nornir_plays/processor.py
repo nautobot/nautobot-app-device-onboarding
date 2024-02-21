@@ -19,11 +19,12 @@ class ProcessorDO(BaseLoggingProcessor):
         self.data: Dict = command_outputs
 
     def task_instance_started(self, task: Task, host: Host) -> None:
+        """Processor for logging and data processing on task start."""
         if not self.data.get(host.name):
             self.data[host.name] = {}
 
     def task_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
-        """Nornir processor task completion for OS upgrades.
+        """Processor for logging and data processing on task completed.
 
         Args:
             task (Task): Nornir task individual object
@@ -58,7 +59,7 @@ class ProcessorDO(BaseLoggingProcessor):
                 self.data[host.name]["failed_reason"] = result.result
 
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
-        """Processor for Logging on SubTask Completed."""
+        """Processor for logging and data processing on subtask completed."""
         self.logger.info(f"subtask_instance_completed Subtask completed {task.name}.", extra={"object": task.host})
         self.logger.info(f"subtask_instance_completed Subtask result {result.result}.", extra={"object": task.host})
 
@@ -73,7 +74,7 @@ class ProcessorDO(BaseLoggingProcessor):
             self.data[host.name][k] = v
 
     def subtask_instance_started(self, task: Task, host: Host) -> None:  # show command start
-        """Processor for Logging on SubTask Start."""
+        """Processor for logging and data processing on subtask start."""
         self.logger.info(f"subtask_instance_started Subtask starting {task.name}.", extra={"object": task.host})
         if not self.data.get(host.name):
             self.data[host.name] = {

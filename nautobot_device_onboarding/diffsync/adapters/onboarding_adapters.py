@@ -140,9 +140,9 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
             return True
         raise netaddr.AddrConversionError
 
-    def _handle_failed_connections(self, device_data):
+    def _handle_failed_devices(self, device_data):
         """
-        Handle result data from failed device connections.
+        Handle result data from failed devices.
 
         If a device fails to return expected data, log the result
         and remove it from the data to be loaded into the diffsync store.
@@ -190,7 +190,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
         if self.job.debug:
             self.job.logger.debug(f"CommandGetter data type check resut: {data_type_check}")
         if data_type_check:
-            self._handle_failed_connections(device_data=result.result)
+            self._handle_failed_devices(device_data=result.result)
         else:
             self.job.logger.error(
                 "Data returned from CommandGetter is not the correct type. "
