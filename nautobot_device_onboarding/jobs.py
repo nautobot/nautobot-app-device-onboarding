@@ -361,6 +361,15 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         """Initialize SSOTNetworkImporter."""
         super().__init__()
         self.filtered_devices = None  # Queryset of devices based on form inputs
+
+        #################### FOR TESTING ONLY #########################################
+        # from nautobot_device_onboarding.diffsync import mock_data
+        # from nautobot_device_onboarding.utils import diffsync_utils
+        # self.command_getter_result = mock_data.network_importer_mock_data
+        # self.devices_to_load = diffsync_utils.generate_device_querset_from_command_getter_result(mock_data.network_importer_mock_data)
+        ################### REMOVE WHEN NOT TESTING ###################################
+
+        ############ RESTORE THESE LINES WHEN NOT TESTING! ############################
         self.command_getter_result = None  # Dict result from CommandGetter job
         self.devices_to_load = None  # Queryset consisting of devices that responded
 
@@ -378,6 +387,12 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
     namespace = ObjectVar(
         model=Namespace, required=True, description="The namespace for all IP addresses created or updated in the sync."
     )
+    interface_status = ObjectVar(
+        model=Status,
+        query_params={"content_types": "dcim.interface"},
+        required=True,
+        description="Status to be applied to all synced device interfaces. This will update existing interface statuses.",
+    )
     ip_address_status = ObjectVar(
         label="IP address status",
         model=Status,
@@ -385,6 +400,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         required=True,
         description="Status to be applied to all synced IP addresses. This will update existing IP address statuses",
     )
+
     default_prefix_status = ObjectVar(
         model=Status,
         query_params={"content_types": "ipam.prefix"},
@@ -431,6 +447,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         memory_profiling,
         debug,
         namespace,
+        interface_status,
         ip_address_status,
         default_prefix_status,
         location,
@@ -447,6 +464,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         self.debug = debug
         self.namespace = namespace
         self.ip_address_status = ip_address_status
+        self.interface_status = interface_status
         self.default_prefix_status = default_prefix_status
         self.location = location
         self.devices = devices

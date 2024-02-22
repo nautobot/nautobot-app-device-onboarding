@@ -104,7 +104,6 @@ class NetworkImporterInterface(FilteredNautobotModel):
         "mtu",
         # "parent_interface__name",
         "mode",
-        "mgmt_only",
         "untagged_vlan__name",
     )
 
@@ -118,7 +117,6 @@ class NetworkImporterInterface(FilteredNautobotModel):
     parent_interface__name: Optional[str]
     lag__name: Optional[str]
     mode: Optional[str]
-    mgmt_only: Optional[bool]
     untagged_vlan__name: Optional[str]
 
 
