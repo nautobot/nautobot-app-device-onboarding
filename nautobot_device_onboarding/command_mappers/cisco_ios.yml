@@ -24,4 +24,5 @@ network_importer:
     jpath: "[*].serial[0]"
   interfaces:
     command: "show interfaces"
-    jpath: "[*].[$interface$,link_status,protocol_status,hardware_type,mac_address,ip_address,prefix_length,mtu]"
+    jpath: "[*].[$interface$,hardware_type,ip_address,prefix_length,mac_address,mtu,description,link_status,vlan_id,vlan_id_inner,vlan_id_outer]"
+    post_processor: "{{ obj | fix_interfaces }}"
