@@ -98,7 +98,7 @@ network_importer_mock_data = {
                     "untagged_vlan": "",
                     "tagged_vlans": [],
                 }
-            }
+            },
         ],
     },
     "demo-cisco-xe2": {
@@ -166,9 +166,9 @@ network_importer_mock_data = {
                     "untagged_vlan": "",
                     "tagged_vlans": [],
                 }
-            }
-        ]
-    }
+            },
+        ],
+    },
 }
 
 device_onboarding_mock_data = {

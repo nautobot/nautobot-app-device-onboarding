@@ -164,17 +164,21 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
 
     def execute_command_getter(self):
         """Start the CommandGetterDO job to query devices for data."""
-        if self.job.platform:
-            if not self.job.platform.network_driver:
-                self.job.logger.error(
-                    f"The selected platform, {self.job.platform} "
-                    "does not have a network driver, please update the Platform."
-                )
-                raise Exception("Platform.network_driver missing")  # pylint: disable=broad-exception-raised
+        if not self.job.processed_csv_data:
+            if self.job.platform:
+                if not self.job.platform.network_driver:
+                    self.job.logger.error(
+                        f"The selected platform, {self.job.platform} "
+                        "does not have a network driver, please update the Platform."
+                    )
+                    raise Exception("Platform.network_driver missing")  # pylint: disable=broad-exception-raised
 
         command_getter_job = Job.objects.get(name="Command Getter for Device Onboarding")
-        job_kwargs = self.job.prepare_job_kwargs(self.job.job_result.task_kwargs)
-        kwargs = self.job.serialize_data(job_kwargs)
+        if self.job.processed_csv_data:
+            kwargs = self.job.job_result.task_kwargs
+        else:
+            job_kwargs = self.job.prepare_job_kwargs(self.job.job_result.task_kwargs)
+            kwargs = self.job.serialize_data(job_kwargs)
         result = JobResult.enqueue_job(
             job_model=command_getter_job, user=self.job.user, celery_kwargs=self.job.job_result.celery_kwargs, **kwargs
         )
@@ -268,14 +272,14 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 onboarding_device = self.device(
                     diffsync=self,
                     device_type__model=self.device_data[ip_address]["device_type"],
-                    location__name=self.job.location.name,
+                    location__name=self.job.processed_csv_data[ip_address]["location"].name,
                     name=self.device_data[ip_address]["hostname"],
                     platform__name=self.device_data[ip_address]["platform"],
                     primary_ip4__host=ip_address,
-                    primary_ip4__status__name=self.job.ip_address_status.name,
-                    role__name=self.job.device_role.name,
-                    status__name=self.job.device_status.name,
-                    secrets_group__name=self.job.secrets_group.name,
+                    primary_ip4__status__name=self.job.processed_csv_data[ip_address]["ip_address_status"].name,
+                    role__name=self.job.processed_csv_data[ip_address]["device_role"].name,
+                    status__name=self.job.processed_csv_data[ip_address]["device_status"].name,
+                    secrets_group__name=self.job.processed_csv_data[ip_address]["secrets_group"].name,
                     interfaces=[self.device_data[ip_address]["mgmt_interface"]],
                     mask_length=self.device_data[ip_address]["mask_length"],
                     serial=self.device_data[ip_address]["serial"],
