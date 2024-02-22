@@ -1,18 +1,18 @@
 ---
 device_onboarding:
-  use_textfsm: false
+  use_textfsm: true
   hostname:
-    command: "show version | display json"
-    jpath: "'software-information'[0].'host-name'[0].data"
+    command: "show version"
+    jpath: "[*].hostname"
   serial:
-    command: "show version | display json"
-    jpath: "'chassis-inventory'[0].'chassis'[0].'serial-number'[0].data"
+    command: "show version"
+    jpath: "[*].serial_number"
   device_type:
-    command: "show version | display json"
-    jpath: "'software-information'[0].'product-model'[0].data"
+    command: "show chassis hardware"
+    jpath: "[*].model"
   mgmt_interface:
     command: "show interfaces"
-    jpath: "'interface-information'[0].'logical-interface'[0].'address-family'[0].'interface-address'[0].'ifa-local'[0].data"
+    jpath: "[?local=='{{ obj }}'].interface"
   mask_length:
     command: "show interfaces"
     jpath: "[?local=='{{ obj }}'].destination"
