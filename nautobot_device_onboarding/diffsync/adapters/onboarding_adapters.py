@@ -1,16 +1,22 @@
 """DiffSync adapters."""
 
 import time
+from collections import defaultdict
+from typing import Dict, FrozenSet, Hashable, Tuple, Type
 
 import diffsync
 import netaddr
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.db.models import Model
 from nautobot.apps.choices import JobResultStatusChoices
 from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
 from nautobot.extras.models import Job, JobResult
 
 from nautobot_device_onboarding.diffsync.models import onboarding_models
 from nautobot_device_onboarding.utils import diffsync_utils
+
+ParameterSet = FrozenSet[Tuple[str, Hashable]]
 
 
 class OnboardingNautobotAdapter(diffsync.DiffSync):
@@ -28,6 +34,26 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
         super().__init__(*args, **kwargs)
         self.job = job
         self.sync = sync
+        self.invalidate_cache()
+
+    def invalidate_cache(self, zero_out_hits=True):
+        """Invalidates all the objects in the ORM cache."""
+        self._cache = defaultdict(dict)
+        if zero_out_hits:
+            self._cache_hits = defaultdict(int)
+
+    def get_from_orm_cache(self, parameters: Dict, model_class: Type[Model]):
+        """Retrieve an object from the ORM or the cache."""
+        parameter_set = frozenset(parameters.items())
+        content_type = ContentType.objects.get_for_model(model_class)
+        model_cache_key = f"{content_type.app_label}.{content_type.model}"
+        if cached_object := self._cache[model_cache_key].get(parameter_set):
+            self._cache_hits[model_cache_key] += 1
+            return cached_object
+        # As we are using `get` here, this will error if there is not exactly one object that corresponds to the
+        # parameter set. We intentionally pass these errors through.
+        self._cache[model_cache_key][parameter_set] = model_class.objects.get(**dict(parameter_set))
+        return self._cache[model_cache_key][parameter_set]
 
     def load_manufacturers(self):
         """Load manufacturer data from Nautobot."""

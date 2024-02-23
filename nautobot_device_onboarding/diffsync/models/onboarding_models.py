@@ -163,6 +163,8 @@ class OnboardingDevice(DiffSyncModel):
     @classmethod
     def create(cls, diffsync, ids, attrs):
         """Create a new nautobot device using data scraped from a device."""
+        if diffsync.job.debug:
+            diffsync.job.debug.logger.debug("Creating device {ids}")
         # Determine device platform
         platform = None
         if diffsync_utils.retrieve_submitted_value(

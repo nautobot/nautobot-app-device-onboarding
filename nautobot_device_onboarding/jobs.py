@@ -11,7 +11,6 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from nautobot.apps.jobs import BooleanVar, FileVar, IntegerVar, Job, MultiObjectVar, ObjectVar, StringVar
 from nautobot.core.celery import register_jobs
 from nautobot.dcim.models import Device, DeviceType, Location, Platform
-from nautobot.ipam.models import Namespace
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status, Tag
 from nautobot.ipam.models import Namespace
@@ -380,7 +379,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
                 processed_csv_data[row["ip_address_host"]]["location"] = location
                 processed_csv_data[row["ip_address_host"]]["namespace"] = namespace
                 processed_csv_data[row["ip_address_host"]]["port"] = row["port"].strip()
-                processed_csv_data[row["ip_address_host"]]["timeout"] = row["timeout"].strip()
+                processed_csv_data[row["ip_address_host"]]["timeout"] = int(row["timeout"].strip())
                 processed_csv_data[row["ip_address_host"]]["set_mgmt_only"] = set_mgmgt_only
                 processed_csv_data[row["ip_address_host"]][
                     "update_devices_without_primary_ip"
@@ -648,11 +647,11 @@ class CommandGetterDO(Job):
         has_sensitive_variables = False
         hidden = False
 
-    csv_file = StringVar()
-    debug = BooleanVar()
-    ip_addresses = StringVar()
-    port = IntegerVar()
-    timeout = IntegerVar()
+    csv_file = StringVar(required=False)
+    debug = BooleanVar(required=False)
+    ip_addresses = StringVar(required=False)
+    port = IntegerVar(required=False)
+    timeout = IntegerVar(required=False)
     secrets_group = ObjectVar(model=SecretsGroup)
     platform = ObjectVar(model=Platform, required=False)
 
