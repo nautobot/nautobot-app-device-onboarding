@@ -471,11 +471,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
                 "timeout": timeout, 
                 "secrets_group": secrets_group
             }
-            # missing_required_inputs = []
-            # for form_field, input_value in required_inputs:
-            #     if not input_value:
-            #         missing_required_inputs.append(form_field)
-            
+  
             missing_required_inputs = [form_field for form_field, input_value in required_inputs.items() if not input_value]
             if not missing_required_inputs:
                 pass
@@ -512,7 +508,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
                 "timeout": timeout,
                 "secrets_group": secrets_group,
                 "platform": platform,
-                "processed_csv_data": "",
+                "csv_file": "",
             }
         super().run(dryrun, memory_profiling, *args, **kwargs)
 
