@@ -27,4 +27,4 @@ network_importer:
   interfaces:
     command: "show interfaces"
     jpath: "[*].[$interface$,hardware_type,ip_address,prefix_length,mac_address,mtu,description,link_status,vlan_id,vlan_id_inner,vlan_id_outer]"
-    post_processor: "{{ obj | fix_interfaces }}"
+    post_processor: "{{ obj | fix_interfaces | tojson }}"
