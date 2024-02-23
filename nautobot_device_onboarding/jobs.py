@@ -9,7 +9,7 @@ from nautobot.apps.jobs import BooleanVar, IntegerVar, Job, MultiObjectVar, Obje
 from nautobot.core.celery import register_jobs
 from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
-from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status, Tag
+from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status
 from nautobot.ipam.models import Namespace
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
@@ -424,12 +424,6 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         required=False,
         description="Only update devices with the selected role.",
     )
-    tag = ObjectVar(
-        model=Tag,
-        query_params={"content_types": "dcim.device"},
-        required=False,
-        description="Only update devices with the selected tag.",
-    )
 
     def load_source_adapter(self):
         """Load onboarding network adapter."""
@@ -454,7 +448,6 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         devices,
         device_role,
         sync_vlans,
-        tag,
         *args,
         **kwargs,
     ):
@@ -469,7 +462,6 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         self.location = location
         self.devices = devices
         self.device_role = device_role
-        self.tag = tag
         self.sync_vlans = sync_vlans
 
         # Filter devices based on form input
@@ -480,8 +472,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
             device_filter["location"] = location
         if self.device_role:
             device_filter["role"] = device_role
-        if self.tag:
-            device_filter["tags"] = tag
+
         self.filtered_devices = Device.objects.filter(**device_filter)
 
         self.job_result.task_kwargs = {
@@ -491,7 +482,6 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
             "location": location,
             "devices": self.filtered_devices,
             "device_role": device_role,
-            "tag": tag,
             "sync_vlans": sync_vlans,
         }
 
@@ -571,12 +561,6 @@ class CommandGetterNetworkImporter(Job):
         query_params={"content_types": "dcim.device"},
         required=False,
         description="Only update devices with the selected role.",
-    )
-    tag = ObjectVar(
-        model=Tag,
-        query_params={"content_types": "dcim.device"},
-        required=False,
-        description="Only update devices with the selected tag.",
     )
     port = IntegerVar(default=22)
     timeout = IntegerVar(default=30)
