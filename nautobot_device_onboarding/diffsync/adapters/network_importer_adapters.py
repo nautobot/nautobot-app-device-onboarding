@@ -409,7 +409,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
 
     def load(self):
         """Load network data."""
-        # self.execute_command_getter()
+        self.execute_command_getter()
         self.load_ip_addresses()
         if self.job.sync_vlans:
             self.load_vlans()
