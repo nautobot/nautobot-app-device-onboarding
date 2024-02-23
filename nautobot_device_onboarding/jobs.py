@@ -404,6 +404,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
             except ObjectDoesNotExist as err:
                 self.logger.error(f"(row {sum([row_count, 1])}), {err} {query}")
                 processing_failed = True
+                row_count += 1
             except ValidationError as err:
                 self.logger.error(f"(row {sum([row_count, 1])}), {err}")
                 self.logger.error
@@ -455,7 +456,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
                 # prepare the task_kwargs needed by the CommandGetterDO job
                 self.job_result.task_kwargs = {"debug": debug, "csv_file": self.task_kwargs_csv_data}
             else:
-                raise ValidationError(mesage="CSV check failed. No devices will be onboarded.")
+                raise ValidationError(message="CSV check failed. No devices will be onboarded.")
 
         else:
             self.location = location
