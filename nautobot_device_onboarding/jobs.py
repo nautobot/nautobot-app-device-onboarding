@@ -678,7 +678,6 @@ class CommandGetterDO(Job):
 
     def run(self, *args, **kwargs):
         """Process onboarding task from ssot-ni job."""
-        print(kwargs)
         if kwargs["csv_file"]:
             self.ip_addresses = []
             for ip_address in kwargs["csv_file"]:
