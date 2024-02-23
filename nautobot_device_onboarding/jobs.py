@@ -489,7 +489,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
             "ip_address_status": ip_address_status,
             "default_prefix_status": default_prefix_status,
             "location": location,
-            "devices": devices,
+            "devices": self.filtered_devices,
             "device_role": device_role,
             "tag": tag,
             "sync_vlans": sync_vlans,
