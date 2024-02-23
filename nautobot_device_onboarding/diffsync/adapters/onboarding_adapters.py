@@ -2,7 +2,7 @@
 
 import time
 from collections import defaultdict
-from typing import Dict, FrozenSet, Hashable, Tuple, Type
+from typing import Dict, FrozenSet, DefaultDict, Hashable, Tuple, Type
 
 import diffsync
 import netaddr
@@ -28,6 +28,10 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
     device_type = onboarding_models.OnboardingDeviceType
 
     top_level = ["manufacturer", "platform", "device_type", "device"]
+
+    # This dictionary acts as an ORM cache.
+    _cache: DefaultDict[str, Dict[ParameterSet, Model]]
+    _cache_hits: DefaultDict[str, int] = defaultdict(int)
 
     def __init__(self, job, sync, *args, **kwargs):
         """Initialize the OnboardingNautobotAdapter."""
@@ -307,7 +311,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                     status__name=self.job.processed_csv_data[ip_address]["device_status"].name,
                     secrets_group__name=self.job.processed_csv_data[ip_address]["secrets_group"].name,
                     interfaces=[self.device_data[ip_address]["mgmt_interface"]],
-                    mask_length=self.device_data[ip_address]["mask_length"],
+                    mask_length=int(self.device_data[ip_address]["mask_length"]),
                     serial=self.device_data[ip_address]["serial"],
                 )  # type: ignore
                 try:

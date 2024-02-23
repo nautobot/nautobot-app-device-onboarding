@@ -378,7 +378,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
                 processed_csv_data[row["ip_address_host"]] = {}
                 processed_csv_data[row["ip_address_host"]]["location"] = location
                 processed_csv_data[row["ip_address_host"]]["namespace"] = namespace
-                processed_csv_data[row["ip_address_host"]]["port"] = row["port"].strip()
+                processed_csv_data[row["ip_address_host"]]["port"] = int(row["port"].strip())
                 processed_csv_data[row["ip_address_host"]]["timeout"] = int(row["timeout"].strip())
                 processed_csv_data[row["ip_address_host"]]["set_mgmt_only"] = set_mgmgt_only
                 processed_csv_data[row["ip_address_host"]][
@@ -393,8 +393,8 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
 
                 # Prepare ids to send to the job in celery
                 self.task_kwargs_csv_data[row["ip_address_host"]] = {}
-                self.task_kwargs_csv_data[row["ip_address_host"]]["port"] = row["port"].strip()
-                self.task_kwargs_csv_data[row["ip_address_host"]]["timeout"] = row["timeout"].strip()
+                self.task_kwargs_csv_data[row["ip_address_host"]]["port"] = int(row["port"].strip())
+                self.task_kwargs_csv_data[row["ip_address_host"]]["timeout"] = int(row["timeout"].strip())
                 self.task_kwargs_csv_data[row["ip_address_host"]]["secrets_group"] = (
                     secrets_group.id if secrets_group else ""
                 )
@@ -458,6 +458,31 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
                 raise ValidationError(message="CSV check failed. No devices will be onboarded.")
 
         else:
+            # Verify that all requried form inputs have been provided
+            required_inputs = {
+                "location": location, 
+                "namespace": namespace, 
+                "ip_addresses": ip_addresses, 
+                "device_role": device_role, 
+                "device_status": device_status, 
+                "interface_status": interface_status, 
+                "ip_address_status": ip_address_status, 
+                "port": port, 
+                "timeout": timeout, 
+                "secrets_group": secrets_group
+            }
+            # missing_required_inputs = []
+            # for form_field, input_value in required_inputs:
+            #     if not input_value:
+            #         missing_required_inputs.append(form_field)
+            
+            missing_required_inputs = [form_field for form_field, input_value in required_inputs.items() if not input_value]
+            if not missing_required_inputs:
+                pass
+            else:
+                self.logger.error(f"Missing requried inputs from job form: {missing_required_inputs}")
+                raise ValidationError(message=f"Missing required inputs {missing_required_inputs}")
+
             self.location = location
             self.namespace = namespace
             self.ip_addresses = ip_addresses.replace(" ", "").split(",")
