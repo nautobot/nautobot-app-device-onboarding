@@ -11,6 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from nautobot.apps.jobs import BooleanVar, FileVar, IntegerVar, Job, MultiObjectVar, ObjectVar, StringVar
 from nautobot.core.celery import register_jobs
 from nautobot.dcim.models import Device, DeviceType, Location, Platform
+from nautobot.ipam.models import Namespace
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status, Tag
 from nautobot.ipam.models import Namespace
@@ -236,7 +237,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
         description="Enable for more verbose logging.",
     )
     csv_file = FileVar(
-        label="CSV File", required=False, description="If a file is provided all other options will be ignored."
+        label="CSV File", required=False, description="If a file is provided all the options below will be ignored."
     )
     location = ObjectVar(
         model=Location,
@@ -252,7 +253,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
     )
     port = IntegerVar(required=False, default=22)
     timeout = IntegerVar(required=False, default=30)
-    management_only_interface = BooleanVar(
+    set_mgmt_only = BooleanVar(
         default=False,
         label="Set Management Only",
         description="If True, new interfaces that are created will be set to management only. If False, new interfaces will be set to not be management only.",
@@ -340,6 +341,10 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
                 device_role = Role.objects.get(
                     name=row["device_role_name"].strip(),
                 )
+                query = f"namespace: {row.get('namespace')}"
+                namespace = Namespace.objects.get(
+                    name=row["namespace"].strip(),
+                )
                 query = f"device_status: {row.get('device_status_name')}"
                 device_status = Status.objects.get(
                     name=row["device_status_name"].strip(),
@@ -373,6 +378,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
 
                 processed_csv_data[row["ip_address_host"]] = {}
                 processed_csv_data[row["ip_address_host"]]["location"] = location
+                processed_csv_data[row["ip_address_host"]]["namespace"] = namespace
                 processed_csv_data[row["ip_address_host"]]["port"] = row["port"].strip()
                 processed_csv_data[row["ip_address_host"]]["timeout"] = row["timeout"].strip()
                 processed_csv_data[row["ip_address_host"]]["set_mgmt_only"] = set_mgmgt_only
@@ -419,7 +425,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
         location,
         namespace,
         ip_addresses,
-        management_only_interface,
+        set_mgmt_only,
         update_devices_without_primary_ip,
         device_role,
         device_status,
@@ -455,7 +461,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
             self.location = location
             self.namespace = namespace
             self.ip_addresses = ip_addresses.replace(" ", "").split(",")
-            self.management_only_interface = management_only_interface
+            self.set_mgmt_only = set_mgmt_only
             self.update_devices_without_primary_ip = update_devices_without_primary_ip
             self.device_role = device_role
             self.device_status = device_status
@@ -471,7 +477,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
                 "location": location,
                 "namespace": namespace,
                 "ip_addresses": ip_addresses,
-                "management_only_interface": management_only_interface,
+                "set_mgmt_only": set_mgmt_only,
                 "update_devices_without_primary_ip": update_devices_without_primary_ip,
                 "device_role": device_role,
                 "device_status": device_status,
