@@ -51,7 +51,7 @@ class OnboardingDevice(DiffSyncModel):
     interfaces: Optional[list]
 
     @classmethod
-    def _get_or_create_device(cls, platform, diffsync, ids, attrs):
+    def _get_or_create_device(cls, diffsync, ids, attrs):
         """Attempt to get a Device, create a new one if necessary."""
         device = None
         try:
@@ -63,6 +63,7 @@ class OnboardingDevice(DiffSyncModel):
             location = diffsync_utils.retrieve_submitted_value(
                 job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="location"
             )
+            platform = Platform.objects.get(name=attrs["platform__name"])
             device = Device.objects.get(name=ids["name"], location=location)
             update_devices_without_primary_ip = location = diffsync_utils.retrieve_submitted_value(
                 job=diffsync.job,
@@ -164,25 +165,10 @@ class OnboardingDevice(DiffSyncModel):
     def create(cls, diffsync, ids, attrs):
         """Create a new nautobot device using data scraped from a device."""
         if diffsync.job.debug:
-            diffsync.job.debug.logger.debug("Creating device {ids}")
-        # Determine device platform
-        platform = None
-        if diffsync_utils.retrieve_submitted_value(
-            job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="platform"
-        ):
-
-            platform = diffsync_utils.retrieve_submitted_value(
-                job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="platform"
-            )
-
-            ip_address = attrs["primary_ip4__host"], latform = diffsync_utils.retrieve_submitted_value(
-                job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="platform"
-            )
-        else:
-            platform = Platform.objects.get(name=attrs["platform__name"])
-
+            diffsync.job.logger.debug("Creating device {ids} with {attrs}")
+            
         # Get or create Device, Interface and IP Address
-        device = cls._get_or_create_device(platform, diffsync, ids, attrs)
+        device = cls._get_or_create_device(diffsync, ids, attrs)
         if device:
             ip_address = diffsync_utils.get_or_create_ip_address(
                 host=attrs["primary_ip4__host"],
