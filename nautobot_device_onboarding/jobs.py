@@ -11,12 +11,6 @@ from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status, Tag
 from nautobot.ipam.models import Namespace
-from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
-from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
-from nautobot_ssot.jobs.base import DataSource
-from nornir import InitNornir
-from nornir.core.plugins.inventory import InventoryPluginRegister, TransformFunctionRegister
-
 from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
     NetworkImporterNautobotAdapter,
     NetworkImporterNetworkAdapter,
@@ -28,17 +22,8 @@ from nautobot_device_onboarding.diffsync.adapters.onboarding_adapters import (
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.helpers import onboarding_task_fqdn_to_ip
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
-from nautobot_device_onboarding.nornir_plays.command_getter import netmiko_send_commands
-from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
-from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
-from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
-from nautobot_device_onboarding.utils.helper import add_platform_parsing_info, get_job_filter
-from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
-
-InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
-InventoryPluginRegister.register("empty-inventory", EmptyInventory)
-TransformFunctionRegister.register("transform_to_add_command_parser_info", add_platform_parsing_info)
-
+from nautobot_device_onboarding.nornir_plays.command_getter import command_getter_do, command_getter_ni
+from nautobot_ssot.jobs.base import DataSource
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
@@ -517,34 +502,8 @@ class CommandGetterDO(Job):
     platform = ObjectVar(model=Platform, required=False)
 
     def run(self, *args, **kwargs):
-        """Process onboarding task from ssot-ni job."""
-        self.ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
-        self.port = kwargs["port"]
-        self.timeout = kwargs["timeout"]
-        self.secrets_group = kwargs["secrets_group"]
-        self.platform = kwargs["platform"]
-
-        # Initiate Nornir instance with empty inventory
-        try:
-            logger = NornirLogger(self.job_result, log_level=0)
-            compiled_results = {}
-            with InitNornir(
-                runner=NORNIR_SETTINGS.get("runner"),
-                logging={"enabled": False},
-                inventory={
-                    "plugin": "empty-inventory",
-                },
-            ) as nornir_obj:
-                nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
-                for entered_ip in self.ip_addresses:
-                    single_host_inventory_constructed = _set_inventory(
-                        entered_ip, self.platform, self.port, self.secrets_group
-                    )
-                    nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
-                nr_with_processors.run(task=netmiko_send_commands, command_getter_job="device_onboarding")
-        except Exception as err:  # pylint: disable=broad-exception-caught
-            self.logger.error("Error: %s", err)
-            return err
+        """Run command getter."""
+        compiled_results = command_getter_do(self.job_result, self.logger.getEffectiveLevel(), kwargs)
         return compiled_results
 
 
@@ -590,28 +549,8 @@ class CommandGetterNetworkImporter(Job):
         hidden = False
 
     def run(self, *args, **kwargs):
-        """Process onboarding task from ssot-ni job."""
-        try:
-            logger = NornirLogger(self.job_result, log_level=0)
-            compiled_results = {}
-            qs = get_job_filter(kwargs)
-            with InitNornir(
-                runner=NORNIR_SETTINGS.get("runner"),
-                logging={"enabled": False},
-                inventory={
-                    "plugin": "nautobot-inventory",
-                    "options": {
-                        "credentials_class": NORNIR_SETTINGS.get("credentials"),
-                        "queryset": qs,
-                    },
-                    "transform_function": "transform_to_add_command_parser_info",
-                },
-            ) as nornir_obj:
-                nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
-                nr_with_processors.run(task=netmiko_send_commands, command_getter_job="network_importer")
-        except Exception as err:  # pylint: disable=broad-exception-caught
-            self.logger.info("Error: %s", err)
-            return err
+        """Run command getter."""
+        compiled_results = command_getter_ni(self.job_result, self.logger.getEffectiveLevel(), kwargs)
         return compiled_results
 
 

@@ -1,19 +1,15 @@
 """DiffSync adapters."""
 
-import time
-
 import diffsync
 from diffsync.enum import DiffSyncModelFlags
 from django.core.exceptions import ValidationError
-from nautobot.apps.choices import JobResultStatusChoices
 from nautobot.dcim.models import Interface
-from nautobot.extras.models import Job, JobResult
-from nautobot.ipam.models import VLAN, IPAddress
+from nautobot.ipam.models import IPAddress, VLAN
+from nautobot_device_onboarding.diffsync.models import network_importer_models
+from nautobot_device_onboarding.nornir_plays.command_getter import command_getter_ni
+from nautobot_device_onboarding.utils import diffsync_utils
 from nautobot_ssot.contrib import NautobotAdapter
 from netaddr import EUI, mac_unix_expanded
-
-from nautobot_device_onboarding.diffsync.models import network_importer_models
-from nautobot_device_onboarding.utils import diffsync_utils
 
 
 class FilteredNautobotAdapter(NautobotAdapter):
@@ -231,26 +227,15 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
 
     def execute_command_getter(self):
         """Start the CommandGetterDO job to query devices for data."""
-        command_getter_job = Job.objects.get(name="Command Getter for Network Importer")
-        job_kwargs = self.job.prepare_job_kwargs(self.job.job_result.task_kwargs)
-        kwargs = self.job.serialize_data(job_kwargs)
-        result = JobResult.enqueue_job(
-            job_model=command_getter_job, user=self.job.user, celery_kwargs=self.job.job_result.celery_kwargs, **kwargs
-        )
-        while True:
-            if result.status not in JobResultStatusChoices.READY_STATES:
-                time.sleep(5)
-                result.refresh_from_db()
-            else:
-                break
+        result = command_getter_ni(self.job.job_result, self.job.logger.getEffectiveLevel(), self.job.job_result.task_kwargs)
         if self.job.debug:
-            self.job.logger.debug(f"Command Getter Job Result: {result.result}")
+            self.job.logger.debug(f"Command Getter Job Result: {result}")
         # verify data returned is a dict
-        data_type_check = diffsync_utils.check_data_type(result.result)
+        data_type_check = diffsync_utils.check_data_type(result)
         if self.job.debug:
             self.job.logger.debug(f"CommandGetter data type check resut: {data_type_check}")
         if data_type_check:
-            self._handle_failed_devices(device_data=result.result)
+            self._handle_failed_devices(device_data=result)
         else:
             self.job.logger.error(
                 "Data returned from CommandGetter is not the correct type. "
