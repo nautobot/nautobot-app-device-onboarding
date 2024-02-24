@@ -65,7 +65,7 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
                     for ip_address in interface_data["ip_addresses"]:
                         if ip_address:
                             ip_address_hosts.add(ip_address["ip_address"])
-        ip_address_hosts.remove('') # do not attempt to filter ip addresses with empty strings
+        ip_address_hosts.remove("")  # do not attempt to filter ip addresses with empty strings
         for ip_address in IPAddress.objects.filter(
             host__in=ip_address_hosts,
             parent__namespace__name=self.job.namespace.name,
@@ -229,7 +229,9 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
 
     def execute_command_getter(self):
         """Start the CommandGetterDO job to query devices for data."""
-        result = command_getter_ni(self.job.job_result, self.job.logger.getEffectiveLevel(), self.job.job_result.task_kwargs)
+        result = command_getter_ni(
+            self.job.job_result, self.job.logger.getEffectiveLevel(), self.job.job_result.task_kwargs
+        )
         if self.job.debug:
             self.job.logger.debug(f"Command Getter Job Result: {result}")
         # verify data returned is a dict
@@ -275,7 +277,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
             status__name=self.job.interface_status.name,
             type=interface_data["type"],
             mac_address=self._process_mac_address(interface_data["mac_address"]),
-            mtu=interface_data["mtu"] if interface_data['mtu'] else 1500,
+            mtu=interface_data["mtu"] if interface_data["mtu"] else 1500,
             description=interface_data["description"],
             enabled=interface_data["link_status"],
             mode=interface_data["802.1Q_mode"],
@@ -292,7 +294,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
             for interface in json.loads(device_data["interfaces"]):
                 for interface_name, interface_data in interface.items():
                     for ip_address in interface_data["ip_addresses"]:
-                        if ip_address["ip_address"]: # the ip_address and mask_length may be empty, skip these
+                        if ip_address["ip_address"]:  # the ip_address and mask_length may be empty, skip these
                             if self.job.debug:
                                 self.job.logger.debug(f"Loading {ip_address} from {interface_name} on {hostname}")
                             network_ip_address = self.ip_address(
@@ -357,17 +359,21 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
             for interface in json.loads(device_data["interfaces"]):
                 for interface_name, interface_data in interface.items():
                     for ip_address in interface_data["ip_addresses"]:
-                        if ip_address["ip_address"]: # the ip_address and mask_length may be empty, skip these
+                        if ip_address["ip_address"]:  # the ip_address and mask_length may be empty, skip these
                             network_ip_address_to_interface = self.ipaddress_to_interface(
                                 diffsync=self,
                                 interface__device__name=hostname,
                                 interface__name=interface_name,
                                 ip_address__host=ip_address["ip_address"],
-                                ip_address__mask_length=int(ip_address["prefix_length"]) if ip_address["prefix_length"] else None,
+                                ip_address__mask_length=(
+                                    int(ip_address["prefix_length"]) if ip_address["prefix_length"] else None
+                                ),
                             )
                             self.add(network_ip_address_to_interface)
                             if self.job.debug:
-                                self.job.logger.debug(f"IP Address to interface {network_ip_address_to_interface} loaded.")
+                                self.job.logger.debug(
+                                    f"IP Address to interface {network_ip_address_to_interface} loaded."
+                                )
 
     def load_tagged_vlans_to_interface(self):
         """Load tagged vlan to interface assignments into the Diffsync store."""

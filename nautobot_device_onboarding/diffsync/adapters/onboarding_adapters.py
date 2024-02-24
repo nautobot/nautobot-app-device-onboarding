@@ -199,7 +199,9 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 )
                 raise Exception("Platform.network_driver missing")  # pylint: disable=broad-exception-raised
 
-        result = command_getter_do(self.job.job_result, self.job.logger.getEffectiveLevel(), self.job.job_result.task_kwargs)
+        result = command_getter_do(
+            self.job.job_result, self.job.logger.getEffectiveLevel(), self.job.job_result.task_kwargs
+        )
         if self.job.debug:
             self.job.logger.debug(f"Command Getter Job Result: {result}")
         data_type_check = diffsync_utils.check_data_type(result)

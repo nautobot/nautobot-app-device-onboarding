@@ -1,4 +1,5 @@
 """Nornir job for backing up actual config."""
+
 # pylint: disable=relative-beyond-top-level
 from nautobot_device_onboarding.constants import NETMIKO_TO_NAPALM_STATIC
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
@@ -68,9 +69,7 @@ def command_getter_do(job_result, log_level, kwargs):
         ) as nornir_obj:
             nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
             for entered_ip in ip_addresses:
-                single_host_inventory_constructed = _set_inventory(
-                    entered_ip, platform, port, secrets_group
-                )
+                single_host_inventory_constructed = _set_inventory(entered_ip, platform, port, secrets_group)
                 nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
             nr_with_processors.run(task=netmiko_send_commands, command_getter_job="device_onboarding")
     except Exception as err:  # pylint: disable=broad-exception-caught

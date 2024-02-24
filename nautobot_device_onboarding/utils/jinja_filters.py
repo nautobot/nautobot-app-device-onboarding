@@ -14,8 +14,8 @@ def fix_interfaces(interfaces):
             int_values["ip_addresses"].append(
                 {"ip_address": int_values.get("ip_address", ""), "prefix_length": int_values.get("prefix_length", "")}
             )
-            if 'up' in int_values['link_status']:
-                int_values['link_status'] = True
+            if "up" in int_values["link_status"]:
+                int_values["link_status"] = True
             else:
-                int_values['link_status'] = False
+                int_values["link_status"] = False
     return interfaces
