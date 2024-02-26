@@ -14,11 +14,7 @@ from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status
 from nautobot.ipam.models import Namespace
-from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
-from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
 from nautobot_ssot.jobs.base import DataSource
-from nornir import InitNornir
-from nornir.core.plugins.inventory import InventoryPluginRegister, TransformFunctionRegister
 
 from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
     NetworkImporterNautobotAdapter,
@@ -31,21 +27,7 @@ from nautobot_device_onboarding.diffsync.adapters.onboarding_adapters import (
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.helpers import onboarding_task_fqdn_to_ip
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
-from nautobot_device_onboarding.nornir_plays.command_getter import (
-    command_getter_do,
-    command_getter_ni,
-    netmiko_send_commands,
-)
-from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
-from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
-from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
-from nautobot_device_onboarding.utils.helper import add_platform_parsing_info, get_job_filter
-from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
-
-InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
-InventoryPluginRegister.register("empty-inventory", EmptyInventory)
-TransformFunctionRegister.register("transform_to_add_command_parser_info", add_platform_parsing_info)
-
+from nautobot_device_onboarding.nornir_plays.command_getter import command_getter_do, command_getter_ni
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
@@ -658,7 +640,7 @@ class CommandGetterDO(Job):
     """Simple Job to Execute Show Command."""
 
     class Meta:
-        """CommandGetterDO Job Meta."""
+        """Job Meta."""
 
         name = "Command Getter for Device Onboarding"
         description = "Login to a device(s) and run commands."
@@ -682,6 +664,14 @@ class CommandGetterDO(Job):
 class CommandGetterNetworkImporter(Job):
     """Simple Job to Execute Show Command."""
 
+    class Meta:
+        """Job Meta."""
+
+        name = "Command Getter for Network Importer"
+        description = "Login to a device(s) and run commands."
+        has_sensitive_variables = False
+        hidden = False
+
     debug = BooleanVar()
     namespace = ObjectVar(model=Namespace, required=True)
     devices = MultiObjectVar(model=Device, required=False)
@@ -689,14 +679,6 @@ class CommandGetterNetworkImporter(Job):
     device_role = ObjectVar(model=Role, required=False)
     port = IntegerVar(default=22)
     timeout = IntegerVar(default=30)
-
-    class Meta:
-        """Meta object boilerplate for onboarding."""
-
-        name = "Command Getter for Network Importer"
-        description = "Login to a device(s) and run commands."
-        has_sensitive_variables = False
-        hidden = False
 
     def run(self, *args, **kwargs):
         """Run command getter."""

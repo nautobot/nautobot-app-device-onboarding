@@ -98,7 +98,6 @@ def retrieve_submitted_value(job, ip_address, query_string):
     that was parsed when the file was loaded. If a CSV file has not been submitted,
     return the value input into the job form.
     """
-    print(vars(job))
     if job.debug:
         job.logger.debug(f"Retrieving {query_string} for {ip_address}")
     if job.processed_csv_data:

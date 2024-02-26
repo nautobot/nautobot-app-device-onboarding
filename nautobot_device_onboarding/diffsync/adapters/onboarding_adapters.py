@@ -1,6 +1,5 @@
 """DiffSync adapters."""
 
-import time
 from collections import defaultdict
 from typing import DefaultDict, Dict, FrozenSet, Hashable, Tuple, Type
 

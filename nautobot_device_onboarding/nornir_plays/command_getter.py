@@ -1,14 +1,14 @@
 """CommandGetter."""
 
 # pylint: disable=relative-beyond-top-level
+from nautobot.dcim.models import Platform
+from nautobot.extras.models import SecretsGroup
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
 from nornir import InitNornir
 from nornir.core.plugins.inventory import InventoryPluginRegister, TransformFunctionRegister
 from nornir.core.task import Result, Task
 from nornir_netmiko.tasks import netmiko_send_command
-from nautobot.extras.models import SecretsGroup
-from nautobot.dcim.models import Platform
 
 from nautobot_device_onboarding.constants import NETMIKO_TO_NAPALM_STATIC
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
@@ -75,7 +75,7 @@ def command_getter_do(job_result, log_level, kwargs):
                 "plugin": "empty-inventory",
             },
         ) as nornir_obj:
-            nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
+            nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results, kwargs)])
             for entered_ip in ip_addresses:
                 if kwargs["csv_file"]:
                     # get platform if one was provided via csv
@@ -123,7 +123,7 @@ def command_getter_ni(job_result, log_level, kwargs):
                 "transform_function": "transform_to_add_command_parser_info",
             },
         ) as nornir_obj:
-            nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
+            nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results, kwargs)])
             nr_with_processors.run(task=netmiko_send_commands, command_getter_job="network_importer")
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info("Error: %s", err)
