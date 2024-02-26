@@ -135,27 +135,19 @@ class OnboardingDevice(DiffSyncModel):
     @classmethod
     def _update_device_with_attrs(cls, device, platform, ids, attrs, diffsync):
         """Update a Nautobot device instance."""
-        device.location = (
-            diffsync_utils.retrieve_submitted_value(
-                job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="location"
-            ),
+        device.location =diffsync_utils.retrieve_submitted_value(
+                job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="location",
         )
-        device.status = (
-            diffsync_utils.retrieve_submitted_value(
-                job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="device_status"
-            ),
+        device.status = diffsync_utils.retrieve_submitted_value(
+                job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="device_status",
         )
-        device.role = (
-            diffsync_utils.retrieve_submitted_value(
-                job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="device_role"
-            ),
+        device.role = diffsync_utils.retrieve_submitted_value(
+                job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="device_role",
         )
         device.device_type = DeviceType.objects.get(model=attrs["device_type__model"])
         device.platform = platform
-        device.secrets_group = (
-            diffsync_utils.retrieve_submitted_value(
-                job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="secrets_group"
-            ),
+        device.secrets_group = diffsync_utils.retrieve_submitted_value(
+                job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="secrets_group",
         )
         device.serial = ids["serial"]
 
@@ -231,13 +223,13 @@ class OnboardingDevice(DiffSyncModel):
                 ip_address = diffsync_utils.get_or_create_ip_address(
                     host=attrs["primary_ip4__host"],
                     mask_length=attrs["mask_length"],
-                    namespace=self.diffsync_utils.retrieve_submitted_value(
+                    namespace=diffsync_utils.retrieve_submitted_value(
                         job=self.job, ip_address=attrs["primary_ip4__host"], query_string="namespace"
                     ),
-                    default_ip_status=self.diffsync_utils.retrieve_submitted_value(
+                    default_ip_status=diffsync_utils.retrieve_submitted_value(
                         job=self.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
                     ),
-                    default_prefix_status=self.diffsync_utils.retrieve_submitted_value(
+                    default_prefix_status=diffsync_utils.retrieve_submitted_value(
                         job=self.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
                     ),
                     job=self.diffsync.job,
@@ -281,13 +273,13 @@ class OnboardingDevice(DiffSyncModel):
                 ip_address = diffsync_utils.get_or_create_ip_address(
                     host=attrs["primary_ip4__host"],
                     mask_length=attrs["mask_length"],
-                    namespace=self.diffsync_utils.retrieve_submitted_value(
+                    namespace=diffsync_utils.retrieve_submitted_value(
                         job=self.job, ip_address=attrs["primary_ip4__host"], query_string="namespace"
                     ),
-                    default_ip_status=self.diffsync_utils.retrieve_submitted_value(
+                    default_ip_status=diffsync_utils.retrieve_submitted_value(
                         job=self.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
                     ),
-                    default_prefix_status=self.diffsync_utils.retrieve_submitted_value(
+                    default_prefix_status=diffsync_utils.retrieve_submitted_value(
                         job=self.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
                     ),
                     job=self.diffsync.job,
