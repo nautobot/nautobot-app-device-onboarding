@@ -57,7 +57,7 @@ def guess_netmiko_device_type(hostname, username, password, port):
 
     except Exception as err:
         print(err)
-    print(f"************************Guessed device type: {guessed_device_type}")
+    print(f"{hostname} - guessed platform: {guessed_device_type}")
     return guessed_device_type
 
 
