@@ -1,18 +1,19 @@
 """Nornir job for backing up actual config."""
 
 # pylint: disable=relative-beyond-top-level
-from nautobot_device_onboarding.constants import NETMIKO_TO_NAPALM_STATIC
-from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
-from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
-from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
-from nautobot_device_onboarding.utils.helper import add_platform_parsing_info, get_job_filter
-from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
 from nornir import InitNornir
 from nornir.core.plugins.inventory import InventoryPluginRegister, TransformFunctionRegister
 from nornir.core.task import Result, Task
 from nornir_netmiko.tasks import netmiko_send_command
+
+from nautobot_device_onboarding.constants import NETMIKO_TO_NAPALM_STATIC
+from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
+from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
+from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
+from nautobot_device_onboarding.utils.helper import add_platform_parsing_info
+from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
@@ -53,7 +54,7 @@ def command_getter_do(job_result, log_level, kwargs):
 
     ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
     port = kwargs["port"]
-    timeout = kwargs["timeout"]
+    # timeout = kwargs["timeout"]
     secrets_group = kwargs["secrets_group"]
     platform = kwargs["platform"]
     # Initiate Nornir instance with empty inventory

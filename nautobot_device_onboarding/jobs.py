@@ -11,6 +11,8 @@ from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status
 from nautobot.ipam.models import Namespace
+from nautobot_ssot.jobs.base import DataSource
+
 from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
     NetworkImporterNautobotAdapter,
     NetworkImporterNetworkAdapter,
@@ -23,7 +25,6 @@ from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.helpers import onboarding_task_fqdn_to_ip
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
 from nautobot_device_onboarding.nornir_plays.command_getter import command_getter_do, command_getter_ni
-from nautobot_ssot.jobs.base import DataSource
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
@@ -347,14 +348,14 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         super().__init__()
         self.filtered_devices = None  # Queryset of devices based on form inputs
 
-        #################### FOR TESTING ONLY #########################################
+        # FOR TESTING ONLY #
         # from nautobot_device_onboarding.diffsync import mock_data
         # from nautobot_device_onboarding.utils import diffsync_utils
         # self.command_getter_result = mock_data.network_importer_mock_data
         # self.devices_to_load = diffsync_utils.generate_device_queryset_from_command_getter_result(mock_data.network_importer_mock_data)
-        ################### REMOVE WHEN NOT TESTING ###################################
+        # REMOVE WHEN NOT TESTING #
 
-        ############ RESTORE THESE LINES WHEN NOT TESTING! ############################
+        # RESTORE THESE LINES WHEN NOT TESTING! #
         self.command_getter_result = None  # Dict result from CommandGetter job
         self.devices_to_load = None  # Queryset consisting of devices that responded
 
@@ -413,7 +414,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
     def load_source_adapter(self):
         """Load onboarding network adapter."""
         # do not load source data if the job form does not filter which devices to sync
-        if self.filtered_devices: 
+        if self.filtered_devices:
             self.source_adapter = NetworkImporterNetworkAdapter(job=self, sync=self.sync)
             self.source_adapter.load()
 
@@ -459,7 +460,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
             device_filter["location"] = location
         if self.device_role:
             device_filter["role"] = device_role
-        if device_filter: # prevent all devices from being returned by an empty filter
+        if device_filter:  # prevent all devices from being returned by an empty filter
             self.filtered_devices = Device.objects.filter(**device_filter)
         else:
             self.logger.error("No device filter options were provided, no devices will be synced.")

@@ -9,6 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db.models import Model
 from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
+
 from nautobot_device_onboarding.diffsync.models import onboarding_models
 from nautobot_device_onboarding.nornir_plays.command_getter import command_getter_do
 from nautobot_device_onboarding.utils import diffsync_utils

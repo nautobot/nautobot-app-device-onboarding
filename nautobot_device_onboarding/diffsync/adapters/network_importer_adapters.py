@@ -1,16 +1,18 @@
 """DiffSync adapters."""
 
 import json
+
 import diffsync
 from diffsync.enum import DiffSyncModelFlags
 from django.core.exceptions import ValidationError
 from nautobot.dcim.models import Interface
-from nautobot.ipam.models import IPAddress, VLAN
+from nautobot.ipam.models import VLAN, IPAddress
+from nautobot_ssot.contrib import NautobotAdapter
+from netaddr import EUI, mac_unix_expanded
+
 from nautobot_device_onboarding.diffsync.models import network_importer_models
 from nautobot_device_onboarding.nornir_plays.command_getter import command_getter_ni
 from nautobot_device_onboarding.utils import diffsync_utils
-from nautobot_ssot.contrib import NautobotAdapter
-from netaddr import EUI, mac_unix_expanded
 
 
 class FilteredNautobotAdapter(NautobotAdapter):
