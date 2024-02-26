@@ -67,7 +67,7 @@ def command_getter_do(job_result, log_level, kwargs):
                 "plugin": "empty-inventory",
             },
         ) as nornir_obj:
-            nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
+            nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results, kwargs)])
             for entered_ip in ip_addresses:
                 single_host_inventory_constructed = _set_inventory(entered_ip, platform, port, secrets_group)
                 nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
@@ -83,7 +83,10 @@ def command_getter_ni(job_result, log_level, kwargs):
     logger = NornirLogger(job_result, log_level)
     try:
         compiled_results = {}
-        qs = get_job_filter(kwargs)
+        # qs = get_job_filter(kwargs)
+        qs = kwargs["devices"]
+        if not qs:
+            return None
         with InitNornir(
             runner=NORNIR_SETTINGS.get("runner"),
             logging={"enabled": False},
@@ -96,7 +99,7 @@ def command_getter_ni(job_result, log_level, kwargs):
                 "transform_function": "transform_to_add_command_parser_info",
             },
         ) as nornir_obj:
-            nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
+            nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results, kwargs)])
             nr_with_processors.run(task=netmiko_send_commands, command_getter_job="network_importer")
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info("Error: %s", err)

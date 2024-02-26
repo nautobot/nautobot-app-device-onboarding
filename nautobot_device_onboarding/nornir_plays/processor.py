@@ -13,10 +13,11 @@ from nautobot_device_onboarding.utils.formatter import extract_show_data
 class ProcessorDO(BaseLoggingProcessor):
     """Processor class for Device Onboarding jobs."""
 
-    def __init__(self, logger, command_outputs):
+    def __init__(self, logger, command_outputs, kwargs):
         """Set logging facility."""
         self.logger = logger
         self.data: Dict = command_outputs
+        self.kwargs = kwargs
 
     def task_instance_started(self, task: Task, host: Host) -> None:
         """Processor for logging and data processing on task start."""
@@ -61,7 +62,8 @@ class ProcessorDO(BaseLoggingProcessor):
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Processor for logging and data processing on subtask completed."""
         self.logger.info(f"subtask_instance_completed Subtask completed {task.name}.", extra={"object": task.host})
-        self.logger.info(f"subtask_instance_completed Subtask result {result.result}.", extra={"object": task.host})
+        if self.kwargs["debug"]:
+            self.logger.info(f"subtask_instance_completed Subtask result {result.result}.", extra={"object": task.host})
 
         self.data[host.name].update(
             {

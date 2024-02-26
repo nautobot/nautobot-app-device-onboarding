@@ -61,11 +61,7 @@ class NetworkImporterDevice(FilteredNautobotModel):
         job.command_getter_result contains the result from the CommandGetter job.
         Only devices that actually responded with data should be considered for the sync.
         """
-        if diffsync.job.filtered_devices:
-            return diffsync.job.devices_to_load
-        else:
-            diffsync.job.logger.error("No device filter options were provided, no devices will be synced.")
-            return cls._model.objects.none()
+        return diffsync.job.devices_to_load
 
     @classmethod
     def create(cls, diffsync, ids, attrs):
