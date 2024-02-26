@@ -329,7 +329,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
         row_count = 1
         for row in csv_reader:
             try:
-               query = f"location_name: {row.get('location_name')}, location_parent_name: {row.get('location_parent_name')}"
+                query = f"location_name: {row.get('location_name')}, location_parent_name: {row.get('location_parent_name')}"
                 if row.get("location_parent_name"):
                     location = Location.objects.get(
                         name=row["location_name"].strip(), parent__name=row["location_parent_name"].strip()
