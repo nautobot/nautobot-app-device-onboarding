@@ -31,7 +31,11 @@ from nautobot_device_onboarding.diffsync.adapters.onboarding_adapters import (
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.helpers import onboarding_task_fqdn_to_ip
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
-from nautobot_device_onboarding.nornir_plays.command_getter import netmiko_send_commands
+from nautobot_device_onboarding.nornir_plays.command_getter import (
+    command_getter_do,
+    command_getter_ni,
+    netmiko_send_commands,
+)
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
@@ -461,19 +465,21 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
         else:
             # Verify that all requried form inputs have been provided
             required_inputs = {
-                "location": location, 
-                "namespace": namespace, 
-                "ip_addresses": ip_addresses, 
-                "device_role": device_role, 
-                "device_status": device_status, 
-                "interface_status": interface_status, 
-                "ip_address_status": ip_address_status, 
-                "port": port, 
-                "timeout": timeout, 
-                "secrets_group": secrets_group
+                "location": location,
+                "namespace": namespace,
+                "ip_addresses": ip_addresses,
+                "device_role": device_role,
+                "device_status": device_status,
+                "interface_status": interface_status,
+                "ip_address_status": ip_address_status,
+                "port": port,
+                "timeout": timeout,
+                "secrets_group": secrets_group,
             }
-  
-            missing_required_inputs = [form_field for form_field, input_value in required_inputs.items() if not input_value]
+
+            missing_required_inputs = [
+                form_field for form_field, input_value in required_inputs.items() if not input_value
+            ]
             if not missing_required_inputs:
                 pass
             else:
@@ -652,7 +658,7 @@ class CommandGetterDO(Job):
     """Simple Job to Execute Show Command."""
 
     class Meta:
-        """Meta object boilerplate for onboarding."""
+        """CommandGetterDO Job Meta."""
 
         name = "Command Getter for Device Onboarding"
         description = "Login to a device(s) and run commands."
@@ -668,87 +674,19 @@ class CommandGetterDO(Job):
     platform = ObjectVar(model=Platform, required=False)
 
     def run(self, *args, **kwargs):
-        """Process onboarding task from ssot-ni job."""
-        if kwargs["csv_file"]:
-            self.ip_addresses = []
-            for ip_address in kwargs["csv_file"]:
-                self.ip_addresses.append(ip_address)
-        else:
-            self.ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
-            self.port = kwargs["port"]
-            self.timeout = kwargs["timeout"]
-            self.secrets_group = kwargs["secrets_group"]
-            self.platform = kwargs["platform"]
-
-        # Initiate Nornir instance with empty inventory
-        try:
-            logger = NornirLogger(self.job_result, log_level=0)
-            compiled_results = {}
-            with InitNornir(
-                runner=NORNIR_SETTINGS.get("runner"),
-                logging={"enabled": False},
-                inventory={
-                    "plugin": "empty-inventory",
-                },
-            ) as nornir_obj:
-                nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
-                for entered_ip in self.ip_addresses:
-                    if kwargs["csv_file"]:
-                        # get platform if one was provided via csv
-                        platform = None
-                        platform_id = kwargs["csv_file"][entered_ip]["platform"]
-                        if platform_id:
-                            platform = Platform.objects.get(id=platform_id)
-
-                        # get secrets group if one was provided via csv
-                        secrets_group = None
-                        secrets_group_id = kwargs["csv_file"][entered_ip]["secrets_group"]
-                        if secrets_group_id:
-                            secrets_group = SecretsGroup.objects.get(id=secrets_group_id)
-
-                        single_host_inventory_constructed = _set_inventory(
-                            host_ip=entered_ip,
-                            platform=platform,
-                            port=kwargs["csv_file"][entered_ip]["port"],
-                            secrets_group=secrets_group,
-                        )
-                    else:
-                        single_host_inventory_constructed = _set_inventory(
-                            entered_ip, self.platform, self.port, self.secrets_group
-                        )
-
-                    nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
-                nr_with_processors.run(task=netmiko_send_commands, command_getter_job="device_onboarding")
-        except Exception as err:  # pylint: disable=broad-exception-caught
-            self.logger.error("Error: %s", err)
-            return err
+        """Run command getter."""
+        compiled_results = command_getter_do(self.job_result, self.logger.getEffectiveLevel(), kwargs)
         return compiled_results
 
 
 class CommandGetterNetworkImporter(Job):
     """Simple Job to Execute Show Command."""
 
-    debug = BooleanVar(description="Enable for more verbose logging.")
-    namespace = ObjectVar(
-        model=Namespace, required=True, description="The namespace for all IP addresses created or updated in the sync."
-    )
-    devices = MultiObjectVar(
-        model=Device,
-        required=False,
-        description="Device(s) to update.",
-    )
-    location = ObjectVar(
-        model=Location,
-        query_params={"content_type": "dcim.device"},
-        required=False,
-        description="Only update devices at a specific location.",
-    )
-    device_role = ObjectVar(
-        model=Role,
-        query_params={"content_types": "dcim.device"},
-        required=False,
-        description="Only update devices with the selected role.",
-    )
+    debug = BooleanVar()
+    namespace = ObjectVar(model=Namespace, required=True)
+    devices = MultiObjectVar(model=Device, required=False)
+    location = ObjectVar(model=Location, required=False)
+    device_role = ObjectVar(model=Role, required=False)
     port = IntegerVar(default=22)
     timeout = IntegerVar(default=30)
 
@@ -761,28 +699,8 @@ class CommandGetterNetworkImporter(Job):
         hidden = False
 
     def run(self, *args, **kwargs):
-        """Process onboarding task from ssot-ni job."""
-        try:
-            logger = NornirLogger(self.job_result, log_level=0)
-            compiled_results = {}
-            qs = get_job_filter(kwargs)
-            with InitNornir(
-                runner=NORNIR_SETTINGS.get("runner"),
-                logging={"enabled": False},
-                inventory={
-                    "plugin": "nautobot-inventory",
-                    "options": {
-                        "credentials_class": NORNIR_SETTINGS.get("credentials"),
-                        "queryset": qs,
-                    },
-                    "transform_function": "transform_to_add_command_parser_info",
-                },
-            ) as nornir_obj:
-                nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
-                nr_with_processors.run(task=netmiko_send_commands, command_getter_job="network_importer")
-        except Exception as err:  # pylint: disable=broad-exception-caught
-            self.logger.info("Error: %s", err)
-            return err
+        """Run command getter."""
+        compiled_results = command_getter_ni(self.job_result, self.logger.getEffectiveLevel(), kwargs)
         return compiled_results
 
 

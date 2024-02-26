@@ -166,7 +166,7 @@ class OnboardingDevice(DiffSyncModel):
         """Create a new nautobot device using data scraped from a device."""
         if diffsync.job.debug:
             diffsync.job.logger.debug("Creating device {ids} with {attrs}")
-            
+
         # Get or create Device, Interface and IP Address
         device = cls._get_or_create_device(diffsync, ids, attrs)
         if device:

@@ -104,4 +104,4 @@ def retrieve_submitted_value(job, ip_address, query_string):
     if job.processed_csv_data:
         return job.processed_csv_data[ip_address][query_string]
     else:
-       return getattr(job, query_string)
+        return getattr(job, query_string)
