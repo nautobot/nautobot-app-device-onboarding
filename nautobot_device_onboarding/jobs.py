@@ -351,7 +351,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         # from nautobot_device_onboarding.diffsync import mock_data
         # from nautobot_device_onboarding.utils import diffsync_utils
         # self.command_getter_result = mock_data.network_importer_mock_data
-        # self.devices_to_load = diffsync_utils.generate_device_querset_from_command_getter_result(mock_data.network_importer_mock_data)
+        # self.devices_to_load = diffsync_utils.generate_device_queryset_from_command_getter_result(mock_data.network_importer_mock_data)
         ################### REMOVE WHEN NOT TESTING ###################################
 
         ############ RESTORE THESE LINES WHEN NOT TESTING! ############################

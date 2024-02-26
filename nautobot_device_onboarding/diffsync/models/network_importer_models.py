@@ -101,6 +101,8 @@ class NetworkImporterInterface(FilteredNautobotModel):
         # "parent_interface__name",
         "mode",
         "untagged_vlan__name",
+        "enabled",
+        "description",
     )
 
     device__name: str
@@ -114,6 +116,8 @@ class NetworkImporterInterface(FilteredNautobotModel):
     lag__name: Optional[str]
     mode: Optional[str]
     untagged_vlan__name: Optional[str]
+    enabled: Optional[bool]
+    description: Optional[str]
 
 
 class NetworkImporterIPAddress(DiffSyncModel):

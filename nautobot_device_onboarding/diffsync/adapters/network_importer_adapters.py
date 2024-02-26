@@ -225,7 +225,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
         if failed_devices:
             self.job.logger.warning(f"Failed devices: {failed_devices}")
         self.job.command_getter_result = device_data
-        self.job.devices_to_load = diffsync_utils.generate_device_querset_from_command_getter_result(device_data)
+        self.job.devices_to_load = diffsync_utils.generate_device_queryset_from_command_getter_result(device_data)
 
     def execute_command_getter(self):
         """Start the CommandGetterDO job to query devices for data."""
