@@ -14,7 +14,7 @@ from nautobot_device_onboarding.constants import NETMIKO_TO_NAPALM_STATIC
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
-from nautobot_device_onboarding.utils.helper import add_platform_parsing_info, get_job_filter
+from nautobot_device_onboarding.utils.helper import add_platform_parsing_info
 from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
@@ -61,9 +61,10 @@ def command_getter_do(job_result, log_level, kwargs):
     else:
         ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
         port = kwargs["port"]
-        timeout = kwargs["timeout"]
+        # timeout = kwargs["timeout"]
         secrets_group = kwargs["secrets_group"]
         platform = kwargs["platform"]
+
     # Initiate Nornir instance with empty inventory
     try:
         logger = NornirLogger(job_result, log_level=0)
@@ -110,7 +111,10 @@ def command_getter_ni(job_result, log_level, kwargs):
     logger = NornirLogger(job_result, log_level)
     try:
         compiled_results = {}
-        qs = get_job_filter(kwargs)
+        # qs = get_job_filter(kwargs)
+        qs = kwargs["devices"]
+        if not qs:
+            return None
         with InitNornir(
             runner=NORNIR_SETTINGS.get("runner"),
             logging={"enabled": False},

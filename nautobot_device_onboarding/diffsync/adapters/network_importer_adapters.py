@@ -227,7 +227,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
         if failed_devices:
             self.job.logger.warning(f"Failed devices: {failed_devices}")
         self.job.command_getter_result = device_data
-        self.job.devices_to_load = diffsync_utils.generate_device_querset_from_command_getter_result(device_data)
+        self.job.devices_to_load = diffsync_utils.generate_device_queryset_from_command_getter_result(device_data)
 
     def execute_command_getter(self):
         """Start the CommandGetterDO job to query devices for data."""
@@ -253,8 +253,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
         """Convert a mac address to match the value stored by Nautobot."""
         if mac_address:
             return str(EUI(mac_address, version=48, dialect=MacUnixExpandedUppercase))
-        else:
-            return ""
+        return ""
 
     def load_devices(self):
         """Load devices into the DiffSync store."""
@@ -292,7 +291,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
 
     def load_ip_addresses(self):
         """Load IP addresses into the DiffSync store."""
-        for hostname, device_data in self.job.command_getter_result.items():
+        for hostname, device_data in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
             for interface in json.loads(device_data["interfaces"]):
                 for interface_name, interface_data in interface.items():
                     for ip_address in interface_data["ip_addresses"]:
@@ -323,7 +322,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
         for device in self.job.devices_to_load:
             location_names[device.name] = device.location.name
 
-        for hostname, device_data in self.job.command_getter_result.items():
+        for hostname, device_data in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
             for interface in json.loads(device_data["interfaces"]):
                 for _, interface_data in interface.items():
                     # add tagged vlans
@@ -357,7 +356,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
 
     def load_ip_address_to_interfaces(self):
         """Load ip address interface assignments into the Diffsync store."""
-        for hostname, device_data in self.job.command_getter_result.items():
+        for hostname, device_data in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
             for interface in json.loads(device_data["interfaces"]):
                 for interface_name, interface_data in interface.items():
                     for ip_address in interface_data["ip_addresses"]:

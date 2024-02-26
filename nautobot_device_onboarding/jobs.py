@@ -510,14 +510,14 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         super().__init__()
         self.filtered_devices = None  # Queryset of devices based on form inputs
 
-        #################### FOR TESTING ONLY #########################################
+        # FOR TESTING ONLY #
         # from nautobot_device_onboarding.diffsync import mock_data
         # from nautobot_device_onboarding.utils import diffsync_utils
         # self.command_getter_result = mock_data.network_importer_mock_data
-        # self.devices_to_load = diffsync_utils.generate_device_querset_from_command_getter_result(mock_data.network_importer_mock_data)
-        ################### REMOVE WHEN NOT TESTING ###################################
+        # self.devices_to_load = diffsync_utils.generate_device_queryset_from_command_getter_result(mock_data.network_importer_mock_data)
+        # REMOVE WHEN NOT TESTING #
 
-        ############ RESTORE THESE LINES WHEN NOT TESTING! ############################
+        # RESTORE THESE LINES WHEN NOT TESTING! #
         self.command_getter_result = None  # Dict result from CommandGetter job
         self.devices_to_load = None  # Queryset consisting of devices that responded
 
@@ -575,8 +575,10 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
 
     def load_source_adapter(self):
         """Load onboarding network adapter."""
-        self.source_adapter = NetworkImporterNetworkAdapter(job=self, sync=self.sync)
-        self.source_adapter.load()
+        # do not load source data if the job form does not filter which devices to sync
+        if self.filtered_devices:
+            self.source_adapter = NetworkImporterNetworkAdapter(job=self, sync=self.sync)
+            self.source_adapter.load()
 
     def load_target_adapter(self):
         """Load onboarding Nautobot adapter."""
@@ -620,8 +622,10 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
             device_filter["location"] = location
         if self.device_role:
             device_filter["role"] = device_role
-
-        self.filtered_devices = Device.objects.filter(**device_filter)
+        if device_filter:  # prevent all devices from being returned by an empty filter
+            self.filtered_devices = Device.objects.filter(**device_filter)
+        else:
+            self.logger.error("No device filter options were provided, no devices will be synced.")
 
         self.job_result.task_kwargs = {
             "debug": debug,
