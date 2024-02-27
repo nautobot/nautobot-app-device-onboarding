@@ -8,7 +8,7 @@ from nautobot.dcim.models import Device
 from nautobot.ipam.models import IPAddress, Prefix
 
 
-def generate_device_querset_from_command_getter_result(command_getter_result):
+def generate_device_queryset_from_command_getter_result(command_getter_result):
     """Generate a Nautobot device queryset based on data returned from CommandGetter."""
     devices_to_sync_hostnames = []
     devices_to_sync_serial_numbers = []

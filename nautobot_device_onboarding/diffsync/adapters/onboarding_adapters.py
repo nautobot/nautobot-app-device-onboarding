@@ -1,16 +1,20 @@
 """DiffSync adapters."""
 
-import time
+from collections import defaultdict
+from typing import DefaultDict, Dict, FrozenSet, Hashable, Tuple, Type
 
 import diffsync
 import netaddr
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from nautobot.apps.choices import JobResultStatusChoices
+from django.db.models import Model
 from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
-from nautobot.extras.models import Job, JobResult
 
 from nautobot_device_onboarding.diffsync.models import onboarding_models
+from nautobot_device_onboarding.nornir_plays.command_getter import command_getter_do
 from nautobot_device_onboarding.utils import diffsync_utils
+
+ParameterSet = FrozenSet[Tuple[str, Hashable]]
 
 
 class OnboardingNautobotAdapter(diffsync.DiffSync):
@@ -23,11 +27,35 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
 
     top_level = ["manufacturer", "platform", "device_type", "device"]
 
+    # This dictionary acts as an ORM cache.
+    _cache: DefaultDict[str, Dict[ParameterSet, Model]]
+    _cache_hits: DefaultDict[str, int] = defaultdict(int)
+
     def __init__(self, job, sync, *args, **kwargs):
         """Initialize the OnboardingNautobotAdapter."""
         super().__init__(*args, **kwargs)
         self.job = job
         self.sync = sync
+        self.invalidate_cache()
+
+    def invalidate_cache(self, zero_out_hits=True):
+        """Invalidates all the objects in the ORM cache."""
+        self._cache = defaultdict(dict)
+        if zero_out_hits:
+            self._cache_hits = defaultdict(int)
+
+    def get_from_orm_cache(self, parameters: Dict, model_class: Type[Model]):
+        """Retrieve an object from the ORM or the cache."""
+        parameter_set = frozenset(parameters.items())
+        content_type = ContentType.objects.get_for_model(model_class)
+        model_cache_key = f"{content_type.app_label}.{content_type.model}"
+        if cached_object := self._cache[model_cache_key].get(parameter_set):
+            self._cache_hits[model_cache_key] += 1
+            return cached_object
+        # As we are using `get` here, this will error if there is not exactly one object that corresponds to the
+        # parameter set. We intentionally pass these errors through.
+        self._cache[model_cache_key][parameter_set] = model_class.objects.get(**dict(parameter_set))
+        return self._cache[model_cache_key][parameter_set]
 
     def load_manufacturers(self):
         """Load manufacturer data from Nautobot."""
@@ -172,25 +200,16 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 )
                 raise Exception("Platform.network_driver missing")  # pylint: disable=broad-exception-raised
 
-        command_getter_job = Job.objects.get(name="Command Getter for Device Onboarding")
-        job_kwargs = self.job.prepare_job_kwargs(self.job.job_result.task_kwargs)
-        kwargs = self.job.serialize_data(job_kwargs)
-        result = JobResult.enqueue_job(
-            job_model=command_getter_job, user=self.job.user, celery_kwargs=self.job.job_result.celery_kwargs, **kwargs
+        result = command_getter_do(
+            self.job.job_result, self.job.logger.getEffectiveLevel(), self.job.job_result.task_kwargs
         )
-        while True:
-            if result.status not in JobResultStatusChoices.READY_STATES:
-                time.sleep(5)
-                result.refresh_from_db()
-            else:
-                break
         if self.job.debug:
-            self.job.logger.debug(f"Command Getter Job Result: {result.result}")
-        data_type_check = diffsync_utils.check_data_type(result.result)
+            self.job.logger.debug(f"Command Getter Job Result: {result}")
+        data_type_check = diffsync_utils.check_data_type(result)
         if self.job.debug:
             self.job.logger.debug(f"CommandGetter data type check resut: {data_type_check}")
         if data_type_check:
-            self._handle_failed_devices(device_data=result.result)
+            self._handle_failed_devices(device_data=result)
         else:
             self.job.logger.error(
                 "Data returned from CommandGetter is not the correct type. "

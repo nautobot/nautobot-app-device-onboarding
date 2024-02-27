@@ -13,10 +13,12 @@ device_onboarding:
     jpath: "[*].hardware[0]"
   mgmt_interface:
     command: "show interfaces"
-    jpath: "[?ip_address=='{{ obj }}'].interface"
+    jpath: "[?ip_address=='{{ obj }}'].{name: interface, enabled: link_status}"
+    post_processor: "{% for interface in obj %}{% if 'up' in interface['enabled'] %}{{ interface.name }}{% endif %}{% endfor %}"
   mask_length:
     command: "show interfaces"
     jpath: "[?ip_address=='{{ obj }}'].prefix_length"
+    post_processor: "{{ obj | unique | first }}"
 network_importer:
   use_textfsm: true
   serial:
@@ -24,4 +26,5 @@ network_importer:
     jpath: "[*].serial[0]"
   interfaces:
     command: "show interfaces"
-    jpath: "[*].[$interface$,link_status,protocol_status,hardware_type,mac_address,ip_address,prefix_length,mtu]"
+    jpath: "[*].[$interface$,hardware_type,ip_address,prefix_length,mac_address,mtu,description,link_status,vlan_id,vlan_id_inner,vlan_id_outer]"
+    post_processor: "{{ obj | fix_interfaces | tojson }}"

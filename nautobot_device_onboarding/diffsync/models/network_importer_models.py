@@ -61,11 +61,7 @@ class NetworkImporterDevice(FilteredNautobotModel):
         job.command_getter_result contains the result from the CommandGetter job.
         Only devices that actually responded with data should be considered for the sync.
         """
-        if diffsync.job.filtered_devices:
-            return diffsync.job.devices_to_load
-        else:
-            diffsync.job.logger.error("No device filter options were provided, no devices will be synced.")
-            return cls._model.objects.none()
+        return diffsync.job.devices_to_load
 
     @classmethod
     def create(cls, diffsync, ids, attrs):
@@ -104,8 +100,9 @@ class NetworkImporterInterface(FilteredNautobotModel):
         "mtu",
         # "parent_interface__name",
         "mode",
-        "mgmt_only",
         "untagged_vlan__name",
+        "enabled",
+        "description",
     )
 
     device__name: str
@@ -118,8 +115,9 @@ class NetworkImporterInterface(FilteredNautobotModel):
     parent_interface__name: Optional[str]
     lag__name: Optional[str]
     mode: Optional[str]
-    mgmt_only: Optional[bool]
     untagged_vlan__name: Optional[str]
+    enabled: Optional[bool]
+    description: Optional[str]
 
 
 class NetworkImporterIPAddress(DiffSyncModel):

@@ -9,13 +9,9 @@ from nautobot.apps.jobs import BooleanVar, IntegerVar, Job, MultiObjectVar, Obje
 from nautobot.core.celery import register_jobs
 from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
-from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status, Tag
+from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status
 from nautobot.ipam.models import Namespace
-from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
-from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
 from nautobot_ssot.jobs.base import DataSource
-from nornir import InitNornir
-from nornir.core.plugins.inventory import InventoryPluginRegister, TransformFunctionRegister
 
 from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
     NetworkImporterNautobotAdapter,
@@ -28,17 +24,7 @@ from nautobot_device_onboarding.diffsync.adapters.onboarding_adapters import (
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.helpers import onboarding_task_fqdn_to_ip
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
-from nautobot_device_onboarding.nornir_plays.command_getter import netmiko_send_commands
-from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
-from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
-from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
-from nautobot_device_onboarding.utils.helper import add_platform_parsing_info, get_job_filter
-from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
-
-InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
-InventoryPluginRegister.register("empty-inventory", EmptyInventory)
-TransformFunctionRegister.register("transform_to_add_command_parser_info", add_platform_parsing_info)
-
+from nautobot_device_onboarding.nornir_plays.command_getter import command_getter_do, command_getter_ni
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
@@ -361,6 +347,15 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         """Initialize SSOTNetworkImporter."""
         super().__init__()
         self.filtered_devices = None  # Queryset of devices based on form inputs
+
+        # FOR TESTING ONLY #
+        # from nautobot_device_onboarding.diffsync import mock_data
+        # from nautobot_device_onboarding.utils import diffsync_utils
+        # self.command_getter_result = mock_data.network_importer_mock_data
+        # self.devices_to_load = diffsync_utils.generate_device_queryset_from_command_getter_result(mock_data.network_importer_mock_data)
+        # REMOVE WHEN NOT TESTING #
+
+        # RESTORE THESE LINES WHEN NOT TESTING! #
         self.command_getter_result = None  # Dict result from CommandGetter job
         self.devices_to_load = None  # Queryset consisting of devices that responded
 
@@ -378,6 +373,12 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
     namespace = ObjectVar(
         model=Namespace, required=True, description="The namespace for all IP addresses created or updated in the sync."
     )
+    interface_status = ObjectVar(
+        model=Status,
+        query_params={"content_types": "dcim.interface"},
+        required=True,
+        description="Status to be applied to all synced device interfaces. This will update existing interface statuses.",
+    )
     ip_address_status = ObjectVar(
         label="IP address status",
         model=Status,
@@ -385,6 +386,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         required=True,
         description="Status to be applied to all synced IP addresses. This will update existing IP address statuses",
     )
+
     default_prefix_status = ObjectVar(
         model=Status,
         query_params={"content_types": "ipam.prefix"},
@@ -408,17 +410,13 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         required=False,
         description="Only update devices with the selected role.",
     )
-    tag = ObjectVar(
-        model=Tag,
-        query_params={"content_types": "dcim.device"},
-        required=False,
-        description="Only update devices with the selected tag.",
-    )
 
     def load_source_adapter(self):
         """Load onboarding network adapter."""
-        self.source_adapter = NetworkImporterNetworkAdapter(job=self, sync=self.sync)
-        self.source_adapter.load()
+        # do not load source data if the job form does not filter which devices to sync
+        if self.filtered_devices:
+            self.source_adapter = NetworkImporterNetworkAdapter(job=self, sync=self.sync)
+            self.source_adapter.load()
 
     def load_target_adapter(self):
         """Load onboarding Nautobot adapter."""
@@ -431,13 +429,13 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         memory_profiling,
         debug,
         namespace,
+        interface_status,
         ip_address_status,
         default_prefix_status,
         location,
         devices,
         device_role,
         sync_vlans,
-        tag,
         *args,
         **kwargs,
     ):
@@ -447,11 +445,11 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         self.debug = debug
         self.namespace = namespace
         self.ip_address_status = ip_address_status
+        self.interface_status = interface_status
         self.default_prefix_status = default_prefix_status
         self.location = location
         self.devices = devices
         self.device_role = device_role
-        self.tag = tag
         self.sync_vlans = sync_vlans
 
         # Filter devices based on form input
@@ -462,18 +460,18 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
             device_filter["location"] = location
         if self.device_role:
             device_filter["role"] = device_role
-        if self.tag:
-            device_filter["tags"] = tag
-        self.filtered_devices = Device.objects.filter(**device_filter)
+        if device_filter:  # prevent all devices from being returned by an empty filter
+            self.filtered_devices = Device.objects.filter(**device_filter)
+        else:
+            self.logger.error("No device filter options were provided, no devices will be synced.")
 
         self.job_result.task_kwargs = {
             "debug": debug,
             "ip_address_status": ip_address_status,
             "default_prefix_status": default_prefix_status,
             "location": location,
-            "devices": devices,
+            "devices": self.filtered_devices,
             "device_role": device_role,
-            "tag": tag,
             "sync_vlans": sync_vlans,
         }
 
@@ -499,34 +497,8 @@ class CommandGetterDO(Job):
     platform = ObjectVar(model=Platform, required=False)
 
     def run(self, *args, **kwargs):
-        """Process onboarding task from ssot-ni job."""
-        self.ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
-        self.port = kwargs["port"]
-        self.timeout = kwargs["timeout"]
-        self.secrets_group = kwargs["secrets_group"]
-        self.platform = kwargs["platform"]
-
-        # Initiate Nornir instance with empty inventory
-        try:
-            logger = NornirLogger(self.job_result, log_level=0)
-            compiled_results = {}
-            with InitNornir(
-                runner=NORNIR_SETTINGS.get("runner"),
-                logging={"enabled": False},
-                inventory={
-                    "plugin": "empty-inventory",
-                },
-            ) as nornir_obj:
-                nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
-                for entered_ip in self.ip_addresses:
-                    single_host_inventory_constructed = _set_inventory(
-                        entered_ip, self.platform, self.port, self.secrets_group
-                    )
-                    nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
-                nr_with_processors.run(task=netmiko_send_commands, command_getter_job="device_onboarding")
-        except Exception as err:  # pylint: disable=broad-exception-caught
-            self.logger.error("Error: %s", err)
-            return err
+        """Run command getter."""
+        compiled_results = command_getter_do(self.job_result, self.logger.getEffectiveLevel(), kwargs)
         return compiled_results
 
 
@@ -554,12 +526,6 @@ class CommandGetterNetworkImporter(Job):
         required=False,
         description="Only update devices with the selected role.",
     )
-    tag = ObjectVar(
-        model=Tag,
-        query_params={"content_types": "dcim.device"},
-        required=False,
-        description="Only update devices with the selected tag.",
-    )
     port = IntegerVar(default=22)
     timeout = IntegerVar(default=30)
 
@@ -572,28 +538,8 @@ class CommandGetterNetworkImporter(Job):
         hidden = False
 
     def run(self, *args, **kwargs):
-        """Process onboarding task from ssot-ni job."""
-        try:
-            logger = NornirLogger(self.job_result, log_level=0)
-            compiled_results = {}
-            qs = get_job_filter(kwargs)
-            with InitNornir(
-                runner=NORNIR_SETTINGS.get("runner"),
-                logging={"enabled": False},
-                inventory={
-                    "plugin": "nautobot-inventory",
-                    "options": {
-                        "credentials_class": NORNIR_SETTINGS.get("credentials"),
-                        "queryset": qs,
-                    },
-                    "transform_function": "transform_to_add_command_parser_info",
-                },
-            ) as nornir_obj:
-                nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results)])
-                nr_with_processors.run(task=netmiko_send_commands, command_getter_job="network_importer")
-        except Exception as err:  # pylint: disable=broad-exception-caught
-            self.logger.info("Error: %s", err)
-            return err
+        """Run command getter."""
+        compiled_results = command_getter_ni(self.job_result, self.logger.getEffectiveLevel(), kwargs)
         return compiled_results
 
 

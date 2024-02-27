@@ -57,7 +57,7 @@ def guess_netmiko_device_type(hostname, username, password, port):
 
     except Exception as err:
         print(err)
-    print(f"************************Guessed device type: {guessed_device_type}")
+    print(f"{hostname} - guessed platform: {guessed_device_type}")
     return guessed_device_type
 
 
@@ -73,8 +73,6 @@ def _set_inventory(host_ip, platform, port, secrets_group):
         parsing_info = _get_platform_parsing_info(platform)
     else:
         parsing_info = {}
-    print(parsing_info)
-    print(type(parsing_info))
 
     host = Host(
         name=host_ip,
