@@ -22,9 +22,19 @@ device_onboarding:
 network_importer:
   use_textfsm: true
   serial:
-    command: "show version"
-    jpath: "[*].serial[0]"
+    serial:
+      command: "show version"
+      jpath: "[*].serial[0]"
   interfaces:
-    command: "show interfaces"
-    jpath: "[*].[$interface$,hardware_type,ip_address,prefix_length,mac_address,mtu,description,link_status,vlan_id,vlan_id_inner,vlan_id_outer]"
-    post_processor: "{{ obj | fix_interfaces | tojson }}"
+    mtu:
+      command: "show interfaces"
+      jpath: "[*].[$interface$,mtu,hardware_type,ip_address,prefix_length,mac_address,mtu,description,link_status,vlan_id,vlan_id_inner,vlan_id_outer]"
+      post_processor: "{{ obj | fix_interfaces | tojson }}"
+    mode:
+      command: "show interfaces switchport"
+      jpath: "[*].[$interface$,admin_mode]"
+      post_processor: "{{ obj | fix_interfaces_switchport | tojson }}"
+  vlans:
+    vlans:
+      command: "show vlan"
+      jpath: "[*].[vlan_name,vlan_id]"

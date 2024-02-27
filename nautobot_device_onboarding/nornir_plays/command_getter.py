@@ -23,10 +23,14 @@ TransformFunctionRegister.register("transform_to_add_command_parser_info", add_p
 def _get_commands_to_run(yaml_parsed_info, command_getter_job):
     """Load yaml file and look up all commands that need to be run."""
     commands = []
-    for key, value in yaml_parsed_info[command_getter_job].items():
-        if not key == "use_textfsm":
-            commands.append(value["command"])
-    print(f"COMMANDS: {commands}")
+    command_getter_info = yaml_parsed_info.get(command_getter_job, {})
+    for key, value in command_getter_info.items():
+        if key == "use_textfsm":
+            continue
+        for k, v, in value.items():
+            if "command" in v:
+                commands.append(v["command"])
+                print(f"COMMAND: {v['command']}")
     return list(set(commands))
 
 
@@ -84,7 +88,6 @@ def command_getter_ni(job_result, log_level, kwargs):
     logger = NornirLogger(job_result, log_level)
     try:
         compiled_results = {}
-        # qs = get_job_filter(kwargs)
         qs = kwargs["devices"]
         if not qs:
             return None

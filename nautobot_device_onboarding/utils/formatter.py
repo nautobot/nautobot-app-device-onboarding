@@ -13,7 +13,7 @@ from jinja2.sandbox import SandboxedEnvironment
 # from nautobot.core.utils.data import render_jinja2
 
 # from nautobot_device_onboarding.exceptions import OnboardException
-from nautobot_device_onboarding.utils.jinja_filters import fix_interfaces
+from nautobot_device_onboarding.utils.jinja_filters import fix_interfaces, fix_interfaces_switchport
 
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "command_mappers"))
 
@@ -35,6 +35,7 @@ def get_django_env():
     jinja_env = SandboxedEnvironment(**j2_env)
     jinja_env.filters = engines["jinja"].env.filters
     jinja_env.filters["fix_interfaces"] = fix_interfaces
+    jinja_env.filters["fix_interfaces_switchport"] = fix_interfaces_switchport
     return jinja_env
 
 
@@ -109,23 +110,26 @@ def extract_show_data(host, multi_result, command_getter_type):
 
     result_dict = {}
     for default_dict_field, command_info in command_jpaths[command_getter_type].items():
+        print(f"DEFAULT_DICT_FIELD: {default_dict_field}, COMMAND_INFO: {command_info}")
         if not default_dict_field == "use_textfsm":
-            if command_info["command"] == multi_result[0].name:
-                jpath_template = jinja_env.from_string(command_info["jpath"])
-                j2_rendered_jpath = jpath_template.render({"obj": host.name})
-                # j2_rendered_jpath = render_jinja_template(obj=host.name, template=command_info["jpath"])
-                extracted_value = extract_data_from_json(multi_result[0].result, j2_rendered_jpath)
-                # print(extracted_value)
-                if command_info.get("post_processor"):
-                    template = jinja_env.from_string(command_info["post_processor"])
-                    extracted_processed = template.render({"obj": extracted_value})
-                    # extracted_processed = render_jinja_template(
-                    #     obj=extracted_value, template=command_info["post_processor"]
-                    # )
-                    # print(extracted_processed)
-                else:
-                    extracted_processed = extracted_value
-                    if isinstance(extracted_value, list) and len(extracted_value) == 1:
-                        extracted_processed = extracted_value[0]
-                result_dict[default_dict_field] = extracted_processed
+            for k, v in command_info.items():
+                print(f"K: {k}, V: {v}")
+                if v.get("command") == multi_result[0].name:
+                    jpath_template = jinja_env.from_string(v["jpath"])
+                    j2_rendered_jpath = jpath_template.render({"obj": host.name})
+                    # j2_rendered_jpath = render_jinja_template(obj=host.name, template=command_info["jpath"])
+                    extracted_value = extract_data_from_json(multi_result[0].result, j2_rendered_jpath)
+                    # print(extracted_value)
+                    if v.get("post_processor"):
+                        template = jinja_env.from_string(v["post_processor"])
+                        extracted_processed = template.render({"obj": extracted_value})
+                        # extracted_processed = render_jinja_template(
+                        #     obj=extracted_value, template=command_info["post_processor"]
+                        # )
+                        # print(extracted_processed)
+                    else:
+                        extracted_processed = extracted_value
+                        if isinstance(extracted_value, list) and len(extracted_value) == 1:
+                            extracted_processed = extracted_value[0]
+                    result_dict[default_dict_field] = extracted_processed
     return result_dict
