@@ -2,29 +2,30 @@
 device_onboarding:
   hostname:
     command:
-      command: "show version"
-      use_textfsm: true
-    jpath: "[*].hostname"
+      command: "show version | display json"
+      use_textfsm: false
+    jpath: '"software-information"[]."host-name"[].data'
   serial:
     command:
-      command: "show version"
-      use_textfsm: true
-    jpath: "[*].serial_number"
+      command: "show chassis hardware | display json"
+      use_textfsm: false
+    jpath: '"chassis-inventory"[]."chassis"[]."serial-number"[].data'
   device_type:
     command:
-      command: "show chassis hardware"
-      use_textfsm: true
-    jpath: "[*].model"
+      command: "show chassis hardware | display json"
+      use_textfsm: false
+    jpath: '"chassis-inventory"[]."chassis"[]."description"[].data'
   mgmt_interface:
     command:
       command: "show configuration interfaces | display json"
       use_textfsm: false
     # jpath: '"interface-information"[]."physical-interface"[]."logical-interface"[].{name: name[].data, ip: "address-family"[]."interface-address"[]."ifa-local"[][data=="{{ obj }}"][]}'
     jpath: "*.interfaces.interface[].{name: name, ip: unit[].family[].*.address[][].name}"
-    post_processor: "{% for entry in obj %}{% if entry['ip'] and original_host in entry['ip'] %}{{ entry['name'] }}{% endif %}{% endfor %}"
+    post_processor: "{% for entry in obj %}{% if entry['ip'] is not none %}{% for ipaddr in entry['ip'] %}{% if original_host in ipaddr %}{{ entry['name'] }}{% endif %}{% endfor %}{% endif %}{% endfor %}"
   mask_length:
     command:
       command: "show configuration interfaces | display json"
       use_textfsm: false
     jpath: "*.interfaces.interface[].{name: name, ip: unit[].family[].*.address[][].name}"
-    post_processor: "{% for entry in obj %}{% if entry['ip'] and original_host in entry['ip'] %}{{ entry['ip'] | ipaddress_interface('netmask') | netmask_to_cidr }}{% endif %}{% endfor %}"
+    # post_processor: "{% for entry in obj %}{% if entry['ip'] and original_host in entry['ip'] %}{{ entry['ip'] | ipaddress_interface('netmask') | netmask_to_cidr }}{% endif %}{% endfor %}"
+    post_processor: "{% for entry in obj %}{% if entry['ip'] is not none %}{% for ipaddr in entry['ip'] %}{% if ipaddr.split('/')[0] == original_host %}{{ ipaddr.split('/')[1] }}{% endif %}{% endfor %}{% endif %}{% endfor %}"
