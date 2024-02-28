@@ -1,0 +1,83 @@
+{
+  "type": "object",
+  "properties": {
+    "create_platform_if_missing": {
+      "type": "boolean",
+      "default": true
+    },
+    "create_device_type_if_missing": {
+      "type": "boolean",
+      "default": true
+    },
+    "create_manufacturer_if_missing": {
+      "type": "boolean",
+      "default": true
+    },
+    "create_device_role_if_missing": {
+      "type": "boolean",
+      "default": true
+    },
+    "create_management_interface_if_missing": {
+      "type": "boolean",
+      "default": true
+    },
+    "default_device_status": {
+      "type": "string",
+      "default": "Active"
+    },
+    "default_ip_status": {
+      "type": "string",
+      "default": "Active"
+    },
+    "default_device_role": {
+      "type": "string",
+      "default": "network"
+    },
+    "default_device_role_color": {
+      "type": "string",
+      "default": "ff0000"
+    },
+    "default_management_interface": {
+      "type": "string",
+      "default": "PLACEHOLDER"
+    },
+    "default_management_prefix_length": {
+      "type": "integer",
+      "default": 0
+    },
+    "skip_device_type_on_update": {
+      "type": "boolean",
+      "default": false
+    },
+    "skip_manufacturer_on_update": {
+      "type": "boolean",
+      "default": false
+    },
+    "platform_map": {
+      "type": "object",
+      "patternProperties": {
+        "": {
+          "type": "string"
+        }
+      },
+      "default": {}
+    },
+    "onboarding_extensions_map": {
+      "type": "object",
+      "patternProperties": {
+        "": {
+          "type": "string"
+        }
+      },
+      "default": {
+        "ios": "nautobot_device_onboarding.onboarding_extensions.ios"
+      }
+    },
+    "object_match_strategy": {
+      "type": "string",
+      "enum": ["loose", "strict"],
+      "default": "loose"
+    }
+  },
+  "additionalProperties": false
+}
