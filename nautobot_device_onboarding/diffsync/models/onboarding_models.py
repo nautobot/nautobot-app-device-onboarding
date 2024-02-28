@@ -65,27 +65,29 @@ class OnboardingDevice(DiffSyncModel):
             )
             platform = Platform.objects.get(name=attrs["platform__name"])
             device = Device.objects.get(name=ids["name"], location=location)
-            update_devices_without_primary_ip = location = diffsync_utils.retrieve_submitted_value(
+            update_devices_without_primary_ip = diffsync_utils.retrieve_submitted_value(
                 job=diffsync.job,
                 ip_address=attrs["primary_ip4__host"],
                 query_string="update_devices_without_primary_ip",
             )
             if update_devices_without_primary_ip:
                 diffsync.job.logger.warning(
-                    f"Device {ids['name']} at location {location} already exists in Nautobot "
+                    f"Device {device.name} at location {location.name} already exists in Nautobot "
                     "but the primary ip address either does not exist, or doesn't match an entered ip address. "
                     "This device will be updated."
                 )
                 device = cls._update_device_with_attrs(device, platform, ids, attrs, diffsync)
             else:
                 diffsync.job.logger.warning(
-                    f"Device {ids['name']} at location {location} already exists in Nautobot "
+                    f"Device {device.name} at location {location.name} already exists in Nautobot "
                     "but the primary ip address either does not exist, or doesn't match an entered ip address. "
                     "IP Address, this device will be skipped."
                 )
                 return None
 
         except ObjectDoesNotExist:
+            print(ids["name"], location) 
+            print("does not exist") 
             # Create Device
             device = Device(
                 location=location,
@@ -135,7 +137,7 @@ class OnboardingDevice(DiffSyncModel):
     @classmethod
     def _update_device_with_attrs(cls, device, platform, ids, attrs, diffsync):
         """Update a Nautobot device instance."""
-        device.location =diffsync_utils.retrieve_submitted_value(
+        device.location = diffsync_utils.retrieve_submitted_value(
                 job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="location",
         )
         device.status = diffsync_utils.retrieve_submitted_value(
