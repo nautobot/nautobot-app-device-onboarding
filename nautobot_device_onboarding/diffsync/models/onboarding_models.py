@@ -26,7 +26,6 @@ class OnboardingDevice(DiffSyncModel):
         "mask_length",
         "primary_ip4__host",
         "primary_ip4__status__name",
-        "prefix_length",
         "platform__name",
         "role__name",
         "secrets_group__name",
@@ -42,7 +41,6 @@ class OnboardingDevice(DiffSyncModel):
     mask_length: Optional[int]
     primary_ip4__host: Optional[str]
     primary_ip4__status__name: Optional[str]
-    prefix_length: Optional[int]
     platform__name: Optional[str]
     role__name: Optional[str]
     secrets_group__name: Optional[str]
@@ -86,8 +84,6 @@ class OnboardingDevice(DiffSyncModel):
                 return None
 
         except ObjectDoesNotExist:
-            print(ids["name"], location) 
-            print("does not exist") 
             # Create Device
             device = Device(
                 location=location,
