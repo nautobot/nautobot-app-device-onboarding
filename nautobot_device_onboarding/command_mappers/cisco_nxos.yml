@@ -1,18 +1,28 @@
 ---
 device_onboarding:
-  use_textfsm: true
+  # use_textfsm: true
   hostname:
-    command: "show version"
+    command:
+      command: "show version"
+      use_textfsm: true
     jpath: "[*].hostname"
   serial:
-    command: "show version"
+    command:
+      command: "show version"
+      use_textfsm: true
     jpath: "[*].serial"
   device_type:
-    command: "show version"
+    command:
+      command: "show version"
+      use_textfsm: true
     jpath: "[*].platform"
   mgmt_interface:
-    command: "show interface"
+    command:
+      command: "show interface"
+      use_textfsm: true
     jpath: "[?ip_address=='{{ obj }}'].interface || [`mgmt0`]"
   mask_length:
-    command: "show interface"
+    command:
+      command: "show interface"
+      use_textfsm: true
     jpath: "[?ip_address=='{{ obj }}'].prefix_length || [`31`]"

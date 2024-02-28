@@ -1,19 +1,30 @@
 ---
 device_onboarding:
-  use_textfsm: true
   hostname:
-    command: "show version"
+    command:
+      command: "show version"
+      use_textfsm: true
     jpath: "[*].hostname"
   serial:
-    command: "show version"
+    command:
+      command: "show version"
+      use_textfsm: true
     jpath: "[*].serial_number"
   device_type:
-    command: "show chassis hardware"
+    command:
+      command: "show chassis hardware"
+      use_textfsm: true
     jpath: "[*].model"
   mgmt_interface:
-    command: "show interfaces"
-    jpath: "[?local=='{{ obj }}'].interface"
+    command:
+      command: "show configuration interfaces | display json"
+      use_textfsm: false
+    # jpath: '"interface-information"[]."physical-interface"[]."logical-interface"[].{name: name[].data, ip: "address-family"[]."interface-address"[]."ifa-local"[][data=="{{ obj }}"][]}'
+    jpath: "*.interfaces.interface[].{name: name, ip: unit[].family[].*.address[][].name}"
+    post_processor: "{% for entry in obj %}{% if entry['ip'] and original_host in entry['ip'] %}{{ entry['name'] }}{% endif %}{% endfor %}"
   mask_length:
-    command: "show interfaces"
-    jpath: "[?local=='{{ obj }}'].destination"
-    post_processor: "{{ obj[0] | ipaddress_interface('netmask') | netmask_to_cidr }}"
+    command:
+      command: "show configuration interfaces | display json"
+      use_textfsm: false
+    jpath: "*.interfaces.interface[].{name: name, ip: unit[].family[].*.address[][].name}"
+    post_processor: "{% for entry in obj %}{% if entry['ip'] and original_host in entry['ip'] %}{{ entry['ip'] | ipaddress_interface('netmask') | netmask_to_cidr }}{% endif %}{% endfor %}"
