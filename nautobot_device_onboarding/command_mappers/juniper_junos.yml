@@ -30,4 +30,4 @@ device_onboarding:
     # jpath: "*.interfaces.interface[].{name: name, ip: unit[].family[].*.address[][].name}"
     # post_processor: "{% for entry in obj %}{% if entry['ip'] and original_host in entry['ip'] %}{{ entry['ip'] | ipaddress_interface('netmask') | netmask_to_cidr }}{% endif %}{% endfor %}"
     jpath: '"route-information"[]."route-table"[]."rt"[]."rt-destination"[].data'
-    post_processor: "{% for ipaddr in obj %}{% if ipaddr.split('/')[0] == original_host %}{{ ipaddr.split('/')[1] }}{% endif %}{% endfor %}{% endif %}{% endfor %}"
+    post_processor: "{% for ipaddr in obj %}{% if ipaddr.split('/')[0] == original_host %}{{ ipaddr.split('/')[1] }}{% endif %}{% endfor %}"
