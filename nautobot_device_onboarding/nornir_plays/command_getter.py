@@ -25,11 +25,11 @@ TransformFunctionRegister.register("transform_to_add_command_parser_info", add_p
 def _get_commands_to_run(yaml_parsed_info, command_getter_job):
     """Load yaml file and look up all commands that need to be run."""
     commands = []
-    for key, value in yaml_parsed_info[command_getter_job].items():
-        if not key == "use_textfsm":
+    for _, value in yaml_parsed_info[command_getter_job].items():
+        # Deduplicate commands + parser key
+        if value["command"] not in commands:
             commands.append(value["command"])
-    print(f"COMMANDS: {commands}")
-    return list(set(commands))
+    return commands
 
 
 def netmiko_send_commands(task: Task, command_getter_job: str):
@@ -40,12 +40,11 @@ def netmiko_send_commands(task: Task, command_getter_job: str):
         return Result(host=task.host, result=f"{task.host.name} has a unsupported platform set.", failed=True)
     commands = _get_commands_to_run(task.host.data["platform_parsing_info"], command_getter_job)
     for command in commands:
-        command_use_textfsm = task.host.data["platform_parsing_info"][command_getter_job]["use_textfsm"]
         task.run(
             task=netmiko_send_command,
-            name=command,
-            command_string=command,
-            use_textfsm=command_use_textfsm,
+            name=command["command"],
+            command_string=command["command"],
+            use_textfsm=command["use_textfsm"],
             read_timeout=60,
         )
 

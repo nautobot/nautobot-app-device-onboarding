@@ -1,18 +1,13 @@
 """Formatter."""
 
 import os
-
+import json
 import yaml
 from django.template import engines
 from django.utils.module_loading import import_string
 from jdiff import extract_data_from_json
 
-# from jinja2 import exceptions as jinja_errors
 from jinja2.sandbox import SandboxedEnvironment
-
-# from nautobot.core.utils.data import render_jinja2
-
-# from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.utils.jinja_filters import fix_interfaces
 
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "command_mappers"))
@@ -36,47 +31,6 @@ def get_django_env():
     jinja_env.filters = engines["jinja"].env.filters
     jinja_env.filters["fix_interfaces"] = fix_interfaces
     return jinja_env
-
-
-# def render_jinja_template(obj, template):
-#     """
-#     Helper function to render Jinja templates.
-
-#     Args:
-#         obj (Device): The Device object from Nautobot.
-#         template (str): A Jinja2 template to be rendered.
-
-#     Returns:
-#         str: The ``template`` rendered.
-
-#     Raises:
-#         NornirNautobotException: When there is an error rendering the ``template``.
-#     """
-#     try:
-#         return render_jinja2(template_code=template, context={"obj": obj})
-#     except jinja_errors.UndefinedError as error:
-#         error_msg = (
-#             "`E3019:` Jinja encountered and UndefinedError`, check the template for missing variable definitions.\n"
-#             f"Template:\n{template}\n"
-#             f"Original Error: {error}"
-#         )
-#         raise OnboardException(error_msg) from error
-
-#     except jinja_errors.TemplateSyntaxError as error:  # Also catches subclass of TemplateAssertionError
-#         error_msg = (
-#             f"`E3020:` Jinja encountered a SyntaxError at line number {error.lineno},"
-#             f"check the template for invalid Jinja syntax.\nTemplate:\n{template}\n"
-#             f"Original Error: {error}"
-#         )
-#         raise OnboardException(error_msg) from error
-#     # Intentionally not catching TemplateNotFound errors since template is passes as a string and not a filename
-#     except jinja_errors.TemplateError as error:  # Catches all remaining Jinja errors
-#         error_msg = (
-#             "`E3021:` Jinja encountered an unexpected TemplateError; check the template for correctness\n"
-#             f"Template:\n{template}\n"
-#             f"Original Error: {error}"
-#         )
-#         raise OnboardException(error_msg) from error
 
 
 def load_yaml_datafile(filename):
@@ -109,23 +63,22 @@ def extract_show_data(host, multi_result, command_getter_type):
 
     result_dict = {}
     for default_dict_field, command_info in command_jpaths[command_getter_type].items():
-        if not default_dict_field == "use_textfsm":
-            if command_info["command"] == multi_result[0].name:
-                jpath_template = jinja_env.from_string(command_info["jpath"])
-                j2_rendered_jpath = jpath_template.render({"obj": host.name})
-                # j2_rendered_jpath = render_jinja_template(obj=host.name, template=command_info["jpath"])
+        if command_info["command"]["command"] == multi_result[0].name:
+            jpath_template = jinja_env.from_string(command_info["jpath"])
+            j2_rendered_jpath = jpath_template.render({"obj": host.name})
+            print(j2_rendered_jpath)
+            print(type(multi_result[0].result))
+            if isinstance(multi_result[0].result, str):
+                extracted_value = extract_data_from_json(json.loads(multi_result[0].result), j2_rendered_jpath)
+            else:
                 extracted_value = extract_data_from_json(multi_result[0].result, j2_rendered_jpath)
-                # print(extracted_value)
-                if command_info.get("post_processor"):
-                    template = jinja_env.from_string(command_info["post_processor"])
-                    extracted_processed = template.render({"obj": extracted_value})
-                    # extracted_processed = render_jinja_template(
-                    #     obj=extracted_value, template=command_info["post_processor"]
-                    # )
-                    # print(extracted_processed)
-                else:
-                    extracted_processed = extracted_value
-                    if isinstance(extracted_value, list) and len(extracted_value) == 1:
-                        extracted_processed = extracted_value[0]
-                result_dict[default_dict_field] = extracted_processed
+            print(extracted_value)
+            if command_info.get("post_processor"):
+                template = jinja_env.from_string(command_info["post_processor"])
+                extracted_processed = template.render({"obj": extracted_value, "original_host": host.name})
+            else:
+                extracted_processed = extracted_value
+                if isinstance(extracted_value, list) and len(extracted_value) == 1:
+                    extracted_processed = extracted_value[0]
+            result_dict[default_dict_field] = extracted_processed
     return result_dict
