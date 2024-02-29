@@ -17,12 +17,12 @@ device_onboarding:
     jpath: '"chassis-inventory"[]."chassis"[]."description"[].data'
   mgmt_interface:
     command:
-      command: "show configuration interfaces | display json"
+      command: "show interfaces | display json"
       use_textfsm: false
     # jpath: '"interface-information"[]."physical-interface"[]."logical-interface"[].{name: name[].data, ip: "address-family"[]."interface-address"[]."ifa-local"[][data=="{{ obj }}"][]}'
     # jpath: "*.interfaces.interface[].{name: name, ip: unit[].family[].*.address[][].name}"
-    jpath: '"interface-information"[]."physical-interface"[]."logical-interface"[].{name: name[].data, ip: "address-family"[]."interface-address"[]."ifa-local"[].data[]}'
-    post_processor: "{% for entry in obj %}{% if entry['ip'] is not none %}{% for ipaddr in entry['ip'] %}{% if original_host in ipaddr %}{{ entry['name'] }}{% endif %}{% endfor %}{% endif %}{% endfor %}"
+    jpath: '"interface-information"[]."physical-interface"[]."logical-interface"[].{name: name[].data, ip: "address-family"[]."interface-address"[]."ifa-local"[].data}'
+    post_processor: "{% for entry in obj %}{% if entry['ip'] is not none %}{% for ipaddr in entry['ip'] %}{% if original_host in ipaddr %}{{ entry['name'] | first }}{% endif %}{% endfor %}{% endif %}{% endfor %}"
   mask_length:
     command:
       command: "show route protocol direct | display json"
