@@ -140,6 +140,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
     """Adapter for loading device data from a network."""
 
     device_data = None
+    failed_ip_addresses = []
 
     manufacturer = onboarding_models.OnboardingManufacturer
     platform = onboarding_models.OnboardingPlatform
@@ -183,11 +184,9 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                     f"{ip_address}: Connection or data error, this device will not be synced. "
                     f"{device_data[ip_address].get('failed_reason')}"
                 )
-                failed_ip_addresses.append(ip_address)
-        for ip_address in failed_ip_addresses:
+                self.failed_ip_addresses.append(ip_address)
+        for ip_address in self.failed_ip_addresses:
             del device_data[ip_address]
-        if failed_ip_addresses:
-            self.job.logger.warning(f"Failed IP Addresses: {failed_ip_addresses}")
         self.device_data = device_data
 
     def execute_command_getter(self):
@@ -279,6 +278,20 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                     f"{ip_address}: Unable to load DeviceType due to missing key in returned data, {err}"
                 )
 
+    def _fields_missing_data(self, device_data, ip_address, platform):
+        """Verify that all of the fields returned from a device actually contain data."""
+        fields_missing_data = []
+        required_fields_from_device = ["device_type", "hostname", "mgmt_interface", "mask_length", "serial"]
+
+        if platform: # platform is only retruned with device data if not provided on the job form/csv
+            required_fields_from_device.append("platform")
+
+        for field in required_fields_from_device:
+            if not device_data[ip_address][field]:
+                fields_missing_data.append(field)
+
+        return fields_missing_data
+
     def load_devices(self):
         """Load devices into the DiffSync store."""
         for ip_address in self.device_data:
@@ -320,6 +333,15 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                     mask_length=int(self.device_data[ip_address]["mask_length"]),
                     serial=self.device_data[ip_address]["serial"],
                 )  # type: ignore
+            except KeyError as err:
+                self.job.logger.error(f"{ip_address}: Unable to load Device due to missing key in returned data, {err}")
+
+            fields_missing_data = self._fields_missing_data(
+                device_data=self.device_data, ip_address=ip_address, platform=platform)
+            if fields_missing_data:
+                self.failed_ip_addresses.append(ip_address)
+                self.job.logger.error(f"Unable to onbaord {ip_address}, returned data missing for {fields_missing_data}")
+            else:
                 try:
                     self.add(onboarding_device)
                     if self.job.debug:
@@ -331,8 +353,6 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                         f"[Serial Number: {self.device_data[ip_address]['serial']}, "
                         f"IP Address: {ip_address}]"
                     )
-            except KeyError as err:
-                self.job.logger.error(f"{ip_address}: Unable to load Device due to missing key in returned data, {err}")
 
     def load(self):
         """Load network data."""
@@ -342,3 +362,6 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
         self.load_platforms()
         self.load_device_types()
         self.load_devices()
+
+        if self.failed_ip_addresses:
+            self.job.logger.warning(f"Failed IP Addresses: {self.failed_ip_addresses}")
