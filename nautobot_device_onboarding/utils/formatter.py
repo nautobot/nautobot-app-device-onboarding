@@ -46,6 +46,43 @@ def load_yaml_datafile(filename):
         return data
 
 
+def perform_data_extraction(host, dict_field, command_info_dict, j2_env, task_result):
+    """Extract, process data."""
+    result_dict = {}
+    for show_command in command_info_dict["commands"]:
+        if show_command["command"] == task_result.name:
+            jpath_template = j2_env.from_string(show_command["jpath"])
+            j2_rendered_jpath = jpath_template.render({"obj": host.name})
+            if not task_result.failed:
+                if isinstance(task_result.result, str):
+                    try:
+                        result_to_json = json.loads(task_result.result)
+                        extracted_value = extract_data_from_json(result_to_json, j2_rendered_jpath)
+                    except json.decoder.JSONDecodeError:
+                        extracted_value = None
+                else:
+                    extracted_value = extract_data_from_json(task_result.result, j2_rendered_jpath)
+                if show_command.get("post_processor"):
+                    template = j2_env.from_string(show_command["post_processor"])
+                    extracted_processed = template.render({"obj": extracted_value, "original_host": host.name})
+                else:
+                    extracted_processed = extracted_value
+                    if isinstance(extracted_value, list) and len(extracted_value) == 1:
+                        extracted_processed = extracted_value[0]
+                if command_info_dict.get("validator_pattern"):
+                    # temp validator
+                    if command_info_dict["validator_pattern"] == "not None":
+                        if not extracted_processed:
+                            print("validator pattern not detected, checking next command.")
+                            continue
+                        else:
+                            print("About to break the sequence due to valid pattern found")
+                            result_dict[dict_field] = extracted_processed
+                            break
+                result_dict[dict_field] = extracted_processed
+    return result_dict
+
+
 def extract_show_data(host, multi_result, command_getter_type):
     """Take a result of show command and extra specific needed data.
 
@@ -60,25 +97,15 @@ def extract_show_data(host, multi_result, command_getter_type):
     if host_platform == "cisco_xe":
         host_platform = "cisco_ios"
     command_jpaths = host.data["platform_parsing_info"]
-
-    result_dict = {}
+    final_result_dict = {}
     for default_dict_field, command_info in command_jpaths[command_getter_type].items():
-        if command_info["command"]["command"] == multi_result[0].name:
-            jpath_template = jinja_env.from_string(command_info["jpath"])
-            j2_rendered_jpath = jpath_template.render({"obj": host.name})
-            print(j2_rendered_jpath)
-            print(type(multi_result[0].result))
-            if isinstance(multi_result[0].result, str):
-                extracted_value = extract_data_from_json(json.loads(multi_result[0].result), j2_rendered_jpath)
-            else:
-                extracted_value = extract_data_from_json(multi_result[0].result, j2_rendered_jpath)
-            print(extracted_value)
-            if command_info.get("post_processor"):
-                template = jinja_env.from_string(command_info["post_processor"])
-                extracted_processed = template.render({"obj": extracted_value, "original_host": host.name})
-            else:
-                extracted_processed = extracted_value
-                if isinstance(extracted_value, list) and len(extracted_value) == 1:
-                    extracted_processed = extracted_value[0]
-            result_dict[default_dict_field] = extracted_processed
-    return result_dict
+        if command_info.get("commands"):
+            # Means their isn't any "nested" structures. Therefore not expected to see "validator_pattern key"
+            result = perform_data_extraction(host, default_dict_field, command_info, jinja_env, multi_result[0])
+            final_result_dict.update(result)
+        else:
+            # Means their is a "nested" structures. Priority 
+            for dict_field, nested_command_info in command_info.items():
+                result = perform_data_extraction(host, dict_field, nested_command_info, jinja_env, multi_result[0])
+                final_result_dict.update(result)
+    return final_result_dict

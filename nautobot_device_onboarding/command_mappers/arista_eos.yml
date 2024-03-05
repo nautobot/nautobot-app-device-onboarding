@@ -1,27 +1,27 @@
 ---
 device_onboarding:
   hostname:
-    command:
-      command: "show hostname"
-      use_textfsm: true
-    jpath: "[*].hostname"
+    commands:
+      - command: "show hostname"
+        use_textfsm: true
+        jpath: "[*].hostname"
   serial:
-    command:
-      command: "show version"
-      use_textfsm: true
-    jpath: "[*].serial_number"
+    commands:
+      - command: "show version"
+        use_textfsm: true
+        jpath: "[*].serial_number"
   device_type:
-    command:
-      command: "show version"
-      use_textfsm: true
-    jpath: "[*].model"
+    commands:
+      - command: "show version"
+        use_textfsm: true
+        jpath: "[*].model"
   mgmt_interface:
-    command:
-      command: "show ip interface brief | json"
-      use_textfsm: false
-    jpath: "interfaces.*.{name: name, match_ip: interfaceAddress.ipAddr.address=='{{ obj }}'}[? match_ip].name"
+    commands:
+      - command: "show ip interface brief | json"
+        use_textfsm: false
+        jpath: "interfaces.*.{name: name, match_ip: interfaceAddress.ipAddr.address=='{{ obj }}'}[? match_ip].name"
   mask_length:
-    command:
-      command: "show ip interface brief | json"
-      use_textfsm: false
-    jpath: "interfaces.*.interfaceAddress[?ipAddr.address=='{{ obj }}'].ipAddr.maskLen"
+    commands:
+      - command: "show ip interface brief | json"
+        use_textfsm: false
+        jpath: "interfaces.*.interfaceAddress[?ipAddr.address=='{{ obj }}'].ipAddr.maskLen"

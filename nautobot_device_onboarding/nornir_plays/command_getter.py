@@ -8,6 +8,7 @@ from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInv
 from nornir import InitNornir
 from nornir.core.plugins.inventory import InventoryPluginRegister, TransformFunctionRegister
 from nornir.core.task import Result, Task
+from nornir.core.exceptions import NornirSubTaskError
 from nornir_netmiko.tasks import netmiko_send_command
 
 from nautobot_device_onboarding.constants import NETMIKO_TO_NAPALM_STATIC
@@ -22,14 +23,42 @@ InventoryPluginRegister.register("empty-inventory", EmptyInventory)
 TransformFunctionRegister.register("transform_to_add_command_parser_info", add_platform_parsing_info)
 
 
+def deduplicate_command_list(data):
+    """Deduplicates a list of dictionaries based on 'command' and 'use_textfsm' keys.
+
+    Args:
+        data: A list of dictionaries.
+
+    Returns:
+        A new list containing only unique elements based on 'command' and 'use_textfsm'.
+    """
+    seen = set()
+    unique_list = []
+    for item in data:
+        # Create a tuple containing only 'command' and 'use_textfsm' for comparison
+        key = (item['command'], item['use_textfsm'])
+        if key not in seen:
+            seen.add(key)
+            unique_list.append(item)
+    return unique_list
+
+
 def _get_commands_to_run(yaml_parsed_info, command_getter_job):
     """Load yaml file and look up all commands that need to be run."""
-    commands = []
+    all_commands = []
     for _, value in yaml_parsed_info[command_getter_job].items():
         # Deduplicate commands + parser key
-        if value["command"] not in commands:
-            commands.append(value["command"])
-    return commands
+        if value.get("commands"):
+            # Means their isn't any "nested" structures.
+            for command in value["commands"]:
+                all_commands.append(command)
+        else:
+            # Means their is a "nested" structures.
+            for _, nested_command_info in value.items():
+                if isinstance(nested_command_info, dict):
+                    for command in nested_command_info["commands"]:
+                        all_commands.append(command)
+    return deduplicate_command_list(all_commands)
 
 
 def netmiko_send_commands(task: Task, command_getter_job: str):
@@ -40,13 +69,16 @@ def netmiko_send_commands(task: Task, command_getter_job: str):
         return Result(host=task.host, result=f"{task.host.name} has a unsupported platform set.", failed=True)
     commands = _get_commands_to_run(task.host.data["platform_parsing_info"], command_getter_job)
     for command in commands:
-        task.run(
-            task=netmiko_send_command,
-            name=command["command"],
-            command_string=command["command"],
-            use_textfsm=command["use_textfsm"],
-            read_timeout=60,
-        )
+        try:
+            task.run(
+                task=netmiko_send_command,
+                name=command["command"],
+                command_string=command["command"],
+                use_textfsm=command["use_textfsm"],
+                read_timeout=60,
+            )
+        except NornirSubTaskError:
+            Result(host=task.host, changed=False, result=f"{command['command']}: E0001 - Textfsm template issue.", failed=True)
 
 
 def command_getter_do(job_result, log_level, kwargs):
