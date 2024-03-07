@@ -7,9 +7,9 @@ device_onboarding:
         jpath: "[*].hostname"
   serial:
     commands:
-      - command: "show version"
+      - command: "show inventory"
         use_textfsm: true
-        jpath: "[*].serial"
+        jpath: "[?name=='Chassis'].sn"
   device_type:
     commands:
       - command: "show version"
