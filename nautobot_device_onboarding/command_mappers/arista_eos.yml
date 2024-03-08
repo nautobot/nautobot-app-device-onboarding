@@ -1,30 +1,27 @@
 ---
 device_onboarding:
-  use_textfsm: false
   hostname:
-    # command: "show hostname"
-    # jpath: "[*].hostname"
-    command: "show hostname | json"
-    jpath: "'hostname'"
+    commands:
+      - command: "show hostname"
+        use_textfsm: true
+        jpath: "[*].hostname"
   serial:
-    # command: "show version"
-    # jpath: "[*].serial_number"
-    command: "show version | json"
-    jpath: "'serialNumber'"
+    commands:
+      - command: "show version"
+        use_textfsm: true
+        jpath: "[*].serial_number"
   device_type:
-    # command: "show version"
-    # jpath: "[*].model"
-    command: "show version | json"
-    jpath: "'modelName'"
+    commands:
+      - command: "show version"
+        use_textfsm: true
+        jpath: "[*].model"
   mgmt_interface:
-    # command: "show ip interface brief"
-    # jpath: "[?interface=='Management1'].interface"
-    command: "show ip interface brief | json"
-    #jpath: "[?interface=='Management1'].interface"
-    jpath: "[*].[$interface$,link_status,protocol_status,hardware_type,mac_address,ip_address,prefix_length,mtu]"
+    commands:
+      - command: "show ip interface brief | json"
+        use_textfsm: false
+        jpath: "interfaces.*.{name: name, match_ip: interfaceAddress.ipAddr.address=='{{ obj }}'}[? match_ip].name"
   mask_length:
-    # command: "show ip interface brief"
-    # jpath: "[?interface=='Management1'].ip_address"
-    command: "show ip interface brief"
-    jpath: "$interfaces$.*.interfaceAddress[?ipAddr.address=='{{ obj }}']"
-    # post_processor: "{{ obj[0] | ipaddress_interface('netmask') | netmask_to_cidr }}"
+    commands:
+      - command: "show ip interface brief | json"
+        use_textfsm: false
+        jpath: "interfaces.*.interfaceAddress[?ipAddr.address=='{{ obj }}'].ipAddr.maskLen"

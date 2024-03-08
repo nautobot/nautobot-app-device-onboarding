@@ -140,6 +140,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
     """Adapter for loading device data from a network."""
 
     device_data = None
+    failed_ip_addresses = []
 
     manufacturer = onboarding_models.OnboardingManufacturer
     platform = onboarding_models.OnboardingPlatform
@@ -175,30 +176,24 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
         If a device fails to return expected data, log the result
         and remove it from the data to be loaded into the diffsync store.
         """
-        failed_ip_addresses = []
-
         for ip_address in device_data:
-            if device_data[ip_address].get("failed"):
-                self.job.logger.error(
-                    f"{ip_address}: Connection or data error, this device will not be synced. "
-                    f"{device_data[ip_address].get('failed_reason')}"
-                )
-                failed_ip_addresses.append(ip_address)
-        for ip_address in failed_ip_addresses:
+            if not device_data[ip_address]:
+                self.job.logger.error(f"{ip_address}: Connection or data error, this device will not be synced.")
+                self.failed_ip_addresses.append(ip_address)
+        for ip_address in self.failed_ip_addresses:
             del device_data[ip_address]
-        if failed_ip_addresses:
-            self.job.logger.warning(f"Failed IP Addresses: {failed_ip_addresses}")
         self.device_data = device_data
 
     def execute_command_getter(self):
         """Start the CommandGetterDO job to query devices for data."""
-        if self.job.platform:
-            if not self.job.platform.network_driver:
-                self.job.logger.error(
-                    f"The selected platform, {self.job.platform} "
-                    "does not have a network driver, please update the Platform."
-                )
-                raise Exception("Platform.network_driver missing")  # pylint: disable=broad-exception-raised
+        if not self.job.processed_csv_data:
+            if self.job.platform:
+                if not self.job.platform.network_driver:
+                    self.job.logger.error(
+                        f"The selected platform, {self.job.platform} "
+                        "does not have a network driver, please update the Platform."
+                    )
+                    raise Exception("Platform.network_driver missing")  # pylint: disable=broad-exception-raised
 
         result = command_getter_do(
             self.job.job_result, self.job.logger.getEffectiveLevel(), self.job.job_result.task_kwargs
@@ -278,27 +273,76 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                     f"{ip_address}: Unable to load DeviceType due to missing key in returned data, {err}"
                 )
 
+    def _fields_missing_data(self, device_data, ip_address, platform):
+        """Verify that all of the fields returned from a device actually contain data."""
+        fields_missing_data = []
+        required_fields_from_device = ["device_type", "hostname", "mgmt_interface", "mask_length", "serial"]
+        if platform:  # platform is only retruned with device data if not provided on the job form/csv
+            required_fields_from_device.append("platform")
+        for field in required_fields_from_device:
+            data = device_data[ip_address]
+            if not data.get(field):
+                fields_missing_data.append(field)
+        return fields_missing_data
+
     def load_devices(self):
         """Load devices into the DiffSync store."""
         for ip_address in self.device_data:
+            platform = None  # If an excption is caught below, the platform must still be set.
             try:
                 if self.job.debug:
                     self.job.logger.debug(f"loading device data for {ip_address}")
+
+                location = diffsync_utils.retrieve_submitted_value(
+                    job=self.job, ip_address=ip_address, query_string="location"
+                )
+                platform = diffsync_utils.retrieve_submitted_value(
+                    job=self.job, ip_address=ip_address, query_string="platform"
+                )
+                primary_ip4__status = diffsync_utils.retrieve_submitted_value(
+                    job=self.job, ip_address=ip_address, query_string="ip_address_status"
+                )
+                device_role = diffsync_utils.retrieve_submitted_value(
+                    job=self.job, ip_address=ip_address, query_string="device_role"
+                )
+                device_status = diffsync_utils.retrieve_submitted_value(
+                    job=self.job, ip_address=ip_address, query_string="device_status"
+                )
+                secrets_group = diffsync_utils.retrieve_submitted_value(
+                    job=self.job, ip_address=ip_address, query_string="secrets_group"
+                )
+
                 onboarding_device = self.device(
                     diffsync=self,
                     device_type__model=self.device_data[ip_address]["device_type"],
-                    location__name=self.job.location.name,
+                    location__name=location.name,
                     name=self.device_data[ip_address]["hostname"],
-                    platform__name=self.device_data[ip_address]["platform"],
+                    platform__name=platform.name if platform else self.device_data[ip_address]["platform"],
                     primary_ip4__host=ip_address,
-                    primary_ip4__status__name=self.job.ip_address_status.name,
-                    role__name=self.job.device_role.name,
-                    status__name=self.job.device_status.name,
-                    secrets_group__name=self.job.secrets_group.name,
+                    primary_ip4__status__name=primary_ip4__status.name,
+                    role__name=device_role.name,
+                    status__name=device_status.name,
+                    secrets_group__name=secrets_group.name,
                     interfaces=[self.device_data[ip_address]["mgmt_interface"]],
-                    mask_length=self.device_data[ip_address]["mask_length"],
+                    mask_length=int(self.device_data[ip_address]["mask_length"]),
                     serial=self.device_data[ip_address]["serial"],
                 )  # type: ignore
+            except KeyError as err:
+                self.job.logger.error(f"{ip_address}: Unable to load Device due to missing key in returned data, {err}")
+            except ValueError as err:
+                self.job.logger.error(
+                    f"{ip_address}: Unable to load Device due to invalid data type in data return, {err}"
+                )
+
+            fields_missing_data = self._fields_missing_data(
+                device_data=self.device_data, ip_address=ip_address, platform=platform
+            )
+            if fields_missing_data:
+                self.failed_ip_addresses.append(ip_address)
+                self.job.logger.error(
+                    f"Unable to onbaord {ip_address}, returned data missing for {fields_missing_data}"
+                )
+            else:
                 try:
                     self.add(onboarding_device)
                     if self.job.debug:
@@ -310,8 +354,6 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                         f"[Serial Number: {self.device_data[ip_address]['serial']}, "
                         f"IP Address: {ip_address}]"
                     )
-            except KeyError as err:
-                self.job.logger.error(f"{ip_address}: Unable to load Device due to missing key in returned data, {err}")
 
     def load(self):
         """Load network data."""
@@ -321,3 +363,6 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
         self.load_platforms()
         self.load_device_types()
         self.load_devices()
+
+        if self.failed_ip_addresses:
+            self.job.logger.warning(f"Failed IP Addresses: {self.failed_ip_addresses}")

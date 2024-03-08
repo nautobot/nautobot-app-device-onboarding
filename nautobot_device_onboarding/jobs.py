@@ -1,11 +1,14 @@
 # pylint: disable=attribute-defined-outside-init
 """Device Onboarding Jobs."""
 
+import csv
 import logging
+from io import StringIO
 
 from diffsync.enum import DiffSyncFlags
 from django.conf import settings
-from nautobot.apps.jobs import BooleanVar, IntegerVar, Job, MultiObjectVar, ObjectVar, StringVar
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from nautobot.apps.jobs import BooleanVar, FileVar, IntegerVar, Job, MultiObjectVar, ObjectVar, StringVar
 from nautobot.core.celery import register_jobs
 from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
@@ -204,6 +207,8 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
     def __init__(self):
         """Initialize SSOTDeviceOnboarding."""
         super().__init__()
+        self.processed_csv_data = {}
+        self.task_kwargs_csv_data = {}
         self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
 
     class Meta:
@@ -216,19 +221,24 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
         default=False,
         description="Enable for more verbose logging.",
     )
+    csv_file = FileVar(
+        label="CSV File", required=False, description="If a file is provided all the options below will be ignored."
+    )
     location = ObjectVar(
         model=Location,
+        required=False,
         query_params={"content_type": "dcim.device"},
         description="Assigned Location for all synced device(s)",
     )
-    namespace = ObjectVar(model=Namespace, description="Namespace ip addresses belong to.")
+    namespace = ObjectVar(model=Namespace, required=False, description="Namespace ip addresses belong to.")
     ip_addresses = StringVar(
+        required=False,
         description="IP address of the device to sync, specify in a comma separated list for multiple devices.",
         label="IPv4 addresses",
     )
-    port = IntegerVar(default=22)
-    timeout = IntegerVar(default=30)
-    management_only_interface = BooleanVar(
+    port = IntegerVar(required=False, default=22)
+    timeout = IntegerVar(required=False, default=30)
+    set_mgmt_only = BooleanVar(
         default=False,
         label="Set Management Only",
         description="If True, new interfaces that are created will be set to management only. If False, new interfaces will be set to not be management only.",
@@ -241,30 +251,30 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
     device_role = ObjectVar(
         model=Role,
         query_params={"content_types": "dcim.device"},
-        required=True,
+        required=False,
         description="Role to be applied to all synced devices.",
     )
     device_status = ObjectVar(
         model=Status,
         query_params={"content_types": "dcim.device"},
-        required=True,
+        required=False,
         description="Status to be applied to all synced devices.",
     )
     interface_status = ObjectVar(
         model=Status,
         query_params={"content_types": "dcim.interface"},
-        required=True,
+        required=False,
         description="Status to be applied to all new synced device interfaces. This value does not update with additional syncs.",
     )
     ip_address_status = ObjectVar(
         label="IP address status",
         model=Status,
         query_params={"content_types": "ipam.ipaddress"},
-        required=True,
+        required=False,
         description="Status to be applied to all new synced IP addresses. This value does not update with additional syncs.",
     )
     secrets_group = ObjectVar(
-        model=SecretsGroup, required=True, description="SecretsGroup for device connection credentials."
+        model=SecretsGroup, required=False, description="SecretsGroup for device connection credentials."
     )
     platform = ObjectVar(
         model=Platform,
@@ -282,15 +292,126 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
         self.target_adapter = OnboardingNautobotAdapter(job=self, sync=self.sync)
         self.target_adapter.load()
 
+    def _convert_sring_to_bool(self, string, header):
+        """Given a string of 'true' or 'false' convert to bool."""
+        if string.lower() == "true":
+            return True
+        if string.lower() == "false":
+            return False
+        raise ValidationError(
+            f"'{string}' in column '{header}' failed to convert to a boolean value. "
+            "Please use either 'True' or 'False'."
+        )
+
+    def _process_csv_data(self, csv_file):
+        """Convert CSV data into a dictionary containing Nautobot objects."""
+        self.logger.info("Decoding CSV file...")
+        decoded_csv_file = csv_file.read().decode("utf-8")
+        csv_reader = csv.DictReader(StringIO(decoded_csv_file))
+        self.logger.info("Processing CSV data...")
+        processing_failed = False
+        processed_csv_data = {}
+        row_count = 1
+        for row in csv_reader:
+            query = None
+            try:
+                query = f"location_name: {row.get('location_name')}, location_parent_name: {row.get('location_parent_name')}"
+                if row.get("location_parent_name"):
+                    location = Location.objects.get(
+                        name=row["location_name"].strip(), parent__name=row["location_parent_name"].strip()
+                    )
+                else:
+                    query = query = f"location_name: {row.get('location_name')}"
+                    location = Location.objects.get(name=row["location_name"].strip(), parent=None)
+                query = f"device_role: {row.get('device_role_name')}"
+                device_role = Role.objects.get(
+                    name=row["device_role_name"].strip(),
+                )
+                query = f"namespace: {row.get('namespace')}"
+                namespace = Namespace.objects.get(
+                    name=row["namespace"].strip(),
+                )
+                query = f"device_status: {row.get('device_status_name')}"
+                device_status = Status.objects.get(
+                    name=row["device_status_name"].strip(),
+                )
+                query = f"interface_status: {row.get('interface_status_name')}"
+                interface_status = Status.objects.get(
+                    name=row["interface_status_name"].strip(),
+                )
+                query = f"ip_address_status: {row.get('ip_address_status_name')}"
+                ip_address_status = Status.objects.get(
+                    name=row["ip_address_status_name"].strip(),
+                )
+                query = f"secrets_group: {row.get('secrets_group_name')}"
+                secrets_group = SecretsGroup.objects.get(
+                    name=row["secrets_group_name"].strip(),
+                )
+                query = f"platform: {row.get('platform_name')}"
+                platform = None
+                if row.get("platform_name"):
+                    platform = Platform.objects.get(
+                        name=row["platform_name"].strip(),
+                    )
+
+                set_mgmgt_only = self._convert_sring_to_bool(
+                    string=row["set_mgmt_only"].lower().strip(), header="set_mgmt_only"
+                )
+                update_devices_without_primary_ip = self._convert_sring_to_bool(
+                    string=row["update_devices_without_primary_ip"].lower().strip(),
+                    header="update_devices_without_primary_ip",
+                )
+
+                processed_csv_data[row["ip_address_host"]] = {}
+                processed_csv_data[row["ip_address_host"]]["location"] = location
+                processed_csv_data[row["ip_address_host"]]["namespace"] = namespace
+                processed_csv_data[row["ip_address_host"]]["port"] = int(row["port"].strip())
+                processed_csv_data[row["ip_address_host"]]["timeout"] = int(row["timeout"].strip())
+                processed_csv_data[row["ip_address_host"]]["set_mgmt_only"] = set_mgmgt_only
+                processed_csv_data[row["ip_address_host"]][
+                    "update_devices_without_primary_ip"
+                ] = update_devices_without_primary_ip
+                processed_csv_data[row["ip_address_host"]]["device_role"] = device_role
+                processed_csv_data[row["ip_address_host"]]["device_status"] = device_status
+                processed_csv_data[row["ip_address_host"]]["interface_status"] = interface_status
+                processed_csv_data[row["ip_address_host"]]["ip_address_status"] = ip_address_status
+                processed_csv_data[row["ip_address_host"]]["secrets_group"] = secrets_group
+                processed_csv_data[row["ip_address_host"]]["platform"] = platform
+
+                # Prepare ids to send to the job in celery
+                self.task_kwargs_csv_data[row["ip_address_host"]] = {}
+                self.task_kwargs_csv_data[row["ip_address_host"]]["port"] = int(row["port"].strip())
+                self.task_kwargs_csv_data[row["ip_address_host"]]["timeout"] = int(row["timeout"].strip())
+                self.task_kwargs_csv_data[row["ip_address_host"]]["secrets_group"] = (
+                    secrets_group.id if secrets_group else ""
+                )
+                self.task_kwargs_csv_data[row["ip_address_host"]]["platform"] = platform.id if platform else ""
+                row_count += 1
+            except ObjectDoesNotExist as err:
+                self.logger.error(f"(row {sum([row_count, 1])}), {err} {query}")
+                processing_failed = True
+                row_count += 1
+            except ValidationError as err:
+                self.logger.error(f"(row {sum([row_count, 1])}), {err}")
+                row_count += 1
+        if processing_failed:
+            processed_csv_data = None
+        if row_count <= 1:
+            self.logger.error("The CSV file is empty!")
+            processed_csv_data = None
+
+        return processed_csv_data
+
     def run(
         self,
         dryrun,
         memory_profiling,
         debug,
+        csv_file,
         location,
         namespace,
         ip_addresses,
-        management_only_interface,
+        set_mgmt_only,
         update_devices_without_primary_ip,
         device_role,
         device_status,
@@ -307,36 +428,76 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
         self.dryrun = dryrun
         self.memory_profiling = memory_profiling
         self.debug = debug
-        self.location = location
-        self.namespace = namespace
-        self.ip_addresses = ip_addresses.replace(" ", "").split(",")
-        self.management_only_interface = management_only_interface
-        self.update_devices_without_primary_ip = update_devices_without_primary_ip
-        self.device_role = device_role
-        self.device_status = device_status
-        self.interface_status = interface_status
-        self.ip_address_status = ip_address_status
-        self.port = port
-        self.timeout = timeout
-        self.secrets_group = secrets_group
-        self.platform = platform
 
-        self.job_result.task_kwargs = {
-            "debug": debug,
-            "location": location,
-            "namespace": namespace,
-            "ip_addresses": ip_addresses,
-            "management_only_interface": management_only_interface,
-            "update_devices_without_primary_ip": update_devices_without_primary_ip,
-            "device_role": device_role,
-            "device_status": device_status,
-            "interface_status": interface_status,
-            "ip_address_status": ip_address_status,
-            "port": port,
-            "timeout": timeout,
-            "secrets_group": secrets_group,
-            "platform": platform,
-        }
+        if csv_file:
+            self.processed_csv_data = self._process_csv_data(csv_file=csv_file)
+            if self.processed_csv_data:
+                if self.debug:
+                    self.logger.debug(self.processed_csv_data)
+                # create a list of ip addresses for processing in the adapter
+                self.ip_addresses = []
+                for ip_address in self.processed_csv_data:
+                    self.ip_addresses.append(ip_address)
+                # prepare the task_kwargs needed by the CommandGetterDO job
+                self.job_result.task_kwargs = {"debug": debug, "csv_file": self.task_kwargs_csv_data}
+            else:
+                raise ValidationError(message="CSV check failed. No devices will be onboarded.")
+
+        else:
+            # Verify that all requried form inputs have been provided
+            required_inputs = {
+                "location": location,
+                "namespace": namespace,
+                "ip_addresses": ip_addresses,
+                "device_role": device_role,
+                "device_status": device_status,
+                "interface_status": interface_status,
+                "ip_address_status": ip_address_status,
+                "port": port,
+                "timeout": timeout,
+                "secrets_group": secrets_group,
+            }
+
+            missing_required_inputs = [
+                form_field for form_field, input_value in required_inputs.items() if not input_value
+            ]
+            if not missing_required_inputs:
+                pass
+            else:
+                self.logger.error(f"Missing requried inputs from job form: {missing_required_inputs}")
+                raise ValidationError(message=f"Missing required inputs {missing_required_inputs}")
+
+            self.location = location
+            self.namespace = namespace
+            self.ip_addresses = ip_addresses.replace(" ", "").split(",")
+            self.set_mgmt_only = set_mgmt_only
+            self.update_devices_without_primary_ip = update_devices_without_primary_ip
+            self.device_role = device_role
+            self.device_status = device_status
+            self.interface_status = interface_status
+            self.ip_address_status = ip_address_status
+            self.port = port
+            self.timeout = timeout
+            self.secrets_group = secrets_group
+            self.platform = platform
+
+            self.job_result.task_kwargs = {
+                "debug": debug,
+                "location": location,
+                "namespace": namespace,
+                "ip_addresses": ip_addresses,
+                "set_mgmt_only": set_mgmt_only,
+                "update_devices_without_primary_ip": update_devices_without_primary_ip,
+                "device_role": device_role,
+                "device_status": device_status,
+                "interface_status": interface_status,
+                "ip_address_status": ip_address_status,
+                "port": port,
+                "timeout": timeout,
+                "secrets_group": secrets_group,
+                "platform": platform,
+                "csv_file": "",
+            }
         super().run(dryrun, memory_profiling, *args, **kwargs)
 
 
@@ -482,17 +643,18 @@ class CommandGetterDO(Job):
     """Simple Job to Execute Show Command."""
 
     class Meta:
-        """Meta object boilerplate for onboarding."""
+        """Job Meta."""
 
         name = "Command Getter for Device Onboarding"
         description = "Login to a device(s) and run commands."
         has_sensitive_variables = False
         hidden = False
 
-    debug = BooleanVar()
-    ip_addresses = StringVar()
-    port = IntegerVar()
-    timeout = IntegerVar()
+    csv_file = StringVar(required=False)
+    debug = BooleanVar(required=False)
+    ip_addresses = StringVar(required=False)
+    port = IntegerVar(required=False)
+    timeout = IntegerVar(required=False)
     secrets_group = ObjectVar(model=SecretsGroup)
     platform = ObjectVar(model=Platform, required=False)
 
@@ -505,37 +667,21 @@ class CommandGetterDO(Job):
 class CommandGetterNetworkImporter(Job):
     """Simple Job to Execute Show Command."""
 
-    debug = BooleanVar(description="Enable for more verbose logging.")
-    namespace = ObjectVar(
-        model=Namespace, required=True, description="The namespace for all IP addresses created or updated in the sync."
-    )
-    devices = MultiObjectVar(
-        model=Device,
-        required=False,
-        description="Device(s) to update.",
-    )
-    location = ObjectVar(
-        model=Location,
-        query_params={"content_type": "dcim.device"},
-        required=False,
-        description="Only update devices at a specific location.",
-    )
-    device_role = ObjectVar(
-        model=Role,
-        query_params={"content_types": "dcim.device"},
-        required=False,
-        description="Only update devices with the selected role.",
-    )
-    port = IntegerVar(default=22)
-    timeout = IntegerVar(default=30)
-
     class Meta:
-        """Meta object boilerplate for onboarding."""
+        """Job Meta."""
 
         name = "Command Getter for Network Importer"
         description = "Login to a device(s) and run commands."
         has_sensitive_variables = False
         hidden = False
+
+    debug = BooleanVar()
+    namespace = ObjectVar(model=Namespace, required=True)
+    devices = MultiObjectVar(model=Device, required=False)
+    location = ObjectVar(model=Location, required=False)
+    device_role = ObjectVar(model=Role, required=False)
+    port = IntegerVar(default=22)
+    timeout = IntegerVar(default=30)
 
     def run(self, *args, **kwargs):
         """Run command getter."""

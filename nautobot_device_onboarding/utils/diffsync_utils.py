@@ -30,7 +30,7 @@ def check_data_type(data):
 
 
 def get_or_create_prefix(host, mask_length, default_status, namespace, job=None):
-    """Attempt to get a Nautobot Prefix, create a new one if necessary."""
+    """Attempt to get a Nautobot Prefix, and create a new one if necessary."""
     prefix = None
     new_network = ipaddress.ip_interface(f"{host}/{mask_length}")
     try:
@@ -54,7 +54,7 @@ def get_or_create_prefix(host, mask_length, default_status, namespace, job=None)
 
 
 def get_or_create_ip_address(host, mask_length, namespace, default_ip_status, default_prefix_status, job=None):
-    """Attempt to get a Nautobot IPAddress, create a new one if necessary."""
+    """Attempt to get a Nautobot IPAddress, and create a new one if necessary."""
     ip_address = None
 
     try:
@@ -88,3 +88,17 @@ def get_or_create_ip_address(host, mask_length, namespace, default_ip_status, de
             if job:
                 job.logger.error(f"IP Address {host} failed to create, {err}")
     return ip_address
+
+
+def retrieve_submitted_value(job, ip_address, query_string):
+    """
+    Check for a submitted CSV file and retrieve a the appropriate user submitted value.
+
+    If a user has submitted a CSV file, return the relevant value based on the data
+    that was parsed when the file was loaded. If a CSV file has not been submitted,
+    return the value input into the job form.
+    """
+    if job.processed_csv_data:
+        return job.processed_csv_data[ip_address][query_string]
+    else:
+        return getattr(job, query_string)
