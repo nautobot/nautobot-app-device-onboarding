@@ -173,9 +173,7 @@ def command_getter_do(job_result, log_level, kwargs):
                             password=password,
                         )
                 else:
-                    single_host_inventory_constructed = _set_inventory(
-                        entered_ip, platform, port, username, password
-                    )
+                    single_host_inventory_constructed = _set_inventory(entered_ip, platform, port, username, password)
                 nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
             nr_with_processors.run(task=netmiko_send_commands, command_getter_job="device_onboarding")
     except Exception as err:  # pylint: disable=broad-exception-caught

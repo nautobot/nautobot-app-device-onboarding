@@ -277,14 +277,12 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
         """Verify that all of the fields returned from a device actually contain data."""
         fields_missing_data = []
         required_fields_from_device = ["device_type", "hostname", "mgmt_interface", "mask_length", "serial"]
-
         if platform:  # platform is only retruned with device data if not provided on the job form/csv
             required_fields_from_device.append("platform")
-
         for field in required_fields_from_device:
-            if not device_data[ip_address][field]:
+            data = device_data[ip_address]
+            if not data.get(field):
                 fields_missing_data.append(field)
-
         return fields_missing_data
 
     def load_devices(self):
@@ -331,7 +329,9 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
             except KeyError as err:
                 self.job.logger.error(f"{ip_address}: Unable to load Device due to missing key in returned data, {err}")
             except ValueError as err:
-                self.job.logger.error(f"{ip_address}: Unable to load Device due to invalid data type in data return, {err}")
+                self.job.logger.error(
+                    f"{ip_address}: Unable to load Device due to invalid data type in data return, {err}"
+                )
 
             fields_missing_data = self._fields_missing_data(
                 device_data=self.device_data, ip_address=ip_address, platform=platform
