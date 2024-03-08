@@ -288,6 +288,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
     def load_devices(self):
         """Load devices into the DiffSync store."""
         for ip_address in self.device_data:
+            platform = None  # If an excption is caught below, the platform must still be set.
             try:
                 if self.job.debug:
                     self.job.logger.debug(f"loading device data for {ip_address}")
