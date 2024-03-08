@@ -1,13 +1,14 @@
 """Formatter."""
 
-import os
 import json
+import os
+
 import yaml
 from django.template import engines
 from django.utils.module_loading import import_string
 from jdiff import extract_data_from_json
-
 from jinja2.sandbox import SandboxedEnvironment
+
 from nautobot_device_onboarding.utils.jinja_filters import fix_interfaces
 
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "command_mappers"))
@@ -104,7 +105,7 @@ def extract_show_data(host, multi_result, command_getter_type):
             result = perform_data_extraction(host, default_dict_field, command_info, jinja_env, multi_result[0])
             final_result_dict.update(result)
         else:
-            # Means their is a "nested" structures. Priority 
+            # Means their is a "nested" structures. Priority
             for dict_field, nested_command_info in command_info.items():
                 result = perform_data_extraction(host, dict_field, nested_command_info, jinja_env, multi_result[0])
                 final_result_dict.update(result)

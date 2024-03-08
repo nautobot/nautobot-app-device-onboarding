@@ -296,13 +296,12 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
         """Given a string of 'true' or 'false' convert to bool."""
         if string.lower() == "true":
             return True
-        elif string.lower() == "false":
+        if string.lower() == "false":
             return False
-        else:
-            raise ValidationError(
-                f"'{string}' in column '{header}' failed to convert to a boolean value. "
-                "Please use either 'True' or 'False'."
-            )
+        raise ValidationError(
+            f"'{string}' in column '{header}' failed to convert to a boolean value. "
+            "Please use either 'True' or 'False'."
+        )
 
     def _process_csv_data(self, csv_file):
         """ "Convert CSV data into a dictionary containing Nautobot objects."""
@@ -314,6 +313,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
         processed_csv_data = {}
         row_count = 1
         for row in csv_reader:
+            query = None
             try:
                 query = f"location_name: {row.get('location_name')}, location_parent_name: {row.get('location_parent_name')}"
                 if row.get("location_parent_name"):
@@ -393,7 +393,6 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
                 row_count += 1
             except ValidationError as err:
                 self.logger.error(f"(row {sum([row_count, 1])}), {err}")
-                self.logger.error
                 row_count += 1
         if processing_failed:
             processed_csv_data = None

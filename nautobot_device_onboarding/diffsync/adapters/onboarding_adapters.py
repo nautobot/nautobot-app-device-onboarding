@@ -176,14 +176,9 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
         If a device fails to return expected data, log the result
         and remove it from the data to be loaded into the diffsync store.
         """
-        failed_ip_addresses = []
-
         for ip_address in device_data:
-            if device_data[ip_address].get("failed"):
-                self.job.logger.error(
-                    f"{ip_address}: Connection or data error, this device will not be synced. "
-                    f"{device_data[ip_address].get('failed_reason')}"
-                )
+            if not device_data[ip_address]:
+                self.job.logger.error(f"{ip_address}: Connection or data error, this device will not be synced.")
                 self.failed_ip_addresses.append(ip_address)
         for ip_address in self.failed_ip_addresses:
             del device_data[ip_address]
@@ -283,7 +278,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
         fields_missing_data = []
         required_fields_from_device = ["device_type", "hostname", "mgmt_interface", "mask_length", "serial"]
 
-        if platform: # platform is only retruned with device data if not provided on the job form/csv
+        if platform:  # platform is only retruned with device data if not provided on the job form/csv
             required_fields_from_device.append("platform")
 
         for field in required_fields_from_device:
@@ -335,12 +330,17 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 )  # type: ignore
             except KeyError as err:
                 self.job.logger.error(f"{ip_address}: Unable to load Device due to missing key in returned data, {err}")
+            except ValueError as err:
+                self.job.logger.error(f"{ip_address}: Unable to load Device due to invalid data type in data return, {err}")
 
             fields_missing_data = self._fields_missing_data(
-                device_data=self.device_data, ip_address=ip_address, platform=platform)
+                device_data=self.device_data, ip_address=ip_address, platform=platform
+            )
             if fields_missing_data:
                 self.failed_ip_addresses.append(ip_address)
-                self.job.logger.error(f"Unable to onbaord {ip_address}, returned data missing for {fields_missing_data}")
+                self.job.logger.error(
+                    f"Unable to onbaord {ip_address}, returned data missing for {fields_missing_data}"
+                )
             else:
                 try:
                     self.add(onboarding_device)

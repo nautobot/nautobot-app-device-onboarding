@@ -1,14 +1,16 @@
 """CommandGetter."""
 
 # pylint: disable=relative-beyond-top-level
+from django.conf import settings
 from nautobot.dcim.models import Platform
+from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import SecretsGroup
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
 from nornir import InitNornir
+from nornir.core.exceptions import NornirSubTaskError
 from nornir.core.plugins.inventory import InventoryPluginRegister, TransformFunctionRegister
 from nornir.core.task import Result, Task
-from nornir.core.exceptions import NornirSubTaskError
 from nornir_netmiko.tasks import netmiko_send_command
 
 from nautobot_device_onboarding.constants import NETMIKO_TO_NAPALM_STATIC
@@ -36,7 +38,7 @@ def deduplicate_command_list(data):
     unique_list = []
     for item in data:
         # Create a tuple containing only 'command' and 'use_textfsm' for comparison
-        key = (item['command'], item['use_textfsm'])
+        key = (item["command"], item["use_textfsm"])
         if key not in seen:
             seen.add(key)
             unique_list.append(item)
@@ -78,7 +80,40 @@ def netmiko_send_commands(task: Task, command_getter_job: str):
                 read_timeout=60,
             )
         except NornirSubTaskError:
-            Result(host=task.host, changed=False, result=f"{command['command']}: E0001 - Textfsm template issue.", failed=True)
+            Result(
+                host=task.host,
+                changed=False,
+                result=f"{command['command']}: E0001 - Textfsm template issue.",
+                failed=True,
+            )
+
+
+def _parse_credentials(credentials):
+    """Parse and return dictionary of credentials."""
+    if credentials:
+        try:
+            username = credentials.get_secret_value(
+                access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
+                secret_type=SecretsGroupSecretTypeChoices.TYPE_USERNAME,
+            )
+            password = credentials.get_secret_value(
+                access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
+                secret_type=SecretsGroupSecretTypeChoices.TYPE_PASSWORD,
+            )
+            try:
+                secret = credentials.get_secret_value(
+                    access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
+                    secret_type=SecretsGroupSecretTypeChoices.TYPE_SECRET,
+                )
+            except Exception:
+                secret = None
+        except Exception:
+            return (None, None, None)
+    else:
+        username = settings.NAPALM_USERNAME
+        password = settings.NAPALM_PASSWORD
+        secret = settings.NAPALM_ARGS.get("secret", None)
+    return (username, password, secret)
 
 
 def command_getter_do(job_result, log_level, kwargs):
@@ -93,8 +128,8 @@ def command_getter_do(job_result, log_level, kwargs):
         ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
         port = kwargs["port"]
         # timeout = kwargs["timeout"]
-        secrets_group = kwargs["secrets_group"]
         platform = kwargs["platform"]
+        username, password, secret = _parse_credentials(kwargs["secrets_group"])
 
     # Initiate Nornir instance with empty inventory
     try:
@@ -108,6 +143,7 @@ def command_getter_do(job_result, log_level, kwargs):
             },
         ) as nornir_obj:
             nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results, kwargs)])
+            loaded_secrets_group = None
             for entered_ip in ip_addresses:
                 if kwargs["csv_file"]:
                     # get platform if one was provided via csv
@@ -116,24 +152,34 @@ def command_getter_do(job_result, log_level, kwargs):
                     if platform_id:
                         platform = Platform.objects.get(id=platform_id)
 
-                    # get secrets group if one was provided via csv
-                    secrets_group = None
+                    # parse secrets from secrets groups provided via csv
                     secrets_group_id = kwargs["csv_file"][entered_ip]["secrets_group"]
                     if secrets_group_id:
-                        secrets_group = SecretsGroup.objects.get(id=secrets_group_id)
-                    single_host_inventory_constructed = _set_inventory(
-                        host_ip=entered_ip,
-                        platform=platform,
-                        port=kwargs["csv_file"][entered_ip]["port"],
-                        secrets_group=secrets_group,
-                    )
+                        new_secrets_group = SecretsGroup.objects.get(id=secrets_group_id)
+                        # only update the credentials if the secrets_group specified on a csv row
+                        # is different than the secrets group on the previous csv row. This prevents
+                        # unnecessary repeat calls to secrets providers.
+                        if new_secrets_group != loaded_secrets_group:
+                            logger.info(f"Parsing credentials from Secrets Group: {new_secrets_group.name}")
+                            loaded_secrets_group = new_secrets_group
+                            username, password, secret = _parse_credentials(loaded_secrets_group)
+                            if not (username and password):
+                                logger.error(f"Unable to onboard {entered_ip}, failed to parse credentials")
+                        single_host_inventory_constructed = _set_inventory(
+                            host_ip=entered_ip,
+                            platform=platform,
+                            port=kwargs["csv_file"][entered_ip]["port"],
+                            username=username,
+                            password=password,
+                        )
                 else:
-                    single_host_inventory_constructed = _set_inventory(entered_ip, platform, port, secrets_group)
+                    single_host_inventory_constructed = _set_inventory(
+                        entered_ip, platform, port, username, password
+                    )
                 nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
             nr_with_processors.run(task=netmiko_send_commands, command_getter_job="device_onboarding")
     except Exception as err:  # pylint: disable=broad-exception-caught
-        logger.error("Error: %s", err)
-        return err
+        logger.error(err)
     return compiled_results
 
 

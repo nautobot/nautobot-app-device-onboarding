@@ -1,40 +1,9 @@
 """Inventory Creator and Helpers."""
 
-from django.conf import settings
-from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from netmiko import SSHDetect
 from nornir.core.inventory import ConnectionOptions, Host
 
-from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.utils.helper import _get_platform_parsing_info
-
-
-def _parse_credentials(credentials):
-    """Parse and return dictionary of credentials."""
-    if credentials:
-        try:
-            username = credentials.get_secret_value(
-                access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
-                secret_type=SecretsGroupSecretTypeChoices.TYPE_USERNAME,
-            )
-            password = credentials.get_secret_value(
-                access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
-                secret_type=SecretsGroupSecretTypeChoices.TYPE_PASSWORD,
-            )
-            try:
-                secret = credentials.get_secret_value(
-                    access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
-                    secret_type=SecretsGroupSecretTypeChoices.TYPE_SECRET,
-                )
-            except Exception:
-                secret = None
-        except Exception as err:
-            raise OnboardException("fail-credentials - Unable to parse selected credentials.") from err
-    else:
-        username = settings.NAPALM_USERNAME
-        password = settings.NAPALM_PASSWORD
-        secret = settings.NAPALM_ARGS.get("secret", None)
-    return (username, password, secret)
 
 
 def guess_netmiko_device_type(hostname, username, password, port):
@@ -61,10 +30,9 @@ def guess_netmiko_device_type(hostname, username, password, port):
     return guessed_device_type
 
 
-def _set_inventory(host_ip, platform, port, secrets_group):
+def _set_inventory(host_ip, platform, port, username, password):
     """Construct Nornir Inventory."""
     inv = {}
-    username, password, secret = _parse_credentials(secrets_group)
     if platform:
         platform = platform.network_driver
     else:

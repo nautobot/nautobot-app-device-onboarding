@@ -24,7 +24,7 @@ class NornirLogger:
         if not extra:
             extra = {}
         getattr(LOGGER_ADAPTER, attr)(message, extra=extra)
-        self.job_result.log(message, level_choice=attr, obj=extra.get("object"), grouping=extra.get("grouping", ""))
+        self.job_result.log(message, level_choice=attr)
 
     def debug(self, message: str, extra: Any = None):
         """Match standard Python Library debug signature."""

@@ -37,14 +37,14 @@ class ProcessorDO(BaseLoggingProcessor):
         # Complex logic to see if the task exception is expected, which is depicted by
         # a sub task raising a NornirNautobotException.
         # if result.failed:
-            # for level_1_result in result:
-                # if hasattr(level_1_result, "exception") and hasattr(level_1_result.exception, "result"):
-                #     print("inside level2 hasatter")
-                #     for level_2_result in level_1_result.exception.result:  # type: ignore
-                #         print("inside the level2")
-                #         if isinstance(level_2_result.exception, NornirNautobotException):
-                #             return
-            # self.logger.critical(f"{task.name} failed: {result.exception}", extra={"object": task.host})
+        # for level_1_result in result:
+        # if hasattr(level_1_result, "exception") and hasattr(level_1_result.exception, "result"):
+        #     print("inside level2 hasatter")
+        #     for level_2_result in level_1_result.exception.result:  # type: ignore
+        #         print("inside the level2")
+        #         if isinstance(level_2_result.exception, NornirNautobotException):
+        #             return
+        # self.logger.critical(f"{task.name} failed: {result.exception}", extra={"object": task.host})
         # else:
         self.logger.info(
             f"task_instance_completed Task Name: {task.name} Task Result: {result.result}",
@@ -64,12 +64,14 @@ class ProcessorDO(BaseLoggingProcessor):
         """Processor for logging and data processing on subtask completed."""
         self.logger.info(f"subtask_instance_completed Subtask completed {task.name}.", extra={"object": task.host})
         if self.kwargs["debug"]:
-            self.logger.debug(f"subtask_instance_completed Subtask result {result.result}.", extra={"object": task.host})
+            self.logger.debug(
+                f"subtask_instance_completed Subtask result {result.result}.", extra={"object": task.host}
+            )
 
         # self.data[host.name].update(
         #     {
         #         "failed": result.failed,
-        #     
+        #
         # }
         # )
         # if not result.failed:

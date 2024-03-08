@@ -99,8 +99,6 @@ def retrieve_submitted_value(job, ip_address, query_string):
     return the value input into the job form.
     """
     if job.processed_csv_data:
-        if job.debug:
-            job.logger.debug(f"Retrieved csv value: {query_string} for {ip_address}")
         return job.processed_csv_data[ip_address][query_string]
     else:
         return getattr(job, query_string)

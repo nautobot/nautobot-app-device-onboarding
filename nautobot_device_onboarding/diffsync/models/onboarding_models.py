@@ -134,18 +134,26 @@ class OnboardingDevice(DiffSyncModel):
     def _update_device_with_attrs(cls, device, platform, ids, attrs, diffsync):
         """Update a Nautobot device instance."""
         device.location = diffsync_utils.retrieve_submitted_value(
-                job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="location",
+            job=diffsync.job,
+            ip_address=attrs["primary_ip4__host"],
+            query_string="location",
         )
         device.status = diffsync_utils.retrieve_submitted_value(
-                job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="device_status",
+            job=diffsync.job,
+            ip_address=attrs["primary_ip4__host"],
+            query_string="device_status",
         )
         device.role = diffsync_utils.retrieve_submitted_value(
-                job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="device_role",
+            job=diffsync.job,
+            ip_address=attrs["primary_ip4__host"],
+            query_string="device_role",
         )
         device.device_type = DeviceType.objects.get(model=attrs["device_type__model"])
         device.platform = platform
         device.secrets_group = diffsync_utils.retrieve_submitted_value(
-                job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="secrets_group",
+            job=diffsync.job,
+            ip_address=attrs["primary_ip4__host"],
+            query_string="secrets_group",
         )
         device.serial = ids["serial"]
 
@@ -155,7 +163,7 @@ class OnboardingDevice(DiffSyncModel):
     def create(cls, diffsync, ids, attrs):
         """Create a new nautobot device using data scraped from a device."""
         if diffsync.job.debug:
-            diffsync.job.logger.debug("Creating device {ids} with {attrs}")
+            diffsync.job.logger.debug(f"Creating device {ids} with {attrs}")
 
         # Get or create Device, Interface and IP Address
         device = cls._get_or_create_device(diffsync, ids, attrs)
