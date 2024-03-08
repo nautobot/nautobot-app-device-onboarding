@@ -304,7 +304,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
         )
 
     def _process_csv_data(self, csv_file):
-        """ "Convert CSV data into a dictionary containing Nautobot objects."""
+        """Convert CSV data into a dictionary containing Nautobot objects."""
         self.logger.info("Decoding CSV file...")
         decoded_csv_file = csv_file.read().decode("utf-8")
         csv_reader = csv.DictReader(StringIO(decoded_csv_file))
