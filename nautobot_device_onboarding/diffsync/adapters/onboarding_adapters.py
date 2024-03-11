@@ -139,9 +139,6 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
 class OnboardingNetworkAdapter(diffsync.DiffSync):
     """Adapter for loading device data from a network."""
 
-    device_data = None
-    failed_ip_addresses = []
-
     manufacturer = onboarding_models.OnboardingManufacturer
     platform = onboarding_models.OnboardingPlatform
     device = onboarding_models.OnboardingDevice
@@ -154,6 +151,8 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
         super().__init__(*args, **kwargs)
         self.job = job
         self.sync = sync
+        self.device_data = None
+        self.failed_ip_addresses = []
 
     def _validate_ip_addresses(self, ip_addresses):
         """Validate the format of each IP Address in a list of IP Addresses."""
@@ -176,6 +175,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
         If a device fails to return expected data, log the result
         and remove it from the data to be loaded into the diffsync store.
         """
+        self.failed_ip_addresses = []
         for ip_address in device_data:
             if not device_data[ip_address]:
                 self.job.logger.error(f"{ip_address}: Connection or data error, this device will not be synced.")

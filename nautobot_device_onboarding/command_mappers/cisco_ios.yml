@@ -21,7 +21,7 @@ device_onboarding:
       - command: "show interfaces"
         use_textfsm: true
         jpath: "[?ip_address=='{{ obj }}'].{name: interface, enabled: link_status}"
-        post_processor: "{% for interface in obj %}{% if 'up' in interface['enabled'] %}{{ interface.name }}{% endif %}{% endfor %}"
+        post_processor: "{{ (obj | selectattr('enabled', 'eq', 'up') | list | first ).name }}"
   mask_length:
     commands:
       - command: "show interfaces"
