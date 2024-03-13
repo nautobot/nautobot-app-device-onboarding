@@ -204,11 +204,12 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
 class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-attributes
     """Job for syncing basic device info from a network into Nautobot."""
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """Initialize SSOTDeviceOnboarding."""
-        super().__init__()
+        super().__init__(*args, **kwargs)
         self.processed_csv_data = {}
         self.task_kwargs_csv_data = {}
+
         self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
 
     class Meta:
@@ -239,7 +240,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
     port = IntegerVar(required=False, default=22)
     timeout = IntegerVar(required=False, default=30)
     set_mgmt_only = BooleanVar(
-        default=False,
+        default=True,
         label="Set Management Only",
         description="If True, new interfaces that are created will be set to management only. If False, new interfaces will be set to not be management only.",
     )
@@ -311,6 +312,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
         self.logger.info("Processing CSV data...")
         processing_failed = False
         processed_csv_data = {}
+        self.task_kwargs_csv_data = {}
         row_count = 1
         for row in csv_reader:
             query = None
@@ -432,8 +434,6 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
         if csv_file:
             self.processed_csv_data = self._process_csv_data(csv_file=csv_file)
             if self.processed_csv_data:
-                if self.debug:
-                    self.logger.debug(self.processed_csv_data)
                 # create a list of ip addresses for processing in the adapter
                 self.ip_addresses = []
                 for ip_address in self.processed_csv_data:
@@ -504,21 +504,23 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
 class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attributes
     """Job syncing extended device attributes into Nautobot."""
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """Initialize SSOTNetworkImporter."""
-        super().__init__()
+        super().__init__(*args, **kwargs)
+
         self.filtered_devices = None  # Queryset of devices based on form inputs
 
-        # FOR TESTING ONLY #
+        # FOR TESTING ONLY, REMOVE WHEN NOT TESTING
         # from nautobot_device_onboarding.diffsync import mock_data
         # from nautobot_device_onboarding.utils import diffsync_utils
         # self.command_getter_result = mock_data.network_importer_mock_data
         # self.devices_to_load = diffsync_utils.generate_device_queryset_from_command_getter_result(mock_data.network_importer_mock_data)
-        # REMOVE WHEN NOT TESTING #
+        # FOR TESTING ONLY, REMOVE WHEN NOT TESTING
 
         # RESTORE THESE LINES WHEN NOT TESTING! #
         self.command_getter_result = None  # Dict result from CommandGetter job
         self.devices_to_load = None  # Queryset consisting of devices that responded
+        # RESTORE THESE LINES WHEN NOT TESTING! #
 
     class Meta:
         """Metadata about this Job."""
