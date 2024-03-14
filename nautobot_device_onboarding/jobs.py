@@ -24,10 +24,14 @@ from nautobot_device_onboarding.diffsync.adapters.onboarding_adapters import (
     OnboardingNautobotAdapter,
     OnboardingNetworkAdapter,
 )
+
+
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.helpers import onboarding_task_fqdn_to_ip
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
+from nautobot_device_onboarding.utils.formatter import map_interface_type
 from nautobot_device_onboarding.nornir_plays.command_getter import command_getter_do, command_getter_ni
+from netutils.interface import canonical_interface_name
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
@@ -688,6 +692,52 @@ class CommandGetterNetworkImporter(Job):
     def run(self, *args, **kwargs):
         """Run command getter."""
         compiled_results = command_getter_ni(self.job_result, self.logger.getEffectiveLevel(), kwargs)
+        for device, device_data in compiled_results.items():
+            self.logger.info(f"Device Data: {device_data}")
+            serial = Device.objects.get(name=device).serial
+            self.logger.info(f"Serial: {serial}")
+            mtu_list = device_data.get("mtu", [])
+            type_list = device_data.get("type", [])
+            ip_list = device_data.get("ip_addresses", [])
+            prefix_list = device_data.get("prefix_length", [])
+            mac_list = device_data.get("mac_address", [])
+            description_list = device_data.get("description", [])
+            link_status_list = device_data.get("link_status", [])
+            self.logger.info(f"IP List {ip_list}")
+            self.logger.info(f"Prefix List {prefix_list}")
+            interface_dict = {}
+            for item in mtu_list:
+                interface_dict.setdefault(item["interface"], {})["mtu"] = item["mtu"]
+            for item in type_list:
+                interface_type = map_interface_type(item["type"])
+                interface_dict.setdefault(item["interface"], {})["type"] = interface_type
+            for item in ip_list:
+                interface_dict.setdefault(item["interface"], {})["ip_addresses"] = {"host": item["ip_address"]}
+            self.logger.info(f"Interface Dict {interface_dict}")
+            for item in prefix_list:
+                interface_dict.setdefault(item["interface"], {}).setdefault("ip_addresses", {})["prefix_length"] = item[
+                    "prefix_length"
+                ]
+            for item in mac_list:
+                interface_dict.setdefault(item["interface"], {})["mac_address"] = item["mac_address"]
+            for item in description_list:
+                interface_dict.setdefault(item["interface"], {})["description"] = item["description"]
+            for item in link_status_list:
+                interface_dict.setdefault(item["interface"], {})["enabled"] = (
+                    True if item["link_status"] == "up" else False
+                )
+
+            device_data["interfaces"] = interface_dict
+            device_data["serial"] = serial
+
+            del device_data["mtu"]
+            del device_data["type"]
+            del device_data["ip_addresses"]
+            del device_data["prefix_length"]
+            del device_data["mac_address"]
+            del device_data["description"]
+            del device_data["link_status"]
+
         return compiled_results
 
 

@@ -8,7 +8,7 @@ from django.template import engines
 from django.utils.module_loading import import_string
 from jdiff import extract_data_from_json
 from jinja2.sandbox import SandboxedEnvironment
-
+from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC
 from nautobot_device_onboarding.utils.jinja_filters import fix_interfaces
 
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "command_mappers"))
@@ -58,15 +58,19 @@ def perform_data_extraction(host, dict_field, command_info_dict, j2_env, task_re
                 if isinstance(task_result.result, str):
                     try:
                         result_to_json = json.loads(task_result.result)
+                        print("result_to_json_1: ", result_to_json)
                         extracted_value = extract_data_from_json(result_to_json, j2_rendered_jpath)
                     except json.decoder.JSONDecodeError:
                         extracted_value = None
                 else:
+                    print(f"result_to_json_2:  {task_result.result}")
                     extracted_value = extract_data_from_json(task_result.result, j2_rendered_jpath)
                 if show_command.get("post_processor"):
                     template = j2_env.from_string(show_command["post_processor"])
+                    print(f"extracted_value_2: {extracted_value}")
                     extracted_processed = template.render({"obj": extracted_value, "original_host": host.name})
                 else:
+                    print(f"extracted_value_3: {extracted_value}")
                     extracted_processed = extracted_value
                     if isinstance(extracted_value, list) and len(extracted_value) == 1:
                         extracted_processed = extracted_value[0]
@@ -102,11 +106,18 @@ def extract_show_data(host, multi_result, command_getter_type):
     for default_dict_field, command_info in command_jpaths[command_getter_type].items():
         if command_info.get("commands"):
             # Means their isn't any "nested" structures. Therefore not expected to see "validator_pattern key"
+            print(f"default dict field: {default_dict_field}")
             result = perform_data_extraction(host, default_dict_field, command_info, jinja_env, multi_result[0])
             final_result_dict.update(result)
         else:
             # Means their is a "nested" structures. Priority
             for dict_field, nested_command_info in command_info.items():
+                print(f"default dict field: {default_dict_field}")
                 result = perform_data_extraction(host, dict_field, nested_command_info, jinja_env, multi_result[0])
                 final_result_dict.update(result)
     return final_result_dict
+
+
+def map_interface_type(interface_type):
+    "Map interface type to a Nautobot type."
+    return INTERFACE_TYPE_MAP_STATIC.get(interface_type, "other")

@@ -17,13 +17,17 @@ device_onboarding:
         jpath: "'chassis-inventory'[].'chassis'[].'description'[].data"
   mgmt_interface:
     commands:
-      - command: "show interfaces | display json"
+      - command: "show interfaces terse | display json"
         use_textfsm: false
         jpath: "'interface-information'[].'physical-interface'[].'logical-interface'[].{name: name[].data, ip: 'address-family'[].'interface-address'[].'ifa-local'[].data}"
         post_processor: "{% for entry in obj %}{% if entry['ip'] is not none %}{% for ipaddr in entry['ip'] %}{% if original_host in ipaddr %}{{ entry['name'] | first }}{% endif %}{% endfor %}{% endif %}{% endfor %}"
   mask_length:
     commands:
-      - command: "show route protocol direct | display json"
+      # - command: "show route protocol direct | display json"
+      #   use_textfsm: false
+      #   jpath: '"route-information"[]."route-table"[]."rt"[]."rt-destination"[].data  || [`31`]'
+      #   post_processor: "{% for ipaddr in obj %}{% if '/' in ipaddr and ipaddr.split('/')[0] == original_host %}{{ ipaddr.split('/')[1] }}{% endif %}{% endfor %}"
+      - command: "show interfaces terse | display json"
         use_textfsm: false
         jpath: "'route-information'[].'route-table'[].'rt'[].'rt-destination'[].data"
         post_processor: "{% for ipaddr in obj %}{% if ipaddr.split('/')[0] == original_host %}{{ ipaddr.split('/')[1] }}{% endif %}{% endfor %}"
