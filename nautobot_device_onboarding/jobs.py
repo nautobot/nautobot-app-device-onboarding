@@ -727,6 +727,11 @@ class CommandGetterNetworkImporter(Job):
                     True if item["link_status"] == "up" else False
                 )
 
+            for interface, data in interface_dict.items():
+                ip_addresses = data.get("ip_addresses", {})
+                if ip_addresses:
+                    data["ip_addresses"] = [ip_addresses]
+                    
             device_data["interfaces"] = interface_dict
             device_data["serial"] = serial
 
