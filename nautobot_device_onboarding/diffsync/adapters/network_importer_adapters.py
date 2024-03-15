@@ -62,7 +62,7 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
         """
         ip_address_hosts = set()
         for _, device_data in self.job.command_getter_result.items():
-            for interface in json.loads(device_data["interfaces"]):
+            for interface in device_data["interfaces"]:
                 for _, interface_data in interface.items():
                     for ip_address in interface_data["ip_addresses"]:
                         if ip_address:
@@ -262,7 +262,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
             self.add(network_device)
             if self.job.debug:
                 self.job.logger.debug(f"Device {network_device} loaded.")
-            for interface in json.loads(device_data["interfaces"]):
+            for interface in device_data["interfaces"]:
                 for interface_name, interface_data in interface.items():
                     network_interface = self.load_interface(hostname, interface_name, interface_data)
                     network_device.add_child(network_interface)
@@ -292,7 +292,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
     def load_ip_addresses(self):
         """Load IP addresses into the DiffSync store."""
         for hostname, device_data in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
-            for interface in json.loads(device_data["interfaces"]):
+            for interface in device_data["interfaces"]:
                 for interface_name, interface_data in interface.items():
                     for ip_address in interface_data["ip_addresses"]:
                         if ip_address["ip_address"]:  # the ip_address and mask_length may be empty, skip these
@@ -323,7 +323,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
             location_names[device.name] = device.location.name
 
         for hostname, device_data in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
-            for interface in json.loads(device_data["interfaces"]):
+            for interface in device_data["interfaces"]:
                 for _, interface_data in interface.items():
                     # add tagged vlans
                     for tagged_vlan in interface_data["tagged_vlans"]:
@@ -357,7 +357,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
     def load_ip_address_to_interfaces(self):
         """Load ip address interface assignments into the Diffsync store."""
         for hostname, device_data in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
-            for interface in json.loads(device_data["interfaces"]):
+            for interface in device_data["interfaces"]:
                 for interface_name, interface_data in interface.items():
                     for ip_address in interface_data["ip_addresses"]:
                         if ip_address["ip_address"]:  # the ip_address and mask_length may be empty, skip these
@@ -379,7 +379,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
     def load_tagged_vlans_to_interface(self):
         """Load tagged vlan to interface assignments into the Diffsync store."""
         for hostname, device_data in self.job.command_getter_result.items():
-            for interface in json.loads(device_data["interfaces"]):
+            for interface in device_data["interfaces"]:
                 for interface_name, interface_data in interface.items():
                     network_tagged_vlans_to_interface = self.tagged_vlans_to_interface(
                         diffsync=self,
@@ -394,7 +394,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
     def load_lag_to_interface(self):
         """Load lag interface assignments into the Diffsync store."""
         for hostname, device_data in self.job.command_getter_result.items():
-            for interface in json.loads(device_data["interfaces"]):
+            for interface in device_data["interfaces"]:
                 for interface_name, interface_data in interface.items():
                     network_lag_to_interface = self.lag_to_interface(
                         diffsync=self,

@@ -10,6 +10,7 @@ from jdiff import extract_data_from_json
 from jinja2.sandbox import SandboxedEnvironment
 from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC
 from nautobot_device_onboarding.utils.jinja_filters import fix_interfaces
+from nautobot.dcim.models import Device
 
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "command_mappers"))
 
@@ -58,19 +59,15 @@ def perform_data_extraction(host, dict_field, command_info_dict, j2_env, task_re
                 if isinstance(task_result.result, str):
                     try:
                         result_to_json = json.loads(task_result.result)
-                        print("result_to_json_1: ", result_to_json)
                         extracted_value = extract_data_from_json(result_to_json, j2_rendered_jpath)
                     except json.decoder.JSONDecodeError:
                         extracted_value = None
                 else:
-                    print(f"result_to_json_2:  {task_result.result}")
                     extracted_value = extract_data_from_json(task_result.result, j2_rendered_jpath)
                 if show_command.get("post_processor"):
                     template = j2_env.from_string(show_command["post_processor"])
-                    print(f"extracted_value_2: {extracted_value}")
                     extracted_processed = template.render({"obj": extracted_value, "original_host": host.name})
                 else:
-                    print(f"extracted_value_3: {extracted_value}")
                     extracted_processed = extracted_value
                     if isinstance(extracted_value, list) and len(extracted_value) == 1:
                         extracted_processed = extracted_value[0]
@@ -106,13 +103,11 @@ def extract_show_data(host, multi_result, command_getter_type):
     for default_dict_field, command_info in command_jpaths[command_getter_type].items():
         if command_info.get("commands"):
             # Means their isn't any "nested" structures. Therefore not expected to see "validator_pattern key"
-            print(f"default dict field: {default_dict_field}")
             result = perform_data_extraction(host, default_dict_field, command_info, jinja_env, multi_result[0])
             final_result_dict.update(result)
         else:
             # Means their is a "nested" structures. Priority
             for dict_field, nested_command_info in command_info.items():
-                print(f"default dict field: {default_dict_field}")
                 result = perform_data_extraction(host, dict_field, nested_command_info, jinja_env, multi_result[0])
                 final_result_dict.update(result)
     return final_result_dict
@@ -121,3 +116,71 @@ def extract_show_data(host, multi_result, command_getter_type):
 def map_interface_type(interface_type):
     "Map interface type to a Nautobot type."
     return INTERFACE_TYPE_MAP_STATIC.get(interface_type, "other")
+
+def format_ios_results(compiled_results):
+    """Format the results of the show commands for IOS devices.
+
+    Args:
+        compiled_results (dict): The compiled results from the Nornir task.
+
+    Returns:
+        dict: The formatted results.
+    """
+    for device, device_data in compiled_results.items():
+        serial = Device.objects.get(name=device).serial
+        mtu_list = device_data.get("mtu", [])
+        type_list = device_data.get("type", [])
+        ip_list = device_data.get("ip_addresses", [])
+        prefix_list = device_data.get("prefix_length", [])
+        mac_list = device_data.get("mac_address", [])
+        description_list = device_data.get("description", [])
+        link_status_list = device_data.get("link_status", [])
+        interface_dict = {}
+        for item in mtu_list:
+            interface_dict.setdefault(item["interface"], {})["mtu"] = item["mtu"]
+        for item in type_list:
+            interface_type = map_interface_type(item["type"])
+            interface_dict.setdefault(item["interface"], {})["type"] = interface_type
+        for item in ip_list:
+            interface_dict.setdefault(item["interface"], {})["ip_addresses"] = {"ip_address": item["ip_address"]}
+        for item in prefix_list:
+            interface_dict.setdefault(item["interface"], {}).setdefault("ip_addresses", {})["prefix_length"] = item[
+                "prefix_length"
+            ]
+        for item in mac_list:
+            interface_dict.setdefault(item["interface"], {})["mac_address"] = item["mac_address"]
+        for item in description_list:
+            interface_dict.setdefault(item["interface"], {})["description"] = item["description"]
+        for item in link_status_list:
+            interface_dict.setdefault(item["interface"], {})["link_status"] = (
+                True if item["link_status"] == "up" else False
+            )
+        # Add missing keys with default values for David
+        for interface in interface_dict.values():
+            interface.setdefault("802.1Q_mode", "")
+            interface.setdefault("lag", "")
+            interface.setdefault("untagged_vlan", {"name": "", "id": ""})
+            interface.setdefault("tagged_vlans", [{"name": "", "id": ""}])
+
+        for interface, data in interface_dict.items():
+            ip_addresses = data.get("ip_addresses", {})
+            if ip_addresses:
+                data["ip_addresses"] = [ip_addresses]
+
+        # Convert to nice list for David        
+        interface_list = []
+        for interface, data in interface_dict.items():
+            interface_list.append({interface: data})
+
+        device_data["interfaces"] = interface_list
+        device_data["serial"] = serial
+
+        del device_data["mtu"]
+        del device_data["type"]
+        del device_data["ip_addresses"]
+        del device_data["prefix_length"]
+        del device_data["mac_address"]
+        del device_data["description"]
+        del device_data["link_status"]
+
+    return compiled_results

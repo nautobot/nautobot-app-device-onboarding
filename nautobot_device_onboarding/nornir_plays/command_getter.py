@@ -2,7 +2,7 @@
 
 # pylint: disable=relative-beyond-top-level
 from django.conf import settings
-from nautobot.dcim.models import Platform
+from nautobot.dcim.models import Platform, Device
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import SecretsGroup
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
@@ -19,6 +19,7 @@ from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
 from nautobot_device_onboarding.utils.helper import add_platform_parsing_info
 from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
+from nautobot_device_onboarding.utils.formatter import map_interface_type, format_ios_results
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
@@ -207,4 +208,9 @@ def command_getter_ni(job_result, log_level, kwargs):
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info("Error: %s", err)
         return err
+    
+    compiled_results = format_ios_results(compiled_results)
+
     return compiled_results
+
+
