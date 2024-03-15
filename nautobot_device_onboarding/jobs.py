@@ -31,7 +31,6 @@ from nautobot_device_onboarding.helpers import onboarding_task_fqdn_to_ip
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
 from nautobot_device_onboarding.utils.formatter import map_interface_type
 from nautobot_device_onboarding.nornir_plays.command_getter import command_getter_do, command_getter_ni
-from netutils.interface import canonical_interface_name
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
