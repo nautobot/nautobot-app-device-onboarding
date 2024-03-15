@@ -119,5 +119,5 @@ def extract_show_data(host, multi_result, command_getter_type):
 
 
 def map_interface_type(interface_type):
-    "Map interface type to a Nautobot type."
+    """Map interface type to a Nautobot type."""
     return INTERFACE_TYPE_MAP_STATIC.get(interface_type, "other")

@@ -31,7 +31,6 @@ from nautobot_device_onboarding.helpers import onboarding_task_fqdn_to_ip
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
 from nautobot_device_onboarding.utils.formatter import map_interface_type
 from nautobot_device_onboarding.nornir_plays.command_getter import command_getter_do, command_getter_ni
-from netutils.interface import canonical_interface_name
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
@@ -723,15 +722,12 @@ class CommandGetterNetworkImporter(Job):
             for item in description_list:
                 interface_dict.setdefault(item["interface"], {})["description"] = item["description"]
             for item in link_status_list:
-                interface_dict.setdefault(item["interface"], {})["enabled"] = (
-                    True if item["link_status"] == "up" else False
-                )
-
-            for interface, data in interface_dict.items():
+                interface_dict.setdefault(item["interface"], {})["enabled"] = item["link_status"] == "up"
+            for _, data in interface_dict.items():
                 ip_addresses = data.get("ip_addresses", {})
                 if ip_addresses:
                     data["ip_addresses"] = [ip_addresses]
-                    
+
             device_data["interfaces"] = interface_dict
             device_data["serial"] = serial
 
