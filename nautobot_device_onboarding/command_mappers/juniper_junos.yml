@@ -30,4 +30,4 @@ device_onboarding:
       - command: "show route protocol direct | display json"
         use_textfsm: false
         jpath: '"route-information"[]."route-table"[]."rt"[]."rt-destination"[].data'  # yamllint disable-line rule:quoted-strings
-        post_processor: "{% set mask = [] %}{% for ip_route in obj %}{% if ip_route | is_network %}{% if ip_route | ipaddress_network('version') == 4 %}{% if '139.65.209.82' | is_ip_within(ip_route) %}{% set _=mask.append(ip_route.split('/')[1]) %}{% endif %}{% endif %}{% endif %}{% endfor %}{{ mask | unique | first}}"
+        post_processor: "{% set mask = [] %}{% for ip_route in obj %}{% if ip_route | is_network %}{% if ip_route | ipaddress_network('version') == 4 %}{% if original_host | is_ip_within(ip_route) %}{% set _=mask.append(ip_route.split('/')[1]) %}{% endif %}{% endif %}{% endif %}{% endfor %}{{ mask | unique | first}}"
