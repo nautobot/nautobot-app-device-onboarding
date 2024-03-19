@@ -522,7 +522,6 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
 
         # RESTORE THESE LINES WHEN NOT TESTING! #
         self.command_getter_result = None  # Dict result from CommandGetter job
-        self.logger.info(f"Command Getter Result: {self.command_getter_result}")
         self.devices_to_load = None  # Queryset consisting of devices that responded
         # RESTORE THESE LINES WHEN NOT TESTING! #
 
