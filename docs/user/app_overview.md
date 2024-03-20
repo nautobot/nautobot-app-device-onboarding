@@ -1,6 +1,6 @@
 # App Overview
 
-This document provides an overview of the App including critical information and import considerations when applying it to your Nautobot environment.
+This document provides an overview of the App including critical information and important considerations when applying it to your Nautobot environment.
 
 This [Nautobot](https://github.com/nautobot/nautobot) App allows to easily onboard new devices.
 
