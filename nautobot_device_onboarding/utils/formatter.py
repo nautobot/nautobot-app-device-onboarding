@@ -160,8 +160,8 @@ def format_ios_results(compiled_results):
         for interface in interface_dict.values():
             interface.setdefault("802.1Q_mode", "")
             interface.setdefault("lag", "")
-            interface.setdefault("untagged_vlan", {"name": "", "id": ""})
-            interface.setdefault("tagged_vlans", [{"name": "", "id": ""}])
+            interface.setdefault("untagged_vlan", {})
+            interface.setdefault("tagged_vlans", [])
 
         for interface, data in interface_dict.items():
             ip_addresses = data.get("ip_addresses", {})
@@ -226,8 +226,8 @@ def format_nxos_results(compiled_results):
         for interface in interface_dict.values():
             interface.setdefault("802.1Q_mode", "")
             interface.setdefault("lag", "")
-            interface.setdefault("untagged_vlan", {"name": "", "id": ""})
-            interface.setdefault("tagged_vlans", [{"name": "", "id": ""}])
+            interface.setdefault("untagged_vlan", {})
+            interface.setdefault("tagged_vlans", [])
 
         for interface, data in interface_dict.items():
             ip_addresses = data.get("ip_addresses", {})
@@ -254,8 +254,7 @@ def format_nxos_results(compiled_results):
 
 
 def format_junos_results(compiled_results):
-    pass
-
+    return compiled_results
 
 def format_results(compiled_results):
     """Format the results of the show commands for IOS devices.
