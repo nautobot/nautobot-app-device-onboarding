@@ -1,7 +1,5 @@
 """DiffSync adapters."""
 
-import json
-
 import diffsync
 from diffsync.enum import DiffSyncModelFlags
 from django.core.exceptions import ValidationError
@@ -38,6 +36,7 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
     ipaddress_to_interface = network_importer_models.NetworkImporterIPAddressToInterface
     vlan = network_importer_models.NetworkImporterVLAN
     tagged_vlans_to_interface = network_importer_models.NetworkImporterTaggedVlansToInterface
+    untagged_vlan_to_interface = network_importer_models.NetworkImporterUnTaggedVlanToInterface
     lag_to_interface = network_importer_models.NetworkImporterLagToInterface
 
     top_level = [
@@ -45,6 +44,7 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
         "vlan",
         "device",
         "ipaddress_to_interface",
+        "untagged_vlan_to_interface",
         "tagged_vlans_to_interface",
         "lag_to_interface",
     ]
@@ -54,6 +54,14 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
         if self.job.debug:
             self.job.logger.debug(f"Converting {parameter_name}: {database_object.mac_address}")
         return str(database_object.mac_address)
+
+    def load_param_untagged_vlan__name(self, parameter_name, database_object):
+        """Load, or prevent loading, untagged vlans depending on form selection."""
+        if not self.job.sync_vlans:
+            if self.job.debug:
+                self.job.logger.debug(f"{parameter_name} will not be synced to {database_object}")
+            return ""
+        return str(database_object.untagged_vlan.name)
 
     def load_ip_addresses(self):
         """Load IP addresses into the DiffSync store.
@@ -67,7 +75,8 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
                     for ip_address in interface_data["ip_addresses"]:
                         if ip_address:
                             ip_address_hosts.add(ip_address["ip_address"])
-        ip_address_hosts.remove("")  # do not attempt to filter ip addresses with empty strings
+        if "" in ip_address_hosts:
+            ip_address_hosts.remove("")  # do not attempt to filter ip addresses with empty strings
         for ip_address in IPAddress.objects.filter(
             host__in=ip_address_hosts,
             parent__namespace__name=self.job.namespace.name,
@@ -133,7 +142,29 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
             network_tagged_vlans_to_interface.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
             self.add(network_tagged_vlans_to_interface)
             if self.job.debug:
-                self.job.logger.debug(f"Vlan to interface: {network_tagged_vlans_to_interface} loaded.")
+                self.job.logger.debug(f"Tagged Vlan to interface: {network_tagged_vlans_to_interface} loaded.")
+
+    def load_untagged_vlan_to_interface(self):
+        """Load a model representing untagged vlan assignments to the Diffsync store.
+
+        Only Vlan assignments that were returned by the CommandGetter job should be loaded.
+        """
+        for interface in Interface.objects.filter(device__in=self.job.devices_to_load):
+            untagged_vlan = {}
+            if interface.untagged_vlan:
+                untagged_vlan["name"] = interface.untagged_vlan.name
+                untagged_vlan["id"] = str(interface.untagged_vlan.vid)
+
+            network_untagged_vlan_to_interface = self.untagged_vlan_to_interface(
+                diffsync=self,
+                device__name=interface.device.name,
+                name=interface.name,
+                untagged_vlan=untagged_vlan,
+            )
+            network_untagged_vlan_to_interface.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
+            self.add(network_untagged_vlan_to_interface)
+            if self.job.debug:
+                self.job.logger.debug(f"Unagged Vlan to interface: {network_untagged_vlan_to_interface} loaded.")
 
     def load_lag_to_interface(self):
         """
@@ -167,6 +198,9 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
             elif model_name == "tagged_vlans_to_interface":
                 if self.job.sync_vlans:
                     self.load_tagged_vlans_to_interface()
+            elif model_name == "untagged_vlan_to_interface":
+                if self.job.sync_vlans:
+                    self.load_untagged_vlan_to_interface()
             elif model_name == "lag_to_interface":
                 self.load_lag_to_interface()
             else:
@@ -195,6 +229,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
     ipaddress_to_interface = network_importer_models.NetworkImporterIPAddressToInterface
     vlan = network_importer_models.NetworkImporterVLAN
     tagged_vlans_to_interface = network_importer_models.NetworkImporterTaggedVlansToInterface
+    untagged_vlan_to_interface = network_importer_models.NetworkImporterUnTaggedVlanToInterface
     lag_to_interface = network_importer_models.NetworkImporterLagToInterface
 
     top_level = [
@@ -202,6 +237,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
         "vlan",
         "device",
         "ipaddress_to_interface",
+        "untagged_vlan_to_interface",
         "tagged_vlans_to_interface",
         "lag_to_interface",
     ]
@@ -244,8 +280,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
             self._handle_failed_devices(device_data=result)
         else:
             self.job.logger.error(
-                "Data returned from CommandGetter is not the correct type. "
-                "No devices will be onboarded, check the CommandGetter job logs."
+                "Data returned from CommandGetter is not the correct type. " "No devices will be onboarded"
             )
             raise ValidationError("Unexpected data returend from CommandGetter.")
 
@@ -253,7 +288,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
         """Convert a mac address to match the value stored by Nautobot."""
         if mac_address:
             return str(EUI(mac_address, version=48, dialect=MacUnixExpandedUppercase))
-        return ""
+        return "None"
 
     def load_devices(self):
         """Load devices into the DiffSync store."""
@@ -269,6 +304,13 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
                     if self.job.debug:
                         self.job.logger.debug(f"Interface {network_interface} loaded.")
 
+    def _get_vlan_name(self, interface_data):
+        """Given interface data returned from a device, process and return the vlan name."""
+        vlan_name = ""
+        if self.job.sync_vlans:
+            vlan_name = interface_data["untagged_vlan"]["name"] if interface_data["untagged_vlan"] else ""
+        return vlan_name
+
     def load_interface(self, hostname, interface_name, interface_data):
         """Load an interface into the DiffSync store."""
         network_interface = self.interface(
@@ -282,7 +324,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
             description=interface_data["description"],
             enabled=interface_data["link_status"],
             mode=interface_data["802.1Q_mode"],
-            untagged_vlan__name=interface_data["untagged_vlan"]["name"] if interface_data["untagged_vlan"] else None,
+            untagged_vlan__name=self._get_vlan_name(interface_data=interface_data),
         )
         self.add(network_interface)
         if self.job.debug:
@@ -391,6 +433,23 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
                     if self.job.debug:
                         self.job.logger.debug(f"Tagged Vlan to interface {network_tagged_vlans_to_interface} loaded.")
 
+    def load_untagged_vlan_to_interface(self):
+        """Load untagged vlan to interface assignments into the Diffsync store."""
+        for hostname, device_data in self.job.command_getter_result.items():
+            for interface in device_data["interfaces"]:
+                for interface_name, interface_data in interface.items():
+                    network_untagged_vlan_to_interface = self.untagged_vlan_to_interface(
+                        diffsync=self,
+                        device__name=hostname,
+                        name=interface_name,
+                        untagged_vlan=interface_data["untagged_vlan"],
+                    )
+                    self.add(network_untagged_vlan_to_interface)
+                    if self.job.debug:
+                        self.job.logger.debug(
+                            f"Untagged Vlan to interface {network_untagged_vlan_to_interface} loaded."
+                        )
+
     def load_lag_to_interface(self):
         """Load lag interface assignments into the Diffsync store."""
         for hostname, device_data in self.job.command_getter_result.items():
@@ -416,4 +475,5 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
         self.load_ip_address_to_interfaces()
         if self.job.sync_vlans:
             self.load_tagged_vlans_to_interface()
+            self.load_untagged_vlan_to_interface()
         self.load_lag_to_interface()

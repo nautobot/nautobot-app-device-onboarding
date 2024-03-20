@@ -8,9 +8,10 @@ from django.template import engines
 from django.utils.module_loading import import_string
 from jdiff import extract_data_from_json
 from jinja2.sandbox import SandboxedEnvironment
+from nautobot.dcim.models import Device
+
 from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC
 from nautobot_device_onboarding.utils.jinja_filters import fix_interfaces
-from nautobot.dcim.models import Device
 
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "command_mappers"))
 
@@ -125,7 +126,7 @@ def map_interface_type(interface_type):
 
 
 def format_ios_results(compiled_results):
-    "Format the results of the show commands for IOS devices."
+    """Format the results of the show commands for IOS devices."""
     for device, device_data in compiled_results.items():
         serial = Device.objects.get(name=device).serial
         mtu_list = device_data.get("mtu", [])
@@ -187,7 +188,7 @@ def format_ios_results(compiled_results):
 
 
 def format_nxos_results(compiled_results):
-    "Format the results of the show commands for NX-OS devices."
+    """Format the results of the show commands for NX-OS devices."""
     for device, device_data in compiled_results.items():
         serial = Device.objects.get(name=device).serial
         mtu_list = device_data.get("mtu", [])
@@ -254,7 +255,9 @@ def format_nxos_results(compiled_results):
 
 
 def format_junos_results(compiled_results):
+    """For mat the results of the show commands for Junos devices."""
     return compiled_results
+
 
 def format_results(compiled_results):
     """Format the results of the show commands for IOS devices.

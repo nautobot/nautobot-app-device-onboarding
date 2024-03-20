@@ -24,12 +24,9 @@ from nautobot_device_onboarding.diffsync.adapters.onboarding_adapters import (
     OnboardingNautobotAdapter,
     OnboardingNetworkAdapter,
 )
-
-
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.helpers import onboarding_task_fqdn_to_ip
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
-from nautobot_device_onboarding.utils.formatter import map_interface_type
 from nautobot_device_onboarding.nornir_plays.command_getter import command_getter_do, command_getter_ni
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
@@ -517,7 +514,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         # from nautobot_device_onboarding.diffsync import mock_data
         # from nautobot_device_onboarding.utils import diffsync_utils
         # self.command_getter_result = mock_data.network_importer_mock_data
-        # self.devices_to_load = diffsync_utils.generate_device_queryset_from_command_getter_result(mock_data.network_importer_mock_data)
+        # self.devices_to_load = diffsync_utils.generate_device_queryset_from_command_getter_result(self.command_getter_result)
         # FOR TESTING ONLY, REMOVE WHEN NOT TESTING
 
         # RESTORE THESE LINES WHEN NOT TESTING! #

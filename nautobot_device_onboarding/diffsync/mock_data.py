@@ -34,7 +34,7 @@ network_importer_mock_data = {
                     "link_status": True,
                     "802.1Q_mode": "",
                     "lag": "Po2",
-                    "untagged_vlan": "",
+                    "untagged_vlan": {},
                     "tagged_vlans": [],
                 }
             },
@@ -51,7 +51,7 @@ network_importer_mock_data = {
                     "link_status": True,
                     "802.1Q_mode": "tagged",
                     "lag": "Po1",
-                    "untagged_vlan": "",
+                    "untagged_vlan": {},
                     "tagged_vlans": [{"name": "vlan40", "id": "40"}, {"name": "vlan50", "id": "50"}],
                 }
             },
@@ -67,7 +67,7 @@ network_importer_mock_data = {
                     "link_status": True,
                     "802.1Q_mode": "",
                     "lag": "",
-                    "untagged_vlan": "",
+                    "untagged_vlan": {},
                     "tagged_vlans": [],
                 }
             },
@@ -81,7 +81,7 @@ network_importer_mock_data = {
                     "link_status": True,
                     "802.1Q_mode": "",
                     "lag": "",
-                    "untagged_vlan": "",
+                    "untagged_vlan": {},
                     "tagged_vlans": [],
                 }
             },
@@ -132,7 +132,7 @@ network_importer_mock_data = {
                     "link_status": True,
                     "802.1Q_mode": "",
                     "lag": "Po1",
-                    "untagged_vlan": "",
+                    "untagged_vlan": {},
                     "tagged_vlans": [],
                 }
             },
@@ -149,7 +149,7 @@ network_importer_mock_data = {
                     "link_status": True,
                     "802.1Q_mode": "tagged",
                     "lag": "Po1",
-                    "untagged_vlan": "",
+                    "untagged_vlan": {},
                     "tagged_vlans": [{"name": "vlan40", "id": "40"}, {"name": "vlan50", "id": "50"}],
                 }
             },
@@ -163,7 +163,7 @@ network_importer_mock_data = {
                     "link_status": True,
                     "802.1Q_mode": "",
                     "lag": "",
-                    "untagged_vlan": "",
+                    "untagged_vlan": {},
                     "tagged_vlans": [],
                 }
             },
