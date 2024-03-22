@@ -280,7 +280,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
             self._handle_failed_devices(device_data=result)
         else:
             self.job.logger.error(
-                "Data returned from CommandGetter is not the correct type. " "No devices will be onboarded"
+                "Data returned from CommandGetter is not the correct type. No devices will be onboarded"
             )
             raise ValidationError("Unexpected data returend from CommandGetter.")
 
