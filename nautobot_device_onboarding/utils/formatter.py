@@ -8,7 +8,9 @@ from django.template import engines
 from django.utils.module_loading import import_string
 from jdiff import extract_data_from_json
 from jinja2.sandbox import SandboxedEnvironment
+from nautobot.dcim.models import Device
 
+from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC
 from nautobot_device_onboarding.utils.jinja_filters import fix_interfaces
 
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "command_mappers"))
@@ -53,23 +55,29 @@ def perform_data_extraction(host, dict_field, command_info_dict, j2_env, task_re
     for show_command in command_info_dict["commands"]:
         if show_command["command"] == task_result.name:
             jpath_template = j2_env.from_string(show_command["jpath"])
-            j2_rendered_jpath = jpath_template.render({"obj": host.name})
+            j2_rendered_jpath = jpath_template.render({"obj": host.name, "original_host": host.name})
+            print(j2_rendered_jpath)
             if not task_result.failed:
                 if isinstance(task_result.result, str):
                     try:
                         result_to_json = json.loads(task_result.result)
                         extracted_value = extract_data_from_json(result_to_json, j2_rendered_jpath)
+                        print(f"extraced value: {extracted_value}")
                     except json.decoder.JSONDecodeError:
                         extracted_value = None
                 else:
                     extracted_value = extract_data_from_json(task_result.result, j2_rendered_jpath)
+                    print(f"extracted value 2: {extracted_value}")
                 if show_command.get("post_processor"):
                     template = j2_env.from_string(show_command["post_processor"])
                     extracted_processed = template.render({"obj": extracted_value, "original_host": host.name})
+                    print(f"extracted 1: {extracted_processed}")
                 else:
                     extracted_processed = extracted_value
+                    print(f"extracted 2: {extracted_processed}")
                     if isinstance(extracted_value, list) and len(extracted_value) == 1:
                         extracted_processed = extracted_value[0]
+                        print(f"extracted 3: {extracted_processed}")
                 if command_info_dict.get("validator_pattern"):
                     # temp validator
                     if command_info_dict["validator_pattern"] == "not None":
@@ -110,3 +118,165 @@ def extract_show_data(host, multi_result, command_getter_type):
                 result = perform_data_extraction(host, dict_field, nested_command_info, jinja_env, multi_result[0])
                 final_result_dict.update(result)
     return final_result_dict
+
+
+def map_interface_type(interface_type):
+    """Map interface type to a Nautobot type."""
+    return INTERFACE_TYPE_MAP_STATIC.get(interface_type, "other")
+
+
+def format_ios_results(compiled_results):
+    """Format the results of the show commands for IOS devices."""
+    for device, device_data in compiled_results.items():
+        serial = Device.objects.get(name=device).serial
+        mtu_list = device_data.get("mtu", [])
+        type_list = device_data.get("type", [])
+        ip_list = device_data.get("ip_addresses", [])
+        prefix_list = device_data.get("prefix_length", [])
+        mac_list = device_data.get("mac_address", [])
+        description_list = device_data.get("description", [])
+        link_status_list = device_data.get("link_status", [])
+
+        interface_dict = {}
+        for item in mtu_list:
+            interface_dict.setdefault(item["interface"], {})["mtu"] = item["mtu"]
+        for item in type_list:
+            interface_type = map_interface_type(item["type"])
+            interface_dict.setdefault(item["interface"], {})["type"] = interface_type
+        for item in ip_list:
+            interface_dict.setdefault(item["interface"], {})["ip_addresses"] = {"ip_address": item["ip_address"]}
+        for item in prefix_list:
+            interface_dict.setdefault(item["interface"], {}).setdefault("ip_addresses", {})["prefix_length"] = item[
+                "prefix_length"
+            ]
+        for item in mac_list:
+            interface_dict.setdefault(item["interface"], {})["mac_address"] = item["mac_address"]
+        for item in description_list:
+            interface_dict.setdefault(item["interface"], {})["description"] = item["description"]
+        for item in link_status_list:
+            interface_dict.setdefault(item["interface"], {})["link_status"] = (
+                True if item["link_status"] == "up" else False
+            )
+
+        for interface in interface_dict.values():
+            interface.setdefault("802.1Q_mode", "")
+            interface.setdefault("lag", "")
+            interface.setdefault("untagged_vlan", {})
+            interface.setdefault("tagged_vlans", [])
+
+        for interface, data in interface_dict.items():
+            ip_addresses = data.get("ip_addresses", {})
+            if ip_addresses:
+                data["ip_addresses"] = [ip_addresses]
+
+        interface_list = []
+        for interface, data in interface_dict.items():
+            interface_list.append({interface: data})
+
+        device_data["interfaces"] = interface_list
+        device_data["serial"] = serial
+
+        del device_data["mtu"]
+        del device_data["type"]
+        del device_data["ip_addresses"]
+        del device_data["prefix_length"]
+        del device_data["mac_address"]
+        del device_data["description"]
+        del device_data["link_status"]
+
+    return compiled_results
+
+
+def format_nxos_results(compiled_results):
+    """Format the results of the show commands for NX-OS devices."""
+    for device, device_data in compiled_results.items():
+        serial = Device.objects.get(name=device).serial
+        mtu_list = device_data.get("mtu", [])
+        type_list = device_data.get("type", [])
+        ip_list = device_data.get("ip_addresses", [])
+        prefix_list = device_data.get("prefix_length", [])
+        mac_list = device_data.get("mac_address", [])
+        description_list = device_data.get("description", [])
+        link_status_list = device_data.get("link_status", [])
+        mode_list = device_data.get("mode", [])
+        interface_dict = {}
+        for item in mtu_list:
+            interface_dict.setdefault(item["interface"], {})["mtu"] = item["mtu"]
+        for item in type_list:
+            interface_type = map_interface_type(item["type"])
+            interface_dict.setdefault(item["interface"], {})["type"] = interface_type
+        for item in ip_list:
+            interface_dict.setdefault(item["interface"], {})["ip_addresses"] = {"ip_address": item["ip_address"]}
+        for item in prefix_list:
+            interface_dict.setdefault(item["interface"], {}).setdefault("ip_addresses", {})["prefix_length"] = item[
+                "prefix_length"
+            ]
+        for item in mac_list:
+            interface_dict.setdefault(item["interface"], {})["mac_address"] = item["mac_address"]
+        for item in description_list:
+            interface_dict.setdefault(item["interface"], {})["description"] = item["description"]
+        for item in link_status_list:
+            interface_dict.setdefault(item["interface"], {})["link_status"] = (
+                True if item["link_status"] == "up" else False
+            )
+        for item in mode_list:
+            interface_dict.setdefault(item["interface"], {})["802.1Q_mode"] = (
+                "access" if item["mode"] == "access" else "tagged" if item["mode"] == "trunk" else ""
+            )
+
+        for interface in interface_dict.values():
+            interface.setdefault("802.1Q_mode", "")
+            interface.setdefault("lag", "")
+            interface.setdefault("untagged_vlan", {})
+            interface.setdefault("tagged_vlans", [])
+
+        for interface, data in interface_dict.items():
+            ip_addresses = data.get("ip_addresses", {})
+            if ip_addresses:
+                data["ip_addresses"] = [ip_addresses]
+
+        interface_list = []
+        for interface, data in interface_dict.items():
+            interface_list.append({interface: data})
+
+        device_data["interfaces"] = interface_list
+        device_data["serial"] = serial
+
+        del device_data["mtu"]
+        del device_data["type"]
+        del device_data["ip_addresses"]
+        del device_data["prefix_length"]
+        del device_data["mac_address"]
+        del device_data["description"]
+        del device_data["link_status"]
+        del device_data["mode"]
+
+    return compiled_results
+
+
+def format_junos_results(compiled_results):
+    """For mat the results of the show commands for Junos devices."""
+    return compiled_results
+
+
+def format_results(compiled_results):
+    """Format the results of the show commands for IOS devices.
+
+    Args:
+        compiled_results (dict): The compiled results from the Nornir task.
+
+    Returns:
+        dict: The formatted results.
+    """
+    for device in compiled_results:
+        platform = compiled_results[device]["platform"]
+        if platform in ["cisco_ios", "cisco_xe"]:
+            format_ios_results(compiled_results)
+        elif platform == "cisco_nxos":
+            format_nxos_results(compiled_results)
+        elif platform == "juniper_junos":
+            format_junos_results(compiled_results)
+        else:
+            raise ValueError(f"Unsupported platform {platform}")
+
+    return compiled_results

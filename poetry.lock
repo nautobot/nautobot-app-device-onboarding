@@ -2405,13 +2405,13 @@ nautobot = ["nautobot (>=2.0.0,<3.0.0)"]
 
 [[package]]
 name = "nautobot-ssot"
-version = "2.3.0"
+version = "2.5.0"
 description = "Nautobot Single Source of Truth"
 optional = false
-python-versions = ">=3.8,<3.12"
+python-versions = "<3.12,>=3.8"
 files = [
-    {file = "nautobot_ssot-2.3.0-py3-none-any.whl", hash = "sha256:7db10e0b80515fda56b3ec1b2f8f3bc51c674bb59b07033433d3e32ed531b0c5"},
-    {file = "nautobot_ssot-2.3.0.tar.gz", hash = "sha256:63841e4db86c1f8be2e829a489dc2884be5f36082595f823f1776131a01bd4f0"},
+    {file = "nautobot_ssot-2.5.0-py3-none-any.whl", hash = "sha256:41c4243d3075f61f2e1b3f23c842ee0ac7019f9985761600e7dbc62b4105cb09"},
+    {file = "nautobot_ssot-2.5.0.tar.gz", hash = "sha256:57ff7a1d503641da69ec912137f3c93d772a4e95f092ab0a65da5ab7a89448c9"},
 ]
 
 [package.dependencies]
@@ -4534,4 +4534,4 @@ all = []
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "1a27531e336ada6a38d6d600445f835e0821f635efe7b73b5974c4665df5bb03"
+content-hash = "110bd5243e3ce25d6cd73453bf4ba0c9f1749170acf5d633dcc652553bccb9cd"

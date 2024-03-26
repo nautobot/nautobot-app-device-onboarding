@@ -514,7 +514,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         # from nautobot_device_onboarding.diffsync import mock_data
         # from nautobot_device_onboarding.utils import diffsync_utils
         # self.command_getter_result = mock_data.network_importer_mock_data
-        # self.devices_to_load = diffsync_utils.generate_device_queryset_from_command_getter_result(mock_data.network_importer_mock_data)
+        # self.devices_to_load = diffsync_utils.generate_device_queryset_from_command_getter_result(self.command_getter_result)
         # FOR TESTING ONLY, REMOVE WHEN NOT TESTING
 
         # RESTORE THESE LINES WHEN NOT TESTING! #
@@ -532,7 +532,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         )
 
     debug = BooleanVar(description="Enable for more verbose logging.")
-    sync_vlans = BooleanVar(default=True, description="Sync VLANs and interface VLAN assignments.")
+    sync_vlans = BooleanVar(default=False, description="Sync VLANs and interface VLAN assignments.")
     namespace = ObjectVar(
         model=Namespace, required=True, description="The namespace for all IP addresses created or updated in the sync."
     )

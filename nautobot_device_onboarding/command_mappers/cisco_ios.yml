@@ -29,68 +29,73 @@ device_onboarding:
         jpath: "[?ip_address=='{{ obj }}'].prefix_length"
         post_processor: "{{ obj | unique | first }}"
 network_importer:
-  serial:
+  # serial:
+  #   commands:
+  #     - command: "show version"
+  #       use_textfsm: true
+  #       jpath: "[*].serial[0]"
+  # interfaces:
+  #   interfaces:
+  #     commands:
+  #       - command: "show interfaces"
+  #         use_textfsm: true
+  #         jpath: "[*].{interface: interface}"
+  type:
     commands:
-      - command: "show version"
+      - command: "show interfaces"
         use_textfsm: true
-        jpath: "[*].serial[0]"
-  interfaces:
-    interfaces:
-      commands:
-        - command: "show interfaces"
-          use_textfsm: true
-          jpath: "[*].{interface: interface}"
-    type:
-      commands:
-        - command: "show interfaces"
-          use_textfsm: true
-          jpath: "[*].{interface: interface, hardware_type: hardware_type}"
-    ip_addresses:
-      commands:
-        - command: "show interfaces"
-          use_textfsm: true
-          jpath: "[*].{interface: interface, ip_address: ip_address}"
-    mtu:
-      commands:
-        - command: "show interfaces"
-          use_textfsm: true
-          jpath: "[*].{interface: interface, mtu: mtu}"
-    mac_address:
-      commands:
-        - command: "show interfaces"
-          use_textfsm: true
-          jpath: "[*].{interface: interface, mac_address: mac_address}"
-    description:
-      commands:
-        - command: "show interfaces"
-          use_textfsm: true
-          jpath: "[*].{interface: interface, description: description}"
-    link_status:
-      commands:
-        - command: "show interfaces"
-          use_textfsm: true
-          jpath: "[*].{interface: interface, link_status: link_status}"
-    dot1q_mode:
-      commands:
-        - command: "show interfaces switchport"
-          use_textfsm: true
-          jpath: "[*].mode"
-        - command: "show interfaces"
-          use_textfsm: true
-          jpath: "[*].{interface: interface, encapsulation: encapsulation}"
-      validator_pattern: "not None"
-    lag:
-      commands:
-        - command: "show etherchannel summary"
-          use_textfsm: true
-          jpath: "[*].protocol"
-    untagged_vlan:
-      commands:
-        - command: "show vlans"
-          use_textfsm: true
-          jpath: "[*].vlan_id"
-    tagged_vlans:
-      commands:
-        - command: "show vlans"
-          use_textfsm: true
-          jpath: "[*].vlan_id"
+        jpath: "[*].{interface: interface, type: hardware_type}"
+  ip_addresses:
+    commands:
+      - command: "show interfaces"
+        use_textfsm: true
+        jpath: "[*].{interface: interface, ip_address: ip_address}"
+  prefix_length:
+    commands:
+      - command: "show interfaces"
+        use_textfsm: true
+        jpath: "[*].{interface: interface, prefix_length: prefix_length}"
+  mtu:
+    commands:
+      - command: "show interfaces"
+        use_textfsm: true
+        jpath: "[*].{interface: interface, mtu: mtu}"
+  mac_address:
+    commands:
+      - command: "show interfaces"
+        use_textfsm: true
+        jpath: "[*].{interface: interface, mac_address: mac_address}"
+  description:
+    commands:
+      - command: "show interfaces"
+        use_textfsm: true
+        jpath: "[*].{interface: interface, description: description}"
+  link_status:
+    commands:
+      - command: "show interfaces"
+        use_textfsm: true
+        jpath: "[*].{interface: interface, link_status: link_status}"
+        # dot1q_mode:
+        #   commands:
+        #     # - command: "show interfaces switchport"
+        #     #   use_textfsm: true
+        #     #   jpath: "[*].mode"
+        #     - command: "show interfaces switchport"
+        #       use_textfsm: true
+        #       jpath: "[*].{interface: interface, dot1q_mode: admin_mode}"
+        #   validator_pattern: "not None"
+        # # lag:
+        # #   commands:
+        # #     - command: "show etherchannel summary"
+        # #       use_textfsm: true
+        # #       jpath: "[*].protocol"
+        # # untagged_vlan:
+        # #   commands:
+        # #     - command: "show vlans"
+        # #       use_textfsm: true
+        # #       jpath: "[*].vlan_id"
+        # # tagged_vlans:
+        # #   commands:
+        # #     - command: "show vlans"
+        # #       use_textfsm: true
+        # #       jpath: "[*].vlan_id"

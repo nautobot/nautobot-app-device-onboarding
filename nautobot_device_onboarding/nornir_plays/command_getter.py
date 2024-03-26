@@ -17,6 +17,7 @@ from nautobot_device_onboarding.constants import NETMIKO_TO_NAPALM_STATIC
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
+from nautobot_device_onboarding.utils.formatter import format_results
 from nautobot_device_onboarding.utils.helper import add_platform_parsing_info
 from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
 
@@ -207,4 +208,7 @@ def command_getter_ni(job_result, log_level, kwargs):
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info("Error: %s", err)
         return err
+
+    compiled_results = format_results(compiled_results)
+
     return compiled_results
