@@ -12,6 +12,8 @@ from nautobot.dcim.models import Device
 
 from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC
 from nautobot_device_onboarding.utils.jinja_filters import fix_interfaces
+from nautobot.dcim.models import Device
+from netutils.interface import canonical_interface_name
 
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "command_mappers"))
 
@@ -136,8 +138,12 @@ def format_ios_results(compiled_results):
         mac_list = device_data.get("mac_address", [])
         description_list = device_data.get("description", [])
         link_status_list = device_data.get("link_status", [])
+        vrf_list = device_data.get("vrfs", [])
+        mode_list = device_data.get("mode", [])
 
         interface_dict = {}
+        for item in vrf_list:
+            item["interfaces"] = [canonical_interface_name(interface) for interface in item["interfaces"]]
         for item in mtu_list:
             interface_dict.setdefault(item["interface"], {})["mtu"] = item["mtu"]
         for item in type_list:
@@ -157,7 +163,10 @@ def format_ios_results(compiled_results):
             interface_dict.setdefault(item["interface"], {})["link_status"] = (
                 True if item["link_status"] == "up" else False
             )
-
+        for item in mode_list:
+            interface_dict.setdefault(item["interface"], {})["802.1Q_mode"] = (
+                "access" if item["mode"] == "static access" else "tagged" if item["mode"] == "trunk" else ""
+            )
         for interface in interface_dict.values():
             interface.setdefault("802.1Q_mode", "")
             interface.setdefault("lag", "")
@@ -183,6 +192,7 @@ def format_ios_results(compiled_results):
         del device_data["mac_address"]
         del device_data["description"]
         del device_data["link_status"]
+        del device_data["mode"]
 
     return compiled_results
 

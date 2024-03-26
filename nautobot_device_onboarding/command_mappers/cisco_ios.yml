@@ -75,6 +75,29 @@ network_importer:
       - command: "show interfaces"
         use_textfsm: true
         jpath: "[*].{interface: interface, link_status: link_status}"
+  vlans:
+    commands:
+      - command: "show vlan"
+        use_textfsm: true
+        jpath: "[*].{vlan_id: vlan_id, vlan_name: vlan_name}"
+      - command: "show vlans"
+        use_textfsm: true
+        jpath: "[*].{vlan_id: vlan_id, vlan_name: vlan_name}"
+  mode:
+    commands:
+      - command: "show interfaces switchport"
+        use_textfsm: true
+        jpath: "[*].{interface: interface, mode: admin_mode}"
+  tagged_vlans:
+          commands:
+            - command: "show interfaces switchport"
+              use_textfsm: true
+              jpath: "[*].{trunking_vlans: trunking_vlans, interface: interface}"
+  vrfs:
+    commands:
+      - command: "show vrf"
+        use_textfsm: true
+        jpath: "[*].{name: name, default_rd: default_rd, interfaces: interfaces}"
         # dot1q_mode:
         #   commands:
         #     # - command: "show interfaces switchport"
