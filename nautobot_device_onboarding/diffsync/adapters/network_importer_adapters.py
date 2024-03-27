@@ -51,9 +51,9 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
 
     def load_param_mac_address(self, parameter_name, database_object):
         """Convert interface mac_address to string."""
-        if self.job.debug:
-            self.job.logger.debug(f"Converting {parameter_name}: {database_object.mac_address}")
-        return str(database_object.mac_address)
+        if database_object.mac_address:
+            return str(database_object.mac_address)
+        return ""
 
     def load_param_untagged_vlan__name(self, parameter_name, database_object):
         """Load, or prevent loading, untagged vlans depending on form selection."""
@@ -288,7 +288,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
         """Convert a mac address to match the value stored by Nautobot."""
         if mac_address:
             return str(EUI(mac_address, version=48, dialect=MacUnixExpandedUppercase))
-        return "None"
+        return ""
 
     def load_devices(self):
         """Load devices into the DiffSync store."""

@@ -29,11 +29,11 @@ device_onboarding:
         jpath: "[?ip_address=='{{ obj }}'].prefix_length"
         post_processor: "{{ obj | unique | first }}"
 network_importer:
-  # serial:
-  #   commands:
-  #     - command: "show version"
-  #       use_textfsm: true
-  #       jpath: "[*].serial[0]"
+  serial:
+    commands:
+      - command: "show version"
+        use_textfsm: true
+        jpath: "[*].serial[0]"
   # interfaces:
   #   interfaces:
   #     commands:
@@ -75,6 +75,11 @@ network_importer:
       - command: "show interfaces"
         use_textfsm: true
         jpath: "[*].{interface: interface, link_status: link_status}"
+  # mode:
+  #   commands:
+  #     - command: "show interfaces switchport"
+  #       use_textfsm: true
+  #       jpath: "[*].{interface: interface, mode: admin_mode}"
         # dot1q_mode:
         #   commands:
         #     # - command: "show interfaces switchport"
