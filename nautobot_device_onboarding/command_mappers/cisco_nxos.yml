@@ -26,6 +26,11 @@ device_onboarding:
         use_textfsm: true
         jpath: "[?ip_address=='{{ obj }}'].prefix_length || [`31`]"
 network_importer:
+  serial:
+    commands:
+      - command: "show inventory"
+        use_textfsm: true
+        jpath: "[?name=='Chassis'].sn"
   type:
     commands:
       - command: "show interface"
