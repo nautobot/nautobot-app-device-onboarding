@@ -227,7 +227,7 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
             if not device.primary_ip:
                 try:
                     ip_address = IPAddress.objects.get(id=self.primary_ips[device.id])
-                    device.primary_ip = ip_address
+                    device.primary_ip4 = ip_address
                     device.validated_save()
                 except Exception as err:
                     self.job.logger.error(f"Unable to set Primary IP for {device.name}, {err.args}")
