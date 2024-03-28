@@ -227,6 +227,7 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
             if self.job.debug:
                 self.job.logger.debug("Sync Complete method called, checking for missing primary ip addresses...")
             if not device.primary_ip:
+                ip_address = ""
                 try:
                     ip_address = IPAddress.objects.get(id=self.primary_ips[device.id])
                     device.primary_ip4 = ip_address
@@ -235,6 +236,20 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
                 except Exception as err:
                     self.job.logger.error(f"Unable to set Primary IP for {device.name}, {err.args}. "
                                           "Please check the primary IP Address assignment for this device.")
+                if ip_address:
+                    try:
+                        interface = Interface.objects.get(
+                            device=device,
+                            ip_addresses__in=[ip_address]
+                        )
+                        interface.mgmt_only = True
+                        interface.validated_save()
+                        self.job.logger.info(f"Management only set for interface: {interface.name} on device: {device.name}")
+                    except Exception as err:
+                        self.job.logger.error("Failed to set management only on the "
+                                            f"management interface for {device.name}, {err}, {err.args}")
+                else:
+                    self.job.logger.error(f"Failed to set management only on the managmeent interface for {device.name}")
         return super().sync_complete(source, diff, *args, **kwargs)
 
 class MacUnixExpandedUppercase(mac_unix_expanded):
