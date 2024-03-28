@@ -223,6 +223,15 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
                 self._load_objects(diffsync_model)
 
     def sync_complete(self, source, diff, *args, **kwargs):
+        """
+        Assign the primary ip address to a device and update the management interface setting.
+
+        Syncing interfaces may result in the deletion of the original management interface. If
+        this happens, the primary IP Address for the device should be set and the management only 
+        option on the appropriate interface should be set to True.
+
+        This method only runs if data was changed.
+        """
         for device in self.job.devices_to_load.all(): # refresh queryset after sync is complete
             if self.job.debug:
                 self.job.logger.debug("Sync Complete method called, checking for missing primary ip addresses...")
