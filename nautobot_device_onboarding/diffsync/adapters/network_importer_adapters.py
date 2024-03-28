@@ -222,16 +222,20 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
                 diffsync_model = self._get_diffsync_class(model_name)
                 self._load_objects(diffsync_model)
 
-    def sync_complete(self, source: diffsync.DiffSync, *args, **kwargs):
-        for device in self.job.devices_to_load:
+    def sync_complete(self, source, diff, *args, **kwargs):
+        for device in self.job.devices_to_load.all(): # refresh queryset after sync is complete
+            if self.job.debug:
+                self.job.logger.debug("Sync Complete method called, checking for missing primary ip addresses...")
             if not device.primary_ip:
                 try:
                     ip_address = IPAddress.objects.get(id=self.primary_ips[device.id])
                     device.primary_ip4 = ip_address
                     device.validated_save()
+                    self.job.logger.info(f"Assigning {ip_address} as primary IP Address for Device: {device.name}")
                 except Exception as err:
-                    self.job.logger.error(f"Unable to set Primary IP for {device.name}, {err.args}")
-        return super().sync_complete(source, *args, **kwargs)
+                    self.job.logger.error(f"Unable to set Primary IP for {device.name}, {err.args}. "
+                                          "Please check the primary IP Address assignment for this device.")
+        return super().sync_complete(source, diff, *args, **kwargs)
 
 class MacUnixExpandedUppercase(mac_unix_expanded):
     """Mac Unix Expanded Uppercase."""
