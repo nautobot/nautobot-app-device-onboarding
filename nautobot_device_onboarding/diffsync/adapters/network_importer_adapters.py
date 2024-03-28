@@ -242,7 +242,7 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
                     device.primary_ip4 = ip_address
                     device.validated_save()
                     self.job.logger.info(f"Assigning {ip_address} as primary IP Address for Device: {device.name}")
-                except Exception as err:
+                except Exception as err:  # pylint: disable=broad-exception-caught
                     self.job.logger.error(
                         f"Unable to set Primary IP for {device.name}, {err.args}. "
                         "Please check the primary IP Address assignment for this device."
@@ -255,7 +255,7 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
                         self.job.logger.info(
                             f"Management only set for interface: {interface.name} on device: {device.name}"
                         )
-                    except Exception as err:
+                    except Exception as err:  # pylint: disable=broad-exception-caught
                         self.job.logger.error(
                             "Failed to set management only on the "
                             f"management interface for {device.name}, {err}, {err.args}"
