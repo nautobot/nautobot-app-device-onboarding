@@ -165,9 +165,10 @@ def format_ios_results(device):
         if ip_addresses:
             data["ip_addresses"] = [ip_addresses]
 
+    # Convert interface names to canonical form
     interface_list = []
-    for interface, data in interface_dict.items():
-        interface_list.append({canonical_interface_name(interface): data})
+    for interface_name, interface_info in interface_dict.items():
+        interface_list.append({canonical_interface_name(interface_name): interface_info})
 
     device["interfaces"] = interface_list
     device["serial"] = serial
@@ -232,21 +233,24 @@ def format_nxos_results(device):
         if ip_addresses:
             data["ip_addresses"] = [ip_addresses]
 
+    # Convert interface names to canonical form
     interface_list = []
-    for interface, data in interface_dict.items():
-        interface_list.append({canonical_interface_name(interface): data})
+    for interface_name, interface_info in interface_dict.items():
+        interface_list.append({canonical_interface_name(interface_name): interface_info})
 
     device["interfaces"] = interface_list
     device["serial"] = serial
-
-    del device["mtu"]
-    del device["type"]
-    del device["ip_addresses"]
-    del device["prefix_length"]
-    del device["mac_address"]
-    del device["description"]
-    del device["link_status"]
-    del device["mode"]
+    try:
+        del device["mtu"]
+        del device["type"]
+        del device["ip_addresses"]
+        del device["prefix_length"]
+        del device["mac_address"]
+        del device["description"]
+        del device["link_status"]
+        del device["mode"]
+    except KeyError:
+        pass
 
     return device
 
