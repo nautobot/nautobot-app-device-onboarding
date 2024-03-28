@@ -54,7 +54,7 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
     def _cache_primary_ips(self, device_queryset):
         """
         Create a cache of primary ip address for devices.
-        
+
         If the primary ip address of a device is unset due to the deletion
         of an interface, this cache is used to reset it.
         """
@@ -201,7 +201,7 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
         """Generic implementation of the load function."""
         if not hasattr(self, "top_level") or not self.top_level:
             raise ValueError("'top_level' needs to be set on the class.")
-        
+
         self._cache_primary_ips(device_queryset=self.job.devices_to_load)
 
         for model_name in self.top_level:
@@ -227,12 +227,12 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
         Assign the primary ip address to a device and update the management interface setting.
 
         Syncing interfaces may result in the deletion of the original management interface. If
-        this happens, the primary IP Address for the device should be set and the management only 
+        this happens, the primary IP Address for the device should be set and the management only
         option on the appropriate interface should be set to True.
 
         This method only runs if data was changed.
         """
-        for device in self.job.devices_to_load.all(): # refresh queryset after sync is complete
+        for device in self.job.devices_to_load.all():  # refresh queryset after sync is complete
             if self.job.debug:
                 self.job.logger.debug("Sync Complete method called, checking for missing primary ip addresses...")
             if not device.primary_ip:
@@ -243,23 +243,29 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
                     device.validated_save()
                     self.job.logger.info(f"Assigning {ip_address} as primary IP Address for Device: {device.name}")
                 except Exception as err:
-                    self.job.logger.error(f"Unable to set Primary IP for {device.name}, {err.args}. "
-                                          "Please check the primary IP Address assignment for this device.")
+                    self.job.logger.error(
+                        f"Unable to set Primary IP for {device.name}, {err.args}. "
+                        "Please check the primary IP Address assignment for this device."
+                    )
                 if ip_address:
                     try:
-                        interface = Interface.objects.get(
-                            device=device,
-                            ip_addresses__in=[ip_address]
-                        )
+                        interface = Interface.objects.get(device=device, ip_addresses__in=[ip_address])
                         interface.mgmt_only = True
                         interface.validated_save()
-                        self.job.logger.info(f"Management only set for interface: {interface.name} on device: {device.name}")
+                        self.job.logger.info(
+                            f"Management only set for interface: {interface.name} on device: {device.name}"
+                        )
                     except Exception as err:
-                        self.job.logger.error("Failed to set management only on the "
-                                            f"management interface for {device.name}, {err}, {err.args}")
+                        self.job.logger.error(
+                            "Failed to set management only on the "
+                            f"management interface for {device.name}, {err}, {err.args}"
+                        )
                 else:
-                    self.job.logger.error(f"Failed to set management only on the managmeent interface for {device.name}")
+                    self.job.logger.error(
+                        f"Failed to set management only on the managmeent interface for {device.name}"
+                    )
         return super().sync_complete(source, diff, *args, **kwargs)
+
 
 class MacUnixExpandedUppercase(mac_unix_expanded):
     """Mac Unix Expanded Uppercase."""
