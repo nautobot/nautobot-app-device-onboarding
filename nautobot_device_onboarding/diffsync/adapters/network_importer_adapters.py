@@ -39,6 +39,8 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
     untagged_vlan_to_interface = network_importer_models.NetworkImporterUnTaggedVlanToInterface
     lag_to_interface = network_importer_models.NetworkImporterLagToInterface
 
+    primary_ips = None
+
     top_level = [
         "ip_address",
         "vlan",
@@ -48,6 +50,17 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
         "tagged_vlans_to_interface",
         "lag_to_interface",
     ]
+
+    def _cache_primary_ips(self, device_queryset):
+        """
+        Create a cache of primary ip address for devices.
+
+        If the primary ip address of a device is unset due to the deletion
+        of an interface, this cache is used to reset it.
+        """
+        self.primary_ips = {}
+        for device in device_queryset:
+            self.primary_ips[device.id] = device.primary_ip.id
 
     def load_param_mac_address(self, parameter_name, database_object):
         """Convert interface mac_address to string."""
@@ -189,6 +202,8 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
         if not hasattr(self, "top_level") or not self.top_level:
             raise ValueError("'top_level' needs to be set on the class.")
 
+        self._cache_primary_ips(device_queryset=self.job.devices_to_load)
+
         for model_name in self.top_level:
             if model_name == "ip_address":
                 self.load_ip_addresses()
@@ -206,6 +221,50 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
             else:
                 diffsync_model = self._get_diffsync_class(model_name)
                 self._load_objects(diffsync_model)
+
+    def sync_complete(self, source, diff, *args, **kwargs):
+        """
+        Assign the primary ip address to a device and update the management interface setting.
+
+        Syncing interfaces may result in the deletion of the original management interface. If
+        this happens, the primary IP Address for the device should be set and the management only
+        option on the appropriate interface should be set to True.
+
+        This method only runs if data was changed.
+        """
+        for device in self.job.devices_to_load.all():  # refresh queryset after sync is complete
+            if self.job.debug:
+                self.job.logger.debug("Sync Complete method called, checking for missing primary ip addresses...")
+            if not device.primary_ip:
+                ip_address = ""
+                try:
+                    ip_address = IPAddress.objects.get(id=self.primary_ips[device.id])
+                    device.primary_ip4 = ip_address
+                    device.validated_save()
+                    self.job.logger.info(f"Assigning {ip_address} as primary IP Address for Device: {device.name}")
+                except Exception as err:  # pylint: disable=broad-exception-caught
+                    self.job.logger.error(
+                        f"Unable to set Primary IP for {device.name}, {err.args}. "
+                        "Please check the primary IP Address assignment for this device."
+                    )
+                if ip_address:
+                    try:
+                        interface = Interface.objects.get(device=device, ip_addresses__in=[ip_address])
+                        interface.mgmt_only = True
+                        interface.validated_save()
+                        self.job.logger.info(
+                            f"Management only set for interface: {interface.name} on device: {device.name}"
+                        )
+                    except Exception as err:  # pylint: disable=broad-exception-caught
+                        self.job.logger.error(
+                            "Failed to set management only on the "
+                            f"management interface for {device.name}, {err}, {err.args}"
+                        )
+                else:
+                    self.job.logger.error(
+                        f"Failed to set management only on the managmeent interface for {device.name}"
+                    )
+        return super().sync_complete(source, diff, *args, **kwargs)
 
 
 class MacUnixExpandedUppercase(mac_unix_expanded):

@@ -13,8 +13,9 @@ INTERFACE_TYPE_MAP_STATIC = {
     "Gigabit Ethernet": "1000base-t",
     "Ten Gigabit Ethernet": "10gbase-t",
     "Ethernet SVI": "virtual",
-    "EthernetChannel": "lag",
+    "EtherChannel": "lag",
     "1000/10000 Ethernet": "1000base-t",
     "Port-channel": "lag",
     "EtherSVI": "virtual",
+    "FastEthernet": "100base-fx",
 }
