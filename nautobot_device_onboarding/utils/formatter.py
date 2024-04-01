@@ -278,10 +278,10 @@ def format_results(compiled_results):
         compiled_results (dict): The formatted results.
     """
     for device, data in compiled_results.items():
-        print(f"data: {data}")
         if "platform" in data:
             platform = data.get("platform")
         if platform not in ["cisco_ios", "cisco_xe", "cisco_nxos"]:
+            print(f"Unsupported platform {platform}")
             data.update({"failed": True, "failed_reason": f"Unsupported platform {platform}"})
         if "type" in data:
             if platform in ["cisco_ios", "cisco_xe"]:
