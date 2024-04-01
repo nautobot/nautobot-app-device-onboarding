@@ -82,7 +82,9 @@ class ProcessorDO(BaseLoggingProcessor):
 
     def subtask_instance_started(self, task: Task, host: Host) -> None:  # show command start
         """Processor for logging and data processing on subtask start."""
-        self.logger.info(f"subtask_instance_started Subtask starting {task.name}, {task.host}.", extra={"object": task.host})
+        self.logger.info(
+            f"subtask_instance_started Subtask starting {task.name}, {task.host}.", extra={"object": task.host}
+        )
         if not self.data.get(host.name):
             self.data[host.name] = {
                 "platform": host.platform,
