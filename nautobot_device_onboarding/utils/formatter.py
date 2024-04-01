@@ -136,8 +136,6 @@ def format_ios_results(device):
         mac_list = device.get("mac_address", [])
         description_list = device.get("description", [])
         link_status_list = device.get("link_status", [])
-        #vrf_list = device.get("vrf", [])
-        #print(f"vrf_list: {vrf_list}")
 
         interface_dict = {}
         for item in mtu_list:
@@ -156,7 +154,9 @@ def format_ios_results(device):
         for item in description_list:
             interface_dict.setdefault(item["interface"], {})["description"] = item["description"]
         for item in link_status_list:
-            interface_dict.setdefault(item["interface"], {})["link_status"] = True if item["link_status"] == "up" else False
+            interface_dict.setdefault(item["interface"], {})["link_status"] = (
+                True if item["link_status"] == "up" else False
+            )
         for interface in interface_dict.values():
             interface.setdefault("802.1Q_mode", "")
             interface.setdefault("lag", "")
@@ -186,8 +186,8 @@ def format_ios_results(device):
 
         except KeyError:
             pass
-    except Error as e:
-        device = { "failed": True, "failed_reason": f"Formatting error for device {device}"}  
+    except Exception:
+        device = {"failed": True, "failed_reason": f"Formatting error for device {device}"}
     return device
 
 
@@ -221,7 +221,9 @@ def format_nxos_results(device):
         for item in description_list:
             interface_dict.setdefault(item["interface"], {})["description"] = item["description"]
         for item in link_status_list:
-            interface_dict.setdefault(item["interface"], {})["link_status"] = True if item["link_status"] == "up" else False
+            interface_dict.setdefault(item["interface"], {})["link_status"] = (
+                True if item["link_status"] == "up" else False
+            )
         for item in mode_list:
             interface_dict.setdefault(item["interface"], {})["802.1Q_mode"] = (
                 "access" if item["mode"] == "access" else "tagged" if item["mode"] == "trunk" else ""
@@ -256,10 +258,10 @@ def format_nxos_results(device):
             del device["mode"]
         except KeyError:
             pass
-    except Error as e:
-        device = { "failed": True, "failed_reason": f"Formatting error for device {device}"}
+    except Exception:
+        device = {"failed": True, "failed_reason": f"Formatting error for device {device}"}
         return device
-       
+
     return device
 
 
@@ -287,8 +289,8 @@ def format_results(compiled_results):
             if platform in ["cisco_ios", "cisco_xe"]:
                 format_ios_results(data)
             elif platform == "cisco_nxos":
-                format_nxos_results(data)                   
+                format_nxos_results(data)
         else:
             data.update({"failed": True, "failed_reason": "Cannot connect to device."})
-            
+
     return compiled_results
