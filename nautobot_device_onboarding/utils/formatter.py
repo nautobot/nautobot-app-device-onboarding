@@ -9,6 +9,7 @@ from django.utils.module_loading import import_string
 from jdiff import extract_data_from_json
 from jinja2.sandbox import SandboxedEnvironment
 from netutils.interface import canonical_interface_name
+from nautobot.dcim.models import Device
 
 from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC
 from nautobot_device_onboarding.utils.jinja_filters import fix_interfaces
@@ -74,10 +75,10 @@ def perform_data_extraction(host, dict_field, command_info_dict, j2_env, task_re
                     print(f"extracted 1: {extracted_processed}")
                 else:
                     extracted_processed = extracted_value
-                    print(f"extracted 2: {extracted_processed}")
-                    if isinstance(extracted_value, list) and len(extracted_value) == 1:
-                        extracted_processed = extracted_value[0]
-                        print(f"extracted 3: {extracted_processed}")
+                    # print(f"extracted 2: {extracted_processed}")
+                    # if isinstance(extracted_value, list) and len(extracted_value) == 1:
+                    #    extracted_processed = extracted_value[0]
+                    #    print(f"extracted 3: {extracted_processed}")
                 if command_info_dict.get("validator_pattern"):
                     # temp validator
                     if command_info_dict["validator_pattern"] == "not None":
@@ -136,6 +137,7 @@ def format_ios_results(device):
         mac_list = device.get("mac_address", [])
         description_list = device.get("description", [])
         link_status_list = device.get("link_status", [])
+        vrf_list = device.get("vrfs", [])
 
         interface_dict = {}
         for item in mtu_list:
@@ -157,6 +159,11 @@ def format_ios_results(device):
             interface_dict.setdefault(item["interface"], {})["link_status"] = (
                 True if item["link_status"] == "up" else False
             )
+        for vrf in vrf_list:
+            for interface in vrf["interfaces"]:
+                canonical_name = canonical_interface_name(interface)
+                interface_dict.setdefault(canonical_name, {})
+                interface_dict[canonical_name]["vrf"] = {"name": vrf["name"], "rd": vrf["default_rd"]}
         for interface in interface_dict.values():
             interface.setdefault("802.1Q_mode", "")
             interface.setdefault("lag", "")
@@ -183,9 +190,10 @@ def format_ios_results(device):
             del device["mac_address"]
             del device["description"]
             del device["link_status"]
+            del device["vrfs"]
 
         except KeyError:
-            pass
+            device = {"failed": True, "failed_reason": f"Formatting error for device {device}"}
     except Exception:
         device = {"failed": True, "failed_reason": f"Formatting error for device {device}"}
     return device
@@ -257,11 +265,9 @@ def format_nxos_results(device):
             del device["link_status"]
             del device["mode"]
         except KeyError:
-            pass
+            device = {"failed": True, "failed_reason": f"Formatting error for device {device}"}
     except Exception:
         device = {"failed": True, "failed_reason": f"Formatting error for device {device}"}
-        return device
-
     return device
 
 
@@ -280,17 +286,24 @@ def format_results(compiled_results):
         compiled_results (dict): The formatted results.
     """
     for device, data in compiled_results.items():
-        if "platform" in data:
-            platform = data.get("platform")
-        if platform not in ["cisco_ios", "cisco_xe", "cisco_nxos"]:
-            print(f"Unsupported platform {platform}")
-            data.update({"failed": True, "failed_reason": f"Unsupported platform {platform}"})
-        if "type" in data:
-            if platform in ["cisco_ios", "cisco_xe"]:
-                format_ios_results(data)
-            elif platform == "cisco_nxos":
-                format_nxos_results(data)
-        else:
-            data.update({"failed": True, "failed_reason": "Cannot connect to device."})
+        try:
+            if "platform" in data:
+                platform = data.get("platform")
+            if platform not in ["cisco_ios", "cisco_xe", "cisco_nxos"]:
+                data.update({"failed": True, "failed_reason": f"Unsupported platform {platform}"})
+            if "type" in data:
 
+                serial = Device.objects.get(name=device).serial
+                if serial == "":
+                    data.update({"failed": True, "failed_reason": "Serial not found for device in Nautobot."})
+                else:
+                    data["serial"] = serial
+                if platform in ["cisco_ios", "cisco_xe"]:
+                    format_ios_results(data)
+                elif platform == "cisco_nxos":
+                    format_nxos_results(data)
+            else:
+                data.update({"failed": True, "failed_reason": "Cannot connect to device."})
+        except Exception as e:
+            data.update({"failed": True, "failed_reason": f"Error formatting device: {e}"})
     return compiled_results
