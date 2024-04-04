@@ -1,19 +1,14 @@
 """Formatter."""
 
 import json
-import os
-
-import yaml
 from django.template import engines
 from django.utils.module_loading import import_string
 from jdiff import extract_data_from_json
 from jinja2.sandbox import SandboxedEnvironment
 from netutils.interface import canonical_interface_name
 
-from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC
+from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC, PLUGIN_CFG
 from nautobot_device_onboarding.utils.jinja_filters import fix_interfaces
-
-DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "command_mappers"))
 
 
 def get_django_env():
@@ -32,21 +27,21 @@ def get_django_env():
         j2_env["undefined"] = import_string(j2_env["undefined"])
     jinja_env = SandboxedEnvironment(**j2_env)
     jinja_env.filters = engines["jinja"].env.filters
+    if PLUGIN_CFG.get("custom_post_processing_filters"):
+        for filter_name, filter_function in PLUGIN_CFG["custom_post_processing_filters"].items():
+            try:
+                func = import_string(filter_function)
+            except Exception as error:  # pylint: disable=broad-except
+                msg = (
+                    "There was an issue attempting to import the custom post_processing filters of"
+                    f" {filter_name} this is expected with a local configuration issue "
+                    "and not related to the Device Onboarding App, please contact your system admin for further details"
+                )
+                raise Exception(msg).with_traceback(error.__traceback__)
+            jinja_env.filters[filter_name] = func
     jinja_env.filters["fix_interfaces"] = fix_interfaces
     return jinja_env
 
-
-def load_yaml_datafile(filename):
-    """Get the contents of the given YAML data file.
-
-    Args:
-        filename (str): Filename within the 'data' directory.
-    """
-    file_path = os.path.join(DATA_DIR, filename)
-    if os.path.isfile(file_path):
-        with open(file_path, "r", encoding="utf-8") as yaml_file:
-            data = yaml.safe_load(yaml_file)
-        return data
 
 
 def perform_data_extraction(host, dict_field, command_info_dict, j2_env, task_result):
@@ -100,6 +95,8 @@ def extract_show_data(host, multi_result, command_getter_type):
         multi_result (multiResult): multiresult object from nornir
         command_getter_type (str): to know what dict to pull, device_onboarding or network_importer.
     """
+    # Think about whether this should become a constant, the env shouldn't change per job execution, but
+    # perhaps it shouldn't be reused to avoid any memory leak?
     jinja_env = get_django_env()
 
     host_platform = host.platform
@@ -110,11 +107,15 @@ def extract_show_data(host, multi_result, command_getter_type):
     for default_dict_field, command_info in command_jpaths[command_getter_type].items():
         if command_info.get("commands"):
             # Means their isn't any "nested" structures. Therefore not expected to see "validator_pattern key"
+            if isinstance(command_info["commands"], dict):
+                command_info["commands"] = [command_info["commands"]]
             result = perform_data_extraction(host, default_dict_field, command_info, jinja_env, multi_result[0])
             final_result_dict.update(result)
         else:
             # Means their is a "nested" structures. Priority
             for dict_field, nested_command_info in command_info.items():
+                if isinstance(nested_command_info["commands"], dict):
+                    nested_command_info["commands"] = [nested_command_info["commands"]]
                 result = perform_data_extraction(host, dict_field, nested_command_info, jinja_env, multi_result[0])
                 final_result_dict.update(result)
     return final_result_dict
