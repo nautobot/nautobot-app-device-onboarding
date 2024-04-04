@@ -75,10 +75,10 @@ def perform_data_extraction(host, dict_field, command_info_dict, j2_env, task_re
                     print(f"extracted 1: {extracted_processed}")
                 else:
                     extracted_processed = extracted_value
-                    # print(f"extracted 2: {extracted_processed}")
-                    # if isinstance(extracted_value, list) and len(extracted_value) == 1:
-                    #    extracted_processed = extracted_value[0]
-                    #    print(f"extracted 3: {extracted_processed}")
+                    print(f"extracted 2: {extracted_processed}")
+                    if isinstance(extracted_value, list) and len(extracted_value) == 1:
+                        extracted_processed = extracted_value[0]
+                        print(f"extracted 3: {extracted_processed}")
                 if command_info_dict.get("validator_pattern"):
                     # temp validator
                     if command_info_dict["validator_pattern"] == "not None":
@@ -126,18 +126,36 @@ def map_interface_type(interface_type):
     return INTERFACE_TYPE_MAP_STATIC.get(interface_type, "other")
 
 
+def ensure_list(data):
+    """Ensure data is a list."""
+    if not isinstance(data, list):
+        return [data]
+    return data
+
+
 def format_ios_results(device):
     """Format the results of the show commands for IOS devices."""
+
     try:
         serial = device.get("serial")
-        mtu_list = device.get("mtu", [])
-        type_list = device.get("type", [])
-        ip_list = device.get("ip_addresses", [])
-        prefix_list = device.get("prefix_length", [])
-        mac_list = device.get("mac_address", [])
-        description_list = device.get("description", [])
-        link_status_list = device.get("link_status", [])
-        vrf_list = device.get("vrfs", [])
+        mtus = device.get("mtu", [])
+        types = device.get("type", [])
+        ips = device.get("ip_addresses", [])
+        prefixes = device.get("prefix_length", [])
+        macs = device.get("mac_address", [])
+        descriptions = device.get("description", [])
+        link_statuses = device.get("link_status", [])
+        vrfs = device.get("vrfs", [])
+
+        # Some data may come across as a dict, needs to be list. Probably should do this elsewhere.
+        mtu_list = ensure_list(mtus)
+        type_list = ensure_list(types)
+        ip_list = ensure_list(ips)
+        prefix_list = ensure_list(prefixes)
+        mac_list = ensure_list(macs)
+        description_list = ensure_list(descriptions)
+        link_status_list = ensure_list(link_statuses)
+        vrf_list = ensure_list(vrfs)
 
         interface_dict = {}
         for item in mtu_list:
@@ -193,24 +211,50 @@ def format_ios_results(device):
             del device["vrfs"]
 
         except KeyError:
-            device = {"failed": True, "failed_reason": f"Formatting error for device {device}"}
+            device = {"failed": True, "failed_reason": f"Formatting error 2 for device {device}"}
+    except Exception as e:
+        device = {"failed": True, "failed_reason": f"Formatting error 1 {e} for device {device}"}
+        print(f"susan {device}")
+    return device
+
+
+def format_nxos_vrf_results(device):
+    """Format the show commands to get interface and rd"""
+    try:
+        vrf_interface_list = device.get("vrf_interfaces", [])
+        vrf_rd_list = device.get("vrf_rds", [])
+
+        dict2 = {item["id"]: item for item in list2}
+
+        for id in vrf_interface_list:
+            id.update(vrf_rd_list.get(id["id"], {}))
+        print(f"vrf_interface_list {vrf_interface_list}")
     except Exception:
         device = {"failed": True, "failed_reason": f"Formatting error for device {device}"}
-    return device
+    return vrf_interface_list
 
 
 def format_nxos_results(device):
     """Format the results of the show commands for NX-OS devices."""
     try:
         serial = device.get("serial")
-        mtu_list = device.get("mtu", [])
-        type_list = device.get("type", [])
-        ip_list = device.get("ip_addresses", [])
-        prefix_list = device.get("prefix_length", [])
-        mac_list = device.get("mac_address", [])
-        description_list = device.get("description", [])
-        link_status_list = device.get("link_status", [])
-        mode_list = device.get("mode", [])
+        mtus = device.get("mtu", [])
+        types = device.get("type", [])
+        ips = device.get("ip_addresses", [])
+        prefixes = device.get("prefix_length", [])
+        macs = device.get("mac_address", [])
+        descriptions = device.get("description", [])
+        link_statuses = device.get("link_status", [])
+        modes = device.get("mode", [])
+
+        mtu_list = ensure_list(mtus)
+        type_list = ensure_list(types)
+        ip_list = ensure_list(ips)
+        prefix_list = ensure_list(prefixes)
+        mac_list = ensure_list(macs)
+        description_list = ensure_list(descriptions)
+        link_status_list = ensure_list(link_statuses)
+        mode_list = ensure_list(modes)
 
         interface_dict = {}
         for item in mtu_list:
