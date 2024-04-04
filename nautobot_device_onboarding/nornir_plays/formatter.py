@@ -8,8 +8,7 @@ from jinja2.sandbox import SandboxedEnvironment
 from netutils.interface import canonical_interface_name
 from nautobot.dcim.models import Device
 
-from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC, PLUGIN_CFG
-from nautobot_device_onboarding.nornir_plays.jinja_filters import fix_interfaces
+from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC
 
 
 def get_django_env():
@@ -28,19 +27,21 @@ def get_django_env():
         j2_env["undefined"] = import_string(j2_env["undefined"])
     jinja_env = SandboxedEnvironment(**j2_env)
     jinja_env.filters = engines["jinja"].env.filters
-    if PLUGIN_CFG.get("custom_post_processing_filters"):
-        for filter_name, filter_function in PLUGIN_CFG["custom_post_processing_filters"].items():
-            try:
-                func = import_string(filter_function)
-            except Exception as error:  # pylint: disable=broad-except
-                msg = (
-                    "There was an issue attempting to import the custom post_processing filters of"
-                    f" {filter_name} this is expected with a local configuration issue "
-                    "and not related to the Device Onboarding App, please contact your system admin for further details"
-                )
-                raise Exception(msg).with_traceback(error.__traceback__)
-            jinja_env.filters[filter_name] = func
-    jinja_env.filters["fix_interfaces"] = fix_interfaces
+    # https://docs.nautobot.com/projects/core/en/stable/development/apps/api/platform-features/jinja2-filters/
+    # 
+    # if PLUGIN_CFG.get("custom_post_processing_filters"):
+    #     for filter_name, filter_function in PLUGIN_CFG["custom_post_processing_filters"].items():
+    #         try:
+    #             func = import_string(filter_function)
+    #         except Exception as error:  # pylint: disable=broad-except
+    #             msg = (
+    #                 "There was an issue attempting to import the custom post_processing filters of"
+    #                 f" {filter_name} this is expected with a local configuration issue "
+    #                 "and not related to the Device Onboarding App, please contact your system admin for further details"
+    #             )
+    #             raise Exception(msg).with_traceback(error.__traceback__)
+    #         jinja_env.filters[filter_name] = func
+    # jinja_env.filters["fix_interfaces"] = fix_interfaces
     return jinja_env
 
 
@@ -123,6 +124,11 @@ def extract_show_data(host, multi_result, command_getter_type):
 
 def map_interface_type(interface_type):
     """Map interface type to a Nautobot type."""
+    # Can maybe this be used?
+    # from nautobot.dcim.choices import InterfaceTypeChoices
+    # InterfaceTypeChoices.CHOICES
+    # In [15]: dict(InterfaceTypeChoices.CHOICES).get('Other')
+    # Out[15]: (('other', 'Other'),)
     return INTERFACE_TYPE_MAP_STATIC.get(interface_type, "other")
 
 
