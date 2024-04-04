@@ -6,7 +6,7 @@ from nornir.core.inventory import Defaults, Groups, Hosts, Inventory
 class EmptyInventory:
     """Creates an empty Nornir inventory."""
 
-    def load(self):
+    def load(self) -> Inventory:
         """Create a default empty inventory."""
         hosts = Hosts()
         defaults = Defaults(data={})

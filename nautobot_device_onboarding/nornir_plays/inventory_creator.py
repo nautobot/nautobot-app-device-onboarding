@@ -3,7 +3,7 @@
 from netmiko import SSHDetect
 from nornir.core.inventory import ConnectionOptions, Host
 
-from nautobot_device_onboarding.utils.helper import add_platform_parsing_info
+from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info
 
 
 def guess_netmiko_device_type(hostname, username, password, port):

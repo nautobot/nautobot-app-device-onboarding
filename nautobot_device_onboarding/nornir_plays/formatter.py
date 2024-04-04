@@ -8,7 +8,7 @@ from jinja2.sandbox import SandboxedEnvironment
 from netutils.interface import canonical_interface_name
 
 from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC, PLUGIN_CFG
-from nautobot_device_onboarding.utils.jinja_filters import fix_interfaces
+from nautobot_device_onboarding.nornir_plays.jinja_filters import fix_interfaces
 
 
 def get_django_env():
@@ -41,7 +41,6 @@ def get_django_env():
             jinja_env.filters[filter_name] = func
     jinja_env.filters["fix_interfaces"] = fix_interfaces
     return jinja_env
-
 
 
 def perform_data_extraction(host, dict_field, command_info_dict, j2_env, task_result):

@@ -1,4 +1,5 @@
 """Constants for nautobot_device_onboarding app."""
+
 import os
 from django.conf import settings
 
