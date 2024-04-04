@@ -137,10 +137,9 @@ PLUGINS = [
 # Each key in the dictionary is the name of an installed App and its value is a dictionary of settings.
 PLUGINS_CONFIG = {
     "nautobot_device_onboarding": {
-        "custom_post_processing_filters": {
-            "example_filter_one": "parts.jeff.jeff_interfaces",
-            # "example_filter_two": "my_package.my_filters.filtertwo"
-        }
+        # "custom_post_processing_filters": {
+            # "example_filter_one": "my_package.my_filters.filterone"
+        # }
     },
     "nautobot_ssot": {
         "hide_example_jobs": is_truthy(os.getenv("NAUTOBOT_SSOT_HIDE_EXAMPLE_JOBS")),
