@@ -75,3 +75,8 @@ network_importer:
       - command: "show interfaces"
         use_textfsm: true
         jpath: "[*].{interface: interface, link_status: link_status}"
+  vrfs:
+    commands:
+      - command: "show vrf"
+        use_textfsm: true
+        jpath: "[*].{name: name, default_rd: default_rd, interfaces: interfaces}"

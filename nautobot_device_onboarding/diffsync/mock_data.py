@@ -20,6 +20,7 @@ network_importer_mock_data = {
                     "lag": "",
                     "untagged_vlan": {"name": "vlan60", "id": "60"},
                     "tagged_vlans": [{"name": "vlan40", "id": "40"}],
+                    "vrf": {"name": "vrf1", "rd": "65000:1"},
                 }
             },
             {
@@ -36,6 +37,7 @@ network_importer_mock_data = {
                     "lag": "Po2",
                     "untagged_vlan": {},
                     "tagged_vlans": [],
+                    "vrf": {},
                 }
             },
             {
@@ -53,6 +55,7 @@ network_importer_mock_data = {
                     "lag": "Po1",
                     "untagged_vlan": {},
                     "tagged_vlans": [{"name": "vlan40", "id": "40"}, {"name": "vlan50", "id": "50"}],
+                    "vrf": {"name": "mgmt", "rd": "65500:1"},
                 }
             },
             {
@@ -83,6 +86,7 @@ network_importer_mock_data = {
                     "lag": "",
                     "untagged_vlan": {},
                     "tagged_vlans": [],
+                    "vrf": {"name": "mgmt", "rd": "65500:1"},
                 }
             },
             {
@@ -97,6 +101,7 @@ network_importer_mock_data = {
                     "lag": "",
                     "untagged_vlan": "",
                     "tagged_vlans": [],
+                    "vrf": {"name": "mgmt", "rd": "65500:1"},
                 }
             },
         ],
@@ -118,6 +123,7 @@ network_importer_mock_data = {
                     "lag": "",
                     "untagged_vlan": {"name": "vlan60", "id": "60"},
                     "tagged_vlans": [{"name": "vlan40", "id": "40"}],
+                    "vrf": {"name": "mgmt", "rd": "65500:1"},
                 }
             },
             {
@@ -134,6 +140,7 @@ network_importer_mock_data = {
                     "lag": "Po1",
                     "untagged_vlan": {},
                     "tagged_vlans": [],
+                    "vrf": {},
                 }
             },
             {
@@ -151,6 +158,7 @@ network_importer_mock_data = {
                     "lag": "Po1",
                     "untagged_vlan": {},
                     "tagged_vlans": [{"name": "vlan40", "id": "40"}, {"name": "vlan50", "id": "50"}],
+                    "vrf": {"name": "mgmt", "rd": "65500:1"},
                 }
             },
             {
@@ -165,6 +173,7 @@ network_importer_mock_data = {
                     "lag": "",
                     "untagged_vlan": {},
                     "tagged_vlans": [],
+                    "vrf": {"name": "mgmt", "rd": "65500:1"},
                 }
             },
         ],

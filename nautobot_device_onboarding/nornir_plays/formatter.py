@@ -6,6 +6,7 @@ from django.utils.module_loading import import_string
 from jdiff import extract_data_from_json
 from jinja2.sandbox import SandboxedEnvironment
 from netutils.interface import canonical_interface_name
+from nautobot.dcim.models import Device
 
 from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC, PLUGIN_CFG
 from nautobot_device_onboarding.nornir_plays.jinja_filters import fix_interfaces
@@ -125,17 +126,36 @@ def map_interface_type(interface_type):
     return INTERFACE_TYPE_MAP_STATIC.get(interface_type, "other")
 
 
+def ensure_list(data):
+    """Ensure data is a list."""
+    if not isinstance(data, list):
+        return [data]
+    return data
+
+
 def format_ios_results(device):
     """Format the results of the show commands for IOS devices."""
+
     try:
         serial = device.get("serial")
-        mtu_list = device.get("mtu", [])
-        type_list = device.get("type", [])
-        ip_list = device.get("ip_addresses", [])
-        prefix_list = device.get("prefix_length", [])
-        mac_list = device.get("mac_address", [])
-        description_list = device.get("description", [])
-        link_status_list = device.get("link_status", [])
+        mtus = device.get("mtu", [])
+        types = device.get("type", [])
+        ips = device.get("ip_addresses", [])
+        prefixes = device.get("prefix_length", [])
+        macs = device.get("mac_address", [])
+        descriptions = device.get("description", [])
+        link_statuses = device.get("link_status", [])
+        vrfs = device.get("vrfs", [])
+
+        # Some data may come across as a dict, needs to be list. Probably should do this elsewhere.
+        mtu_list = ensure_list(mtus)
+        type_list = ensure_list(types)
+        ip_list = ensure_list(ips)
+        prefix_list = ensure_list(prefixes)
+        mac_list = ensure_list(macs)
+        description_list = ensure_list(descriptions)
+        link_status_list = ensure_list(link_statuses)
+        vrf_list = ensure_list(vrfs)
 
         interface_dict = {}
         for item in mtu_list:
@@ -157,6 +177,11 @@ def format_ios_results(device):
             interface_dict.setdefault(item["interface"], {})["link_status"] = (
                 True if item["link_status"] == "up" else False
             )
+        for vrf in vrf_list:
+            for interface in vrf["interfaces"]:
+                canonical_name = canonical_interface_name(interface)
+                interface_dict.setdefault(canonical_name, {})
+                interface_dict[canonical_name]["vrf"] = {"name": vrf["name"], "rd": vrf["default_rd"]}
         for interface in interface_dict.values():
             interface.setdefault("802.1Q_mode", "")
             interface.setdefault("lag", "")
@@ -183,26 +208,53 @@ def format_ios_results(device):
             del device["mac_address"]
             del device["description"]
             del device["link_status"]
+            del device["vrfs"]
 
         except KeyError:
-            pass
+            device = {"failed": True, "failed_reason": f"Formatting error 2 for device {device}"}
+    except Exception as e:
+        device = {"failed": True, "failed_reason": f"Formatting error 1 {e} for device {device}"}
+        print(f"susan {device}")
+    return device
+
+
+def format_nxos_vrf_results(device):
+    """Format the show commands to get interface and rd"""
+    try:
+        vrf_interface_list = device.get("vrf_interfaces", [])
+        vrf_rd_list = device.get("vrf_rds", [])
+
+        dict2 = {item["id"]: item for item in list2}
+
+        for id in vrf_interface_list:
+            id.update(vrf_rd_list.get(id["id"], {}))
+        print(f"vrf_interface_list {vrf_interface_list}")
     except Exception:
         device = {"failed": True, "failed_reason": f"Formatting error for device {device}"}
-    return device
+    return vrf_interface_list
 
 
 def format_nxos_results(device):
     """Format the results of the show commands for NX-OS devices."""
     try:
         serial = device.get("serial")
-        mtu_list = device.get("mtu", [])
-        type_list = device.get("type", [])
-        ip_list = device.get("ip_addresses", [])
-        prefix_list = device.get("prefix_length", [])
-        mac_list = device.get("mac_address", [])
-        description_list = device.get("description", [])
-        link_status_list = device.get("link_status", [])
-        mode_list = device.get("mode", [])
+        mtus = device.get("mtu", [])
+        types = device.get("type", [])
+        ips = device.get("ip_addresses", [])
+        prefixes = device.get("prefix_length", [])
+        macs = device.get("mac_address", [])
+        descriptions = device.get("description", [])
+        link_statuses = device.get("link_status", [])
+        modes = device.get("mode", [])
+
+        mtu_list = ensure_list(mtus)
+        type_list = ensure_list(types)
+        ip_list = ensure_list(ips)
+        prefix_list = ensure_list(prefixes)
+        mac_list = ensure_list(macs)
+        description_list = ensure_list(descriptions)
+        link_status_list = ensure_list(link_statuses)
+        mode_list = ensure_list(modes)
 
         interface_dict = {}
         for item in mtu_list:
@@ -257,11 +309,9 @@ def format_nxos_results(device):
             del device["link_status"]
             del device["mode"]
         except KeyError:
-            pass
+            device = {"failed": True, "failed_reason": f"Formatting error for device {device}"}
     except Exception:
         device = {"failed": True, "failed_reason": f"Formatting error for device {device}"}
-        return device
-
     return device
 
 
@@ -280,17 +330,24 @@ def format_results(compiled_results):
         compiled_results (dict): The formatted results.
     """
     for device, data in compiled_results.items():
-        if "platform" in data:
-            platform = data.get("platform")
-        if platform not in ["cisco_ios", "cisco_xe", "cisco_nxos"]:
-            print(f"Unsupported platform {platform}")
-            data.update({"failed": True, "failed_reason": f"Unsupported platform {platform}"})
-        if "type" in data:
-            if platform in ["cisco_ios", "cisco_xe"]:
-                format_ios_results(data)
-            elif platform == "cisco_nxos":
-                format_nxos_results(data)
-        else:
-            data.update({"failed": True, "failed_reason": "Cannot connect to device."})
+        try:
+            if "platform" in data:
+                platform = data.get("platform")
+            if platform not in ["cisco_ios", "cisco_xe", "cisco_nxos"]:
+                data.update({"failed": True, "failed_reason": f"Unsupported platform {platform}"})
+            if "type" in data:
 
+                serial = Device.objects.get(name=device).serial
+                if serial == "":
+                    data.update({"failed": True, "failed_reason": "Serial not found for device in Nautobot."})
+                else:
+                    data["serial"] = serial
+                if platform in ["cisco_ios", "cisco_xe"]:
+                    format_ios_results(data)
+                elif platform == "cisco_nxos":
+                    format_nxos_results(data)
+            else:
+                data.update({"failed": True, "failed_reason": "Cannot connect to device."})
+        except Exception as e:
+            data.update({"failed": True, "failed_reason": f"Error formatting device: {e}"})
     return compiled_results
