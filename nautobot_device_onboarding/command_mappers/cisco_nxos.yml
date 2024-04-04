@@ -2,9 +2,9 @@
 device_onboarding:
   hostname:
     commands:
-      - command: "show version"
-        use_textfsm: true
-        jpath: "[*].hostname"
+      command: "show version"
+      use_textfsm: true
+      jpath: "[*].hostname"
   serial:
     commands:
       - command: "show inventory"

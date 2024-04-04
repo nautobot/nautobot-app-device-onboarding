@@ -17,9 +17,9 @@ from nautobot_device_onboarding.constants import NETMIKO_TO_NAPALM_STATIC
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
-from nautobot_device_onboarding.utils.formatter import format_results
-from nautobot_device_onboarding.utils.helper import add_platform_parsing_info
-from nautobot_device_onboarding.utils.inventory_creator import _set_inventory
+from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
+from nautobot_device_onboarding.nornir_plays.formatter import format_results
+from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
@@ -141,6 +141,8 @@ def command_getter_do(job_result, log_level, kwargs):
             logging={"enabled": False},
             inventory={
                 "plugin": "empty-inventory",
+                # Can't use this since we're dynamically generating inventory on demand.
+                # "transform_function": "transform_to_add_command_parser_info",
             },
         ) as nornir_obj:
             nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results, kwargs)])

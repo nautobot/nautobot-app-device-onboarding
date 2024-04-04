@@ -25,7 +25,7 @@ from nautobot_device_onboarding.diffsync.adapters.onboarding_adapters import (
     OnboardingNetworkAdapter,
 )
 from nautobot_device_onboarding.exceptions import OnboardException
-from nautobot_device_onboarding.helpers import onboarding_task_fqdn_to_ip
+from nautobot_device_onboarding.utils.helper import onboarding_task_fqdn_to_ip
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
 from nautobot_device_onboarding.nornir_plays.command_getter import command_getter_do, command_getter_ni
 
