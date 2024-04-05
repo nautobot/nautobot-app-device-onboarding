@@ -167,6 +167,9 @@ def format_ios_results(device):
             interface_dict.setdefault(item["interface"], {})["link_status"] = (
                 True if item["link_status"] == "up" else False
             )
+        for interface in interface_dict.values():
+            interface.setdefault("vrf", {})
+
         for vrf in vrf_list:
             for interface in vrf["interfaces"]:
                 canonical_name = canonical_interface_name(interface)
@@ -204,7 +207,7 @@ def format_ios_results(device):
             device = {"failed": True, "failed_reason": f"Formatting error 2 for device {device}"}
     except Exception as e:
         device = {"failed": True, "failed_reason": f"Formatting error 1 {e} for device {device}"}
-        print(f"susan {device}")
+
     return device
 
 
@@ -236,7 +239,9 @@ def format_nxos_results(device):
         descriptions = device.get("description", [])
         link_statuses = device.get("link_status", [])
         modes = device.get("mode", [])
-
+        vrfs_rd = device.get("vrf_rds", [])
+        vrfs_interfaces = device.get("vrf_interfaces", [])
+        print(f"vrfs_rd {vrfs_rd}, vrf_interfaces {vrfs_interfaces}")
         mtu_list = ensure_list(mtus)
         type_list = ensure_list(types)
         ip_list = ensure_list(ips)
@@ -272,7 +277,6 @@ def format_nxos_results(device):
             )
 
         for interface in interface_dict.values():
-            # interface.setdefault("802.1Q_mode", "")
             interface.setdefault("lag", "")
             interface.setdefault("untagged_vlan", {})
             interface.setdefault("tagged_vlans", [])
