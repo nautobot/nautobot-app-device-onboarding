@@ -27,7 +27,7 @@ def add_platform_parsing_info(host):
     merged_command_mappers = {**command_mapper_defaults, **command_mappers_repo_path}
     # This is so we can reuse this for a non-nornir host object since we don't have it in an empty inventory at this point.
     if not isinstance(host, str):
-        host.data.update({"platform_parsing_info": merged_command_mappers})
+        host.data.update({"platform_parsing_info": merged_command_mappers[host.platform]})
     return merged_command_mappers
 
 
