@@ -39,4 +39,4 @@ def load_command_mappers_from_dir(command_mappers_path):
             network_driver = filename.split(".")[0]
             command_mappers_data = yaml.safe_load(fd)
             command_mappers_result[network_driver] = command_mappers_data
-        return command_mappers_result
+    return command_mappers_result
