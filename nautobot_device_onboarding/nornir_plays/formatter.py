@@ -28,7 +28,7 @@ def get_django_env():
     jinja_env = SandboxedEnvironment(**j2_env)
     jinja_env.filters = engines["jinja"].env.filters
     # https://docs.nautobot.com/projects/core/en/stable/development/apps/api/platform-features/jinja2-filters/
-    # 
+    #
     # if PLUGIN_CFG.get("custom_post_processing_filters"):
     #     for filter_name, filter_function in PLUGIN_CFG["custom_post_processing_filters"].items():
     #         try:
@@ -141,7 +141,6 @@ def ensure_list(data):
 
 def format_ios_results(device):
     """Format the results of the show commands for IOS devices."""
-
     try:
         serial = device.get("serial")
         mtus = device.get("mtu", [])
@@ -225,12 +224,12 @@ def format_ios_results(device):
 
 
 def format_nxos_vrf_results(device):
-    """Format the show commands to get interface and rd"""
+    """Format the show commands to get interface and rd."""
     try:
         vrf_interface_list = device.get("vrf_interfaces", [])
         vrf_rd_list = device.get("vrf_rds", [])
 
-        dict2 = {item["id"]: item for item in list2}
+        # dict2 = {item["id"]: item for item in list2}  # jeff commented out since it wasn't used at all.
 
         for id in vrf_interface_list:
             id.update(vrf_rd_list.get(id["id"], {}))
