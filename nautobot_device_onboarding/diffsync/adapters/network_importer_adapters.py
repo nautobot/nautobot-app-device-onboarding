@@ -253,17 +253,14 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
             raise ValueError("'top_level' needs to be set on the class.")
 
         self._cache_primary_ips(device_queryset=self.job.devices_to_load)
-        self.job.logger.warning("Called 1")
         for model_name in self.top_level:
             if model_name == "ip_address":
                 self.load_ip_addresses()
             elif model_name == "vlan":
                 if self.job.sync_vlans:
-                    self.job.logger.warning("Called 2")
                     self.load_vlans()
             elif model_name == "vrf":
                 if self.job.sync_vrfs:
-                    self.job.logger.warning("Called 3")
                     self.load_vrfs()
             elif model_name == "tagged_vlans_to_interface":
                 if self.job.sync_vlans:
