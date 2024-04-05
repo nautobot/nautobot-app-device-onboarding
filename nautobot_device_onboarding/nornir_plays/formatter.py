@@ -27,21 +27,6 @@ def get_django_env():
         j2_env["undefined"] = import_string(j2_env["undefined"])
     jinja_env = SandboxedEnvironment(**j2_env)
     jinja_env.filters = engines["jinja"].env.filters
-    # https://docs.nautobot.com/projects/core/en/stable/development/apps/api/platform-features/jinja2-filters/
-    #
-    # if PLUGIN_CFG.get("custom_post_processing_filters"):
-    #     for filter_name, filter_function in PLUGIN_CFG["custom_post_processing_filters"].items():
-    #         try:
-    #             func = import_string(filter_function)
-    #         except Exception as error:  # pylint: disable=broad-except
-    #             msg = (
-    #                 "There was an issue attempting to import the custom post_processing filters of"
-    #                 f" {filter_name} this is expected with a local configuration issue "
-    #                 "and not related to the Device Onboarding App, please contact your system admin for further details"
-    #             )
-    #             raise Exception(msg).with_traceback(error.__traceback__)
-    #         jinja_env.filters[filter_name] = func
-    # jinja_env.filters["fix_interfaces"] = fix_interfaces
     return jinja_env
 
 

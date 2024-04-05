@@ -1,6 +1,7 @@
 """CommandGetter."""
 
 # pylint: disable=relative-beyond-top-level
+from typing import Dict
 from django.conf import settings
 from nautobot.dcim.models import Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
@@ -9,7 +10,7 @@ from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
 from nornir import InitNornir
 from nornir.core.exceptions import NornirSubTaskError
-from nornir.core.plugins.inventory import InventoryPluginRegister, TransformFunctionRegister
+from nornir.core.plugins.inventory import InventoryPluginRegister
 from nornir.core.task import Result, Task
 from nornir_netmiko.tasks import netmiko_send_command
 
@@ -23,7 +24,6 @@ from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsi
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
-TransformFunctionRegister.register("transform_to_add_command_parser_info", add_platform_parsing_info)
 
 
 def deduplicate_command_list(data):
@@ -46,10 +46,10 @@ def deduplicate_command_list(data):
     return unique_list
 
 
-def _get_commands_to_run(yaml_parsed_info, command_getter_job):
+def _get_commands_to_run(yaml_parsed_info):
     """Load yaml file and look up all commands that need to be run."""
     all_commands = []
-    for _, value in yaml_parsed_info[command_getter_job].items():
+    for _, value in yaml_parsed_info.items():
         # Deduplicate commands + parser key
         if value.get("commands"):
             # Means their isn't any "nested" structures.
@@ -64,13 +64,14 @@ def _get_commands_to_run(yaml_parsed_info, command_getter_job):
     return deduplicate_command_list(all_commands)
 
 
-def netmiko_send_commands(task: Task, command_getter_job: str):
+def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_getter_job: str):
     """Run commands specified in PLATFORM_COMMAND_MAP."""
     if not task.host.platform:
         return Result(host=task.host, result=f"{task.host.name} has no platform set.", failed=True)
     if task.host.platform not in list(NETMIKO_TO_NAPALM_STATIC.keys()):
         return Result(host=task.host, result=f"{task.host.name} has a unsupported platform set.", failed=True)
-    commands = _get_commands_to_run(task.host.data["platform_parsing_info"], command_getter_job)
+    task.host.data["platform_parsing_info"] = command_getter_yaml_data[task.host.platform]
+    commands = _get_commands_to_run(command_getter_yaml_data[task.host.platform][command_getter_job])
     for command in commands:
         try:
             task.run(
@@ -141,8 +142,6 @@ def command_getter_do(job_result, log_level, kwargs):
             logging={"enabled": False},
             inventory={
                 "plugin": "empty-inventory",
-                # Can't use this since we're dynamically generating inventory on demand.
-                # "transform_function": "transform_to_add_command_parser_info",
             },
         ) as nornir_obj:
             nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results, kwargs)])
@@ -178,7 +177,11 @@ def command_getter_do(job_result, log_level, kwargs):
                 else:
                     single_host_inventory_constructed = _set_inventory(entered_ip, platform, port, username, password)
                 nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
-            nr_with_processors.run(task=netmiko_send_commands, command_getter_job="device_onboarding")
+            nr_with_processors.run(
+                task=netmiko_send_commands,
+                command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
+                command_getter_job="device_onboarding",
+            )
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.error(err)
     return compiled_results
@@ -189,7 +192,6 @@ def command_getter_ni(job_result, log_level, kwargs):
     logger = NornirLogger(job_result, log_level)
     try:
         compiled_results = {}
-        # qs = get_job_filter(kwargs)
         qs = kwargs["devices"]
         if not qs:
             return None
@@ -201,12 +203,16 @@ def command_getter_ni(job_result, log_level, kwargs):
                 "options": {
                     "credentials_class": NORNIR_SETTINGS.get("credentials"),
                     "queryset": qs,
+                    "defaults": {"platform_parsing_info": add_platform_parsing_info()},
                 },
-                "transform_function": "transform_to_add_command_parser_info",
             },
         ) as nornir_obj:
             nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results, kwargs)])
-            nr_with_processors.run(task=netmiko_send_commands, command_getter_job="network_importer")
+            nr_with_processors.run(
+                task=netmiko_send_commands,
+                command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
+                command_getter_job="network_importer",
+            )
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info("Error: %s", err)
         return err

@@ -1,4 +1,4 @@
-"""Nornir tranform function to add command mapper, platform parsing info."""
+"""Adds command mapper, platform parsing info."""
 
 import os
 import yaml
@@ -7,8 +7,8 @@ from nautobot.extras.models import GitRepository
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "command_mappers"))
 
 
-def add_platform_parsing_info(host):
-    """This nornir transform function adds platform parsing info."""
+def add_platform_parsing_info():
+    """Merges platform command mapper from repo or defaults."""
     if (
         GitRepository.objects.filter(
             provided_contents=["nautobot_device_onboarding.onboarding_command_mappers"]
@@ -23,14 +23,7 @@ def add_platform_parsing_info(host):
     else:
         command_mappers_repo_path = {}
     command_mapper_defaults = load_command_mappers_from_dir(DATA_DIR)
-    # parsing_info = _get_default_platform_parsing_info(host.platform)
     merged_command_mappers = {**command_mapper_defaults, **command_mappers_repo_path}
-    # This is so we can reuse this for a non-nornir host object since we don't have it in an empty inventory at this point.
-    if not isinstance(host, str):
-        if host.platform == 'cisco_xe':
-            host.data.update({"platform_parsing_info": merged_command_mappers['cisco_ios']})
-        else:
-            host.data.update({"platform_parsing_info": merged_command_mappers[host.platform]})
     return merged_command_mappers
 
 

@@ -1,0 +1,82 @@
+---
+device_onboarding:
+  hostname:
+    commands:
+      - command: "show version"
+        use_textfsm: true
+        post_processor: "{{ obj[0] | upper }}"
+        jpath: "[*].hostname"
+  serial:
+    commands:
+      - command: "show version"
+        use_textfsm: true
+        jpath: "[*].serial[0]"
+  device_type:
+    commands:
+      - command: "show version"
+        use_textfsm: true
+        jpath: "[*].hardware[0]"
+  mgmt_interface:
+    commands:
+      - command: "show interfaces"
+        use_textfsm: true
+        jpath: "[?ip_address=='{{ obj }}'].{name: interface, enabled: link_status}"
+        post_processor: "{{ (obj | selectattr('enabled', 'eq', 'up') | list | first ).name }}"
+  mask_length:
+    commands:
+      - command: "show interfaces"
+        use_textfsm: true
+        jpath: "[?ip_address=='{{ obj }}'].prefix_length"
+        post_processor: "{{ obj | unique | first }}"
+network_importer:
+  serial:
+    commands:
+      - command: "show version"
+        use_textfsm: true
+        jpath: "[*].serial[0]"
+  # interfaces:
+  #   interfaces:
+  #     commands:
+  #       - command: "show interfaces"
+  #         use_textfsm: true
+  #         jpath: "[*].{interface: interface}"
+  type:
+    commands:
+      - command: "show interfaces"
+        use_textfsm: true
+        jpath: "[*].{interface: interface, type: hardware_type}"
+  ip_addresses:
+    commands:
+      - command: "show interfaces"
+        use_textfsm: true
+        jpath: "[*].{interface: interface, ip_address: ip_address}"
+  prefix_length:
+    commands:
+      - command: "show interfaces"
+        use_textfsm: true
+        jpath: "[*].{interface: interface, prefix_length: prefix_length}"
+  mtu:
+    commands:
+      - command: "show interfaces"
+        use_textfsm: true
+        jpath: "[*].{interface: interface, mtu: mtu}"
+  mac_address:
+    commands:
+      - command: "show interfaces"
+        use_textfsm: true
+        jpath: "[*].{interface: interface, mac_address: mac_address}"
+  description:
+    commands:
+      - command: "show interfaces"
+        use_textfsm: true
+        jpath: "[*].{interface: interface, description: description}"
+  link_status:
+    commands:
+      - command: "show interfaces"
+        use_textfsm: true
+        jpath: "[*].{interface: interface, link_status: link_status}"
+  vrfs:
+    commands:
+      - command: "show vrf"
+        use_textfsm: true
+        jpath: "[*].{name: name, default_rd: default_rd, interfaces: interfaces}"
