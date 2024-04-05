@@ -206,7 +206,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
             self.job.job_result, self.job.logger.getEffectiveLevel(), self.job.job_result.task_kwargs
         )
         if self.job.debug:
-            self.job.logger.debug(f"Command Getter Job Result: {result}")
+            self.job.logger.debug(f"Command Getter Result: {result}")
         data_type_check = diffsync_utils.check_data_type(result)
         if self.job.debug:
             self.job.logger.debug(f"CommandGetter data type check resut: {data_type_check}")
@@ -347,7 +347,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                 )
             except KeyError as err:
                 self.job.logger.error(
-                    f"{ip_address}: Unable to load Device due to a missing key in returned data, {err.args}"
+                    f"{ip_address}: Unable to load Device due to a missing key in returned data, {err.args}, {err}"
                 )
                 if ip_address not in self.failed_ip_addresses:
                     self.failed_ip_addresses.append(ip_address)

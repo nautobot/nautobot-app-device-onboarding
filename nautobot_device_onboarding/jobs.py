@@ -25,9 +25,9 @@ from nautobot_device_onboarding.diffsync.adapters.onboarding_adapters import (
     OnboardingNetworkAdapter,
 )
 from nautobot_device_onboarding.exceptions import OnboardException
-from nautobot_device_onboarding.utils.helper import onboarding_task_fqdn_to_ip
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
 from nautobot_device_onboarding.nornir_plays.command_getter import command_getter_do, command_getter_ni
+from nautobot_device_onboarding.utils.helper import onboarding_task_fqdn_to_ip
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
@@ -533,6 +533,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
 
     debug = BooleanVar(description="Enable for more verbose logging.")
     sync_vlans = BooleanVar(default=False, description="Sync VLANs and interface VLAN assignments.")
+    sync_vrfs = BooleanVar(default=False, description="Sync VRFs and interface VRF assignments.")
     namespace = ObjectVar(
         model=Namespace, required=True, description="The namespace for all IP addresses created or updated in the sync."
     )
@@ -599,6 +600,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         devices,
         device_role,
         sync_vlans,
+        sync_vrfs,
         *args,
         **kwargs,
     ):
@@ -614,6 +616,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         self.devices = devices
         self.device_role = device_role
         self.sync_vlans = sync_vlans
+        self.sync_vrfs = sync_vrfs
 
         # Filter devices based on form input
         device_filter = {}
@@ -636,6 +639,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
             "devices": self.filtered_devices,
             "device_role": device_role,
             "sync_vlans": sync_vlans,
+            "sync_vrfs": sync_vrfs,
         }
 
         super().run(dryrun, memory_profiling, *args, **kwargs)

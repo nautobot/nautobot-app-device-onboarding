@@ -1,12 +1,13 @@
 """Formatter."""
 
 import json
+
 from django.template import engines
 from django.utils.module_loading import import_string
 from jdiff import extract_data_from_json
 from jinja2.sandbox import SandboxedEnvironment
-from netutils.interface import canonical_interface_name
 from nautobot.dcim.models import Device
+from netutils.interface import canonical_interface_name
 
 from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC
 

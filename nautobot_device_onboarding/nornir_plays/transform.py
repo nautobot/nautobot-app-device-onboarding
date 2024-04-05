@@ -1,6 +1,7 @@
 """Adds command mapper, platform parsing info."""
 
 import os
+
 import yaml
 from nautobot.extras.models import GitRepository
 

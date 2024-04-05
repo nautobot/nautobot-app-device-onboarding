@@ -1,6 +1,7 @@
 """Empty Nornir Inventory Plugin."""
 
 from nornir.core.inventory import Defaults, Groups, Hosts, Inventory
+
 from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info
 
 

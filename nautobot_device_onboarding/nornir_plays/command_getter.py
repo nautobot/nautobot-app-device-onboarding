@@ -2,6 +2,7 @@
 
 # pylint: disable=relative-beyond-top-level
 from typing import Dict
+
 from django.conf import settings
 from nautobot.dcim.models import Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
@@ -16,10 +17,10 @@ from nornir_netmiko.tasks import netmiko_send_command
 
 from nautobot_device_onboarding.constants import NETMIKO_TO_NAPALM_STATIC
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
+from nautobot_device_onboarding.nornir_plays.formatter import format_results
+from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
-from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
-from nautobot_device_onboarding.nornir_plays.formatter import format_results
 from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)

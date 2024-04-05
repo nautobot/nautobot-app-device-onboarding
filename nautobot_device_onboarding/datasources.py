@@ -1,7 +1,7 @@
 """Datasources to override command_mapper yaml files."""
 
-from nautobot.extras.choices import LogLevelChoices
 from nautobot.apps.datasources import DatasourceContent
+from nautobot.extras.choices import LogLevelChoices
 
 
 def refresh_git_command_mappers(repository_record, job_result, delete=False):  # pylint: disable=unused-argument

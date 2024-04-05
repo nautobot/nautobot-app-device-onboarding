@@ -4,7 +4,7 @@ import diffsync
 from diffsync.enum import DiffSyncModelFlags
 from django.core.exceptions import ValidationError
 from nautobot.dcim.models import Interface
-from nautobot.ipam.models import VLAN, IPAddress
+from nautobot.ipam.models import VLAN, VRF, IPAddress
 from nautobot_ssot.contrib import NautobotAdapter
 from netaddr import EUI, mac_unix_expanded
 
@@ -35,20 +35,24 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
     ip_address = network_importer_models.NetworkImporterIPAddress
     ipaddress_to_interface = network_importer_models.NetworkImporterIPAddressToInterface
     vlan = network_importer_models.NetworkImporterVLAN
+    vrf = network_importer_models.NetworkImporterVRF
     tagged_vlans_to_interface = network_importer_models.NetworkImporterTaggedVlansToInterface
     untagged_vlan_to_interface = network_importer_models.NetworkImporterUnTaggedVlanToInterface
     lag_to_interface = network_importer_models.NetworkImporterLagToInterface
+    vrf_to_interface = network_importer_models.NetworkImporterVrfToInterface
 
     primary_ips = None
 
     top_level = [
         "ip_address",
         "vlan",
+        "vrf",
         "device",
         "ipaddress_to_interface",
         "untagged_vlan_to_interface",
         "tagged_vlans_to_interface",
         "lag_to_interface",
+        "vrf_to_interface",
     ]
 
     def _cache_primary_ips(self, device_queryset):
@@ -116,7 +120,7 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
         """
         Load Vlans into the Diffsync store.
 
-        Only Vlans that were returned by the CommandGetter job should be loaded.
+        Only Vlans that were returned by the CommandGetter job should be synced.
         """
         for vlan in VLAN.objects.all():
             network_vlan = self.vlan(
@@ -134,7 +138,8 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
                 pass
 
     def load_tagged_vlans_to_interface(self):
-        """Load a model representing tagged vlan assignments to the Diffsync store.
+        """
+        Load Tagged VLAN interface assignments into the Diffsync store.
 
         Only Vlan assignments that were returned by the CommandGetter job should be loaded.
         """
@@ -158,9 +163,10 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
                 self.job.logger.debug(f"Tagged Vlan to interface: {network_tagged_vlans_to_interface} loaded.")
 
     def load_untagged_vlan_to_interface(self):
-        """Load a model representing untagged vlan assignments to the Diffsync store.
+        """
+        Load UnTagged VLAN interface assignments into the Diffsync store.
 
-        Only Vlan assignments that were returned by the CommandGetter job should be loaded.
+        Only UnTagged Vlan assignments that were returned by the CommandGetter job should be synced.
         """
         for interface in Interface.objects.filter(device__in=self.job.devices_to_load):
             untagged_vlan = {}
@@ -181,9 +187,9 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
 
     def load_lag_to_interface(self):
         """
-        Load a model representing lag assignments to the Diffsync store.
+        Load Lag interface assignments into the Diffsync store.
 
-        Only Lag assignments that were returned by the CommandGetter job should be loaded.
+        Only Lag assignments that were returned by the CommandGetter job should be synced.
         """
         for interface in Interface.objects.filter(device__in=self.job.devices_to_load):
             network_lag_to_interface = self.lag_to_interface(
@@ -197,19 +203,68 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
             if self.job.debug:
                 self.job.logger.debug(f"Lag to interface {network_lag_to_interface} loaded.")
 
+    def load_vrfs(self):
+        """
+        Load Vrfs into the Diffsync store.
+
+        Only Vrfs that were returned by the CommandGetter job should be synced.
+        """
+        for vrf in VRF.objects.all():
+            network_vrf = self.vrf(
+                diffsync=self,
+                name=vrf.name,
+                rd=vrf.rd if vrf.rd else "",
+                namespace__name=vrf.namespace.name,
+            )
+            try:
+                network_vrf.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
+                self.add(network_vrf)
+                if self.job.debug:
+                    self.job.logger.debug(f"Vrf {network_vrf} loaded.")
+            except diffsync.exceptions.ObjectAlreadyExists:
+                pass
+
+    def load_vrf_to_interface(self):
+        """
+        Load Vrf to  interface assignments into the Diffsync store.
+
+        Only Vrf assignments that were returned by the CommandGetter job should be synced.
+        """
+        for interface in Interface.objects.filter(device__in=self.job.devices_to_load):
+            vrf = {}
+            if interface.vrf:
+                vrf["name"] = interface.vrf.name
+                vrf["rd"] = str(interface.vrf.rd)
+
+            network_vrf_to_interface = self.vrf_to_interface(
+                diffsync=self,
+                device__name=interface.device.name,
+                name=interface.name,
+                vrf=vrf,
+            )
+            network_vrf_to_interface.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
+            self.add(network_vrf_to_interface)
+            if self.job.debug:
+                self.job.logger.debug(f"Vrf to interface: {network_vrf_to_interface} loaded.")
+
     def load(self):
         """Generic implementation of the load function."""
         if not hasattr(self, "top_level") or not self.top_level:
             raise ValueError("'top_level' needs to be set on the class.")
 
         self._cache_primary_ips(device_queryset=self.job.devices_to_load)
-
+        self.job.logger.warning("Called 1")
         for model_name in self.top_level:
             if model_name == "ip_address":
                 self.load_ip_addresses()
             elif model_name == "vlan":
                 if self.job.sync_vlans:
+                    self.job.logger.warning("Called 2")
                     self.load_vlans()
+            elif model_name == "vrf":
+                if self.job.sync_vrfs:
+                    self.job.logger.warning("Called 3")
+                    self.load_vrfs()
             elif model_name == "tagged_vlans_to_interface":
                 if self.job.sync_vlans:
                     self.load_tagged_vlans_to_interface()
@@ -218,6 +273,9 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
                     self.load_untagged_vlan_to_interface()
             elif model_name == "lag_to_interface":
                 self.load_lag_to_interface()
+            elif model_name == "vrf_to_interface":
+                if self.job.sync_vrfs:
+                    self.load_vrf_to_interface()
             else:
                 diffsync_model = self._get_diffsync_class(model_name)
                 self._load_objects(diffsync_model)
@@ -232,9 +290,9 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
 
         This method only runs if data was changed.
         """
+        if self.job.debug:
+            self.job.logger.debug("Sync Complete method called, checking for missing primary ip addresses...")
         for device in self.job.devices_to_load.all():  # refresh queryset after sync is complete
-            if self.job.debug:
-                self.job.logger.debug("Sync Complete method called, checking for missing primary ip addresses...")
             if not device.primary_ip:
                 ip_address = ""
                 try:
@@ -287,18 +345,22 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
     ip_address = network_importer_models.NetworkImporterIPAddress
     ipaddress_to_interface = network_importer_models.NetworkImporterIPAddressToInterface
     vlan = network_importer_models.NetworkImporterVLAN
+    vrf = network_importer_models.NetworkImporterVRF
     tagged_vlans_to_interface = network_importer_models.NetworkImporterTaggedVlansToInterface
     untagged_vlan_to_interface = network_importer_models.NetworkImporterUnTaggedVlanToInterface
     lag_to_interface = network_importer_models.NetworkImporterLagToInterface
+    vrf_to_interface = network_importer_models.NetworkImporterVrfToInterface
 
     top_level = [
         "ip_address",
         "vlan",
+        "vrf",
         "device",
         "ipaddress_to_interface",
         "untagged_vlan_to_interface",
         "tagged_vlans_to_interface",
         "lag_to_interface",
+        "vrf_to_interface",
     ]
 
     def _handle_failed_devices(self, device_data):
@@ -330,7 +392,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
             self.job.job_result, self.job.logger.getEffectiveLevel(), self.job.job_result.task_kwargs
         )
         if self.job.debug:
-            self.job.logger.debug(f"Command Getter Job Result: {result}")
+            self.job.logger.debug(f"Command Getter Result: {result}")
         # verify data returned is a dict
         data_type_check = diffsync_utils.check_data_type(result)
         if self.job.debug:
@@ -455,6 +517,25 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
                         except diffsync.exceptions.ObjectAlreadyExists:
                             pass
 
+    def load_vrfs(self):
+        """Load vrfs into the Diffsync store."""
+        for hostname, device_data in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
+            for interface in device_data["interfaces"]:
+                for _, interface_data in interface.items():
+                    if interface_data["vrf"]:
+                        network_vrf = self.vrf(
+                            diffsync=self,
+                            name=interface_data["vrf"]["name"],
+                            rd=interface_data["vrf"]["rd"] if interface_data["vrf"]["rd"] else "",
+                            namespace__name=self.job.namespace.name,
+                        )
+                        try:
+                            self.add(network_vrf)
+                            if self.job.debug:
+                                self.job.logger.debug(f"Vrf {network_vrf} loaded.")
+                        except diffsync.exceptions.ObjectAlreadyExists:
+                            pass
+
     def load_ip_address_to_interfaces(self):
         """Load ip address interface assignments into the Diffsync store."""
         for hostname, device_data in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
@@ -524,15 +605,34 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
                     if self.job.debug:
                         self.job.logger.debug(f"Lag to interface {network_lag_to_interface} loaded.")
 
+    def load_vrf_to_interface(self):
+        """Load Vrf to interface assignments into the Diffsync store."""
+        for hostname, device_data in self.job.command_getter_result.items():
+            for interface in device_data["interfaces"]:
+                for interface_name, interface_data in interface.items():
+                    network_vrf_to_interface = self.vrf_to_interface(
+                        diffsync=self,
+                        device__name=hostname,
+                        name=interface_name,
+                        vrf=interface_data["vrf"],
+                    )
+                    self.add(network_vrf_to_interface)
+                    if self.job.debug:
+                        self.job.logger.debug(f"Untagged Vlan to interface {network_vrf_to_interface} loaded.")
+
     def load(self):
         """Load network data."""
         self.execute_command_getter()
         self.load_ip_addresses()
         if self.job.sync_vlans:
             self.load_vlans()
+        if self.job.sync_vrfs:
+            self.load_vrfs()
         self.load_devices()
         self.load_ip_address_to_interfaces()
         if self.job.sync_vlans:
             self.load_tagged_vlans_to_interface()
             self.load_untagged_vlan_to_interface()
         self.load_lag_to_interface()
+        if self.job.sync_vrfs:
+            self.load_vrf_to_interface()
