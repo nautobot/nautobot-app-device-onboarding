@@ -145,8 +145,10 @@ def format_ios_results(device):
         mac_list = ensure_list(macs)
         description_list = ensure_list(descriptions)
         link_status_list = ensure_list(link_statuses)
-        vrf_list = ensure_list(vrfs)
-
+        if vrfs is None:
+            vrf_list = []
+        else:
+            vrf_list = ensure_list(vrfs)
         interface_dict = {}
         for item in mtu_list:
             interface_dict.setdefault(item["interface"], {})["mtu"] = item["mtu"]
@@ -169,7 +171,6 @@ def format_ios_results(device):
             )
         for interface in interface_dict.values():
             interface.setdefault("vrf", {})
-
         for vrf in vrf_list:
             for interface in vrf["interfaces"]:
                 canonical_name = canonical_interface_name(interface)

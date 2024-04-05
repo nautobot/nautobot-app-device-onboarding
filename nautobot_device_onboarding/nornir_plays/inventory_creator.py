@@ -3,8 +3,6 @@
 from netmiko import SSHDetect
 from nornir.core.inventory import ConnectionOptions, Host
 
-from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info
-
 
 def guess_netmiko_device_type(hostname, username, password, port):
     """Guess the device type of host, based on Netmiko."""
@@ -32,7 +30,6 @@ def guess_netmiko_device_type(hostname, username, password, port):
 
 def _set_inventory(host_ip, platform, port, username, password):
     """Construct Nornir Inventory."""
-    parsing_info = add_platform_parsing_info(host_ip)
     inv = {}
     if platform:
         platform = platform.network_driver
@@ -55,7 +52,6 @@ def _set_inventory(host_ip, platform, port, username, password):
                 platform=platform,
             )
         },
-        data={"platform_parsing_info": parsing_info[platform]},
     )
     inv.update({host_ip: host})
 
