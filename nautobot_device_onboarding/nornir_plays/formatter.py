@@ -1,13 +1,12 @@
 """Formatter."""
 
 import json
-
 from django.template import engines
 from django.utils.module_loading import import_string
 from jdiff import extract_data_from_json
 from jinja2.sandbox import SandboxedEnvironment
-from nautobot.dcim.models import Device
 from netutils.interface import canonical_interface_name
+from nautobot.dcim.models import Device
 
 from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC
 
@@ -93,13 +92,13 @@ def extract_show_data(host, multi_result, command_getter_type):
     final_result_dict = {}
     for default_dict_field, command_info in command_jpaths[command_getter_type].items():
         if command_info.get("commands"):
-            # Means their isn't any "nested" structures. Therefore not expected to see "validator_pattern key"
+            # Means there isn't any "nested" structures. Therefore not expected to see "validator_pattern key"
             if isinstance(command_info["commands"], dict):
                 command_info["commands"] = [command_info["commands"]]
             result = perform_data_extraction(host, default_dict_field, command_info, jinja_env, multi_result[0])
             final_result_dict.update(result)
         else:
-            # Means their is a "nested" structures. Priority
+            # Means there is a "nested" structures. Priority
             for dict_field, nested_command_info in command_info.items():
                 if isinstance(nested_command_info["commands"], dict):
                     nested_command_info["commands"] = [nested_command_info["commands"]]
@@ -150,6 +149,7 @@ def format_ios_results(device):
             vrf_list = []
         else:
             vrf_list = ensure_list(vrfs)
+
         interface_dict = {}
         for item in mtu_list:
             interface_dict.setdefault(item["interface"], {})["mtu"] = item["mtu"]
@@ -170,18 +170,13 @@ def format_ios_results(device):
             interface_dict.setdefault(item["interface"], {})["link_status"] = (
                 True if item["link_status"] == "up" else False
             )
+
+        # Add default values to interface
+        default_values = {"lag": "", "untagged_vlan": {}, "tagged_vlans": [], "vrf": {}, "802.1Q_mode": ""}
+
         for interface in interface_dict.values():
-            interface.setdefault("vrf", {})
-        for vrf in vrf_list:
-            for interface in vrf["interfaces"]:
-                canonical_name = canonical_interface_name(interface)
-                interface_dict.setdefault(canonical_name, {})
-                interface_dict[canonical_name]["vrf"] = {"name": vrf["name"], "rd": vrf["default_rd"]}
-        for interface in interface_dict.values():
-            interface.setdefault("802.1Q_mode", "")
-            interface.setdefault("lag", "")
-            interface.setdefault("untagged_vlan", {})
-            interface.setdefault("tagged_vlans", [])
+            for key, default in default_values.items():
+                interface.setdefault(key, default)
 
         for interface, data in interface_dict.items():
             ip_addresses = data.get("ip_addresses", {})
@@ -193,8 +188,25 @@ def format_ios_results(device):
         for interface_name, interface_info in interface_dict.items():
             interface_list.append({canonical_interface_name(interface_name): interface_info})
 
+        # Change VRF interface names to canonical and create dict of interfaces
+        for vrf in vrf_list:
+            for interface in vrf["interfaces"]:
+                canonical_name = canonical_interface_name(interface)
+                if canonical_name.startswith("VLAN"):
+                    canonical_name = canonical_name.replace("VLAN", "Vlan", 1)
+                interface_dict.setdefault(canonical_name, {})
+                if vrf["default_rd"] in ["<not set>", ":"]:
+
+                    interface_dict[canonical_name]["vrf"] = {}
+                else:
+                    interface_dict[canonical_name]["vrf"] = {
+                        "name": vrf["name"],
+                        "rd": vrf["default_rd"],
+                    }
+
         device["interfaces"] = interface_list
         device["serial"] = serial
+
         try:
             del device["mtu"]
             del device["type"]
@@ -213,22 +225,6 @@ def format_ios_results(device):
     return device
 
 
-def format_nxos_vrf_results(device):
-    """Format the show commands to get interface and rd."""
-    try:
-        vrf_interface_list = device.get("vrf_interfaces", [])
-        vrf_rd_list = device.get("vrf_rds", [])
-
-        # dict2 = {item["id"]: item for item in list2}  # jeff commented out since it wasn't used at all.
-
-        for id in vrf_interface_list:
-            id.update(vrf_rd_list.get(id["id"], {}))
-        print(f"vrf_interface_list {vrf_interface_list}")
-    except Exception:
-        device = {"failed": True, "failed_reason": f"Formatting error for device {device}"}
-    return vrf_interface_list
-
-
 def format_nxos_results(device):
     """Format the results of the show commands for NX-OS devices."""
     try:
@@ -243,7 +239,7 @@ def format_nxos_results(device):
         modes = device.get("mode", [])
         vrfs_rd = device.get("vrf_rds", [])
         vrfs_interfaces = device.get("vrf_interfaces", [])
-        print(f"vrfs_rd {vrfs_rd}, vrf_interfaces {vrfs_interfaces}")
+
         mtu_list = ensure_list(mtus)
         type_list = ensure_list(types)
         ip_list = ensure_list(ips)
@@ -252,6 +248,15 @@ def format_nxos_results(device):
         description_list = ensure_list(descriptions)
         link_status_list = ensure_list(link_statuses)
         mode_list = ensure_list(modes)
+
+        if vrfs_rd is None:
+            vrfs_rds = []
+        else:
+            vrfs_rds = ensure_list(vrfs_rd)
+        if vrfs_interfaces is None:
+            vrfs_interfaces = []
+        else:
+            vrfs_interfaces = ensure_list(vrfs_interfaces)
 
         interface_dict = {}
         for item in mtu_list:
@@ -278,10 +283,11 @@ def format_nxos_results(device):
                 "access" if item["mode"] == "access" else "tagged" if item["mode"] == "trunk" else ""
             )
 
+        default_values = {"lag": "", "untagged_vlan": {}, "tagged_vlans": [], "vrf": {}}
+
         for interface in interface_dict.values():
-            interface.setdefault("lag", "")
-            interface.setdefault("untagged_vlan", {})
-            interface.setdefault("tagged_vlans", [])
+            for key, default in default_values.items():
+                interface.setdefault(key, default)
 
         for interface, data in interface_dict.items():
             ip_addresses = data.get("ip_addresses", {})
@@ -292,6 +298,29 @@ def format_nxos_results(device):
         interface_list = []
         for interface_name, interface_info in interface_dict.items():
             interface_list.append({canonical_interface_name(interface_name): interface_info})
+
+        # Populate vrf_dict from commands and add to interface_dict
+        vrf_dict = {vrf["id"]: vrf for vrf in vrfs_rds}
+
+        for interface in vrfs_interfaces:
+            vrf_id = interface["id"]
+            if "interfaces" not in vrf_dict[vrf_id]:
+                vrf_dict[vrf_id]["interfaces"] = []
+            vrf_dict[vrf_id]["interfaces"].append(interface["interface"])
+
+        vrf_list = list(vrf_dict.values())
+        for vrf in vrf_list:
+            if "interfaces" in vrf:
+                for interface in vrf["interfaces"]:
+                    canonical_name = canonical_interface_name(interface)
+                    if canonical_name.startswith("VLAN"):
+                        canonical_name = canonical_name.replace("VLAN", "Vlan", 1)
+                    interface_dict.setdefault(canonical_name, {})
+                    if vrf["default_rd"] == "0:0":
+                        print(f"RD {vrf['name']} configured but no route set for interface {canonical_name}.")
+                        interface_dict[canonical_name]["vrf"] = {}
+                    else:
+                        interface_dict[canonical_name]["vrf"] = {"name": vrf["name"], "rd": vrf["default_rd"]}
 
         device["interfaces"] = interface_list
         device["serial"] = serial
@@ -304,6 +333,9 @@ def format_nxos_results(device):
             del device["description"]
             del device["link_status"]
             del device["mode"]
+            del device["vrf_rds"]
+            del device["vrf_interfaces"]
+
         except KeyError:
             device = {"failed": True, "failed_reason": f"Formatting error for device {device}"}
     except Exception:

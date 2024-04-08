@@ -62,6 +62,7 @@ def _get_commands_to_run(yaml_parsed_info):
                 if isinstance(nested_command_info, dict):
                     for command in nested_command_info["commands"]:
                         all_commands.append(command)
+    print(f"all_commands: {all_commands}")
     return deduplicate_command_list(all_commands)
 
 
@@ -218,5 +219,5 @@ def command_getter_ni(job_result, log_level, kwargs):
         logger.info("Error: %s", err)
         return err
     compiled_results = format_results(compiled_results)
-    print(f"compiled_results: {compiled_results}")
+
     return compiled_results
