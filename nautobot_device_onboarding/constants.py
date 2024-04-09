@@ -14,6 +14,7 @@ NETMIKO_TO_NAPALM_STATIC = {
     "arista_eos": "eos",
     "juniper_junos": "junos",
     "cisco_xr": "iosxr",
+    "cisco_wlc": "cisco_wlc",
 }
 
 # This should potentially be removed and used nautobot core directly choices.
