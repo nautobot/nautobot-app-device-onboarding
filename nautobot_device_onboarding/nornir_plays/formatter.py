@@ -136,6 +136,7 @@ def format_ios_results(device):
         descriptions = device.get("description", [])
         link_statuses = device.get("link_status", [])
         vrfs = device.get("vrfs", [])
+        mode = device.get("mode", [])
 
         # Some data may come across as a dict, needs to be list. Probably should do this elsewhere.
         mtu_list = ensure_list(mtus)
@@ -145,6 +146,8 @@ def format_ios_results(device):
         mac_list = ensure_list(macs)
         description_list = ensure_list(descriptions)
         link_status_list = ensure_list(link_statuses)
+        mode_list = ensure_list(mode)
+
         if vrfs is None:
             vrf_list = []
         else:
@@ -172,7 +175,20 @@ def format_ios_results(device):
             )
 
         # Add default values to interface
-        default_values = {"lag": "", "untagged_vlan": {}, "tagged_vlans": [], "vrf": {}, "802.1Q_mode": ""}
+        default_values = {
+            "lag": "",
+            "untagged_vlan": {},
+            "tagged_vlans": [],
+            "vrf": {},
+            "802.1Q_mode": "",
+        }
+
+        for item in mode_list:
+            print(f"item: {item}, {mode_list}")
+            canonical_name = canonical_interface_name(item["interface"])
+            print(canonical_name)
+            interface_dict.setdefault(canonical_name, {})
+            interface_dict[canonical_name]["802.1Q_mode"] = "tagged" if item["vlan_id"] == "trunk" else "access"
 
         for interface in interface_dict.values():
             for key, default in default_values.items():
@@ -212,6 +228,7 @@ def format_ios_results(device):
             del device["description"]
             del device["link_status"]
             del device["vrfs"]
+            del device["mode"]
 
         except KeyError:
             device = {"failed": True, "failed_reason": f"Formatting error 2 for device {device}"}
