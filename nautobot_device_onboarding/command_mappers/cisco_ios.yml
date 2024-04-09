@@ -80,3 +80,8 @@ network_importer:
       - command: "show vrf"
         use_textfsm: true
         jpath: "[*].{name: name, default_rd: default_rd, interfaces: interfaces}"
+  mode:
+    commands:
+      - command: "show interface status"
+        use_textfsm: true
+        jpath: "[*].{interface: port, vlan_id: vlan_id}"
