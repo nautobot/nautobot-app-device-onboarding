@@ -195,14 +195,10 @@ def format_ios_results(device):
                 if canonical_name.startswith("VLAN"):
                     canonical_name = canonical_name.replace("VLAN", "Vlan", 1)
                 interface_dict.setdefault(canonical_name, {})
-                if vrf["default_rd"] in ["<not set>", ":"]:
-
-                    interface_dict[canonical_name]["vrf"] = {}
-                else:
-                    interface_dict[canonical_name]["vrf"] = {
-                        "name": vrf["name"],
-                        "rd": vrf["default_rd"],
-                    }
+                interface_dict[canonical_name]["vrf"] = {
+                    "name": vrf["name"],
+                    "rd": vrf["default_rd"],
+                }
 
         device["interfaces"] = interface_list
         device["serial"] = serial
@@ -316,11 +312,7 @@ def format_nxos_results(device):
                     if canonical_name.startswith("VLAN"):
                         canonical_name = canonical_name.replace("VLAN", "Vlan", 1)
                     interface_dict.setdefault(canonical_name, {})
-                    if vrf["default_rd"] == "0:0":
-                        print(f"RD {vrf['name']} configured but no route set for interface {canonical_name}.")
-                        interface_dict[canonical_name]["vrf"] = {}
-                    else:
-                        interface_dict[canonical_name]["vrf"] = {"name": vrf["name"], "rd": vrf["default_rd"]}
+                    interface_dict[canonical_name]["vrf"] = {"name": vrf["name"], "rd": vrf["default_rd"]}
 
         device["interfaces"] = interface_list
         device["serial"] = serial
