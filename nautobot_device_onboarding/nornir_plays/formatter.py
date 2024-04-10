@@ -136,7 +136,8 @@ def format_ios_results(device):
         descriptions = device.get("description", [])
         link_statuses = device.get("link_status", [])
         vrfs = device.get("vrfs", [])
-        mode = device.get("mode", [])
+        vlans = device.get("vlans", [])
+        interface_vlans = device.get("interface_vlans", [])
 
         # Some data may come across as a dict, needs to be list. Probably should do this elsewhere.
         mtu_list = ensure_list(mtus)
@@ -146,7 +147,8 @@ def format_ios_results(device):
         mac_list = ensure_list(macs)
         description_list = ensure_list(descriptions)
         link_status_list = ensure_list(link_statuses)
-        mode_list = ensure_list(mode)
+        vlan_list = ensure_list(vlans)
+        interface_vlan_list = ensure_list(interface_vlans)
 
         if vrfs is None:
             vrf_list = []
@@ -183,12 +185,48 @@ def format_ios_results(device):
             "802.1Q_mode": "",
         }
 
-        for item in mode_list:
-            print(f"item: {item}, {mode_list}")
+        vlan_map = {vlan["vlan_id"]: vlan["vlan_name"] for vlan in vlan_list}
+
+        for item in interface_vlan_list:
             canonical_name = canonical_interface_name(item["interface"])
-            print(canonical_name)
             interface_dict.setdefault(canonical_name, {})
-            interface_dict[canonical_name]["802.1Q_mode"] = "tagged" if item["vlan_id"] == "trunk" else "access"
+            mode = item["admin_mode"]
+            trunking_vlans = item["trunking_vlans"]
+
+            if mode == "trunk" and trunking_vlans == ["ALL"]:
+                interface_dict[canonical_name]["802.1Q_mode"] = "tagged-all"
+                interface_dict[canonical_name]["untagged_vlan"] = {
+                    "name": vlan_map[item["native_vlan"]],
+                    "id": item["native_vlan"],
+                }
+            elif mode == "static access":
+                interface_dict[canonical_name]["802.1Q_mode"] = "access"
+                interface_dict[canonical_name]["untagged_vlan"] = {
+                    "name": vlan_map[item["access_vlan"]],
+                    "id": item["access_vlan"],
+                }
+            elif mode == "trunk" and trunking_vlans != "['ALL']":
+                interface_dict[canonical_name]["802.1Q_mode"] = "tagged"
+                tagged_vlans = []
+                for vlan_id in trunking_vlans[0].split(","):
+                    if "-" in vlan_id:
+                        start, end = map(int, vlan_id.split("-"))
+                        for id in range(start, end + 1):
+                            if str(id) not in vlan_map:
+                                print(f"Error: VLAN {id} found on interface, but not found in vlan db.")
+                            else:
+                                tagged_vlans.append({"name": vlan_map[str(id)], "id": str(id)})
+                    if vlan_id not in vlan_map:
+                        print(f"Error: VLAN {vlan_id} found on interface, but not found in vlan db.")
+                    else:
+                        tagged_vlans.append({"name": vlan_map[vlan_id], "id": vlan_id})
+                interface_dict[canonical_name]["tagged_vlans"] = tagged_vlans
+                interface_dict[canonical_name]["untagged_vlan"] = {
+                    "name": vlan_map[item["native_vlan"]],
+                    "id": item["native_vlan"],
+                }
+            else:
+                interface_dict[canonical_name]["802.1Q_mode"] = ""
 
         for interface in interface_dict.values():
             for key, default in default_values.items():
