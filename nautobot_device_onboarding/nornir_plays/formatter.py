@@ -176,7 +176,7 @@ def format_ios_results(device):
                 True if item["link_status"] == "up" else False
             )
 
-        # Add default values to interface
+        # Add default values to interfaces
         default_values = {
             "lag": "",
             "untagged_vlan": {},
@@ -249,11 +249,17 @@ def format_ios_results(device):
                 if canonical_name.startswith("VLAN"):
                     canonical_name = canonical_name.replace("VLAN", "Vlan", 1)
                 interface_dict.setdefault(canonical_name, {})
-                interface_dict[canonical_name]["vrf"] = {
-                    "name": vrf["name"],
-                    "rd": vrf["default_rd"],
-                }
-
+                if vrf["default_rd"] == "<not set>":
+                    interface_dict[canonical_name]["vrf"] = {
+                        "name": vrf["name"],
+                        "rd": "",
+                    }
+                else:
+                    interface_dict[canonical_name]["vrf"] = {
+                        "name": vrf["name"],
+                        "rd": vrf["default_rd"],
+                    }
+        print(f"interface_dict: {interface_dict}")
         device["interfaces"] = interface_list
         device["serial"] = serial
 
@@ -290,6 +296,8 @@ def format_nxos_results(device):
         modes = device.get("mode", [])
         vrfs_rd = device.get("vrf_rds", [])
         vrfs_interfaces = device.get("vrf_interfaces", [])
+        vlans = device.get("vlans", [])
+        interface_vlans = device.get("interface_vlans", [])
 
         mtu_list = ensure_list(mtus)
         type_list = ensure_list(types)
@@ -299,6 +307,8 @@ def format_nxos_results(device):
         description_list = ensure_list(descriptions)
         link_status_list = ensure_list(link_statuses)
         mode_list = ensure_list(modes)
+        vlan_list = ensure_list(vlans)
+        interface_vlan_list = ensure_list(interface_vlans)
 
         if vrfs_rd is None:
             vrfs_rds = []
@@ -336,6 +346,8 @@ def format_nxos_results(device):
 
         default_values = {"lag": "", "untagged_vlan": {}, "tagged_vlans": [], "vrf": {}}
 
+        vlan_map = {vlan["vlan_id"]: vlan["vlan_name"] for vlan in vlan_list}
+
         for interface in interface_dict.values():
             for key, default in default_values.items():
                 interface.setdefault(key, default)
@@ -367,7 +379,13 @@ def format_nxos_results(device):
                     if canonical_name.startswith("VLAN"):
                         canonical_name = canonical_name.replace("VLAN", "Vlan", 1)
                     interface_dict.setdefault(canonical_name, {})
-                    interface_dict[canonical_name]["vrf"] = {"name": vrf["name"], "rd": vrf["default_rd"]}
+                    if vrf["default_rd"] == "0:0":
+                        interface_dict[canonical_name]["vrf"] = {
+                            "name": vrf["name"],
+                            "rd": "",
+                        }
+                    else:
+                        interface_dict[canonical_name]["vrf"] = {"name": vrf["name"], "rd": vrf["default_rd"]}
 
         device["interfaces"] = interface_list
         device["serial"] = serial
