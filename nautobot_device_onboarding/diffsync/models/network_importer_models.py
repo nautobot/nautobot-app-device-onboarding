@@ -1,6 +1,6 @@
 """Diffsync models."""
 
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from diffsync import DiffSync, DiffSyncModel
 from diffsync import exceptions as diffsync_exceptions
@@ -459,9 +459,10 @@ class NetworkImporterVRF(FilteredNautobotModel):
 
     _modelname = "vrf"
     _model = VRF
-    _identifiers = ("rd", "name", "namespace__name")
+    _identifiers = ("name", "namespace__name")
+    _attributes = ("rd",)
 
-    rd: str
+    rd: Union[str, None]
     name: str
     namespace__name: str
 
@@ -484,7 +485,7 @@ class NetworkImporterVrfToInterface(DiffSyncModel):
         try:
             vrf = VRF.objects.get(
                 name=attrs["vrf"]["name"],
-                rd=attrs["vrf"]["rd"],
+                rd=attrs["vrf"]["rd"] if attrs["vrf"]["rd"] else None,
                 namespace=diffsync.job.namespace,
             )
         except ObjectDoesNotExist:
