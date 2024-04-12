@@ -528,7 +528,7 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         name = "Sync Network Data"
         description = (
             "Synchronize extended device attribute information into Nautobot; "
-            "including Interfaces, IPAddresses, Prefixes, Vlans and Cables."
+            "including Interfaces, IPAddresses, Prefixes, Vlans and Vrfs."
         )
 
     debug = BooleanVar(description="Enable for more verbose logging.")

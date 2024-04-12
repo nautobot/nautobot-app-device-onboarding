@@ -213,7 +213,7 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
             network_vrf = self.vrf(
                 diffsync=self,
                 name=vrf.name,
-                rd=vrf.rd if vrf.rd else "",
+                rd=vrf.rd if vrf.rd else None,
                 namespace__name=vrf.namespace.name,
             )
             try:
@@ -452,6 +452,8 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
     def load_ip_addresses(self):
         """Load IP addresses into the DiffSync store."""
         for hostname, device_data in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
+            if self.job.debug:
+                self.job.logger.debug(f"Loading IP Addresses from {hostname}")
             for interface in device_data["interfaces"]:
                 for interface_name, interface_data in interface.items():
                     for ip_address in interface_data["ip_addresses"]:
@@ -483,6 +485,8 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
             location_names[device.name] = device.location.name
 
         for hostname, device_data in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
+            if self.job.debug:
+                self.job.logger.debug(f"Loading Vlans from {hostname}")
             for interface in device_data["interfaces"]:
                 for _, interface_data in interface.items():
                     # add tagged vlans
@@ -517,13 +521,15 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
     def load_vrfs(self):
         """Load vrfs into the Diffsync store."""
         for hostname, device_data in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
+            if self.job.debug:
+                self.job.logger.debug(f"Loading Vrfs from {hostname}")
             for interface in device_data["interfaces"]:
                 for _, interface_data in interface.items():
                     if interface_data["vrf"]:
                         network_vrf = self.vrf(
                             diffsync=self,
                             name=interface_data["vrf"]["name"],
-                            rd=interface_data["vrf"]["rd"] if interface_data["vrf"]["rd"] else "",
+                            rd=interface_data["vrf"]["rd"] if interface_data["vrf"]["rd"] else None,
                             namespace__name=self.job.namespace.name,
                         )
                         try:
