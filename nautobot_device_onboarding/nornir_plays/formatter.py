@@ -126,73 +126,77 @@ def ensure_list(data):
 
 def format_ios_results(device):
     """Format the results of the show commands for IOS devices."""
-    try:
-        serial = device.get("serial")
-        mtus = device.get("mtu", [])
-        types = device.get("type", [])
-        ips = device.get("ip_addresses", [])
-        prefixes = device.get("prefix_length", [])
-        macs = device.get("mac_address", [])
-        descriptions = device.get("description", [])
-        link_statuses = device.get("link_status", [])
-        vrfs = device.get("vrfs", [])
-        vlans = device.get("vlans", [])
-        interface_vlans = device.get("interface_vlans", [])
+    serial = device.get("serial")
+    mtus = device.get("mtu", [])
+    types = device.get("type", [])
+    ips = device.get("ip_addresses", [])
+    prefixes = device.get("prefix_length", [])
+    macs = device.get("mac_address", [])
+    descriptions = device.get("description", [])
+    link_statuses = device.get("link_status", [])
+    vrfs = device.get("vrfs", [])
+    vlans = device.get("vlans", [])
+    interface_vlans = device.get("interface_vlans", [])
 
-        # Some data may come across as a dict, needs to be list. Probably should do this elsewhere.
-        mtu_list = ensure_list(mtus)
-        type_list = ensure_list(types)
-        ip_list = ensure_list(ips)
-        prefix_list = ensure_list(prefixes)
-        mac_list = ensure_list(macs)
-        description_list = ensure_list(descriptions)
-        link_status_list = ensure_list(link_statuses)
-        vlan_list = ensure_list(vlans)
-        interface_vlan_list = ensure_list(interface_vlans)
+    # Some data may come across as a dict, needs to be list. Probably should do this elsewhere.
+    mtu_list = ensure_list(mtus)
+    type_list = ensure_list(types)
+    ip_list = ensure_list(ips)
+    prefix_list = ensure_list(prefixes)
+    mac_list = ensure_list(macs)
+    description_list = ensure_list(descriptions)
+    link_status_list = ensure_list(link_statuses)
+    vlan_list = ensure_list(vlans)
+    interface_vlan_list = ensure_list(interface_vlans)
 
-        if vrfs is None:
-            vrf_list = []
-        else:
-            vrf_list = ensure_list(vrfs)
+    if vrfs is None:
+        vrf_list = []
+    else:
+        vrf_list = ensure_list(vrfs)
 
-        interface_dict = {}
-        for item in mtu_list:
-            interface_dict.setdefault(item["interface"], {})["mtu"] = item["mtu"]
-        for item in type_list:
-            interface_type = map_interface_type(item["type"])
-            interface_dict.setdefault(item["interface"], {})["type"] = interface_type
-        for item in ip_list:
-            interface_dict.setdefault(item["interface"], {})["ip_addresses"] = {"ip_address": item["ip_address"]}
-        for item in prefix_list:
-            interface_dict.setdefault(item["interface"], {}).setdefault("ip_addresses", {})["prefix_length"] = item[
-                "prefix_length"
-            ]
-        for item in mac_list:
-            interface_dict.setdefault(item["interface"], {})["mac_address"] = item["mac_address"]
-        for item in description_list:
-            interface_dict.setdefault(item["interface"], {})["description"] = item["description"]
-        for item in link_status_list:
-            interface_dict.setdefault(item["interface"], {})["link_status"] = (
-                True if item["link_status"] == "up" else False
-            )
+    interface_dict = {}
+    for item in mtu_list:
+        interface_dict.setdefault(item["interface"], {})["mtu"] = item["mtu"]
+    for item in type_list:
+        interface_type = map_interface_type(item["type"])
+        interface_dict.setdefault(item["interface"], {})["type"] = interface_type
 
-        # Add default values to interfaces
-        default_values = {
-            "lag": "",
-            "untagged_vlan": {},
-            "tagged_vlans": [],
-            "vrf": {},
-            "802.1Q_mode": "",
-        }
+    for item in ip_list:
+        interface_dict.setdefault(item["interface"], {})["ip_addresses"] = {"ip_address": item["ip_address"]}
 
-        vlan_map = {vlan["vlan_id"]: vlan["vlan_name"] for vlan in vlan_list}
+    for item in prefix_list:
+        interface_dict.setdefault(item["interface"], {}).setdefault("ip_addresses", {})["prefix_length"] = item[
+            "prefix_length"
+        ]
+    for item in mac_list:
+        interface_dict.setdefault(item["interface"], {})["mac_address"] = (
+            item["mac_address"] if item["mac_address"] else ""
+        )
+    for item in description_list:
+        interface_dict.setdefault(item["interface"], {})["description"] = (
+            item["description"] if item["description"] else ""
+        )
+    for item in link_status_list:
+        interface_dict.setdefault(item["interface"], {})["link_status"] = True if item["link_status"] == "up" else False
 
-        for item in interface_vlan_list:
+    # Add default values to interfaces
+    default_values = {
+        "lag": "",
+        "untagged_vlan": {},
+        "tagged_vlans": [],
+        "vrf": {},
+        "802.1Q_mode": "",
+    }
+
+    vlan_map = {vlan["vlan_id"]: vlan["vlan_name"] for vlan in vlan_list}
+    for item in interface_vlan_list:
+        try:
+            if not item["interface"]:
+                continue
             canonical_name = canonical_interface_name(item["interface"])
             interface_dict.setdefault(canonical_name, {})
             mode = item["admin_mode"]
             trunking_vlans = item["trunking_vlans"]
-
             if mode == "trunk" and trunking_vlans == ["ALL"]:
                 interface_dict[canonical_name]["802.1Q_mode"] = "tagged-all"
                 interface_dict[canonical_name]["untagged_vlan"] = {
@@ -205,10 +209,11 @@ def format_ios_results(device):
                     "name": vlan_map[item["access_vlan"]],
                     "id": item["access_vlan"],
                 }
-            elif mode == "trunk" and trunking_vlans != "['ALL']":
+            elif mode == "trunk" and trunking_vlans != ["ALL"]:
                 interface_dict[canonical_name]["802.1Q_mode"] = "tagged"
                 tagged_vlans = []
                 for vlan_id in trunking_vlans[0].split(","):
+                    print(f"vlan_id: {vlan_id}")
                     if "-" in vlan_id:
                         start, end = map(int, vlan_id.split("-"))
                         for id in range(start, end + 1):
@@ -216,10 +221,12 @@ def format_ios_results(device):
                                 print(f"Error: VLAN {id} found on interface, but not found in vlan db.")
                             else:
                                 tagged_vlans.append({"name": vlan_map[str(id)], "id": str(id)})
-                    if vlan_id not in vlan_map:
-                        print(f"Error: VLAN {vlan_id} found on interface, but not found in vlan db.")
                     else:
-                        tagged_vlans.append({"name": vlan_map[vlan_id], "id": vlan_id})
+                        if vlan_id not in vlan_map:
+                            print(f"Error: VLAN {vlan_id} found on interface, but not found in vlan db.")
+                        else:
+                            tagged_vlans.append({"name": vlan_map[vlan_id], "id": vlan_id})
+
                 interface_dict[canonical_name]["tagged_vlans"] = tagged_vlans
                 interface_dict[canonical_name]["untagged_vlan"] = {
                     "name": vlan_map[item["native_vlan"]],
@@ -227,23 +234,27 @@ def format_ios_results(device):
                 }
             else:
                 interface_dict[canonical_name]["802.1Q_mode"] = ""
+        except KeyError as e:
+            print(f"Error: VLAN not found on interface for interface {canonical_name} {e}")
+            continue
 
-        for interface in interface_dict.values():
-            for key, default in default_values.items():
-                interface.setdefault(key, default)
+    for interface in interface_dict.values():
+        for key, default in default_values.items():
+            interface.setdefault(key, default)
 
-        for interface, data in interface_dict.items():
-            ip_addresses = data.get("ip_addresses", {})
-            if ip_addresses:
-                data["ip_addresses"] = [ip_addresses]
+    for interface, data in interface_dict.items():
+        ip_addresses = data.get("ip_addresses", {})
+        if ip_addresses:
+            data["ip_addresses"] = [ip_addresses]
 
-        # Convert interface names to canonical form
-        interface_list = []
-        for interface_name, interface_info in interface_dict.items():
-            interface_list.append({canonical_interface_name(interface_name): interface_info})
+    # Convert interface names to canonical form
+    interface_list = []
+    for interface_name, interface_info in interface_dict.items():
+        interface_list.append({canonical_interface_name(interface_name): interface_info})
 
-        # Change VRF interface names to canonical and create dict of interfaces
-        for vrf in vrf_list:
+    # Change VRF interface names to canonical and create dict of interfaces
+    for vrf in vrf_list:
+        try:
             for interface in vrf["interfaces"]:
                 canonical_name = canonical_interface_name(interface)
                 if canonical_name.startswith("VLAN"):
@@ -259,120 +270,169 @@ def format_ios_results(device):
                         "name": vrf["name"],
                         "rd": vrf["default_rd"],
                     }
-        print(f"interface_dict: {interface_dict}")
-        device["interfaces"] = interface_list
-        device["serial"] = serial
-
-        try:
-            del device["mtu"]
-            del device["type"]
-            del device["ip_addresses"]
-            del device["prefix_length"]
-            del device["mac_address"]
-            del device["description"]
-            del device["link_status"]
-            del device["vrfs"]
-            del device["mode"]
-
         except KeyError:
-            device = {"failed": True, "failed_reason": f"Formatting error 2 for device {device}"}
-    except Exception as e:
-        device = {"failed": True, "failed_reason": f"Formatting error 1 {e} for device {device}"}
+            print(f"Error: VRF configuration on interface {interface} not as expected.")
+            continue
+
+    device["interfaces"] = interface_list
+    device["serial"] = serial
+
+    del device["mtu"]
+    del device["type"]
+    del device["ip_addresses"]
+    del device["prefix_length"]
+    del device["mac_address"]
+    del device["description"]
+    del device["link_status"]
+    del device["vrfs"]
+    del device["vlans"]
+    del device["interface_vlans"]
 
     return device
 
 
 def format_nxos_results(device):
     """Format the results of the show commands for NX-OS devices."""
-    try:
-        serial = device.get("serial")
-        mtus = device.get("mtu", [])
-        types = device.get("type", [])
-        ips = device.get("ip_addresses", [])
-        prefixes = device.get("prefix_length", [])
-        macs = device.get("mac_address", [])
-        descriptions = device.get("description", [])
-        link_statuses = device.get("link_status", [])
-        modes = device.get("mode", [])
-        vrfs_rd = device.get("vrf_rds", [])
-        vrfs_interfaces = device.get("vrf_interfaces", [])
-        vlans = device.get("vlans", [])
-        interface_vlans = device.get("interface_vlans", [])
 
-        mtu_list = ensure_list(mtus)
-        type_list = ensure_list(types)
-        ip_list = ensure_list(ips)
-        prefix_list = ensure_list(prefixes)
-        mac_list = ensure_list(macs)
-        description_list = ensure_list(descriptions)
-        link_status_list = ensure_list(link_statuses)
-        mode_list = ensure_list(modes)
-        vlan_list = ensure_list(vlans)
-        interface_vlan_list = ensure_list(interface_vlans)
+    serial = device.get("serial")
+    mtus = device.get("mtu", [])
+    types = device.get("type", [])
+    ips = device.get("ip_addresses", [])
+    prefixes = device.get("prefix_length", [])
+    macs = device.get("mac_address", [])
+    descriptions = device.get("description", [])
+    link_statuses = device.get("link_status", [])
+    # modes = device.get("mode", [])
+    vrfs_rd = device.get("vrf_rds", [])
+    vrfs_interfaces = device.get("vrf_interfaces", [])
+    vlans = device.get("vlans", [])
+    interface_vlans = device.get("interface_vlans", [])
 
-        if vrfs_rd is None:
-            vrfs_rds = []
-        else:
-            vrfs_rds = ensure_list(vrfs_rd)
-        if vrfs_interfaces is None:
-            vrfs_interfaces = []
-        else:
-            vrfs_interfaces = ensure_list(vrfs_interfaces)
+    mtu_list = ensure_list(mtus)
+    type_list = ensure_list(types)
+    ip_list = ensure_list(ips)
+    prefix_list = ensure_list(prefixes)
+    mac_list = ensure_list(macs)
+    description_list = ensure_list(descriptions)
+    link_status_list = ensure_list(link_statuses)
+    # mode_list = ensure_list(modes)
+    vlan_list = ensure_list(vlans)
+    interface_vlan_list = ensure_list(interface_vlans)
 
-        interface_dict = {}
-        for item in mtu_list:
-            interface_dict.setdefault(item["interface"], {})["mtu"] = item["mtu"]
-        for item in type_list:
-            interface_type = map_interface_type(item["type"])
-            interface_dict.setdefault(item["interface"], {})["type"] = interface_type
-        for item in ip_list:
-            interface_dict.setdefault(item["interface"], {})["ip_addresses"] = {"ip_address": item["ip_address"]}
-        for item in prefix_list:
-            interface_dict.setdefault(item["interface"], {}).setdefault("ip_addresses", {})["prefix_length"] = item[
-                "prefix_length"
-            ]
-        for item in mac_list:
-            interface_dict.setdefault(item["interface"], {})["mac_address"] = item["mac_address"]
-        for item in description_list:
-            interface_dict.setdefault(item["interface"], {})["description"] = item["description"]
-        for item in link_status_list:
-            interface_dict.setdefault(item["interface"], {})["link_status"] = (
-                True if item["link_status"] == "up" else False
-            )
-        for item in mode_list:
-            interface_dict.setdefault(item["interface"], {})["802.1Q_mode"] = (
-                "access" if item["mode"] == "access" else "tagged" if item["mode"] == "trunk" else ""
-            )
+    if vrfs_rd is None:
+        vrfs_rds = []
+    else:
+        vrfs_rds = ensure_list(vrfs_rd)
+    if vrfs_interfaces is None:
+        vrfs_interfaces = []
+    else:
+        vrfs_interfaces = ensure_list(vrfs_interfaces)
 
-        default_values = {"lag": "", "untagged_vlan": {}, "tagged_vlans": [], "vrf": {}}
+    interface_dict = {}
+    for item in mtu_list:
+        interface_dict.setdefault(item["interface"], {})["mtu"] = item["mtu"]
+    for item in type_list:
+        interface_type = map_interface_type(item["type"])
+        interface_dict.setdefault(item["interface"], {})["type"] = interface_type
+    for item in ip_list:
+        interface_dict.setdefault(item["interface"], {})["ip_addresses"] = {"ip_address": item["ip_address"]}
+    for item in prefix_list:
+        interface_dict.setdefault(item["interface"], {}).setdefault("ip_addresses", {})["prefix_length"] = item[
+            "prefix_length"
+        ]
+    for item in mac_list:
+        interface_dict.setdefault(item["interface"], {})["mac_address"] = item["mac_address"]
+    for item in description_list:
+        interface_dict.setdefault(item["interface"], {})["description"] = item["description"]
+    for item in link_status_list:
+        interface_dict.setdefault(item["interface"], {})["link_status"] = True if item["link_status"] == "up" else False
+    # for item in mode_list:
+    #     interface_dict.setdefault(item["interface"], {})["802.1Q_mode"] = (
+    #         "access" if item["mode"] == "access" else "tagged" if item["mode"] == "trunk" else ""
+    #     )
 
-        vlan_map = {vlan["vlan_id"]: vlan["vlan_name"] for vlan in vlan_list}
+    default_values = {"lag": "", "untagged_vlan": {}, "tagged_vlans": [], "vrf": {}, "802.1Q_mode": ""}
 
-        for interface in interface_dict.values():
-            for key, default in default_values.items():
-                interface.setdefault(key, default)
+    vlan_map = {vlan["vlan_id"]: vlan["vlan_name"] for vlan in vlan_list}
+    print(f"vlan_map: {vlan_map}, interface_vlan_list: {interface_vlan_list}")
+    # for item in interface_vlan_list:
+    #     try:
+    #         if not item["interface"]:
+    #             continue
+    #         canonical_name = canonical_interface_name(item["interface"])
+    #         interface_dict.setdefault(canonical_name, {})
+    #         mode = item["mode"]
+    #         trunking_vlans = item["trunking_vlans"]
+    #         if mode == "trunk" and trunking_vlans == "1-4094":
+    #             interface_dict[canonical_name]["802.1Q_mode"] = "tagged-all"
+    #             interface_dict[canonical_name]["untagged_vlan"] = {
+    #                 "name": vlan_map[item["native_vlan"]],
+    #                 "id": item["native_vlan"],
+    #             }
+    #         elif mode == "access":
+    #             interface_dict[canonical_name]["802.1Q_mode"] = "access"
+    #             interface_dict[canonical_name]["untagged_vlan"] = {
+    #                 "name": item["access_vlan_name"],
+    #                 "id": item["access_vlan"],
+    #             }
+    #         elif mode == "trunk" and trunking_vlans != "1-4094":
+    #             print(f"trunking_vlans: {trunking_vlans}")
+    #             pass
+    #             interface_dict[canonical_name]["802.1Q_mode"] = "tagged"
+    #             tagged_vlans = []
+    #             trunking_vlans = trunking_vlans.split(",")
+    #             for vlan_id in trunking_vlans:
+    #                 print(f"vlan_id: {vlan_id}")
+    #                 if "-" in vlan_id:
+    #                     start, end = map(int, vlan_id.split("-"))
+    #                     for id in range(start, end + 1):
+    #                         if str(id) not in vlan_map:
+    #                             print(f"Error: VLAN {id} found on interface, but not found in vlan db.")
+    #                         else:
+    #                             tagged_vlans.append({"name": vlan_map[str(id)], "id": str(id)})
+    #                 else:
+    #                     if vlan_id not in vlan_map:
+    #                         print(f"Error: VLAN {vlan_id} found on interface, but not found in vlan db.")
+    #                     else:
+    #                         tagged_vlans.append({"name": vlan_map[vlan_id], "id": vlan_id})
 
-        for interface, data in interface_dict.items():
-            ip_addresses = data.get("ip_addresses", {})
-            if ip_addresses:
-                data["ip_addresses"] = [ip_addresses]
+    #             interface_dict[canonical_name]["tagged_vlans"] = tagged_vlans
+    #             interface_dict[canonical_name]["untagged_vlan"] = {
+    #                 "name": vlan_map[item["native_vlan"]],
+    #                 "id": item["native_vlan"],
+    #             }
+    #         else:
+    #             interface_dict[canonical_name]["802.1Q_mode"] = ""
+    #     except KeyError as e:
+    #         print(f"Error: VLAN not found on interface for interface {canonical_name} {e}")
+    #         continue
 
-        # Convert interface names to canonical form
-        interface_list = []
-        for interface_name, interface_info in interface_dict.items():
-            interface_list.append({canonical_interface_name(interface_name): interface_info})
+    for interface in interface_dict.values():
+        for key, default in default_values.items():
+            interface.setdefault(key, default)
 
-        # Populate vrf_dict from commands and add to interface_dict
-        vrf_dict = {vrf["id"]: vrf for vrf in vrfs_rds}
+    for interface, data in interface_dict.items():
+        ip_addresses = data.get("ip_addresses", {})
+        if ip_addresses:
+            data["ip_addresses"] = [ip_addresses]
 
-        for interface in vrfs_interfaces:
-            vrf_id = interface["id"]
-            if "interfaces" not in vrf_dict[vrf_id]:
-                vrf_dict[vrf_id]["interfaces"] = []
-            vrf_dict[vrf_id]["interfaces"].append(interface["interface"])
+    # Convert interface names to canonical form
+    interface_list = []
+    for interface_name, interface_info in interface_dict.items():
+        interface_list.append({canonical_interface_name(interface_name): interface_info})
 
-        vrf_list = list(vrf_dict.values())
-        for vrf in vrf_list:
+    # Populate vrf_dict from commands and add to interface_dict
+    vrf_dict = {vrf["id"]: vrf for vrf in vrfs_rds}
+
+    for interface in vrfs_interfaces:
+        vrf_id = interface["id"]
+        if "interfaces" not in vrf_dict[vrf_id]:
+            vrf_dict[vrf_id]["interfaces"] = []
+        vrf_dict[vrf_id]["interfaces"].append(interface["interface"])
+
+    vrf_list = list(vrf_dict.values())
+    for vrf in vrf_list:
+        try:
             if "interfaces" in vrf:
                 for interface in vrf["interfaces"]:
                     canonical_name = canonical_interface_name(interface)
@@ -386,25 +446,26 @@ def format_nxos_results(device):
                         }
                     else:
                         interface_dict[canonical_name]["vrf"] = {"name": vrf["name"], "rd": vrf["default_rd"]}
-
-        device["interfaces"] = interface_list
-        device["serial"] = serial
-        try:
-            del device["mtu"]
-            del device["type"]
-            del device["ip_addresses"]
-            del device["prefix_length"]
-            del device["mac_address"]
-            del device["description"]
-            del device["link_status"]
-            del device["mode"]
-            del device["vrf_rds"]
-            del device["vrf_interfaces"]
-
         except KeyError:
-            device = {"failed": True, "failed_reason": f"Formatting error for device {device}"}
-    except Exception:
-        device = {"failed": True, "failed_reason": f"Formatting error for device {device}"}
+            print(f"Error: VRF configuration on interface {interface} not as expected.")
+            continue
+
+    device["interfaces"] = interface_list
+    device["serial"] = serial
+
+    del device["mtu"]
+    del device["type"]
+    del device["ip_addresses"]
+    del device["prefix_length"]
+    del device["mac_address"]
+    del device["description"]
+    del device["link_status"]
+    # del device["mode"]
+    del device["vrf_rds"]
+    del device["vrf_interfaces"]
+    del device["vlans"]
+    del device["interface_vlans"]
+
     return device
 
 
