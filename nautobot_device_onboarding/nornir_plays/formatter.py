@@ -354,7 +354,7 @@ def format_nxos_results(device):
     default_values = {"lag": "", "untagged_vlan": {}, "tagged_vlans": [], "vrf": {}, "802.1Q_mode": ""}
 
     vlan_map = {vlan["vlan_id"]: vlan["vlan_name"] for vlan in vlan_list}
-    print(f"vlan_map: {vlan_map}, interface_vlan_list: {interface_vlan_list}")
+    # print(f"vlan_map: {vlan_map}, interface_vlan_list: {interface_vlan_list}")
     # for item in interface_vlan_list:
     #     try:
     #         if not item["interface"]:
