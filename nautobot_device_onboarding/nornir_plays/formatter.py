@@ -502,6 +502,6 @@ def format_results(compiled_results):
                     format_nxos_results(data)
             else:
                 data.update({"failed": True, "failed_reason": "Cannot connect to device."})
-        except Exception as e:
-            data.update({"failed": True, "failed_reason": f"Error formatting device: {e}"})
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            data.update({"failed": True, "failed_reason": f"Error formatting device: {err}"})
     return compiled_results
