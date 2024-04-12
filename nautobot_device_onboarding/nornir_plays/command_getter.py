@@ -1,6 +1,5 @@
 """CommandGetter."""
 
-# pylint: disable=relative-beyond-top-level
 from typing import Dict
 
 from django.conf import settings
@@ -48,7 +47,7 @@ def deduplicate_command_list(data):
 
 
 def _get_commands_to_run(yaml_parsed_info):
-    """Load yaml file and look up all commands that need to be run."""
+    """Using merged command mapper info and look up all commands that need to be run."""
     all_commands = []
     for _, value in yaml_parsed_info.items():
         # Deduplicate commands + parser key
@@ -62,7 +61,6 @@ def _get_commands_to_run(yaml_parsed_info):
                 if isinstance(nested_command_info, dict):
                     for command in nested_command_info["commands"]:
                         all_commands.append(command)
-    print(f"all_commands: {all_commands}")
     return deduplicate_command_list(all_commands)
 
 
@@ -74,6 +72,8 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
         return Result(host=task.host, result=f"{task.host.name} has a unsupported platform set.", failed=True)
     task.host.data["platform_parsing_info"] = command_getter_yaml_data[task.host.platform]
     commands = _get_commands_to_run(command_getter_yaml_data[task.host.platform][command_getter_job])
+    # Appears all commands in this for loop are already within 1 connection.
+    # task.host.open_connection("netmiko", configuration=task.nornir.config)
     for command in commands:
         try:
             task.run(
@@ -90,6 +90,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                 result=f"{command['command']}: E0001 - Textfsm template issue.",
                 failed=True,
             )
+    # task.host.close_connection("netmiko")
 
 
 def _parse_credentials(credentials):
@@ -109,9 +110,9 @@ def _parse_credentials(credentials):
                     access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
                     secret_type=SecretsGroupSecretTypeChoices.TYPE_SECRET,
                 )
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 secret = None
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             return (None, None, None)
     else:
         username = settings.NAPALM_USERNAME
@@ -137,7 +138,6 @@ def command_getter_do(job_result, log_level, kwargs):
 
     # Initiate Nornir instance with empty inventory
     try:
-        logger = NornirLogger(job_result, log_level=0)
         compiled_results = {}
         with InitNornir(
             runner=NORNIR_SETTINGS.get("runner"),
@@ -185,7 +185,7 @@ def command_getter_do(job_result, log_level, kwargs):
                 command_getter_job="device_onboarding",
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
-        logger.error(err)
+        logger.info("Error: %s", err)
     return compiled_results
 
 

@@ -28,9 +28,67 @@ def fix_interfaces(interfaces):
             int_values["ip_addresses"].append(
                 {"ip_address": int_values.get("ip_address", ""), "prefix_length": int_values.get("prefix_length", "")}
             )
-            if "up" in int_values["link_status"]:
-                int_values["link_status"] = True
+            if "up" in int_values["jeff_status"]:
+                int_values["jeff_status"] = True
             else:
-                int_values["link_status"] = False
+                int_values["jeff_status"] = False
 
     return interfaces
+
+
+@library.filter
+def collapse_list_to_dict(original_data):
+    """Takes a list of dictionaries and creates a dictionary based on outtermost key
+
+    Args:
+        original_data (list): list of dictionaries
+        root_key (str): dictionary key to use as the root key
+
+    Example:
+    >>> example_data = [
+            {'GigabitEthernet1': {'jeff_status': 'up'}},
+            {'GigabitEthernet2': {'jeff_status': 'administratively down'}},
+            {'GigabitEthernet3': {'jeff_status': 'administratively down'}},
+            {'GigabitEthernet4': {'jeff_status': 'administratively down'}},
+            {'Loopback0': {'jeff_status': 'administratively down'}},
+            {'Loopback2': {'jeff_status': 'administratively down'}},
+            {'Port-channel1': {'jeff_status': 'down'}}
+        ]
+    >>> collapse_list_to_dict(example_data)
+    {'GigabitEthernet1': {'jeff_status': 'up'},
+    'GigabitEthernet2': {'jeff_status': 'administratively down'},
+    'GigabitEthernet3': {'jeff_status': 'administratively down'},
+    'GigabitEthernet4': {'jeff_status': 'administratively down'},
+    'Loopback0': {'jeff_status': 'administratively down'},
+    'Loopback2': {'jeff_status': 'administratively down'},
+    'Port-channel1': {'jeff_status': 'down'}}
+    """
+    return {root_key: data for data in original_data for root_key, data in data.items()}
+
+
+def merge_dicts(*dicts):
+    """Merges any number of dictionaries recursively, handling nested dictionaries.
+
+    Args:
+        *dicts: A variable number of dictionaries to merge.
+
+    Returns:
+        A new dictionary containing the merged data from all dictionaries.
+    """
+    if not dicts:
+        return {}  # Empty input returns an empty dictionary
+    merged = dicts[0].copy()
+    for other_dict in dicts[1:]:
+        if not other_dict:
+            continue  # Skip empty dictionaries
+        for key, value in other_dict.items():
+            if key in merged:
+                if isinstance(value, dict) and isinstance(merged[key], dict):
+                    # Recursively merge nested dictionaries
+                    merged[key] = merge_dicts(merged[key], value)
+            else:
+                # Overwrite existing values with values from subsequent dictionaries (giving priority to later ones)
+                merged[key] = value
+        # Add new key-value pairs from subsequent dictionaries
+        merged[key] = value
+    return merged
