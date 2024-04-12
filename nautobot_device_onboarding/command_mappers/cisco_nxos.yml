@@ -81,3 +81,13 @@ network_importer:
       - command: "show vrf detail"
         use_textfsm: true
         jpath: "[*].{id: id, name: name, default_rd: default_rd}"
+  vlans:
+    commands:
+      - command: "show vlan"
+        use_textfsm: true
+        jpath: "[*].{interfaces: interfaces, vlan_name: vlan_name, vlan_id: vlan_id, status: status}"
+  interface_vlans:
+    commands:
+      - command: "show interface switchport"
+        use_textfsm: true
+        jpath: "[*].{interface: interface, mode:mode, access_vlan: access_vlan, access_vlan_name: access_vlan_name, native_vlan: native_vlan, trunking_vlans: trunking_vlans, voice_vlan: voice_vlan}"
