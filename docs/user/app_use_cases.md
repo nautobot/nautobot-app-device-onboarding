@@ -56,8 +56,9 @@ The Onboarding App will automatically create Platforms for vendor operating syst
 ![juniper_junos_platform](../images/platform_juniper_junos.png)
 
 
-## Use-cases and common workflows
+# Use-cases and common workflows
 
+## Onboarding a Device
 
 ### Onboard a New Device
 
@@ -79,7 +80,7 @@ This SSoT job supports a bulk CSV execution option to speed up this process.
 
 The status of onboarding jobs can be viewed via the UI (Jobs > Job Results) or retrieved via API (`/api/extras/job-results/`) with each process corresponding to an individual Job-Result object.
 
-# API
+### API
 
 To run the SSoT Sync Devices Job via the api:
 
@@ -103,7 +104,9 @@ Optional Fields:
     device_type: Device Type UUID
     continue_on_failure: Boolean
 
-### Enhace Existing Device
+## Onboarding Interface, Vlans, IPs Etc.
+
+### Enhance Existing Device
 
 A existing devices data can be expanded to include additonal objects by:
 
@@ -121,7 +124,7 @@ During a successful network data sync process, a devices related objects will be
 
 The status of onboarding jobs can be viewed via the UI (Jobs > Job Results) or retrieved via API (`/api/extras/job-results/`) with each process corresponding to an individual Job-Result object.
 
-# API
+### API
 
 To run the SSoT Sync Devices Job via the api:
 
@@ -134,3 +137,10 @@ curl -X "POST" <nautobot URL>/api/extras/jobs/TODO/run/ -H "Content-Type: applic
 
 Required Fields:
     devices: Location UUID
+
+
+## Using Git(Datasources) to Override the Apps Defaults
+
+By utilizing the Nautobot core feature `Datasource` the command mappers, jpaths, post_processors for each platform can be overriden. This also gives an easy way for a user to add platform support without having to get those fixes directly upstreamed into this application.
+
+The format of these YAML files are and how to extend this application is covered in [App YAML Overrides](./app_yaml_overrides.md).

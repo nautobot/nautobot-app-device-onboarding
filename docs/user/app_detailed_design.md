@@ -45,3 +45,10 @@ This page will describe the newer SSoT jobs that this App exposes and how they w
     - This essentially is our "ET" portion of a "ETL" process.
     - Next, the JSON result from the show command after the parser executes (E.g. textfsm), gets run through the jdiff function `extract_data_from_json()` with the data and the `jpath` from the YAML file definition.
     - Finally, an optional `post_processor` jinja2 capable execution can further transform the data for that command before passing it to finish the SSoT syncronizaton.
+
+## Detailed Design Diagram
+
+Here are two diagrams detailing the SSoT based jobs in deeper detail.
+
+![Sync Devices]().
+![Sync Network Data]().

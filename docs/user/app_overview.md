@@ -48,7 +48,7 @@ One example of a solution that can retrieve that additional device data and impo
 The new implementation of device onboarding in this app is utilizing the SSoT framework; the main reasons for providing the new mechanisms were to solve the following challenges:
 
 - Make it easier to extending and add additonal vendor/OS support.
-- Collapse this app and the external [network-importer]() into the same Nautobot app for simplified device onboarding with more object support.'
+- Collapse this app and the external [Network Importer](https://github.com/networktocode/network-importer) into the same Nautobot app for simplified device onboarding with more object support.'
     - Remove the Batfish dependency.
 - Re-use backend plugins and libraries such as `nautobot-app-nornir` to provide the a similar feeling to other plugins like `nautobot-app-golden-config`.
 - Utilize SSoT framework and the new `contrib` functionality to speed up development of new features.

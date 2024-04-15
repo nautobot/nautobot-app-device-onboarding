@@ -102,8 +102,10 @@ nav:
       - App Overview: "user/app_overview.md"
       - Getting Started: "user/app_getting_started.md"
       - Using the App: "user/app_use_cases.md"
+      - Using the App (Legacy): "user/app_use_cases_legacy.md"
       - Frequently Asked Questions: "user/faq.md"
       - External Interactions: "user/external_interactions.md"
+      - Detailed Design: "user/app_detailed_design.md"
   - Administrator Guide:
       - Install and Configure: "admin/install.md"
       - Upgrade: "admin/upgrade.md"
@@ -118,6 +120,7 @@ nav:
           - v1.0: "admin/release_notes/version_1.0.md"
   - Developer Guide:
       - Extending the App: "dev/extending.md"
+      - YAML Overrides: "dev/app_yaml_overrides.md"
       - Onboarding Extensions: "dev/onboarding_extensions.md"
       - Contributing to the App: "dev/contributing.md"
       - Development Environment: "dev/dev_environment.md"

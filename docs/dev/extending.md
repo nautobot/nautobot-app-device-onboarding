@@ -19,4 +19,4 @@ Extending the platform support for the SSoT specific jobs should be accomplished
 
 New platform support should be simplified in this framework, by providing a YAML file.
 
-TODO:
+The format of these YAML files are and how to extend this application is covered in [App YAML Overrides](./app_yaml_overrides.md).
