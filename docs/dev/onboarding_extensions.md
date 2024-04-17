@@ -1,5 +1,8 @@
 # Onboarding Extensions
 
+!!! warn
+    This is the legacy onboarding extensions.
+
 ## What are onboarding extensions?
 
 Onboarding Extensions are Python modules that are dynamically loaded and executed as a part of device onboarding.
