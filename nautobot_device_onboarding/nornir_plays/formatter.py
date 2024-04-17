@@ -126,6 +126,7 @@ def ensure_list(data):
 
 
 def extract_prefix_from_subnet(prefix_list):
+    """Extract the prefix length from the IP/Prefix."""
     for item in prefix_list:
         if "prefix_length" in item and item["prefix_length"]:
             item["prefix_length"] = item["prefix_length"].split("/")[-1]
@@ -170,10 +171,8 @@ def format_ios_results(device):
     for item in type_list:
         interface_type = map_interface_type(item["type"])
         interface_dict.setdefault(item["interface"], {})["type"] = interface_type
-
     for item in ip_list:
         interface_dict.setdefault(item["interface"], {})["ip_addresses"] = {"ip_address": item["ip_address"]}
-
     for item in prefix_list:
         interface_dict.setdefault(item["interface"], {}).setdefault("ip_addresses", {})["prefix_length"] = item[
             "prefix_length"
@@ -355,7 +354,6 @@ def format_nxos_results(device):
     for item in interface_list:
         canonical_name = canonical_interface_name(item["interface"])
         interface_dict[canonical_name] = {**default_values}
-
     for item in mtu_list:
         canonical_name = canonical_interface_name(item["interface"])
         interface_dict.setdefault(canonical_name, {})["mtu"] = item["mtu"]
@@ -382,16 +380,15 @@ def format_nxos_results(device):
         interface_dict.setdefault(canonical_name, {})["link_status"] = True if item["link_status"] == "up" else False
 
     vlan_map = {vlan["vlan_id"]: vlan["vlan_name"] for vlan in vlan_list}
-
     for item in interface_vlan_list:
         try:
             if not item["interface"]:
                 continue
             canonical_name = canonical_interface_name(item["interface"])
-
             interface_dict.setdefault(canonical_name, {})
             mode = item["mode"]
             trunking_vlans = item["trunking_vlans"]
+
             if mode == "trunk" and trunking_vlans == "1-4094":
                 interface_dict[canonical_name]["802.1Q_mode"] = "tagged-all"
                 interface_dict[canonical_name]["untagged_vlan"] = {
@@ -518,7 +515,6 @@ def format_results(compiled_results):
             if platform not in ["cisco_ios", "cisco_xe", "cisco_nxos"]:
                 data.update({"failed": True, "failed_reason": f"Unsupported platform {platform}"})
             if "type" in data:
-
                 serial = Device.objects.get(name=device).serial
                 if serial == "":
                     data.update({"failed": True, "failed_reason": "Serial not found for device in Nautobot."})

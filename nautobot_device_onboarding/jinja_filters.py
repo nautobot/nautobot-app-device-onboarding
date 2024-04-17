@@ -38,7 +38,7 @@ def fix_interfaces(interfaces):
 
 @library.filter
 def collapse_list_to_dict(original_data):
-    """Takes a list of dictionaries and creates a dictionary based on outtermost key
+    """Takes a list of dictionaries and creates a dictionary based on outtermost key.
 
     Args:
         original_data (list): list of dictionaries

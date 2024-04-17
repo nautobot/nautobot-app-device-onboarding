@@ -44,7 +44,7 @@ network_importer:
         jpath: "[*].{interface: interface, type: hardware_type}"
   ip_addresses:
     commands:
-      - command:  "show ip interface vrf all"
+      - command: "show ip interface vrf all"
         use_textfsm: true
         jpath: "[*].{interface: interface, ip_address: ip_address}"
   prefix_length:
@@ -52,7 +52,6 @@ network_importer:
       - command: "show ip interface vrf all"
         use_textfsm: true
         jpath: "[*].{interface: interface, prefix_length: subnet}"
-        #post_processor: "[*].{interface: interface, prefix_length: subnet && map(&subnet, [?ip_address=='{{ obj }}'])}"
   mtu:
     commands:
       - command: "show interface"
