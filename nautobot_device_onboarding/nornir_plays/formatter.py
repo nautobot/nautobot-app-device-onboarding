@@ -272,12 +272,10 @@ def format_ios_results(device):
                 if vrf["default_rd"] == "<not set>":
                     interface_dict[canonical_name]["vrf"] = {
                         "name": vrf["name"],
-                        "rd": "",
                     }
                 else:
                     interface_dict[canonical_name]["vrf"] = {
                         "name": vrf["name"],
-                        "rd": vrf["default_rd"],
                     }
         except KeyError:
             print(f"Error: VRF configuration on interface {interface} not as expected.")
@@ -463,13 +461,7 @@ def format_nxos_results(device):
                     if canonical_name.startswith("VLAN"):
                         canonical_name = canonical_name.replace("VLAN", "Vlan", 1)
                     interface_dict.setdefault(canonical_name, {})
-                    if vrf["default_rd"] == "0:0":
-                        interface_dict[canonical_name]["vrf"] = {
-                            "name": vrf["name"],
-                            "rd": "",
-                        }
-                    else:
-                        interface_dict[canonical_name]["vrf"] = {"name": vrf["name"], "rd": vrf["default_rd"]}
+                    interface_dict[canonical_name]["vrf"] = {"name": vrf["name"]}
         except KeyError:
             print(f"Error: VRF configuration on interface {interface} not as expected.")
             continue

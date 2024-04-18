@@ -73,7 +73,7 @@ network_importer:
     commands:
       - command: "show vrf"
         use_textfsm: true
-        jpath: "[*].{name: name, default_rd: default_rd, interfaces: interfaces}"
+        jpath: "[*].{name: name, interfaces: interfaces}"
   vlans:
     commands:
       - command: "show vlan"
