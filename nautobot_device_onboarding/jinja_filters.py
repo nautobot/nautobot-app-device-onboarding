@@ -28,10 +28,10 @@ def fix_interfaces(interfaces):
             int_values["ip_addresses"].append(
                 {"ip_address": int_values.get("ip_address", ""), "prefix_length": int_values.get("prefix_length", "")}
             )
-            if "up" in int_values["jeff_status"]:
-                int_values["jeff_status"] = True
+            if "up" in int_values["link_status"]:
+                int_values["link_status"] = True
             else:
-                int_values["jeff_status"] = False
+                int_values["link_status"] = False
 
     return interfaces
 
@@ -46,22 +46,22 @@ def collapse_list_to_dict(original_data):
 
     Example:
     >>> example_data = [
-            {'GigabitEthernet1': {'jeff_status': 'up'}},
-            {'GigabitEthernet2': {'jeff_status': 'administratively down'}},
-            {'GigabitEthernet3': {'jeff_status': 'administratively down'}},
-            {'GigabitEthernet4': {'jeff_status': 'administratively down'}},
-            {'Loopback0': {'jeff_status': 'administratively down'}},
-            {'Loopback2': {'jeff_status': 'administratively down'}},
-            {'Port-channel1': {'jeff_status': 'down'}}
+            {'GigabitEthernet1': {'link_status': 'up'}},
+            {'GigabitEthernet2': {'link_status': 'administratively down'}},
+            {'GigabitEthernet3': {'link_status': 'administratively down'}},
+            {'GigabitEthernet4': {'link_status': 'administratively down'}},
+            {'Loopback0': {'link_status': 'administratively down'}},
+            {'Loopback2': {'link_status': 'administratively down'}},
+            {'Port-channel1': {'link_status': 'down'}}
         ]
     >>> collapse_list_to_dict(example_data)
-    {'GigabitEthernet1': {'jeff_status': 'up'},
-    'GigabitEthernet2': {'jeff_status': 'administratively down'},
-    'GigabitEthernet3': {'jeff_status': 'administratively down'},
-    'GigabitEthernet4': {'jeff_status': 'administratively down'},
-    'Loopback0': {'jeff_status': 'administratively down'},
-    'Loopback2': {'jeff_status': 'administratively down'},
-    'Port-channel1': {'jeff_status': 'down'}}
+    {'GigabitEthernet1': {'link_status': 'up'},
+    'GigabitEthernet2': {'link_status': 'administratively down'},
+    'GigabitEthernet3': {'link_status': 'administratively down'},
+    'GigabitEthernet4': {'link_status': 'administratively down'},
+    'Loopback0': {'link_status': 'administratively down'},
+    'Loopback2': {'link_status': 'administratively down'},
+    'Port-channel1': {'link_status': 'down'}}
     """
     return {root_key: data for data in original_data for root_key, data in data.items()}
 
