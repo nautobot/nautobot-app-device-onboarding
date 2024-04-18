@@ -34,12 +34,6 @@ network_importer:
       - command: "show version"
         use_textfsm: true
         jpath: "[*].serial[0]"
-  # interfaces:
-  #   interfaces:
-  #     commands:
-  #       - command: "show interfaces"
-  #         use_textfsm: true
-  #         jpath: "[*].{interface: interface}"
   type:
     commands:
       - command: "show interfaces"
@@ -80,11 +74,6 @@ network_importer:
       - command: "show vrf"
         use_textfsm: true
         jpath: "[*].{name: name, default_rd: default_rd, interfaces: interfaces}"
-  # mode:
-  #   commands:
-  #     - command: "show interfaces switchport"
-  #       use_textfsm: true
-  #       jpath: "[*].{interface: interface, mode: mode, admin_mode: admin_mode}"
   vlans:
     commands:
       - command: "show vlan"

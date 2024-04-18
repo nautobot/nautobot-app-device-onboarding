@@ -17,15 +17,21 @@ device_onboarding:
         jpath: "[*].platform"
   mgmt_interface:
     commands:
-      - command: "show interface"
+      - command: "show ip interface vrf all"
         use_textfsm: true
         jpath: "[?ip_address=='{{ obj }}'].interface || [`mgmt0`]"
   mask_length:
     commands:
+      - command: "show ip interface vrf all"
+        use_textfsm: true
+        jpath: "[?ip_address=='{{ obj }}'].subnet"
+        post_processor: "{% if '/' in obj[0] %}{{ obj[0].split('/')[1] }}{% else %}31{% endif %}"
+network_importer:
+  interface:
+    commands:
       - command: "show interface"
         use_textfsm: true
-        jpath: "[?ip_address=='{{ obj }}'].prefix_length || [`31`]"
-network_importer:
+        jpath: "[*].{interface: interface, interface: interface}"
   serial:
     commands:
       - command: "show inventory"
@@ -38,14 +44,14 @@ network_importer:
         jpath: "[*].{interface: interface, type: hardware_type}"
   ip_addresses:
     commands:
-      - command: "show interface"
+      - command: "show ip interface vrf all"
         use_textfsm: true
         jpath: "[*].{interface: interface, ip_address: ip_address}"
   prefix_length:
     commands:
-      - command: "show interface"
+      - command: "show ip interface vrf all"
         use_textfsm: true
-        jpath: "[*].{interface: interface, prefix_length: prefix_length}"
+        jpath: "[*].{interface: interface, prefix_length: subnet}"
   mtu:
     commands:
       - command: "show interface"
