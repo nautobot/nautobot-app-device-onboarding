@@ -79,16 +79,15 @@ def merge_dicts(*dicts):
         return {}  # Empty input returns an empty dictionary
     merged = dicts[0].copy()
     for other_dict in dicts[1:]:
-        if not other_dict:
-            continue  # Skip empty dictionaries
-        for key, value in other_dict.items():
-            if key in merged:
-                if isinstance(value, dict) and isinstance(merged[key], dict):
-                    # Recursively merge nested dictionaries
-                    merged[key] = merge_dicts(merged[key], value)
-            else:
-                # Overwrite existing values with values from subsequent dictionaries (giving priority to later ones)
-                merged[key] = value
-        # Add new key-value pairs from subsequent dictionaries
-        merged[key] = value
+        if other_dict:
+            for key, value in other_dict.items():
+                if key in merged:
+                    if isinstance(value, dict) and isinstance(merged[key], dict):
+                        # Recursively merge nested dictionaries
+                        merged[key] = merge_dicts(merged[key], value)
+                else:
+                    # Overwrite existing values with values from subsequent dictionaries (giving priority to later ones)
+                    merged[key] = value
+            # Add new key-value pairs from subsequent dictionaries
+            # merged[key] = value
     return merged
