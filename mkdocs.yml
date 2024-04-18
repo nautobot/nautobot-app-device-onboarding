@@ -120,7 +120,7 @@ nav:
           - v1.0: "admin/release_notes/version_1.0.md"
   - Developer Guide:
       - Extending the App: "dev/extending.md"
-      - YAML Overrides: "dev/app_yaml_overrides.md"
+      - YAML Overrides: "user/app_yaml_overrides.md"
       - Onboarding Extensions: "dev/onboarding_extensions.md"
       - Contributing to the App: "dev/contributing.md"
       - Development Environment: "dev/dev_environment.md"
