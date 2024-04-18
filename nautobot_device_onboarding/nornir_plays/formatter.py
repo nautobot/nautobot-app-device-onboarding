@@ -319,7 +319,6 @@ def format_nxos_results(device):
     link_status_list = ensure_list(link_statuses)
     vlan_list = ensure_list(vlans)
     interface_vlan_list = ensure_list(interface_vlans)
-    # vrfs_interfaces_list = ensure_list(vrfs_interfaces)
 
     if vrfs_interfaces is None:
         vrfs_interfaces = []
