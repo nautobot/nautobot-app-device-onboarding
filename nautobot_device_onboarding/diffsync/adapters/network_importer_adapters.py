@@ -213,7 +213,6 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
             network_vrf = self.vrf(
                 diffsync=self,
                 name=vrf.name,
-                rd=vrf.rd if vrf.rd else None,
                 namespace__name=vrf.namespace.name,
             )
             try:
@@ -234,7 +233,6 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
             vrf = {}
             if interface.vrf:
                 vrf["name"] = interface.vrf.name
-                vrf["rd"] = str(interface.vrf.rd)
 
             network_vrf_to_interface = self.vrf_to_interface(
                 diffsync=self,
@@ -529,7 +527,6 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
                         network_vrf = self.vrf(
                             diffsync=self,
                             name=interface_data["vrf"]["name"],
-                            rd=interface_data["vrf"]["rd"] if interface_data["vrf"]["rd"] else None,
                             namespace__name=self.job.namespace.name,
                         )
                         try:

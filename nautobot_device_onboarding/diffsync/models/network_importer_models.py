@@ -1,6 +1,6 @@
 """Diffsync models."""
 
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from diffsync import DiffSync, DiffSyncModel
 from diffsync import exceptions as diffsync_exceptions
@@ -460,15 +460,13 @@ class NetworkImporterVRF(FilteredNautobotModel):
     _modelname = "vrf"
     _model = VRF
     _identifiers = ("name", "namespace__name")
-    _attributes = ("rd",)
 
-    rd: Union[str, None]
     name: str
     namespace__name: str
 
 
 class NetworkImporterVrfToInterface(DiffSyncModel):
-    """Shared data model representing a UnTaggedVlanToInterface."""
+    """Shared data model representing a VrfToInterface."""
 
     _modelname = "vrf_to_interface"
     _identifiers = ("device__name", "name")
@@ -485,14 +483,22 @@ class NetworkImporterVrfToInterface(DiffSyncModel):
         try:
             vrf = VRF.objects.get(
                 name=attrs["vrf"]["name"],
-                rd=attrs["vrf"]["rd"] if attrs["vrf"]["rd"] else None,
+                rd=None,
                 namespace=diffsync.job.namespace,
             )
         except ObjectDoesNotExist:
             diffsync.job.logger.error(
                 f"Failed to assign vrf to {interface.device}:{interface}, unable to locate a vrf with attributes "
-                f"[name: {attrs['vrf']['name']}, rd: {attrs['vrf']['rd']} "
+                f"[name: {attrs['vrf']['name']}"
                 f"namespace: {diffsync.job.namespace}]"
+            )
+            raise diffsync_exceptions.ObjectNotCreated
+        except MultipleObjectsReturned:
+            diffsync.job.logger.error(
+                f"Failed to assign vrf to {interface.device}:{interface}, there are multipple vrfs with attributes "
+                f"[name: {attrs['vrf']['name']}"
+                f"namespace: {diffsync.job.namespace}]. "
+                "Unsure which to assign."
             )
             raise diffsync_exceptions.ObjectNotCreated
         try:
@@ -505,13 +511,13 @@ class NetworkImporterVrfToInterface(DiffSyncModel):
 
     @classmethod
     def create(cls, diffsync, ids, attrs):
-        """Assign an untagged vlan to an interface."""
+        """Assign a vrf to an interface."""
         if attrs.get("vrf"):
             try:
                 interface = Interface.objects.get(device__name=ids["device__name"], name=ids["name"])
             except ObjectDoesNotExist:
                 diffsync.job.logger.error(
-                    f"Failed to assign vrf {attrs['untagged_vlan']}. An interface with attributes: "
+                    f"Failed to assign vrf {attrs['vrf']}. An interface with attributes: "
                     f"[device__name: {ids['device__name']} name: {ids['name']}] was not found."
                 )
                 raise diffsync_exceptions.ObjectNotCreated
