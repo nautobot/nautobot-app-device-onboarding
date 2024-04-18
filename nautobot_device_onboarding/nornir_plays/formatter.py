@@ -269,14 +269,9 @@ def format_ios_results(device):
                 if canonical_name.startswith("VLAN"):
                     canonical_name = canonical_name.replace("VLAN", "Vlan", 1)
                 interface_dict.setdefault(canonical_name, {})
-                if vrf["default_rd"] == "<not set>":
-                    interface_dict[canonical_name]["vrf"] = {
-                        "name": vrf["name"],
-                    }
-                else:
-                    interface_dict[canonical_name]["vrf"] = {
-                        "name": vrf["name"],
-                    }
+                interface_dict[canonical_name]["vrf"] = {
+                    "name": vrf["name"],
+                }
         except KeyError:
             print(f"Error: VRF configuration on interface {interface} not as expected.")
             continue
@@ -309,7 +304,6 @@ def format_nxos_results(device):
     macs = device.get("mac_address", [])
     descriptions = device.get("description", [])
     link_statuses = device.get("link_status", [])
-    vrfs_rd = device.get("vrf_rds", [])
     vrfs_interfaces = device.get("vrf_interfaces", [])
     vlans = device.get("vlans", [])
     interface_vlans = device.get("interface_vlans", [])
@@ -325,11 +319,8 @@ def format_nxos_results(device):
     link_status_list = ensure_list(link_statuses)
     vlan_list = ensure_list(vlans)
     interface_vlan_list = ensure_list(interface_vlans)
+    # vrfs_interfaces_list = ensure_list(vrfs_interfaces)
 
-    if vrfs_rd is None:
-        vrfs_rds = []
-    else:
-        vrfs_rds = ensure_list(vrfs_rd)
     if vrfs_interfaces is None:
         vrfs_interfaces = []
     else:
@@ -443,25 +434,11 @@ def format_nxos_results(device):
     for interface_name, interface_info in interface_dict.items():
         interface_list.append({canonical_interface_name(interface_name): interface_info})
 
-    # Populate vrf_dict from commands and add to interface_dict
-    vrf_dict = {vrf["id"]: vrf for vrf in vrfs_rds}
-
-    for interface in vrfs_interfaces:
-        vrf_id = interface["id"]
-        if "interfaces" not in vrf_dict[vrf_id]:
-            vrf_dict[vrf_id]["interfaces"] = []
-        vrf_dict[vrf_id]["interfaces"].append(interface["interface"])
-
-    vrf_list = list(vrf_dict.values())
-    for vrf in vrf_list:
+    for vrf in vrfs_interfaces:
         try:
-            if "interfaces" in vrf:
-                for interface in vrf["interfaces"]:
-                    canonical_name = canonical_interface_name(interface)
-                    if canonical_name.startswith("VLAN"):
-                        canonical_name = canonical_name.replace("VLAN", "Vlan", 1)
-                    interface_dict.setdefault(canonical_name, {})
-                    interface_dict[canonical_name]["vrf"] = {"name": vrf["name"]}
+            canonical_name = canonical_interface_name(vrf["interface"])
+            interface_dict.setdefault(canonical_name, {})
+            interface_dict[canonical_name]["vrf"] = {"name": vrf["name"]}
         except KeyError:
             print(f"Error: VRF configuration on interface {interface} not as expected.")
             continue
@@ -477,7 +454,6 @@ def format_nxos_results(device):
     del device["description"]
     del device["link_status"]
     del device["mode"]
-    del device["vrf_rds"]
     del device["vrf_interfaces"]
     del device["vlans"]
     del device["interface_vlans"]
