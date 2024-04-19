@@ -16,27 +16,26 @@ from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, 
 from nautobot.ipam.models import Namespace
 from nautobot_ssot.jobs.base import DataSource
 
-from nautobot_device_onboarding.diffsync.adapters.network_importer_adapters import (
-    NetworkImporterNautobotAdapter,
-    NetworkImporterNetworkAdapter,
+from nautobot_device_onboarding.diffsync.adapters.sync_network_data_adapters import (
+    SyncNetworkDataNautobotAdapter,
+    SyncNetworkDataNetworkAdapter,
 )
-from nautobot_device_onboarding.diffsync.adapters.onboarding_adapters import (
-    OnboardingNautobotAdapter,
-    OnboardingNetworkAdapter,
+from nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters import (
+    SyncDevicesNautobotAdapter,
+    SyncDevicesNetworkAdapter,
 )
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
-from nautobot_device_onboarding.nornir_plays.command_getter import command_getter_do, command_getter_ni
 from nautobot_device_onboarding.utils.helper import onboarding_task_fqdn_to_ip
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
 LOGGER = logging.getLogger(__name__)
-name = "Device Onboarding/Network Importer"  # pylint: disable=invalid-name
+name = "Device Onboarding"  # pylint: disable=invalid-name
 
 
 class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
-    """Nautobot Job for onboarding a new device."""
+    """Nautobot Job for onboarding a new device (original)."""
 
     location = ObjectVar(
         model=Location,
@@ -78,8 +77,8 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
     class Meta:
         """Meta object boilerplate for onboarding."""
 
-        name = "Perform Device Onboarding"
-        description = "Login to a device(s) and populate Nautobot Device object(s)."
+        name = "Perform Device Onboarding (Original)"
+        description = "Login to a device(s) and populate Nautobot Device object(s). This is the original Job as part of Device Onboarding initially created in 2021."
         has_sensitive_variables = False
 
     def __init__(self, *args, **kwargs):
@@ -201,11 +200,11 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
             self.secret = settings.NAPALM_ARGS.get("secret", None)
 
 
-class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-attributes
+class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attributes
     """Job for syncing basic device info from a network into Nautobot."""
 
     def __init__(self, *args, **kwargs):
-        """Initialize SSOTDeviceOnboarding."""
+        """Initialize SSoTSyncDevices."""
         super().__init__(*args, **kwargs)
         self.processed_csv_data = {}
         self.task_kwargs_csv_data = {}
@@ -215,8 +214,8 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
     class Meta:
         """Metadata about this Job."""
 
-        name = "Sync Devices"
-        description = "Synchronize basic device information into Nautobot"
+        name = "Sync Devices From Network"
+        description = "Synchronize basic device information into Nautobot from one or more network devices. Information includes Device Name, Serial Number, Management IP/Interface."
 
     debug = BooleanVar(
         default=False,
@@ -285,12 +284,12 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
 
     def load_source_adapter(self):
         """Load onboarding network adapter."""
-        self.source_adapter = OnboardingNetworkAdapter(job=self, sync=self.sync)
+        self.source_adapter = SyncDevicesNetworkAdapter(job=self, sync=self.sync)
         self.source_adapter.load()
 
     def load_target_adapter(self):
         """Load onboarding Nautobot adapter."""
-        self.target_adapter = OnboardingNautobotAdapter(job=self, sync=self.sync)
+        self.target_adapter = SyncDevicesNautobotAdapter(job=self, sync=self.sync)
         self.target_adapter.load()
 
     def _convert_sring_to_bool(self, string, header):
@@ -441,7 +440,7 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
                 # prepare the task_kwargs needed by the CommandGetterDO job
                 self.job_result.task_kwargs = {"debug": debug, "csv_file": self.task_kwargs_csv_data}
             else:
-                raise ValidationError(message="CSV check failed. No devices will be onboarded.")
+                raise ValidationError(message="CSV check failed. No devices will be synced.")
 
         else:
             # Verify that all requried form inputs have been provided
@@ -501,35 +500,22 @@ class SSOTDeviceOnboarding(DataSource):  # pylint: disable=too-many-instance-att
         super().run(dryrun, memory_profiling, *args, **kwargs)
 
 
-class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attributes
+class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attributes
     """Job syncing extended device attributes into Nautobot."""
 
     def __init__(self, *args, **kwargs):
-        """Initialize SSOTNetworkImporter."""
+        """Initialize SSOTSyncNetworkData."""
         super().__init__(*args, **kwargs)
 
-        self.filtered_devices = None  # Queryset of devices based on form inputs
-
-        # FOR TESTING ONLY, REMOVE WHEN NOT TESTING
-        # from nautobot_device_onboarding.diffsync import mock_data
-        # from nautobot_device_onboarding.utils import diffsync_utils
-        # self.command_getter_result = mock_data.network_importer_mock_data
-        # self.devices_to_load = diffsync_utils.generate_device_queryset_from_command_getter_result(self.command_getter_result)
-        # FOR TESTING ONLY, REMOVE WHEN NOT TESTING
-
-        # RESTORE THESE LINES WHEN NOT TESTING! #
-        self.command_getter_result = None  # Dict result from CommandGetter job
+        self.filtered_devices = None  # Queryset of devices based on job form inputs
+        self.command_getter_result = None  # Dict result from CommandGetter nornir task
         self.devices_to_load = None  # Queryset consisting of devices that responded
-        # RESTORE THESE LINES WHEN NOT TESTING! #
 
     class Meta:
         """Metadata about this Job."""
 
-        name = "Sync Network Data"
-        description = (
-            "Synchronize extended device attribute information into Nautobot; "
-            "including Interfaces, IPAddresses, Prefixes, Vlans and Vrfs."
-        )
+        name = "Sync Network Data From Network"
+        description = "Synchronize extended device attribute information into Nautobot from one or more network devices. Information includes Interfaces, IPAddresses, Prefixes, Vlans and Vrfs."
 
     debug = BooleanVar(description="Enable for more verbose logging.")
     sync_vlans = BooleanVar(default=False, description="Sync VLANs and interface VLAN assignments.")
@@ -576,15 +562,15 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
     )
 
     def load_source_adapter(self):
-        """Load onboarding network adapter."""
+        """Load network data adapter."""
         # do not load source data if the job form does not filter which devices to sync
         if self.filtered_devices:
-            self.source_adapter = NetworkImporterNetworkAdapter(job=self, sync=self.sync)
+            self.source_adapter = SyncNetworkDataNetworkAdapter(job=self, sync=self.sync)
             self.source_adapter.load()
 
     def load_target_adapter(self):
-        """Load onboarding Nautobot adapter."""
-        self.target_adapter = NetworkImporterNautobotAdapter(job=self, sync=self.sync)
+        """Load network data Nautobot adapter."""
+        self.target_adapter = SyncNetworkDataNautobotAdapter(job=self, sync=self.sync)
         self.target_adapter.load()
 
     def run(
@@ -645,55 +631,5 @@ class SSOTNetworkImporter(DataSource):  # pylint: disable=too-many-instance-attr
         super().run(dryrun, memory_profiling, *args, **kwargs)
 
 
-class CommandGetterDO(Job):
-    """Simple Job to Execute Show Command."""
-
-    class Meta:
-        """Job Meta."""
-
-        name = "Command Getter for Device Onboarding"
-        description = "Login to a device(s) and run commands."
-        has_sensitive_variables = False
-        hidden = False
-
-    csv_file = StringVar(required=False)
-    debug = BooleanVar(required=False)
-    ip_addresses = StringVar(required=False)
-    port = IntegerVar(required=False)
-    timeout = IntegerVar(required=False)
-    secrets_group = ObjectVar(model=SecretsGroup)
-    platform = ObjectVar(model=Platform, required=False)
-
-    def run(self, *args, **kwargs):
-        """Run command getter."""
-        compiled_results = command_getter_do(self.job_result, self.logger.getEffectiveLevel(), kwargs)
-        return compiled_results
-
-
-class CommandGetterNetworkImporter(Job):
-    """Simple Job to Execute Show Command."""
-
-    class Meta:
-        """Job Meta."""
-
-        name = "Command Getter for Network Importer"
-        description = "Login to a device(s) and run commands."
-        has_sensitive_variables = False
-        hidden = False
-
-    debug = BooleanVar()
-    namespace = ObjectVar(model=Namespace, required=True)
-    devices = MultiObjectVar(model=Device, required=False)
-    location = ObjectVar(model=Location, required=False)
-    device_role = ObjectVar(model=Role, required=False)
-    port = IntegerVar(default=22)
-    timeout = IntegerVar(default=30)
-
-    def run(self, *args, **kwargs):
-        """Run command getter."""
-        compiled_results = command_getter_ni(self.job_result, self.logger.getEffectiveLevel(), kwargs)
-        return compiled_results
-
-
-jobs = [OnboardingTask, SSOTDeviceOnboarding, SSOTNetworkImporter, CommandGetterDO, CommandGetterNetworkImporter]
+jobs = [OnboardingTask, SSOTSyncDevices, SSOTSyncNetworkData]
 register_jobs(*jobs)

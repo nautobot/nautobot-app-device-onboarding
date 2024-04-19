@@ -10,20 +10,20 @@ from django.core.exceptions import ValidationError
 from django.db.models import Model
 from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
 
-from nautobot_device_onboarding.diffsync.models import onboarding_models
-from nautobot_device_onboarding.nornir_plays.command_getter import command_getter_do
+from nautobot_device_onboarding.diffsync.models import sync_devices_models
+from nautobot_device_onboarding.nornir_plays.command_getter import sync_devices_command_getter
 from nautobot_device_onboarding.utils import diffsync_utils
 
 ParameterSet = FrozenSet[Tuple[str, Hashable]]
 
 
-class OnboardingNautobotAdapter(diffsync.DiffSync):
+class SyncDevicesNautobotAdapter(diffsync.DiffSync):
     """Adapter for loading Nautobot data."""
 
-    manufacturer = onboarding_models.OnboardingManufacturer
-    platform = onboarding_models.OnboardingPlatform
-    device = onboarding_models.OnboardingDevice
-    device_type = onboarding_models.OnboardingDeviceType
+    manufacturer = sync_devices_models.SyncDevicesManufacturer
+    platform = sync_devices_models.SyncDevicesPlatform
+    device = sync_devices_models.SyncDevicesDevice
+    device_type = sync_devices_models.SyncDevicesDeviceType
 
     top_level = ["manufacturer", "platform", "device_type", "device"]
 
@@ -32,7 +32,7 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
     _cache_hits: DefaultDict[str, int] = defaultdict(int)
 
     def __init__(self, job, sync, *args, **kwargs):
-        """Initialize the OnboardingNautobotAdapter."""
+        """Initialize the SyncDevicesNautobotAdapter."""
         super().__init__(*args, **kwargs)
         self.job = job
         self.sync = sync
@@ -142,18 +142,18 @@ class OnboardingNautobotAdapter(diffsync.DiffSync):
         self.load_devices()
 
 
-class OnboardingNetworkAdapter(diffsync.DiffSync):
+class SyncDevicesNetworkAdapter(diffsync.DiffSync):
     """Adapter for loading device data from a network."""
 
-    manufacturer = onboarding_models.OnboardingManufacturer
-    platform = onboarding_models.OnboardingPlatform
-    device = onboarding_models.OnboardingDevice
-    device_type = onboarding_models.OnboardingDeviceType
+    manufacturer = sync_devices_models.SyncDevicesManufacturer
+    platform = sync_devices_models.SyncDevicesPlatform
+    device = sync_devices_models.SyncDevicesDevice
+    device_type = sync_devices_models.SyncDevicesDeviceType
 
     top_level = ["manufacturer", "platform", "device_type", "device"]
 
     def __init__(self, job, sync, *args, **kwargs):
-        """Initialize the OnboardingNetworkAdapter."""
+        """Initialize the SyncDevicesNetworkAdapter."""
         super().__init__(*args, **kwargs)
         self.job = job
         self.sync = sync
@@ -202,7 +202,7 @@ class OnboardingNetworkAdapter(diffsync.DiffSync):
                     )
                     raise Exception("Platform.network_driver missing")  # pylint: disable=broad-exception-raised
 
-        result = command_getter_do(
+        result = sync_devices_command_getter(
             self.job.job_result, self.job.logger.getEffectiveLevel(), self.job.job_result.task_kwargs
         )
         if self.job.debug:

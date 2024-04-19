@@ -1,14 +1,13 @@
 """General helper functions for the app."""
 
 import socket
-
 import netaddr
+from netaddr.core import AddrFormatError
 from nautobot.dcim.filters import DeviceFilterSet
 from nautobot.dcim.models import Device
-from netaddr.core import AddrFormatError
 from nornir_nautobot.exceptions import NornirNautobotException
-
 from nautobot_device_onboarding.exceptions import OnboardException
+
 
 FIELDS_PK = {
     "location",

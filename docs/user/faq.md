@@ -16,7 +16,7 @@ You need to disable automatic platform detection, specify the device platform ty
 
 ## Is it possible to disable the automatic creation of Device Type, Device Role or Platform?
 
-**Yes** (Legacy)! Using the plugin settings, it's possible to control individually the creation of `device_role`, `device_type`, `manufacturer` & `platform`.
+**Yes** (original)! Using the plugin settings, it's possible to control individually the creation of `device_role`, `device_type`, `manufacturer` & `platform`.
 
 ```python
 # configuration.py
@@ -49,7 +49,7 @@ Optional arguments are often used to define a `secret` for Cisco devices and oth
 
 ## Does this app support the discovery and the creation of all interfaces and IP Addresses?
 
-**Yes**. The legacy Deivce Onboarding job/SSot Sync Devices will only discover and create the management interface and the management IP address. Importing all interfaces and IP addresses is available from the SSoT job (Sync Network Data).
+**Yes**. The original Deivce Onboarding job/SSot Sync Devices will only discover and create the management interface and the management IP address. Importing all interfaces and IP addresses is available from the SSoT job (Sync Network Data).
 
 ## Does this app support the discovery of device based on fqdn?
 

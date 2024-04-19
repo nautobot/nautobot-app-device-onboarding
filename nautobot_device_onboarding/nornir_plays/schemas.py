@@ -1,12 +1,12 @@
-"""General Schemas."""
+"""General Schemas and JSONSchemas for SSoT Based Sync Jobs."""
 
 
-def device_onboarding_schema(json_schema=True):
-    """Schema for SSoT Network Device Onboarding."""
+def sync_devices_schema(json_schema=True):
+    """Schema for SSOTSyncDevices Job."""
     if json_schema:
         return {
-            "title": "Device Onboarding",
-            "description": "Schema for SSoT Network Device Onboarding",
+            "title": "Sync Devices From Network",
+            "description": "Schema for SSoT Sync Devices From Network",
             "type": "object",
             "required": ["hostname", "serial", "device_type", "mgmt_interface", "platform", "network_driver"],
             "properties": {
@@ -40,12 +40,12 @@ def device_onboarding_schema(json_schema=True):
     }
 
 
-def network_importer_schema(json_schema=True):
-    """Schema for SSoT Network Network Importer."""
+def sync_network_data_schema(json_schema=True):
+    """Schema for SSoT SSOTSyncNetworkData."""
     if json_schema:
         return {
-            "title": "Network Importer",
-            "description": "Schema for SSoT Network Network Importer",
+            "title": "Sync Network Data From Network",
+            "description": "Schema for SSoT Sync Network Data From Network",
             "type": "object",
             "required": ["type", "ip_addresses", "mac_address", "link_status", "802.1Q_mode"],
             "properties": {

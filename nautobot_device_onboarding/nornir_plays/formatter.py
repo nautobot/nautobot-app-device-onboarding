@@ -1,14 +1,13 @@
-"""Formatter."""
+"""Command Extraction and Formatting or SSoT Based Jobs."""
 
 import json
 from django.template import engines
 from django.utils.module_loading import import_string
 from jdiff import extract_data_from_json
 from jinja2.sandbox import SandboxedEnvironment
+from nautobot.dcim.models import Device
 from netutils.interface import canonical_interface_name
 from netutils.vlan import vlanconfig_to_list
-from nautobot.dcim.models import Device
-
 from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC
 
 
@@ -80,10 +79,8 @@ def extract_show_data(host, multi_result, command_getter_type):
     Args:
         host (host): host from task
         multi_result (multiResult): multiresult object from nornir
-        command_getter_type (str): to know what dict to pull, device_onboarding or network_importer.
+        command_getter_type (str): to know what dict to pull, sync_devices or sync_network_data.
     """
-    # Think about whether this should become a constant, the env shouldn't change per job execution, but
-    # perhaps it shouldn't be reused to avoid any memory leak?
     jinja_env = get_django_env()
 
     host_platform = host.platform
@@ -439,7 +436,6 @@ def format_nxos_results(device):
             interface_dict.setdefault(canonical_name, {})
             interface_dict[canonical_name]["vrf"] = {"name": vrf["name"]}
         except KeyError:
-            print(f"Error: VRF configuration on interface {interface} not as expected.")
             continue
 
     device["interfaces"] = interface_list
