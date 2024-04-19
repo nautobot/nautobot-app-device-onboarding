@@ -74,7 +74,7 @@ Then restart (if necessary) the Nautobot services which may include:
 sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
 ```
 
-## App Configuration
+## App Configuration (Original)
 
 Although the app can run without providing any settings, the app behavior can be controlled with the following list of settings defined in `nautobot_config.py`:
 
