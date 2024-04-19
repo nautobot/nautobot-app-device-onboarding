@@ -9,10 +9,10 @@ This [Nautobot](https://github.com/nautobot/nautobot) App allows to easily onboa
 
 ## Description/Overview
 
-### Legacy Implementation
+### Original Implementation
 
 !!! info
-    The legacy job and extensions pattern will remain a part of this App for the near future, this will allow custom extensions to continue working without causes issues to users that have taken the time and understand the legacy framework.  The newer SSoT implementation will be discussed in the next section.
+    The original job and extensions pattern will remain a part of this App for the near future, this will allow custom extensions to continue working without causes issues to users that have taken the time and understand the original framework.  The newer SSoT implementation will be discussed in the next section.
 
 The `nautobot-device-onboarding` app uses the [netmiko](https://github.com/ktbyers/netmiko) and [NAPALM](https://napalm.readthedocs.io/en/latest/) libraries to simplify the onboarding process of a new device into Nautobot down to, in many cases, an *IP Address* and a *Location*. In some cases, the user may also have to specify a specific *Device Platform* and *Device Port*.
 
@@ -52,11 +52,11 @@ The new implementation of device onboarding in this app is utilizing the SSoT fr
     - Remove the Batfish dependency.
 - Re-use backend plugins and libraries such as `nautobot-app-nornir` to provide the a similar feeling to other plugins like `nautobot-app-golden-config`.
 - Utilize SSoT framework and the new `contrib` functionality to speed up development of new features.
-- By collapsing 
+- By collapsing:
 
 Expose two new SSoT based Nautobot jobs to perform the syncing of data.
 
-1. `Sync Device SSoT Job` - Takes mininum inputs nearly identical to the legacy job (IP, Locaiton, SecretGroup), and create a device with bare minium information to be able to manage a device. This job syncs data from the network itself and creates a device with the follow attributes.
+1. `Sync Devices From Network` - Takes mininum inputs nearly identical to the original job (IP, Locaiton, SecretGroup), and create a device with bare minium information to be able to manage a device. This job syncs data from the network itself and creates a device with the follow attributes.
     - Hostname
     - Serial Number
     - Device Type
@@ -64,7 +64,7 @@ Expose two new SSoT based Nautobot jobs to perform the syncing of data.
     - Management Interface
     - Management IP address (creates a prefix if one doesn't exist for the IP discovered.)
 
-2. `Sync Network Data SSoT Job` - From a provided list of existing Nautobot device objects, sync in additional metadata from a network device to enhance the available data from the network in Nautobot.
+2. `Sync Network Data From Network` - From a provided list of existing Nautobot device objects, sync in additional metadata from a network device to enhance the available data from the network in Nautobot.
     - All interfaces on the device with plus the attributes below:
         - Interface Name
         - MTU

@@ -17,7 +17,7 @@ As an example:
 
 ```yaml
 ---
-device_onboarding:
+sync_devices:
   hostname:
     commands:
       - command: "show version"
@@ -36,9 +36,9 @@ This App provides sane defaults that have been tested, the files are located in 
 
 ### Properly Formatting Git Repository
 
-When loading from a Git Repository this App is expecting a root directory called `onboarding_command_mappers`. Each of the platform YAML files are then located in this directory. The YAML file names must be named `<network_driver>.yml`.
+When loading from a Git Repository this App is expecting a root directory called `command_mappers`. Each of the platform YAML files are then located in this directory. The YAML file names must be named `<network_driver>.yml`.
 
 ### Setting up the Git Repository
 
 1. `Extensibility -> Git Repositories`
-2. Create a new repository, most importantly selecting the `Provides` of `Onboarding Command Mappers`
+2. Create a new repository, most importantly selecting the `Provides` of `Network Sync Job Command Mappers`

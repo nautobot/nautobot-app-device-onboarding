@@ -10,7 +10,7 @@ This page will describe the newer SSoT jobs that this App exposes and how they w
 - [Jdiff](https://jdiff.readthedocs.io/en/latest/usage/#extract_data_from_json) - Used to simplify parsing required data fields out of command outputs returned from command parser libraries like textFSM. Specifically `extract_data_from_json` method.
 - Parsers - Initially NTC Templates via textFSM, but future support for PyATS, TTP, etc. is expected in the future.
 
-## How the SSoT **Sync Devices** Job Works
+## How the SSoT **Sync Devices From Network** Job Works
 
 1. The job is executed with inputs selected.
     - List of comma seperated IP/DNS names is provided.
@@ -28,7 +28,7 @@ This page will describe the newer SSoT jobs that this App exposes and how they w
     - Next, the JSON result from the show command after the parser executes (E.g. textfsm), gets run through the jdiff function `extract_data_from_json()` with the data and the `jpath` from the YAML file definition.
     - Finally, an optional `post_processor` jinja2 capable execution can further transform the data for that command before passing it to finish the SSoT syncronizaton.
 
-## How the SSoT **Sync Network Data** Job Works
+## How the SSoT **Sync Network Data From Network** Job Works
 
 1. The job is executed with inputs selected.
     - One or multiple device selection.

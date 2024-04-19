@@ -9,7 +9,7 @@ This plugin provides methods to customize onboarding behavior. By creating onboa
 Please see the dedicated FAQ for [device onboarding extensions](onboarding_extensions.md).
 
 !!! warn
-    This is the legacy onboarding extensions.  The next section covers how to extend the new framework.
+    This is the original onboarding extensions.  The next section covers how to extend the new framework.
 
 ## Extending SSoT jobs (Sync Devices, and Sync Network Data)
 

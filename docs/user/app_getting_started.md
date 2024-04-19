@@ -8,7 +8,7 @@ To install the App, please follow the instructions detailed in the [Installation
 
 ## First steps with the App
 
-This App exposes a legacy device onboarding job, as well as two new SSoT based jobs that are considered the future of the App.
+This App exposes an original device onboarding job, as well as two new SSoT based jobs that are considered the future of the App.
 
 ### Prerequisites
 
@@ -28,7 +28,7 @@ Locations are the only other Nautobot prerequisite for the plugin to onboard a d
 
 ### Onboarding a Device
 
-Navigate to the Device Onboarding Job: Jobs > Perform Device Onboarding (Legacy).
+Navigate to the Device Onboarding Job: Jobs > Perform Device Onboarding (original).
 
 or
 

@@ -1,7 +1,7 @@
 # Onboarding Extensions
 
 !!! warn
-    This is the legacy onboarding extensions.
+    This is the original onboarding extensions.
 
 ## What are onboarding extensions?
 
