@@ -205,7 +205,7 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
                     "queryset": qs,
                     "defaults": {
                         "platform_parsing_info": add_platform_parsing_info(),
-                        "network_driver_mappings": get_all_network_driver_mappings()
+                        "network_driver_mappings": get_all_network_driver_mappings(),
                     },
                 },
             },

@@ -511,12 +511,11 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         self.command_getter_result = None  # Dict result from CommandGetter nornir task
         self.devices_to_load = None  # Queryset consisting of devices that responded
 
-
     class Meta:
         """Metadata about this Job."""
 
         name = "Sync Network Data From Network"
-        description = ("Synchronize extended device attribute information into Nautobot from one or more network devices. Information includes Interfaces, IPAddresses, Prefixes, Vlans and Vrfs.")
+        description = "Synchronize extended device attribute information into Nautobot from one or more network devices. Information includes Interfaces, IPAddresses, Prefixes, Vlans and Vrfs."
 
     debug = BooleanVar(description="Enable for more verbose logging.")
     sync_vlans = BooleanVar(default=False, description="Sync VLANs and interface VLAN assignments.")
