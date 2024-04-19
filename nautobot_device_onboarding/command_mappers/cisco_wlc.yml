@@ -1,5 +1,5 @@
 ---
-device_onboarding:
+sync_devices:
   hostname:
     commands:
       - command: "show sysinfo"
@@ -25,3 +25,4 @@ device_onboarding:
       - command: "show interface detailed management"
         use_textfsm: true
         jpath: "[*].netmask"
+        post_processor: "{{ obj[0] | netmask_to_cidr }}"

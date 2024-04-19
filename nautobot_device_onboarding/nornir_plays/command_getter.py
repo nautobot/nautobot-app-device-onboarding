@@ -1,9 +1,9 @@
 """CommandGetter."""
 
 from typing import Dict
-
 from django.conf import settings
 from nautobot.dcim.models import Platform
+from nautobot.dcim.utils import get_all_network_driver_mappings
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import SecretsGroup
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
@@ -19,7 +19,7 @@ from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInvento
 from nautobot_device_onboarding.nornir_plays.formatter import format_results
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
-from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
+from nautobot_device_onboarding.nornir_plays.processor import CommandGetterProcessor
 from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
@@ -72,8 +72,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
         return Result(host=task.host, result=f"{task.host.name} has a unsupported platform set.", failed=True)
     task.host.data["platform_parsing_info"] = command_getter_yaml_data[task.host.platform]
     commands = _get_commands_to_run(command_getter_yaml_data[task.host.platform][command_getter_job])
-    # Appears all commands in this for loop are already within 1 connection.
-    # task.host.open_connection("netmiko", configuration=task.nornir.config)
+    # All commands in this for loop are running within 1 device connection.
     for command in commands:
         try:
             task.run(
@@ -90,7 +89,6 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                 result=f"{command['command']}: E0001 - Textfsm template issue.",
                 failed=True,
             )
-    # task.host.close_connection("netmiko")
 
 
 def _parse_credentials(credentials):
@@ -121,8 +119,8 @@ def _parse_credentials(credentials):
     return (username, password, secret)
 
 
-def command_getter_do(job_result, log_level, kwargs):
-    """Nornir play to run show commands."""
+def sync_devices_command_getter(job_result, log_level, kwargs):
+    """Nornir play to run show commands for sync_devices ssot job."""
     logger = NornirLogger(job_result, log_level)
 
     if kwargs["csv_file"]:  # ip_addreses will be keys in a dict
@@ -146,7 +144,7 @@ def command_getter_do(job_result, log_level, kwargs):
                 "plugin": "empty-inventory",
             },
         ) as nornir_obj:
-            nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results, kwargs)])
+            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
             loaded_secrets_group = None
             for entered_ip in ip_addresses:
                 if kwargs["csv_file"]:
@@ -182,15 +180,15 @@ def command_getter_do(job_result, log_level, kwargs):
             nr_with_processors.run(
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
-                command_getter_job="device_onboarding",
+                command_getter_job="sync_devices",
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info("Error: %s", err)
     return compiled_results
 
 
-def command_getter_ni(job_result, log_level, kwargs):
-    """Process onboarding task from ssot-ni job."""
+def sync_network_data_command_getter(job_result, log_level, kwargs):
+    """Nornir play to run show commands for sync_network_data ssot job."""
     logger = NornirLogger(job_result, log_level)
     try:
         compiled_results = {}
@@ -205,15 +203,18 @@ def command_getter_ni(job_result, log_level, kwargs):
                 "options": {
                     "credentials_class": NORNIR_SETTINGS.get("credentials"),
                     "queryset": qs,
-                    "defaults": {"platform_parsing_info": add_platform_parsing_info()},
+                    "defaults": {
+                        "platform_parsing_info": add_platform_parsing_info(),
+                        "network_driver_mappings": get_all_network_driver_mappings()
+                    },
                 },
             },
         ) as nornir_obj:
-            nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results, kwargs)])
+            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
             nr_with_processors.run(
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
-                command_getter_job="network_importer",
+                command_getter_job="sync_network_data",
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info("Error: %s", err)

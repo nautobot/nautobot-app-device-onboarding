@@ -1,5 +1,5 @@
 ---
-device_onboarding:
+sync_devices:
   hostname:
     commands:
       - command: "show hostname"
