@@ -9,11 +9,11 @@ DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__
 
 def add_platform_parsing_info():
     """Merges platform command mapper from repo or defaults."""
-    if GitRepository.objects.filter(provided_contents=["nautobot_device_onboarding.command_mappers"]).count() == 1:
+    if GitRepository.objects.filter(provided_contents=["nautobot_device_onboarding.onboarding_command_mappers"]).count() == 1:
         repository_record = GitRepository.objects.filter(
-            provided_contents=["nautobot_device_onboarding.command_mappers"]
+            provided_contents=["nautobot_device_onboarding.onboarding_command_mappers"]
         ).first()
-        repo_data_dir = os.path.join(repository_record.filesystem_path, "command_mappers")
+        repo_data_dir = os.path.join(repository_record.filesystem_path, "onboarding_command_mappers")
         command_mappers_repo_path = load_command_mappers_from_dir(repo_data_dir)
     else:
         command_mappers_repo_path = {}

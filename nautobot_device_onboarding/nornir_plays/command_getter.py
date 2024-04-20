@@ -3,7 +3,6 @@
 from typing import Dict
 from django.conf import settings
 from nautobot.dcim.models import Platform
-from nautobot.dcim.utils import get_all_network_driver_mappings
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import SecretsGroup
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
@@ -14,13 +13,14 @@ from nornir.core.plugins.inventory import InventoryPluginRegister
 from nornir.core.task import Result, Task
 from nornir_netmiko.tasks import netmiko_send_command
 
-from nautobot_device_onboarding.constants import NETMIKO_TO_NAPALM_STATIC
+from nautobot_device_onboarding.constants import SUPPORTED_NETWORK_DRIVERS
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.formatter import format_results
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import CommandGetterProcessor
 from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info
+from nautobot_device_onboarding.constants import SUPPORTED_NETWORK_DRIVERS
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
@@ -68,8 +68,10 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
     """Run commands specified in PLATFORM_COMMAND_MAP."""
     if not task.host.platform:
         return Result(host=task.host, result=f"{task.host.name} has no platform set.", failed=True)
-    if task.host.platform not in list(NETMIKO_TO_NAPALM_STATIC.keys()):
+    if task.host.platform not in SUPPORTED_NETWORK_DRIVERS:
         return Result(host=task.host, result=f"{task.host.name} has a unsupported platform set.", failed=True)
+    if not command_getter_yaml_data[task.host.platform].get(command_getter_job):
+        return Result(host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True)
     task.host.data["platform_parsing_info"] = command_getter_yaml_data[task.host.platform]
     commands = _get_commands_to_run(command_getter_yaml_data[task.host.platform][command_getter_job])
     # All commands in this for loop are running within 1 device connection.
@@ -205,7 +207,7 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
                     "queryset": qs,
                     "defaults": {
                         "platform_parsing_info": add_platform_parsing_info(),
-                        "network_driver_mappings": get_all_network_driver_mappings(),
+                        "network_driver_mappings": SUPPORTED_NETWORK_DRIVERS,
                     },
                 },
             },

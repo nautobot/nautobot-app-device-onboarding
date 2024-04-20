@@ -5,7 +5,7 @@ One element of the new SSoT based jobs this app exposes; is the attempt to creat
 ## File Format
 There are only a few components to the file and they're described below:
 
-- `ssot job name` - Name of the job to define the commands and metadata needed for that job.
+- `ssot job name` - Name of the job to define the commands and metadata needed for that job. (choices: `sync_devices` or `sync_network_data`)
 - `root key data name` - Is fully defined in the schema definition.
 - `commands` - List of commands to execute in order to get the required data.
 - `command` - Actual `show` command to execute.
@@ -34,11 +34,22 @@ This App provides sane defaults that have been tested, the files are located in 
 !!! info
     To avoid overly complicating the merge logic, the App will always prefer the platform specific YAML file loaded in from the git repository.
 
+!!! warn
+    Partial YAML file merging is not supported. Meaning you can't only overload `sync_devices` definition and inherit `sync_network_data` definition.
+
 ### Properly Formatting Git Repository
 
-When loading from a Git Repository this App is expecting a root directory called `command_mappers`. Each of the platform YAML files are then located in this directory. The YAML file names must be named `<network_driver>.yml`.
+When loading from a Git Repository this App is expecting a root directory called `onboarding_command_mappers`. Each of the platform YAML files are then located in this directory. The YAML file names must be named `<network_driver>.yml`.  Where network_driver must exist in the netutils mapping exposed from Nautobot core.
+
+To quickly get a list run:
+
+```python
+from nautobot.dcim.utils import get_all_network_driver_mappings
+
+sorted(list(get_all_network_driver_mappings().keys()))
+```
 
 ### Setting up the Git Repository
 
-1. `Extensibility -> Git Repositories`
+1. Extensibility -> Git Repositories
 2. Create a new repository, most importantly selecting the `Provides` of `Network Sync Job Command Mappers`

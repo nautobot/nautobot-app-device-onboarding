@@ -17,7 +17,7 @@ datasource_contents = [
         "extras.gitrepository",
         DatasourceContent(
             name="Network Sync Job Command Mappers",
-            content_identifier="nautobot_device_onboarding.command_mappers",
+            content_identifier="nautobot_device_onboarding.onboarding_command_mappers",
             icon="mdi-paw",
             callback=refresh_git_command_mappers,
         ),
