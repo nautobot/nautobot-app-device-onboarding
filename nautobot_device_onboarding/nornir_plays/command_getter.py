@@ -77,7 +77,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
     # All commands in this for loop are running within 1 device connection.
     for command in commands:
         send_command_kwargs = {}
-        if command["parser"] in SUPPORTED_COMMAND_PARSERS:
+        if command.get("parser") in SUPPORTED_COMMAND_PARSERS:
             send_command_kwargs = {f"use_{command['parser']}": True}
         try:
             task.run(

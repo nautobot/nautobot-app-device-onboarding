@@ -23,6 +23,8 @@ SUPPORTED_NETWORK_DRIVERS = list(get_all_network_driver_mappings().keys())
 SUPPORTED_COMMAND_PARSERS = ["textfsm"]
 
 # This should potentially be removed and used nautobot core directly choices.
+# from nautobot.dcim.choices import InterfaceTypeChoices
+# InterfaceTypeChoices.as_dict() doesn't directly fit yet.  Seems like maybe netutils needs the "human readible" nb choices.
 INTERFACE_TYPE_MAP_STATIC = {
     "Gigabit Ethernet": "1000base-t",
     "Ten Gigabit Ethernet": "10gbase-t",
