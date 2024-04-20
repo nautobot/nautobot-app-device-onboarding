@@ -20,7 +20,7 @@ from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inven
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import CommandGetterProcessor
 from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info
-from nautobot_device_onboarding.constants import SUPPORTED_NETWORK_DRIVERS
+from nautobot_device_onboarding.constants import SUPPORTED_NETWORK_DRIVERS, SUPPORTED_COMMAND_PARSERS
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
@@ -76,16 +76,16 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
     commands = _get_commands_to_run(command_getter_yaml_data[task.host.platform][command_getter_job])
     # All commands in this for loop are running within 1 device connection.
     for command in commands:
-        use_parser = False
-        if command["parser"] == "textfsm":
-            use_parser = True
+        send_command_kwargs = {}
+        if command["parser"] in SUPPORTED_COMMAND_PARSERS:
+            send_command_kwargs = {f"use_{command['parser']}": True}
         try:
             task.run(
                 task=netmiko_send_command,
                 name=command["command"],
                 command_string=command["command"],
-                use_textfsm=use_parser,
                 read_timeout=60,
+                **send_command_kwargs
             )
         except NornirSubTaskError:
             Result(
