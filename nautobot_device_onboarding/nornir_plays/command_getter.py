@@ -51,16 +51,15 @@ def _get_commands_to_run(yaml_parsed_info):
     all_commands = []
     for _, value in yaml_parsed_info.items():
         # Deduplicate commands + parser key
-        if value.get("commands"):
-            # Means their isn't any "nested" structures.
+        current_root_key = value.get("commands")
+        if isinstance(current_root_key, list):
+            # Means their is any "nested" structures. e.g multiple commands
             for command in value["commands"]:
                 all_commands.append(command)
         else:
-            # Means their is a "nested" structures.
-            for _, nested_command_info in value.items():
-                if isinstance(nested_command_info, dict):
-                    for command in nested_command_info["commands"]:
-                        all_commands.append(command)
+            if isinstance(current_root_key, dict):
+                # Means their isn't a "nested" structures. e.g 1 command
+                all_commands.append(current_root_key)
     return deduplicate_command_list(all_commands)
 
 
