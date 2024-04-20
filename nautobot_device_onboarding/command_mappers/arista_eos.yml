@@ -2,9 +2,9 @@
 sync_devices:
   hostname:
     commands:
-      - command: "show hostname"
-        parser: "textfsm"
-        jpath: "[*].hostname"
+      command: "show hostname"
+      parser: "textfsm"
+      jpath: "[*].hostname"
   serial:
     commands:
       - command: "show version"

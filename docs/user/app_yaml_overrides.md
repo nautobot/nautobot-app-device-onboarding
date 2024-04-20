@@ -27,6 +27,20 @@ sync_devices:
 ..omitted..
 ```
 
+If there is only one command that needs to be run, the code base also accepts that in a dictionary format.
+
+```yaml
+---
+sync_devices:
+  hostname:
+    commands:
+      command: "show version"
+      parser: "textfsm"
+      jpath: "[*].hostname"
+      post_processor: "{{ obj[0] | upper }}"
+..omitted..
+```
+
 ## Using Datasource to Override
 
 This App provides sane defaults that have been tested, the files are located in the source code under `command_mappers`. There is potential for these sane defaults to not work in a given environment; alternatively you may want to add additional platform support in your deployment. These are the two main use cases to utilize the datasource feature this app exposes.
