@@ -27,19 +27,19 @@ InventoryPluginRegister.register("empty-inventory", EmptyInventory)
 
 
 def deduplicate_command_list(data):
-    """Deduplicates a list of dictionaries based on 'command' and 'use_textfsm' keys.
+    """Deduplicates a list of dictionaries based on 'command' and 'parser' keys.
 
     Args:
         data: A list of dictionaries.
 
     Returns:
-        A new list containing only unique elements based on 'command' and 'use_textfsm'.
+        A new list containing only unique elements based on 'command' and 'parser'.
     """
     seen = set()
     unique_list = []
     for item in data:
-        # Create a tuple containing only 'command' and 'use_textfsm' for comparison
-        key = (item["command"], item["use_textfsm"])
+        # Create a tuple containing only 'command' and 'parser' for comparison
+        key = (item["command"], item["parser"])
         if key not in seen:
             seen.add(key)
             unique_list.append(item)
@@ -76,12 +76,15 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
     commands = _get_commands_to_run(command_getter_yaml_data[task.host.platform][command_getter_job])
     # All commands in this for loop are running within 1 device connection.
     for command in commands:
+        use_parser = False
+        if command["parser"] == "textfsm":
+            use_parser = True
         try:
             task.run(
                 task=netmiko_send_command,
                 name=command["command"],
                 command_string=command["command"],
-                use_textfsm=command["use_textfsm"],
+                use_textfsm=use_parser,
                 read_timeout=60,
             )
         except NornirSubTaskError:

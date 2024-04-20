@@ -3,84 +3,84 @@ sync_devices:
   hostname:
     commands:
       - command: "show version"
-        use_textfsm: true
+        parser: "textfsm"
         post_processor: "{{ obj[0] | upper }}"
         jpath: "[*].hostname"
   serial:
     commands:
       - command: "show version"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].serial[0]"
   device_type:
     commands:
       - command: "show version"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].hardware[0]"
   mgmt_interface:
     commands:
       - command: "show interfaces"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[?ip_address=='{{ obj }}'].{name: interface, enabled: link_status}"
         post_processor: "{{ (obj | selectattr('enabled', 'eq', 'up') | list | first ).name }}"
   mask_length:
     commands:
       - command: "show interfaces"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[?ip_address=='{{ obj }}'].prefix_length"
         post_processor: "{{ obj | unique | first }}"
 sync_network_data:
   serial:
     commands:
       - command: "show version"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].serial[0]"
   type:
     commands:
       - command: "show interfaces"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].{interface: interface, type: hardware_type}"
   ip_addresses:
     commands:
       - command: "show interfaces"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].{interface: interface, ip_address: ip_address}"
   prefix_length:
     commands:
       - command: "show interfaces"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].{interface: interface, prefix_length: prefix_length}"
   mtu:
     commands:
       - command: "show interfaces"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].{interface: interface, mtu: mtu}"
   mac_address:
     commands:
       - command: "show interfaces"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].{interface: interface, mac_address: mac_address}"
   description:
     commands:
       - command: "show interfaces"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].{interface: interface, description: description}"
   link_status:
     commands:
       - command: "show interfaces"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].{interface: interface, link_status: link_status}"
   vrfs:
     commands:
       - command: "show vrf"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].{name: name, interfaces: interfaces}"
   vlans:
     commands:
       - command: "show vlan"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].{interfaces: interfaces, vlan_name: vlan_name, vlan_id: vlan_id, status: status}"
   interface_vlans:
     commands:
       - command: "show interfaces switchport"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].{interface: interface, admin_mode: admin_mode, access_vlan: access_vlan, native_vlan: native_vlan, trunking_vlans: trunking_vlans, voice_vlan: voice_vlan}"
