@@ -30,6 +30,82 @@ def get_django_env():
     return jinja_env
 
 
+def extract_and_post_process(parsed_command_output, yaml_command_element, j2_data_context):
+    """Helper to extract and apply post_processing on a single element."""
+    j2_env = get_django_env()
+    jpath_template = j2_env.from_string(yaml_command_element["jpath"])
+    j2_rendered_jpath = jpath_template.render(**j2_data_context)
+    extracted_value = extract_data_from_json(parsed_command_output, j2_rendered_jpath)
+    pre_processed_extracted = extracted_value
+    if yaml_command_element.get("post_processor"):
+        # j2 context data changes obj(hostname) -> extracted_value for post_processor
+        j2_data_context["obj"] = extracted_value
+        template = j2_env.from_string(yaml_command_element["post_processor"])
+        extracted_processed = template.render(**j2_data_context)
+    else:
+        extracted_processed = extracted_value
+    if isinstance(extracted_value, list) and len(extracted_value) == 1:
+        extracted_processed = extracted_value[0]
+    try:
+        post_processed_data = json.loads(extracted_processed)
+    except Exception:
+        post_processed_data = extracted_processed
+    return pre_processed_extracted, post_processed_data
+
+def perform_data_extractionv2(host, command_info_dict, command_outputs_dict):
+    """Extract, process data."""
+    result_dict = {}
+    for ssot_field, field_data in command_info_dict.items():
+        if isinstance(field_data['commands'], dict):
+            # only one command is specified as a dict force it to a list.
+            loop_commands = [field_data['commands']]
+        else:
+            loop_commands = field_data['commands']
+        for show_command_dict in loop_commands:
+            if field_data.get('root_key'):
+                a1, b1 = extract_and_post_process(
+                    command_outputs_dict[show_command_dict["command"]],
+                    show_command_dict,
+                    {"obj": host.name, "original_host": host.name},
+                )
+                root_key_extracted = a1.copy()
+                result_dict[ssot_field] = b1
+            else:
+                field_nesting = ssot_field.split('__')
+                if len(field_nesting) > 1:
+                    # Means there is "anticipated" data nesting `interfaces__mtu` means final data would be
+                    # {"Ethernet1/1": {"mtu": <value>}}
+                    for current_key in root_key_extracted:
+                        # current_key is a single iteration from the root_key extracted value. Typically we want this to be
+                        # a list of data that we want to become our nested key. E.g. current_key "Ethernet1/1"
+                        # These get passed into the render context for the template render to allow nested jpaths to use
+                        # the current_key context for more flexible jpath queries.
+                        a2, b2 = extract_and_post_process(
+                            command_outputs_dict[show_command_dict["command"]],
+                            show_command_dict,
+                            {"current_key": current_key, "obj": host.name, "original_host": host.name},
+                        )
+                        result_dict[field_nesting[0]][current_key][field_nesting[1]] = b2
+                else:
+                    a3, b3 = extract_and_post_process(
+                        command_outputs_dict[show_command_dict["command"]],
+                        show_command_dict,
+                        {"obj": host.name, "original_host": host.name},
+                    )
+                    result_dict[ssot_field] = b3
+        # if command_info_dict.get("validator_pattern"):
+        #     # temp validator
+        #     if command_info_dict["validator_pattern"] == "not None":
+        #         if not extracted_processed:
+        #             print("validator pattern not detected, checking next command.")
+        #             continue
+        #         else:
+        #             print("About to break the sequence due to valid pattern found")
+        #             result_dict[dict_field] = extracted_processed
+        #             break
+    return result_dict
+
+
 def perform_data_extraction(host, dict_field, command_info_dict, j2_env, task_result):
     """Extract, process data."""
     result_dict = {}
@@ -73,6 +149,19 @@ def perform_data_extraction(host, dict_field, command_info_dict, j2_env, task_re
     return result_dict
 
 
+def extract_show_datav2(host, command_outputs, command_getter_type):
+    """Take a result of show command and extra specific needed data.
+
+    Args:
+        host (host): host from task
+        multi_result (multiResult): multiresult object from nornir
+        command_getter_type (str): to know what dict to pull, sync_devices or sync_network_data.
+    """
+    command_getter_iterable = host.data["platform_parsing_info"][command_getter_type]
+    all_results_extracted = perform_data_extractionv2(host, command_getter_iterable, command_outputs)
+    return all_results_extracted
+
+
 def extract_show_data(host, multi_result, command_getter_type):
     """Take a result of show command and extra specific needed data.
 
@@ -84,34 +173,33 @@ def extract_show_data(host, multi_result, command_getter_type):
     jinja_env = get_django_env()
 
     host_platform = host.platform
-    if host_platform == "cisco_xe":
-        host_platform = "cisco_ios"
+    # if host_platform == "cisco_xe":
+    #     host_platform = "cisco_ios"
     command_jpaths = host.data["platform_parsing_info"]
+    root_keys = extract_root_keys(command_jpaths[command_getter_type])
     final_result_dict = {}
     for default_dict_field, command_info in command_jpaths[command_getter_type].items():
-        if command_info.get("commands"):
-            # Means there isn't any "nested" structures. Therefore not expected to see "validator_pattern key"
-            if isinstance(command_info["commands"], dict):
-                command_info["commands"] = [command_info["commands"]]
-            result = perform_data_extraction(host, default_dict_field, command_info, jinja_env, multi_result[0])
-            final_result_dict.update(result)
-        else:
-            # Means there is a "nested" structures. Priority
-            for dict_field, nested_command_info in command_info.items():
-                if isinstance(nested_command_info["commands"], dict):
-                    nested_command_info["commands"] = [nested_command_info["commands"]]
-                result = perform_data_extraction(host, dict_field, nested_command_info, jinja_env, multi_result[0])
+        if not default_dict_field.startswith('_metadata'):
+            if command_info.get("commands"):
+                # Means there isn't any "nested" structures. Therefore not expected to see "validator_pattern key"
+                if isinstance(command_info["commands"], dict):
+                    command_info["commands"] = [command_info["commands"]]
+                result = perform_data_extraction(host, default_dict_field, command_info, jinja_env, multi_result[0])
+                root_keys[default_dict_field] = result
                 final_result_dict.update(result)
+            else:
+                # Means there is a "nested" structures. Priority
+                for dict_field, nested_command_info in command_info.items():
+                    if isinstance(nested_command_info["commands"], dict):
+                        nested_command_info["commands"] = [nested_command_info["commands"]]
+                    result = perform_data_extraction(host, dict_field, nested_command_info, jinja_env, multi_result[0])
+                    root_keys[default_dict_field] = result
+                    final_result_dict.update(result)
     return final_result_dict
 
 
 def map_interface_type(interface_type):
     """Map interface type to a Nautobot type."""
-    # Can maybe this be used?
-    # from nautobot.dcim.choices import InterfaceTypeChoices
-    # InterfaceTypeChoices.CHOICES
-    # In [15]: dict(InterfaceTypeChoices.CHOICES).get('Other')
-    # Out[15]: (('other', 'Other'),)
     return INTERFACE_TYPE_MAP_STATIC.get(interface_type, "other")
 
 

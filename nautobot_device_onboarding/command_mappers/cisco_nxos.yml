@@ -27,68 +27,70 @@ sync_devices:
         jpath: "[?ip_address=='{{ obj }}'].subnet"
         post_processor: "{% if '/' in obj[0] %}{{ obj[0].split('/')[1] }}{% else %}31{% endif %}"
 sync_network_data:
-  interface:
-    commands:
-      - command: "show interface"
-        parser: "textfsm"
-        jpath: "[*].{interface: interface, interface: interface}"
   serial:
     commands:
-      - command: "show inventory"
-        parser: "textfsm"
-        jpath: "[?name=='Chassis'].sn"
-  type:
+      command: "show inventory"
+      parser: "textfsm"
+      jpath: "[?name=='Chassis'].sn"
+  interfaces:
+    root_key: true
     commands:
       - command: "show interface"
         parser: "textfsm"
-        jpath: "[*].{interface: interface, type: hardware_type}"
-  ip_addresses:
-    commands:
-      - command: "show ip interface vrf all"
-        parser: "textfsm"
-        jpath: "[*].{interface: interface, ip_address: ip_address}"
-  prefix_length:
-    commands:
-      - command: "show ip interface vrf all"
-        parser: "textfsm"
-        jpath: "[*].{interface: interface, prefix_length: subnet}"
-  mtu:
+        jpath: "[*].interface"  # when root_key=true this extracted value is what becomes interable in keys using __ under `current_key`.
+        post_processor: "{% set result={} %}{% for interface in obj %}{{ result.update({interface: {}}) or '' }}{% endfor %}{{ result | tojson }}"
+  interfaces__type:
     commands:
       - command: "show interface"
         parser: "textfsm"
-        jpath: "[*].{interface: interface, mtu: mtu}"
-  mac_address:
+        jpath: "[?interface=='{{ current_key }}'].hardware_type"
+  # ip_addresses:
+  #   commands:
+  #     - command: "show ip interface vrf all"
+  #       parser: "textfsm"
+  #       jpath: "[*].{interface: interface, ip_address: ip_address}"
+  # interfaces__prefix_length:
+  #   commands:
+  #     - command: "show ip interface vrf all"
+  #       parser: "textfsm"
+  #       jpath: "[*].{interface: interface, prefix_length: subnet}"
+  interfaces__mtu:
     commands:
       - command: "show interface"
         parser: "textfsm"
-        jpath: "[*].{interface: interface, mac_address: mac_address}"
-  description:
+        jpath: "[?interface=='{{ current_key }}'].mtu"
+  interfaces__mac_address:
     commands:
       - command: "show interface"
         parser: "textfsm"
-        jpath: "[*].{interface: interface, description: description}"
-  link_status:
+        jpath: "[?interface=='{{ current_key }}'].mac_address"
+  interfaces__description:
     commands:
       - command: "show interface"
         parser: "textfsm"
-        jpath: "[*].{interface: interface, link_status: link_status}"
-  mode:
+        jpath: "[?interface=='{{ current_key }}'].description"
+  interfaces__link_status:
     commands:
       - command: "show interface"
         parser: "textfsm"
-        jpath: "[*].{interface: interface, mode: mode}"
-  vrf_interfaces:
+        jpath: "[?interface=='{{ current_key }}'].link_status"
+  interfaces__mode:
     commands:
-      - command: "show vrf interface"
+      - command: "show interface"
         parser: "textfsm"
-        jpath: "[*].{interface: interface, name: name}"
-  vlans:
-    commands:
-      - command: "show vlan"
-        parser: "textfsm"
-        jpath: "[*].{interfaces: interfaces, vlan_name: vlan_name, vlan_id: vlan_id, status: status}"
-  interface_vlans:
-    commands:
-      - command: "show interface switchport"
-        parser: "textfsm"
-        jpath: "[*].{interface: interface, mode:mode, access_vlan: access_vlan, access_vlan_name: access_vlan_name, native_vlan: native_vlan, trunking_vlans: trunking_vlans, voice_vlan: voice_vlan}"
+        jpath: "[?interface=='{{ current_key }}'].mode"
+  # vrf_interfaces:
+  #   commands:
+  #     - command: "show vrf interface"
+  #       parser: "textfsm"
+  #       jpath: "[*].{interface: interface, name: name}"
+  # vlans:
+  #   commands:
+  #     - command: "show vlan"
+  #       parser: "textfsm"
+  #       jpath: "[*].{interfaces: interfaces, vlan_name: vlan_name, vlan_id: vlan_id, status: status}"
+  # interface_vlans:
+  #   commands:
+  #     - command: "show interface switchport"
+  #       parser: "textfsm"
+  #       jpath: "[*].{interface: interface, mode:mode, access_vlan: access_vlan, access_vlan_name: access_vlan_name, native_vlan: native_vlan, trunking_vlans: trunking_vlans, voice_vlan: voice_vlan}"

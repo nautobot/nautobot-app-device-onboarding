@@ -13,7 +13,6 @@ from nornir.core.plugins.inventory import InventoryPluginRegister
 from nornir.core.task import Result, Task
 from nornir_netmiko.tasks import netmiko_send_command
 
-from nautobot_device_onboarding.constants import SUPPORTED_NETWORK_DRIVERS
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.formatter import format_results
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
@@ -49,17 +48,18 @@ def deduplicate_command_list(data):
 def _get_commands_to_run(yaml_parsed_info):
     """Using merged command mapper info and look up all commands that need to be run."""
     all_commands = []
-    for _, value in yaml_parsed_info.items():
-        # Deduplicate commands + parser key
-        current_root_key = value.get("commands")
-        if isinstance(current_root_key, list):
-            # Means their is any "nested" structures. e.g multiple commands
-            for command in value["commands"]:
-                all_commands.append(command)
-        else:
-            if isinstance(current_root_key, dict):
-                # Means their isn't a "nested" structures. e.g 1 command
-                all_commands.append(current_root_key)
+    for key, value in yaml_parsed_info.items():
+        if not key.startswith('_metadata'):
+            # Deduplicate commands + parser key
+            current_root_key = value.get("commands")
+            if isinstance(current_root_key, list):
+                # Means their is any "nested" structures. e.g multiple commands
+                for command in value["commands"]:
+                    all_commands.append(command)
+            else:
+                if isinstance(current_root_key, dict):
+                    # Means their isn't a "nested" structures. e.g 1 command
+                    all_commands.append(current_root_key)
     return deduplicate_command_list(all_commands)
 
 
@@ -93,7 +93,6 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                 result=f"{command['command']}: E0001 - Textfsm template issue.",
                 failed=True,
             )
-
 
 def _parse_credentials(credentials):
     """Parse and return dictionary of credentials."""
@@ -141,6 +140,7 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
     # Initiate Nornir instance with empty inventory
     try:
         compiled_results = {}
+        compiled_resultsv2 = {}
         with InitNornir(
             runner=NORNIR_SETTINGS.get("runner"),
             logging={"enabled": False},
@@ -148,7 +148,9 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                 "plugin": "empty-inventory",
             },
         ) as nornir_obj:
-            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
+            nr_with_processors = nornir_obj.with_processors(
+                [CommandGetterProcessor(logger, compiled_results, compiled_resultsv2, kwargs)]
+            )
             loaded_secrets_group = None
             for entered_ip in ip_addresses:
                 if kwargs["csv_file"]:
@@ -196,6 +198,7 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
     logger = NornirLogger(job_result, log_level)
     try:
         compiled_results = {}
+        compiled_resultsv2 = {}
         qs = kwargs["devices"]
         if not qs:
             return None
@@ -214,7 +217,7 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
                 },
             },
         ) as nornir_obj:
-            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
+            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, compiled_resultsv2, kwargs)])
             nr_with_processors.run(
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
@@ -223,6 +226,7 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info("Error: %s", err)
         return err
+    print(f"compiled_resultsv2: {compiled_resultsv2}")
     compiled_results = format_results(compiled_results)
 
     return compiled_results
