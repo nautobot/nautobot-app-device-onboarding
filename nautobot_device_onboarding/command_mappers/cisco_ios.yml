@@ -4,7 +4,7 @@ sync_devices:
     commands:
       - command: "show version"
         parser: "textfsm"
-        post_processor: "{{ obj[0] | upper }}"
+        # post_processor: "{{ obj[0] | upper }}"
         jpath: "[*].hostname"
   serial:
     commands:

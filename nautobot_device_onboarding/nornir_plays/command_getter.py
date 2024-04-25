@@ -86,7 +86,8 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                 read_timeout=60,
                 **send_command_kwargs
             )
-        except NornirSubTaskError:
+        except NornirSubTaskError as err:
+            print(err)
             Result(
                 host=task.host,
                 changed=False,
@@ -190,7 +191,7 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info("Error: %s", err)
-    return compiled_results
+    return compiled_resultsv2
 
 
 def sync_network_data_command_getter(job_result, log_level, kwargs):
@@ -217,7 +218,9 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
                 },
             },
         ) as nornir_obj:
-            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, compiled_resultsv2, kwargs)])
+            nr_with_processors = nornir_obj.with_processors(
+                [CommandGetterProcessor(logger, compiled_results, compiled_resultsv2, kwargs)]
+            )
             nr_with_processors.run(
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
@@ -226,7 +229,8 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info("Error: %s", err)
         return err
+    print(f"compiled_resultsv1: {compiled_results}")
     print(f"compiled_resultsv2: {compiled_resultsv2}")
-    compiled_results = format_results(compiled_results)
+    # compiled_results = format_results(compiled_results)
 
-    return compiled_results
+    return compiled_resultsv2

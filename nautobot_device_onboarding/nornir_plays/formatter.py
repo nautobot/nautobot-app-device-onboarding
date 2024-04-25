@@ -35,6 +35,8 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
     j2_env = get_django_env()
     jpath_template = j2_env.from_string(yaml_command_element["jpath"])
     j2_rendered_jpath = jpath_template.render(**j2_data_context)
+    if isinstance(parsed_command_output, str):
+            parsed_command_output = json.loads(parsed_command_output)
     extracted_value = extract_data_from_json(parsed_command_output, j2_rendered_jpath)
     pre_processed_extracted = extracted_value
     if yaml_command_element.get("post_processor"):
@@ -44,12 +46,14 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
         extracted_processed = template.render(**j2_data_context)
     else:
         extracted_processed = extracted_value
-    if isinstance(extracted_value, list) and len(extracted_value) == 1:
-        extracted_processed = extracted_value[0]
     try:
         post_processed_data = json.loads(extracted_processed)
     except Exception:
         post_processed_data = extracted_processed
+    if isinstance(post_processed_data, list) and len(post_processed_data) == 1:
+        post_processed_data = post_processed_data[0]
+    print(f"pre_processed_extracted: {pre_processed_extracted}")
+    print(f"post_processed_data: {post_processed_data}")
     return pre_processed_extracted, post_processed_data
 
 def perform_data_extractionv2(host, command_info_dict, command_outputs_dict):
@@ -63,36 +67,37 @@ def perform_data_extractionv2(host, command_info_dict, command_outputs_dict):
             loop_commands = field_data['commands']
         for show_command_dict in loop_commands:
             if field_data.get('root_key'):
-                a1, b1 = extract_and_post_process(
+                root_key_pre, root_key_post = extract_and_post_process(
                     command_outputs_dict[show_command_dict["command"]],
                     show_command_dict,
                     {"obj": host.name, "original_host": host.name},
                 )
-                root_key_extracted = a1.copy()
-                result_dict[ssot_field] = b1
+                # root_key_extracted = a1.copy()
+                result_dict[ssot_field] = root_key_post
             else:
                 field_nesting = ssot_field.split('__')
+                # for current_nesting in field_nesting:
                 if len(field_nesting) > 1:
                     # Means there is "anticipated" data nesting `interfaces__mtu` means final data would be
                     # {"Ethernet1/1": {"mtu": <value>}}
-                    for current_key in root_key_extracted:
+                    for current_key in root_key_pre:
                         # current_key is a single iteration from the root_key extracted value. Typically we want this to be
                         # a list of data that we want to become our nested key. E.g. current_key "Ethernet1/1"
                         # These get passed into the render context for the template render to allow nested jpaths to use
                         # the current_key context for more flexible jpath queries.
-                        a2, b2 = extract_and_post_process(
+                        _, current_key_post = extract_and_post_process(
                             command_outputs_dict[show_command_dict["command"]],
                             show_command_dict,
                             {"current_key": current_key, "obj": host.name, "original_host": host.name},
                         )
-                        result_dict[field_nesting[0]][current_key][field_nesting[1]] = b2
+                        result_dict[field_nesting[0]][current_key][field_nesting[1]] = current_key_post
                 else:
-                    a3, b3 = extract_and_post_process(
+                    _, current_field_post = extract_and_post_process(
                         command_outputs_dict[show_command_dict["command"]],
                         show_command_dict,
                         {"obj": host.name, "original_host": host.name},
                     )
-                    result_dict[ssot_field] = b3
+                    result_dict[ssot_field] = current_field_post
         # if command_info_dict.get("validator_pattern"):
         #     # temp validator
         #     if command_info_dict["validator_pattern"] == "not None":

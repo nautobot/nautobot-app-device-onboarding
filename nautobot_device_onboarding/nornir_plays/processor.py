@@ -50,8 +50,8 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         for res in result[1:]:
             self.parsed_command_outputs[res.name] = res.result
 
-        meh = extract_show_datav2(host, self.parsed_command_outputs, 'sync_network_data')
-        self.datav2[host.name].update(meh)
+        ready_for_ssot_data = extract_show_datav2(host, self.parsed_command_outputs, task.params["command_getter_job"])
+        self.datav2[host.name].update(ready_for_ssot_data)
 
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Processor for logging and data processing on subtask completed."""
@@ -60,18 +60,9 @@ class CommandGetterProcessor(BaseLoggingProcessor):
             self.logger.debug(
                 f"subtask_instance_completed Subtask result {result.result}.", extra={"object": task.host}
             )
-        # formatted_data = extract_show_data(host, result, task.parent_task.params["command_getter_job"])
-        # for k, v in formatted_data.items():
-        #     self.data[host.name][k] = v
 
     def subtask_instance_started(self, task: Task, host: Host) -> None:  # show command start
         """Processor for logging and data processing on subtask start."""
         self.logger.info(
             f"subtask_instance_started Subtask starting {task.name}, {task.host}.", extra={"object": task.host}
         )
-        if not self.data.get(host.name):
-            self.data[host.name] = {
-                "platform": host.platform,
-                "manufacturer": host.platform.split("_")[0].title() if host.platform else "PLACEHOLDER",
-                "network_driver": host.platform,
-            }
