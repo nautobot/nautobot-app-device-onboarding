@@ -49,6 +49,9 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         formatted_data = extract_show_data(host, result, task.parent_task.params["command_getter_job"])
         for k, v in formatted_data.items():
             self.data[host.name][k] = v
+        if task.parent_task.params["command_getter_job"] == "network_importer":
+            self.data[host.name]["sync_vlans"] = self.kwargs["sync_vlans"]
+            self.data[host.name]["sync_vrfs"] = self.kwargs["sync_vrfs"]
 
     def subtask_instance_started(self, task: Task, host: Host) -> None:  # show command start
         """Processor for logging and data processing on subtask start."""

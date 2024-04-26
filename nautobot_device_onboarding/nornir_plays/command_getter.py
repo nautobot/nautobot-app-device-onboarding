@@ -209,10 +209,9 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
                 "options": {
                     "credentials_class": NORNIR_SETTINGS.get("credentials"),
                     "queryset": qs,
-                    "defaults": {
-                        "platform_parsing_info": add_platform_parsing_info(),
-                        "network_driver_mappings": SUPPORTED_NETWORK_DRIVERS,
-                    },
+                    "defaults": {"platform_parsing_info": add_platform_parsing_info()},
+                    "sync_vlans": kwargs["sync_vlans"],
+                    "sync_vrfs": kwargs["sync_vrfs"],
                 },
             },
         ) as nornir_obj:
