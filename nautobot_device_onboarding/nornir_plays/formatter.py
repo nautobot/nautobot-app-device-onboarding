@@ -30,7 +30,7 @@ def get_django_env():
     return jinja_env
 
 
-def extract_and_post_process(parsed_command_output, yaml_command_element, j2_data_context):
+def extract_and_post_process(parsed_command_output, yaml_command_element, j2_data_context, iter_type):
     """Helper to extract and apply post_processing on a single element."""
     j2_env = get_django_env()
     jpath_template = j2_env.from_string(yaml_command_element["jpath"])
@@ -50,10 +50,21 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
         post_processed_data = json.loads(extracted_processed)
     except Exception:
         post_processed_data = extracted_processed
+    if isinstance(post_processed_data, list) and len(post_processed_data) == 0:
+        # means result was empty, change empty result to iterater_type if applicable.
+        if iter_type:
+            print(f"in iter_type {iter_type}")
+            if iter_type == "dict":
+                print(f"post_iter: {post_processed_data}")
+                post_processed_data = {}
     if isinstance(post_processed_data, list) and len(post_processed_data) == 1:
-        post_processed_data = post_processed_data[0]
-    print(f"pre_processed_extracted: {pre_processed_extracted}")
-    print(f"post_processed_data: {post_processed_data}")
+        if isinstance(post_processed_data[0], str):
+            post_processed_data = post_processed_data[0]
+        else:
+            if isinstance(post_processed_data[0], dict):
+                if iter_type:
+                    if iter_type == "dict":
+                        post_processed_data = post_processed_data[0]
     return pre_processed_extracted, post_processed_data
 
 def perform_data_extractionv2(host, command_info_dict, command_outputs_dict):
@@ -66,11 +77,13 @@ def perform_data_extractionv2(host, command_info_dict, command_outputs_dict):
         else:
             loop_commands = field_data['commands']
         for show_command_dict in loop_commands:
+            final_iterable_type = show_command_dict.get("iterable_type")
             if field_data.get('root_key'):
                 root_key_pre, root_key_post = extract_and_post_process(
                     command_outputs_dict[show_command_dict["command"]],
                     show_command_dict,
                     {"obj": host.name, "original_host": host.name},
+                    final_iterable_type
                 )
                 # root_key_extracted = a1.copy()
                 result_dict[ssot_field] = root_key_post
@@ -89,6 +102,7 @@ def perform_data_extractionv2(host, command_info_dict, command_outputs_dict):
                             command_outputs_dict[show_command_dict["command"]],
                             show_command_dict,
                             {"current_key": current_key, "obj": host.name, "original_host": host.name},
+                            final_iterable_type
                         )
                         result_dict[field_nesting[0]][current_key][field_nesting[1]] = current_key_post
                 else:
@@ -96,6 +110,7 @@ def perform_data_extractionv2(host, command_info_dict, command_outputs_dict):
                         command_outputs_dict[show_command_dict["command"]],
                         show_command_dict,
                         {"obj": host.name, "original_host": host.name},
+                        final_iterable_type
                     )
                     result_dict[ssot_field] = current_field_post
         # if command_info_dict.get("validator_pattern"):

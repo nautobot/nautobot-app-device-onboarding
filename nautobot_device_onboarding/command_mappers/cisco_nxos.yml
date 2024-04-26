@@ -44,16 +44,22 @@ sync_network_data:
       - command: "show interface"
         parser: "textfsm"
         jpath: "[?interface=='{{ current_key }}'].hardware_type"
-  interfaces__ip_addresses__ip_address:
+  interfaces__ip_addresses:
     commands:
       - command: "show ip interface vrf all"
         parser: "textfsm"
-        jpath: "[*].{interface: interface, ip_address: ip_address}"
-  interfaces__ip_addresses__prefix_length:
-    commands:
-      - command: "show ip interface vrf all"
-        parser: "textfsm"
-        jpath: "[*].{interface: interface, prefix_length: subnet}"
+        jpath: "[?interface=='{{ current_key }}'].{ip_address: ip_address, prefix_length: subnet}"
+        iterable_type: "list"
+  # interfaces__ip_addresses__ip_address:
+  #   commands:
+  #     - command: "show ip interface vrf all"
+  #       parser: "textfsm"
+  #       jpath: "[*].{interface: interface, ip_address: ip_address}"
+  # interfaces__ip_addresses__prefix_length:
+  #   commands:
+  #     - command: "show ip interface vrf all"
+  #       parser: "textfsm"
+  #       jpath: "[*].{interface: interface, prefix_length: subnet}"
   interfaces__mtu:
     commands:
       - command: "show interface"
@@ -84,6 +90,7 @@ sync_network_data:
       - command: "show vrf interface"
         parser: "textfsm"
         jpath: "[?interface=='{{ current_key }}'].{name:name}"
+        iterable_type: "dict"
   # vlans:
   #   commands:
   #     - command: "show vlan"
