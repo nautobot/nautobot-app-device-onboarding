@@ -1,6 +1,7 @@
 """Adds command mapper, platform parsing info."""
 
 import os
+
 import yaml
 from nautobot.extras.models import GitRepository
 
@@ -9,7 +10,12 @@ DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__
 
 def add_platform_parsing_info():
     """Merges platform command mapper from repo or defaults."""
-    if GitRepository.objects.filter(provided_contents=["nautobot_device_onboarding.onboarding_command_mappers"]).count() == 1:
+    if (
+        GitRepository.objects.filter(
+            provided_contents=["nautobot_device_onboarding.onboarding_command_mappers"]
+        ).count()
+        == 1
+    ):
         repository_record = GitRepository.objects.filter(
             provided_contents=["nautobot_device_onboarding.onboarding_command_mappers"]
         ).first()

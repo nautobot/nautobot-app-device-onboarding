@@ -16,13 +16,13 @@ from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, 
 from nautobot.ipam.models import Namespace
 from nautobot_ssot.jobs.base import DataSource
 
-from nautobot_device_onboarding.diffsync.adapters.sync_network_data_adapters import (
-    SyncNetworkDataNautobotAdapter,
-    SyncNetworkDataNetworkAdapter,
-)
 from nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters import (
     SyncDevicesNautobotAdapter,
     SyncDevicesNetworkAdapter,
+)
+from nautobot_device_onboarding.diffsync.adapters.sync_network_data_adapters import (
+    SyncNetworkDataNautobotAdapter,
+    SyncNetworkDataNetworkAdapter,
 )
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
@@ -556,9 +556,14 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
     )
     device_role = ObjectVar(
         model=Role,
-        query_params={"content_types": "dcim.device"},
+        query_params={"content_type": "dcim.device"},
         required=False,
         description="Only update devices with the selected role.",
+    )
+    platform = ObjectVar(
+        model=Platform,
+        required=False,
+        description="Only update devices with the selected platform.",
     )
 
     def load_source_adapter(self):
@@ -585,6 +590,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         location,
         devices,
         device_role,
+        platform,
         sync_vlans,
         sync_vrfs,
         *args,
@@ -601,6 +607,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         self.location = location
         self.devices = devices
         self.device_role = device_role
+        self.platform = platform
         self.sync_vlans = sync_vlans
         self.sync_vrfs = sync_vrfs
 
@@ -612,10 +619,20 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
             device_filter["location"] = location
         if self.device_role:
             device_filter["role"] = device_role
+        if self.platform:
+            device_filter["platform"] = platform
         if device_filter:  # prevent all devices from being returned by an empty filter
             self.filtered_devices = Device.objects.filter(**device_filter)
         else:
             self.logger.error("No device filter options were provided, no devices will be synced.")
+
+        # Log selected devices
+        filtered_devices_names = list(self.filtered_devices.values_list("name", flat=True))
+        self.logger.info(f"{len(filtered_devices_names)} devices will be synced")
+        if len(filtered_devices_names) <= 300:
+            self.logger.info(f"Devices: {filtered_devices_names}")
+        else:
+            self.logger.warning("Over 300 devies were selected to sync")
 
         self.job_result.task_kwargs = {
             "debug": debug,
