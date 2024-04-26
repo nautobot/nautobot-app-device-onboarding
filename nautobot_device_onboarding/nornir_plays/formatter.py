@@ -53,10 +53,10 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
     if isinstance(post_processed_data, list) and len(post_processed_data) == 0:
         # means result was empty, change empty result to iterater_type if applicable.
         if iter_type:
-            print(f"in iter_type {iter_type}")
             if iter_type == "dict":
-                print(f"post_iter: {post_processed_data}")
                 post_processed_data = {}
+            if iter_type == "str":
+                post_processed_data = ""
     if isinstance(post_processed_data, list) and len(post_processed_data) == 1:
         if isinstance(post_processed_data[0], str):
             post_processed_data = post_processed_data[0]
@@ -65,6 +65,8 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
                 if iter_type:
                     if iter_type == "dict":
                         post_processed_data = post_processed_data[0]
+    # print(f"pre_processed_extracted: {pre_processed_extracted}")
+    # print(f"post_processed_data: {post_processed_data}")
     return pre_processed_extracted, post_processed_data
 
 def perform_data_extractionv2(host, command_info_dict, command_outputs_dict):

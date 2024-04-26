@@ -190,7 +190,7 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                 command_getter_job="sync_devices",
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
-        logger.info("Error: %s", err)
+        logger.info(f"Error: {err}")
     return compiled_resultsv2
 
 
@@ -227,7 +227,8 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
                 command_getter_job="sync_network_data",
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
-        logger.info("Error: %s", err)
+        print(err)
+        logger.info(f"Error: %{err}")
         return err
     print(f"compiled_resultsv1: {compiled_results}")
     print(f"compiled_resultsv2: {compiled_resultsv2}")
