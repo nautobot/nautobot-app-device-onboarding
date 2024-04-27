@@ -14,7 +14,6 @@ from nornir.core.task import Result, Task
 from nornir_netmiko.tasks import netmiko_send_command
 
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
-from nautobot_device_onboarding.nornir_plays.formatter import format_results
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import CommandGetterProcessor
@@ -87,13 +86,13 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                 **send_command_kwargs
             )
         except NornirSubTaskError as err:
-            print(err)
             Result(
                 host=task.host,
                 changed=False,
-                result=f"{command['command']}: E0001 - Textfsm template issue.",
+                result=f"{command['command']}: E0001 - Textfsm template issue. The error was {err}",
                 failed=True,
             )
+
 
 def _parse_credentials(credentials):
     """Parse and return dictionary of credentials."""
@@ -141,7 +140,6 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
     # Initiate Nornir instance with empty inventory
     try:
         compiled_results = {}
-        compiled_resultsv2 = {}
         with InitNornir(
             runner=NORNIR_SETTINGS.get("runner"),
             logging={"enabled": False},
@@ -150,7 +148,7 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
             },
         ) as nornir_obj:
             nr_with_processors = nornir_obj.with_processors(
-                [CommandGetterProcessor(logger, compiled_results, compiled_resultsv2, kwargs)]
+                [CommandGetterProcessor(logger, compiled_results, kwargs)]
             )
             loaded_secrets_group = None
             for entered_ip in ip_addresses:
@@ -190,8 +188,9 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                 command_getter_job="sync_devices",
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
-        logger.info(f"Error: {err}")
-    return compiled_resultsv2
+        logger.info(f"Error During Sync Devices Command Getter: {err}")
+    print(f"compiled_results: {compiled_results}")
+    return compiled_results
 
 
 def sync_network_data_command_getter(job_result, log_level, kwargs):
@@ -199,7 +198,6 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
     logger = NornirLogger(job_result, log_level)
     try:
         compiled_results = {}
-        compiled_resultsv2 = {}
         qs = kwargs["devices"]
         if not qs:
             return None
@@ -219,7 +217,7 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
             },
         ) as nornir_obj:
             nr_with_processors = nornir_obj.with_processors(
-                [CommandGetterProcessor(logger, compiled_results, compiled_resultsv2, kwargs)]
+                [CommandGetterProcessor(logger, compiled_results, kwargs)]
             )
             nr_with_processors.run(
                 task=netmiko_send_commands,
@@ -227,11 +225,8 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
                 command_getter_job="sync_network_data",
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
-        print(err)
-        logger.info(f"Error: %{err}")
+        logger.info(f"Error During Sync Network Data Command Getter: {err}")
         return err
-    print(f"compiled_resultsv1: {compiled_results}")
-    print(f"compiled_resultsv2: {compiled_resultsv2}")
-    # compiled_results = format_results(compiled_results)
+    print(f"compiled_results: {compiled_results}")
 
-    return compiled_resultsv2
+    return compiled_results

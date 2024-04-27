@@ -25,3 +25,4 @@ sync_devices:
       - command: "show ip interface brief | json"
         parser: "none"
         jpath: "interfaces.*.interfaceAddress[?ipAddr.address=='{{ obj }}'].ipAddr.maskLen"
+        post_processor: "{{ obj[0] }}"

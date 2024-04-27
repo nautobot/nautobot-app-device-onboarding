@@ -6,26 +6,23 @@ from nornir.core.inventory import Host
 from nornir.core.task import MultiResult, Task
 from nornir_nautobot.plugins.processors import BaseLoggingProcessor
 
-from nautobot_device_onboarding.nornir_plays.formatter import extract_show_data, extract_show_datav2
+from nautobot_device_onboarding.nornir_plays.formatter import extract_show_data
 
 
 class CommandGetterProcessor(BaseLoggingProcessor):
     """Processor class for Command Getter Nornir Tasks."""
 
-    def __init__(self, logger, command_outputs, command_outputsv2, kwargs):
+    def __init__(self, logger, command_outputs, kwargs):
         """Set logging facility."""
         self.logger = logger
         self.data: Dict = command_outputs
-        self.datav2: Dict = command_outputsv2
         self.parsed_command_outputs = {}
         self.kwargs = kwargs
 
     def task_instance_started(self, task: Task, host: Host) -> None:
         """Processor for logging and data processing on task start."""
         if not self.data.get(host.name):
-            self.data[host.name] = {}
-        if not self.datav2.get(host.name):
-            self.datav2[host.name] = {
+            self.data[host.name] = {
                 "platform": host.platform,
                 "manufacturer": host.platform.split("_")[0].title() if host.platform else "PLACEHOLDER",
                 "network_driver": host.platform,
@@ -50,8 +47,8 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         for res in result[1:]:
             self.parsed_command_outputs[res.name] = res.result
 
-        ready_for_ssot_data = extract_show_datav2(host, self.parsed_command_outputs, task.params["command_getter_job"])
-        self.datav2[host.name].update(ready_for_ssot_data)
+        ready_for_ssot_data = extract_show_data(host, self.parsed_command_outputs, task.params["command_getter_job"])
+        self.data[host.name].update(ready_for_ssot_data)
 
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Processor for logging and data processing on subtask completed."""
