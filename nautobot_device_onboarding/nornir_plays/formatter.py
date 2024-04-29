@@ -31,9 +31,15 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
     j2_env = get_django_env()
     jpath_template = j2_env.from_string(yaml_command_element["jpath"])
     j2_rendered_jpath = jpath_template.render(**j2_data_context)
+    print(j2_rendered_jpath)
     if isinstance(parsed_command_output, str):
             parsed_command_output = json.loads(parsed_command_output)
-    extracted_value = extract_data_from_json(parsed_command_output, j2_rendered_jpath)
+    try:
+        extracted_value = extract_data_from_json(parsed_command_output, j2_rendered_jpath)
+        print(f"extracted value: {extracted_value}")
+    except TypeError as err:
+        extracted_value = ""
+        print(f"err: {err}")
     pre_processed_extracted = extracted_value
     if yaml_command_element.get("post_processor"):
         # j2 context data changes obj(hostname) -> extracted_value for post_processor
@@ -61,8 +67,8 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
                 if iter_type:
                     if iter_type == "dict":
                         post_processed_data = post_processed_data[0]
-    # print(f"pre_processed_extracted: {pre_processed_extracted}")
-    # print(f"post_processed_data: {post_processed_data}")
+    print(f"pre_processed_extracted: {pre_processed_extracted}")
+    print(f"post_processed_data: {post_processed_data}")
     return pre_processed_extracted, post_processed_data
 
 
@@ -104,6 +110,7 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict):
                         # a list of data that we want to become our nested key. E.g. current_key "Ethernet1/1"
                         # These get passed into the render context for the template render to allow nested jpaths to use
                         # the current_key context for more flexible jpath queries.
+                        print(current_key)
                         _, current_key_post = extract_and_post_process(
                             command_outputs_dict[show_command_dict["command"]],
                             show_command_dict,
@@ -129,6 +136,7 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict):
         #             print("About to break the sequence due to valid pattern found")
         #             result_dict[dict_field] = extracted_processed
         #             break
+    print(result_dict)
     return result_dict
 
 
