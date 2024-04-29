@@ -44,7 +44,7 @@ def deduplicate_command_list(data):
     return unique_list
 
 
-def _get_commands_to_run(yaml_parsed_info):
+def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs):
     """Using merged command mapper info and look up all commands that need to be run."""
     all_commands = []
     for key, value in yaml_parsed_info.items():
@@ -54,15 +54,27 @@ def _get_commands_to_run(yaml_parsed_info):
             if isinstance(current_root_key, list):
                 # Means their is any "nested" structures. e.g multiple commands
                 for command in value["commands"]:
+                    # If syncing vlans isn't inscope don't run the unneeded commands.
+                    if not sync_vlans and key in ["interfaces__tagged_vlans", "interfaces__untagged_vlan"]:
+                        continue
+                    # If syncing vrfs isn't inscope remove the unneeded commands.
+                    if not sync_vrfs and key == "interfaces__vrf":
+                        continue
                     all_commands.append(command)
             else:
                 if isinstance(current_root_key, dict):
+                    # If syncing vlans isn't inscope don't run the unneeded commands.
+                    if not sync_vlans and key in ["interfaces__tagged_vlans", "interfaces__untagged_vlan"]:
+                        continue
+                    # If syncing vrfs isn't inscope remove the unneeded commands.
+                    if not sync_vrfs and key == "interfaces__vrf":
+                        continue
                     # Means their isn't a "nested" structures. e.g 1 command
                     all_commands.append(current_root_key)
     return deduplicate_command_list(all_commands)
 
 
-def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_getter_job: str):
+def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_getter_job: str, **orig_job_kwargs):
     """Run commands specified in PLATFORM_COMMAND_MAP."""
     if not task.host.platform:
         return Result(host=task.host, result=f"{task.host.name} has no platform set.", failed=True)
@@ -71,7 +83,11 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
     if not command_getter_yaml_data[task.host.platform].get(command_getter_job):
         return Result(host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True)
     task.host.data["platform_parsing_info"] = command_getter_yaml_data[task.host.platform]
-    commands = _get_commands_to_run(command_getter_yaml_data[task.host.platform][command_getter_job])
+    commands = _get_commands_to_run(
+        command_getter_yaml_data[task.host.platform][command_getter_job],
+        orig_job_kwargs.get('sync_vlans', False),
+        orig_job_kwargs.get('sync_vrfs', False)
+    )
     # All commands in this for loop are running within 1 device connection.
     for command in commands:
         send_command_kwargs = {}
@@ -86,7 +102,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                 **send_command_kwargs
             )
         except NornirSubTaskError as err:
-            Result(
+            return Result(
                 host=task.host,
                 changed=False,
                 result=f"{command['command']}: E0001 - Textfsm template issue. The error was {err}",
@@ -186,6 +202,7 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
                 command_getter_job="sync_devices",
+                **kwargs,
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info(f"Error During Sync Devices Command Getter: {err}")
@@ -212,6 +229,8 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
                     "defaults": {
                         "platform_parsing_info": add_platform_parsing_info(),
                         "network_driver_mappings": SUPPORTED_NETWORK_DRIVERS,
+                        "sync_vlans": kwargs["sync_vlans"],
+                        "sync_vrfs": kwargs["sync_vrfs"],
                     },
                 },
             },
@@ -223,6 +242,7 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
                 command_getter_job="sync_network_data",
+                **kwargs
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info(f"Error During Sync Network Data Command Getter: {err}")

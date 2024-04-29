@@ -79,6 +79,12 @@ sync_network_data:
         parser: "textfsm"
         jpath: "[?interface=='{{ current_key }}'].mode"
         post_processor: "{{ obj[0] | port_mode_to_nautobot }}"
+  interfaces__lag:
+    commands:
+      - command: "show interface"
+        parser: "textfsm"
+        jpath: "[*].null"
+        iterable_type: "str"
   interfaces__vrf:
     commands:
       - command: "show vrf interface"
@@ -90,17 +96,12 @@ sync_network_data:
       - command: "show vlan"
         parser: "textfsm"
         jpath: "[*].{id: vlan_id, name: vlan_name, interfaces: interfaces}"
-        post_processor: "{% set tagged_vlans = [] %}{% for v in obj %}{% if current_key in v['interfaces'] | canonical_interface_name_list %}{% set _=tagged_vlans.append({'id': v['id'], 'name': v['name']}) %}{% endif %}{% endfor %}{{ tagged_vlans }}"
+        post_processor: "{% set tagged_vlans = [] %}{% for v in obj %}{% if current_key in v['interfaces'] | canonical_interface_name_list %}{% set _=tagged_vlans.append({'id': v['id'], 'name': v['name']}) %}{% endif %}{% endfor %}{{ tagged_vlans | tojson }}"
   interfaces__untagged_vlan:
     commands:
       - command: "show vlan"
         parser: "textfsm"
         jpath: "[*].{id: vlan_id, name: vlan_name, interfaces: interfaces}"
         iterable_type: "dict"
-        post_processor: "{% set tagged_vlans = [] %}{% for v in obj %}{% if current_key in v['interfaces'] | canonical_interface_name_list %}{% set _=tagged_vlans.append({'id': v['id'], 'name': v['name']}) %}{% endif %}{% endfor %}{{ tagged_vlans | tojson }}"
-  interfaces__lag:
-    commands:
-      - command: "show interface"
-        parser: "textfsm"
-        jpath: "[*].null"
-        iterable_type: "str"
+        post_processor: "{% set untagged_vlan = [] %}{% for v in obj %}{% if current_key in v['interfaces'] | canonical_interface_name_list %}{% set _=untagged_vlan.append({'id': v['id'], 'name': v['name']}) %}{% endif %}{% endfor %}{{ untagged_vlan | tojson }}"
+

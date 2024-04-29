@@ -61,15 +61,22 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
                 if iter_type:
                     if iter_type == "dict":
                         post_processed_data = post_processed_data[0]
-    print(f"pre_processed_extracted: {pre_processed_extracted}")
-    print(f"post_processed_data: {post_processed_data}")
+    # print(f"pre_processed_extracted: {pre_processed_extracted}")
+    # print(f"post_processed_data: {post_processed_data}")
     return pre_processed_extracted, post_processed_data
 
 
 def perform_data_extraction(host, command_info_dict, command_outputs_dict):
     """Extract, process data."""
     result_dict = {}
+    sync_vlans = host.defaults.data.get("sync_vlans", False)
+    sync_vrfs = host.defaults.data.get("sync_vrfs", False)
     for ssot_field, field_data in command_info_dict.items():
+        if not sync_vlans and ssot_field in ["interfaces__tagged_vlans", "interfaces__untagged_vlan"]:
+            continue
+        # If syncing vrfs isn't inscope remove the unneeded commands.
+        if not sync_vrfs and ssot_field == "interfaces__vrf":
+            continue
         if isinstance(field_data['commands'], dict):
             # only one command is specified as a dict force it to a list.
             loop_commands = [field_data['commands']]
