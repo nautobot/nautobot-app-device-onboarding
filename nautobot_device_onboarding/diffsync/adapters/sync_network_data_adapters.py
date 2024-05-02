@@ -8,8 +8,8 @@ from nautobot.ipam.models import VLAN, VRF, IPAddress
 from nautobot_ssot.contrib import NautobotAdapter
 from netaddr import EUI, mac_unix_expanded
 
-from nautobot_device_onboarding.diffsync.models import network_importer_models
-from nautobot_device_onboarding.nornir_plays.command_getter import command_getter_ni
+from nautobot_device_onboarding.diffsync.models import sync_network_data_models
+from nautobot_device_onboarding.nornir_plays.command_getter import sync_network_data_command_getter
 from nautobot_device_onboarding.utils import diffsync_utils
 
 
@@ -27,19 +27,19 @@ class FilteredNautobotAdapter(NautobotAdapter):
             self._load_single_object(database_object, diffsync_model, parameter_names)
 
 
-class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
+class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
     """Adapter for loading Nautobot data."""
 
-    device = network_importer_models.NetworkImporterDevice
-    interface = network_importer_models.NetworkImporterInterface
-    ip_address = network_importer_models.NetworkImporterIPAddress
-    ipaddress_to_interface = network_importer_models.NetworkImporterIPAddressToInterface
-    vlan = network_importer_models.NetworkImporterVLAN
-    vrf = network_importer_models.NetworkImporterVRF
-    tagged_vlans_to_interface = network_importer_models.NetworkImporterTaggedVlansToInterface
-    untagged_vlan_to_interface = network_importer_models.NetworkImporterUnTaggedVlanToInterface
-    lag_to_interface = network_importer_models.NetworkImporterLagToInterface
-    vrf_to_interface = network_importer_models.NetworkImporterVrfToInterface
+    device = sync_network_data_models.SyncNetworkDataDevice
+    interface = sync_network_data_models.SyncNetworkDataInterface
+    ip_address = sync_network_data_models.SyncNetworkDataIPAddress
+    ipaddress_to_interface = sync_network_data_models.SyncNetworkDataIPAddressToInterface
+    vlan = sync_network_data_models.SyncNetworkDataVLAN
+    vrf = sync_network_data_models.SyncNetworkDataVRF
+    tagged_vlans_to_interface = sync_network_data_models.SyncNetworkDataTaggedVlansToInterface
+    untagged_vlan_to_interface = sync_network_data_models.SyncNetworkDataUnTaggedVlanToInterface
+    lag_to_interface = sync_network_data_models.SyncNetworkDataLagToInterface
+    vrf_to_interface = sync_network_data_models.SyncNetworkDataVrfToInterface
 
     primary_ips = None
 
@@ -60,7 +60,7 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
         Create a cache of primary ip address for devices.
 
         If the primary ip address of a device is unset due to the deletion
-        of an interface, this cache is used to reset it.
+        of an interface, this cache is used to reset it in sync_complete().
         """
         self.primary_ips = {}
         for device in device_queryset:
@@ -71,14 +71,6 @@ class NetworkImporterNautobotAdapter(FilteredNautobotAdapter):
         if database_object.mac_address:
             return str(database_object.mac_address)
         return ""
-
-    def load_param_untagged_vlan__name(self, parameter_name, database_object):
-        """Load, or prevent loading, untagged vlans depending on form selection."""
-        if not self.job.sync_vlans:
-            if self.job.debug:
-                self.job.logger.debug(f"{parameter_name} will not be synced to {database_object}")
-            return ""
-        return str(database_object.untagged_vlan.name)
 
     def load_ip_addresses(self):
         """Load IP addresses into the DiffSync store.
@@ -326,7 +318,7 @@ class MacUnixExpandedUppercase(mac_unix_expanded):
     word_fmt = "%.2X"
 
 
-class NetworkImporterNetworkAdapter(diffsync.DiffSync):
+class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
     """Adapter for loading Network data."""
 
     def __init__(self, *args, job, sync=None, **kwargs):
@@ -335,16 +327,16 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
         self.job = job
         self.sync = sync
 
-    device = network_importer_models.NetworkImporterDevice
-    interface = network_importer_models.NetworkImporterInterface
-    ip_address = network_importer_models.NetworkImporterIPAddress
-    ipaddress_to_interface = network_importer_models.NetworkImporterIPAddressToInterface
-    vlan = network_importer_models.NetworkImporterVLAN
-    vrf = network_importer_models.NetworkImporterVRF
-    tagged_vlans_to_interface = network_importer_models.NetworkImporterTaggedVlansToInterface
-    untagged_vlan_to_interface = network_importer_models.NetworkImporterUnTaggedVlanToInterface
-    lag_to_interface = network_importer_models.NetworkImporterLagToInterface
-    vrf_to_interface = network_importer_models.NetworkImporterVrfToInterface
+    device = sync_network_data_models.SyncNetworkDataDevice
+    interface = sync_network_data_models.SyncNetworkDataInterface
+    ip_address = sync_network_data_models.SyncNetworkDataIPAddress
+    ipaddress_to_interface = sync_network_data_models.SyncNetworkDataIPAddressToInterface
+    vlan = sync_network_data_models.SyncNetworkDataVLAN
+    vrf = sync_network_data_models.SyncNetworkDataVRF
+    tagged_vlans_to_interface = sync_network_data_models.SyncNetworkDataTaggedVlansToInterface
+    untagged_vlan_to_interface = sync_network_data_models.SyncNetworkDataUnTaggedVlanToInterface
+    lag_to_interface = sync_network_data_models.SyncNetworkDataLagToInterface
+    vrf_to_interface = sync_network_data_models.SyncNetworkDataVrfToInterface
 
     top_level = [
         "ip_address",
@@ -383,7 +375,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
 
     def execute_command_getter(self):
         """Start the CommandGetterDO job to query devices for data."""
-        result = command_getter_ni(
+        result = sync_network_data_command_getter(
             self.job.job_result, self.job.logger.getEffectiveLevel(), self.job.job_result.task_kwargs
         )
         if self.job.debug:
@@ -435,7 +427,7 @@ class NetworkImporterNetworkAdapter(diffsync.DiffSync):
             device__name=hostname,
             status__name=self.job.interface_status.name,
             type=interface_data["type"],
-            mac_address=self._process_mac_address(interface_data["mac_address"]),
+            mac_address=self._process_mac_address(mac_address=interface_data["mac_address"]),
             mtu=interface_data["mtu"] if interface_data["mtu"] else 1500,
             description=interface_data["description"],
             enabled=interface_data["link_status"],

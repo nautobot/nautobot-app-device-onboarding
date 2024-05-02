@@ -2,7 +2,7 @@
 
 # TODO: move this data to testing folder for use in tests
 
-network_importer_mock_data = {
+sync_network_data_mock_data = {
     "demo-cisco-xe1": {
         "serial": "9ABUXU581111",
         "interfaces": [
@@ -180,7 +180,7 @@ network_importer_mock_data = {
     },
 }
 
-device_onboarding_mock_data = {
+sync_devices_mock_data = {
     "10.1.1.11": {
         "hostname": "demo-cisco-xe1",
         "serial": "9ABUXU581111",

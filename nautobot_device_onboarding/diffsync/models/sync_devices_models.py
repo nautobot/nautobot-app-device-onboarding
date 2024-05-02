@@ -13,7 +13,7 @@ from nautobot_ssot.contrib import NautobotModel
 from nautobot_device_onboarding.utils import diffsync_utils
 
 
-class OnboardingDevice(DiffSyncModel):
+class SyncDevicesDevice(DiffSyncModel):
     """Diffsync model for device data."""
 
     _modelname = "device"
@@ -347,7 +347,7 @@ class OnboardingDevice(DiffSyncModel):
         return super().update(attrs)
 
 
-class OnboardingDeviceType(NautobotModel):
+class SyncDevicesDeviceType(NautobotModel):
     """Diffsync model for device type data."""
 
     _modelname = "device_type"
@@ -361,7 +361,7 @@ class OnboardingDeviceType(NautobotModel):
     part_number: str
 
 
-class OnboardingManufacturer(NautobotModel):
+class SyncDevicesManufacturer(NautobotModel):
     """Diffsync model for manufacturer data."""
 
     _modelname = "manufacturer"
@@ -371,7 +371,7 @@ class OnboardingManufacturer(NautobotModel):
     name: str
 
 
-class OnboardingPlatform(NautobotModel):
+class SyncDevicesPlatform(NautobotModel):
     """Diffsync model for platform data."""
 
     _modelname = "platform"

@@ -1,12 +1,11 @@
 """Constants for nautobot_device_onboarding app."""
 
 from django.conf import settings
+from nautobot.dcim.utils import get_all_network_driver_mappings
 
 PLUGIN_CFG = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
-# DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "command_mappers"))
-
-# This should be removed and network_driver mapping should be used instead.
+# This mapping is only used for the original onboarding job.
 NETMIKO_TO_NAPALM_STATIC = {
     "cisco_ios": "ios",
     "cisco_xe": "ios",
@@ -14,11 +13,18 @@ NETMIKO_TO_NAPALM_STATIC = {
     "arista_eos": "eos",
     "juniper_junos": "junos",
     "cisco_xr": "iosxr",
-    "cisco_wlc": "cisco_wlc",
-    "cisco_wlc_ssh": "cisco_wlc_ssh",
 }
 
+
+# This is used in the new SSoT based jobs.
+SUPPORTED_NETWORK_DRIVERS = list(get_all_network_driver_mappings().keys())
+
+# This is used in the new SSoT based jobs. Soon TPP, PYATS should be supported.
+SUPPORTED_COMMAND_PARSERS = ["textfsm"]
+
 # This should potentially be removed and used nautobot core directly choices.
+# from nautobot.dcim.choices import InterfaceTypeChoices
+# InterfaceTypeChoices.as_dict() doesn't directly fit yet.  Seems like maybe netutils needs the "human readible" nb choices.
 INTERFACE_TYPE_MAP_STATIC = {
     "Gigabit Ethernet": "1000base-t",
     "Ten Gigabit Ethernet": "10gbase-t",

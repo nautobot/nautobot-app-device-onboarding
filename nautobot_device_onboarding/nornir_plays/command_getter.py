@@ -14,12 +14,12 @@ from nornir.core.plugins.inventory import InventoryPluginRegister
 from nornir.core.task import Result, Task
 from nornir_netmiko.tasks import netmiko_send_command
 
-from nautobot_device_onboarding.constants import NETMIKO_TO_NAPALM_STATIC
+from nautobot_device_onboarding.constants import SUPPORTED_COMMAND_PARSERS, SUPPORTED_NETWORK_DRIVERS
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.formatter import format_results
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
-from nautobot_device_onboarding.nornir_plays.processor import ProcessorDO
+from nautobot_device_onboarding.nornir_plays.processor import CommandGetterProcessor
 from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
@@ -27,19 +27,19 @@ InventoryPluginRegister.register("empty-inventory", EmptyInventory)
 
 
 def deduplicate_command_list(data):
-    """Deduplicates a list of dictionaries based on 'command' and 'use_textfsm' keys.
+    """Deduplicates a list of dictionaries based on 'command' and 'parser' keys.
 
     Args:
         data: A list of dictionaries.
 
     Returns:
-        A new list containing only unique elements based on 'command' and 'use_textfsm'.
+        A new list containing only unique elements based on 'command' and 'parser'.
     """
     seen = set()
     unique_list = []
     for item in data:
-        # Create a tuple containing only 'command' and 'use_textfsm' for comparison
-        key = (item["command"], item["use_textfsm"])
+        # Create a tuple containing only 'command' and 'parser' for comparison
+        key = (item["command"], item["parser"])
         if key not in seen:
             seen.add(key)
             unique_list.append(item)
@@ -51,16 +51,15 @@ def _get_commands_to_run(yaml_parsed_info):
     all_commands = []
     for _, value in yaml_parsed_info.items():
         # Deduplicate commands + parser key
-        if value.get("commands"):
-            # Means their isn't any "nested" structures.
+        current_root_key = value.get("commands")
+        if isinstance(current_root_key, list):
+            # Means their is any "nested" structures. e.g multiple commands
             for command in value["commands"]:
                 all_commands.append(command)
         else:
-            # Means their is a "nested" structures.
-            for _, nested_command_info in value.items():
-                if isinstance(nested_command_info, dict):
-                    for command in nested_command_info["commands"]:
-                        all_commands.append(command)
+            if isinstance(current_root_key, dict):
+                # Means their isn't a "nested" structures. e.g 1 command
+                all_commands.append(current_root_key)
     return deduplicate_command_list(all_commands)
 
 
@@ -68,20 +67,26 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
     """Run commands specified in PLATFORM_COMMAND_MAP."""
     if not task.host.platform:
         return Result(host=task.host, result=f"{task.host.name} has no platform set.", failed=True)
-    if task.host.platform not in list(NETMIKO_TO_NAPALM_STATIC.keys()):
+    if task.host.platform not in SUPPORTED_NETWORK_DRIVERS:
         return Result(host=task.host, result=f"{task.host.name} has a unsupported platform set.", failed=True)
+    if not command_getter_yaml_data[task.host.platform].get(command_getter_job):
+        return Result(
+            host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True
+        )
     task.host.data["platform_parsing_info"] = command_getter_yaml_data[task.host.platform]
     commands = _get_commands_to_run(command_getter_yaml_data[task.host.platform][command_getter_job])
-    # Appears all commands in this for loop are already within 1 connection.
-    # task.host.open_connection("netmiko", configuration=task.nornir.config)
+    # All commands in this for loop are running within 1 device connection.
     for command in commands:
+        send_command_kwargs = {}
+        if command.get("parser") in SUPPORTED_COMMAND_PARSERS:
+            send_command_kwargs = {f"use_{command['parser']}": True}
         try:
             task.run(
                 task=netmiko_send_command,
                 name=command["command"],
                 command_string=command["command"],
-                use_textfsm=command["use_textfsm"],
                 read_timeout=60,
+                **send_command_kwargs,
             )
         except NornirSubTaskError:
             Result(
@@ -90,7 +95,6 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                 result=f"{command['command']}: E0001 - Textfsm template issue.",
                 failed=True,
             )
-    # task.host.close_connection("netmiko")
 
 
 def _parse_credentials(credentials):
@@ -121,8 +125,8 @@ def _parse_credentials(credentials):
     return (username, password, secret)
 
 
-def command_getter_do(job_result, log_level, kwargs):
-    """Nornir play to run show commands."""
+def sync_devices_command_getter(job_result, log_level, kwargs):
+    """Nornir play to run show commands for sync_devices ssot job."""
     logger = NornirLogger(job_result, log_level)
 
     if kwargs["csv_file"]:  # ip_addreses will be keys in a dict
@@ -146,7 +150,7 @@ def command_getter_do(job_result, log_level, kwargs):
                 "plugin": "empty-inventory",
             },
         ) as nornir_obj:
-            nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results, kwargs)])
+            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
             loaded_secrets_group = None
             for entered_ip in ip_addresses:
                 if kwargs["csv_file"]:
@@ -182,15 +186,15 @@ def command_getter_do(job_result, log_level, kwargs):
             nr_with_processors.run(
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
-                command_getter_job="device_onboarding",
+                command_getter_job="sync_devices",
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info("Error: %s", err)
     return compiled_results
 
 
-def command_getter_ni(job_result, log_level, kwargs):
-    """Process onboarding task from ssot-ni job."""
+def sync_network_data_command_getter(job_result, log_level, kwargs):
+    """Nornir play to run show commands for sync_network_data ssot job."""
     logger = NornirLogger(job_result, log_level)
     try:
         compiled_results = {}
@@ -206,14 +210,16 @@ def command_getter_ni(job_result, log_level, kwargs):
                     "credentials_class": NORNIR_SETTINGS.get("credentials"),
                     "queryset": qs,
                     "defaults": {"platform_parsing_info": add_platform_parsing_info()},
+                    "sync_vlans": kwargs["sync_vlans"],
+                    "sync_vrfs": kwargs["sync_vrfs"],
                 },
             },
         ) as nornir_obj:
-            nr_with_processors = nornir_obj.with_processors([ProcessorDO(logger, compiled_results, kwargs)])
+            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
             nr_with_processors.run(
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
-                command_getter_job="network_importer",
+                command_getter_job="sync_network_data",
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info("Error: %s", err)

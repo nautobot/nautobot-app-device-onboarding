@@ -1,1 +1,1 @@
-"""Diffsync."""
+"""Diffsync Definitions for SSoT Network Integration."""

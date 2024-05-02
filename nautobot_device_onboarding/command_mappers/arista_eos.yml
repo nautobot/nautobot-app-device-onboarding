@@ -1,27 +1,27 @@
 ---
-device_onboarding:
+sync_devices:
   hostname:
     commands:
-      - command: "show hostname"
-        use_textfsm: true
-        jpath: "[*].hostname"
+      command: "show hostname"
+      parser: "textfsm"
+      jpath: "[*].hostname"
   serial:
     commands:
       - command: "show version"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].serial_number"
   device_type:
     commands:
       - command: "show version"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].model"
   mgmt_interface:
     commands:
       - command: "show ip interface brief | json"
-        use_textfsm: false
+        parser: "none"
         jpath: "interfaces.*.{name: name, match_ip: interfaceAddress.ipAddr.address=='{{ obj }}'}[? match_ip].name"
   mask_length:
     commands:
       - command: "show ip interface brief | json"
-        use_textfsm: false
+        parser: "none"
         jpath: "interfaces.*.interfaceAddress[?ipAddr.address=='{{ obj }}'].ipAddr.maskLen"

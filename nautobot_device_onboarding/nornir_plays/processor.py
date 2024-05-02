@@ -1,4 +1,4 @@
-"""Processor used by Device Onboarding to catch unknown errors."""
+"""Processor used by Nornir command getter tasks to prep data for SSoT framework sync and to catch unknown errors."""
 
 from typing import Dict
 
@@ -9,8 +9,8 @@ from nornir_nautobot.plugins.processors import BaseLoggingProcessor
 from nautobot_device_onboarding.nornir_plays.formatter import extract_show_data
 
 
-class ProcessorDO(BaseLoggingProcessor):
-    """Processor class for Device Onboarding jobs."""
+class CommandGetterProcessor(BaseLoggingProcessor):
+    """Processor class for Command Getter Nornir Tasks."""
 
     def __init__(self, logger, command_outputs, kwargs):
         """Set logging facility."""
@@ -34,31 +34,10 @@ class ProcessorDO(BaseLoggingProcessor):
         Returns:
             None
         """
-        # Complex logic to see if the task exception is expected, which is depicted by
-        # a sub task raising a NornirNautobotException.
-        # if result.failed:
-        # for level_1_result in result:
-        # if hasattr(level_1_result, "exception") and hasattr(level_1_result.exception, "result"):
-        #     print("inside level2 hasatter")
-        #     for level_2_result in level_1_result.exception.result:  # type: ignore
-        #         print("inside the level2")
-        #         if isinstance(level_2_result.exception, NornirNautobotException):
-        #             return
-        # self.logger.critical(f"{task.name} failed: {result.exception}", extra={"object": task.host})
-        # else:
         self.logger.info(
             f"task_instance_completed Task Name: {task.name} Task Result: {result.result}",
             extra={"object": task.host},
         )
-        # if result.name == "netmiko_send_commands":
-        #     self.data[host.name].update(
-        #         {
-        #             "failed": result.failed,
-        #         }
-        #     )
-        #     if result.failed:
-        #         self.logger.warning(f"Task Failed! Result {result.result}.", extra={"object": task.host})
-        #         self.data[host.name]["failed_reason"] = result.result
 
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Processor for logging and data processing on subtask completed."""
@@ -67,18 +46,12 @@ class ProcessorDO(BaseLoggingProcessor):
             self.logger.debug(
                 f"subtask_instance_completed Subtask result {result.result}.", extra={"object": task.host}
             )
-
-        # self.data[host.name].update(
-        #     {
-        #         "failed": result.failed,
-        #
-        # }
-        # )
-        # if not result.failed:
         formatted_data = extract_show_data(host, result, task.parent_task.params["command_getter_job"])
-        # revist should be able to just update self.data with full formatted_data
         for k, v in formatted_data.items():
             self.data[host.name][k] = v
+        if task.parent_task.params["command_getter_job"] == "network_importer":
+            self.data[host.name]["sync_vlans"] = self.kwargs["sync_vlans"]
+            self.data[host.name]["sync_vrfs"] = self.kwargs["sync_vrfs"]
 
     def subtask_instance_started(self, task: Task, host: Host) -> None:  # show command start
         """Processor for logging and data processing on subtask start."""

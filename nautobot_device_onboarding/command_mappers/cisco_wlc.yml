@@ -1,27 +1,28 @@
 ---
-device_onboarding:
+sync_devices:
   hostname:
     commands:
       - command: "show sysinfo"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].system_name"
   serial:
     commands:
       - command: "show inventory"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].sn"
   device_type:
     commands:
       - command: "show inventory"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].pid"
   mgmt_interface:
     commands:
       - command: "show interface detailed management"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].interface_name"
   mask_length:
     commands:
       - command: "show interface detailed management"
-        use_textfsm: true
+        parser: "textfsm"
         jpath: "[*].netmask"
+        post_processor: "{{ obj[0] | netmask_to_cidr }}"

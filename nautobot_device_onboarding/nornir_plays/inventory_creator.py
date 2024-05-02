@@ -30,7 +30,7 @@ def _set_inventory(host_ip, platform, port, username, password):
     """Construct Nornir Inventory."""
     inv = {}
     if platform:
-        platform = platform.network_driver
+        platform = platform.network_driver_mappings.get("netmiko")
     else:
         platform = guess_netmiko_device_type(host_ip, username, password, port)
 

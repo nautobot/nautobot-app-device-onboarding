@@ -39,7 +39,7 @@ class FilteredNautobotModel(NautobotModel):
         return cls._model.objects.all()
 
 
-class NetworkImporterDevice(FilteredNautobotModel):
+class SyncNetworkDataDevice(FilteredNautobotModel):
     """Shared data model representing a Device."""
 
     _modelname = "device"
@@ -53,7 +53,7 @@ class NetworkImporterDevice(FilteredNautobotModel):
     name: str
     serial: str
 
-    interfaces: List["NetworkImporterInterface"] = []
+    interfaces: List["SyncNetworkDataInterface"] = []
 
     @classmethod
     def _get_queryset(cls, diffsync: "DiffSync"):
@@ -85,7 +85,7 @@ class NetworkImporterDevice(FilteredNautobotModel):
         return None
 
 
-class NetworkImporterInterface(FilteredNautobotModel):
+class SyncNetworkDataInterface(FilteredNautobotModel):
     """Shared data model representing an Interface."""
 
     _modelname = "interface"
@@ -119,7 +119,7 @@ class NetworkImporterInterface(FilteredNautobotModel):
     description: Optional[str]
 
 
-class NetworkImporterIPAddress(DiffSyncModel):
+class SyncNetworkDataIPAddress(DiffSyncModel):
     """Shared data model representing an IPAddress."""
 
     _modelname = "ip_address"
@@ -166,7 +166,7 @@ class NetworkImporterIPAddress(DiffSyncModel):
         return super().update(attrs)
 
 
-class NetworkImporterIPAddressToInterface(FilteredNautobotModel):
+class SyncNetworkDataIPAddressToInterface(FilteredNautobotModel):
     """Shared data model representing an IPAddressToInterface."""
 
     _modelname = "ipaddress_to_interface"
@@ -183,7 +183,7 @@ class NetworkImporterIPAddressToInterface(FilteredNautobotModel):
         return IPAddressToInterface.objects.filter(interface__device__in=diffsync.job.devices_to_load)
 
 
-class NetworkImporterVLAN(DiffSyncModel):
+class SyncNetworkDataVLAN(DiffSyncModel):
     """Shared data model representing a VLAN."""
 
     _model = VLAN
@@ -226,7 +226,7 @@ class NetworkImporterVLAN(DiffSyncModel):
         return super().create(diffsync, ids, attrs)
 
 
-class NetworkImporterTaggedVlansToInterface(DiffSyncModel):
+class SyncNetworkDataTaggedVlansToInterface(DiffSyncModel):
     """Shared data model representing a TaggedVlanToInterface."""
 
     _modelname = "tagged_vlans_to_interface"
@@ -301,7 +301,7 @@ class NetworkImporterTaggedVlansToInterface(DiffSyncModel):
         return super().update(attrs)
 
 
-class NetworkImporterUnTaggedVlanToInterface(DiffSyncModel):
+class SyncNetworkDataUnTaggedVlanToInterface(DiffSyncModel):
     """Shared data model representing a UnTaggedVlanToInterface."""
 
     _modelname = "untagged_vlan_to_interface"
@@ -375,7 +375,7 @@ class NetworkImporterUnTaggedVlanToInterface(DiffSyncModel):
         return super().update(attrs)
 
 
-class NetworkImporterLagToInterface(DiffSyncModel):
+class SyncNetworkDataLagToInterface(DiffSyncModel):
     """Shared data model representing a LagToInterface."""
 
     _modelname = "lag_to_interface"
@@ -454,7 +454,7 @@ class NetworkImporterLagToInterface(DiffSyncModel):
         return super().update(attrs)
 
 
-class NetworkImporterVRF(FilteredNautobotModel):
+class SyncNetworkDataVRF(FilteredNautobotModel):
     """Shared data model representing a VRF."""
 
     _modelname = "vrf"
@@ -465,7 +465,7 @@ class NetworkImporterVRF(FilteredNautobotModel):
     namespace__name: str
 
 
-class NetworkImporterVrfToInterface(DiffSyncModel):
+class SyncNetworkDataVrfToInterface(DiffSyncModel):
     """Shared data model representing a VrfToInterface."""
 
     _modelname = "vrf_to_interface"
