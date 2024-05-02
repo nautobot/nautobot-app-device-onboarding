@@ -47,6 +47,8 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         )
         # If any main task resulted in a failed:True then add that key so ssot side can ignore that entry.
         if result[0].failed:
+            print(task.params)
+            print(task.params["command_getter_job"])
             if task.params["command_getter_job"] == "sync_devices":
                 del self.data[host.name]
             else:
