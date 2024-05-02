@@ -78,7 +78,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
     """Run commands specified in PLATFORM_COMMAND_MAP."""
     if not task.host.platform:
         return Result(host=task.host, result=f"{task.host.name} has no platform set.", failed=True)
-    if task.host.platform not in SUPPORTED_NETWORK_DRIVERS or 'cisco_wlc_ssh':
+    if task.host.platform not in SUPPORTED_NETWORK_DRIVERS or not 'cisco_wlc_ssh':
         return Result(host=task.host, result=f"{task.host.name} has a unsupported platform set.", failed=True)
     if not command_getter_yaml_data[task.host.platform].get(command_getter_job):
         return Result(host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True)

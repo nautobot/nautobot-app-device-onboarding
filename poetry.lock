@@ -2652,14 +2652,21 @@ name = "ntc-templates"
 version = "5.0.0"
 description = "TextFSM Templates for Network Devices, and Python wrapper for TextFSM's CliTable."
 optional = false
-python-versions = "<4.0,>=3.8"
-files = [
-    {file = "ntc_templates-5.0.0-py3-none-any.whl", hash = "sha256:4fc4e2e9b239bd5b25d3c256c301859eec9262c2d418e17a60ff023ecb6824a5"},
-    {file = "ntc_templates-5.0.0.tar.gz", hash = "sha256:56919fbe83da582de03474f8a204d945dadeef0c98e630743c3c069a9bcf1120"},
-]
+python-versions = "^3.8"
+files = []
+develop = false
 
 [package.dependencies]
-textfsm = ">=1.1.0,<2.0.0"
+textfsm = "^1.1.0"
+
+[package.extras]
+test = []
+
+[package.source]
+type = "git"
+url = "https://github.com/networktocode/ntc-templates.git"
+reference = "master"
+resolved_reference = "eaf22661cd9696f746884ffe2927f71f82f39370"
 
 [[package]]
 name = "oauthlib"
@@ -4485,4 +4492,4 @@ all = []
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "96763f5fc96c300d1191691bad3286e2b3aee5ee77b8a230f2cc36a02c694758"
+content-hash = "5db2fe8fd580270133cd19a973cb15d1a18f59536f987f65e1457fb6527c4303"

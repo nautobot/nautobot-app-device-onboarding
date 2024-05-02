@@ -33,7 +33,7 @@ nautobot = "^2.1.1"
 nautobot-ssot = "^2.5.0"
 nautobot-plugin-nornir = "^2.0.0"
 jdiff = "^0.0.6"
-ntc-templates = "^5.0.0"
+ntc-templates = {git = "https://github.com/networktocode/ntc-templates.git", rev = "master"}
 
 
 [tool.poetry.group.dev.dependencies]
