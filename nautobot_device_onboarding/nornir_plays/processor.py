@@ -47,7 +47,10 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         )
         # If any main task resulted in a failed:True then add that key so ssot side can ignore that entry.
         if result[0].failed:
-            self.data[host.name].update({"failed": True})
+            if task.params["command_getter_job"] == "sync_devices":
+                del self.data[host.name]
+            else:
+                self.data[host.name].update({"failed": True})
         # [1:] because result 1 is the (network_send_commands ) task which runs all the subtask, it has no result.
         for res in result[1:]:
             parsed_command_outputs[res.name] = res.result
