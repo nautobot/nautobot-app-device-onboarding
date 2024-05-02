@@ -52,6 +52,7 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
         post_processed_data = json.loads(extracted_processed)
     except Exception:
         post_processed_data = extracted_processed
+    print(f"early_processed: {post_processed_data}")
     if isinstance(post_processed_data, list) and len(post_processed_data) == 0:
         # means result was empty, change empty result to iterater_type if applicable.
         if iter_type:
@@ -67,6 +68,8 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
                 if iter_type:
                     if iter_type == "dict":
                         post_processed_data = post_processed_data[0]
+            else:
+                post_processed_data = post_processed_data[0]
     print(f"pre_processed_extracted: {pre_processed_extracted}")
     print(f"post_processed_data: {post_processed_data}")
     return pre_processed_extracted, post_processed_data

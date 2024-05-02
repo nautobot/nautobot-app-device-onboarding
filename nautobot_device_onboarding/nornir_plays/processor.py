@@ -16,11 +16,12 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         """Set logging facility."""
         self.logger = logger
         self.data: Dict = command_outputs
-        self.parsed_command_outputs = {}
+        # self.parsed_command_outputs = {}
         self.kwargs = kwargs
 
     def task_instance_started(self, task: Task, host: Host) -> None:
         """Processor for logging and data processing on task start."""
+        self.logger.debug(f"current data: {self.data}")
         if not self.data.get(host.name):
             self.data[host.name] = {
                 "platform": host.platform,
@@ -39,15 +40,17 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         Returns:
             None
         """
+        parsed_command_outputs = {}
         self.logger.info(
             f"task_instance_completed Task Name: {task.name} Task Result: {result.result}",
             extra={"object": task.host},
         )
         # [1:] because result 1 is the (network_send_commands ) task which runs all the subtask, it has no result.
         for res in result[1:]:
-            self.parsed_command_outputs[res.name] = res.result
+            parsed_command_outputs[res.name] = res.result
 
-        ready_for_ssot_data = extract_show_data(host, self.parsed_command_outputs, task.params["command_getter_job"])
+        ready_for_ssot_data = extract_show_data(host, parsed_command_outputs, task.params["command_getter_job"])
+        self.logger.debug(f"read for ssot data {host.name} {ready_for_ssot_data}")
         self.data[host.name].update(ready_for_ssot_data)
 
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
@@ -55,7 +58,7 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         self.logger.info(f"subtask_instance_completed Subtask completed {task.name}.", extra={"object": task.host})
         if self.kwargs["debug"]:
             self.logger.debug(
-                f"subtask_instance_completed Subtask result {result.result}.", extra={"object": task.host}
+                f"subtask_instance_completed {task.host} Subtask result {result.result}.", extra={"object": task.host}
             )
 
     def subtask_instance_started(self, task: Task, host: Host) -> None:  # show command start

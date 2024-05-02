@@ -102,6 +102,9 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                 **send_command_kwargs
             )
         except NornirSubTaskError as err:
+            print(f"err: {err}")
+            print(err.result)
+            print(err.result[0].exception)
             return Result(
                 host=task.host,
                 changed=False,

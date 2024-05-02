@@ -9,12 +9,14 @@ sync_devices:
     commands:
       - command: "show version"
         parser: "textfsm"
-        jpath: "[*].serial[0]"
+        jpath: "[*].serial[]"
+        post_processor: "{{ obj | unique | first }}"
   device_type:
     commands:
       - command: "show version"
         parser: "textfsm"
-        jpath: "[*].hardware[0]"
+        jpath: "[*].hardware[]"
+        post_processor: "{{ obj | unique | first }}"
   mgmt_interface:
     commands:
       - command: "show interfaces"
@@ -32,7 +34,7 @@ sync_network_data:
     commands:
       - command: "show version"
         parser: "textfsm"
-        jpath: "[*].serial[0]"
+        jpath: "[*].serial[]"
   interfaces:
     root_key: true
     commands:

@@ -142,7 +142,7 @@ PLUGINS_CONFIG = {
     },
     "nautobot_plugin_nornir": {
         "nornir_settings": {
-            "credentials": "nautobot_plugin_nornir.plugins.credentials.env_vars.CredentialsEnvVars",
+            "credentials": "nautobot_plugin_nornir.plugins.credentials.nautobot_secrets.CredentialsNautobotSecrets",
             "runner": {
                 "plugin": "threaded",
                 "options": {

@@ -2649,13 +2649,13 @@ nornir = ">=3,<4"
 
 [[package]]
 name = "ntc-templates"
-version = "4.4.0"
+version = "5.0.0"
 description = "TextFSM Templates for Network Devices, and Python wrapper for TextFSM's CliTable."
 optional = false
-python-versions = ">=3.8,<4.0"
+python-versions = "<4.0,>=3.8"
 files = [
-    {file = "ntc_templates-4.4.0-py3-none-any.whl", hash = "sha256:e36274b8ba60e2e2e96f2948e23f6929c79ac0167f87994d4ac4d76e4a8be4ea"},
-    {file = "ntc_templates-4.4.0.tar.gz", hash = "sha256:2f630571f510a8c6573c8b2a1f584494b10505577e446b9ee471b5a1c542620d"},
+    {file = "ntc_templates-5.0.0-py3-none-any.whl", hash = "sha256:4fc4e2e9b239bd5b25d3c256c301859eec9262c2d418e17a60ff023ecb6824a5"},
+    {file = "ntc_templates-5.0.0.tar.gz", hash = "sha256:56919fbe83da582de03474f8a204d945dadeef0c98e630743c3c069a9bcf1120"},
 ]
 
 [package.dependencies]
@@ -4485,4 +4485,4 @@ all = []
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "0e34657465bed6efd2795ad598264cc34bcc1d881bcba444a6b8796139b78047"
+content-hash = "96763f5fc96c300d1191691bad3286e2b3aee5ee77b8a230f2cc36a02c694758"

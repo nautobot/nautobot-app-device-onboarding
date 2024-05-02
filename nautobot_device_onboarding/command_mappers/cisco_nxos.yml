@@ -12,12 +12,12 @@ sync_devices:
         jpath: "[?name=='Chassis'].sn"
   device_type:
     commands:
-      - command: "show version"
+      - command: "show inventory"
         parser: "textfsm"
-        jpath: "[*].platform"
+        jpath: "[?name=='Chassis'].descr"
   mgmt_interface:
     commands:
-      - command: "show ip interface vrf all"
+      - command: "show ip interface brief vrf all"
         parser: "textfsm"
         jpath: "[?ip_address=='{{ obj }}'].interface || [`mgmt0`]"
   mask_length:
@@ -25,13 +25,16 @@ sync_devices:
       - command: "show ip interface vrf all"
         parser: "textfsm"
         jpath: "[?ip_address=='{{ obj }}'].subnet"
+        # jpath: "*[].ROW_intf.{prefix: prefix, subnet:masklen} | [?prefix=='{{ obj }}'].subnet"
         post_processor: "{% if '/' in obj[0] %}{{ obj[0].split('/')[1] }}{% else %}31{% endif %}"
+        # post_processor: "{{ obj[0] | string }}"
 sync_network_data:
   serial:
     commands:
-      command: "show inventory"
-      parser: "textfsm"
-      jpath: "[?name=='Chassis'].sn"
+      - command: "show inventory"
+        parser: "textfsm"
+        jpath: "[?name=='Chassis'].sn"
+        # jpath: "TABLE_inv.ROW_inv[?name == 'Chassis'].serialnum"
   interfaces:
     root_key: true
     commands:

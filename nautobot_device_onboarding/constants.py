@@ -20,7 +20,7 @@ NETMIKO_TO_NAPALM_STATIC = {
 SUPPORTED_NETWORK_DRIVERS = list(get_all_network_driver_mappings().keys())
 
 # This is used in the new SSoT based jobs. Soon TPP, PYATS should be supported.
-SUPPORTED_COMMAND_PARSERS = ["textfsm"]
+SUPPORTED_COMMAND_PARSERS = ["textfsm", "ttp", "pyats"]
 
 # This should potentially be removed and used nautobot core directly choices.
 # from nautobot.dcim.choices import InterfaceTypeChoices
