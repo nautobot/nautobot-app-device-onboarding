@@ -15,7 +15,6 @@ def guess_netmiko_device_type(hostname, username, password, port):
         "password": password,
         **netmiko_optional_args,
     }
-    print(remote_device)
 
     try:
         guesser = SSHDetect(**remote_device)
@@ -30,12 +29,10 @@ def guess_netmiko_device_type(hostname, username, password, port):
 def _set_inventory(host_ip, platform, port, username, password):
     """Construct Nornir Inventory."""
     inv = {}
-    print(platform)
     if platform:
         platform = platform.network_driver_mappings.get("netmiko")
     else:
         platform = guess_netmiko_device_type(host_ip, username, password, port)
-    print(platform)
     host = Host(
         name=host_ip,
         hostname=host_ip,
