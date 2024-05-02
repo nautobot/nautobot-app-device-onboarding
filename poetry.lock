@@ -2355,13 +2355,13 @@ typing-extensions = ">=4.3.0"
 
 [[package]]
 name = "nautobot"
-version = "2.2.2"
+version = "2.2.3"
 description = "Source of truth and network automation platform."
 optional = false
 python-versions = "<3.12,>=3.8"
 files = [
-    {file = "nautobot-2.2.2-py3-none-any.whl", hash = "sha256:4a77b13d60f004815007d519f29602bba5b9ff899d235bb055a64ce9b6f461ce"},
-    {file = "nautobot-2.2.2.tar.gz", hash = "sha256:502fd0bf8691900b1c86c307e8bb3765990890a02e656c4af8e0b9cc3b7cc6f4"},
+    {file = "nautobot-2.2.3-py3-none-any.whl", hash = "sha256:2e0a3cc8d9c5738fda1b75ac4914aa60d9b6eae1bfe969c7aa1d29c515de9674"},
+    {file = "nautobot-2.2.3.tar.gz", hash = "sha256:565cc3039069d31ed2c9176b29c72f64c88356ba167118605887b1757168db77"},
 ]
 
 [package.dependencies]
@@ -2406,16 +2406,16 @@ psycopg2-binary = ">=2.9.9,<2.10.0"
 python-slugify = ">=8.0.3,<8.1.0"
 pyuwsgi = ">=2.0.23,<2.1.0"
 PyYAML = ">=6.0,<6.1"
-social-auth-app-django = ">=5.4.0,<5.5.0"
+social-auth-app-django = ">=5.4.1,<5.5.0"
 svgwrite = ">=1.4.2,<1.5.0"
 
 [package.extras]
-all = ["django-auth-ldap (>=4.7.0,<4.8.0)", "django-storages (>=1.14.2,<1.15.0)", "mysqlclient (>=2.2.3,<2.3.0)", "napalm (>=4.1.0,<4.2.0)", "social-auth-core[openidconnect,saml] (>=4.5.3,<4.6.0)"]
+all = ["django-auth-ldap (>=4.7.0,<4.8.0)", "django-storages (>=1.14.2,<1.15.0)", "mysqlclient (>=2.2.3,<2.3.0)", "napalm (>=4.1.0,<4.2.0)", "social-auth-core[saml] (>=4.5.3,<4.6.0)"]
 ldap = ["django-auth-ldap (>=4.7.0,<4.8.0)"]
 mysql = ["mysqlclient (>=2.2.3,<2.3.0)"]
 napalm = ["napalm (>=4.1.0,<4.2.0)"]
 remote-storage = ["django-storages (>=1.14.2,<1.15.0)"]
-sso = ["social-auth-core[openidconnect,saml] (>=4.5.3,<4.6.0)"]
+sso = ["social-auth-core[saml] (>=4.5.3,<4.6.0)"]
 
 [[package]]
 name = "nautobot-plugin-nornir"
@@ -3503,7 +3503,6 @@ files = [
     {file = "PyYAML-6.0.1-cp311-cp311-win_amd64.whl", hash = "sha256:bf07ee2fef7014951eeb99f56f39c9bb4af143d8aa3c21b1677805985307da34"},
     {file = "PyYAML-6.0.1-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:855fb52b0dc35af121542a76b9a84f8d1cd886ea97c84703eaa6d88e37a2ad28"},
     {file = "PyYAML-6.0.1-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:40df9b996c2b73138957fe23a16a4f0ba614f4c0efce1e9406a184b6d07fa3a9"},
-    {file = "PyYAML-6.0.1-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:a08c6f0fe150303c1c6b71ebcd7213c2858041a7e01975da3a99aed1e7a378ef"},
     {file = "PyYAML-6.0.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6c22bec3fbe2524cde73d7ada88f6566758a8f7227bfbf93a408a9d86bcc12a0"},
     {file = "PyYAML-6.0.1-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:8d4e9c88387b0f5c7d5f281e55304de64cf7f9c0021a3525bd3b1c542da3b0e4"},
     {file = "PyYAML-6.0.1-cp312-cp312-win32.whl", hash = "sha256:d483d2cdf104e7c9fa60c544d92981f12ad66a457afae824d146093b8c294c54"},
@@ -4486,4 +4485,4 @@ all = []
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "056bbf36994fc293fd18dc7ce43a0b26efd5aa93235ef3e431a12c31390b5197"
+content-hash = "4e6a0ec008a02a27de014df783a2f2572e0654a152c44f5d52db1e4ed667be0c"

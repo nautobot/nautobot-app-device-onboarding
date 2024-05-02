@@ -1,6 +1,5 @@
 """Empty Nornir Inventory Plugin."""
 
-from nautobot.dcim.utils import get_all_network_driver_mappings
 from nornir.core.inventory import Defaults, Groups, Hosts, Inventory
 
 from nautobot_device_onboarding.constants import SUPPORTED_NETWORK_DRIVERS

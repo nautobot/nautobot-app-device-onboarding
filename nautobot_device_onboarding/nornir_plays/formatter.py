@@ -316,7 +316,7 @@ def format_nxos_results(device):
     """Format the results of the show commands for NX-OS devices."""
     interfaces = device.get("interface")
     serial = device.get("serial")
-    sync_vrfs = device.get("sync_vrfs")
+    # sync_vrfs = device.get("sync_vrfs")
     sync_vlans = device.get("sync_vlans")
     mtus = device.get("mtu", [])
     types = device.get("type", [])
@@ -503,7 +503,6 @@ def format_results(compiled_results):
     Returns:
         compiled_results (dict): The formatted results.
     """
-
     for device, data in compiled_results.items():
         try:
             if "platform" in data:
