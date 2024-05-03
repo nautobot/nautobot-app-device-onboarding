@@ -36,7 +36,7 @@ sync_network_data:
   interfaces:
     root_key: true
     commands:
-      - command: "show interfaces | display json"
+      - command: "show interfaces brief | display json"
         parser: "none"
         # "interface-information"[]."physical-interface"[]."logical-interface"[].name[].data
         jpath: '"interface-information"[]."physical-interface"[].[name[].data, "logical-interface"[].name[].data][][]'  # when root_key=true this extracted value is what becomes interable in keys using __ under `current_key`.

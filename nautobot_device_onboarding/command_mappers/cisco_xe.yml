@@ -78,21 +78,21 @@ sync_network_data:
         post_processor: "{{ obj[0] | interface_status_to_bool }}"
   interfaces__802.1Q_mode:
     commands:
-      - command: "show interface"
+      - command: "show interfaces"
         parser: "textfsm"
         jpath: "[?interface=='{{ current_key }}'].mode"
         iterable_type: "str"
   interfaces__lag:
     commands:
-      - command: "show interface"
+      - command: "show etherchannel summary"
         parser: "textfsm"
-        jpath: "[*].null"
+        jpath: "[?contains(@.member_interface, `{{ current_key abbreviated_interface_name }}`)].bundle_name"
         iterable_type: "str"
   interfaces__vrf:
     commands:
-      - command: "show vrf interface"
+      - command: "show ip interface"
         parser: "textfsm"
-        jpath: "[?interface=='{{ current_key }}'].{name:name}"
+        jpath: "[?interface=='{{ current_key }}'].{name:vrf}"
         iterable_type: "dict"
   interfaces__tagged_vlans:
     commands:
@@ -107,3 +107,11 @@ sync_network_data:
         jpath: "[*].{id: vlan_id, name: vlan_name, interfaces: interfaces}"
         iterable_type: "dict"
         post_processor: "{% set untagged_vlan = [] %}{% for v in obj %}{% if current_key in v['interfaces'] | canonical_interface_name_list %}{% set _=untagged_vlan.append({'id': v['id'], 'name': v['name']}) %}{% endif %}{% endfor %}{{ untagged_vlan | tojson }}"
+
+    # default_values = {
+    #     "lag": "",
+    #     "untagged_vlan": {},
+    #     "tagged_vlans": [],
+    #     "vrf": {},
+    #     "802.1Q_mode": "",
+    # }
