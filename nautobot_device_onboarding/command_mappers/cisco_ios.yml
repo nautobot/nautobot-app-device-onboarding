@@ -85,7 +85,7 @@ sync_network_data:
     commands:
       - command: "show etherchannel summary"
         parser: "textfsm"
-        jpath: "[?contains(@.member_interface, `{{ current_key abbreviated_interface_name }}`)].bundle_name"
+        jpath: "[?contains(@.member_interface, `{{ current_key | abbreviated_interface_name }}`)].bundle_name"
         iterable_type: "str"
   interfaces__vrf:
     commands:
