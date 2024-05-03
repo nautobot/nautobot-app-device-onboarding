@@ -87,7 +87,7 @@ sync_network_data:
       - command: "show etherchannel summary"
         parser: "textfsm"
         jpath: "[?contains(@.member_interface, `{{ current_key | abbreviated_interface_name }}`)].bundle_name"
-        post_processor: '{{ obj | first(default='') | canonical_interface_name }}'
+        post_processor: '{{ obj | canonical_interface_name_list }}'
         iterable_type: "str"
   interfaces__vrf:
     commands:
