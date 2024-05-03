@@ -81,7 +81,7 @@ sync_network_data:
       - command: "show interfaces switchport"
         parser: "textfsm"
         jpath: "[?interface=='{{ current_key }}'].{admin_mode: admin_mode, trunking_vlans: trunking_vlans}"
-        post_processor: "{{ obj | first(default='') | interface_mode_logic }}"
+        post_processor: "{% if obj | length > 0 %}{{ obj[0] | interface_mode_logic }}{% else %}''{% endif %}"
         iterable_type: "str"
   interfaces__lag:
     commands:
