@@ -45,10 +45,11 @@ def key_exist_or_default(dict_obj, key):
 @library.filter
 def interface_mode_logic(item):
     """Logic to translate network modes to nautobot mode."""
-    if "access" in item["admin_mode"].lower():
-        return "access"
-    if item["admin_mode"] == "trunk" and item["trunking_vlans"] == ["ALL"]:
-        return "tagged-all"
-    if item["admin_mode"] == "trunk":
-        return "tagged"
+    if len(item) > 0:
+        if "access" in item["admin_mode"].lower():
+            return "access"
+        if item["admin_mode"] == "trunk" and item["trunking_vlans"] == ["ALL"]:
+            return "tagged-all"
+        if item["admin_mode"] == "trunk":
+            return "tagged"
     return ""
