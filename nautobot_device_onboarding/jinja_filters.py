@@ -33,9 +33,22 @@ def port_mode_to_nautobot(current_mode):
     }
     return mode_mapping.get(current_mode, "")
 
+
 @library.filter
 def key_exist_or_default(dict_obj, key):
     """Take a dict with a key and if its not truthy return a default"""
     if not dict_obj[key]:
         return {}
     return dict_obj
+
+
+@library.filter
+def interface_mode_logic(item):
+    """Logic to translate network modes to nautobot mode."""
+    if "access" in item["admin_mode"].lower():
+        return "access"
+    if item["admin_mode"] == "trunk" and item["trunking_vlans"] == ["ALL"]:
+        return "tagged-all"
+    if item["admin_mode"] == "trunk":
+        return "tagged"
+    return ""
