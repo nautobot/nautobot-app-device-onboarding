@@ -32,7 +32,7 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
     jpath_template = j2_env.from_string(yaml_command_element["jpath"])
     j2_rendered_jpath = jpath_template.render(**j2_data_context)
     print(j2_rendered_jpath)
-    if isinstance(parsed_command_output, str):
+    if parsed_command_output and isinstance(parsed_command_output, str):
             parsed_command_output = json.loads(parsed_command_output)
     try:
         extracted_value = extract_data_from_json(parsed_command_output, j2_rendered_jpath)
@@ -113,7 +113,6 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict):
                         # a list of data that we want to become our nested key. E.g. current_key "Ethernet1/1"
                         # These get passed into the render context for the template render to allow nested jpaths to use
                         # the current_key context for more flexible jpath queries.
-                        print(current_key)
                         _, current_key_post = extract_and_post_process(
                             command_outputs_dict[show_command_dict["command"]],
                             show_command_dict,
