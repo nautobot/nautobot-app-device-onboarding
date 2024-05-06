@@ -63,6 +63,7 @@ def interface_mode_logic(item):
                 return "tagged"
     return ""
 
+
 @library.filter
 def get_vlan_data(item):
     int_mode = interface_mode_logic(item)

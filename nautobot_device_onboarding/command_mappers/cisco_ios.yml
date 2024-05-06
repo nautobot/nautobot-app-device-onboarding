@@ -97,9 +97,6 @@ sync_network_data:
         post_processor: "{{ obj[0] | key_exist_or_default('name') }}"
         iterable_type: "dict"
   interfaces__tagged_vlans:
-    # Access: One untagged VLAN
-    # Tagged: One untagged VLAN and/or one or more tagged VLANs
-    # Tagged (All): Implies all VLANs are available (w/optional untagged VLAN)
     commands:
             # - command: "show vlan"
             # parser: "textfsm"

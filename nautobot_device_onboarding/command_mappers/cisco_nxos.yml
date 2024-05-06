@@ -84,9 +84,10 @@ sync_network_data:
         post_processor: "{{ obj[0] | port_mode_to_nautobot }}"
   interfaces__lag:
     commands:
-      - command: "show interface"
+      - command: "show port-channel summary"
         parser: "textfsm"
-        jpath: "[*].null"
+        jpath: "[?contains(@.member_interface, `{{ current_key | abbreviated_interface_name }}`)].bundle_name"
+        post_processor: "{% if obj | length > 0 %}{{ obj[0] | canonical_interface_name }}{% else %}{{ obj }}{% endif %}"
         iterable_type: "str"
   interfaces__vrf:
     commands:
