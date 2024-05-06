@@ -1,6 +1,8 @@
 """Filters for Jinja2 PostProcessing."""
 
+from itertools import chain
 from django_jinja import library
+from netutils.vlan import vlanconfig_to_list
 from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC
 
 # https://docs.nautobot.com/projects/core/en/stable/development/apps/api/platform-features/jinja2-filters/
@@ -45,11 +47,30 @@ def key_exist_or_default(dict_obj, key):
 @library.filter
 def interface_mode_logic(item):
     """Logic to translate network modes to nautobot mode."""
-    if len(item) > 0:
-        if "access" in item["admin_mode"].lower():
+    if len(item) == 1:
+        if "access" in item[0]["admin_mode"].lower():
             return "access"
-        if item["admin_mode"] == "trunk" and item["trunking_vlans"] == ["ALL"]:
+        if item[0]["admin_mode"] == "trunk" and item[0]["trunking_vlans"] == ["ALL"]:
             return "tagged-all"
-        if item["admin_mode"] == "trunk":
+        if item[0]["admin_mode"] == "trunk":
             return "tagged"
+        if "dynamic" in item[0]["admin_mode"]:
+            if "access" in item[0]["mode"]:
+                return "access"
+            if item[0]["mode"] == "trunk" and item[0]["trunking_vlans"] == ["ALL"]:
+                return "tagged-all"
+            if item[0]["mode"] == "trunk":
+                return "tagged"
     return ""
+
+@library.filter
+def get_vlan_data(item):
+    int_mode = interface_mode_logic(item)
+    if int_mode:
+        if int_mode == "access":
+            # {id: vlan_id, name: vlan_name}
+            return [{"id": item[0]["access_vlan"], "name": ""}]
+        if int_mode == "tagged-all":
+            return []
+        return [{"id": vid, "name": ""} for vid in list(chain.from_iterable([vlanconfig_to_list(vlan_stanza) for vlan_stanza in item[0]['trunking_vlans']]))]
+    return []
