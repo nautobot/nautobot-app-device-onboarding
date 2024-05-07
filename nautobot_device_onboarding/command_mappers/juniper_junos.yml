@@ -53,7 +53,8 @@ sync_network_data:
       - command: "show interfaces | display json"
         parser: "none"
         # jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key }}`]]][][]."todo"[].data'  # yamllint disable-line rule:quoted-strings
-        jpath: '{% if "." in current_key %}"interface-information"[]."physical-interface"[].["logical-interface"[?name[?data==`{{ current_key }}`]]][][].{prefix: "address-family"[]."interface-address"[]."ifa-destination"[].data, ip: "address-family"[]."interface-address"[]."ifa-local"[].data}{% else %}[]'  # yamllint disable-line rule:quoted-strings
+        jpath: '{% if "." in current_key %}"interface-information"[]."physical-interface"[].["logical-interface"[?name[?data==`{{ current_key }}`]]][][].{prefix_length: "address-family"[]."interface-address"[]."ifa-destination"[].data, ip_address: "address-family"[]."interface-address"[]."ifa-local"[].data}{% else %}[]{% endif %}'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{% set result = [] %}{% for ip in obj %}{% set _=result.append({'ip_address': ip['ip_address'], 'prefix_length': ip['prefix_length'] | extract_prefix }) %}{% endfor %}{{ result | tojson }}"
         iterable_type: "list"
   interfaces__mtu:
     commands:
