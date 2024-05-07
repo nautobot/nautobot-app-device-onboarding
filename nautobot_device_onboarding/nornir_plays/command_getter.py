@@ -89,7 +89,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
         orig_job_kwargs.get('sync_vrfs', False)
     )
     # All commands in this for loop are running within 1 device connection.
-    for command in commands:
+    for result_idx, command in enumerate(commands):
         send_command_kwargs = {}
         if command.get("parser") in SUPPORTED_COMMAND_PARSERS:
             send_command_kwargs = {f"use_{command['parser']}": True}
@@ -102,15 +102,10 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                 **send_command_kwargs
             )
         except NornirSubTaskError as err:
-            print(f"err: {err}")
-            print(err.result)
-            print(err.result[0].exception)
-            return Result(
-                host=task.host,
-                changed=False,
-                result=f"{command['command']}: E0001 - Textfsm template issue. The error was {err}",
-                failed=True,
-            )
+            # We don't want to fail the entire subtask if SubTaskError is hit, set result to empty list and failt to False
+            # Handle this type or result latter in the ETL process.
+            task.results[result_idx].result=[]
+            task.results[result_idx].failed=False
 
 
 def _parse_credentials(credentials):
@@ -249,7 +244,6 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info(f"Error During Sync Network Data Command Getter: {err}")
-        return err
     print(f"compiled_results: {compiled_results}")
 
     return compiled_results

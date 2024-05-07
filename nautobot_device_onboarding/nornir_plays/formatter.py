@@ -70,8 +70,8 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
                         post_processed_data = post_processed_data[0]
             else:
                 post_processed_data = post_processed_data[0]
-    print(f"pre_processed_extracted: {pre_processed_extracted}")
-    print(f"post_processed_data: {post_processed_data}")
+    # print(f"pre_processed_extracted: {pre_processed_extracted}")
+    # print(f"post_processed_data: {post_processed_data}")
     return pre_processed_extracted, post_processed_data
 
 
@@ -138,7 +138,7 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict):
         #             print("About to break the sequence due to valid pattern found")
         #             result_dict[dict_field] = extracted_processed
         #             break
-    print(result_dict)
+    # print(result_dict)
     return result_dict
 
 
