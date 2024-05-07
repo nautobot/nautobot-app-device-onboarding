@@ -75,3 +75,18 @@ def get_vlan_data(item):
             return []
         return [{"id": vid, "name": ""} for vid in list(chain.from_iterable([vlanconfig_to_list(vlan_stanza) for vlan_stanza in item[0]['trunking_vlans']]))]
     return []
+
+
+@library.filter
+def parse_junos_ip_address(item):
+    """Parse Junos IP and destination prefix.
+        Example results that can come back
+        # [{'prefix_length': [], 'ip_address': []}]
+        # [{'prefix_length': ['10.65.229.106/31'], 'ip_address': ['10.65.229.106']}]
+        # [{'prefix_length': ['10.65.133.0/29', '10.65.133.0/29'], 'ip_address': ['10.65.133.1', '10.65.133.3']}]
+        # [{'prefix_length': None, 'ip_address': None}]
+    """
+    if isinstance(item, list):
+        if item[0]['prefix_length'] and item[0]['ip_address']:
+            return [{"prefix_length": pl, "ip_address": ip}]
+    return []
