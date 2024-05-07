@@ -81,6 +81,7 @@ sync_network_data:
       - command: "show interfaces | display json"
         parser: "none"
         jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key }}`]]][][]."todo"[].data'  # yamllint disable-line rule:quoted-strings
+        post_processor: ""
   interfaces__lag:
     commands:
       - command: "show interfaces | display json"
