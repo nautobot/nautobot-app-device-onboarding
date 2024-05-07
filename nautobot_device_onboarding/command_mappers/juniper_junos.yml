@@ -60,7 +60,7 @@ sync_network_data:
       - command: "show interfaces | display json"
         parser: "none"
         # jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key }}`]]][][]."mtu"[].data'  # yamllint disable-line rule:quoted-strings
-        jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key.split('.')[0] }}`]]][][]."mtu"[].data'  # yamllint disable-line rule:quoted-strings
+        jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key.split(".")[0] }}`]]][][]."mtu"[].data'  # yamllint disable-line rule:quoted-strings
   interfaces__mac_address:
     commands:
       - command: "show interfaces | display json"
