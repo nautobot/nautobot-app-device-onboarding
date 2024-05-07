@@ -86,7 +86,7 @@ sync_network_data:
       - command: "show interfaces | display json"
         parser: "none"
         # "interface-information"[]["physical-interface"[?name[?data==`ge-1/0/3`]]][][]."logical-interface"[?name[?data=='ge-1/0/3.16386']][]
-        jpath: '"interface-information"[]."physical-interface"[?name.[?data==`{{ current_key }}`]][][]."logical-interface"[]."address-family"[]."ae-bundle-name"[].data'  # yamllint disable-line rule:quoted-strings
+        jpath: '"interface-information"[].["physical-interface"[?name[?data==`{{ current_key }}`]]][][]."logical-interface"[]."address-family"[]."ae-bundle-name"[].data'  # yamllint disable-line rule:quoted-strings
   interfaces__vrf:
     commands:
       - command: "show interfaces routing-instance all | display json"
