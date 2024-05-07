@@ -89,4 +89,6 @@ def parse_junos_ip_address(item):
     if isinstance(item, list):
         if item[0]['prefix_length'] and item[0]['ip_address']:
             return [{"prefix_length": item[0]['prefix_length'][0].split('/')[-1], "ip_address": item[0]['ip_address'][0]}]
+        if len(item[0]['prefix_length']) == 0 and item[0]['ip_address']:
+            return [{"prefix_length": 32, "ip_address": item[0]['ip_address'][0]}]
     return []
