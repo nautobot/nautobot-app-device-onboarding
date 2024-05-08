@@ -95,9 +95,9 @@ sync_network_data:
         jpath: '"interface-information"[].["physical-interface"[?name[?data==`{{ current_key }}`]]][][]."logical-interface"[]."address-family"[]."ae-bundle-name"[].data'  # yamllint disable-line rule:quoted-strings
   interfaces__vrf:
     commands:
-      - command: "show interfaces routing-instance all | display json"
+      - command: "show interfaces routing-instance all terse | display json"
         parser: "none"
-        jpath: '"interface-information"[]["logical-interface"[?name[?data==`{{ current_key }}`]]][][]."vrfname"[].data'  # yamllint disable-line rule:quoted-strings
+        jpath: '"interface-information"[]."physical-interface"[]["logical-interface"[?name[?data==`{{ current_key }}`]]][][]."vrfname"[].data'  # yamllint disable-line rule:quoted-strings
   # interfaces__tagged_vlans:
   #   commands:
   #     - command: "show interfaces brief | display json"
