@@ -97,7 +97,7 @@ sync_network_data:
     commands:
       - command: "show interfaces routing-instance all | display json"
         parser: "none"
-        jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key }}`]]][][]."vrfname"[].data'  # yamllint disable-line rule:quoted-strings
+        jpath: '"interface-information"[]["logical-interface"[?name[?data==`{{ current_key }}`]]][][]."vrfname"[].data'  # yamllint disable-line rule:quoted-strings
   # interfaces__tagged_vlans:
   #   commands:
   #     - command: "show interfaces brief | display json"
