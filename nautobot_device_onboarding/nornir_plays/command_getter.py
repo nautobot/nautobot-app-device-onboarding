@@ -186,15 +186,21 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                             username, password, secret = _parse_credentials(loaded_secrets_group)
                             if not (username and password):
                                 logger.error(f"Unable to onboard {entered_ip}, failed to parse credentials")
-                        single_host_inventory_constructed = _set_inventory(
+                        single_host_inventory_constructed, exc_info = _set_inventory(
                             host_ip=entered_ip,
                             platform=platform,
                             port=kwargs["csv_file"][entered_ip]["port"],
                             username=username,
                             password=password,
                         )
+                        if exc_info:
+                            logger.error(f"Unable to onboard {entered_ip}, failed with exception {exc_info}")
+                            continue
                 else:
-                    single_host_inventory_constructed = _set_inventory(entered_ip, platform, port, username, password)
+                    single_host_inventory_constructed, exc_info = _set_inventory(entered_ip, platform, port, username, password)
+                    if exc_info:
+                        logger.error(f"Unable to onboard {entered_ip}, failed with exception {exc_info}")
+                        continue
                 nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
             nr_with_processors.run(
                 task=netmiko_send_commands,
