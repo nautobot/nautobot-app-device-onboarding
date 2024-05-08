@@ -7,6 +7,7 @@ from nornir.core.inventory import ConnectionOptions, Host
 def guess_netmiko_device_type(hostname, username, password, port):
     """Guess the device type of host, based on Netmiko."""
     netmiko_optional_args = {"port": port}
+    guessed_device_type = None
 
     remote_device = {
         "device_type": "autodetect",
@@ -20,9 +21,8 @@ def guess_netmiko_device_type(hostname, username, password, port):
         guesser = SSHDetect(**remote_device)
         guessed_device_type = guesser.autodetect()
 
-    except Exception:  # pylint: disable=broad-exception-caught
-        guessed_device_type = None
-        # Additional checking is done later in the process. We shouldn't reraise an error as it causes the job to fail.
+    except Exception as err:  # pylint: disable=broad-exception-caught
+        raise err
     return guessed_device_type
 
 

@@ -134,11 +134,11 @@ def extract_prefix_from_subnet(prefix_list):
     return prefix_list
 
 
-def format_ios_results(device):
+def format_ios_results(device, kwargs):
     """Format the results of the show commands for IOS devices."""
     serial = device.get("serial")
-    sync_vlans = device.get("sync_vlans")
-    sync_vrfs = device.get("sync_vrfs")
+    sync_vlans = kwargs.get("sync_vlans")
+    sync_vrfs = kwargs.get("sync_vrfs")
     mtus = device.get("mtu", [])
     types = device.get("type", [])
     ips = device.get("ip_addresses", [])
@@ -159,12 +159,16 @@ def format_ios_results(device):
     description_list = ensure_list(descriptions)
     link_status_list = ensure_list(link_statuses)
     vlan_list = ensure_list(vlans)
-    interface_vlan_list = ensure_list(interface_vlans)
 
-    if vrfs is None:
+    if not vrfs:
         vrf_list = []
     else:
         vrf_list = ensure_list(vrfs)
+
+    if not interface_vlans:
+        interface_vlan_list = []
+    else:
+        interface_vlan_list = ensure_list(interface_vlans)
 
     interface_dict = {}
     for item in mtu_list:
@@ -191,23 +195,29 @@ def format_ios_results(device):
 
     # Add default values to interfaces
     default_values = {
+        "mtu": "",
+        "type": "other",
+        "ip_addresses": [],
+        "mac_address": "",
+        "description": "",
+        "link_status": False,
         "lag": "",
-        "untagged_vlan": {},
-        "tagged_vlans": [],
         "vrf": {},
         "802.1Q_mode": "",
+        "tagged_vlans": [],
+        "untagged_vlan": "",
     }
 
-    vlan_map = {vlan["vlan_id"]: vlan["vlan_name"] for vlan in vlan_list}
     for item in interface_vlan_list:
         try:
             if not item["interface"]:
                 continue
             canonical_name = canonical_interface_name(item["interface"])
             interface_dict.setdefault(canonical_name, {})
-            mode = item["admin_mode"]
 
             if sync_vlans:
+                vlan_map = {vlan["vlan_id"]: vlan["vlan_name"] for vlan in vlan_list}
+                mode = item["admin_mode"]
                 trunking_vlans = item["trunking_vlans"]
                 if mode == "trunk" and trunking_vlans == ["ALL"]:
                     interface_dict[canonical_name]["802.1Q_mode"] = "tagged-all"
@@ -253,11 +263,6 @@ def format_ios_results(device):
                         except KeyError:
                             interface_dict[canonical_name]["untagged_vlan"] = {}
                             continue
-            else:
-                if mode == "trunk":
-                    interface_dict[canonical_name]["802.1Q_mode"] = "tagged"
-                elif mode == "static access":
-                    interface_dict[canonical_name]["802.1Q_mode"] = "access"
 
         except Exception as e:
             # Overly broad exception, to handle unknow vlan configurations.
@@ -298,26 +303,33 @@ def format_ios_results(device):
     device["interfaces"] = interface_list
     device["serial"] = serial
 
-    del device["mtu"]
-    del device["type"]
-    del device["ip_addresses"]
-    del device["prefix_length"]
-    del device["mac_address"]
-    del device["description"]
-    del device["link_status"]
-    del device["vrfs"]
-    del device["vlans"]
-    del device["interface_vlans"]
+    keys_to_delete = [
+        "mtu",
+        "type",
+        "ip_addresses",
+        "prefix_length",
+        "mac_address",
+        "description",
+        "link_status",
+        "vrfs",
+        "vlans",
+        "interface_vlans",
+    ]
+    for key in keys_to_delete:
+        try:
+            del device[key]
+        except KeyError:
+            continue
 
     return device
 
 
-def format_nxos_results(device):
+def format_nxos_results(device, kwargs):
     """Format the results of the show commands for NX-OS devices."""
     interfaces = device.get("interface")
     serial = device.get("serial")
-    # sync_vrfs = device.get("sync_vrfs")
-    sync_vlans = device.get("sync_vlans")
+    sync_vrfs = kwargs.get("sync_vrfs")
+    sync_vlans = kwargs.get("sync_vlans")
     mtus = device.get("mtu", [])
     types = device.get("type", [])
     ips = device.get("ip_addresses", [])
@@ -339,17 +351,21 @@ def format_nxos_results(device):
     description_list = ensure_list(descriptions)
     link_status_list = ensure_list(link_statuses)
     vlan_list = ensure_list(vlans)
-    interface_vlan_list = ensure_list(interface_vlans)
 
-    if vrfs_interfaces is None:
+    if not vrfs_interfaces:
         vrfs_interfaces = []
     else:
         vrfs_interfaces = ensure_list(vrfs_interfaces)
 
+    if not interface_vlans:
+        interface_vlan_list = []
+    else:
+        interface_vlan_list = ensure_list(interface_vlans)
+
     interface_dict = {}
     default_values = {
         "mtu": "",
-        "type": "",
+        "type": "other",
         "ip_addresses": [],
         "mac_address": "",
         "description": "",
@@ -388,16 +404,16 @@ def format_nxos_results(device):
         canonical_name = canonical_interface_name(item["interface"])
         interface_dict.setdefault(canonical_name, {})["link_status"] = True if item["link_status"] == "up" else False
 
-    vlan_map = {vlan["vlan_id"]: vlan["vlan_name"] for vlan in vlan_list}
     for item in interface_vlan_list:
         try:
             if not item["interface"]:
                 continue
             canonical_name = canonical_interface_name(item["interface"])
             interface_dict.setdefault(canonical_name, {})
-            mode = item["mode"]
             if sync_vlans:
                 trunking_vlans = item["trunking_vlans"]
+                mode = item["mode"]
+                vlan_map = {vlan["vlan_id"]: vlan["vlan_name"] for vlan in vlan_list}
 
                 if mode == "trunk" and trunking_vlans == "1-4094":
                     interface_dict[canonical_name]["802.1Q_mode"] = "tagged-all"
@@ -440,6 +456,7 @@ def format_nxos_results(device):
                     interface_dict[canonical_name]["untagged_vlan"] = {}
                     interface_dict[canonical_name]["tagged_vlans"] = []
             else:
+                mode = item["mode"]
                 if mode == "trunk":
                     interface_dict[canonical_name]["802.1Q_mode"] = "tagged"
                 elif mode == "access":
@@ -462,30 +479,35 @@ def format_nxos_results(device):
     for interface_name, interface_info in interface_dict.items():
         interface_list.append({canonical_interface_name(interface_name): interface_info})
 
-    for vrf in vrfs_interfaces:
-        try:
-            canonical_name = canonical_interface_name(vrf["interface"])
-            interface_dict.setdefault(canonical_name, {})
-            interface_dict[canonical_name]["vrf"] = {"name": vrf["name"]}
-        except KeyError:
-            continue
+    if sync_vrfs:
+        for vrf in vrfs_interfaces:
+            try:
+                canonical_name = canonical_interface_name(vrf["interface"])
+                interface_dict.setdefault(canonical_name, {})
+                interface_dict[canonical_name]["vrf"] = {"name": vrf["name"]}
+            except KeyError:
+                continue
 
     device["interfaces"] = interface_list
     device["serial"] = serial
-
-    del device["mtu"]
-    del device["type"]
-    del device["ip_addresses"]
-    del device["prefix_length"]
-    del device["mac_address"]
-    del device["description"]
-    del device["link_status"]
-    del device["mode"]
-    del device["vrf_interfaces"]
-    del device["vlans"]
-    del device["interface_vlans"]
-    del device["interface"]
-
+    keys_to_delete = [
+        "mtu",
+        "type",
+        "ip_addresses",
+        "prefix_length",
+        "mac_address",
+        "description",
+        "link_status",
+        "vrfs",
+        "vlans",
+        "interface_vlans",
+    ]
+    for key in keys_to_delete:
+        try:
+            del device[key]
+        except KeyError:
+            continue
+    print(f"device: {device}")
     return device
 
 
@@ -494,7 +516,7 @@ def format_junos_results(compiled_results):
     return compiled_results
 
 
-def format_results(compiled_results):
+def format_results(compiled_results, kwargs):
     """Format the results of the show commands for IOS devices.
 
     Args:
@@ -516,9 +538,9 @@ def format_results(compiled_results):
                 else:
                     data["serial"] = serial
                 if platform in ["cisco_ios", "cisco_xe"]:
-                    format_ios_results(data)
+                    format_ios_results(data, kwargs)
                 elif platform == "cisco_nxos":
-                    format_nxos_results(data)
+                    format_nxos_results(data, kwargs)
             else:
                 data.update({"failed": True, "failed_reason": "Cannot connect to device."})
         except Exception as err:  # pylint: disable=broad-exception-caught

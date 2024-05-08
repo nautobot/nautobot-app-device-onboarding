@@ -173,15 +173,28 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                             username, password, secret = _parse_credentials(loaded_secrets_group)
                             if not (username and password):
                                 logger.error(f"Unable to onboard {entered_ip}, failed to parse credentials")
-                        single_host_inventory_constructed = _set_inventory(
-                            host_ip=entered_ip,
-                            platform=platform,
-                            port=kwargs["csv_file"][entered_ip]["port"],
-                            username=username,
-                            password=password,
-                        )
+                        try:
+                            single_host_inventory_constructed = _set_inventory(
+                                host_ip=entered_ip,
+                                platform=platform,
+                                port=kwargs["csv_file"][entered_ip]["port"],
+                                username=username,
+                                password=password,
+                            )
+                        except Exception as err:  # pylint: disable=broad-exception-caught
+                            logger.error(f"{err}")
+                            compiled_results[entered_ip] = {}
+                            continue
                 else:
-                    single_host_inventory_constructed = _set_inventory(entered_ip, platform, port, username, password)
+                    try:
+                        single_host_inventory_constructed = _set_inventory(
+                            entered_ip, platform, port, username, password
+                        )
+                    except Exception as err:  # pylint: disable=broad-exception-caught
+                        logger.error(f"{err}")
+                        compiled_results[entered_ip] = {}
+                        continue
+
                 nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
             nr_with_processors.run(
                 task=netmiko_send_commands,
@@ -189,13 +202,14 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                 command_getter_job="sync_devices",
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
-        logger.info("Error: %s", err)
+        logger.error(f"{err}")
     return compiled_results
 
 
 def sync_network_data_command_getter(job_result, log_level, kwargs):
     """Nornir play to run show commands for sync_network_data ssot job."""
     logger = NornirLogger(job_result, log_level)
+
     try:
         compiled_results = {}
         qs = kwargs["devices"]
@@ -222,8 +236,8 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
                 command_getter_job="sync_network_data",
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
-        logger.info("Error: %s", err)
+        logger.error(f"{err}")
         return err
-    compiled_results = format_results(compiled_results)
+    compiled_results = format_results(compiled_results, kwargs)
 
     return compiled_results
