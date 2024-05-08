@@ -556,7 +556,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
     )
     device_role = ObjectVar(
         model=Role,
-        query_params={"content_type": "dcim.device"},
+        query_params={"content_types": "dcim.device"},
         required=False,
         description="Only update devices with the selected role.",
     )
@@ -625,6 +625,11 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
             self.filtered_devices = Device.objects.filter(**device_filter)
         else:
             self.logger.error("No device filter options were provided, no devices will be synced.")
+
+        # Stop the job if no devices are returned after filtering
+        if not self.filtered_devices:
+            self.logger.info("No devices returned based on filter selections.")
+            return
 
         # Log selected devices
         filtered_devices_names = list(self.filtered_devices.values_list("name", flat=True))
