@@ -48,7 +48,7 @@ sync_network_data:
         jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key.split(".")[0] }}`]]][][]."link-level-type"[].data'  # yamllint disable-line rule:quoted-strings
         # jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key.split(".")[0] }}`]]][][]."if-type"[].data'  # yamllint disable-line rule:quoted-strings
         # jpath: '{% if "." in current_key %}"interface-information"[]["physical-interface"[?name[?data==`{{ current_key }}`]]][][]."if-type"[].data {% else %}"interface-information"[]."physical-interface"[].["logical-interface"[?name[?data==`{{ current_key }}`]]][][]'
-        post_processor: "{% if obj | length > 0 %}{{ obj[0] | map_interface_type }}{% else %}'other'{% endif %}"
+        post_processor: "{% if obj | length > 0 %}{% if 'ae' in current_key %}lag{% else %}{{ obj[0] | map_interface_type }}{% endif %}{% else %}other{% endif %}"
         iterable_type: "str"
   interfaces__ip_addresses:
     commands:
@@ -63,6 +63,7 @@ sync_network_data:
         parser: "none"
         # jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key }}`]]][][]."mtu"[].data'  # yamllint disable-line rule:quoted-strings
         jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key.split(".")[0] }}`]]][][]."mtu"[].data'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{% if obj | length > 0 %}{% if 'nlimited' in obj[0] %}9192{% else %}{{ obj[0] }}{% endif %}{% endif %}"
   interfaces__mac_address:
     commands:
       - command: "show interfaces | display json"
