@@ -84,12 +84,15 @@ sync_network_data:
     commands:
       - command: "show interfaces | json"
         parser: "none"
-        jpath: 'interfaces."{{ current_key }}".null'
-  # interfaces__vrf:
-  #   commands:
-  #     - command: "show vrf interface"
-  #       parser: "textfsm"
-  #       jpath: 'interfaces."{{ current_key }}".{name:name}'
+        jpath: 'interfaces."{{ current_key }}".interfaceMembership'
+        post_processor: "{% if obj | length > 0 %}{{ obj.split()[-1] }}{% else %}{{ obj }}{% endif %}"
+  interfaces__vrf:
+    commands:
+      - command: "show ip interface | json"
+        parser: "none"
+        jpath: 'interfaces.*.{name: name, vrf: vrf}[?name==`{{ current_key }}`].{name: vrf}'
+        post_processor: "{% if obj | length > 0 %}{{ obj[0] | tojson }}{% else %}{{ obj }}{% endif %}"
+        iterable_type: "dict"
   # interfaces__tagged_vlans:
   #   commands:
   #     - command: "show vlan"
