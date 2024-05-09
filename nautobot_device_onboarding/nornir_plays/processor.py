@@ -16,12 +16,10 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         """Set logging facility."""
         self.logger = logger
         self.data: Dict = command_outputs
-        # self.parsed_command_outputs = {}
         self.kwargs = kwargs
 
     def task_instance_started(self, task: Task, host: Host) -> None:
         """Processor for logging and data processing on task start."""
-        self.logger.debug(f"current data: {self.data}")
         if not self.data.get(host.name):
             self.data[host.name] = {
                 "platform": host.platform,
@@ -59,7 +57,12 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         for res in result[1:]:
             parsed_command_outputs[res.name] = res.result
 
-        ready_for_ssot_data = extract_show_data(host, parsed_command_outputs, task.params["command_getter_job"])
+        ready_for_ssot_data = extract_show_data(
+            host,
+            parsed_command_outputs,
+            task.params["command_getter_job"],
+            self.kwargs["debug"]
+        )
         self.logger.debug(f"read for ssot data {host.name} {ready_for_ssot_data}")
         self.data[host.name].update(ready_for_ssot_data)
 

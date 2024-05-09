@@ -1,10 +1,19 @@
 """Command Extraction and Formatting or SSoT Based Jobs."""
-
+import logging
 import json
 from django.template import engines
 from django.utils.module_loading import import_string
 from jdiff import extract_data_from_json
 from jinja2.sandbox import SandboxedEnvironment
+
+def setup_logger(logger_name, debug_on):
+    # Create logger
+    logger = logging.getLogger(logger_name)
+    if debug_on:
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.INFO)
+    return logger
 
 
 def get_django_env():
@@ -26,20 +35,20 @@ def get_django_env():
     return jinja_env
 
 
-def extract_and_post_process(parsed_command_output, yaml_command_element, j2_data_context, iter_type):
+def extract_and_post_process(parsed_command_output, yaml_command_element, j2_data_context, iter_type, job_debug):
     """Helper to extract and apply post_processing on a single element."""
+    logger = logger = setup_logger("DEVICE_ONBOARDING_ETL_LOGGER", job_debug)
     j2_env = get_django_env()
     jpath_template = j2_env.from_string(yaml_command_element["jpath"])
     j2_rendered_jpath = jpath_template.render(**j2_data_context)
-    print(j2_rendered_jpath)
+    logger.debug("Post Rendered Jpath: %s", j2_rendered_jpath)
     if parsed_command_output and isinstance(parsed_command_output, str):
             parsed_command_output = json.loads(parsed_command_output)
     try:
         extracted_value = extract_data_from_json(parsed_command_output, j2_rendered_jpath)
-        print(f"extracted value: {extracted_value}")
     except TypeError as err:
+        logger.debug("Error occurred during extraction: %s", err)
         extracted_value = ""
-        print(f"err: {err}")
     pre_processed_extracted = extracted_value
     if yaml_command_element.get("post_processor"):
         # j2 context data changes obj(hostname) -> extracted_value for post_processor
@@ -52,7 +61,6 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
         post_processed_data = json.loads(extracted_processed)
     except Exception:
         post_processed_data = extracted_processed
-    print(f"early_processed: {post_processed_data}")
     if isinstance(post_processed_data, list) and len(post_processed_data) == 0:
         # means result was empty, change empty result to iterater_type if applicable.
         if iter_type:
@@ -70,12 +78,12 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
                         post_processed_data = post_processed_data[0]
             else:
                 post_processed_data = post_processed_data[0]
-    print(f"pre_processed_extracted: {pre_processed_extracted}")
-    print(f"post_processed_data: {post_processed_data}")
+    logger.debug("Pre Processed Extracted: %s", pre_processed_extracted)
+    logger.debug("Post Processed Data: %s", post_processed_data)
     return pre_processed_extracted, post_processed_data
 
 
-def perform_data_extraction(host, command_info_dict, command_outputs_dict):
+def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_debug):
     """Extract, process data."""
     result_dict = {}
     sync_vlans = host.defaults.data.get("sync_vlans", False)
@@ -98,7 +106,8 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict):
                     command_outputs_dict[show_command_dict["command"]],
                     show_command_dict,
                     {"obj": host.name, "original_host": host.name},
-                    final_iterable_type
+                    final_iterable_type,
+                    job_debug,
                 )
                 # root_key_extracted = a1.copy()
                 result_dict[ssot_field] = root_key_post
@@ -117,7 +126,8 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict):
                             command_outputs_dict[show_command_dict["command"]],
                             show_command_dict,
                             {"current_key": current_key, "obj": host.name, "original_host": host.name},
-                            final_iterable_type
+                            final_iterable_type,
+                            job_debug,
                         )
                         result_dict[field_nesting[0]][current_key][field_nesting[1]] = current_key_post
                 else:
@@ -125,24 +135,24 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict):
                         command_outputs_dict[show_command_dict["command"]],
                         show_command_dict,
                         {"obj": host.name, "original_host": host.name},
-                        final_iterable_type
+                        final_iterable_type,
+                        job_debug,
                     )
                     result_dict[ssot_field] = current_field_post
         # if command_info_dict.get("validator_pattern"):
         #     # temp validator
         #     if command_info_dict["validator_pattern"] == "not None":
         #         if not extracted_processed:
-        #             print("validator pattern not detected, checking next command.")
+        #             logger.debug("validator pattern not detected, checking next command.")
         #             continue
         #         else:
-        #             print("About to break the sequence due to valid pattern found")
+        #             logger.debug("About to break the sequence due to valid pattern found")
         #             result_dict[dict_field] = extracted_processed
         #             break
-    # print(result_dict)
     return result_dict
 
 
-def extract_show_data(host, command_outputs, command_getter_type):
+def extract_show_data(host, command_outputs, command_getter_type, job_debug):
     """Take a result of show command and extra specific needed data.
 
     Args:
@@ -151,5 +161,5 @@ def extract_show_data(host, command_outputs, command_getter_type):
         command_getter_type (str): to know what dict to pull, sync_devices or sync_network_data.
     """
     command_getter_iterable = host.data["platform_parsing_info"][command_getter_type]
-    all_results_extracted = perform_data_extraction(host, command_getter_iterable, command_outputs)
+    all_results_extracted = perform_data_extraction(host, command_getter_iterable, command_outputs, job_debug)
     return all_results_extracted

@@ -1,5 +1,5 @@
 """CommandGetter."""
-
+import logging
 from typing import Dict
 from django.conf import settings
 from nautobot.dcim.models import Platform
@@ -101,7 +101,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                 read_timeout=60,
                 **send_command_kwargs
             )
-        except NornirSubTaskError as err:
+        except NornirSubTaskError:
             # We don't want to fail the entire subtask if SubTaskError is hit, set result to empty list and failt to False
             # Handle this type or result latter in the ETL process.
             task.results[result_idx].result=[]
@@ -210,7 +210,6 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info(f"Error During Sync Devices Command Getter: {err}")
-    print(f"compiled_results: {compiled_results}")
     return compiled_results
 
 
@@ -250,6 +249,4 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info(f"Error During Sync Network Data Command Getter: {err}")
-    print(f"compiled_results: {compiled_results}")
-
     return compiled_results
