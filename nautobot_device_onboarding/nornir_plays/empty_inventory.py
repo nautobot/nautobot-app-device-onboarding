@@ -6,7 +6,6 @@ from nautobot_device_onboarding.constants import SUPPORTED_NETWORK_DRIVERS
 from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info
 
 
-
 class EmptyInventory:  # pylint: disable=too-few-public-methods
     """Creates an empty Nornir inventory."""
 
