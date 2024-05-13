@@ -1,6 +1,7 @@
 """CommandGetter."""
 
 from typing import Dict
+
 from django.conf import settings
 from nautobot.dcim.models import Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
@@ -13,12 +14,12 @@ from nornir.core.plugins.inventory import InventoryPluginRegister
 from nornir.core.task import Result, Task
 from nornir_netmiko.tasks import netmiko_send_command
 
+from nautobot_device_onboarding.constants import SUPPORTED_COMMAND_PARSERS, SUPPORTED_NETWORK_DRIVERS
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import CommandGetterProcessor
 from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info
-from nautobot_device_onboarding.constants import SUPPORTED_NETWORK_DRIVERS, SUPPORTED_COMMAND_PARSERS
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
@@ -218,6 +219,7 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
 def sync_network_data_command_getter(job_result, log_level, kwargs):
     """Nornir play to run show commands for sync_network_data ssot job."""
     logger = NornirLogger(job_result, log_level)
+
     try:
         compiled_results = {}
         qs = kwargs["devices"]

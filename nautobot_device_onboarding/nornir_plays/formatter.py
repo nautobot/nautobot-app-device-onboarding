@@ -2,6 +2,7 @@
 
 import logging
 import json
+
 from django.template import engines
 from django.utils.module_loading import import_string
 from jdiff import extract_data_from_json
@@ -37,7 +38,7 @@ def get_django_env():
     return jinja_env
 
 
-def extract_and_post_process(parsed_command_output, yaml_command_element, j2_data_context, iter_type, job_debug):
+  def extract_and_post_process(parsed_command_output, yaml_command_element, j2_data_context, iter_type, job_debug):
     """Helper to extract and apply post_processing on a single element."""
     logger = logger = setup_logger("DEVICE_ONBOARDING_ETL_LOGGER", job_debug)
     j2_env = get_django_env()

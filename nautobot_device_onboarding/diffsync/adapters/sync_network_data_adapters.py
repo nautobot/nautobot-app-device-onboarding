@@ -60,7 +60,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         Create a cache of primary ip address for devices.
 
         If the primary ip address of a device is unset due to the deletion
-        of an interface, this cache is used to reset it.
+        of an interface, this cache is used to reset it in sync_complete().
         """
         self.primary_ips = {}
         for device in device_queryset:
@@ -71,14 +71,6 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         if database_object.mac_address:
             return str(database_object.mac_address)
         return ""
-
-    def load_param_untagged_vlan__name(self, parameter_name, database_object):
-        """Load, or prevent loading, untagged vlans depending on form selection."""
-        if not self.job.sync_vlans:
-            if self.job.debug:
-                self.job.logger.debug(f"{parameter_name} will not be synced to {database_object}")
-            return ""
-        return str(database_object.untagged_vlan.name)
 
     def load_ip_addresses(self):
         """Load IP addresses into the DiffSync store.
@@ -435,7 +427,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
             device__name=hostname,
             status__name=self.job.interface_status.name,
             type=interface_data["type"],
-            mac_address=self._process_mac_address(interface_data["mac_address"]),
+            mac_address=self._process_mac_address(mac_address=interface_data["mac_address"]),
             mtu=interface_data["mtu"] if interface_data["mtu"] else 1500,
             description=interface_data["description"],
             enabled=interface_data["link_status"],

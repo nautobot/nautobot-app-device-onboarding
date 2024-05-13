@@ -71,6 +71,7 @@ class CommandGetterProcessor(BaseLoggingProcessor):
                 f"subtask_instance_completed {task.host} Subtask result {result.result}.", extra={"object": task.host}
             )
 
+
     def subtask_instance_started(self, task: Task, host: Host) -> None:  # show command start
         """Processor for logging and data processing on subtask start."""
         self.logger.info(

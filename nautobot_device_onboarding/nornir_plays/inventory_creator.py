@@ -7,6 +7,7 @@ from nornir.core.inventory import ConnectionOptions, Host
 def guess_netmiko_device_type(hostname, username, password, port):
     """Guess the device type of host, based on Netmiko."""
     netmiko_optional_args = {"port": port}
+    guessed_device_type = None
 
     remote_device = {
         "device_type": "autodetect",
