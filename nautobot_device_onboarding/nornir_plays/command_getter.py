@@ -1,5 +1,5 @@
 """CommandGetter."""
-import logging
+
 from typing import Dict
 from django.conf import settings
 from nautobot.dcim.models import Platform
@@ -48,7 +48,7 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs):
     """Using merged command mapper info and look up all commands that need to be run."""
     all_commands = []
     for key, value in yaml_parsed_info.items():
-        if not key.startswith('_metadata'):
+        if not key.startswith("_metadata"):
             # Deduplicate commands + parser key
             current_root_key = value.get("commands")
             if isinstance(current_root_key, list):
@@ -78,15 +78,17 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
     """Run commands specified in PLATFORM_COMMAND_MAP."""
     if not task.host.platform:
         return Result(host=task.host, result=f"{task.host.name} has no platform set.", failed=True)
-    if task.host.platform not in SUPPORTED_NETWORK_DRIVERS or not 'cisco_wlc_ssh':
+    if task.host.platform not in SUPPORTED_NETWORK_DRIVERS or not "cisco_wlc_ssh":
         return Result(host=task.host, result=f"{task.host.name} has a unsupported platform set.", failed=True)
     if not command_getter_yaml_data[task.host.platform].get(command_getter_job):
-        return Result(host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True)
+        return Result(
+            host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True
+        )
     task.host.data["platform_parsing_info"] = command_getter_yaml_data[task.host.platform]
     commands = _get_commands_to_run(
         command_getter_yaml_data[task.host.platform][command_getter_job],
-        orig_job_kwargs.get('sync_vlans', False),
-        orig_job_kwargs.get('sync_vrfs', False)
+        orig_job_kwargs.get("sync_vlans", False),
+        orig_job_kwargs.get("sync_vrfs", False),
     )
     # All commands in this for loop are running within 1 device connection.
     for result_idx, command in enumerate(commands):
@@ -99,13 +101,13 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                 name=command["command"],
                 command_string=command["command"],
                 read_timeout=60,
-                **send_command_kwargs
+                **send_command_kwargs,
             )
         except NornirSubTaskError:
             # We don't want to fail the entire subtask if SubTaskError is hit, set result to empty list and failt to False
             # Handle this type or result latter in the ETL process.
-            task.results[result_idx].result=[]
-            task.results[result_idx].failed=False
+            task.results[result_idx].result = []
+            task.results[result_idx].failed = False
 
 
 def _parse_credentials(credentials):
@@ -161,9 +163,7 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                 "plugin": "empty-inventory",
             },
         ) as nornir_obj:
-            nr_with_processors = nornir_obj.with_processors(
-                [CommandGetterProcessor(logger, compiled_results, kwargs)]
-            )
+            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
             loaded_secrets_group = None
             for entered_ip in ip_addresses:
                 if kwargs["csv_file"]:
@@ -197,7 +197,9 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                             logger.error(f"Unable to onboard {entered_ip}, failed with exception {exc_info}")
                             continue
                 else:
-                    single_host_inventory_constructed, exc_info = _set_inventory(entered_ip, platform, port, username, password)
+                    single_host_inventory_constructed, exc_info = _set_inventory(
+                        entered_ip, platform, port, username, password
+                    )
                     if exc_info:
                         logger.error(f"Unable to onboard {entered_ip}, failed with exception {exc_info}")
                         continue
@@ -238,14 +240,12 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
                 },
             },
         ) as nornir_obj:
-            nr_with_processors = nornir_obj.with_processors(
-                [CommandGetterProcessor(logger, compiled_results, kwargs)]
-            )
+            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
             nr_with_processors.run(
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
                 command_getter_job="sync_network_data",
-                **kwargs
+                **kwargs,
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info(f"Error During Sync Network Data Command Getter: {err}")

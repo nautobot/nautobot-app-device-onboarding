@@ -87,7 +87,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         """
         ip_address_hosts = set()
         for _, device_data in self.job.command_getter_result.items():
-            #for interface in device_data["interfaces"]:
+            # for interface in device_data["interfaces"]:
             for _, interface_data in device_data["interfaces"].items():
                 for ip_address in interface_data["ip_addresses"]:
                     if ip_address:
@@ -555,9 +555,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                         )
                         self.add(network_ip_address_to_interface)
                         if self.job.debug:
-                            self.job.logger.debug(
-                                f"IP Address to interface {network_ip_address_to_interface} loaded."
-                            )
+                            self.job.logger.debug(f"IP Address to interface {network_ip_address_to_interface} loaded.")
 
     def load_tagged_vlans_to_interface(self):
         """Load tagged vlan to interface assignments into the Diffsync store."""
@@ -587,9 +585,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                 )
                 self.add(network_untagged_vlan_to_interface)
                 if self.job.debug:
-                    self.job.logger.debug(
-                        f"Untagged Vlan to interface {network_untagged_vlan_to_interface} loaded."
-                    )
+                    self.job.logger.debug(f"Untagged Vlan to interface {network_untagged_vlan_to_interface} loaded.")
 
     def load_lag_to_interface(self):
         """Load lag interface assignments into the Diffsync store."""

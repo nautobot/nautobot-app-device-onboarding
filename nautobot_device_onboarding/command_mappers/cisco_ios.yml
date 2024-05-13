@@ -98,9 +98,6 @@ sync_network_data:
         iterable_type: "dict"
   interfaces__tagged_vlans:
     commands:
-            # - command: "show vlan"
-            # parser: "textfsm"
-            # jpath: "[?contains(interfaces, '{{ current_key | abbreviated_interface_name }}')].{id: vlan_id, name: vlan_name}"
       - command: "show interfaces switchport"
         parser: "textfsm"
         jpath: "[?interface=='{{ current_key | abbreviated_interface_name }}'].{admin_mode: admin_mode, mode: mode, access_vlan: access_vlan, trunking_vlans: trunking_vlans}"
@@ -109,6 +106,5 @@ sync_network_data:
     commands:
       - command: "show interfaces switchport"
         parser: "textfsm"
-        # jpath: "[*].{id: vlan_id, name: vlan_name, interfaces: interfaces}"
         jpath: "[?contains(interface, '{{ current_key }}')].{id: native_vlan}"
         iterable_type: "dict"

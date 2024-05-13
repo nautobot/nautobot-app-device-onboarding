@@ -108,4 +108,3 @@ sync_network_data:
         jpath: "[*].{id: vlan_id, name: vlan_name, interfaces: interfaces}"
         iterable_type: "dict"
         post_processor: "{% set untagged_vlan = [] %}{% for v in obj %}{% if current_key in v['interfaces'] | canonical_interface_name_list %}{% set _=untagged_vlan.append({'id': v['id'], 'name': v['name']}) %}{% endif %}{% endfor %}{{ untagged_vlan | tojson }}"
-

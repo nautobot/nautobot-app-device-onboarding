@@ -19,10 +19,11 @@ def extract_prefix(network):
     """Extract the prefix length from the IP/Prefix. E.g 192.168.1.1/24."""
     return network.split("/")[-1]
 
+
 @library.filter
 def interface_status_to_bool(status):
     """Take links or admin status and change to boolean."""
-    return True if "up" in status.lower() else False
+    return "up" in status.lower()
 
 
 @library.filter
@@ -38,14 +39,14 @@ def port_mode_to_nautobot(current_mode):
 
 @library.filter
 def key_exist_or_default(dict_obj, key):
-    """Take a dict with a key and if its not truthy return a default"""
+    """Take a dict with a key and if its not truthy return a default."""
     if not dict_obj[key]:
         return {}
     return dict_obj
 
 
 @library.filter
-def interface_mode_logic(item):
+def interface_mode_logic(item):  # pylint: disable=too-many-return-statements
     """Logic to translate network modes to nautobot mode."""
     if len(item) == 1:
         if "access" in item[0]["admin_mode"].lower():
@@ -66,6 +67,7 @@ def interface_mode_logic(item):
 
 @library.filter
 def get_vlan_data(item):
+    """Get vlan information from an item."""
     int_mode = interface_mode_logic(item)
     if int_mode:
         if int_mode == "access":
@@ -73,22 +75,30 @@ def get_vlan_data(item):
             return [{"id": item[0]["access_vlan"], "name": ""}]
         if int_mode == "tagged-all":
             return []
-        return [{"id": vid, "name": ""} for vid in list(chain.from_iterable([vlanconfig_to_list(vlan_stanza) for vlan_stanza in item[0]['trunking_vlans']]))]
+        return [
+            {"id": vid, "name": ""}
+            for vid in list(
+                chain.from_iterable([vlanconfig_to_list(vlan_stanza) for vlan_stanza in item[0]["trunking_vlans"]])
+            )
+        ]
     return []
 
 
 @library.filter
 def parse_junos_ip_address(item):
     """Parse Junos IP and destination prefix.
-        Example results that can come back
-        # [{'prefix_length': [], 'ip_address': []}]
-        # [{'prefix_length': ['10.65.229.106/31'], 'ip_address': ['10.65.229.106']}]
-        # [{'prefix_length': ['10.65.133.0/29', '10.65.133.0/29'], 'ip_address': ['10.65.133.1', '10.65.133.3']}]
-        # [{'prefix_length': None, 'ip_address': None}]
+
+    Example:
+    >>> [{'prefix_length': [], 'ip_address': []}]
+    >>> [{'prefix_length': ['10.65.229.106/31'], 'ip_address': ['10.65.229.106']}]
+    >>> [{'prefix_length': ['10.65.133.0/29', '10.65.133.0/29'], 'ip_address': ['10.65.133.1', '10.65.133.3']}]
+    >>> [{'prefix_length': None, 'ip_address': None}]
     """
     if isinstance(item, list):
-        if item[0]['prefix_length'] and item[0]['ip_address']:
-            return [{"prefix_length": item[0]['prefix_length'][0].split('/')[-1], "ip_address": item[0]['ip_address'][0]}]
-        if not item[0]['prefix_length'] and item[0]['ip_address']:
-            return [{"prefix_length": 32, "ip_address": item[0]['ip_address'][0]}]
+        if item[0]["prefix_length"] and item[0]["ip_address"]:
+            return [
+                {"prefix_length": item[0]["prefix_length"][0].split("/")[-1], "ip_address": item[0]["ip_address"][0]}
+            ]
+        if not item[0]["prefix_length"] and item[0]["ip_address"]:
+            return [{"prefix_length": 32, "ip_address": item[0]["ip_address"][0]}]
     return []

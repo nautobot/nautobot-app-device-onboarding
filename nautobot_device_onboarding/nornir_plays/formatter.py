@@ -1,4 +1,5 @@
 """Command Extraction and Formatting or SSoT Based Jobs."""
+
 import logging
 import json
 from django.template import engines
@@ -6,8 +7,9 @@ from django.utils.module_loading import import_string
 from jdiff import extract_data_from_json
 from jinja2.sandbox import SandboxedEnvironment
 
+
 def setup_logger(logger_name, debug_on):
-    # Create logger
+    """Creates a logger for the ETL process."""
     logger = logging.getLogger(logger_name)
     if debug_on:
         logger.setLevel(logging.DEBUG)
@@ -43,7 +45,7 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
     j2_rendered_jpath = jpath_template.render(**j2_data_context)
     logger.debug("Post Rendered Jpath: %s", j2_rendered_jpath)
     if parsed_command_output and isinstance(parsed_command_output, str):
-            parsed_command_output = json.loads(parsed_command_output)
+        parsed_command_output = json.loads(parsed_command_output)
     try:
         extracted_value = extract_data_from_json(parsed_command_output, j2_rendered_jpath)
     except TypeError as err:
@@ -94,14 +96,14 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
         # If syncing vrfs isn't inscope remove the unneeded commands.
         if not sync_vrfs and ssot_field == "interfaces__vrf":
             continue
-        if isinstance(field_data['commands'], dict):
+        if isinstance(field_data["commands"], dict):
             # only one command is specified as a dict force it to a list.
-            loop_commands = [field_data['commands']]
+            loop_commands = [field_data["commands"]]
         else:
-            loop_commands = field_data['commands']
+            loop_commands = field_data["commands"]
         for show_command_dict in loop_commands:
             final_iterable_type = show_command_dict.get("iterable_type")
-            if field_data.get('root_key'):
+            if field_data.get("root_key"):
                 root_key_pre, root_key_post = extract_and_post_process(
                     command_outputs_dict[show_command_dict["command"]],
                     show_command_dict,
@@ -112,7 +114,7 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
                 # root_key_extracted = a1.copy()
                 result_dict[ssot_field] = root_key_post
             else:
-                field_nesting = ssot_field.split('__')
+                field_nesting = ssot_field.split("__")
                 # for current_nesting in field_nesting:
                 if len(field_nesting) > 1:
                     # Means there is "anticipated" data nesting `interfaces__mtu` means final data would be
@@ -157,8 +159,9 @@ def extract_show_data(host, command_outputs, command_getter_type, job_debug):
 
     Args:
         host (host): host from task
-        multi_result (multiResult): multiresult object from nornir
+        command_outputs (dict): dictionary of results from command getter.
         command_getter_type (str): to know what dict to pull, sync_devices or sync_network_data.
+        job_debug (logging.INFO or logging.DEBUG): to know if debug button was checked.
     """
     command_getter_iterable = host.data["platform_parsing_info"][command_getter_type]
     all_results_extracted = perform_data_extraction(host, command_getter_iterable, command_outputs, job_debug)
