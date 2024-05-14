@@ -43,48 +43,48 @@ sync_network_data:
     commands:
       - command: "show interfaces | json"
         parser: "none"
-        jpath: "interfaces.`{{ current_key }}`.hardware"
+        jpath: 'interfaces."{{ current_key }}".hardware'
         post_processor: "{{ obj | map_interface_type }}"
   interfaces__ip_addresses:
     commands:
       - command: "show interfaces | json"
         parser: "none"
-        # jpath: 'interfaces.`{{ current_key }}`.interfaceAddress[].[{ip_address: primaryIp.address, prefix_length: primaryIp.maskLen},{ip_address: secondaryIps.address, prefix_length: secondaryIps.maskLen}][]'
-        jpath: "interfaces.`{{ current_key }}`.interfaceAddress[].[{ip_address: primaryIp.address, prefix_length: primaryIp.maskLen }][]"
+        # jpath: 'interfaces."{{ current_key }}".interfaceAddress[].[{ip_address: primaryIp.address, prefix_length: primaryIp.maskLen},{ip_address: secondaryIps.address, prefix_length: secondaryIps.maskLen}][]'
+        jpath: 'interfaces."{{ current_key }}".interfaceAddress[].[{ip_address: primaryIp.address, prefix_length: primaryIp.maskLen }][]'
         post_processor: "{{ obj | tojson }}"
   interfaces__mtu:
     commands:
       - command: "show interfaces | json"
         parser: "none"
-        jpath: "interfaces.`{{ current_key }}`.[mtu]"
+        jpath: 'interfaces."{{ current_key }}".[mtu]'
         post_processor: "{{ obj[0] }}"
   interfaces__mac_address:
     commands:
       - command: "show interfaces | json"
         parser: "none"
-        jpath: "interfaces.`{{ current_key }}`.physicalAddress"
+        jpath: 'interfaces."{{ current_key }}".physicalAddress'
   interfaces__description:
     commands:
       - command: "show interfaces | json"
         parser: "none"
-        jpath: "interfaces.`{{ current_key }}`.description"
+        jpath: 'interfaces."{{ current_key }}".description'
   interfaces__link_status:
     commands:
       - command: "show interfaces | json"
         parser: "none"
-        jpath: "interfaces.`{{ current_key }}`.lineProtocolStatus"
+        jpath: 'interfaces."{{ current_key }}".lineProtocolStatus'
         post_processor: "{{ obj | interface_status_to_bool }}"
   interfaces__802.1Q_mode:
     commands:
       - command: "show interfaces | json"
         parser: "none"
-        jpath: "interfaces.`{{ current_key }}`.forwardingModel"
+        jpath: 'interfaces."{{ current_key }}".forwardingModel'
         post_processor: "{{ obj | port_mode_to_nautobot }}"
   interfaces__lag:
     commands:
       - command: "show interfaces | json"
         parser: "none"
-        jpath: "interfaces.`{{ current_key }}`.interfaceMembership"
+        jpath: 'interfaces."{{ current_key }}".interfaceMembership'
         post_processor: "{% if obj | length > 0 %}{{ obj.split()[-1] }}{% else %}{{ obj }}{% endif %}"
   interfaces__vrf:
     commands:

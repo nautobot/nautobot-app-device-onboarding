@@ -41,49 +41,62 @@ def get_django_env():
 def extract_and_post_process(parsed_command_output, yaml_command_element, j2_data_context, iter_type, job_debug):
     """Helper to extract and apply post_processing on a single element."""
     logger = logger = setup_logger("DEVICE_ONBOARDING_ETL_LOGGER", job_debug)
-    j2_env = get_django_env()
-    jpath_template = j2_env.from_string(yaml_command_element["jpath"])
-    j2_rendered_jpath = jpath_template.render(**j2_data_context)
-    logger.debug("Post Rendered Jpath: %s", j2_rendered_jpath)
-    if parsed_command_output and isinstance(parsed_command_output, str):
-        parsed_command_output = json.loads(parsed_command_output)
-    try:
-        extracted_value = extract_data_from_json(parsed_command_output, j2_rendered_jpath)
-    except TypeError as err:
-        logger.debug("Error occurred during extraction: %s", err)
-        extracted_value = ""
-    pre_processed_extracted = extracted_value
-    if yaml_command_element.get("post_processor"):
-        # j2 context data changes obj(hostname) -> extracted_value for post_processor
-        j2_data_context["obj"] = extracted_value
-        template = j2_env.from_string(yaml_command_element["post_processor"])
-        extracted_processed = template.render(**j2_data_context)
-    else:
-        extracted_processed = extracted_value
-    try:
-        post_processed_data = json.loads(extracted_processed)
-    except Exception:
-        post_processed_data = extracted_processed
-    if isinstance(post_processed_data, list) and len(post_processed_data) == 0:
-        # means result was empty, change empty result to iterater_type if applicable.
-        if iter_type:
-            if iter_type == "dict":
-                post_processed_data = {}
-            if iter_type == "str":
-                post_processed_data = ""
-    if isinstance(post_processed_data, list) and len(post_processed_data) == 1:
-        if isinstance(post_processed_data[0], str):
-            post_processed_data = post_processed_data[0]
+    # if parsed_command_output is an empty data structure, no need to go through all the processing.
+    if parsed_command_output:
+        j2_env = get_django_env()
+        jpath_template = j2_env.from_string(yaml_command_element["jpath"])
+        j2_rendered_jpath = jpath_template.render(**j2_data_context)
+        logger.debug("Post Rendered Jpath: %s", j2_rendered_jpath)
+        if isinstance(parsed_command_output, str):
+            parsed_command_output = json.loads(parsed_command_output)
+        try:
+            extracted_value = extract_data_from_json(parsed_command_output, j2_rendered_jpath)
+        except TypeError as err:
+            logger.debug("Error occurred during extraction: %s", err)
+            extracted_value = []
+        pre_processed_extracted = extracted_value
+        if yaml_command_element.get("post_processor"):
+            # j2 context data changes obj(hostname) -> extracted_value for post_processor
+            j2_data_context["obj"] = extracted_value
+            template = j2_env.from_string(yaml_command_element["post_processor"])
+            extracted_processed = template.render(**j2_data_context)
         else:
-            if isinstance(post_processed_data[0], dict):
-                if iter_type:
-                    if iter_type == "dict":
-                        post_processed_data = post_processed_data[0]
-            else:
+            extracted_processed = extracted_value
+        if isinstance(extracted_processed, str):
+            try:
+                post_processed_data = json.loads(extracted_processed)
+            except Exception:
+                post_processed_data = extracted_processed
+        else:
+            post_processed_data = extracted_processed
+        if isinstance(post_processed_data, list) and len(post_processed_data) == 0:
+            # means result was empty, change empty result to iterater_type if applicable.
+            if iter_type:
+                if iter_type == "dict":
+                    post_processed_data = {}
+                if iter_type == "str":
+                    post_processed_data = ""
+        if isinstance(post_processed_data, list) and len(post_processed_data) == 1:
+            if isinstance(post_processed_data[0], str):
                 post_processed_data = post_processed_data[0]
-    logger.debug("Pre Processed Extracted: %s", pre_processed_extracted)
+            else:
+                if isinstance(post_processed_data[0], dict):
+                    if iter_type:
+                        if iter_type == "dict":
+                            post_processed_data = post_processed_data[0]
+                else:
+                    post_processed_data = post_processed_data[0]
+        logger.debug("Pre Processed Extracted: %s", pre_processed_extracted)
+        logger.debug("Post Processed Data: %s", post_processed_data)
+        return pre_processed_extracted, post_processed_data
+    if iter_type:
+        if iter_type == "dict":
+            post_processed_data = {}
+        if iter_type == "str":
+            post_processed_data = ""
+    logger.debug("Pre Processed Extracted: %s", parsed_command_output)
     logger.debug("Post Processed Data: %s", post_processed_data)
-    return pre_processed_extracted, post_processed_data
+    return parsed_command_output, post_processed_data
 
 
 def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_debug):
@@ -112,7 +125,6 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
                     final_iterable_type,
                     job_debug,
                 )
-                # root_key_extracted = a1.copy()
                 result_dict[ssot_field] = root_key_post
             else:
                 field_nesting = ssot_field.split("__")
