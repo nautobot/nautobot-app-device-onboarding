@@ -516,7 +516,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         """Metadata about this Job."""
 
         name = "Sync Network Data From Network"
-        description = "Synchronize extended device attribute information into Nautobot from one or more network devices. Information includes Interfaces, IPAddresses, Prefixes, Vlans and Vrfs."
+        description = "Synchronize extended device attribute information into Nautobot from one or more network devices. Information includes Interfaces, IPAddresses, Prefixes, and Vrfs."
 
     debug = BooleanVar(description="Enable for more verbose logging.")
     sync_vlans = BooleanVar(
