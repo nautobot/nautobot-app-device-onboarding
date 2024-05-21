@@ -59,7 +59,7 @@ sync_network_data:
       - command: "show interfaces | display json"
         parser: "none"
         jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key.split(".")[0] }}`]]][][]."mtu"[].data'  # yamllint disable-line rule:quoted-strings
-        post_processor: "{% if obj | length > 0 %}{% if 'nlimited' in obj[0] %}9192{% else %}{{ obj[0] }}{% endif %}{% endif %}"
+        post_processor: "{% if obj | length > 0 %}{% if 'nlimited' in obj[0] %}9192{% else %}{{ obj }}{% endif %}{% endif %}"
   interfaces__mac_address:
     commands:
       - command: "show interfaces | display json"
@@ -76,7 +76,7 @@ sync_network_data:
       - command: "show interfaces | display json"
         parser: "none"
         jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key.split(".")[0] }}`]]][][]."admin-status"[].data'  # yamllint disable-line rule:quoted-strings
-        post_processor: "{{ obj[0] | interface_status_to_bool }}"
+        post_processor: "{% if obj | length > 0 %}{{ obj[0] | interface_status_to_bool }}{% else %}{{ obj }}{% endif %}"
   interfaces__802.1Q_mode:
     commands:
       - command: "show interfaces | display json"
