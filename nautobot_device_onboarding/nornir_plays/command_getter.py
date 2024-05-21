@@ -110,11 +110,15 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                         task.results[result_idx].result = []
                         task.results[result_idx].failed = False
                     else:
-                        if command['parser'] == "textfsm":
+                        if command["parser"] == "textfsm":
                             try:
                                 # Parsing textfsm ourselves instead of using netmikos use_<parser> function to be able to handle exceptions
                                 # ourselves. Default for netmiko is if it can't parse to return raw text which is tougher to handle.
-                                parsed_output = parse_output(platform=get_all_network_driver_mappings()[task.host.platform]['ntc_templates'], command=command["command"], data=current_result.result)
+                                parsed_output = parse_output(
+                                    platform=get_all_network_driver_mappings()[task.host.platform]["ntc_templates"],
+                                    command=command["command"],
+                                    data=current_result.result,
+                                )
                                 task.results[result_idx].result = parsed_output
                                 task.results[result_idx].failed = False
                             except Exception:  # https://github.com/networktocode/ntc-templates/issues/369
