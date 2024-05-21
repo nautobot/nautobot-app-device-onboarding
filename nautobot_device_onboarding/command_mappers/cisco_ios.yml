@@ -94,7 +94,7 @@ sync_network_data:
       - command: "show ip interface"
         parser: "textfsm"
         jpath: "[?interface=='{{ current_key }}'].{name:vrf}"
-        post_processor: "{{ obj[0] | key_exist_or_default('name') | tojson }}"
+        post_processor: "{% if obj | length > 0 %}{{ obj[0] | key_exist_or_default('name') | tojson }}{% else %}{{ obj }}{% endif %}"
         iterable_type: "dict"
   interfaces__tagged_vlans:
     commands:
