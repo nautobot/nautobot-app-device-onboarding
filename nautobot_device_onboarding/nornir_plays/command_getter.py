@@ -4,6 +4,7 @@ from typing import Dict
 
 from django.conf import settings
 from nautobot.dcim.models import Platform
+from nautobot.dcim.utils import get_all_network_driver_mappings
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import SecretsGroup
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
@@ -108,20 +109,17 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                     if "Invalid input detected at" in current_result.result:
                         task.results[result_idx].result = []
                         task.results[result_idx].failed = False
-                    if command['parser'] == "textfsm":
-                        try:
-                            # Parsing textfsm ourselves instead of using netmikos use_<parser> function to be able to handle exceptions
-                            # ourselves. Default for netmiko is if it can't parse to return raw text which is tougher to handle.
-                            if task.host.platform == "cisco_xe":
-                                plat = "cisco_ios"
-                            else:
-                                plat = task.host.platform
-                            parsed_output = parse_output(platform=plat, command=command["command"], data=current_result.result)
-                            task.results[result_idx].result = parsed_output
-                            task.results[result_idx].failed = False
-                        except Exception:  # https://github.com/networktocode/ntc-templates/issues/369
-                            task.results[result_idx].result = []
-                            task.results[result_idx].failed = False
+                    else:
+                        if command['parser'] == "textfsm":
+                            try:
+                                # Parsing textfsm ourselves instead of using netmikos use_<parser> function to be able to handle exceptions
+                                # ourselves. Default for netmiko is if it can't parse to return raw text which is tougher to handle.
+                                parsed_output = parse_output(platform=get_all_network_driver_mappings()[task.host.platform]['ntc_templates'], command=command["command"], data=current_result.result)
+                                task.results[result_idx].result = parsed_output
+                                task.results[result_idx].failed = False
+                            except Exception:  # https://github.com/networktocode/ntc-templates/issues/369
+                                task.results[result_idx].result = []
+                                task.results[result_idx].failed = False
         except NornirSubTaskError:
             # We don't want to fail the entire subtask if SubTaskError is hit, set result to empty list and failt to False
             # Handle this type or result latter in the ETL process.
