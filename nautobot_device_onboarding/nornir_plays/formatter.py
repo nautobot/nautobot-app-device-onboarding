@@ -1,7 +1,7 @@
 """Command Extraction and Formatting or SSoT Based Jobs."""
 
-import logging
 import json
+import logging
 
 from django.template import engines
 from django.utils.module_loading import import_string

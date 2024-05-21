@@ -1,8 +1,10 @@
 """Filters for Jinja2 PostProcessing."""
 
 from itertools import chain
+
 from django_jinja import library
 from netutils.vlan import vlanconfig_to_list
+
 from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC
 
 # https://docs.nautobot.com/projects/core/en/stable/development/apps/api/platform-features/jinja2-filters/
