@@ -1,9 +1,12 @@
 """DiffSync adapters."""
 
+import datetime
+
 import diffsync
 from diffsync.enum import DiffSyncModelFlags
+from django.conf import settings
 from django.core.exceptions import ValidationError
-from nautobot.dcim.models import Interface
+from nautobot.dcim.models import Device, Interface
 from nautobot.ipam.models import VLAN, VRF, IPAddress
 from nautobot_ssot.contrib import NautobotAdapter
 from netaddr import EUI, mac_unix_expanded
@@ -11,6 +14,8 @@ from netaddr import EUI, mac_unix_expanded
 from nautobot_device_onboarding.diffsync.models import sync_network_data_models
 from nautobot_device_onboarding.nornir_plays.command_getter import sync_network_data_command_getter
 from nautobot_device_onboarding.utils import diffsync_utils
+
+app_settings = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
 
 class FilteredNautobotAdapter(NautobotAdapter):
@@ -65,6 +70,18 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         self.primary_ips = {}
         for device in device_queryset:
             self.primary_ips[device.id] = device.primary_ip.id
+
+    def load_param_last_network_data_sync(self, parameter_name, database_object):
+        """Return None or the current date depending on the config setting for sync dates."""
+        print("call 1")
+        if type(database_object) is Device:
+            print("call 2")
+            if app_settings.get("track_network_data_sync_dates"):  # optionally sync dates
+                print("call 3")
+                return database_object.cf.get("last_network_data_sync")
+            else:
+                print("call 4")
+                return None
 
     def load_param_mac_address(self, parameter_name, database_object):
         """Convert interface mac_address to string."""
@@ -398,10 +415,22 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
             return str(EUI(mac_address, version=48, dialect=MacUnixExpandedUppercase))
         return ""
 
+    def _get_sync_date(self):
+        """Return None or the current date depending on the config setting for sync dates."""
+        if app_settings.get("track_network_data_sync_dates"):  # optionally sync dates
+            return datetime.datetime.now().date().isoformat()
+        else:
+            return "0001-01-01"
+
     def load_devices(self):
         """Load devices into the DiffSync store."""
         for hostname, device_data in self.job.command_getter_result.items():
-            network_device = self.device(diffsync=self, name=hostname, serial=device_data["serial"])
+            network_device = self.device(
+                diffsync=self,
+                name=hostname,
+                serial=device_data["serial"],
+                last_network_data_sync=self._get_sync_date(),
+            )
             self.add(network_device)
             if self.job.debug:
                 self.job.logger.debug(f"Device {network_device} loaded.")

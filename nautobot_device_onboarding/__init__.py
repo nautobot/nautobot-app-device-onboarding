@@ -43,6 +43,7 @@ class NautobotDeviceOnboardingConfig(NautobotAppConfig):
             "ios": "nautobot_device_onboarding.onboarding_extensions.ios",
         },
         "object_match_strategy": "loose",
+        "track_network_data_sync_dates": False,
     }
     caching_config = {}
 
