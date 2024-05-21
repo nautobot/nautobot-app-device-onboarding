@@ -94,7 +94,7 @@ def parse_junos_ip_address(item):
     >>> [{'prefix_length': ['10.65.133.0/29', '10.65.133.0/29'], 'ip_address': ['10.65.133.1', '10.65.133.3']}]
     >>> [{'prefix_length': None, 'ip_address': None}]
     """
-    if isinstance(item, list):
+    if isinstance(item, list) and len(item) > 0:
         if item[0]["prefix_length"] and item[0]["ip_address"]:
             return [
                 {"prefix_length": item[0]["prefix_length"][0].split("/")[-1], "ip_address": item[0]["ip_address"][0]}
