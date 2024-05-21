@@ -46,7 +46,7 @@ sync_network_data:
       - command: "show interfaces | display json"
         parser: "none"
         jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key.split(".")[0] }}`]]][][]."link-level-type"[].data'  # yamllint disable-line rule:quoted-strings
-        post_processor: "{% if obj | length > 0 %}{% if 'ae' in current_key %}lag{% else %}{{ obj[0] | map_interface_type }}{% endif %}{% else %}other{% endif %}"
+        post_processor: "{% if 'ae' in current_key %}lag{% else %}{% if obj | length > 0 %}{{ obj[0] | map_interface_type }}{% else %}other{% endif %}{% endif %}"
         iterable_type: "str"
   interfaces__ip_addresses:
     commands:
