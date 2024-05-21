@@ -94,6 +94,8 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
             post_processed_data = {}
         if iter_type == "str":
             post_processed_data = ""
+    else:
+        post_processed_data = []
     logger.debug("Pre Processed Extracted: %s", parsed_command_output)
     logger.debug("Post Processed Data: %s", post_processed_data)
     return parsed_command_output, post_processed_data
