@@ -165,7 +165,7 @@ class SyncNetworkDataIPAddress(DiffSyncModel):
         if attrs.get("status__name"):
             ip_address.status = Status.objects.get(name=attrs["status__name"])
         if attrs.get("ip_version"):
-            ip_address.status = attrs["ip_version"]
+            ip_address.ip_version = attrs["ip_version"]
         try:
             ip_address.validated_save()
         except ValidationError as err:
