@@ -8,6 +8,7 @@ from io import StringIO
 from diffsync.enum import DiffSyncFlags
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.forms import HiddenInput
 from nautobot.apps.jobs import BooleanVar, FileVar, IntegerVar, Job, MultiObjectVar, ObjectVar, StringVar
 from nautobot.core.celery import register_jobs
 from nautobot.dcim.models import Device, DeviceType, Location, Platform
@@ -515,10 +516,12 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         """Metadata about this Job."""
 
         name = "Sync Network Data From Network"
-        description = "Synchronize extended device attribute information into Nautobot from one or more network devices. Information includes Interfaces, IPAddresses, Prefixes, Vlans and Vrfs."
+        description = "Synchronize extended device attribute information into Nautobot from one or more network devices. Information includes Interfaces, IPAddresses, Prefixes, and Vrfs."
 
     debug = BooleanVar(description="Enable for more verbose logging.")
-    sync_vlans = BooleanVar(default=False, description="Sync VLANs and interface VLAN assignments.")
+    sync_vlans = BooleanVar(
+        default=False, description="Sync VLANs and interface VLAN assignments.", widget=HiddenInput()
+    )
     sync_vrfs = BooleanVar(default=False, description="Sync VRFs and interface VRF assignments.")
     namespace = ObjectVar(
         model=Namespace, required=True, description="The namespace for all IP addresses created or updated in the sync."
@@ -556,7 +559,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
     )
     device_role = ObjectVar(
         model=Role,
-        query_params={"content_type": "dcim.device"},
+        query_params={"content_types": "dcim.device"},
         required=False,
         description="Only update devices with the selected role.",
     )
@@ -625,6 +628,11 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
             self.filtered_devices = Device.objects.filter(**device_filter)
         else:
             self.logger.error("No device filter options were provided, no devices will be synced.")
+
+        # Stop the job if no devices are returned after filtering
+        if not self.filtered_devices:
+            self.logger.info("No devices returned based on filter selections.")
+            return
 
         # Log selected devices
         filtered_devices_names = list(self.filtered_devices.values_list("name", flat=True))

@@ -25,4 +25,4 @@ sync_devices:
       - command: "show interface detailed management"
         parser: "textfsm"
         jpath: "[*].netmask"
-        post_processor: "{{ obj[0] | netmask_to_cidr }}"
+        post_processor: "{% if obj | length > 0 %}{{ obj[0] | netmask_to_cidr }}{% else %}{{ obj }}{% endif %}"

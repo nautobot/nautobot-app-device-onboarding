@@ -12,12 +12,12 @@ sync_devices:
         jpath: "[?name=='Chassis'].sn"
   device_type:
     commands:
-      - command: "show version"
+      - command: "show inventory"
         parser: "textfsm"
-        jpath: "[*].platform"
+        jpath: "[?name=='Chassis'].descr"
   mgmt_interface:
     commands:
-      - command: "show ip interface vrf all"
+      - command: "show ip interface brief vrf all"
         parser: "textfsm"
         jpath: "[?ip_address=='{{ obj }}'].interface || [`mgmt0`]"
   mask_length:
@@ -25,70 +25,86 @@ sync_devices:
       - command: "show ip interface vrf all"
         parser: "textfsm"
         jpath: "[?ip_address=='{{ obj }}'].subnet"
+        # jpath: "*[].ROW_intf.{prefix: prefix, subnet:masklen} | [?prefix=='{{ obj }}'].subnet"
         post_processor: "{% if '/' in obj[0] %}{{ obj[0].split('/')[1] }}{% else %}31{% endif %}"
+        # post_processor: "{{ obj[0] | string }}"
 sync_network_data:
-  interface:
-    commands:
-      - command: "show interface"
-        parser: "textfsm"
-        jpath: "[*].{interface: interface, interface: interface}"
   serial:
     commands:
       - command: "show inventory"
         parser: "textfsm"
         jpath: "[?name=='Chassis'].sn"
-  type:
+        # jpath: "TABLE_inv.ROW_inv[?name == 'Chassis'].serialnum"
+  interfaces:
+    root_key: true
     commands:
       - command: "show interface"
         parser: "textfsm"
-        jpath: "[*].{interface: interface, type: hardware_type}"
-  ip_addresses:
+        jpath: "[*].interface"  # when root_key=true this extracted value is what becomes interable in keys using __ under `current_key`.
+        post_processor: "{% set result={} %}{% for interface in obj %}{{ result.update({interface: {}}) or '' }}{% endfor %}{{ result | tojson }}"
+  interfaces__type:
+    commands:
+      - command: "show interface"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].hardware_type"
+        post_processor: "{{ obj[0] | map_interface_type }}"
+  interfaces__ip_addresses:
     commands:
       - command: "show ip interface vrf all"
         parser: "textfsm"
-        jpath: "[*].{interface: interface, ip_address: ip_address}"
-  prefix_length:
-    commands:
-      - command: "show ip interface vrf all"
-        parser: "textfsm"
-        jpath: "[*].{interface: interface, prefix_length: subnet}"
-  mtu:
+        jpath: "[?interface=='{{ current_key }}'].{ip_address: ip_address, prefix_length: subnet}"
+        post_processor: "{% set result = [] %}{% for ip in obj %}{% set _=result.append({'ip_address': ip['ip_address'], 'prefix_length': ip['prefix_length'] | extract_prefix }) %}{% endfor %}{{ result | tojson }}"
+        iterable_type: "list"
+  interfaces__mtu:
     commands:
       - command: "show interface"
         parser: "textfsm"
-        jpath: "[*].{interface: interface, mtu: mtu}"
-  mac_address:
+        jpath: "[?interface=='{{ current_key }}'].mtu"
+  interfaces__mac_address:
     commands:
       - command: "show interface"
         parser: "textfsm"
-        jpath: "[*].{interface: interface, mac_address: mac_address}"
-  description:
+        jpath: "[?interface=='{{ current_key }}'].mac_address"
+  interfaces__description:
     commands:
       - command: "show interface"
         parser: "textfsm"
-        jpath: "[*].{interface: interface, description: description}"
-  link_status:
+        jpath: "[?interface=='{{ current_key }}'].description"
+  interfaces__link_status:
     commands:
       - command: "show interface"
         parser: "textfsm"
-        jpath: "[*].{interface: interface, link_status: link_status}"
-  mode:
+        jpath: "[?interface=='{{ current_key }}'].link_status"
+        post_processor: "{{ obj[0] | interface_status_to_bool }}"
+  interfaces__802.1Q_mode:
     commands:
       - command: "show interface"
         parser: "textfsm"
-        jpath: "[*].{interface: interface, mode: mode}"
-  vrf_interfaces:
+        jpath: "[?interface=='{{ current_key }}'].mode"
+        post_processor: "{{ obj[0] | port_mode_to_nautobot }}"
+  interfaces__lag:
+    commands:
+      - command: "show port-channel summary"
+        parser: "textfsm"
+        jpath: "[?contains(@.member_interface, `{{ current_key | abbreviated_interface_name }}`)].bundle_name"
+        post_processor: "{% if obj | length > 0 %}{{ obj[0] | canonical_interface_name }}{% else %}[]{% endif %}"
+        iterable_type: "str"
+  interfaces__vrf:
     commands:
       - command: "show vrf interface"
         parser: "textfsm"
-        jpath: "[*].{interface: interface, name: name}"
-  vlans:
+        jpath: "[?interface=='{{ current_key }}'].{name:name}"
+        iterable_type: "dict"
+  interfaces__tagged_vlans:
     commands:
       - command: "show vlan"
         parser: "textfsm"
-        jpath: "[*].{interfaces: interfaces, vlan_name: vlan_name, vlan_id: vlan_id, status: status}"
-  interface_vlans:
+        jpath: "[*].{id: vlan_id, name: vlan_name, interfaces: interfaces}"
+        post_processor: "{% set tagged_vlans = [] %}{% for v in obj %}{% if current_key in v['interfaces'] | canonical_interface_name_list %}{% set _=tagged_vlans.append({'id': v['id'], 'name': v['name']}) %}{% endif %}{% endfor %}{{ tagged_vlans | tojson }}"
+  interfaces__untagged_vlan:
     commands:
-      - command: "show interface switchport"
+      - command: "show vlan"
         parser: "textfsm"
-        jpath: "[*].{interface: interface, mode:mode, access_vlan: access_vlan, access_vlan_name: access_vlan_name, native_vlan: native_vlan, trunking_vlans: trunking_vlans, voice_vlan: voice_vlan}"
+        jpath: "[*].{id: vlan_id, name: vlan_name, interfaces: interfaces}"
+        iterable_type: "dict"
+        post_processor: "{% set untagged_vlan = [] %}{% for v in obj %}{% if current_key in v['interfaces'] | canonical_interface_name_list %}{% set _=untagged_vlan.append({'id': v['id'], 'name': v['name']}) %}{% endif %}{% endfor %}{{ untagged_vlan | tojson }}"

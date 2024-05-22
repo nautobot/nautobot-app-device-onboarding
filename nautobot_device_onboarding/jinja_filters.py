@@ -1,6 +1,9 @@
 """Filters for Jinja2 PostProcessing."""
 
+from itertools import chain
+
 from django_jinja import library
+from netutils.vlan import vlanconfig_to_list
 
 from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC
 
@@ -14,57 +17,90 @@ def map_interface_type(interface_type):
 
 
 @library.filter
-def collapse_list_to_dict(original_data):
-    """Takes a list of dictionaries and creates a dictionary based on outtermost key.
+def extract_prefix(network):
+    """Extract the prefix length from the IP/Prefix. E.g 192.168.1.1/24."""
+    return network.split("/")[-1]
 
-    Args:
-        original_data (list): list of dictionaries
-        root_key (str): dictionary key to use as the root key
+
+@library.filter
+def interface_status_to_bool(status):
+    """Take links or admin status and change to boolean."""
+    return "up" in status.lower()
+
+
+@library.filter
+def port_mode_to_nautobot(current_mode):
+    """Take links or admin status and change to boolean."""
+    mode_mapping = {
+        "access": "access",
+        "trunk": "tagged",
+        # "trunk+x": "tagged-all"
+    }
+    return mode_mapping.get(current_mode, "")
+
+
+@library.filter
+def key_exist_or_default(dict_obj, key):
+    """Take a dict with a key and if its not truthy return a default."""
+    if not dict_obj[key]:
+        return {}
+    return dict_obj
+
+
+@library.filter
+def interface_mode_logic(item):  # pylint: disable=too-many-return-statements
+    """Logic to translate network modes to nautobot mode."""
+    if len(item) == 1:
+        if "access" in item[0]["admin_mode"].lower():
+            return "access"
+        if item[0]["admin_mode"] == "trunk" and item[0]["trunking_vlans"] == ["ALL"]:
+            return "tagged-all"
+        if item[0]["admin_mode"] == "trunk":
+            return "tagged"
+        if "dynamic" in item[0]["admin_mode"]:
+            if "access" in item[0]["mode"]:
+                return "access"
+            if item[0]["mode"] == "trunk" and item[0]["trunking_vlans"] == ["ALL"]:
+                return "tagged-all"
+            if item[0]["mode"] == "trunk":
+                return "tagged"
+    return ""
+
+
+@library.filter
+def get_vlan_data(item):
+    """Get vlan information from an item."""
+    int_mode = interface_mode_logic(item)
+    if int_mode:
+        if int_mode == "access":
+            # {id: vlan_id, name: vlan_name}
+            return [{"id": item[0]["access_vlan"], "name": ""}]
+        if int_mode == "tagged-all":
+            return []
+        return [
+            {"id": vid, "name": ""}
+            for vid in list(
+                chain.from_iterable([vlanconfig_to_list(vlan_stanza) for vlan_stanza in item[0]["trunking_vlans"]])
+            )
+        ]
+    return []
+
+
+@library.filter
+def parse_junos_ip_address(item):
+    """Parse Junos IP and destination prefix.
 
     Example:
-    >>> example_data = [
-            {'GigabitEthernet1': {'link_status': 'up'}},
-            {'GigabitEthernet2': {'link_status': 'administratively down'}},
-            {'GigabitEthernet3': {'link_status': 'administratively down'}},
-            {'GigabitEthernet4': {'link_status': 'administratively down'}},
-            {'Loopback0': {'link_status': 'administratively down'}},
-            {'Loopback2': {'link_status': 'administratively down'}},
-            {'Port-channel1': {'link_status': 'down'}}
-        ]
-    >>> collapse_list_to_dict(example_data)
-    {'GigabitEthernet1': {'link_status': 'up'},
-    'GigabitEthernet2': {'link_status': 'administratively down'},
-    'GigabitEthernet3': {'link_status': 'administratively down'},
-    'GigabitEthernet4': {'link_status': 'administratively down'},
-    'Loopback0': {'link_status': 'administratively down'},
-    'Loopback2': {'link_status': 'administratively down'},
-    'Port-channel1': {'link_status': 'down'}}
+    >>> [{'prefix_length': [], 'ip_address': []}]
+    >>> [{'prefix_length': ['10.65.229.106/31'], 'ip_address': ['10.65.229.106']}]
+    >>> [{'prefix_length': ['10.65.133.0/29', '10.65.133.0/29'], 'ip_address': ['10.65.133.1', '10.65.133.3']}]
+    >>> [{'prefix_length': None, 'ip_address': None}]
     """
-    return {root_key: data for data in original_data for root_key, data in data.items()}
-
-
-def merge_dicts(*dicts):
-    """Merges any number of dictionaries recursively, handling nested dictionaries.
-
-    Args:
-        *dicts: A variable number of dictionaries to merge.
-
-    Returns:
-        A new dictionary containing the merged data from all dictionaries.
-    """
-    if not dicts:
-        return {}  # Empty input returns an empty dictionary
-    merged = dicts[0].copy()
-    for other_dict in dicts[1:]:
-        if other_dict:
-            for key, value in other_dict.items():
-                if key in merged:
-                    if isinstance(value, dict) and isinstance(merged[key], dict):
-                        # Recursively merge nested dictionaries
-                        merged[key] = merge_dicts(merged[key], value)
-                else:
-                    # Overwrite existing values with values from subsequent dictionaries (giving priority to later ones)
-                    merged[key] = value
-            # Add new key-value pairs from subsequent dictionaries
-            # merged[key] = value
-    return merged
+    if isinstance(item, list) and len(item) > 0:
+        if item[0]["prefix_length"] and item[0]["ip_address"]:
+            return [
+                {"prefix_length": item[0]["prefix_length"][0].split("/")[-1], "ip_address": item[0]["ip_address"][0]}
+            ]
+        if not item[0]["prefix_length"] and item[0]["ip_address"]:
+            return [{"prefix_length": 32, "ip_address": item[0]["ip_address"][0]}]
+    return []

@@ -27,3 +27,81 @@ sync_devices:
         parser: "none"
         jpath: '"route-information"[]."route-table"[]."rt"[]."rt-destination"[].data'  # yamllint disable-line rule:quoted-strings
         post_processor: "{% set mask = [] %}{% for ip_route in obj %}{% if ip_route | is_network %}{% if ip_route | ipaddress_network('version') == 4 %}{% if original_host | is_ip_within(ip_route) %}{% set _=mask.append(ip_route.split('/')[1]) %}{% endif %}{% endif %}{% endif %}{% endfor %}{{ mask | unique | first}}"
+sync_network_data:
+  serial:
+    commands:
+      - command: "show chassis hardware | display json"
+        parser: "none"
+        jpath: '"chassis-inventory"[]."chassis"[]."serial-number"[].data'  # yamllint disable-line rule:quoted-strings
+  interfaces:
+    root_key: true
+    commands:
+      - command: "show interfaces | display json"
+        parser: "none"
+        # when root_key=true this extracted value is what becomes interable in keys using __ under `current_key`.
+        jpath: '"interface-information"[]."physical-interface"[].[name[].data, "logical-interface"[].name[].data][][]'   # yamllint disable-line rule:quoted-strings
+        post_processor: "{% set result={} %}{% for interface in obj %}{{ result.update({interface: {}}) or '' }}{% endfor %}{{ result | tojson }}"
+  interfaces__type:
+    commands:
+      - command: "show interfaces | display json"
+        parser: "none"
+        jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key.split(".")[0] }}`]]][][]."link-level-type"[].data'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{% if 'ae' in current_key %}lag{% elif obj | length > 0 %}{{ obj[0] | map_interface_type }}{% else %}other{% endif %}"
+        iterable_type: "str"
+  interfaces__ip_addresses:
+    commands:
+      - command: "show interfaces | display json"
+        parser: "none"
+        jpath: '"interface-information"[]."physical-interface"[].["logical-interface"[?name[?data==`{{ current_key }}`]]][][].{prefix_length: "address-family"[]."interface-address"[]."ifa-destination"[].data, ip_address: "address-family"[]."interface-address"[]."ifa-local"[].data}'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj | parse_junos_ip_address | tojson }}"
+  interfaces__mtu:
+    commands:
+      - command: "show interfaces | display json"
+        parser: "none"
+        jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key.split(".")[0] }}`]]][][]."mtu"[].data'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{% if obj | length > 0 %}{% if 'nlimited' in obj[0] %}9192{% else %}{{ obj[0] }}{% endif %}{% endif %}"
+  interfaces__mac_address:
+    commands:
+      - command: "show interfaces | display json"
+        parser: "none"
+        jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key }}`]]][][]."hardware-physical-address"[].data'  # yamllint disable-line rule:quoted-strings
+  interfaces__description:
+    commands:
+      - command: "show interfaces | display json"
+        parser: "none"
+        jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key }}`]]][][]."description"[].data'  # yamllint disable-line rule:quoted-strings
+        iterable_type: "str"
+  interfaces__link_status:
+    commands:
+      - command: "show interfaces | display json"
+        parser: "none"
+        jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key.split(".")[0] }}`]]][][]."admin-status"[].data'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{% if obj | length > 0 %}{{ obj[0] | interface_status_to_bool }}{% else %}{{ obj }}{% endif %}"
+  interfaces__802.1Q_mode:
+    commands:
+      - command: "show interfaces | display json"
+        parser: "none"
+        jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key }}`]]][][]."todo"[].data'  # yamllint disable-line rule:quoted-strings
+        iterable_type: "str"
+  interfaces__lag:
+    commands:
+      - command: "show interfaces | display json"
+        parser: "none"
+        jpath: '"interface-information"[].["physical-interface"[?name[?data==`{{ current_key }}`]]][][]."logical-interface"[]."address-family"[]."ae-bundle-name"[].data'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{% if obj | length > 0 %}{{ obj[0].split('.')[0] }}{% else %}{{ obj }}{% endif %}"
+  interfaces__vrf:
+    commands:
+      - command: "show interfaces routing-instance all terse | display json"
+        parser: "none"
+        jpath: '"interface-information"[]."physical-interface"[]["logical-interface"[?name[?data==`{{ current_key }}`]]][][].{name: "vrfname"[0].data}'  # yamllint disable-line rule:quoted-strings
+        iterable_type: "dict"
+# interfaces__tagged_vlans:
+#   commands:
+#     - command: "show interfaces brief | display json"
+#       parser: "none"
+#       jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key }}`]]][][]."todo"[].data'  # yamllint disable-line rule:quoted-string
+# interfaces__untagged_vlan:
+#   commands:
+#     - command: "show interfaces brief | display json"
+#       parser: "none"
+#       jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key }}`]]][][]."todo"[].data'  # yamllint disable-line rule:quoted-strings
