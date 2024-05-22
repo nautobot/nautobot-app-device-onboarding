@@ -7,13 +7,14 @@ from io import StringIO
 
 from diffsync.enum import DiffSyncFlags
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.forms import HiddenInput
 from nautobot.apps.jobs import BooleanVar, FileVar, IntegerVar, Job, MultiObjectVar, ObjectVar, StringVar
 from nautobot.core.celery import register_jobs
 from nautobot.dcim.models import Device, DeviceType, Location, Platform
-from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
-from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status
+from nautobot.extras.choices import CustomFieldTypeChoices, SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
+from nautobot.extras.models import CustomField, Role, SecretsGroup, SecretsGroupAssociation, Status
 from nautobot.ipam.models import Namespace
 from nautobot_ssot.jobs.base import DataSource
 
@@ -613,6 +614,24 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         self.platform = platform
         self.sync_vlans = sync_vlans
         self.sync_vrfs = sync_vrfs
+
+        # Check for last_network_data_sync CustomField
+        if self.debug:
+            self.logger.debug("Checking for last_network_data_sync custom field")
+        try:
+            cf, _ = CustomField.objects.get_or_create(
+                label="Last Network Data Sync",
+                key="last_network_data_sync",
+                type=CustomFieldTypeChoices.TYPE_DATE,
+                required=False,
+            )
+
+            cf.content_types.add(ContentType.objects.get_for_model(Device))
+            if self.debug:
+                self.logger.debug("Custom field found or created")
+        except Exception as err:
+            self.logger.error(f"Failed to get or create last_network_data_sync custom field, {err}")
+            return
 
         # Filter devices based on form input
         device_filter = {}

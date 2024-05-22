@@ -136,9 +136,7 @@ PLUGINS = [
 # Apps configuration settings. These settings are used by various Apps that the user may have installed.
 # Each key in the dictionary is the name of an installed App and its value is a dictionary of settings.
 PLUGINS_CONFIG = {
-    "nautobot_device_onboarding": {
-        "track_network_data_sync_dates": True,
-    },
+    "nautobot_device_onboarding": {},
     "nautobot_ssot": {
         "hide_example_jobs": is_truthy(os.getenv("NAUTOBOT_SSOT_HIDE_EXAMPLE_JOBS")),
     },

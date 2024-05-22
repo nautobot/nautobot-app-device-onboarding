@@ -59,7 +59,9 @@ class SyncNetworkDataDevice(FilteredNautobotModel):
     name: str
     serial: str
 
-    last_network_data_sync: Annotated[str, CustomFieldAnnotation(key="last_network_data_sync")]
+    last_network_data_sync: Annotated[
+        Optional[str], CustomFieldAnnotation(key="last_network_data_sync", name="last_network_data_sync")
+    ]
 
     interfaces: List["SyncNetworkDataInterface"] = []
 
