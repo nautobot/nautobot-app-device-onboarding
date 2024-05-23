@@ -562,7 +562,6 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
     def load_ip_address_to_interfaces(self):
         """Load ip address interface assignments into the Diffsync store."""
         for hostname, device_data in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
-            # for interface in device_data["interfaces"]:
             for interface_name, interface_data in device_data["interfaces"].items():
                 for ip_address in interface_data["ip_addresses"]:
                     if ip_address["ip_address"]:  # the ip_address and mask_length may be empty, skip these
