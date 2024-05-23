@@ -127,11 +127,7 @@ if not _TESTING:
 #
 
 # Enable installed Apps. Add the name of each App to the list.
-PLUGINS = [
-    "nautobot_device_onboarding",
-    "nautobot_ssot",
-    "nautobot_plugin_nornir",
-]
+PLUGINS = ["nautobot_device_onboarding", "nautobot_ssot", "nautobot_plugin_nornir"]
 
 # Apps configuration settings. These settings are used by various Apps that the user may have installed.
 # Each key in the dictionary is the name of an installed App and its value is a dictionary of settings.
@@ -140,6 +136,18 @@ PLUGINS_CONFIG = {
     "nautobot_ssot": {
         "hide_example_jobs": is_truthy(os.getenv("NAUTOBOT_SSOT_HIDE_EXAMPLE_JOBS")),
     },
+    # "nautobot_secrets_providers": {
+    #     "thycotic": {
+    #         "base_url": "https://chevronpas.secretservercloud.com",
+    #         "domain": "ct.chevrontexaco.net",
+    #         "username": "svc-nautobot-pas",
+    #         "password": os.getenv("THYCOTIC_PASSWORD"),
+    #         "tenant": "chevronpas",
+    #         "ca_bundle_path": None,
+    #         "cloud_based": True,
+    #         "token": None,
+    #     },
+    # },
     "nautobot_plugin_nornir": {
         "nornir_settings": {
             "credentials": "nautobot_plugin_nornir.plugins.credentials.nautobot_secrets.CredentialsNautobotSecrets",

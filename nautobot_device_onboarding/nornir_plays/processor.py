@@ -41,7 +41,7 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         """
         parsed_command_outputs = {}
         self.logger.info(
-            f"task_instance_completed Task Name: {task.name} Task Result: {result.result}",
+            f"task_instance_completed Task Name: {task.name}",
             extra={"object": task.host},
         )
         # If any main task resulted in a failed:True then add that key so ssot side can ignore that entry.
@@ -65,19 +65,23 @@ class CommandGetterProcessor(BaseLoggingProcessor):
             try:
                 validate(ready_for_ssot_data, NETWORK_DEVICES_SCHEMA)
             except ValidationError as e:
-                self.logger.debug(f"Schema validation failed for {host.name}. Error: {e}.")
+                if self.kwargs["debug"]:
+                    self.logger.debug(f"Schema validation failed for {host.name}. Error: {e}.")
                 self.data[host.name] = {"failed": True, "failed_reason": "Schema validation failed."}
             else:
-                self.logger.debug(f"ready for ssot data {host.name} {ready_for_ssot_data}")
+                if self.kwargs["debug"]:
+                    self.logger.debug(f"Ready for ssot data: {host.name} {ready_for_ssot_data}")
                 self.data[host.name].update(ready_for_ssot_data)
         elif task.params["command_getter_job"] == "sync_network_data":
             try:
                 validate(ready_for_ssot_data, NETWORK_DATA_SCHEMA)
             except ValidationError as err:
-                self.logger.debug(f"Schema validation failed for {host.name} Error: {err}")
+                if self.kwargs["debug"]:
+                    self.logger.debug(f"Schema validation failed for {host.name} Error: {err}")
                 self.data[host.name] = {"failed": True, "failed_reason": "Schema validation failed."}
             else:
-                self.logger.debug(f"ready for ssot data {host.name} {ready_for_ssot_data}")
+                if self.kwargs["debug"]:
+                    self.logger.debug(f"Ready for ssot data: {host.name} {ready_for_ssot_data}")
                 self.data[host.name].update(ready_for_ssot_data)
 
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
