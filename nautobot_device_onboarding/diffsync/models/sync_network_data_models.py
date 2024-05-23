@@ -2,6 +2,11 @@
 
 from typing import List, Optional
 
+try:
+    from typing import Annotated  # Python>=3.9
+except ModuleNotFoundError:
+    from typing_extensions import Annotated  # Python<3.9
+
 from diffsync import DiffSync, DiffSyncModel
 from diffsync import exceptions as diffsync_exceptions
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
@@ -9,7 +14,7 @@ from nautobot.dcim.choices import InterfaceTypeChoices
 from nautobot.dcim.models import Device, Interface, Location
 from nautobot.extras.models import Status
 from nautobot.ipam.models import VLAN, VRF, IPAddress, IPAddressToInterface
-from nautobot_ssot.contrib import NautobotModel
+from nautobot_ssot.contrib import CustomFieldAnnotation, NautobotModel
 
 from nautobot_device_onboarding.utils import diffsync_utils
 
@@ -48,10 +53,15 @@ class SyncNetworkDataDevice(FilteredNautobotModel):
         "name",
         "serial",
     )
+    _attributes = ("last_network_data_sync",)
     _children = {"interface": "interfaces"}
 
     name: str
     serial: str
+
+    last_network_data_sync: Annotated[
+        Optional[str], CustomFieldAnnotation(key="last_network_data_sync", name="last_network_data_sync")
+    ]
 
     interfaces: List["SyncNetworkDataInterface"] = []
 
