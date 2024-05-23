@@ -6,7 +6,7 @@ import diffsync
 from diffsync.enum import DiffSyncModelFlags
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from nautobot.dcim.models import Device, Interface
+from nautobot.dcim.models import Interface
 from nautobot.ipam.models import VLAN, VRF, IPAddress
 from nautobot_ssot.contrib import NautobotAdapter
 from netaddr import EUI, mac_unix_expanded
@@ -407,12 +407,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                 )
                 self.add(network_device)
             except Exception as err:
-                self._handle_general_load_exception(
-                    error=err,
-                    hostname=hostname,
-                    data=device_data,
-                    model_type="device"
-                )
+                self._handle_general_load_exception(error=err, hostname=hostname, data=device_data, model_type="device")
                 continue
             # for interface in device_data["interfaces"]:
             for interface_name, interface_data in device_data["interfaces"].items():
@@ -474,10 +469,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                                 continue
                             except Exception as err:
                                 self._handle_general_load_exception(
-                                    error=err,
-                                    hostname=hostname,
-                                    data=device_data,
-                                    model_type="ip_address"
+                                    error=err, hostname=hostname, data=device_data, model_type="ip_address"
                                 )
                                 continue
 
@@ -506,10 +498,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                         continue
                     except Exception as err:
                         self._handle_general_load_exception(
-                            error=err,
-                            hostname=hostname,
-                            data=device_data,
-                            model_type="vlan"
+                            error=err, hostname=hostname, data=device_data, model_type="vlan"
                         )
                         continue
                 # check for untagged vlan and add if necessary
@@ -526,10 +515,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                         continue
                     except Exception as err:
                         self._handle_general_load_exception(
-                            error=err,
-                            hostname=hostname,
-                            data=device_data,
-                            model_type="vlan"
+                            error=err, hostname=hostname, data=device_data, model_type="vlan"
                         )
                         continue
 
@@ -552,10 +538,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                         continue
                     except Exception as err:
                         self._handle_general_load_exception(
-                            error=err,
-                            hostname=hostname,
-                            data=device_data,
-                            model_type="vrf"
+                            error=err, hostname=hostname, data=device_data, model_type="vrf"
                         )
                         continue
 
@@ -578,10 +561,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                             self.add(network_ip_address_to_interface)
                         except Exception as err:
                             self._handle_general_load_exception(
-                                error=err,
-                                hostname=hostname,
-                                data=device_data,
-                                model_type="ip_address to interface"
+                                error=err, hostname=hostname, data=device_data, model_type="ip_address to interface"
                             )
                             continue
 
@@ -600,10 +580,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                     self.add(network_tagged_vlans_to_interface)
                 except Exception as err:
                     self._handle_general_load_exception(
-                        error=err,
-                        hostname=hostname,
-                        data=device_data,
-                        model_type="tagged vlan to interface"
+                        error=err, hostname=hostname, data=device_data, model_type="tagged vlan to interface"
                     )
                     continue
 
@@ -622,10 +599,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                     self.add(network_untagged_vlan_to_interface)
                 except Exception as err:
                     self._handle_general_load_exception(
-                        error=err,
-                        hostname=hostname,
-                        data=device_data,
-                        model_type="untagged vlan to interface"
+                        error=err, hostname=hostname, data=device_data, model_type="untagged vlan to interface"
                     )
                     continue
 
@@ -644,10 +618,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                     self.add(network_lag_to_interface)
                 except Exception as err:
                     self._handle_general_load_exception(
-                        error=err,
-                        hostname=hostname,
-                        data=device_data,
-                        model_type="lag to interface"
+                        error=err, hostname=hostname, data=device_data, model_type="lag to interface"
                     )
                     continue
 
@@ -666,10 +637,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                     self.add(network_vrf_to_interface)
                 except Exception as err:
                     self._handle_general_load_exception(
-                        error=err,
-                        hostname=hostname,
-                        data=device_data,
-                        model_type="vrf to interface"
+                        error=err, hostname=hostname, data=device_data, model_type="vrf to interface"
                     )
                     continue
 
