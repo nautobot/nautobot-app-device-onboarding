@@ -1,12 +1,13 @@
 """Processor used by Nornir command getter tasks to prep data for SSoT framework sync and to catch unknown errors."""
 
 from typing import Dict
-
+from jsonschema import validate, ValidationError
 from nornir.core.inventory import Host
 from nornir.core.task import MultiResult, Task
 from nornir_nautobot.plugins.processors import BaseLoggingProcessor
 
 from nautobot_device_onboarding.nornir_plays.formatter import extract_show_data
+from nautobot_device_onboarding.nornir_plays.schemas import NETWORK_DATA_SCHEMA, NETWORK_DEVICES_SCHEMA
 
 
 class CommandGetterProcessor(BaseLoggingProcessor):
@@ -40,7 +41,7 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         """
         parsed_command_outputs = {}
         self.logger.info(
-            f"task_instance_completed Task Name: {task.name} Task Result: {result.result}",
+            f"task_instance_completed Task Name: {task.name}",
             extra={"object": task.host},
         )
         # If any main task resulted in a failed:True then add that key so ssot side can ignore that entry.
@@ -62,6 +63,28 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         )
         self.logger.debug(f"ready for ssot data {host.name} {ready_for_ssot_data}")
         self.data[host.name].update(ready_for_ssot_data)
+        if task.params["command_getter_job"] == "sync_devices":
+            try:
+                validate(ready_for_ssot_data, NETWORK_DEVICES_SCHEMA)
+            except ValidationError as e:
+                if self.kwargs["debug"]:
+                    self.logger.debug(f"Schema validation failed for {host.name}. Error: {e}.")
+                self.data[host.name] = {"failed": True, "failed_reason": "Schema validation failed."}
+            else:
+                if self.kwargs["debug"]:
+                    self.logger.debug(f"Ready for ssot data: {host.name} {ready_for_ssot_data}")
+                self.data[host.name].update(ready_for_ssot_data)
+        elif task.params["command_getter_job"] == "sync_network_data":
+            try:
+                validate(ready_for_ssot_data, NETWORK_DATA_SCHEMA)
+            except ValidationError as err:
+                if self.kwargs["debug"]:
+                    self.logger.debug(f"Schema validation failed for {host.name} Error: {err}")
+                self.data[host.name] = {"failed": True, "failed_reason": "Schema validation failed."}
+            else:
+                if self.kwargs["debug"]:
+                    self.logger.debug(f"Ready for ssot data: {host.name} {ready_for_ssot_data}")
+                self.data[host.name].update(ready_for_ssot_data)
 
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Processor for logging and data processing on subtask completed."""
