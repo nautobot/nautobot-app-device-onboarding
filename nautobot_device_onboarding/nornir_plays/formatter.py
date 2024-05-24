@@ -116,12 +116,6 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
     sync_vrfs = host.defaults.data.get("sync_vrfs", False)
     get_context_from_pre_processor = {}
     if command_info_dict.get("pre_processor"):
-        #   pre_processor:
-        #     vlan_map:
-        #       commands:
-        #         - command: "show vlan"
-        #           parser: "textfsm"
-        #           jpath: "[*].{id: vid, name: name}"
         for pre_processor_name, field_data in command_info_dict["pre_processor"].items():
             if isinstance(field_data["commands"], dict):
                 # only one command is specified as a dict force it to a list.

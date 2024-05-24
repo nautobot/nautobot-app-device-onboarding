@@ -23,14 +23,14 @@ class TestFormatter(unittest.TestCase):
             hostname="10.255.0.16",
             port=22,
             username="username",
-            password="password",
+            password="password",  # nosec
             platform="cisco_ios",
             connection_options={
                 "netmiko": ConnectionOptions(
                     hostname="10.255.0.16",
                     port=22,
                     username="username",
-                    password="password",
+                    password="password",  # nosec
                     platform="platform",
                 )
             },
