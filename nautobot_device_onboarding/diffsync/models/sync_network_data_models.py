@@ -4,7 +4,7 @@ from typing import List, Optional
 
 try:
     from typing import Annotated  # Python>=3.9
-except ModuleNotFoundError:
+except ImportError:
     from typing_extensions import Annotated  # Python<3.9
 
 from diffsync import DiffSync, DiffSyncModel
