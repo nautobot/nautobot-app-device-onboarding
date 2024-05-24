@@ -1,6 +1,7 @@
 """Command Extraction and Formatting or SSoT Based Jobs."""
 
 import json
+from json.decoder import JSONDecodeError
 import logging
 
 from django.template import engines
@@ -38,67 +39,74 @@ def get_django_env():
     return jinja_env
 
 
+def process_empty_result(iterable_type):
+    """Helper to map iterable_type on an empty result."""
+    iterable_mapping = {
+        "dict": {},
+        "str": "",
+    }
+    return iterable_mapping.get(iterable_type, [])
+
+
+def normalize_processed_data(processed_data, iterable_type):
+    """Helper to normalize the processed data returned from jdiff/jmespath."""
+    # If processed_data is an empty data structure, return default based on iterable_type
+    if not processed_data:
+        return process_empty_result(iterable_type)
+    if isinstance(processed_data, str):
+        try:
+            # If processed_data is a json string try to load it into a python datatype.
+            post_processed_data = json.loads(processed_data)
+        except (JSONDecodeError, TypeError):
+            post_processed_data = processed_data
+    else:
+        post_processed_data = processed_data
+    if isinstance(post_processed_data, list) and len(post_processed_data) == 1:
+        if isinstance(post_processed_data[0], str):
+            post_processed_data = post_processed_data[0]
+        else:
+            if isinstance(post_processed_data[0], dict):
+                if iterable_type:
+                    if iterable_type == "dict":
+                        post_processed_data = post_processed_data[0]
+            else:
+                post_processed_data = post_processed_data[0]
+    return post_processed_data
+
+
 def extract_and_post_process(parsed_command_output, yaml_command_element, j2_data_context, iter_type, job_debug):
     """Helper to extract and apply post_processing on a single element."""
     logger = logger = setup_logger("DEVICE_ONBOARDING_ETL_LOGGER", job_debug)
     # if parsed_command_output is an empty data structure, no need to go through all the processing.
-    if parsed_command_output:
-        j2_env = get_django_env()
-        jpath_template = j2_env.from_string(yaml_command_element["jpath"])
-        j2_rendered_jpath = jpath_template.render(**j2_data_context)
-        logger.debug("Post Rendered Jpath: %s", j2_rendered_jpath)
+    if not parsed_command_output:
+        return parsed_command_output, normalize_processed_data(parsed_command_output, iter_type)
+    j2_env = get_django_env()
+    # This just renders the jpath itself if any interpolation is needed.
+    jpath_template = j2_env.from_string(yaml_command_element["jpath"])
+    j2_rendered_jpath = jpath_template.render(**j2_data_context)
+    logger.debug("Post Rendered Jpath: %s", j2_rendered_jpath)
+    try:
         if isinstance(parsed_command_output, str):
-            parsed_command_output = json.loads(parsed_command_output)
-        try:
-            extracted_value = extract_data_from_json(parsed_command_output, j2_rendered_jpath)
-        except TypeError as err:
-            logger.debug("Error occurred during extraction: %s", err)
-            extracted_value = []
-        pre_processed_extracted = extracted_value
-        if yaml_command_element.get("post_processor"):
-            # j2 context data changes obj(hostname) -> extracted_value for post_processor
-            j2_data_context["obj"] = extracted_value
-            template = j2_env.from_string(yaml_command_element["post_processor"])
-            extracted_processed = template.render(**j2_data_context)
-        else:
-            extracted_processed = extracted_value
-        if isinstance(extracted_processed, str):
             try:
-                post_processed_data = json.loads(extracted_processed)
-            except Exception:
-                post_processed_data = extracted_processed
-        else:
-            post_processed_data = extracted_processed
-        if isinstance(post_processed_data, list) and len(post_processed_data) == 0:
-            # means result was empty, change empty result to iterater_type if applicable.
-            if iter_type:
-                if iter_type == "dict":
-                    post_processed_data = {}
-                if iter_type == "str":
-                    post_processed_data = ""
-        if isinstance(post_processed_data, list) and len(post_processed_data) == 1:
-            if isinstance(post_processed_data[0], str):
-                post_processed_data = post_processed_data[0]
-            else:
-                if isinstance(post_processed_data[0], dict):
-                    if iter_type:
-                        if iter_type == "dict":
-                            post_processed_data = post_processed_data[0]
-                else:
-                    post_processed_data = post_processed_data[0]
-        logger.debug("Pre Processed Extracted: %s", pre_processed_extracted)
-        logger.debug("Post Processed Data: %s", post_processed_data)
-        return pre_processed_extracted, post_processed_data
-    if iter_type:
-        if iter_type == "dict":
-            post_processed_data = {}
-        if iter_type == "str":
-            post_processed_data = ""
+                parsed_command_output = json.loads(parsed_command_output)
+            except (JSONDecodeError, TypeError):
+                logger.debug("Parsed Command Output is a string but not jsonable: %s", parsed_command_output)
+        extracted_value = extract_data_from_json(parsed_command_output, j2_rendered_jpath)
+    except TypeError as err:
+        logger.debug("Error occurred during extraction: %s setting default extracted value to []", err)
+        extracted_value = []
+    pre_processed_extracted = extracted_value
+    if yaml_command_element.get("post_processor"):
+        # j2 context data changes obj(hostname) -> extracted_value for post_processor
+        j2_data_context["obj"] = extracted_value
+        template = j2_env.from_string(yaml_command_element["post_processor"])
+        extracted_processed = template.render(**j2_data_context)
     else:
-        post_processed_data = []
-    logger.debug("Pre Processed Extracted: %s", parsed_command_output)
+        extracted_processed = extracted_value
+    post_processed_data = normalize_processed_data(extracted_processed, iter_type)
+    logger.debug("Pre Processed Extracted: %s", pre_processed_extracted)
     logger.debug("Post Processed Data: %s", post_processed_data)
-    return parsed_command_output, post_processed_data
+    return pre_processed_extracted, post_processed_data
 
 
 def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_debug):
@@ -106,11 +114,37 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
     result_dict = {}
     sync_vlans = host.defaults.data.get("sync_vlans", False)
     sync_vrfs = host.defaults.data.get("sync_vrfs", False)
+    get_context_from_pre_processor = {}
+    if command_info_dict.get("pre_processor"):
+        #   pre_processor:
+        #     vlan_map:
+        #       commands:
+        #         - command: "show vlan"
+        #           parser: "textfsm"
+        #           jpath: "[*].{id: vid, name: name}"
+        for pre_processor_name, field_data in command_info_dict["pre_processor"].items():
+            if isinstance(field_data["commands"], dict):
+                # only one command is specified as a dict force it to a list.
+                loop_commands = [field_data["commands"]]
+            else:
+                loop_commands = field_data["commands"]
+            for show_command_dict in loop_commands:
+                final_iterable_type = show_command_dict.get("iterable_type")
+                _, current_field_post = extract_and_post_process(
+                    command_outputs_dict[show_command_dict["command"]],
+                    show_command_dict,
+                    {"obj": host.name, "original_host": host.name},
+                    final_iterable_type,
+                    job_debug,
+                )
+                get_context_from_pre_processor[pre_processor_name] = current_field_post
     for ssot_field, field_data in command_info_dict.items():
         if not sync_vlans and ssot_field in ["interfaces__tagged_vlans", "interfaces__untagged_vlan"]:
             continue
         # If syncing vrfs isn't inscope remove the unneeded commands.
         if not sync_vrfs and ssot_field == "interfaces__vrf":
+            continue
+        if ssot_field == "pre_processor":
             continue
         if isinstance(field_data["commands"], dict):
             # only one command is specified as a dict force it to a list.
@@ -120,10 +154,12 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
         for show_command_dict in loop_commands:
             final_iterable_type = show_command_dict.get("iterable_type")
             if field_data.get("root_key"):
+                original_context = {"obj": host.name, "original_host": host.name}
+                merged_context = {**original_context, **get_context_from_pre_processor}
                 root_key_pre, root_key_post = extract_and_post_process(
                     command_outputs_dict[show_command_dict["command"]],
                     show_command_dict,
-                    {"obj": host.name, "original_host": host.name},
+                    merged_context,
                     final_iterable_type,
                     job_debug,
                 )
@@ -139,19 +175,23 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
                         # a list of data that we want to become our nested key. E.g. current_key "Ethernet1/1"
                         # These get passed into the render context for the template render to allow nested jpaths to use
                         # the current_key context for more flexible jpath queries.
+                        original_context = {"current_key": current_key, "obj": host.name, "original_host": host.name}
+                        merged_context = {**original_context, **get_context_from_pre_processor}
                         _, current_key_post = extract_and_post_process(
                             command_outputs_dict[show_command_dict["command"]],
                             show_command_dict,
-                            {"current_key": current_key, "obj": host.name, "original_host": host.name},
+                            merged_context,
                             final_iterable_type,
                             job_debug,
                         )
                         result_dict[field_nesting[0]][current_key][field_nesting[1]] = current_key_post
                 else:
+                    original_context = {"obj": host.name, "original_host": host.name}
+                    merged_context = {**original_context, **get_context_from_pre_processor}
                     _, current_field_post = extract_and_post_process(
                         command_outputs_dict[show_command_dict["command"]],
                         show_command_dict,
-                        {"obj": host.name, "original_host": host.name},
+                        merged_context,
                         final_iterable_type,
                         job_debug,
                     )

@@ -60,7 +60,7 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         ready_for_ssot_data = extract_show_data(
             host, parsed_command_outputs, task.params["command_getter_job"], self.kwargs["debug"]
         )
-        self.logger.debug(f"read for ssot data {host.name} {ready_for_ssot_data}")
+        self.logger.debug(f"ready for ssot data {host.name} {ready_for_ssot_data}")
         self.data[host.name].update(ready_for_ssot_data)
 
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:

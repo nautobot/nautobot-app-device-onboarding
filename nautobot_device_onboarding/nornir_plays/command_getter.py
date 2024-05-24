@@ -51,7 +51,17 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs):
     """Using merged command mapper info and look up all commands that need to be run."""
     all_commands = []
     for key, value in yaml_parsed_info.items():
-        if not key.startswith("_metadata"):
+        if key == "pre_processor":
+            for _, v in value.items():
+                current_root_key = v.get("commands")
+                if isinstance(current_root_key, list):
+                    # Means their is any "nested" structures. e.g multiple commands
+                    for command in v["commands"]:
+                        all_commands.append(command)
+                else:
+                    if isinstance(current_root_key, dict):
+                        all_commands.append(current_root_key)
+        else:
             # Deduplicate commands + parser key
             current_root_key = value.get("commands")
             if isinstance(current_root_key, list):
