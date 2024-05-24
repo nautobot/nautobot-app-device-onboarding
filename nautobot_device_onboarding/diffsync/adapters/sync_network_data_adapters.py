@@ -406,7 +406,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                     last_network_data_sync=datetime.datetime.now().date().isoformat(),
                 )
                 self.add(network_device)
-            except Exception as err:
+            except Exception as err:  # pylint: disable=broad-exception-caught
                 self._handle_general_load_exception(error=err, hostname=hostname, data=device_data, model_type="device")
                 continue
             # for interface in device_data["interfaces"]:
@@ -467,7 +467,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                                     "DiffSync store. This is a duplicate IP Address."
                                 )
                                 continue
-                            except Exception as err:
+                            except Exception as err:  # pylint: disable=broad-exception-caught
                                 self._handle_general_load_exception(
                                     error=err, hostname=hostname, data=device_data, model_type="ip_address"
                                 )
@@ -496,7 +496,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                         self.add(network_vlan)
                     except diffsync.exceptions.ObjectAlreadyExists:
                         continue
-                    except Exception as err:
+                    except Exception as err:  # pylint: disable=broad-exception-caught
                         self._handle_general_load_exception(
                             error=err, hostname=hostname, data=device_data, model_type="vlan"
                         )
@@ -513,7 +513,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                         self.add(network_vlan)
                     except diffsync.exceptions.ObjectAlreadyExists:
                         continue
-                    except Exception as err:
+                    except Exception as err:  # pylint: disable=broad-exception-caught
                         self._handle_general_load_exception(
                             error=err, hostname=hostname, data=device_data, model_type="vlan"
                         )
@@ -536,7 +536,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                         self.add(network_vrf)
                     except diffsync.exceptions.ObjectAlreadyExists:
                         continue
-                    except Exception as err:
+                    except Exception as err:  # pylint: disable=broad-exception-caught
                         self._handle_general_load_exception(
                             error=err, hostname=hostname, data=device_data, model_type="vrf"
                         )
@@ -559,7 +559,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                                 ),
                             )
                             self.add(network_ip_address_to_interface)
-                        except Exception as err:
+                        except Exception as err:  # pylint: disable=broad-exception-caught
                             self._handle_general_load_exception(
                                 error=err, hostname=hostname, data=device_data, model_type="ip_address to interface"
                             )
@@ -578,7 +578,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                         tagged_vlans=interface_data["tagged_vlans"],
                     )
                     self.add(network_tagged_vlans_to_interface)
-                except Exception as err:
+                except Exception as err:  # pylint: disable=broad-exception-caught
                     self._handle_general_load_exception(
                         error=err, hostname=hostname, data=device_data, model_type="tagged vlan to interface"
                     )
@@ -597,7 +597,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                         untagged_vlan=interface_data["untagged_vlan"],
                     )
                     self.add(network_untagged_vlan_to_interface)
-                except Exception as err:
+                except Exception as err:  # pylint: disable=broad-exception-caught
                     self._handle_general_load_exception(
                         error=err, hostname=hostname, data=device_data, model_type="untagged vlan to interface"
                     )
@@ -616,7 +616,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                         lag__interface__name=interface_data["lag"] if interface_data["lag"] else "",
                     )
                     self.add(network_lag_to_interface)
-                except Exception as err:
+                except Exception as err:  # pylint: disable=broad-exception-caught
                     self._handle_general_load_exception(
                         error=err, hostname=hostname, data=device_data, model_type="lag to interface"
                     )
@@ -635,7 +635,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                         vrf=interface_data["vrf"],
                     )
                     self.add(network_vrf_to_interface)
-                except Exception as err:
+                except Exception as err:  # pylint: disable=broad-exception-caught
                     self._handle_general_load_exception(
                         error=err, hostname=hostname, data=device_data, model_type="vrf to interface"
                     )

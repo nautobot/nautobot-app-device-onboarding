@@ -629,7 +629,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
             cf.content_types.add(ContentType.objects.get_for_model(Device))
             if self.debug:
                 self.logger.debug("Custom field found or created")
-        except Exception as err:
+        except Exception as err:  # pylint: disable=broad-exception-caught
             self.logger.error(f"Failed to get or create last_network_data_sync custom field, {err}")
             return
 

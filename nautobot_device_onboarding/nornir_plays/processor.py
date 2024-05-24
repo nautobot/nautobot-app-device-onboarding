@@ -44,6 +44,10 @@ class CommandGetterProcessor(BaseLoggingProcessor):
             f"task_instance_completed Task Name: {task.name}",
             extra={"object": task.host},
         )
+        if self.kwargs["debug"]:
+            self.logger.debug(
+                f"task_instance_completed {task.host} Task result {result.result}.", extra={"object": task.host}
+            )
         # If any main task resulted in a failed:True then add that key so ssot side can ignore that entry.
         if result[0].failed:
             if task.params["command_getter_job"] == "sync_devices":
