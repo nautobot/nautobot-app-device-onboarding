@@ -41,13 +41,9 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         """
         parsed_command_outputs = {}
         self.logger.info(
-            f"task_instance_completed Task Name: {task.name}",
+            f"Task instance completed. Task Name: {task.name}",
             extra={"object": task.host},
         )
-        if self.kwargs["debug"]:
-            self.logger.debug(
-                f"task_instance_completed {task.host} Task result {result.result}.", extra={"object": task.host}
-            )
         # If any main task resulted in a failed:True then add that key so ssot side can ignore that entry.
         if result[0].failed:
             if task.params["command_getter_job"] == "sync_devices":
@@ -90,14 +86,8 @@ class CommandGetterProcessor(BaseLoggingProcessor):
 
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Processor for logging and data processing on subtask completed."""
-        self.logger.info(f"subtask_instance_completed Subtask completed {task.name}.", extra={"object": task.host})
-        if self.kwargs["debug"]:
-            self.logger.debug(
-                f"subtask_instance_completed {task.host} Subtask result {result.result}.", extra={"object": task.host}
-            )
+        self.logger.info(f"Subtask completed: {task.name}, {task.host}.", extra={"object": task.host})
 
     def subtask_instance_started(self, task: Task, host: Host) -> None:  # show command start
         """Processor for logging and data processing on subtask start."""
-        self.logger.info(
-            f"subtask_instance_started Subtask starting {task.name}, {task.host}.", extra={"object": task.host}
-        )
+        self.logger.info(f"Subtask starting: {task.name}, {task.host}.", extra={"object": task.host})
