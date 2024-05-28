@@ -91,3 +91,26 @@ class CommandGetterProcessor(BaseLoggingProcessor):
     def subtask_instance_started(self, task: Task, host: Host) -> None:  # show command start
         """Processor for logging and data processing on subtask start."""
         self.logger.info(f"Subtask starting: {task.name}, {task.host}.", extra={"object": task.host})
+
+
+class TroubleshootingProcessor(BaseLoggingProcessor):
+    """Processor class for to troubleshot command getter."""
+
+    def __init__(self, command_outputs):
+        """Set logging facility."""
+        self.data: Dict = command_outputs
+
+    def task_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
+        """Processor for logging and data processing on task completed.
+
+        Args:
+            task (Task): Nornir task individual object
+            host (Host): Host object with Nornir
+            result (MultiResult): Result from Nornir task
+
+        Returns:
+            None
+        """
+        # [1:] because result 1 is the (network_send_commands ) task which runs all the subtask, it has no result.
+        for res in result[1:]:
+            self.data[res.name] = res.result
