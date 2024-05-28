@@ -17,7 +17,7 @@ from nautobot.ipam.choices import IPAddressTypeChoices, PrefixTypeChoices
 from nautobot.ipam.models import IPAddress, IPAddressToInterface, Namespace, Prefix
 
 
-#TODO Update this for testing Network Importer
+# TODO Update this for testing Network Importer
 # def sync_network_data_ensure_required_nautobot_objects():
 #     """Ensure the requied Nautobot objects needed for testing exist."""
 #     status, _ = Status.objects.get_or_create(name="Active")
@@ -94,6 +94,7 @@ from nautobot.ipam.models import IPAddress, IPAddressToInterface, Namespace, Pre
 #     device.primary_ip4 = ip_address
 #     device.validated_save()
 #     return True
+
 
 def sync_devices_ensure_required_nautobot_objects():
     """Ensure the requied Nautobot objects needed for testing exist."""

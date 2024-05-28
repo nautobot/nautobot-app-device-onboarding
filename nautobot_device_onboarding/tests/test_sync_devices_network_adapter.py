@@ -72,6 +72,3 @@ class TestSyncDevicesNetworkTestCase(TransactionTestCase):
             self.assertEqual([data["mgmt_interface"]], diffsync_device.interfaces)
             self.assertEqual(data["mask_length"], diffsync_device.mask_length)
             self.assertEqual(data["serial"], diffsync_device.serial)
-
-
-

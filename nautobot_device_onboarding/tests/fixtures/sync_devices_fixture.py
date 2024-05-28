@@ -20,7 +20,7 @@ sync_devices_mock_data_valid = {
         "platform": "cisco_xe",
         "network_driver": "cisco_xe",
         "mask_length": 16,
-    }
+    },
 }
 
 sync_devices_mock_data_invalid = {
@@ -43,5 +43,5 @@ sync_devices_mock_data_invalid = {
         "platform": "cisco_xe",
         "network_driver": "cisco_xe",
         "mask_length": 16,
-    }
+    },
 }

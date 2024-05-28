@@ -62,9 +62,7 @@ class TestTransformWithGitRepo(TransactionTestCase):
                 {
                     "sync_devices": {
                         "serial": {
-                            "commands": [
-                                {"command": "show version", "parser": "textfsm", "jpath": "[*].serial"}
-                            ]
+                            "commands": [{"command": "show version", "parser": "textfsm", "jpath": "[*].serial"}]
                         }
                     }
                 },
@@ -99,7 +97,7 @@ class TestTransformWithGitRepo(TransactionTestCase):
                 )
                 mock_load_command_mappers.side_effect = [
                     {"foo_bar": {"sync_devices": "serial"}},
-                    {"cisco_ios": {"sync_devices": "serial-2"}}
+                    {"cisco_ios": {"sync_devices": "serial-2"}},
                 ]
                 expected_dict = {
                     "foo_bar": {"sync_devices": "serial"},
