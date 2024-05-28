@@ -1,17 +1,14 @@
 """Test Cisco Support adapter."""
 
-import json
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from nautobot.core.testing import TransactionTestCase
 from nautobot.extras.models import JobResult
 
 from nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters import SyncDevicesNetworkAdapter
-from nautobot_device_onboarding.diffsync.models.sync_devices_models import SyncDevicesDevice
 
 from nautobot_device_onboarding.jobs import SSOTSyncDevices
 from nautobot_device_onboarding.tests import utils
-from nautobot_device_onboarding.nornir_plays import command_getter
 from nautobot_device_onboarding.tests.fixtures import sync_devices_fixture
 
 

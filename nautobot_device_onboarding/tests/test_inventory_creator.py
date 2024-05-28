@@ -1,3 +1,5 @@
+"""Test ability to create an inventory."""
+
 import unittest
 from unittest.mock import patch
 from nautobot.dcim.models import Platform
@@ -5,12 +7,13 @@ from nautobot_device_onboarding.nornir_plays.inventory_creator import guess_netm
 
 
 class TestInventoryCreator(unittest.TestCase):
+    """Test ability to create an inventory."""
 
     def setUp(self) -> None:
         self.host_ip = "198.51.100.1"
         self.hostname = "router1.example.com"
         self.username = "admin"
-        self.password = "password"
+        self.password = "password"  # nosec
         self.port = 22
         self.platform = Platform(name="cisco_xe", network_driver="cisco_xe")
 

@@ -1,20 +1,15 @@
 """Utilities for easier testing."""
 
 from django.contrib.contenttypes.models import ContentType
-from nautobot.dcim.choices import InterfaceTypeChoices
 from nautobot.dcim.models import (
     Device,
-    DeviceType,
     Interface,
     Location,
     LocationType,
-    Manufacturer,
-    Platform,
 )
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Role, Secret, SecretsGroup, SecretsGroupAssociation, Status
-from nautobot.ipam.choices import IPAddressTypeChoices, PrefixTypeChoices
-from nautobot.ipam.models import IPAddress, IPAddressToInterface, Namespace, Prefix
+from nautobot.ipam.models import IPAddress, Namespace, Prefix
 
 
 # TODO Update this for testing Network Importer

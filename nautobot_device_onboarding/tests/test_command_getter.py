@@ -9,6 +9,7 @@ MOCK_DIR = os.path.join("nautobot_device_onboarding", "tests", "mock")
 
 
 class TestGetCommandsToRun(unittest.TestCase):
+    """Test the ability to get the proper commands to run."""
 
     def setUp(self):
         with open(f"{MOCK_DIR}/command_mappers/mock_cisco_ios.yml", "r", encoding="utf-8") as mock_file_data:
