@@ -56,7 +56,7 @@ class TestFormatterDeviceSync(unittest.TestCase):
     def test_add_platform_parsing_info_sane_defaults(self):
         # Note: This is also officially tested in test_transform, but secondary check here as well.
         default_mappers = ["cisco_ios", "arista_eos", "cisco_wlc", "cisco_xe", "juniper_junos", "cisco_nxos"]
-        self.assertEqual(default_mappers, list(self.platform_parsing_info.keys()))
+        self.assertEqual(sorted(default_mappers), list(sorted(self.platform_parsing_info.keys())))
 
     def test_create_inventory_host_per_platform(self):
         for platform in list(self.platform_parsing_info.keys()):
