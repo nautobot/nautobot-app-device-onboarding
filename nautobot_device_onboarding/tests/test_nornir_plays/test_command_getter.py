@@ -11,7 +11,7 @@ MOCK_DIR = os.path.join("nautobot_device_onboarding", "tests", "mock")
 class TestGetCommandsToRun(unittest.TestCase):
 
     def setUp(self):
-        with open(f"{MOCK_DIR}/mock_cisco_ios.yml", "r", encoding="utf-8") as mock_file_data:
+        with open(f"{MOCK_DIR}/command_mappers/mock_cisco_ios.yml", "r", encoding="utf-8") as mock_file_data:
             self.expected_data = yaml.safe_load(mock_file_data)
 
     def test_deduplicate_command_list_sync_devices(self):
@@ -36,7 +36,7 @@ class TestGetCommandsToRun(unittest.TestCase):
             self.expected_data["sync_network_data"], sync_vlans=False, sync_vrfs=False
         )
         expected_commands_to_run = [
-            {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vid, name: name}"},
+            {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vlan_id, name: vlan_name}"},
             {"command": "show version", "parser": "textfsm", "jpath": "[*].serial[]"},
             {
                 "command": "show interfaces",
@@ -67,7 +67,7 @@ class TestGetCommandsToRun(unittest.TestCase):
             self.expected_data["sync_network_data"], sync_vlans=False, sync_vrfs=True
         )
         expected_commands_to_run = [
-            {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vid, name: name}"},
+            {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vlan_id, name: vlan_name}"},
             {"command": "show version", "parser": "textfsm", "jpath": "[*].serial[]"},
             {
                 "command": "show interfaces",
@@ -105,7 +105,7 @@ class TestGetCommandsToRun(unittest.TestCase):
             self.expected_data["sync_network_data"], sync_vlans=True, sync_vrfs=False
         )
         expected_commands_to_run = [
-            {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vid, name: name}"},
+            {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vlan_id, name: vlan_name}"},
             {"command": "show version", "parser": "textfsm", "jpath": "[*].serial[]"},
             {
                 "command": "show interfaces",
@@ -136,7 +136,7 @@ class TestGetCommandsToRun(unittest.TestCase):
             self.expected_data["sync_network_data"], sync_vlans=True, sync_vrfs=True
         )
         expected_commands_to_run = [
-            {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vid, name: name}"},
+            {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vlan_id, name: vlan_name}"},
             {"command": "show version", "parser": "textfsm", "jpath": "[*].serial[]"},
             {
                 "command": "show interfaces",

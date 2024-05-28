@@ -35,7 +35,8 @@ sync_network_data:
       commands:
         - command: "show vlan"
           parser: "textfsm"
-          jpath: "[*].{id: vid, name: name}"
+          jpath: "[*].{id: vlan_id, name: vlan_name}"
+          # post_processor: "{% set result={} %}{% for entry in obj %}{{ result.update({entry['id']: entry['name']}) or '' }}{% endfor %}{{ result }}"
   serial:
     commands:
       - command: "show version"
@@ -112,5 +113,6 @@ sync_network_data:
     commands:
       - command: "show interfaces switchport"
         parser: "textfsm"
-        jpath: "[?contains(interface, '{{ current_key }}')].{id: native_vlan}"
+        jpath: "[?contains(interface, '{{ current_key | abbreviated_interface_name  }}')].native_vlan"
+        post_processor: "{% if obj | length > 0 %}{{ vlan_map | selectattr('id', 'eq', obj[0]) | list }}{% else %}{{ obj }}{% endif %}"
         iterable_type: "dict"

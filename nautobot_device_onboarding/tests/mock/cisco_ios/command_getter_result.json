@@ -414,7 +414,82 @@
         }
     ],
     "show vlan": [
-        {"1": "foo"}
+      {
+        "interfaces": [
+          "Gi0/1"
+        ],
+        "status": "active",
+        "vlan_id": "1",
+        "vlan_name": "default"
+      },
+      {
+        "interfaces": [],
+        "status": "active",
+        "vlan_id": "10",
+        "vlan_name": "Management"
+      },
+      {
+        "interfaces": [
+          "Fa0/1",
+          "Fa0/2",
+          "Fa0/3",
+          "Fa0/4",
+          "Fa0/5",
+          "Fa0/6",
+          "Fa0/7",
+          "Fa0/8",
+          "Fa0/9",
+          "Fa0/10",
+          "Fa0/11",
+          "Fa0/12"
+        ],
+        "status": "active",
+        "vlan_id": "50",
+        "vlan_name": "VLan50"
+      },
+      {
+        "interfaces": [
+          "Fa0/13",
+          "Fa0/14",
+          "Fa0/15",
+          "Fa0/16",
+          "Fa0/17",
+          "Fa0/18",
+          "Fa0/19",
+          "Fa0/20",
+          "Fa0/21",
+          "Fa0/22",
+          "Fa0/23",
+          "Fa0/24"
+        ],
+        "status": "active",
+        "vlan_id": "60",
+        "vlan_name": "VLan60"
+      },
+      {
+        "interfaces": [],
+        "status": "act/unsup",
+        "vlan_id": "1002",
+        "vlan_name": "fddi-default"
+      },
+      {
+        "interfaces": [],
+        "status": "act/unsup",
+        "vlan_id": "1003",
+        "vlan_name": "token-ring-default"
+      },
+      {
+        "interfaces": [],
+        "status": "act/unsup",
+        "vlan_id": "1004",
+        "vlan_name": "fddinet-default"
+      },
+      {
+        "interfaces": [],
+        "status": "act/unsup",
+        "vlan_id": "1005",
+        "vlan_name": "trnet-default"
+      }
     ],
     "show interfaces switchport": [
         {

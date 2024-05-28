@@ -14,7 +14,7 @@ class TestFormatter(unittest.TestCase):
 
     def setUp(self):
         self.maxDiff = None
-        with open(f"{MOCK_DIR}/mock_cisco_ios.yml", "r", encoding="utf-8") as parsing_info:
+        with open(f"{MOCK_DIR}/command_mappers/mock_cisco_ios.yml", "r", encoding="utf-8") as parsing_info:
             self.platform_parsing_info = yaml.safe_load(parsing_info)
         with open(f"{MOCK_DIR}/cisco_ios/command_getter_result.json", "r", encoding="utf-8") as command_info:
             self.command_outputs = json.loads(command_info.read())
@@ -349,5 +349,84 @@ class TestFormatter(unittest.TestCase):
                     "type": "virtual",
                 },
             },
+        }
+        self.assertEqual(expected_parsed_result, actual_result)
+
+    def test_extract_and_post_process_result_list_to_string_vios(self):
+        parsed_command_output = [
+            {
+                "software_image": "VIOS-ADVENTERPRISEK9-M",
+                "version": "15.8(3)M2",
+                "release": "fc2",
+                "rommon": "Bootstrap",
+                "hostname": "rtr-01",
+                "uptime": "1 week, 3 days, 16 hours, 11 minutes",
+                "uptime_years": "",
+                "uptime_weeks": "1",
+                "uptime_days": "3",
+                "uptime_hours": "16",
+                "uptime_minutes": "11",
+                "reload_reason": "Unknown reason",
+                "running_image": "/vios-adventerprisek9-m",
+                "hardware": ["IOSv"],
+                "serial": ["991UCMIHG4UAJ1J010CQG"],
+                "config_register": "0x0",
+                "mac_address": [],
+                "restarted": "",
+            }
+        ]
+        actual_result = extract_and_post_process(
+            parsed_command_output,
+            {
+                "command": "show version",
+                "parser": "textfsm",
+                "jpath": "[*].serial[]",
+            },
+            {"obj": "1.1.1.1", "original_host": "1.1.1.1"},
+            "str",
+            False,
+        )
+        expected_parsed_result = (["991UCMIHG4UAJ1J010CQG"], "991UCMIHG4UAJ1J010CQG")
+        self.assertEqual(expected_parsed_result, actual_result)
+
+
+class TestFormatterVlans(unittest.TestCase):
+
+    def setUp(self):
+        self.maxDiff = None
+        with open(f"{MOCK_DIR}/command_mappers/mock_cisco_ios.yml", "r", encoding="utf-8") as parsing_info:
+            self.platform_parsing_info = yaml.safe_load(parsing_info)
+        with open(f"{MOCK_DIR}/cisco_ios/command_getter_result.json", "r", encoding="utf-8") as command_info:
+            self.command_outputs = json.loads(command_info.read())
+        self.host = Host(
+            name="10.255.0.16",
+            hostname="10.255.0.16",
+            port=22,
+            username="username",
+            password="password",  # nosec
+            platform="cisco_ios",
+            connection_options={
+                "netmiko": ConnectionOptions(
+                    hostname="10.255.0.16",
+                    port=22,
+                    username="username",
+                    password="password",  # nosec
+                    platform="platform",
+                )
+            },
+            defaults=Defaults(data={"sync_vlans": True, "sync_vrfs": False}),
+        )
+
+    @unittest.skip("WIP")
+    def test_perform_data_extraction_sync_network_data(self):
+        actual_result = perform_data_extraction(
+            self.host, self.platform_parsing_info["sync_network_data"], self.command_outputs, job_debug=False
+        )
+        expected_parsed_result = {
+            "device_type": "WS-C4948E",
+            "hostname": "dummy_rtr",
+            "mask_length": 16,
+            "mgmt_interface": "Vlan1",
+            "serial": "CAT1451S15C",
         }
         self.assertEqual(expected_parsed_result, actual_result)
