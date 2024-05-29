@@ -72,7 +72,6 @@ class TestFormatterDeviceSync(unittest.TestCase):
                 self.assertFalse(self.host.data.get("sync_vlans"))
                 self.assertFalse(self.host.data.get("sync_vrfs"))
 
-    @unittest.skip(reason="This will be the future way to test multiple platforms and multiple command getter results.")
     def test_perform_data_extraction_sync_devices(self):
         for platform in list(self.platform_parsing_info.keys()):
             self.host.platform = platform
@@ -83,7 +82,7 @@ class TestFormatterDeviceSync(unittest.TestCase):
                 with self.subTest(msg=f"test_perform_data_extraction_sync_devices with platform {platform}"):
                     for command_getter_file in getters:
                         with open(
-                            f"{MOCK_DIR}/{platform}/expected_result_{command_getter_file.split('_')[-1]}",
+                            f"{MOCK_DIR}/{platform}/sync_devices_expected_result_{command_getter_file.split('_')[-1]}",
                             "r",
                             encoding="utf-8",
                         ) as expected_parsed:
@@ -95,6 +94,34 @@ class TestFormatterDeviceSync(unittest.TestCase):
                             actual_result = perform_data_extraction(
                                 self.host,
                                 self.platform_parsing_info[platform]["sync_devices"],
+                                command_outputs,
+                                job_debug=False,
+                            )
+                            self.assertEqual(expected_parsed_result, actual_result)
+
+    @unittest.skip(reason="Todo test sync network data, similar to test_perform_data_extraction_sync_devices.")
+    def test_perform_data_extraction_sync_network_data(self):
+        for platform in list(self.platform_parsing_info.keys()):
+            self.host.platform = platform
+            current_test_dir = f"{MOCK_DIR}/{platform}/"
+            getters = find_files_by_prefix(current_test_dir, "command_getter")
+            # NOTE: Cleanup later, should always require tests to be present
+            if len(getters) > 0:
+                with self.subTest(msg=f"test_perform_data_extraction_sync_devices with platform {platform}"):
+                    for command_getter_file in getters:
+                        with open(
+                            f"{MOCK_DIR}/{platform}/sync_network_data_expected_result_{command_getter_file.split('_')[-1]}",
+                            "r",
+                            encoding="utf-8",
+                        ) as expected_parsed:
+                            expected_parsed_result = json.loads(expected_parsed.read())
+                        with open(
+                            f"{MOCK_DIR}/{platform}/{command_getter_file}", "r", encoding="utf-8"
+                        ) as command_info:
+                            command_outputs = json.loads(command_info.read())
+                            actual_result = perform_data_extraction(
+                                self.host,
+                                self.platform_parsing_info[platform]["sync_network_data"],
                                 command_outputs,
                                 job_debug=False,
                             )
