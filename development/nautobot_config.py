@@ -127,11 +127,7 @@ if not _TESTING:
 #
 
 # Enable installed Apps. Add the name of each App to the list.
-PLUGINS = [
-    "nautobot_device_onboarding",
-    "nautobot_ssot",
-    "nautobot_plugin_nornir",
-]
+PLUGINS = ["nautobot_device_onboarding", "nautobot_ssot", "nautobot_plugin_nornir"]
 
 # Apps configuration settings. These settings are used by various Apps that the user may have installed.
 # Each key in the dictionary is the name of an installed App and its value is a dictionary of settings.

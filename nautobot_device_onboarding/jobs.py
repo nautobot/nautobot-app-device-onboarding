@@ -7,15 +7,19 @@ from io import StringIO
 
 from diffsync.enum import DiffSyncFlags
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.forms import HiddenInput
-from nautobot.apps.jobs import BooleanVar, FileVar, IntegerVar, Job, MultiObjectVar, ObjectVar, StringVar
+from nornir import InitNornir
+from nornir.core.plugins.inventory import InventoryPluginRegister
+from nautobot.apps.jobs import BooleanVar, FileVar, IntegerVar, Job, MultiObjectVar, ObjectVar, StringVar, ChoiceVar
 from nautobot.core.celery import register_jobs
 from nautobot.dcim.models import Device, DeviceType, Location, Platform
-from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
-from nautobot.extras.models import Role, SecretsGroup, SecretsGroupAssociation, Status
+from nautobot.extras.choices import CustomFieldTypeChoices, SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
+from nautobot.extras.models import CustomField, Role, SecretsGroup, SecretsGroupAssociation, Status
 from nautobot.ipam.models import Namespace
 from nautobot_ssot.jobs.base import DataSource
+from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 
 from nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters import (
     SyncDevicesNautobotAdapter,
@@ -28,6 +32,13 @@ from nautobot_device_onboarding.diffsync.adapters.sync_network_data_adapters imp
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
 from nautobot_device_onboarding.utils.helper import onboarding_task_fqdn_to_ip
+from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
+from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
+from nautobot_device_onboarding.nornir_plays.command_getter import netmiko_send_commands, _parse_credentials
+from nautobot_device_onboarding.choices import SSOT_JOB_TO_COMMAND_CHOICE
+from nautobot_device_onboarding.nornir_plays.processor import TroubleshootingProcessor
+
+InventoryPluginRegister.register("empty-inventory", EmptyInventory)
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
@@ -614,6 +625,28 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         self.sync_vlans = sync_vlans
         self.sync_vrfs = sync_vrfs
 
+        # Check for last_network_data_sync CustomField
+        if self.debug:
+            self.logger.debug("Checking for last_network_data_sync custom field")
+        try:
+
+            cf = CustomField.objects.get(key="last_network_data_sync")
+        except ObjectDoesNotExist:
+            cf, _ = CustomField.objects.get_or_create(
+                label="Last Network Data Sync",
+                key="last_network_data_sync",
+                type=CustomFieldTypeChoices.TYPE_DATE,
+                required=False,
+            )
+
+            cf.content_types.add(ContentType.objects.get_for_model(Device))
+
+            if self.debug:
+                self.logger.debug("Custom field found or created")
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            self.logger.error(f"Failed to get or create last_network_data_sync custom field, {err}")
+            return
+
         # Filter devices based on form input
         device_filter = {}
         if self.devices:
@@ -634,7 +667,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
             self.logger.info("No devices returned based on filter selections.")
             return
 
-        # Log selected devices
+        # Log the devices that will be synced
         filtered_devices_names = list(self.filtered_devices.values_list("name", flat=True))
         self.logger.info(f"{len(filtered_devices_names)} devices will be synced")
         if len(filtered_devices_names) <= 300:
@@ -656,5 +689,72 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         super().run(dryrun, memory_profiling, *args, **kwargs)
 
 
-jobs = [OnboardingTask, SSOTSyncDevices, SSOTSyncNetworkData]
+class DeviceOnboardingTroubleshootingJob(Job):
+    """Simple Job to Execute Show Command."""
+
+    debug = BooleanVar()
+    ip_addresses = StringVar()
+    port = IntegerVar(default=22)
+    timeout = IntegerVar(default=30)
+    secrets_group = ObjectVar(model=SecretsGroup)
+    platform = ObjectVar(model=Platform, required=True)
+    ssot_job_type = ChoiceVar(choices=SSOT_JOB_TO_COMMAND_CHOICE)
+
+    class Meta:
+        """Meta object boilerplate for onboarding."""
+
+        name = "Runs Commands on a Device to simulate SSoT Command Getter."
+        description = "Login to a device(s) and run commands."
+        has_sensitive_variables = False
+        hidden = True
+
+    def run(self, *args, **kwargs):
+        """Process onboarding task from ssot-ni job."""
+        ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
+        port = kwargs["port"]
+        platform = kwargs["platform"]
+        username, password, secret = _parse_credentials(kwargs["secrets_group"])  # pylint:disable=unused-variable
+
+        # Initiate Nornir instance with empty inventory
+        compiled_results = {}
+        try:
+            with InitNornir(
+                runner=NORNIR_SETTINGS.get("runner"),
+                logging={"enabled": False},
+                inventory={
+                    "plugin": "empty-inventory",
+                },
+            ) as nornir_obj:
+                for entered_ip in ip_addresses:
+                    single_host_inventory_constructed, _ = _set_inventory(
+                        entered_ip, platform, port, username, password
+                    )
+                    nornir_obj.inventory.hosts.update(single_host_inventory_constructed)
+                nr_with_processors = nornir_obj.with_processors([TroubleshootingProcessor(compiled_results)])
+                if kwargs["ssot_job_type"] == "both":
+                    nr_with_processors.run(
+                        task=netmiko_send_commands,
+                        command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],
+                        command_getter_job="sync_devices",
+                        **kwargs,
+                    )
+                    nr_with_processors.run(
+                        task=netmiko_send_commands,
+                        command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],
+                        command_getter_job="sync_network_data",
+                        **kwargs,
+                    )
+                else:
+                    nr_with_processors.run(
+                        task=netmiko_send_commands,
+                        command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],
+                        command_getter_job=kwargs["ssot_job_type"],
+                        **kwargs,
+                    )
+        except Exception as err:  # pylint: disable=broad-exception-caught
+            self.logger.info("Error During Sync Devices Command Getter: %s", err)
+        return compiled_results
+
+
+jobs = [OnboardingTask, SSOTSyncDevices, SSOTSyncNetworkData, DeviceOnboardingTroubleshootingJob]
 register_jobs(*jobs)

@@ -1,6 +1,4 @@
-"""Mock Data for use with Diffsync."""
-
-# TODO: move this data to testing folder for use in tests
+"""Data fixture for use in testing."""
 
 sync_network_data_mock_data = {
     "demo-cisco-xe1": {
@@ -177,28 +175,5 @@ sync_network_data_mock_data = {
                 }
             },
         ],
-    },
-}
-
-sync_devices_mock_data = {
-    "10.1.1.11": {
-        "hostname": "demo-cisco-xe1",
-        "serial": "9ABUXU581111",
-        "device_type": "CSR1000V17",
-        "mgmt_interface": "GigabitEthernet1",
-        "manufacturer": "Cisco",
-        "platform": "IOS-test",
-        "network_driver": "cisco_ios",
-        "mask_length": 16,
-    },
-    "10.1.1.10": {
-        "hostname": "demo-cisco-xe2",
-        "serial": "9ABUXU5882222",
-        "device_type": "CSR1000V2",
-        "mgmt_interface": "GigabitEthernet1",
-        "manufacturer": "Cisco",
-        "platform": "IOS",
-        "network_driver": "cisco_ios",
-        "mask_length": 24,
     },
 }

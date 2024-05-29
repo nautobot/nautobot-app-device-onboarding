@@ -1,0 +1,5 @@
+{"device_type": "C9500-24Y4C",
+ "hostname": "ABC-CAT9K",
+ "mask_length": 28,
+ "mgmt_interface": "GigabitEthernet0/0",
+ "serial": "FDO24340K4L"}

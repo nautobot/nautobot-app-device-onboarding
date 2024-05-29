@@ -1,5 +1,6 @@
 """CommandGetter."""
 
+import json
 from typing import Dict
 
 from django.conf import settings
@@ -51,7 +52,17 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs):
     """Using merged command mapper info and look up all commands that need to be run."""
     all_commands = []
     for key, value in yaml_parsed_info.items():
-        if not key.startswith("_metadata"):
+        if key == "pre_processor":
+            for _, v in value.items():
+                current_root_key = v.get("commands")
+                if isinstance(current_root_key, list):
+                    # Means their is any "nested" structures. e.g multiple commands
+                    for command in v["commands"]:
+                        all_commands.append(command)
+                else:
+                    if isinstance(current_root_key, dict):
+                        all_commands.append(current_root_key)
+        else:
             # Deduplicate commands + parser key
             current_root_key = value.get("commands")
             if isinstance(current_root_key, list):
@@ -124,6 +135,14 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                             except Exception:  # https://github.com/networktocode/ntc-templates/issues/369
                                 task.results[result_idx].result = []
                                 task.results[result_idx].failed = False
+            else:
+                if command["parser"] == "none":
+                    try:
+                        jsonified = json.loads(current_result.result)
+                        task.results[result_idx].result = jsonified
+                        task.results[result_idx].failed = False
+                    except Exception:
+                        task.result.failed = False
         except NornirSubTaskError:
             # We don't want to fail the entire subtask if SubTaskError is hit, set result to empty list and failt to False
             # Handle this type or result latter in the ETL process.

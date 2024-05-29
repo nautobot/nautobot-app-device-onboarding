@@ -1,0 +1,5 @@
+{"device_type": "Nexus9000 C9372PX chassis",
+ "hostname": "ABC-N9K",
+ "mask_length": 24,
+ "mgmt_interface": "mgmt0",
+ "serial": "FDO20432435"}

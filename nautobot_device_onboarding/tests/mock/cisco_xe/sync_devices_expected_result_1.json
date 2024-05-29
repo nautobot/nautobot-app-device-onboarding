@@ -1,0 +1,7 @@
+{
+    "device_type": "WS-C4948E",
+    "hostname": "dummy_rtr",
+    "mask_length": 16,
+    "mgmt_interface": "Vlan1",
+    "serial": "CAT1451S15C"
+}

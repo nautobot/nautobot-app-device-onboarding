@@ -297,7 +297,7 @@ fabric.properties
 
 # Rando
 creds.env
-development/*.txt
+development/
 
 # Invoke overrides
 invoke.yml
