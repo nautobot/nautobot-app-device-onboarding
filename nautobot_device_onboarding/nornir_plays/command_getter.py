@@ -1,5 +1,6 @@
 """CommandGetter."""
 
+import json
 from typing import Dict
 
 from django.conf import settings
@@ -134,6 +135,14 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                             except Exception:  # https://github.com/networktocode/ntc-templates/issues/369
                                 task.results[result_idx].result = []
                                 task.results[result_idx].failed = False
+            else:
+                if command["parser"] == "none":
+                    try:
+                        jsonified = json.loads(current_result.result)
+                        task.results[result_idx].result = jsonified
+                        task.results[result_idx].failed = False
+                    except Exception:
+                        task.result.failed = False
         except NornirSubTaskError:
             # We don't want to fail the entire subtask if SubTaskError is hit, set result to empty list and failt to False
             # Handle this type or result latter in the ETL process.
