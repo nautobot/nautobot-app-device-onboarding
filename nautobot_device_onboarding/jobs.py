@@ -3,6 +3,7 @@
 
 import csv
 import logging
+import json
 from io import StringIO
 
 from diffsync.enum import DiffSyncFlags
@@ -753,7 +754,8 @@ class DeviceOnboardingTroubleshootingJob(Job):
                     )
         except Exception as err:  # pylint: disable=broad-exception-caught
             self.logger.info("Error During Sync Devices Command Getter: %s", err)
-        return compiled_results
+        self.create_file("command_outputs.json", json.dumps(compiled_results))
+        return f"Successfully ran the following commands: {', '.join(list(compiled_results.keys()))}"
 
 
 jobs = [OnboardingTask, SSOTSyncDevices, SSOTSyncNetworkData, DeviceOnboardingTroubleshootingJob]
