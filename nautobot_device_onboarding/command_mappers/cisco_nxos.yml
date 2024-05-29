@@ -81,7 +81,8 @@ sync_network_data:
       - command: "show interface"
         parser: "textfsm"
         jpath: "[?interface=='{{ current_key }}'].mode"
-        post_processor: "{{ obj[0] | port_mode_to_nautobot }}"
+        post_processor: "{% if obj | length > 0 %}{{ obj[0] | port_mode_to_nautobot }}{% else %}{{ obj }}{% endif %}"
+        iterable_type: "str"
   interfaces__lag:
     commands:
       - command: "show port-channel summary"
