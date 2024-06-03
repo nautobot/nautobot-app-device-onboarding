@@ -1,4 +1,5 @@
 """Device Onboarding Jobs."""
+
 from django.conf import settings
 from nautobot.apps.jobs import Job, ObjectVar, IntegerVar, StringVar, BooleanVar
 from nautobot.core.celery import register_jobs
@@ -113,9 +114,9 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
             password=self.password,
             secret=self.secret,
             napalm_driver=self.platform.napalm_driver if self.platform and self.platform.napalm_driver else None,
-            optional_args=self.platform.napalm_args
-            if self.platform and self.platform.napalm_args
-            else settings.NAPALM_ARGS,
+            optional_args=(
+                self.platform.napalm_args if self.platform and self.platform.napalm_args else settings.NAPALM_ARGS
+            ),
         )
         netdev.get_onboarding_facts()
         netdev_dict = netdev.get_netdev_dict()

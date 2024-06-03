@@ -1,4 +1,5 @@
 """Unit tests for nautobot_device_onboarding.onboard module and its classes."""
+
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
