@@ -1,20 +1,17 @@
 """Nautobot Keeper."""
 
-import logging
 import ipaddress
+import logging
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from nautobot.apps.choices import PrefixTypeChoices
 from nautobot.dcim.choices import InterfaceTypeChoices
-from nautobot.dcim.models import Manufacturer, Device, Interface, DeviceType
-from nautobot.extras.models import Role
-from nautobot.dcim.models import Platform
-from nautobot.dcim.models import Location
-from nautobot.extras.models import Status
+from nautobot.dcim.models import Device, DeviceType, Interface, Location, Manufacturer, Platform
+from nautobot.extras.models import Role, Status
 from nautobot.extras.models.customfields import CustomField
-from nautobot.ipam.models import IPAddress, Prefix, Namespace
+from nautobot.ipam.models import IPAddress, Namespace, Prefix
 
 from nautobot_device_onboarding.constants import NETMIKO_TO_NAPALM_STATIC
 from nautobot_device_onboarding.exceptions import OnboardException
