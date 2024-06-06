@@ -1,0 +1,7 @@
+{
+  "device_type": "vEOS-lab",
+  "hostname": "veos-0",
+  "mask_length": 24,
+  "mgmt_interface": "Management1",
+  "serial": "17E1C0B9EEFFCE88C2E0703E4A1D4FB0"
+}
