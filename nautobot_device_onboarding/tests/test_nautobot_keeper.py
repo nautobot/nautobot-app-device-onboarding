@@ -4,11 +4,12 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from nautobot.dcim.choices import InterfaceTypeChoices
-from nautobot.dcim.models import Location, LocationType, Manufacturer, DeviceType, Device, Interface, Platform
-from nautobot.extras.models import Role, Status, CustomField
-from nautobot.ipam.models import IPAddress
+from nautobot.dcim.models import Device, DeviceType, Interface, Location, LocationType, Manufacturer, Platform
 from nautobot.extras.choices import CustomFieldTypeChoices
+from nautobot.extras.models import CustomField, Role, Status
 from nautobot.extras.models.secrets import SecretsGroup
+from nautobot.ipam.models import IPAddress
+
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.nautobot_keeper import NautobotKeeper
 
