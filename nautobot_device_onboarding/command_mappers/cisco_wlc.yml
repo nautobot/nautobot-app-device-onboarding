@@ -1,0 +1,28 @@
+---
+sync_devices:
+  hostname:
+    commands:
+      - command: "show sysinfo"
+        parser: "textfsm"
+        jpath: "[*].system_name"
+  serial:
+    commands:
+      - command: "show inventory"
+        parser: "textfsm"
+        jpath: "[*].sn"
+  device_type:
+    commands:
+      - command: "show inventory"
+        parser: "textfsm"
+        jpath: "[*].pid"
+  mgmt_interface:
+    commands:
+      - command: "show interface detailed management"
+        parser: "textfsm"
+        jpath: "[*].interface_name"
+  mask_length:
+    commands:
+      - command: "show interface detailed management"
+        parser: "textfsm"
+        jpath: "[*].netmask"
+        post_processor: "{% if obj | length > 0 %}{{ obj[0] | netmask_to_cidr }}{% else %}{{ obj }}{% endif %}"
