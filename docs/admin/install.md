@@ -12,23 +12,13 @@ Here you will find detailed instructions on how to **install** and **configure**
 
 ### Access Requirements
 
-#### NAPALM Credentials
-
-The Onboarding App uses NAPALM. You can configure a default NAPALM username and password in `nautobot_config.py`.
-
-When `NAPALM_USERNAME`, `NAPALM_PASSWORD` and `NAPALM_ARGS` are configured in `nautobot_config.py`, the user does not have to use the Credentials/SecretGroup fields in the Device Onboarding job, unless they wish to override the values in `nautobot_config.py`:
-
-```python
-# Credentials that Nautobot will use to authenticate to devices when connecting via NAPALM.
-NAPALM_USERNAME = "<napalm username>"
-NAPALM_PASSWORD = "<napalm pwd>"
-NAPALM_ARGS = {"secret": "<enable secret pwd>"}
-```
+- The original OnboardingTask Job used NAPALM Credentials.
+- The new SSoT based jobs use Nautobot Secrets in a similar method to other apps. This is a more flexible and supportable way for the future.
 
 ## Install Guide
 
 !!! note
-    Apps can be installed from the [Python Package Index](https://pypi.org/) or locally. See the [Nautobot documentation](https://docs.nautobot.com/projects/core/en/stable/user-guide/administration/installation/app-install/) for more details. The pip package name for this app is [`nautobot-device-onboarding`](https://pypi.org/project/nautobot-device-onboarding/).
+    Apps can be installed manually or using Python's `pip`. See the [nautobot documentation](https://nautobot.readthedocs.io/en/latest/plugins/#install-the-package) for more details. The pip package name for this app is [`nautobot-device-onboarding`](https://pypi.org/project/nautobot-device-onboarding/).
 
 The app is available as a Python package via PyPI and can be installed with `pip`:
 
@@ -74,7 +64,7 @@ Then restart (if necessary) the Nautobot services which may include:
 sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
 ```
 
-## App Configuration
+## App Configuration (Original)
 
 Although the app can run without providing any settings, the app behavior can be controlled with the following list of settings defined in `nautobot_config.py`:
 

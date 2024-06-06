@@ -1,0 +1,7 @@
+{
+    "device_type": "ISR4331/K9",
+    "hostname": "ISR-XE-01",
+    "mask_length": 32,
+    "mgmt_interface": "Loopback0",
+    "serial": "FLM241611GV"
+}

@@ -8,6 +8,8 @@ To install the App, please follow the instructions detailed in the [Installation
 
 ## First steps with the App
 
+This App exposes an original device onboarding job, as well as two new SSoT based jobs that are considered the future of the App.
+
 ### Prerequisites
 
 You will need:
@@ -21,9 +23,16 @@ The device must be reachable from the Nautobot and Nautobot worker instances (us
 
 Locations are the only other Nautobot prerequisite for the plugin to onboard a device.
 
+!!! info
+    There are a few other requirements for the new SSoT based jobs, but can also support some defaults.
+
 ### Onboarding a Device
 
-Navigate to the Device Onboarding Job: Jobs > Perform Device Onboarding.
+Navigate to the Device Onboarding Job: Jobs > Perform Device Onboarding (original).
+
+or
+
+Navigate to the SSoT dashboard and run `Sync Devices` to get basic device and information onboarding, followed by `Sync Network Data` to add additonal details from the network to these devices. E.g. Interfaces, IPs, VRFs, VLANs.
 
 ## What are the next steps?
 

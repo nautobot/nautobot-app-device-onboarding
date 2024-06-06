@@ -1,0 +1,45 @@
+{
+    "show interface detailed management": [
+        {
+            "gateway": "14.36.4.193",
+            "interface_name": "management",
+            "ip_address": "14.36.4.194",
+            "mac_address": "00:5d:73:da:e3:2b",
+            "netmask": "255.255.255.240",
+            "primary_dhcp_server": "14.36.82.34",
+            "secondary_dhcp_server": "14.36.80.34"
+        }
+    ],
+    "show inventory": [
+        {
+            "bia": "00:5D:73:DA:E3:23",
+            "description": "Cisco 5520 Wireless Controller",
+            "max_ap_num": "1500",
+            "name": "Chassis",
+            "pid": "AIR-CT5520-K9",
+            "sn": "FCH2145V28L",
+            "vid": "V01"
+        }
+    ],
+    "show sysinfo": [
+        {
+            "bootloader_version": "8.3.15.177",
+            "build_type": "DATA + WPS",
+            "configured_country": "Multiple Countries : BE,US",
+            "field_recovery_image_version": "",
+            "firmware_version": "",
+            "ip_address": "14.36.4.194",
+            "last_reset": "",
+            "mac_address": "00:5D:73:DA:E3:23",
+            "maximum_aps": "1500",
+            "number_active_clients": "58",
+            "number_wlans": "7",
+            "product_version": "8.10.185.0",
+            "system_contact": "Dan and Jake",
+            "system_location": "Dallas, Texas / United States / Americas",
+            "system_name": "ABCWC-01",
+            "system_timezone_location": "(GMT -6:00) Central Time (US and Canada)",
+            "system_up_time": "269 days 3 hrs 35 mins 31 secs"
+        }
+    ]
+}
