@@ -56,7 +56,6 @@ sync_network_data:
     commands:
       - command: "show interfaces | json"
         parser: "none"
-        # jpath: 'interfaces."{{ current_key }}".interfaceAddress[].[{ip_address: primaryIp.address, prefix_length: primaryIp.maskLen},{ip_address: secondaryIps.address, prefix_length: secondaryIps.maskLen}][]'
         jpath: 'interfaces."{{ current_key }}".interfaceAddress[].[{ip_address: primaryIp.address, prefix_length: primaryIp.maskLen }][]' # yamllint disable-line rule:quoted-strings
         post_processor: "{{ obj | tojson }}"
   interfaces__mtu:
@@ -85,7 +84,8 @@ sync_network_data:
     commands:
       - command: "show interfaces switchport | json"
         parser: "none"
-        jpath: 'switchports."{{ current_key }}".switchportInfo.mode'  # yamllint disable-line rule:quoted-strings
+        jpath: '{admin_mode: switchports."{{ current_key }}".switchportInfo.mode, mode: switchports."{{ current_key }}".switchportInfo.mode, trunking_vlans: switchports."{{ current_key }}".switchportInfo.trunkAllowedVlans}'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj | interface_mode_logic }}"
         iterable_type: "str"
   interfaces__lag:
     commands:
@@ -104,12 +104,12 @@ sync_network_data:
     commands:
       - command: "show interfaces switchport | json"
         parser: "none"
-        jpath: '{admin_mode: switchports."{{ current_key }}".switchportInfo.mode, mode: switchports."{{ current_key }}".switchportInfo.mode, access_vlan: switchports."{{ current_key }}".switchportInfo.accessVlanId, trunking_vlans: switchports."{{ current_key }}".switchportInfo.trunkAllowedVlans}'  # yamllint disable-line rule:quoted-strings
-        post_processor: "{{ obj | get_vlan_data(vlan_map) | tojson }}"
+        jpath: '{admin_mode: switchports."{{ current_key }}".switchportInfo.mode, mode: switchports."{{ current_key }}".switchportInfo.mode, access_vlan: switchports."{{ current_key }}".switchportInfo.accessVlanId, trunking_vlans: switchports."{{ current_key }}".switchportInfo.trunkAllowedVlans, native_vlan: switchports."{{ current_key }}".switchportInfo.trunkingNativeVlanId}'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj | get_vlan_data(vlan_map, 'tagged') | tojson }}"
   interfaces__untagged_vlan:
     commands:
       - command: "show interfaces switchport | json"
         parser: "none"
-        jpath: '{id: switchports."{{ current_key }}".switchportInfo.trunkingNativeVlanId, name: switchports."{{ current_key }}".switchportInfo.trunkingNativeVlanName}'  # yamllint disable-line rule:quoted-strings
-        post_processor: "{{ obj | key_exist_or_default('id') | tojson }}"
+        jpath: '{admin_mode: switchports."{{ current_key }}".switchportInfo.mode, mode: switchports."{{ current_key }}".switchportInfo.mode, access_vlan: switchports."{{ current_key }}".switchportInfo.accessVlanId, trunking_vlans: switchports."{{ current_key }}".switchportInfo.trunkAllowedVlans, native_vlan: switchports."{{ current_key }}".switchportInfo.trunkingNativeVlanId}'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj | get_vlan_data(vlan_map, 'untagged') | tojson }}"
         iterable_type: "dict"

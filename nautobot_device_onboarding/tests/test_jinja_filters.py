@@ -169,7 +169,7 @@ class TestJinjaFilters(unittest.TestCase):
         """Get vlan information from an item."""
         mock_mode.return_value = "access"
         expected_value = []
-        actual_value = get_vlan_data([], [])
+        actual_value = get_vlan_data([], [], "tagged")
         self.assertEqual(expected_value, actual_value)
 
     @unittest.mock.patch("nautobot_device_onboarding.jinja_filters.interface_mode_logic")
@@ -177,7 +177,7 @@ class TestJinjaFilters(unittest.TestCase):
         """Get vlan information from an item."""
         mock_mode.return_value = "tagged-all"
         expected_value = []
-        actual_value = get_vlan_data([{"access_vlan": "10", "trunking_vlans": ["ALL"]}], [{"10": "VLAN0010"}])
+        actual_value = get_vlan_data([{"access_vlan": "10", "trunking_vlans": ["ALL"]}], [{"10": "VLAN0010"}], "tagged")
         self.assertEqual(expected_value, actual_value)
 
     @unittest.mock.patch("nautobot_device_onboarding.jinja_filters.interface_mode_logic")
@@ -185,7 +185,9 @@ class TestJinjaFilters(unittest.TestCase):
         """Get vlan information from an item."""
         mock_mode.return_value = "tagged-all"
         expected_value = []
-        actual_value = get_vlan_data([{"access_vlan": "10", "trunking_vlans": ["1-4094"]}], {"10": "VLAN0010"})
+        actual_value = get_vlan_data(
+            [{"access_vlan": "10", "trunking_vlans": ["1-4094"]}], {"10": "VLAN0010"}, "tagged"
+        )
         self.assertEqual(expected_value, actual_value)
 
     @unittest.mock.patch("nautobot_device_onboarding.jinja_filters.interface_mode_logic")
@@ -193,7 +195,7 @@ class TestJinjaFilters(unittest.TestCase):
         """Get vlan information from an item."""
         mock_mode.return_value = "access"
         expected_value = [{"id": "10", "name": "DATA"}]
-        actual_value = get_vlan_data([{"access_vlan": "10", "trunking_vlans": ["1-4094"]}], {"10": "DATA"})
+        actual_value = get_vlan_data([{"access_vlan": "10", "trunking_vlans": ["1-4094"]}], {"10": "DATA"}, "untagged")
         self.assertEqual(expected_value, actual_value)
 
     @unittest.mock.patch("nautobot_device_onboarding.jinja_filters.interface_mode_logic")
@@ -201,7 +203,7 @@ class TestJinjaFilters(unittest.TestCase):
         """Get vlan information from an item."""
         mock_mode.return_value = "tagged"
         expected_value = [{"id": "10", "name": "DATA"}]
-        actual_value = get_vlan_data([{"access_vlan": "10", "trunking_vlans": ["10"]}], {"10": "DATA"})
+        actual_value = get_vlan_data([{"access_vlan": "10", "trunking_vlans": ["10"]}], {"10": "DATA"}, "tagged")
         self.assertEqual(expected_value, actual_value)
 
     @unittest.mock.patch("nautobot_device_onboarding.jinja_filters.interface_mode_logic")
@@ -209,7 +211,7 @@ class TestJinjaFilters(unittest.TestCase):
         """Get vlan information from an item."""
         mock_mode.return_value = "tagged"
         expected_value = [{"id": "10", "name": "DATA"}]
-        actual_value = get_vlan_data([{"access_vlan": "10", "trunking_vlans": "10"}], {"10": "DATA"})
+        actual_value = get_vlan_data([{"access_vlan": "10", "trunking_vlans": "10"}], {"10": "DATA"}, "tagged")
         self.assertEqual(expected_value, actual_value)
 
     @unittest.mock.patch("nautobot_device_onboarding.jinja_filters.interface_mode_logic")
@@ -217,7 +219,7 @@ class TestJinjaFilters(unittest.TestCase):
         """Get vlan information from an item."""
         mock_mode.return_value = "tagged"
         expected_value = [{"id": "12", "name": "VLAN0012"}]
-        actual_value = get_vlan_data([{"access_vlan": "10", "trunking_vlans": ["12"]}], {"10": "DATA"})
+        actual_value = get_vlan_data([{"access_vlan": "10", "trunking_vlans": ["12"]}], {"10": "DATA"}, "tagged")
         self.assertEqual(expected_value, actual_value)
 
     @unittest.mock.patch("nautobot_device_onboarding.jinja_filters.interface_mode_logic")
@@ -225,7 +227,7 @@ class TestJinjaFilters(unittest.TestCase):
         """Get vlan information from an item."""
         mock_mode.return_value = "tagged"
         expected_value = [{"id": "12", "name": "VLAN0012"}]
-        actual_value = get_vlan_data([{"access_vlan": "10", "trunking_vlans": "12"}], {"10": "DATA"})
+        actual_value = get_vlan_data([{"access_vlan": "10", "trunking_vlans": "12"}], {"10": "DATA"}, "tagged")
         self.assertEqual(expected_value, actual_value)
 
     def test_parse_junos_ip_address_values_as_list_single(self):

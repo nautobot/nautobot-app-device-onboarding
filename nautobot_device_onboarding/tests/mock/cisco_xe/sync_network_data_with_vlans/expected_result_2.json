@@ -1,0 +1,2181 @@
+{
+    "interfaces": {
+        "FastEthernet0": {
+            "802.1Q_mode": "",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.ccb9",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "GigabitEthernet1/0/1": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf01",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/10": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf0a",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/11": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf0b",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet1/0/12": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf0c",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/13": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf0d",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/14": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf0e",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet1/0/15": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf0f",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/16": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf10",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/17": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf11",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet1/0/18": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf12",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/19": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf13",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/2": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf02",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/20": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf14",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/21": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf15",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/22": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf16",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/23": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf17",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet1/0/24": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf18",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/25": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf19",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/26": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf1a",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet1/0/27": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf1b",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/28": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf1c",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet1/0/29": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf1d",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/3": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf03",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/30": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf1e",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/31": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf1f",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/32": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf20",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet1/0/33": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf21",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/34": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf22",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet1/0/35": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf23",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/36": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf24",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet1/0/37": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf25",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/38": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf26",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet1/0/39": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf27",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/4": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf04",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/40": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf28",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet1/0/41": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf29",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/42": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf2a",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet1/0/43": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf2b",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/44": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf2c",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet1/0/45": {
+            "802.1Q_mode": "tagged-all",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "d0ec.3507.cf2d",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "244",
+                "name": "mgmt"
+            }
+        },
+        "GigabitEthernet1/0/46": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf2e",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet1/0/47": {
+            "802.1Q_mode": "tagged-all",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "d0ec.3507.cf2f",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "244",
+                "name": "mgmt"
+            }
+        },
+        "GigabitEthernet1/0/48": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf30",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet1/0/49": {
+            "802.1Q_mode": "tagged",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "Port-channel1",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf31",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "1",
+                "name": "default"
+            }
+        },
+        "GigabitEthernet1/0/5": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf05",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/50": {
+            "802.1Q_mode": "",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf32",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {}
+        },
+        "GigabitEthernet1/0/6": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf06",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet1/0/7": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf07",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet1/0/8": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf08",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet1/0/9": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf09",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "160",
+                "name": "v160"
+            }
+        },
+        "GigabitEthernet2/0/1": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc81",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/10": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc8a",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/11": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc8b",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/12": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc8c",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/13": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc8d",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/14": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc8e",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/15": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc8f",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/16": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc90",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/17": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc91",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/18": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc92",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/19": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc93",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/2": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc82",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/20": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc94",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/21": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc95",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/22": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc96",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/23": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc97",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/24": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc98",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/25": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc99",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/26": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc9a",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/27": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc9b",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/28": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc9c",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/29": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc9d",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/3": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc83",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/30": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc9e",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/31": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc9f",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/32": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cca0",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/33": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cca1",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/34": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cca2",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/35": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cca3",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/36": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cca4",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/37": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cca5",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/38": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cca6",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/39": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cca7",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/4": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "d0ec.3507.cc84",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/40": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cca8",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/41": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cca9",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/42": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.ccaa",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/43": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.ccab",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/44": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.ccac",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/45": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.ccad",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/46": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.ccae",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/47": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.ccaf",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/48": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.ccb0",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/49": {
+            "802.1Q_mode": "",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.ccb1",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {}
+        },
+        "GigabitEthernet2/0/5": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc85",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/50": {
+            "802.1Q_mode": "",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.ccb2",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {}
+        },
+        "GigabitEthernet2/0/6": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc86",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/7": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc87",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/8": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc88",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "GigabitEthernet2/0/9": {
+            "802.1Q_mode": "access",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cc89",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": "111",
+                "name": "data"
+            }
+        },
+        "Port-channel1": {
+            "802.1Q_mode": "tagged-all",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "d0ec.3507.ccb3",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "lag",
+            "untagged_vlan": {
+                "id": "1",
+                "name": "default"
+            }
+        },
+        "TenGigabitEthernet1/0/1": {
+            "802.1Q_mode": "tagged-all",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "d0ec.3507.cf33",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "10gbase-t",
+            "untagged_vlan": {
+                "id": "1",
+                "name": "default"
+            }
+        },
+        "TenGigabitEthernet1/0/2": {
+            "802.1Q_mode": "tagged-all",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.cf34",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "10gbase-t",
+            "untagged_vlan": {
+                "id": "1",
+                "name": "default"
+            }
+        },
+        "TenGigabitEthernet2/0/1": {
+            "802.1Q_mode": "tagged-all",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "Port-channel1",
+            "link_status": "True",
+            "mac_address": "d0ec.3507.ccb3",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "10gbase-t",
+            "untagged_vlan": {
+                "id": "1",
+                "name": "default"
+            }
+        },
+        "TenGigabitEthernet2/0/2": {
+            "802.1Q_mode": "tagged-all",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.ccb4",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "10gbase-t",
+            "untagged_vlan": {
+                "id": "1",
+                "name": "default"
+            }
+        },
+        "Vlan1": {
+            "802.1Q_mode": "",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.ccc0",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "virtual",
+            "untagged_vlan": {}
+        },
+        "Vlan255": {
+            "802.1Q_mode": "",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "10.60.255.59",
+                    "prefix_length": "24"
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "d0ec.3507.ccc2",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "virtual",
+            "untagged_vlan": {}
+        },
+        "Vlan41": {
+            "802.1Q_mode": "",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "d0ec.3507.ccc1",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "virtual",
+            "untagged_vlan": {}
+        },
+        "Vlan955": {
+            "802.1Q_mode": "",
+            "description": "a description",
+            "ip_addresses": [
+                {
+                    "ip_address": "198.51.100.1",
+                    "prefix_length": "27"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "d0ec.3507.ccc3",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "virtual",
+            "untagged_vlan": {}
+        }
+    },
+    "serial": "FJC2304W0BB"
+}

@@ -25,12 +25,7 @@
             "link_status": "True",
             "mac_address": "52:54:00:15:b8:13",
             "mtu": 9214,
-            "tagged_vlans": [
-                {
-                    "id": 1,
-                    "name": "default"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
                 "id": 1,
@@ -45,12 +40,7 @@
             "link_status": "True",
             "mac_address": "52:54:00:07:8d:69",
             "mtu": 9214,
-            "tagged_vlans": [
-                {
-                    "id": 1,
-                    "name": "default"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
                 "id": 1,
@@ -58,7 +48,7 @@
             }
         },
         "Ethernet4": {
-            "802.1Q_mode": "trunk",
+            "802.1Q_mode": "tagged",
             "description": [],
             "ip_addresses": [
                 {

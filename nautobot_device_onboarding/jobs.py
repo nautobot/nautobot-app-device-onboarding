@@ -531,8 +531,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         description = "Synchronize extended device attribute information into Nautobot from one or more network devices. Information includes Interfaces, IPAddresses, Prefixes, and Vrfs."
 
     debug = BooleanVar(description="Enable for more verbose logging.")
-    sync_vlans = BooleanVar(
-        default=False, description="Sync VLANs and interface VLAN assignments.")
+    sync_vlans = BooleanVar(default=False, description="Sync VLANs and interface VLAN assignments.")
     sync_vrfs = BooleanVar(default=False, description="Sync VRFs and interface VRF assignments.")
     namespace = ObjectVar(
         model=Namespace, required=True, description="The namespace for all IP addresses created or updated in the sync."
