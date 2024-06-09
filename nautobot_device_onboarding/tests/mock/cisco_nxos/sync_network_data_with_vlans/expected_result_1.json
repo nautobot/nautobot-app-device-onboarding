@@ -10,10 +10,7 @@
             "mtu": "1500",
             "tagged_vlans": [],
             "type": "1000base-t",
-            "untagged_vlan": {
-                "id": "1",
-                "name": "default"
-            }
+            "untagged_vlan": {}
         },
         "Ethernet1/1.1": {
             "802.1Q_mode": "",
@@ -76,12 +73,7 @@
             "link_status": "False",
             "mac_address": "286f.7f7e.99f6",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "1",
-                    "name": "default"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
                 "id": "1",
@@ -96,12 +88,7 @@
             "link_status": "False",
             "mac_address": "286f.7f7e.99f7",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "1",
-                    "name": "default"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
                 "id": "1",
@@ -116,12 +103,7 @@
             "link_status": "False",
             "mac_address": "286f.7f7e.99f8",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "1",
-                    "name": "default"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
                 "id": "1",
@@ -136,12 +118,7 @@
             "link_status": "False",
             "mac_address": "286f.7f7e.99f9",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "1",
-                    "name": "default"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
                 "id": "1",
@@ -156,12 +133,7 @@
             "link_status": "False",
             "mac_address": "286f.7f7e.99fa",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "1",
-                    "name": "default"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
                 "id": "1",
@@ -176,12 +148,7 @@
             "link_status": "False",
             "mac_address": "286f.7f7e.99fb",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "1",
-                    "name": "default"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
                 "id": "1",
@@ -196,12 +163,7 @@
             "link_status": "False",
             "mac_address": "286f.7f7e.99fc",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "1",
-                    "name": "default"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
                 "id": "1",
@@ -216,12 +178,7 @@
             "link_status": "False",
             "mac_address": "286f.7f7e.99fd",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "1",
-                    "name": "default"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
                 "id": "1",
@@ -236,12 +193,7 @@
             "link_status": "False",
             "mac_address": "286f.7f7e.99fe",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "1",
-                    "name": "default"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
                 "id": "1",
@@ -258,10 +210,7 @@
             "mtu": "1500",
             "tagged_vlans": [],
             "type": "1000base-t",
-            "untagged_vlan": {
-                "id": "1",
-                "name": "default"
-            }
+            "untagged_vlan": {}
         },
         "Ethernet1/2.1": {
             "802.1Q_mode": "",
@@ -288,12 +237,7 @@
             "link_status": "False",
             "mac_address": "286f.7f7e.99ff",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "1",
-                    "name": "default"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
                 "id": "1",
@@ -308,12 +252,7 @@
             "link_status": "False",
             "mac_address": "286f.7f7e.9a00",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "1",
-                    "name": "default"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
                 "id": "1",
@@ -328,16 +267,11 @@
             "link_status": "False",
             "mac_address": "286f.7f7e.9a01",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "136",
-                    "name": "vlan136"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
-                "id": "1",
-                "name": "default"
+                "id": "136",
+                "name": "vlan136"
             }
         },
         "Ethernet1/23": {
@@ -392,16 +326,11 @@
             "link_status": "True",
             "mac_address": "286f.7f7e.9a03",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "67",
-                    "name": "vlan67"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
-                "id": "1",
-                "name": "default"
+                "id": "67",
+                "name": "vlan67"
             }
         },
         "Ethernet1/25": {
@@ -1014,12 +943,7 @@
             "link_status": "False",
             "mac_address": "286f.7f7e.99ef",
             "mtu": "9216",
-            "tagged_vlans": [
-                {
-                    "id": "1",
-                    "name": "default"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
                 "id": "1",
@@ -1322,12 +1246,7 @@
             "link_status": "False",
             "mac_address": "286f.7f7e.9a1c",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "1",
-                    "name": "default"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "other",
             "untagged_vlan": {
                 "id": "1",
@@ -1342,16 +1261,11 @@
             "link_status": "False",
             "mac_address": "286f.7f7e.99f0",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "200",
-                    "name": "data"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
-                "id": "1",
-                "name": "default"
+                "id": "200",
+                "name": "data"
             }
         },
         "Ethernet1/50": {
@@ -1362,12 +1276,7 @@
             "link_status": "False",
             "mac_address": "286f.7f7e.9a1d",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "1",
-                    "name": "default"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "other",
             "untagged_vlan": {
                 "id": "1",
@@ -1382,12 +1291,7 @@
             "link_status": "False",
             "mac_address": "286f.7f7e.9a1e",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "1",
-                    "name": "default"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "other",
             "untagged_vlan": {
                 "id": "1",
@@ -1402,12 +1306,7 @@
             "link_status": "False",
             "mac_address": "286f.7f7e.9a1f",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "1",
-                    "name": "default"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "other",
             "untagged_vlan": {
                 "id": "1",
@@ -1442,12 +1341,7 @@
             "link_status": "False",
             "mac_address": "286f.7f7e.9a21",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "1",
-                    "name": "default"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "other",
             "untagged_vlan": {
                 "id": "1",
@@ -1462,16 +1356,11 @@
             "link_status": "True",
             "mac_address": "286f.7f7e.99f1",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "201",
-                    "name": "fw"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
-                "id": "1",
-                "name": "default"
+                "id": "201",
+                "name": "fw"
             }
         },
         "Ethernet1/7": {
@@ -2496,16 +2385,11 @@
             "link_status": "True",
             "mac_address": "286f.7f7e.99f1",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "201",
-                    "name": "fw"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "lag",
             "untagged_vlan": {
-                "id": "1",
-                "name": "default"
+                "id": "201",
+                "name": "fw"
             }
         },
         "port-channel7": {

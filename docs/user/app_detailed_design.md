@@ -52,7 +52,8 @@ To learn how to extend the app, or update its default YAML definitions visit [Ex
 
 ## Detailed Design Diagram
 
-Here are two diagrams detailing the SSoT based jobs in deeper detail.
+Here are three diagrams detailing the SSoT based jobs in deeper detail.
 
-![Sync Devices]().
-![Sync Network Data]().
+![C4 Onboarding Overview](../images/device-onboarding-4.0-Overview.png).
+![Sync Devices](../images/device-onboarding-4.0-Sync%20Device%20Job.png).
+![Sync Network Data](../images/device-onboarding-4.0-Sync%20Network%20Data%20Job.png).

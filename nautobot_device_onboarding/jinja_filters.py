@@ -79,7 +79,12 @@ def _interface_mode_logic(dict_item):  # pylint: disable=too-many-return-stateme
         if "dynamic" in dict_item["admin_mode"]:
             if "access" in dict_item["mode"]:
                 return "access"
-            if dict_item["mode"] == "trunk" and dict_item["trunking_vlans"] in ["ALL", "1-4094", ["ALL"], ["1-4094"]]:
+            if dict_item["mode"] in ["trunk", "down"] and dict_item["trunking_vlans"] in [
+                "ALL",
+                "1-4094",
+                ["ALL"],
+                ["1-4094"],
+            ]:
                 return "tagged-all"
             if dict_item["mode"] == "trunk":
                 return "tagged"
@@ -93,20 +98,29 @@ def interface_mode_logic(item):  # pylint: disable=too-many-return-statements
         return _interface_mode_logic(item)
     if len(item) == 1:
         return _interface_mode_logic(item[0])
-    return ""
+    return item
 
 
 @library.filter
-def get_vlan_data(item, vlan_mapping):
+def get_vlan_data(item, vlan_mapping, tag_type):  # pylint: disable=too-many-return-statements
     """Get vlan information from an item."""
-    int_mode = interface_mode_logic(item)
     current_item = item
     if isinstance(item, list) and len(item) == 1:
         current_item = item[0]
-    if current_item:
-        if int_mode:
-            if int_mode == "tagged-all":
-                return []
+    int_mode = interface_mode_logic(item)
+    if int_mode == "tagged-all" and tag_type == "tagged":
+        return []
+    if int_mode == "tagged-all" and tag_type == "untagged":
+        return [
+            {
+                "id": current_item["native_vlan"],
+                "name": vlan_mapping.get(
+                    str(current_item["native_vlan"]), f"VLAN{str(current_item['native_vlan']).zfill(4)}"
+                ),
+            }
+        ]
+    if current_item and int_mode:
+        if tag_type == "untagged":
             if int_mode == "access":
                 if current_item.get("access_vlan"):
                     return [
@@ -117,6 +131,18 @@ def get_vlan_data(item, vlan_mapping):
                             ),
                         }
                     ]
+            vid = current_item["native_vlan"]
+            if not vid:
+                vid = "1"
+            return [
+                {
+                    "id": vid,
+                    "name": vlan_mapping.get(str(vid), f"VLAN{str(vid).zfill(4)}"),
+                }
+            ]
+        if tag_type == "tagged":
+            if int_mode == "access":
+                return []
             if not isinstance(current_item["trunking_vlans"], list):
                 trunk_vlans = [current_item["trunking_vlans"]]
             else:

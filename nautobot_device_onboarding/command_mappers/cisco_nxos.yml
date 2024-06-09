@@ -25,9 +25,7 @@ sync_devices:
       - command: "show ip interface vrf all"
         parser: "textfsm"
         jpath: "[?ip_address=='{{ obj }}'].subnet"
-        # jpath: "*[].ROW_intf.{prefix: prefix, subnet:masklen} | [?prefix=='{{ obj }}'].subnet"
         post_processor: "{% if '/' in obj[0] %}{{ obj[0].split('/')[1] }}{% else %}31{% endif %}"
-        # post_processor: "{{ obj[0] | string }}"
 sync_network_data:
   pre_processor:
     vlan_map:
@@ -42,7 +40,6 @@ sync_network_data:
       - command: "show inventory"
         parser: "textfsm"
         jpath: "[?name=='Chassis'].sn"
-        # jpath: "TABLE_inv.ROW_inv[?name == 'Chassis'].serialnum"
   interfaces:
     root_key: true
     commands:
@@ -108,12 +105,12 @@ sync_network_data:
     commands:
       - command: "show interface switchport"
         parser: "textfsm"
-        jpath: "[?INTERFACE=='{{ current_key }}'].{admin_mode: MODE, mode: MODE, access_vlan: ACCESS_VLAN, trunking_vlans: TRUNKING_VLANS}"
-        post_processor: "{{ obj | get_vlan_data(vlan_map) | tojson }}"
+        jpath: "[?INTERFACE=='{{ current_key }}'].{admin_mode: MODE, mode: MODE, access_vlan: ACCESS_VLAN, trunking_vlans: TRUNKING_VLANS, native_vlan: NATIVE_VLAN}"
+        post_processor: "{{ obj | get_vlan_data(vlan_map, 'tagged') | tojson }}"
   interfaces__untagged_vlan:
     commands:
       - command: "show interface switchport"
         parser: "textfsm"
-        jpath: "[?contains(INTERFACE, '{{ current_key }}')].NATIVE_VLAN"
-        post_processor: "{% if obj | length > 0 %}{{ {'id': obj[0], 'name': vlan_map[obj[0]]} | tojson }}{% else %}{{ obj }}{% endif %}"
+        jpath: "[?INTERFACE=='{{ current_key }}'].{admin_mode: MODE, mode: MODE, access_vlan: ACCESS_VLAN, trunking_vlans: TRUNKING_VLANS, native_vlan: NATIVE_VLAN}"
+        post_processor: "{{ obj | get_vlan_data(vlan_map, 'untagged') | tojson }}"
         iterable_type: "dict"

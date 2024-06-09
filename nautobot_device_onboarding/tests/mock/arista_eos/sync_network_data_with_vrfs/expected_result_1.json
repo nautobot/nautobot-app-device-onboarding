@@ -41,7 +41,7 @@
             "vrf": {}
         },
         "Ethernet4": {
-            "802.1Q_mode": "trunk",
+            "802.1Q_mode": "tagged",
             "description": [],
             "ip_addresses": [
                 {

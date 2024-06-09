@@ -180,7 +180,7 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
         self.assertEqual(expected_parsed_result, actual_result)
 
     def test_extract_and_post_process_result_non_json_string(self):
-        parsed_command_output = "jeff"
+        parsed_command_output = "baz"
         actual_result = extract_and_post_process(
             parsed_command_output,
             {
@@ -280,8 +280,8 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
             {
                 "command": "show interfaces switchport",
                 "parser": "textfsm",
-                "jpath": "[?interface=='{{ current_key | abbreviated_interface_name }}'].{admin_mode: admin_mode, mode: mode, access_vlan: access_vlan, trunking_vlans: trunking_vlans}",
-                "post_processor": "{{ obj | get_vlan_data(vlan_map) | tojson }}",
+                "jpath": "[?interface=='{{ current_key | abbreviated_interface_name }}'].{admin_mode: admin_mode, mode: mode, access_vlan: access_vlan, trunking_vlans: trunking_vlans, native_vlan: native_vlan}",
+                "post_processor": "{{ obj | get_vlan_data(vlan_map, 'tagged') | tojson }}",
             },
             {
                 "obj": "1.1.1.1",
@@ -298,6 +298,7 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
                     "access_vlan": "10",
                     "admin_mode": "trunk",
                     "mode": "down (suspended member of bundle Po8)",
+                    "native_vlan": "10",
                     "trunking_vlans": ["10"],
                 }
             ],
@@ -461,7 +462,9 @@ class TestFormatterSyncNetworkDataNoOptions(unittest.TestCase):
             getters = find_files_by_prefix(current_test_dir, "command_getter")
             # NOTE: Cleanup later, should always require tests to be present
             if len(getters) > 0:
-                with self.subTest(msg=f"test_perform_data_extraction_sync_devices with platform {platform}"):
+                with self.subTest(
+                    msg=f"test_perform_data_extraction_sync_network_data_no_options with platform {platform}"
+                ):
                     for command_getter_file in getters:
                         with open(
                             f"{MOCK_DIR}/{platform}/sync_network_data_no_options/expected_result_{command_getter_file.split('_')[-1]}",
@@ -526,7 +529,9 @@ class TestFormatterSyncNetworkDataWithVrfs(unittest.TestCase):
             getters = find_files_by_prefix(current_test_dir, "command_getter")
             # NOTE: Cleanup later, should always require tests to be present
             if len(getters) > 0:
-                with self.subTest(msg=f"test_perform_data_extraction_sync_devices with platform {platform}"):
+                with self.subTest(
+                    msg=f"test_perform_data_extraction_sync_network_data_with_vrfs with platform {platform}"
+                ):
                     for command_getter_file in getters:
                         with open(
                             f"{MOCK_DIR}/{platform}/sync_network_data_with_vrfs/expected_result_{command_getter_file.split('_')[-1]}",
@@ -591,7 +596,9 @@ class TestFormatterSyncNetworkDataWithVlans(unittest.TestCase):
             getters = find_files_by_prefix(current_test_dir, "command_getter")
             # NOTE: Cleanup later, should always require tests to be present
             if len(getters) > 0:
-                with self.subTest(msg=f"test_perform_data_extraction_sync_devices with platform {platform}"):
+                with self.subTest(
+                    msg=f"test_perform_data_extraction_sync_network_data_with_vlans with platform {platform}"
+                ):
                     for command_getter_file in getters:
                         with open(
                             f"{MOCK_DIR}/{platform}/sync_network_data_with_vlans/expected_result_{command_getter_file.split('_')[-1]}",
@@ -657,7 +664,7 @@ class TestFormatterSyncNetworkDataAll(unittest.TestCase):
             getters = find_files_by_prefix(current_test_dir, "command_getter")
             # NOTE: Cleanup later, should always require tests to be present
             if len(getters) > 0:
-                with self.subTest(msg=f"test_perform_data_extraction_sync_devices with platform {platform}"):
+                with self.subTest(msg=f"test_perform_data_extraction_sync_network_data_all with platform {platform}"):
                     for command_getter_file in getters:
                         with open(
                             f"{MOCK_DIR}/{platform}/sync_network_data_all/expected_result_{command_getter_file.split('_')[-1]}",
