@@ -60,14 +60,14 @@ The Onboarding App will automatically create Platforms for vendor operating syst
 
 ## Onboarding a Device
 
-### Onboard a New Device
+### Onboard a New Device Using Sync Devices From Network Job
 
 A new device can be onboarded via :
 
-- A SSoT job execution.
+- A SSoT job execution using the `Sync Devices from Network` job.
     - Via Jobs menu
     - Via SSoT Dashboard
-- API, via a `POST` to `/api/extras/jobs/TODO/run` or `/api/extras/jobs/{id}/run` 
+- API, via a `POST` to `/api/extras/jobs/SSOTSyncDevices/run` or `/api/extras/jobs/{id}/run` 
 
 !!! note
     The SSoT Job's ID (UUID) will be different per Nautobot instance. 
@@ -85,10 +85,10 @@ The status of onboarding jobs can be viewed via the UI (Jobs > Job Results) or r
 To run the SSoT Sync Devices Job via the api:
 
 
-Post to `/api/extras/jobs/TODO/run/` with the relevent onboarding data: 
+Post to `/api/extras/jobs/SSOTSyncDevices/run/` with the relevent onboarding data: 
 
 ```bash
-curl -X "POST" <nautobot URL>/api/extras/jobs/TODO/run/ -H "Content-Type: application/json" -H "Authorization: Token $NAUTOBOT_TOKEN" -d '{"data": {"location": "<valid location UUID>", "ip_address": "<reachable IP to onboard>", "port": 22, "timeout": 30}}
+curl -X "POST" <nautobot URL>/api/extras/jobs/SSOTSyncDevices/run/ -H "Content-Type: application/json" -H "Authorization: Token $NAUTOBOT_TOKEN" -d '{"data": {"location": "<valid location UUID>", "ip_address": "<reachable IP to onboard>", "port": 22, "timeout": 30}}
 ```
 
 Required Fields:
@@ -113,7 +113,7 @@ A existing devices data can be expanded to include additonal objects by:
 - A SSoT job execution.
     - Via Jobs menu
     - Via SSoT Dashboard
-- API, via a `POST` to `/api/extras/jobs/TODO/run` or `/api/extras/jobs/{id}/run` 
+- API, via a `POST` to `/api/extras/jobs/SSOTSyncNetworkData/run` or `/api/extras/jobs/{id}/run` 
 
 !!! note
     The SSoT Job's ID (UUID) will be different per Nautobot instance. 
@@ -126,13 +126,13 @@ The status of onboarding jobs can be viewed via the UI (Jobs > Job Results) or r
 
 ### API
 
-To run the SSoT Sync Devices Job via the api:
+To run the SSoT Sync Network Data Job via the api:
 
 
-Post to `/api/extras/jobs/TODO/run/` with the relevent onboarding data: 
+Post to `/api/extras/jobs/SSOTSyncNetworkData/run/` with the relevent onboarding data: 
 
 ```bash
-curl -X "POST" <nautobot URL>/api/extras/jobs/TODO/run/ -H "Content-Type: application/json" -H "Authorization: Token $NAUTOBOT_TOKEN" -d '{"data": {"devices": "<valid devices UUID>"}
+curl -X "POST" <nautobot URL>/api/extras/jobs/SSOTSyncNetworkData/run/ -H "Content-Type: application/json" -H "Authorization: Token $NAUTOBOT_TOKEN" -d '{"data": {"devices": "<valid devices UUID>"}
 ```
 
 Required Fields:

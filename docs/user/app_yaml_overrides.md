@@ -12,6 +12,7 @@ There are only a few components to the file and they're described below:
 - `parser` - Whether to use a parser (textfsm, pyats, ttp, etc) alternatively `no` can be used if the platform supports some other method to return structured data. E.g. (`| display json`) or an equivalent.
 - `jpath` - The jmespath (specifically jdiffs implementation) to extract the data from the parsed json returned from parser.
 - `post_processor` - Jinja2 capable code to further transform the returned data post jpath extraction.
+- `iterable_type` - A optional value to force a parsed result to a specific data type.
 
 As an example:
 

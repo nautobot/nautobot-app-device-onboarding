@@ -38,6 +38,6 @@ Navigate to the SSoT dashboard and run `Sync Devices` to get basic device and in
 
 You can check out the [Use Cases](app_use_cases.md) section for more examples or try out the job inputs with at least the required fields.
 
-![job input](../images/do_job_inputs.png)
+![job input](../images/sync_devices_inputs.png)
 
 The Nautobot job will pass the job execution to the worker which will initiate an onboarding and will reach out to the device and attempt to onboard it.

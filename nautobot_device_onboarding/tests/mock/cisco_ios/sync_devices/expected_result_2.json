@@ -1,0 +1,7 @@
+{
+    "device_type": "WS-C3560CG-8PC-S",
+    "hostname": "3560-01",
+    "mask_length": 27,
+    "mgmt_interface": "Vlan955",
+    "serial": "FOC1541W2SP"
+}

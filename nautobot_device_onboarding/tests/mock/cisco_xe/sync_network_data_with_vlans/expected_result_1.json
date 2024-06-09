@@ -15,10 +15,7 @@
             "mtu": "1500",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": {
-                "id": "1",
-                "name": "default"
-            }
+            "untagged_vlan": {}
         },
         "GigabitEthernet0/0/0": {
             "802.1Q_mode": "",
@@ -123,7 +120,7 @@
             "untagged_vlan": {}
         },
         "GigabitEthernet0/2/0": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "isr description",
             "ip_addresses": [
                 {
@@ -143,7 +140,7 @@
             }
         },
         "GigabitEthernet0/2/1": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "isr description",
             "ip_addresses": [
                 {
@@ -163,7 +160,7 @@
             }
         },
         "GigabitEthernet0/2/2": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "isr description",
             "ip_addresses": [
                 {
@@ -183,7 +180,7 @@
             }
         },
         "GigabitEthernet0/2/3": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "isr description",
             "ip_addresses": [
                 {
@@ -203,7 +200,7 @@
             }
         },
         "GigabitEthernet0/2/4": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "isr description",
             "ip_addresses": [
                 {
@@ -223,7 +220,7 @@
             }
         },
         "GigabitEthernet0/2/5": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "isr description",
             "ip_addresses": [
                 {
@@ -243,7 +240,7 @@
             }
         },
         "GigabitEthernet0/2/6": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "isr description",
             "ip_addresses": [
                 {
@@ -275,16 +272,11 @@
             "link_status": "False",
             "mac_address": "ac3a.6789.5d57",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "500",
-                    "name": "VLAN0500"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "other",
             "untagged_vlan": {
-                "id": "1",
-                "name": "default"
+                "id": "500",
+                "name": "VLAN0500"
             }
         },
         "Loopback0": {

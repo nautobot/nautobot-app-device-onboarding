@@ -21,7 +21,7 @@ Regardless, the Onboarding App greatly simplifies the onboarding process by allo
 
 Device Onboarding is a Job that allows you to provide a few required pieces of information and onboard the device.
 
-![job input](https://raw.githubusercontent.com/nautobot/nautobot-app-device-onboarding/develop/docs/images/do_job_inputs.png)
+![job input](https://raw.githubusercontent.com/nautobot/nautobot-app-device-onboarding/develop/docs/images/sync_devices_inputs.png)
 
 ## Try it out!
 
