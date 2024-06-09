@@ -13,20 +13,15 @@
             "link_status": "True",
             "mac_address": "6c71.0d1d.3581",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "100",
-                    "name": "VLAN0100"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
-                "id": "1",
-                "name": "default"
+                "id": "100",
+                "name": "VLAN0100"
             }
         },
         "GigabitEthernet0/10": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "",
             "ip_addresses": [
                 {
@@ -46,7 +41,7 @@
             }
         },
         "GigabitEthernet0/11": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "",
             "ip_addresses": [
                 {
@@ -66,7 +61,7 @@
             }
         },
         "GigabitEthernet0/12": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "",
             "ip_addresses": [
                 {
@@ -86,7 +81,7 @@
             }
         },
         "GigabitEthernet0/13": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "",
             "ip_addresses": [
                 {
@@ -106,7 +101,7 @@
             }
         },
         "GigabitEthernet0/14": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "",
             "ip_addresses": [
                 {
@@ -183,7 +178,7 @@
             }
         },
         "GigabitEthernet0/16": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "",
             "ip_addresses": [
                 {
@@ -215,16 +210,11 @@
             "link_status": "True",
             "mac_address": "6c71.0d1d.3582",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "100",
-                    "name": "VLAN0100"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
-                "id": "1",
-                "name": "default"
+                "id": "100",
+                "name": "VLAN0100"
             }
         },
         "GigabitEthernet0/3": {
@@ -240,16 +230,11 @@
             "link_status": "True",
             "mac_address": "6c71.0d1d.3583",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "100",
-                    "name": "VLAN0100"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
-                "id": "1",
-                "name": "default"
+                "id": "100",
+                "name": "VLAN0100"
             }
         },
         "GigabitEthernet0/4": {
@@ -265,20 +250,15 @@
             "link_status": "True",
             "mac_address": "6c71.0d1d.3584",
             "mtu": "1500",
-            "tagged_vlans": [
-                {
-                    "id": "100",
-                    "name": "VLAN0100"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
-                "id": "1",
-                "name": "default"
+                "id": "100",
+                "name": "VLAN0100"
             }
         },
         "GigabitEthernet0/5": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "",
             "ip_addresses": [
                 {
@@ -298,7 +278,7 @@
             }
         },
         "GigabitEthernet0/6": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "",
             "ip_addresses": [
                 {
@@ -318,7 +298,7 @@
             }
         },
         "GigabitEthernet0/7": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "",
             "ip_addresses": [
                 {
@@ -338,7 +318,7 @@
             }
         },
         "GigabitEthernet0/8": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "",
             "ip_addresses": [
                 {
@@ -358,7 +338,7 @@
             }
         },
         "GigabitEthernet0/9": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "",
             "ip_addresses": [
                 {

@@ -113,7 +113,7 @@
             "vrf": {}
         },
         "GigabitEthernet0/2/0": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "isr description",
             "ip_addresses": [
                 {
@@ -129,7 +129,7 @@
             "vrf": {}
         },
         "GigabitEthernet0/2/1": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "isr description",
             "ip_addresses": [
                 {
@@ -145,7 +145,7 @@
             "vrf": {}
         },
         "GigabitEthernet0/2/2": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "isr description",
             "ip_addresses": [
                 {
@@ -161,7 +161,7 @@
             "vrf": {}
         },
         "GigabitEthernet0/2/3": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "isr description",
             "ip_addresses": [
                 {
@@ -177,7 +177,7 @@
             "vrf": {}
         },
         "GigabitEthernet0/2/4": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "isr description",
             "ip_addresses": [
                 {
@@ -193,7 +193,7 @@
             "vrf": {}
         },
         "GigabitEthernet0/2/5": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "isr description",
             "ip_addresses": [
                 {
@@ -209,7 +209,7 @@
             "vrf": {}
         },
         "GigabitEthernet0/2/6": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "isr description",
             "ip_addresses": [
                 {

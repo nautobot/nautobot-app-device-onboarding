@@ -1,0 +1,5 @@
+Sync Devices from Network job was added which utilizes the SSoT framework to onboard devices.
+Sync Data from Network job was added which utilizes the SSoT framework to onboard devices.
+Git Datasource object to be able to use a Git Repo to overload new SSoT job YAML file definitions.
+Create a Nornir inventory `EmptyInventory` to support ondemand inventory population for `Sync Devices` job.
+Add `nautobot-app-nornir` dependency to reuse `NautobotORMInventory` to support inventory creation for `Sync Data` job.
