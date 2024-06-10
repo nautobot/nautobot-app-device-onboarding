@@ -95,14 +95,16 @@ sync_network_data:
         parser: "none"
         jpath: '"interface-information"[]."physical-interface"[]["logical-interface"[?name[?data==`{{ current_key }}`]]][][].{name: "vrfname"[0].data}'  # yamllint disable-line rule:quoted-strings
         iterable_type: "dict"
-# Vlans on JUNOS are a bit hit or miss show ethernet-switching vs show vlans vs neither working.
-# interfaces__tagged_vlans:
-#   commands:
-#     - command: "show interfaces brief | display json"
-#       parser: "none"
-#       jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key }}`]]][][]."todo"[].data'  # yamllint disable-line rule:quoted-string
-# interfaces__untagged_vlan:
-#   commands:
-#     - command: "show interfaces brief | display json"
-#       parser: "none"
-#       jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key }}`]]][][]."todo"[].data'  # yamllint disable-line rule:quoted-strings
+  # Vlans on JUNOS are a bit hit or miss show ethernet-switching vs show vlans vs neither working also in most cases JUNOS aren't used in access land.
+  interfaces__tagged_vlans:
+    commands:
+      - command: "show vlans | display json"
+        parser: "textfsm"
+        jpath: "[?contains(interfaces, `{{ current_key }}`*)].{admin_mode: admin_mode, mode: mode, access_vlan: access_vlan, trunking_vlans: trunking_vlans, native_vlan: native_vlan}"
+        post_processor: "{{ obj | get_vlan_data(vlan_map, 'tagged') | tojson }}"
+  interfaces__untagged_vlan:
+    commands:
+      - command: "show vlans | display json"
+        parser: "textfsm"
+        jpath: "[?contains(interfaces, `{{ current_key }}`*)].{admin_mode: admin_mode, mode: mode, access_vlan: access_vlan, trunking_vlans: trunking_vlans, native_vlan: native_vlan}"
+        post_processor: "{{ obj | get_vlan_data(vlan_map, 'untagged') | tojson }}"
