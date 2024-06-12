@@ -493,20 +493,19 @@ class SyncNetworkDataVrfToInterface(DiffSyncModel):
         try:
             vrf = VRF.objects.get(
                 name=attrs["vrf"]["name"],
-                rd=None,
                 namespace=diffsync.job.namespace,
             )
         except ObjectDoesNotExist:
             diffsync.job.logger.error(
                 f"Failed to assign vrf to {interface.device}:{interface}, unable to locate a vrf with attributes "
-                f"[name: {attrs['vrf']['name']}"
+                f"[name: {attrs['vrf']['name']} "
                 f"namespace: {diffsync.job.namespace}]"
             )
             raise diffsync_exceptions.ObjectNotCreated
         except MultipleObjectsReturned:
             diffsync.job.logger.error(
                 f"Failed to assign vrf to {interface.device}:{interface}, there are multipple vrfs with attributes "
-                f"[name: {attrs['vrf']['name']}"
+                f"[name: {attrs['vrf']['name']} "
                 f"namespace: {diffsync.job.namespace}]. "
                 "Unsure which to assign."
             )
