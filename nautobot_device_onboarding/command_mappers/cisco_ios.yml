@@ -17,6 +17,7 @@ sync_devices:
         parser: "textfsm"
         jpath: "[*].hardware[]"
         post_processor: "{{ obj | unique | first }}"
+        iterable_type: "str"
   mgmt_interface:
     commands:
       - command: "show interfaces"
