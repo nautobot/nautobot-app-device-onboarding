@@ -1,5 +1,6 @@
 """Filters for Jinja2 PostProcessing."""
 
+import logging
 from itertools import chain
 
 from django_jinja import library
@@ -8,6 +9,9 @@ from netutils.vlan import vlanconfig_to_list
 from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC
 
 # https://docs.nautobot.com/projects/core/en/stable/development/apps/api/platform-features/jinja2-filters/
+
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 
 @library.filter
@@ -105,6 +109,10 @@ def interface_mode_logic(item):  # pylint: disable=too-many-return-statements
 def get_vlan_data(item, vlan_mapping, tag_type):  # pylint: disable=too-many-return-statements
     """Get vlan information from an item."""
     current_item = item
+    # If for some reason the vlan mapping does not come back, skip adding vlans.
+    if isinstance(vlan_mapping, list):
+        logger.debug(f"Unable to format, vlan dict not returned: vlan_mapping {vlan_mapping}")
+        return []
     if isinstance(item, list) and len(item) == 1:
         current_item = item[0]
     int_mode = interface_mode_logic(item)
