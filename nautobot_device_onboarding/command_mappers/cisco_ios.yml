@@ -30,6 +30,7 @@ sync_devices:
         parser: "textfsm"
         jpath: "[?ip_address=='{{ obj }}'].prefix_length"
         post_processor: "{{ obj | unique | first }}"
+        iterable_type: "int"
 sync_network_data:
   pre_processor:
     vlan_map:
@@ -69,6 +70,7 @@ sync_network_data:
       - command: "show interfaces"
         parser: "textfsm"
         jpath: "[?interface=='{{ current_key }}'].mtu"
+        iterable_type: "str"
   interfaces__mac_address:
     commands:
       - command: "show interfaces"

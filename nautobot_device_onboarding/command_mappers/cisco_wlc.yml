@@ -26,3 +26,4 @@ sync_devices:
         parser: "textfsm"
         jpath: "[*].netmask"
         post_processor: "{% if obj | length > 0 %}{{ obj[0] | netmask_to_cidr }}{% else %}{{ obj }}{% endif %}"
+        iterable_type: "int"

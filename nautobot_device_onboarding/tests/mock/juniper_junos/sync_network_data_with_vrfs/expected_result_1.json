@@ -7,7 +7,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "28:8a:1c:56:72:c0",
-                    "mtu": 1602,
+                    "mtu": "1602",
                     "type": "lag",
                     "vrf": {}
             },
@@ -23,7 +23,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1602,
+                    "mtu": "1602",
                     "type": "lag",
                     "vrf": {}
             },
@@ -34,7 +34,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "28:8a:1c:56:72:c2",
-                    "mtu": 1602,
+                    "mtu": "1602",
                     "type": "lag",
                     "vrf": {}
             },
@@ -50,7 +50,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1602,
+                    "mtu": "1602",
                     "type": "lag",
                     "vrf": {}
             },
@@ -61,7 +61,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "28:8a:1c:56:72:c3",
-                    "mtu": 1602,
+                    "mtu": "1602",
                     "type": "lag",
                     "vrf": {}
             },
@@ -77,7 +77,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1602,
+                    "mtu": "1602",
                     "type": "lag",
                     "vrf": {}
             },
@@ -88,7 +88,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "28:8a:1c:56:72:c1",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "lag",
                     "vrf": {}
             },
@@ -99,7 +99,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "2a:8a:1c:56:72:11",
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -110,7 +110,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -121,7 +121,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -132,7 +132,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "02:00:00:00:00:04",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -148,7 +148,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -159,7 +159,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "02:00:02:00:00:04",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -175,7 +175,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -186,7 +186,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -197,7 +197,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -208,7 +208,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -219,7 +219,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -230,7 +230,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -241,7 +241,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -252,7 +252,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -263,7 +263,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -274,7 +274,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -285,7 +285,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "28:8a:1c:56:72:ff",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -296,7 +296,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -307,7 +307,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "28:8a:1c:56:72:60",
-                    "mtu": 1522,
+                    "mtu": "1522",
                     "type": "other",
                     "vrf": {}
             },
@@ -323,7 +323,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1522,
+                    "mtu": "1522",
                     "type": "other",
                     "vrf": {}
             },
@@ -339,7 +339,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1522,
+                    "mtu": "1522",
                     "type": "other",
                     "vrf": {}
             },
@@ -350,7 +350,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1522,
+                    "mtu": "1522",
                     "type": "other",
                     "vrf": {}
             },
@@ -361,7 +361,7 @@
                     "lag": [],
                     "link_status": "False",
                     "mac_address": "28:8a:1c:56:72:61",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -372,7 +372,7 @@
                     "lag": [],
                     "link_status": "False",
                     "mac_address": "28:8a:1c:56:72:62",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -383,7 +383,7 @@
                     "lag": [],
                     "link_status": "False",
                     "mac_address": "28:8a:1c:56:72:63",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -394,7 +394,7 @@
                     "lag": [],
                     "link_status": "False",
                     "mac_address": "28:8a:1c:56:72:64",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -405,7 +405,7 @@
                     "lag": [],
                     "link_status": "False",
                     "mac_address": "28:8a:1c:56:72:65",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -416,7 +416,7 @@
                     "lag": [],
                     "link_status": "False",
                     "mac_address": "28:8a:1c:56:72:66",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -427,7 +427,7 @@
                     "lag": [],
                     "link_status": "False",
                     "mac_address": "28:8a:1c:56:72:67",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -438,7 +438,7 @@
                     "lag": [],
                     "link_status": "False",
                     "mac_address": "28:8a:1c:56:72:68",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -449,7 +449,7 @@
                     "lag": [],
                     "link_status": "False",
                     "mac_address": "28:8a:1c:56:72:69",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -460,7 +460,7 @@
                     "lag": [],
                     "link_status": "False",
                     "mac_address": "28:8a:1c:56:72:6c",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -471,7 +471,7 @@
                     "lag": [],
                     "link_status": "False",
                     "mac_address": "28:8a:1c:56:72:6d",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -482,7 +482,7 @@
                     "lag": [],
                     "link_status": "False",
                     "mac_address": "28:8a:1c:56:72:6e",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -493,7 +493,7 @@
                     "lag": [],
                     "link_status": "False",
                     "mac_address": "28:8a:1c:56:72:6f",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -504,7 +504,7 @@
                     "lag": [],
                     "link_status": "False",
                     "mac_address": "28:8a:1c:56:72:70",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -515,7 +515,7 @@
                     "lag": [],
                     "link_status": "False",
                     "mac_address": "28:8a:1c:56:72:71",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -526,7 +526,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "28:8a:1c:56:72:72",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -537,7 +537,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -548,7 +548,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "28:8a:1c:56:72:73",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -559,7 +559,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -570,7 +570,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "28:8a:1c:56:72:74",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -581,7 +581,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -592,7 +592,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "28:8a:1c:56:72:75",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -603,7 +603,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -614,7 +614,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -625,7 +625,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -636,7 +636,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "28:8a:1c:56:72:f0",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -647,7 +647,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "28:8a:1c:56:72:c0",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -663,7 +663,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -674,7 +674,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": [],
+                    "mtu": "",
                     "type": "other",
                     "vrf": {}
             },
@@ -685,7 +685,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": [],
+                    "mtu": "",
                     "type": "other",
                     "vrf": {}
             },
@@ -696,7 +696,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -712,7 +712,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -728,7 +728,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -739,7 +739,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -750,7 +750,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -761,7 +761,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -772,7 +772,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -783,7 +783,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -794,7 +794,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -805,7 +805,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -816,7 +816,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -827,7 +827,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -838,7 +838,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -849,7 +849,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "02:00:00:00:00:0b",
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -860,7 +860,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1514,
+                    "mtu": "1514",
                     "type": "other",
                     "vrf": {}
             },
@@ -871,7 +871,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -882,7 +882,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": [],
+                    "mtu": "",
                     "type": "other",
                     "vrf": {}
             },
@@ -893,7 +893,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": [],
+                    "mtu": "",
                     "type": "other",
                     "vrf": {}
             },
@@ -904,7 +904,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": [],
+                    "mtu": "",
                     "type": "other",
                     "vrf": {}
             },
@@ -915,7 +915,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": [],
+                    "mtu": "",
                     "type": "other",
                     "vrf": {}
             },
@@ -926,7 +926,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": [],
+                    "mtu": "",
                     "type": "other",
                     "vrf": {}
             },
@@ -937,7 +937,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -948,7 +948,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -959,7 +959,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "28:8a:1c:56:72:b0",
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -970,7 +970,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1532,
+                    "mtu": "1532",
                     "type": "other",
                     "vrf": {}
             },
@@ -981,7 +981,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -992,7 +992,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -1003,7 +1003,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 9192,
+                    "mtu": "9192",
                     "type": "other",
                     "vrf": {}
             },
@@ -1014,7 +1014,7 @@
                     "lag": "ae0",
                     "link_status": "True",
                     "mac_address": "28:8a:1c:56:72:00",
-                    "mtu": 1602,
+                    "mtu": "1602",
                     "type": "other",
                     "vrf": {}
             },
@@ -1025,7 +1025,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1602,
+                    "mtu": "1602",
                     "type": "other",
                     "vrf": {}
             },
@@ -1036,7 +1036,7 @@
                     "lag": "ae14",
                     "link_status": "True",
                     "mac_address": "28:8a:1c:56:72:01",
-                    "mtu": 1602,
+                    "mtu": "1602",
                     "type": "other",
                     "vrf": {}
             },
@@ -1047,7 +1047,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1602,
+                    "mtu": "1602",
                     "type": "other",
                     "vrf": {}
             },
@@ -1058,7 +1058,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "28:8a:1c:56:72:02",
-                    "mtu": 1522,
+                    "mtu": "1522",
                     "type": "other",
                     "vrf": {}
             },
@@ -1074,7 +1074,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1522,
+                    "mtu": "1522",
                     "type": "other",
                     "vrf": {}
             },
@@ -1090,7 +1090,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1522,
+                    "mtu": "1522",
                     "type": "other",
                     "vrf": {}
             },
@@ -1106,7 +1106,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1522,
+                    "mtu": "1522",
                     "type": "other",
                     "vrf": {}
             },
@@ -1122,7 +1122,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1522,
+                    "mtu": "1522",
                     "type": "other",
                     "vrf": {}
             },
@@ -1138,7 +1138,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1522,
+                    "mtu": "1522",
                     "type": "other",
                     "vrf": {}
             },
@@ -1149,7 +1149,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1522,
+                    "mtu": "1522",
                     "type": "other",
                     "vrf": {}
             },
@@ -1160,7 +1160,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "28:8a:1c:56:72:03",
-                    "mtu": 1522,
+                    "mtu": "1522",
                     "type": "other",
                     "vrf": {}
             },
@@ -1171,7 +1171,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1522,
+                    "mtu": "1522",
                     "type": "other",
                     "vrf": {}
             },
@@ -1182,7 +1182,7 @@
                     "lag": "ae11",
                     "link_status": "True",
                     "mac_address": "28:8a:1c:56:72:78",
-                    "mtu": 1602,
+                    "mtu": "1602",
                     "type": "other",
                     "vrf": {}
             },
@@ -1193,7 +1193,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1602,
+                    "mtu": "1602",
                     "type": "other",
                     "vrf": {}
             },
@@ -1204,7 +1204,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": "28:8a:1c:56:72:84",
-                    "mtu": 1522,
+                    "mtu": "1522",
                     "type": "other",
                     "vrf": {}
             },
@@ -1215,7 +1215,7 @@
                     "lag": [],
                     "link_status": "True",
                     "mac_address": [],
-                    "mtu": 1522,
+                    "mtu": "1522",
                     "type": "other",
                     "vrf": {}
             }

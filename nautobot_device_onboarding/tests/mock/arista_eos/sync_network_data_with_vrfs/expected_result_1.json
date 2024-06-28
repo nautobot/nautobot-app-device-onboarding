@@ -12,7 +12,7 @@
             "lag": [],
             "link_status": "False",
             "mac_address": "52:54:00:91:1e:bf",
-            "mtu": 1500,
+            "mtu": "1500",
             "type": "1000base-t",
             "vrf": {
                 "name": "default"
@@ -25,7 +25,7 @@
             "lag": [],
             "link_status": "True",
             "mac_address": "52:54:00:15:b8:13",
-            "mtu": 9214,
+            "mtu": "9214",
             "type": "1000base-t",
             "vrf": {}
         },
@@ -36,7 +36,7 @@
             "lag": [],
             "link_status": "True",
             "mac_address": "52:54:00:07:8d:69",
-            "mtu": 9214,
+            "mtu": "9214",
             "type": "1000base-t",
             "vrf": {}
         },
@@ -52,7 +52,7 @@
             "lag": [],
             "link_status": "True",
             "mac_address": "52:54:00:91:1e:bf",
-            "mtu": 1500,
+            "mtu": "1500",
             "type": "1000base-t",
             "vrf": {
                 "name": "jeff"
@@ -70,7 +70,7 @@
             "lag": [],
             "link_status": "True",
             "mac_address": "52:54:00:0d:29:5c",
-            "mtu": 1500,
+            "mtu": "1500",
             "type": "1000base-t",
             "vrf": {
                 "name": "default"
