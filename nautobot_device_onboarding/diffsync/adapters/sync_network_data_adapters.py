@@ -358,12 +358,24 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                     f"{device_data[hostname].get('failed_reason')}"
                 )
                 failed_devices.append(hostname)
+        # remove devices that failed from the command getter results
         for hostname in failed_devices:
             del device_data[hostname]
+
+        device_queryset, devices_with_errors = diffsync_utils.generate_device_queryset_from_command_getter_result(
+            job=self.job, command_getter_result=device_data
+        )
+
+        # remove devices that have errors found while creating the queryset from the command getter results
+        for hostname in devices_with_errors:
+            del device_data[hostname]
+
+        failed_devices = failed_devices + devices_with_errors
         if failed_devices:
             self.job.logger.warning(f"Failed devices: {failed_devices}")
+
         self.job.command_getter_result = device_data
-        self.job.devices_to_load = diffsync_utils.generate_device_queryset_from_command_getter_result(device_data)
+        self.job.devices_to_load = device_queryset
 
     def _handle_general_load_exception(self, error, hostname, data, model_type):
         """If a diffsync model fails to load, log the error."""

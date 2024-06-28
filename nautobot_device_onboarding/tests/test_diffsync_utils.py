@@ -63,9 +63,12 @@ class TestDiffSyncUtils(TestCase):
 
     def test_generate_device_queryset_from_command_getter_result(self):
         """Test generating a queryset from data returned from command getter."""
-        queryset = generate_device_queryset_from_command_getter_result(command_getter_result=self.command_getter_result)
+        queryset, devices_with_errors = generate_device_queryset_from_command_getter_result(
+            job=self.mock_job, command_getter_result=self.command_getter_result
+        )
         hostnames_list = list(queryset.values_list("name", flat=True))
         self.assertEqual(2, queryset.count())
+        self.assertEqual(devices_with_errors, [])
         self.assertIn("demo-cisco-1", hostnames_list)
         self.assertIn("demo-cisco-2", hostnames_list)
 
