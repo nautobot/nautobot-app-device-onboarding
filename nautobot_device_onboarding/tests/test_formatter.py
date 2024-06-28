@@ -8,7 +8,11 @@ from unittest.mock import patch
 import yaml
 from nornir.core.inventory import ConnectionOptions, Defaults, Host
 
-from nautobot_device_onboarding.nornir_plays.formatter import extract_and_post_process, perform_data_extraction
+from nautobot_device_onboarding.nornir_plays.formatter import (
+    extract_and_post_process,
+    perform_data_extraction,
+    normalize_processed_data,
+)
 from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info
 
 MOCK_DIR = os.path.join("nautobot_device_onboarding", "tests", "mock")
@@ -29,6 +33,55 @@ def find_files_by_prefix(directory, prefix):
         if filename.startswith(prefix):
             matching_files.append(filename)
     return matching_files
+
+
+class TestFormatterNormalizeProccessedData(unittest.TestCase):
+    """Tests to ensure normalize_processed_data is working."""
+
+    def test_normalize_processed_data_str_stringified_integer(self):
+        self.assertEqual(normalize_processed_data("7201", "str"), "7201")
+
+    def test_normalize_processed_data_str__list_index_string(self):
+        self.assertEqual(normalize_processed_data(["IOS-SW-1"], "str"), "IOS-SW-1")
+
+    def test_normalize_processed_data_str__string(self):
+        self.assertEqual(normalize_processed_data("Vlan10", "str"), "Vlan10")
+
+    def test_normalize_processed_data_none_stringified_integer(self):
+        self.assertEqual(normalize_processed_data("7201", None), "7201")
+
+    def test_normalize_processed_data_none_list_index_string(self):
+        self.assertEqual(normalize_processed_data(["IOS-SW-1"], None), "IOS-SW-1")
+
+    def test_normalize_processed_data_none_string(self):
+        self.assertEqual(normalize_processed_data("Vlan10", None), "Vlan10")
+
+    def test_normalize_processed_data_none_int(self):
+        self.assertEqual(normalize_processed_data(10, None), 10)
+
+    def test_normalize_processed_data_empty_none(self):
+        self.assertEqual(normalize_processed_data([], None), [])
+
+    def test_normalize_processed_data_empty_str(self):
+        self.assertEqual(normalize_processed_data([], "str"), "")
+
+    def test_normalize_processed_data_empty_dict(self):
+        self.assertEqual(normalize_processed_data([], "dict"), {})
+
+    def test_normalize_processed_data_empty_int(self):
+        self.assertEqual(normalize_processed_data([], "int"), [])
+
+    def test_normalize_processed_data_str_int(self):
+        self.assertEqual(normalize_processed_data(10, "str"), "10")
+
+    def test_normalize_processed_data_int_str(self):
+        self.assertEqual(normalize_processed_data("10", "int"), 10)
+
+    def test_normalize_processed_data_int_int(self):
+        self.assertEqual(normalize_processed_data(10, "int"), 10)
+
+    def test_normalize_processed_data_int_list_index_int(self):
+        self.assertEqual(normalize_processed_data([881], "int"), 881)
 
 
 class TestFormatterExtractAndProcess(unittest.TestCase):

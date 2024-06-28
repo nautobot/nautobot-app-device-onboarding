@@ -26,6 +26,7 @@ sync_devices:
         parser: "none"
         jpath: "interfaces.*.interfaceAddress[?ipAddr.address==`{{ obj }}`].ipAddr.maskLen"
         post_processor: "{{ obj[0] }}"
+        iterable_type: "int"
 sync_network_data:
   pre_processor:
     vlan_map:
@@ -64,6 +65,7 @@ sync_network_data:
         parser: "none"
         jpath: 'interfaces."{{ current_key }}".[mtu]'  # yamllint disable-line rule:quoted-strings
         post_processor: "{{ obj[0] }}"
+        iterable_type: "str"
   interfaces__mac_address:
     commands:
       - command: "show interfaces | json"

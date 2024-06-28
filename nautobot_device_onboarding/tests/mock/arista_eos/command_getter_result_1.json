@@ -11,7 +11,7 @@
                 "name": "Ethernet1",
                 "lineProtocolStatus": "down",
                 "interfaceStatus": "disabled",
-                "mtu": 1500,
+                "mtu": "1500",
                 "interfaceAddressBrief": {
                     "ipAddr": {
                         "address": "1.1.1.1",
@@ -55,7 +55,7 @@
                 "name": "Ethernet4",
                 "lineProtocolStatus": "up",
                 "interfaceStatus": "connected",
-                "mtu": 1500,
+                "mtu": "1500",
                 "interfaceAddressBrief": {
                     "ipAddr": {
                         "address": "0.0.0.0",
@@ -99,7 +99,7 @@
                 "name": "Management1",
                 "lineProtocolStatus": "up",
                 "interfaceStatus": "connected",
-                "mtu": 1500,
+                "mtu": "1500",
                 "interfaceAddressBrief": {
                     "ipAddr": {
                         "address": "10.1.1.219",
@@ -214,7 +214,7 @@
                 "lastStatusChangeTimestamp": 1716994739.7751265,
                 "lineProtocolStatus": "down",
                 "loopbackMode": "loopbackNone",
-                "mtu": 1500,
+                "mtu": "1500",
                 "name": "Ethernet1",
                 "physicalAddress": "52:54:00:91:1e:bf"
             },
@@ -273,7 +273,7 @@
                 "lastStatusChangeTimestamp": 1716994739.775847,
                 "lineProtocolStatus": "up",
                 "loopbackMode": "loopbackNone",
-                "mtu": 9214,
+                "mtu": "9214",
                 "name": "Ethernet2",
                 "physicalAddress": "52:54:00:15:b8:13"
             },
@@ -332,7 +332,7 @@
                 "lastStatusChangeTimestamp": 1716994739.7754223,
                 "lineProtocolStatus": "up",
                 "loopbackMode": "loopbackNone",
-                "mtu": 9214,
+                "mtu": "9214",
                 "name": "Ethernet3",
                 "physicalAddress": "52:54:00:07:8d:69"
             },
@@ -407,7 +407,7 @@
                 "lastStatusChangeTimestamp": 1716994739.7757108,
                 "lineProtocolStatus": "up",
                 "loopbackMode": "loopbackNone",
-                "mtu": 1500,
+                "mtu": "1500",
                 "name": "Ethernet4",
                 "physicalAddress": "52:54:00:91:1e:bf"
             },
@@ -483,7 +483,7 @@
                 "lastStatusChangeTimestamp": 1716994731.7559597,
                 "lineProtocolStatus": "up",
                 "loopbackMode": "loopbackNone",
-                "mtu": 1500,
+                "mtu": "1500",
                 "name": "Management1",
                 "physicalAddress": "52:54:00:0d:29:5c"
             }
@@ -502,7 +502,7 @@
                 "ipv4Routable0": false,
                 "ipv4Routable240": false,
                 "lineProtocolStatus": "down",
-                "mtu": 1500,
+                "mtu": "1500",
                 "name": "Ethernet1",
                 "nonRoutableClassEIntf": false
             },
@@ -517,7 +517,7 @@
                 "ipv4Routable0": false,
                 "ipv4Routable240": false,
                 "lineProtocolStatus": "up",
-                "mtu": 1500,
+                "mtu": "1500",
                 "name": "Ethernet4",
                 "nonRoutableClassEIntf": false
             },
@@ -532,7 +532,7 @@
                 "ipv4Routable0": false,
                 "ipv4Routable240": false,
                 "lineProtocolStatus": "up",
-                "mtu": 1500,
+                "mtu": "1500",
                 "name": "Management1",
                 "nonRoutableClassEIntf": false
             }

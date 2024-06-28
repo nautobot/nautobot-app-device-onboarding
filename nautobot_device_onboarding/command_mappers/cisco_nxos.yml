@@ -26,6 +26,7 @@ sync_devices:
         parser: "textfsm"
         jpath: "[?ip_address=='{{ obj }}'].subnet"
         post_processor: "{% if '/' in obj[0] %}{{ obj[0].split('/')[1] }}{% else %}31{% endif %}"
+        iterable_type: "int"
 sync_network_data:
   pre_processor:
     vlan_map:
@@ -65,6 +66,7 @@ sync_network_data:
       - command: "show interface"
         parser: "textfsm"
         jpath: "[?interface=='{{ current_key }}'].mtu"
+        iterable_type: "str"
   interfaces__mac_address:
     commands:
       - command: "show interface"

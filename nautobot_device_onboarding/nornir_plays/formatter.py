@@ -53,7 +53,7 @@ def normalize_processed_data(processed_data, iterable_type):
     # If processed_data is an empty data structure, return default based on iterable_type
     if not processed_data:
         return process_empty_result(iterable_type)
-    if isinstance(processed_data, str):
+    if isinstance(processed_data, str) and not processed_data.isdigit():
         try:
             # If processed_data is a json string try to load it into a python datatype.
             post_processed_data = json.loads(processed_data)
@@ -73,6 +73,10 @@ def normalize_processed_data(processed_data, iterable_type):
                 post_processed_data = post_processed_data[0]
     if not post_processed_data and iterable_type in ["str", "dict"]:
         return process_empty_result(iterable_type)
+    if iterable_type == "int":
+        return int(post_processed_data)
+    if iterable_type == "str":
+        return str(post_processed_data)
     return post_processed_data
 
 
