@@ -11,6 +11,7 @@ sync_devices:
         parser: "textfsm"
         jpath: "[*].serial[]"
         post_processor: "{{ obj | unique | first }}"
+        iterable_type: "str"
   device_type:
     commands:
       - command: "show version"
@@ -45,6 +46,7 @@ sync_network_data:
         parser: "textfsm"
         jpath: "[*].serial[]"
         post_processor: "{{ obj | unique | first }}"
+        iterable_type: "str"
   interfaces:
     root_key: true
     commands:

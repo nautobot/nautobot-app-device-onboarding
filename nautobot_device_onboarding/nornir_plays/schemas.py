@@ -11,7 +11,7 @@ def sync_devices_schema(json_schema=True):
             "required": ["hostname", "serial", "device_type", "mgmt_interface", "platform", "network_driver"],
             "properties": {
                 "hostname": {"type": "string", "description": "Hostname of the network device"},
-                "serial": {"type": "string", "description": "Serial number of the network device"},
+                "serial": {"type": ["string", "integer"], "description": "Serial number of the network device"},
                 "device_type": {"type": ["string", "integer"], "description": "Type of the network device"},
                 "mgmt_interface": {"type": "string", "description": "Management interface of the network device"},
                 "mask_length": {
@@ -112,7 +112,7 @@ NETWORK_DEVICES_SCHEMA = {
     "required": ["serial", "hostname", "device_type", "mgmt_interface", "mask_length"],
     "properties": {
         "serial": {
-            "type": "string",
+            "type": ["string", "integer"],
             "description": "Serial number of the network device",
             "minItems": 1,
         },
