@@ -8,17 +8,25 @@ from nautobot.dcim.models import Device
 from nautobot.ipam.models import IPAddress, Prefix
 
 
-def generate_device_queryset_from_command_getter_result(command_getter_result):
+def generate_device_queryset_from_command_getter_result(job, command_getter_result):
     """Generate a Nautobot device queryset based on data returned from Command Getter Nornir Task."""
     devices_to_sync_hostnames = []
     devices_to_sync_serial_numbers = []
+    devices_with_errors = []
     for hostname, device_data in command_getter_result.items():
-        devices_to_sync_hostnames.append(hostname)
-        devices_to_sync_serial_numbers.append(device_data["serial"])
+        try:
+            devices_to_sync_hostnames.append(hostname)
+            devices_to_sync_serial_numbers.append(device_data["serial"])
+        except Exception as err:
+            devices_with_errors.append(hostname)
+            job.logger.error(f"Error while creating device queryset, hostname: {hostname}, {type(err).__name__} {err}")
+            if job.debug:
+                job.logger.debug(f"{hostname}: {device_data}")
+            continue
     device_queryset = Device.objects.filter(name__in=devices_to_sync_hostnames).filter(
         serial__in=devices_to_sync_serial_numbers
     )
-    return device_queryset
+    return device_queryset, devices_with_errors
 
 
 def check_data_type(data):
