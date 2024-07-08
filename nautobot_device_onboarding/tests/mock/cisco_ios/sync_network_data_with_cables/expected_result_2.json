@@ -196,5 +196,22 @@
             "type": "virtual"
         }
     },
-    "serial": "FOC1541W2SP"
+    "serial": "FOC1541W2SP",
+    "neighbors": [
+            {
+                "remote_device": "demo-cisco-1",
+                "local_interface": "GigabitEthernet1",
+                "remote_interface": "GigabitEthernet1"
+            },
+            {
+                "remote_device": "demo-cisco-3",
+                "local_interface": "GigabitEthernet2",
+                "remote_interface": "GigabitEthernet2"
+            },
+            {
+                "remote_device": "demo-cisco-4",
+                "local_interface": "GigabitEthernet3",
+                "remote_interface": "GigabitEthernet3"
+            }
+        ]
 }

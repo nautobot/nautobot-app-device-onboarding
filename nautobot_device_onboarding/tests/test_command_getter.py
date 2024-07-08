@@ -20,7 +20,10 @@ class TestGetCommandsToRun(unittest.TestCase):
     def test_deduplicate_command_list_sync_devices(self):
         """Test dedup on sync_devices ssot job."""
         get_commands_to_run = _get_commands_to_run(
-            self.expected_data["sync_devices"], sync_vlans=False, sync_vrfs=False
+            self.expected_data["sync_devices"],
+            sync_vlans=False,
+            sync_vrfs=False,
+            sync_cables=False,
         )
         expected_commands_to_run = [
             {"command": "show version", "jpath": "[*].hostname", "parser": "textfsm"},
@@ -36,7 +39,10 @@ class TestGetCommandsToRun(unittest.TestCase):
     def test_deduplicate_command_list_sync_data_no_vrfs_no_vlans(self):
         """Test dedup on sync_network_data ssot job."""
         get_commands_to_run = _get_commands_to_run(
-            self.expected_data["sync_network_data"], sync_vlans=False, sync_vrfs=False
+            self.expected_data["sync_network_data"],
+            sync_vlans=False,
+            sync_vrfs=False,
+            sync_cables=False,
         )
         expected_commands_to_run = [
             {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vlan_id, name: vlan_name}"},
@@ -67,7 +73,10 @@ class TestGetCommandsToRun(unittest.TestCase):
     def test_deduplicate_command_list_sync_data_with_vrfs_no_vlans(self):
         """Test dedup on sync_network_data ssot job."""
         get_commands_to_run = _get_commands_to_run(
-            self.expected_data["sync_network_data"], sync_vlans=False, sync_vrfs=True
+            self.expected_data["sync_network_data"],
+            sync_vlans=False,
+            sync_vrfs=True,
+            sync_cables=False,
         )
         expected_commands_to_run = [
             {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vlan_id, name: vlan_name}"},
@@ -105,7 +114,10 @@ class TestGetCommandsToRun(unittest.TestCase):
     def test_deduplicate_command_list_sync_data_no_vrfs_with_vlans(self):
         """Test dedup on sync_network_data ssot job."""
         get_commands_to_run = _get_commands_to_run(
-            self.expected_data["sync_network_data"], sync_vlans=True, sync_vrfs=False
+            self.expected_data["sync_network_data"],
+            sync_vlans=True,
+            sync_vrfs=False,
+            sync_cables=False,
         )
         expected_commands_to_run = [
             {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vlan_id, name: vlan_name}"},
@@ -136,7 +148,10 @@ class TestGetCommandsToRun(unittest.TestCase):
     def test_deduplicate_command_list_sync_data_with_vrfs_and_vlans(self):
         """Test dedup on sync_network_data ssot job."""
         get_commands_to_run = _get_commands_to_run(
-            self.expected_data["sync_network_data"], sync_vlans=True, sync_vrfs=True
+            self.expected_data["sync_network_data"],
+            sync_vlans=True,
+            sync_vrfs=True,
+            sync_cables=False,
         )
         expected_commands_to_run = [
             {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vlan_id, name: vlan_name}"},
@@ -167,6 +182,42 @@ class TestGetCommandsToRun(unittest.TestCase):
                 "jpath": "[?interface=='{{ current_key }}'].{name:vrf}",
                 "post_processor": "{% if obj | length > 0 %}{{ obj[0] | key_exist_or_default('name') | tojson }}{% else %}{{ obj }}{% endif %}",
                 "iterable_type": "dict",
+            },
+        ]
+        self.assertEqual(get_commands_to_run, expected_commands_to_run)
+
+    def test_deduplicate_command_list_sync_data_cables(self):
+        get_commands_to_run = _get_commands_to_run(
+            self.expected_data["sync_network_data"], sync_vlans=False, sync_vrfs=False, sync_cables=True
+        )
+        expected_commands_to_run = [
+            {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vlan_id, name: vlan_name}"},
+            {"command": "show version", "parser": "textfsm", "jpath": "[*].serial[]"},
+            {
+                "command": "show interfaces",
+                "parser": "textfsm",
+                "jpath": "[*].interface",
+                "post_processor": "{% set result={} %}{% for interface in obj %}{{ result.update({interface: {}}) or '' }}{% endfor %}{{ result | tojson }}",
+            },
+            {
+                "command": "show interfaces switchport",
+                "parser": "textfsm",
+                "jpath": "[?interface=='{{ current_key | abbreviated_interface_name }}'].{admin_mode: admin_mode, mode: mode, trunking_vlans: trunking_vlans}",
+                "post_processor": "{{ obj | interface_mode_logic }}",
+                "iterable_type": "str",
+            },
+            {
+                "command": "show etherchannel summary",
+                "parser": "textfsm",
+                "jpath": "[?contains(@.member_interface, `{{ current_key | abbreviated_interface_name }}`)].bundle_name",
+                "post_processor": "{% if obj | length > 0 %}{{ obj[0] | canonical_interface_name }}{% else %}{{ obj }}{% endif %}",
+                "iterable_type": "str",
+            },
+            {
+                "command": "show cdp neighbors detail",
+                "parser": "textfsm",
+                "jpath": "*.neighbor",
+                "post_processor": "{% set result=[] %}{% for interface in obj %}{{ result.append([local_interface: local_interface, remote_interface: neighbor_interface, remote_device: neighbor_name])}}{% endfor %}{{ result | tojson }}",
             },
         ]
         self.assertEqual(get_commands_to_run, expected_commands_to_run)
