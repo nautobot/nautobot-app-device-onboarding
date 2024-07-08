@@ -6,7 +6,7 @@ import diffsync
 from diffsync.enum import DiffSyncModelFlags
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from nautobot.dcim.models import Interface
+from nautobot.dcim.models import Cable, Interface
 from nautobot.ipam.models import VLAN, VRF, IPAddress
 from nautobot_ssot.contrib import NautobotAdapter
 from netaddr import EUI, mac_unix_expanded
@@ -45,6 +45,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
     untagged_vlan_to_interface = sync_network_data_models.SyncNetworkDataUnTaggedVlanToInterface
     lag_to_interface = sync_network_data_models.SyncNetworkDataLagToInterface
     vrf_to_interface = sync_network_data_models.SyncNetworkDataVrfToInterface
+    cable = sync_network_data_models.SyncNetworkDataCable
 
     primary_ips = None
 
@@ -58,6 +59,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         "tagged_vlans_to_interface",
         "lag_to_interface",
         "vrf_to_interface",
+        "cable",
     ]
 
     def _cache_primary_ips(self, device_queryset):
@@ -229,6 +231,24 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
             network_vrf_to_interface.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
             self.add(network_vrf_to_interface)
 
+    def load_cables(self):
+        """
+        Load Cables into diffsync store.
+
+        Only cables returned by the CommandGetter job should be synced.
+        """
+
+        for cable in Cable.objects.all():
+            network_cable = self.cable(
+                diffsync=self,
+                termination_a_device=cable.termination_a.device.name,
+                termination_a_interface=cable.termination_a.name,
+                termination_b_device=cable.termination_b.device.name,
+                termination_b_interface=cable.termination_b.name,
+            )
+            network_cable.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
+            self.add(network_cable)
+
     def load(self):
         """Generic implementation of the load function."""
         if not hasattr(self, "top_level") or not self.top_level:
@@ -329,6 +349,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
     untagged_vlan_to_interface = sync_network_data_models.SyncNetworkDataUnTaggedVlanToInterface
     lag_to_interface = sync_network_data_models.SyncNetworkDataLagToInterface
     vrf_to_interface = sync_network_data_models.SyncNetworkDataVrfToInterface
+    cable = sync_network_data_models.SyncNetworkDataCable
 
     top_level = [
         "ip_address",
@@ -340,6 +361,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
         "tagged_vlans_to_interface",
         "lag_to_interface",
         "vrf_to_interface",
+        "cable",
     ]
 
     def _handle_failed_devices(self, device_data):
@@ -652,6 +674,29 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                     )
                     continue
 
+    def load_cables(self):
+        """Load cables into the Diffsync store.
+
+        When loading cables from the network, assume local device is termination a device.
+        """
+        for hostname, device_data in self.job.command_getter_result.items():
+            # for interface in device_data["interfaces"]:
+            for neighbor in device_data["neighbors"].items():
+                try:
+                    network_cable = self.cable(
+                        diffsync=self,
+                        termination_a_device=hostname,
+                        termination_a_interface=neighbor["local_interface"],
+                        termination_b_device=neighbor["neighbor_name"],
+                        termination_b_interface=neighbor["neighbor_interface"],
+                    )
+                    self.add(network_cable)
+                except Exception as err:
+                    self._handle_general_load_exception(
+                        error=err, hostname=hostname, data=device_data, model_type="cable"
+                    )
+                    continue
+
     def load(self):
         """Load network data."""
         self.execute_command_getter()
@@ -668,3 +713,5 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
         self.load_lag_to_interface()
         if self.job.sync_vrfs:
             self.load_vrf_to_interface()
+        if self.job.sync_cables:
+            self.load_cables()

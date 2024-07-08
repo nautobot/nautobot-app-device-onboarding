@@ -48,7 +48,7 @@ def deduplicate_command_list(data):
     return unique_list
 
 
-def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs):
+def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables):
     """Using merged command mapper info and look up all commands that need to be run."""
     all_commands = []
     for key, value in yaml_parsed_info.items():
@@ -74,6 +74,9 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs):
                     # If syncing vrfs isn't inscope remove the unneeded commands.
                     if not sync_vrfs and key == "interfaces__vrf":
                         continue
+                    # If syncing cables isn't inscope remove the unneeded commands.
+                    if not sync_cables and key == "neighbors":
+                        continue
                     all_commands.append(command)
             else:
                 if isinstance(current_root_key, dict):
@@ -82,6 +85,9 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs):
                         continue
                     # If syncing vrfs isn't inscope remove the unneeded commands.
                     if not sync_vrfs and key == "interfaces__vrf":
+                        continue
+                    # If syncing cables isn't inscope remove the unneeded commands.
+                    if not sync_cables and key == "neighbors":
                         continue
                     # Means their isn't a "nested" structures. e.g 1 command
                     all_commands.append(current_root_key)

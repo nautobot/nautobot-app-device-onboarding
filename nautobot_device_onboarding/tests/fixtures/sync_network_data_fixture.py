@@ -92,6 +92,23 @@ sync_network_mock_data_valid = {
                 "vrf": {"name": "mgmt"},
             },
         },
+        "neighbors": [
+            {
+                "remote_device": "demo-cisco-2",
+                "local_interface": "GigabitEthernet1",
+                "remote_interface": "GigabitEthernet1",
+            },
+            {
+                "remote_device": "demo-cisco-3",
+                "local_interface": "GigabitEthernet2",
+                "remote_interface": "GigabitEthernet2",
+            },
+            {
+                "remote_device": "demo-cisco-4",
+                "local_interface": "GigabitEthernet3",
+                "remote_interface": "GigabitEthernet3",
+            },
+        ],
     },
     "demo-cisco-2": {
         "serial": "9ABUXU5882222",
@@ -156,6 +173,23 @@ sync_network_mock_data_valid = {
                 "vrf": {"name": "mgmt"},
             },
         },
+        "neighbors": [
+            {
+                "remote_device": "demo-cisco-1",
+                "local_interface": "GigabitEthernet1",
+                "remote_interface": "GigabitEthernet1",
+            },
+            {
+                "remote_device": "demo-cisco-3",
+                "local_interface": "GigabitEthernet2",
+                "remote_interface": "GigabitEthernet2",
+            },
+            {
+                "remote_device": "demo-cisco-4",
+                "local_interface": "GigabitEthernet3",
+                "remote_interface": "GigabitEthernet3",
+            },
+        ],
     },
 }
 failed_device = {"demo-cisco-3": {"failed": True, "failed_reason": "Authentication failure"}}

@@ -11,7 +11,7 @@ from diffsync import DiffSync, DiffSyncModel
 from diffsync import exceptions as diffsync_exceptions
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
 from nautobot.dcim.choices import InterfaceTypeChoices
-from nautobot.dcim.models import Device, Interface, Location
+from nautobot.dcim.models import Cable, Device, Interface, Location
 from nautobot.extras.models import Status
 from nautobot.ipam.models import VLAN, VRF, IPAddress, IPAddressToInterface
 from nautobot_ssot.contrib import CustomFieldAnnotation, NautobotModel
@@ -563,3 +563,19 @@ class SyncNetworkDataVrfToInterface(DiffSyncModel):
 
 
 # TODO: Cable Model
+class SyncNetworkDataCable(FilteredNautobotModel):
+    """Shared data model representing a cable between two interfaces."""
+
+    _modelname = "cable"
+    _model = Cable
+    _identifiers = (
+        "termination_a_device",
+        "termination_a_interface",
+        "termination_b_device",
+        "termination_b_interface",
+    )
+
+    termination_a_device: str
+    termination_a_interface: str
+    termination_b_device: str
+    termination_b_interface: str
