@@ -92,7 +92,7 @@ sync_network_mock_data_valid = {
                 "vrf": {"name": "mgmt"},
             },
         },
-        "neighbors": [
+        "cables": [
             {
                 "remote_device": "demo-cisco-2",
                 "local_interface": "GigabitEthernet1",
@@ -173,7 +173,7 @@ sync_network_mock_data_valid = {
                 "vrf": {"name": "mgmt"},
             },
         },
-        "neighbors": [
+        "cables": [
             {
                 "remote_device": "demo-cisco-1",
                 "local_interface": "GigabitEthernet1",

@@ -145,7 +145,7 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
         # If syncing vrfs isn't inscope remove the unneeded commands.
         if not sync_vrfs and ssot_field == "interfaces__vrf":
             continue
-        if not sync_cables and ssot_field == "neighbors":
+        if not sync_cables and ssot_field == "cables":
             continue
         if ssot_field == "pre_processor":
             continue
