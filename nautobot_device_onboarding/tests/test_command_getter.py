@@ -216,7 +216,7 @@ class TestGetCommandsToRun(unittest.TestCase):
             {
                 "command": "show cdp neighbors detail",
                 "parser": "textfsm",
-                "jpath": "*.neighbor",
+                "jpath": "[*].local_interface",
                 "post_processor": "{% set result=[] %}{% for interface in obj %}{{ result.append([local_interface: local_interface, remote_interface: neighbor_interface, remote_device: neighbor_name])}}{% endfor %}{{ result | tojson }}",
             },
         ]
