@@ -128,7 +128,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
                 location__name=vlan.location.name if vlan.location else "",
             )
             try:
-                network_vlan.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
+                network_vlan.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_SRC
                 self.add(network_vlan)
             except diffsync.exceptions.ObjectAlreadyExists:
                 pass
@@ -238,16 +238,37 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         Only cables returned by the CommandGetter job should be synced.
         """
 
-        for cable in Cable.objects.all():
+        for cable in self.job.devices_to_load.get_cables():
+            if cable.termination_a.device.name < cable.termination_b.device.name:
+                termination_a_device = cable.termination_a.device.name
+                termination_a_interface = cable.termination_a.name
+                termination_b_device = cable.termination_b.device.name
+                termination_b_interface = cable.termination_b.name
+            else:
+                termination_a_device = cable.termination_b.device.name
+                termination_a_interface = cable.termination_b.name
+                termination_b_device = cable.termination_a.device.name
+                termination_b_interface = cable.termination_a.name
+
             network_cable = self.cable(
                 diffsync=self,
-                termination_a_device=cable.termination_a.device.name,
-                termination_a_interface=cable.termination_a.name,
-                termination_b_device=cable.termination_b.device.name,
-                termination_b_interface=cable.termination_b.name,
+                status__name="Connected",
+                termination_a__app_label="dcim",
+                termination_a__model="interface",
+                termination_a__device__name=termination_a_device,
+                termination_a__name=termination_a_interface,
+                termination_b__app_label="dcim",
+                termination_b__model="interface",
+                termination_b__device__name=termination_b_device,
+                termination_b__name=termination_b_interface,
             )
             network_cable.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
-            self.add(network_cable)
+            try:
+                self.add(network_cable)
+                if self.job.debug:
+                    self.job.logger.debug(f"Loaded Cable: {network_cable}")
+            except diffsync.exceptions.ObjectAlreadyExists:
+                continue
 
     def load(self):
         """Generic implementation of the load function."""
@@ -413,14 +434,14 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
         # verify data returned is a dict
         data_type_check = diffsync_utils.check_data_type(result)
         if self.job.debug:
-            self.job.logger.debug(f"CommandGetter data type check resut: {data_type_check}")
+            self.job.logger.debug(f"CommandGetter data type check result: {data_type_check}")
         if data_type_check:
             self._handle_failed_devices(device_data=result)
         else:
             self.job.logger.error(
                 "Data returned from CommandGetter is not the correct type. No devices will be onboarded"
             )
-            raise ValidationError("Unexpected data returend from CommandGetter.")
+            raise ValidationError("Unexpected data returned from CommandGetter.")
 
     def _process_mac_address(self, mac_address):
         """Convert a mac address to match the value stored by Nautobot."""
@@ -675,22 +696,48 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                     continue
 
     def load_cables(self):
-        """Load cables into the Diffsync store.
+        """Load cables into the Diffsync store."""
 
-        When loading cables from the network, assume local device is termination a device.
-        """
         for hostname, device_data in self.job.command_getter_result.items():
-            # for interface in device_data["interfaces"]:
-            for neighbor in device_data["neighbors"].items():
+            if self.job.debug:
+                self.job.logger.debug(f"Loading Cables from {hostname}")
+                self.job.logger.debug(f"Cable Data: {device_data['cables']}")
+
+            for local_interface, neighbor_data in device_data["cables"].items():
+                self.job.logger.debug(f"Local Interface: {local_interface}, Neighbor Data: {neighbor_data}")
+
+                # always put the alphabetically first device as termination a
+                if hostname < neighbor_data["remote_device"]:
+                    termination_a_device = hostname
+                    termination_a_interface = local_interface
+                    termination_b_device = neighbor_data["remote_device"]
+                    termination_b_interface = neighbor_data["remote_interface"]
+                else:
+                    termination_a_device = neighbor_data["remote_device"]
+                    termination_a_interface = neighbor_data["remote_interface"]
+                    termination_b_device = hostname
+                    termination_b_interface = local_interface
+
                 try:
                     network_cable = self.cable(
                         diffsync=self,
-                        termination_a_device=hostname,
-                        termination_a_interface=neighbor["local_interface"],
-                        termination_b_device=neighbor["neighbor_name"],
-                        termination_b_interface=neighbor["neighbor_interface"],
+                        status__name="Connected",  # ask for default status in the job form
+                        termination_a__app_label="dcim",
+                        termination_a__model="interface",
+                        termination_a__device__name=termination_a_device,
+                        termination_a__name=termination_a_interface,
+                        termination_b__app_label="dcim",
+                        termination_b__model="interface",
+                        termination_b__device__name=termination_b_device,
+                        termination_b__name=termination_b_interface,
                     )
-                    self.add(network_cable)
+                    try:
+                        self.add(network_cable)
+                        if self.job.debug:
+                            self.job.logger.debug(f"Loaded Cable: {network_cable}")
+                    except diffsync.exceptions.ObjectAlreadyExists:
+                        # object already in the diffsync store.
+                        pass
                 except Exception as err:
                     self._handle_general_load_exception(
                         error=err, hostname=hostname, data=device_data, model_type="cable"
