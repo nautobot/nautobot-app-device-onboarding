@@ -631,7 +631,6 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         if self.debug:
             self.logger.debug("Checking for last_network_data_sync custom field")
         try:
-
             cf = CustomField.objects.get(key="last_network_data_sync")
         except ObjectDoesNotExist:
             cf, _ = CustomField.objects.get_or_create(

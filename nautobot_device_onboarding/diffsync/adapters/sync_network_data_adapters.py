@@ -6,7 +6,7 @@ import diffsync
 from diffsync.enum import DiffSyncModelFlags
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from nautobot.dcim.models import Cable, Interface
+from nautobot.dcim.models import Interface
 from nautobot.ipam.models import VLAN, VRF, IPAddress
 from nautobot_ssot.contrib import NautobotAdapter
 from netaddr import EUI, mac_unix_expanded
@@ -237,7 +237,6 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
 
         Only cables returned by the CommandGetter job should be synced.
         """
-
         for cable in self.job.devices_to_load.get_cables():
             if cable.termination_a.device.name < cable.termination_b.device.name:
                 termination_a_device = cable.termination_a.device.name
@@ -697,7 +696,6 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
 
     def load_cables(self):
         """Load cables into the Diffsync store."""
-
         for hostname, device_data in self.job.command_getter_result.items():
             if self.job.debug:
                 self.job.logger.debug(f"Loading Cables from {hostname}")
