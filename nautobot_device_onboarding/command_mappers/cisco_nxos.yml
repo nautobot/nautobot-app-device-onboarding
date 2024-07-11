@@ -133,4 +133,3 @@ sync_network_data:
       - command: "show cdp neighbors detail"
         parser: "textfsm"
         jpath: "[?local_interface=='{{ current_key }}'].neighbor_name"
-
