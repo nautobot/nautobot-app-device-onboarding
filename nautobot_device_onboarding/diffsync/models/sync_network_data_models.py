@@ -569,13 +569,30 @@ class SyncNetworkDataCable(FilteredNautobotModel):
     _modelname = "cable"
     _model = Cable
     _identifiers = (
-        "termination_a_device",
-        "termination_a_interface",
-        "termination_b_device",
-        "termination_b_interface",
+        "termination_a__app_label",
+        "termination_a__model",
+        "termination_a__device__name",
+        "termination_a__name",
+        "termination_b__app_label",
+        "termination_b__model",
+        "termination_b__device__name",
+        "termination_b__name",
+        "status__name",
     )
 
-    termination_a_device: str
-    termination_a_interface: str
-    termination_b_device: str
-    termination_b_interface: str
+    termination_a__app_label: str
+    termination_a__model: str
+    termination_a__device__name: str
+    termination_a__name: str
+    termination_b__app_label: str
+    termination_b__model: str
+    termination_b__device__name: str
+    termination_b__name: str
+    status__name: str
+
+    # @classmethod
+    # def create(cls, diffsync, ids, attrs):
+    #     """Create a new Cable object."""
+
+    #     # if the same termination pair exists in reverse, don't create
+    #     return super().create(diffsync, ids, attrs)
