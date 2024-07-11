@@ -75,7 +75,7 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables):
                     if not sync_vrfs and key == "interfaces__vrf":
                         continue
                     # If syncing cables isn't inscope remove the unneeded commands.
-                    if not sync_cables and key == "neighbors":
+                    if not sync_cables and key == "cables":
                         continue
                     all_commands.append(command)
             else:
@@ -87,7 +87,7 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables):
                     if not sync_vrfs and key == "interfaces__vrf":
                         continue
                     # If syncing cables isn't inscope remove the unneeded commands.
-                    if not sync_cables and key == "neighbors":
+                    if not sync_cables and key == "cables":
                         continue
                     # Means their isn't a "nested" structures. e.g 1 command
                     all_commands.append(current_root_key)
@@ -109,6 +109,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
         command_getter_yaml_data[task.host.platform][command_getter_job],
         orig_job_kwargs.get("sync_vlans", False),
         orig_job_kwargs.get("sync_vrfs", False),
+        orig_job_kwargs.get("sync_cables", False),
     )
     # All commands in this for loop are running within 1 device connection.
     for result_idx, command in enumerate(commands):
@@ -283,6 +284,7 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
                         "network_driver_mappings": SUPPORTED_NETWORK_DRIVERS,
                         "sync_vlans": kwargs["sync_vlans"],
                         "sync_vrfs": kwargs["sync_vrfs"],
+                        "sync_cables": kwargs["sync_cables"],
                     },
                 },
             },
