@@ -126,15 +126,4 @@ sync_network_data:
     commands:
       - command: "show cdp neighbors detail"
         parser: "textfsm"
-        jpath: "[*].local_interface"
-        post_processor: "{% set result=[] %}{% for interface in obj %}{{ result.append([local_interface: local_interface, remote_interface: neighbor_interface, remote_device: neighbor_name])}}{% endfor %}{{ result | tojson }}"
-  cables__remote_interface:
-    commands:
-      - command: "show cdp neighbors detail"
-        parser: "textfsm"
-        jpath: "[?local_interface=='{{ current_key }}'].neighbor_interface"
-  cables__remote_device:
-    commands:
-      - command: "show cdp neighbors detail"
-        parser: "textfsm"
-        jpath: "[?local_interface=='{{ current_key }}'].neighbor_name"
+        jpath: "[*].{local_interface:local_interface, remote_interface:neighbor_interface, remote_device:neighbor_name}"

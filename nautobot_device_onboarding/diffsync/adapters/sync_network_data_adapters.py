@@ -10,6 +10,7 @@ from nautobot.dcim.models import Interface
 from nautobot.ipam.models import VLAN, VRF, IPAddress
 from nautobot_ssot.contrib import NautobotAdapter
 from netaddr import EUI, mac_unix_expanded
+from netutils.interface import canonical_interface_name
 
 from nautobot_device_onboarding.diffsync.models import sync_network_data_models
 from nautobot_device_onboarding.nornir_plays.command_getter import sync_network_data_command_getter
@@ -701,18 +702,22 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                 self.job.logger.debug(f"Loading Cables from {hostname}")
                 self.job.logger.debug(f"Cable Data: {device_data['cables']}")
 
-            for local_interface, neighbor_data in device_data["cables"].items():
-                self.job.logger.debug(f"Local Interface: {local_interface}, Neighbor Data: {neighbor_data}")
+            for neighbor_data in device_data["cables"]:
+                local_interface = canonical_interface_name(neighbor_data["local_interface"])
+                remote_interface = canonical_interface_name(neighbor_data["remote_interface"])
+                remote_device = neighbor_data["remote_device"]
+                if self.job.debug:
+                    self.job.logger.debug(f"Neighbor Data: {neighbor_data}")
 
                 # always put the alphabetically first device as termination a
-                if hostname < neighbor_data["remote_device"]:
+                if hostname < remote_device:
                     termination_a_device = hostname
                     termination_a_interface = local_interface
-                    termination_b_device = neighbor_data["remote_device"]
-                    termination_b_interface = neighbor_data["remote_interface"]
+                    termination_b_device = remote_device
+                    termination_b_interface = remote_interface
                 else:
-                    termination_a_device = neighbor_data["remote_device"]
-                    termination_a_interface = neighbor_data["remote_interface"]
+                    termination_a_device = remote_device
+                    termination_a_interface = remote_interface
                     termination_b_device = hostname
                     termination_b_interface = local_interface
 
