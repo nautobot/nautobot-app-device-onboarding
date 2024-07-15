@@ -2,7 +2,7 @@
     "interfaces": {
         "GigabitEthernet0/1": {
             "802.1Q_mode": "access",
-            "description": "a description",
+            "description": "",
             "ip_addresses": [
                 {
                     "ip_address": "",
@@ -11,13 +11,88 @@
             ],
             "lag": "",
             "link_status": "True",
-            "mac_address": "2c3f.3899.1501",
+            "mac_address": "6c71.0d1d.3581",
             "mtu": "1500",
             "type": "1000base-t"
         },
         "GigabitEthernet0/10": {
             "802.1Q_mode": "tagged-all",
-            "description": "a description",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "6c71.0d1d.358a",
+            "mtu": "1500",
+            "type": "1000base-t"
+        },
+        "GigabitEthernet0/11": {
+            "802.1Q_mode": "tagged-all",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "6c71.0d1d.358b",
+            "mtu": "1500",
+            "type": "1000base-t"
+        },
+        "GigabitEthernet0/12": {
+            "802.1Q_mode": "tagged-all",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "6c71.0d1d.358c",
+            "mtu": "1500",
+            "type": "1000base-t"
+        },
+        "GigabitEthernet0/13": {
+            "802.1Q_mode": "tagged-all",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "6c71.0d1d.358d",
+            "mtu": "1500",
+            "type": "1000base-t"
+        },
+        "GigabitEthernet0/14": {
+            "802.1Q_mode": "tagged-all",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "6c71.0d1d.358e",
+            "mtu": "1500",
+            "type": "1000base-t"
+        },
+        "GigabitEthernet0/15": {
+            "802.1Q_mode": "tagged",
+            "description": "***connection to SW1***",
             "ip_addresses": [
                 {
                     "ip_address": "",
@@ -26,13 +101,28 @@
             ],
             "lag": "",
             "link_status": "True",
-            "mac_address": "2c3f.3899.150a",
+            "mac_address": "6c71.0d1d.358f",
+            "mtu": "1500",
+            "type": "1000base-t"
+        },
+        "GigabitEthernet0/16": {
+            "802.1Q_mode": "tagged-all",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "",
+                    "prefix_length": ""
+                }
+            ],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "6c71.0d1d.3590",
             "mtu": "1500",
             "type": "1000base-t"
         },
         "GigabitEthernet0/2": {
             "802.1Q_mode": "access",
-            "description": "a description",
+            "description": "",
             "ip_addresses": [
                 {
                     "ip_address": "",
@@ -41,13 +131,13 @@
             ],
             "lag": "",
             "link_status": "True",
-            "mac_address": "2c3f.3899.1502",
+            "mac_address": "6c71.0d1d.3582",
             "mtu": "1500",
             "type": "1000base-t"
         },
         "GigabitEthernet0/3": {
             "802.1Q_mode": "access",
-            "description": "a description",
+            "description": "",
             "ip_addresses": [
                 {
                     "ip_address": "",
@@ -56,13 +146,13 @@
             ],
             "lag": "",
             "link_status": "True",
-            "mac_address": "2c3f.3899.1503",
+            "mac_address": "6c71.0d1d.3583",
             "mtu": "1500",
             "type": "1000base-t"
         },
         "GigabitEthernet0/4": {
             "802.1Q_mode": "access",
-            "description": "a description",
+            "description": "",
             "ip_addresses": [
                 {
                     "ip_address": "",
@@ -71,13 +161,13 @@
             ],
             "lag": "",
             "link_status": "True",
-            "mac_address": "2c3f.3899.1504",
+            "mac_address": "6c71.0d1d.3584",
             "mtu": "1500",
             "type": "1000base-t"
         },
         "GigabitEthernet0/5": {
-            "802.1Q_mode": "access",
-            "description": "a description",
+            "802.1Q_mode": "tagged-all",
+            "description": "",
             "ip_addresses": [
                 {
                     "ip_address": "",
@@ -85,13 +175,13 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
-            "mac_address": "2c3f.3899.1505",
+            "link_status": "False",
+            "mac_address": "6c71.0d1d.3585",
             "mtu": "1500",
             "type": "1000base-t"
         },
         "GigabitEthernet0/6": {
-            "802.1Q_mode": "access",
+            "802.1Q_mode": "tagged-all",
             "description": "",
             "ip_addresses": [
                 {
@@ -101,12 +191,12 @@
             ],
             "lag": "",
             "link_status": "False",
-            "mac_address": "2c3f.3899.1506",
+            "mac_address": "6c71.0d1d.3586",
             "mtu": "1500",
             "type": "1000base-t"
         },
         "GigabitEthernet0/7": {
-            "802.1Q_mode": "access",
+            "802.1Q_mode": "tagged-all",
             "description": "",
             "ip_addresses": [
                 {
@@ -116,12 +206,12 @@
             ],
             "lag": "",
             "link_status": "False",
-            "mac_address": "2c3f.3899.1507",
+            "mac_address": "6c71.0d1d.3587",
             "mtu": "1500",
             "type": "1000base-t"
         },
         "GigabitEthernet0/8": {
-            "802.1Q_mode": "access",
+            "802.1Q_mode": "tagged-all",
             "description": "",
             "ip_addresses": [
                 {
@@ -131,12 +221,12 @@
             ],
             "lag": "",
             "link_status": "False",
-            "mac_address": "2c3f.3899.1508",
+            "mac_address": "6c71.0d1d.3588",
             "mtu": "1500",
             "type": "1000base-t"
         },
         "GigabitEthernet0/9": {
-            "802.1Q_mode": "access",
+            "802.1Q_mode": "tagged-all",
             "description": "",
             "ip_addresses": [
                 {
@@ -146,7 +236,7 @@
             ],
             "lag": "",
             "link_status": "False",
-            "mac_address": "2c3f.3899.1509",
+            "mac_address": "6c71.0d1d.3589",
             "mtu": "1500",
             "type": "1000base-t"
         },
@@ -161,57 +251,25 @@
             ],
             "lag": "",
             "link_status": "False",
-            "mac_address": "2c3f.3899.1540",
+            "mac_address": "6c71.0d1d.35c0",
             "mtu": "1500",
             "type": "virtual"
         },
-        "Vlan255": {
-            "802.1Q_mode": "",
-            "description": "",
-            "ip_addresses": [
-                {
-                    "ip_address": "10.35.255.75",
-                    "prefix_length": "24"
-                }
-            ],
-            "lag": "",
-            "link_status": "True",
-            "mac_address": "2c3f.3899.1541",
-            "mtu": "1500",
-            "type": "virtual"
-        },
-        "Vlan955": {
+        "Vlan10": {
             "802.1Q_mode": "",
             "description": "",
             "ip_addresses": [
                 {
                     "ip_address": "198.51.100.1",
-                    "prefix_length": "27"
+                    "prefix_length": "28"
                 }
             ],
             "lag": "",
             "link_status": "True",
-            "mac_address": "2c3f.3899.1542",
+            "mac_address": "6c71.0d1d.35c1",
             "mtu": "1500",
             "type": "virtual"
         }
     },
-    "serial": "FOC1541W2SP",
-    "cables": [
-            {
-                "remote_device": "demo-cisco-1",
-                "local_interface": "GigabitEthernet1",
-                "remote_interface": "GigabitEthernet1"
-            },
-            {
-                "remote_device": "demo-cisco-3",
-                "local_interface": "GigabitEthernet2",
-                "remote_interface": "GigabitEthernet2"
-            },
-            {
-                "remote_device": "demo-cisco-4",
-                "local_interface": "GigabitEthernet3",
-                "remote_interface": "GigabitEthernet3"
-            }
-        ]
+    "serial": "FOC2341Y2CQ"
 }
