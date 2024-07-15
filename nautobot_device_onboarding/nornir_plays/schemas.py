@@ -86,13 +86,16 @@ def sync_network_data_schema(json_schema=True):
                     "description": "List of tagged VLANs associated with the interface (optional)",
                 },
                 "cables": {
-                    "type": "object",
+                    "type": "array",
                     "items": {
                         "type": "object",
                         "required": ["local_interface", "remote_interface", "remote_device"],
                         "properties": {
                             "local_interface": {"type": "string", "description": "Interface Name of the local device"},
-                            "remote_interface": {"type": "string", "description": "Interface Name of the remote device"},
+                            "remote_interface": {
+                                "type": "string",
+                                "description": "Interface Name of the remote device",
+                            },
                             "remote_device": {"type": "string", "description": "Name of the remote device"},
                         },
                     },
@@ -202,7 +205,7 @@ NETWORK_DATA_SCHEMA = {
             },
         },
         "cables": {
-            "type": "object",
+            "type": "array",
             "items": {
                 "type": "object",
                 "required": ["local_interface", "remote_interface", "remote_device"],
@@ -212,5 +215,6 @@ NETWORK_DATA_SCHEMA = {
                     "remote_device": {"type": "string", "description": "Name of the remote device"},
                 },
             },
+        },
     },
 }
