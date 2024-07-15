@@ -562,7 +562,6 @@ class SyncNetworkDataVrfToInterface(DiffSyncModel):
         return super().update(attrs)
 
 
-# TODO: Cable Model
 class SyncNetworkDataCable(FilteredNautobotModel):
     """Shared data model representing a cable between two interfaces."""
 
@@ -577,8 +576,9 @@ class SyncNetworkDataCable(FilteredNautobotModel):
         "termination_b__model",
         "termination_b__device__name",
         "termination_b__name",
-        "status__name",
     )
+
+    _attributes = ("status__name",)
 
     termination_a__app_label: str
     termination_a__model: str
@@ -588,11 +588,5 @@ class SyncNetworkDataCable(FilteredNautobotModel):
     termination_b__model: str
     termination_b__device__name: str
     termination_b__name: str
+
     status__name: str
-
-    # @classmethod
-    # def create(cls, diffsync, ids, attrs):
-    #     """Create a new Cable object."""
-
-    #     # if the same termination pair exists in reverse, don't create
-    #     return super().create(diffsync, ids, attrs)
