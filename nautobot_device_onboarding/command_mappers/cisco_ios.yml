@@ -122,7 +122,6 @@ sync_network_data:
         post_processor: "{{ obj | get_vlan_data(vlan_map, 'untagged') | tojson }}"
         iterable_type: "dict"
   cables:
-    root_key: true
     commands:
       - command: "show cdp neighbors detail"
         parser: "textfsm"
