@@ -51,11 +51,11 @@ Regardless, the Onboarding App greatly simplifies the onboarding process by allo
 
 |     Cabling          | Cisco IOS          | Cisco XE           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  |
 | ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: |
-|  Cabling       | :warning: | :warning: | :test_tube: | :x: | :x: | :x: | :x: |
+|  Terminations A and B      | :test_tube: | :test_tube: | :test_tube: | :x: | :x: | :x: | :x: |
 
 :white_check_mark: - Supported and stable.
 :x: - No current support.
-:warning: - Supported, but has limited testing.
+:test_tube: - Supported, but has limited testing.
 
 ### Screenshots
 
