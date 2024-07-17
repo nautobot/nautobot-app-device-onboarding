@@ -17,6 +17,19 @@ The `nautobot-device-onboarding` plugin is using the [netmiko](https://github.co
 
 Regardless, the Onboarding App greatly simplifies the onboarding process by allowing the user to specify a small amount of info and having the app populate a much larger amount of device data in Nautobot.
 
+### Support Matrix (Sync Devices From Network)
+
+|     Data Attribute      | Cisco IOS | Cisco XE   | Cisco NXOS    | Cisco WLC | Juniper Junos | Arista EOS | F5 |
+| ----------------------- | --------- | ---------- | ------------- | --------- | ------------- | ---------- | ---------- |
+| Hostname                | :white_check_mark: |                  |                      |                            |                      || :x: |
+| Serial Number           | :white_check_mark: |                  |                      |                            |                      || :x: |
+| Device Type             | :white_check_mark: |                  |                      |                            |                      || :x: |
+| Mgmt Interface          | :white_check_mark: |                  |                      |                            |                      || :x: |
+| Mgmt IP Address         | :white_check_mark: |                  |                      |                            |                      || :x: |
+
+### Support Matrix (Sync Data From Network)
+
+
 ### Screenshots
 
 Device Onboarding is a Job that allows you to provide a few required pieces of information and onboard the device.
