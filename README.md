@@ -51,8 +51,11 @@ Regardless, the Onboarding App greatly simplifies the onboarding process by allo
 
 |     Cabling          | Cisco IOS          | Cisco XE           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  |
 | ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: |
-| Untagged VLANs       | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :x: | :x: | :x: |
-| Tagged VLANs        | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :x: | :x: | :x: |
+|  Cabling       | :warning: | :warning: | :test_tube: | :x: | :x: | :x: | :x: |
+
+:white_check_mark: - Supported and stable.
+:x: - No current support.
+:warning: - Supported, but has limited testing.
 
 ### Screenshots
 
