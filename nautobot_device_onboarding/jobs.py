@@ -18,6 +18,7 @@ from nautobot.extras.models import CustomField, Role, SecretsGroup, SecretsGroup
 from nautobot.ipam.models import Namespace
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_ssot.jobs.base import DataSource
+from netaddr import iter_iprange
 from nornir import InitNornir
 from nornir.core.plugins.inventory import InventoryPluginRegister
 
@@ -691,12 +692,12 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
 class DeviceOnboardingTroubleshootingJob(Job):
     """Simple Job to Execute Show Command."""
 
-    debug = BooleanVar()
-    ip_addresses = StringVar()
-    port = IntegerVar(default=22)
-    timeout = IntegerVar(default=30)
-    secrets_group = ObjectVar(model=SecretsGroup)
-    platform = ObjectVar(model=Platform, required=True)
+    debug = BooleanVar(description="Enable for more verbose logging.")
+    ip_addresses = StringVar(description="A comma separated list of IP addresses.", required=True)
+    port = IntegerVar(default=22, description="Port to connect to the device.")
+    timeout = IntegerVar(default=30, description="Timeout for the connection.")
+    secrets_group = ObjectVar(model=SecretsGroup, description="SecretsGroup for device connection credentials.", required=True)
+    platform = ObjectVar(model=Platform, description="Device platform.", required=True)
     ssot_job_type = ChoiceVar(choices=SSOT_JOB_TO_COMMAND_CHOICE)
 
     class Meta:
@@ -759,7 +760,49 @@ class DeviceOnboardingTroubleshootingJob(Job):
             self.logger.info("Error During Sync Devices Command Getter: %s", err)
         self.create_file("command_outputs.json", json.dumps(compiled_results))
         return f"Successfully ran the following commands: {', '.join(list(compiled_results.keys()))}"
+    
+class DeviceConnectivityCheck(Job):
+    """Job to check connectivity of a device or devices."""
+    debug = BooleanVar(description="Enable for more verbose logging.")
+    ip_addresses = StringVar(description="A comma separated list or range of IP addresses.", required=True)
+    port = IntegerVar(default=22, description="Port to connect to the device.")
+    timeout = IntegerVar(default=30, description="Timeout for the connection.")
+    secrets_group = ObjectVar(model=SecretsGroup, description="SecretsGroup for device connection credentials.", required=True)
 
+    def __init__(self, *args, **kwargs): 
+        """Initialize SSOTSyncNetworkData."""
+        super().__init__(*args, **kwargs)
 
-jobs = [OnboardingTask, SSOTSyncDevices, SSOTSyncNetworkData, DeviceOnboardingTroubleshootingJob]
+    class Meta:
+        """Meta object boilerplate for onboarding."""
+
+        name = "Check Device Connectivity"
+        description = "Check connectivity to a device(s)."
+        has_sensitive_variables = False
+        hidden = True
+
+    def run(
+        self,
+        dryrun,
+        memory_profiling,
+        debug,
+        *args,
+        **kwargs,
+    ):
+        
+        """Run sync."""
+        self.dryrun = dryrun
+        self.memory_profiling = memory_profiling
+        self.debug = debug
+
+        # Check if IP addresses entered are a range, or a list, or CIDR block
+        # Limit how big the range can be
+        # Build a nornir inventory with the IP addresses
+        # Check SSH Connectivity to each device
+        # Check Username/password authentication
+        # Build exportable CSV with results
+        # Ability to hook into onboarding task? 
+        # Ability to load existing devices from nautobot and change status based on results? 
+
+jobs = [OnboardingTask, SSOTSyncDevices, SSOTSyncNetworkData, DeviceOnboardingTroubleshootingJob, DeviceConnectivityCheck]
 register_jobs(*jobs)
