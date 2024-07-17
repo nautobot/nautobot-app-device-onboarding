@@ -62,7 +62,7 @@ class SyncDevicesNautobotAdapter(diffsync.DiffSync):
         for manufacturer in Manufacturer.objects.all():
             if self.job.debug:
                 self.job.logger.debug("Loading Manufacturer data from Nautobot...")
-            onboarding_manufacturer = self.manufacturer(diffsync=self, name=manufacturer.name)
+            onboarding_manufacturer = self.manufacturer(diffsync=self, pk=manufacturer.pk, name=manufacturer.name)
             self.add(onboarding_manufacturer)
             if self.job.debug:
                 self.job.logger.debug(f"Manufacturer: {manufacturer.name} loaded.")
@@ -74,6 +74,7 @@ class SyncDevicesNautobotAdapter(diffsync.DiffSync):
         for platform in Platform.objects.all():
             onboarding_platform = self.platform(
                 diffsync=self,
+                pk=platform.pk,
                 name=platform.name,
                 network_driver=platform.network_driver if platform.network_driver else "",
                 manufacturer__name=platform.manufacturer.name if platform.manufacturer else None,
@@ -89,8 +90,9 @@ class SyncDevicesNautobotAdapter(diffsync.DiffSync):
         for device_type in DeviceType.objects.all():
             onboarding_device_type = self.device_type(
                 diffsync=self,
+                pk=device_type.pk,
                 model=device_type.model,
-                part_number=device_type.model,
+                part_number=device_type.part_number,
                 manufacturer__name=device_type.manufacturer.name,
             )
             self.add(onboarding_device_type)
@@ -117,6 +119,7 @@ class SyncDevicesNautobotAdapter(diffsync.DiffSync):
                 interfaces = []
             onboarding_device = self.device(
                 diffsync=self,
+                pk=device.pk,
                 device_type__model=device.device_type.model,
                 location__name=device.location.name,
                 name=device.name,
