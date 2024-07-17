@@ -107,6 +107,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
                 status__name=ip_address.status.name,
             )
             try:
+                network_ip_address.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
                 self.add(network_ip_address)
             except diffsync.exceptions.ObjectAlreadyExists:
                 self.job.logger.warning(
@@ -128,7 +129,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
                 location__name=vlan.location.name if vlan.location else "",
             )
             try:
-                network_vlan.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_SRC
+                network_vlan.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
                 self.add(network_vlan)
             except diffsync.exceptions.ObjectAlreadyExists:
                 pass
