@@ -2430,7 +2430,7 @@
         }
     },
     "serial": "FDO20432435",
-    "neighbors": [
+    "cables": [
             {
                 "remote_device": "demo-cisco-2",
                 "local_interface": "GigabitEthernet1",
