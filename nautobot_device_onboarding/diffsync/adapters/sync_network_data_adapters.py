@@ -240,6 +240,14 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         """
         for device in self.job.devices_to_load:
             for cable in device.get_cables():
+                if cable.termination_b.device.name == "" or cable.termination_a.device.name == "":
+                    self._handle_general_load_exception(
+                        error="Device attached to a cable is missing a name. Devices must have a name to utilize cable onboarding.",
+                        hostname=device.name,
+                        data=cable,
+                        model_type="cable",
+                    )
+                    continue
                 if cable.termination_a.device.name < cable.termination_b.device.name:
                     termination_a_device = cable.termination_a.device.name
                     termination_a_interface = cable.termination_a.name
@@ -707,9 +715,45 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                 self.job.logger.debug(f"Loading Cables from {hostname}")
                 self.job.logger.debug(f"Cable Data: {device_data['cables']}")
 
+            # last case check to make sure cable data is returned and returned in the correct format (list of dict)
+            if device_data.get("cables") is None or not isinstance(device_data.get("cables"), list):
+                self._handle_general_load_exception(
+                    error="Cable data is missing from the returned device data or returned data is not a list.",
+                    hostname=hostname,
+                    data=device_data.get("cables"),
+                    model_type="cable",
+                )
+                return []
+
             for neighbor_data in device_data["cables"]:
+                if neighbor_data.get("local_interface") == "" or neighbor_data.get("local_interface") is None:
+                    self._handle_general_load_exception(
+                        error="Local interface is missing a name. Interfaces must have a name to utilize cable onboarding.",
+                        hostname=hostname,
+                        data=neighbor_data,
+                        model_type="cable",
+                    )
+                    continue
                 local_interface = canonical_interface_name(neighbor_data["local_interface"])
+
+                if neighbor_data.get("remote_interface") == "" or neighbor_data.get("remote_interface") is None:
+                    self._handle_general_load_exception(
+                        error="Remote interface is missing a name. Interfaces must have a name to utilize cable onboarding.",
+                        hostname=hostname,
+                        data=neighbor_data,
+                        model_type="cable",
+                    )
+                    continue
                 remote_interface = canonical_interface_name(neighbor_data["remote_interface"])
+
+                if neighbor_data.get("remote_device") == "" or neighbor_data.get("remote_device") is None:
+                    self._handle_general_load_exception(
+                        error="Remote device is missing a name. Devices must have a name to utilize cable onboarding.",
+                        hostname=hostname,
+                        data=neighbor_data,
+                        model_type="cable",
+                    )
+                    continue
                 remote_device = neighbor_data["remote_device"]
                 if self.job.debug:
                     self.job.logger.debug(f"Neighbor Data: {neighbor_data}")
