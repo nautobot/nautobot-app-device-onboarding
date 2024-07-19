@@ -22,6 +22,7 @@ class NautobotDeviceOnboardingConfig(NautobotAppConfig):
     required_settings = []
     min_version = "2.1.1"
     max_version = "2.9999"
+    docs_view_name = "plugins:nautobot_device_onboarding:docs"
     default_settings = {
         "create_platform_if_missing": True,
         "create_manufacturer_if_missing": True,
