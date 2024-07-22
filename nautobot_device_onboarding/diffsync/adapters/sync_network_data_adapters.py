@@ -708,7 +708,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                     )
                     continue
 
-    def load_cables(self):
+    def load_cables(self):  # pylint: disable=inconsistent-return-statements
         """Load cables into the Diffsync store."""
         for hostname, device_data in self.job.command_getter_result.items():
             if self.job.debug:
@@ -716,45 +716,58 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                 self.job.logger.debug(f"Cable Data: {device_data['cables']}")
 
             # last case check to make sure cable data is returned and returned in the correct format (list of dict)
-            if device_data.get("cables") is None or not isinstance(device_data.get("cables"), list):
+
+            try:
+                neighbors = device_data["cables"]
+            except KeyError as error:
+                error.args = (
+                    error.args
+                    + "Cable data/cable key is missing from the returned device data or returned data is not a list."
+                )
                 self._handle_general_load_exception(
-                    error="Cable data is missing from the returned device data or returned data is not a list.",
+                    error=error,
                     hostname=hostname,
-                    data=device_data.get("cables"),
+                    data=device_data,
                     model_type="cable",
                 )
-                return []
 
             for neighbor_data in device_data["cables"]:
-                if neighbor_data.get("local_interface") == "" or neighbor_data.get("local_interface") is None:
+                try:
+                    local_interface = canonical_interface_name(neighbor_data["local_interface"])
+                except KeyError as error:
+                    error.args = error.args + "Local interface is missing a name."
                     self._handle_general_load_exception(
-                        error="Local interface is missing a name. Interfaces must have a name to utilize cable onboarding.",
+                        error=error,
                         hostname=hostname,
                         data=neighbor_data,
                         model_type="cable",
                     )
                     continue
-                local_interface = canonical_interface_name(neighbor_data["local_interface"])
 
-                if neighbor_data.get("remote_interface") == "" or neighbor_data.get("remote_interface") is None:
+                try:
+                    remote_interface = canonical_interface_name(neighbor_data["remote_interface"])
+                except KeyError as error:
+                    error.args = error.args + "Remote interface is missing a name."
                     self._handle_general_load_exception(
-                        error="Remote interface is missing a name. Interfaces must have a name to utilize cable onboarding.",
+                        error=error,
                         hostname=hostname,
                         data=neighbor_data,
                         model_type="cable",
                     )
                     continue
-                remote_interface = canonical_interface_name(neighbor_data["remote_interface"])
 
-                if neighbor_data.get("remote_device") == "" or neighbor_data.get("remote_device") is None:
+                try:
+                    remote_device = neighbor_data["remote_device"]
+                except KeyError as error:
+                    error.args = error.args + "Remote device is missing a name."
                     self._handle_general_load_exception(
-                        error="Remote device is missing a name. Devices must have a name to utilize cable onboarding.",
+                        error=error,
                         hostname=hostname,
                         data=neighbor_data,
                         model_type="cable",
                     )
                     continue
-                remote_device = neighbor_data["remote_device"]
+
                 if self.job.debug:
                     self.job.logger.debug(f"Neighbor Data: {neighbor_data}")
 
