@@ -718,7 +718,77 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
             # last case check to make sure cable data is returned and returned in the correct format (list of dict)
 
             try:
-                neighbors = device_data["cables"]
+                for neighbor_data in device_data["cables"]:
+                    try:
+                        local_interface = canonical_interface_name(neighbor_data["local_interface"])
+                    except KeyError as error:
+                        error.args = error.args + "Local interface is missing a name."
+                        self._handle_general_load_exception(
+                            error=error,
+                            hostname=hostname,
+                            data=neighbor_data,
+                            model_type="cable",
+                        )
+                        continue
+
+                    try:
+                        remote_interface = canonical_interface_name(neighbor_data["remote_interface"])
+                    except KeyError as error:
+                        error.args = error.args + "Remote interface is missing a name."
+                        self._handle_general_load_exception(
+                            error=error,
+                            hostname=hostname,
+                            data=neighbor_data,
+                            model_type="cable",
+                        )
+                        continue
+
+                    try:
+                        remote_device = neighbor_data["remote_device"]
+                    except KeyError as error:
+                        error.args = error.args + "Remote device is missing a name."
+                        self._handle_general_load_exception(
+                            error=error,
+                            hostname=hostname,
+                            data=neighbor_data,
+                            model_type="cable",
+                        )
+                        continue
+
+                    if self.job.debug:
+                        self.job.logger.debug(f"Neighbor Data: {neighbor_data}")
+
+                    # always put the alphabetically first device as termination a
+                    if hostname < remote_device:
+                        termination_a_device = hostname
+                        termination_a_interface = local_interface
+                        termination_b_device = remote_device
+                        termination_b_interface = remote_interface
+                    else:
+                        termination_a_device = remote_device
+                        termination_a_interface = remote_interface
+                        termination_b_device = hostname
+                        termination_b_interface = local_interface
+
+                    network_cable = self.cable(
+                        diffsync=self,
+                        status__name="Connected",  # ask for default status in the job form
+                        termination_a__app_label="dcim",
+                        termination_a__model="interface",
+                        termination_a__device__name=termination_a_device,
+                        termination_a__name=termination_a_interface,
+                        termination_b__app_label="dcim",
+                        termination_b__model="interface",
+                        termination_b__device__name=termination_b_device,
+                        termination_b__name=termination_b_interface,
+                    )
+                    try:
+                        self.add(network_cable)
+                        if self.job.debug:
+                            self.job.logger.debug(f"Loaded Cable: {network_cable}")
+                    except diffsync.exceptions.ObjectAlreadyExists:
+                        # object already in the diffsync store.
+                        pass
             except KeyError as error:
                 error.args = (
                     error.args
@@ -730,78 +800,6 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                     data=device_data,
                     model_type="cable",
                 )
-
-            for neighbor_data in device_data["cables"]:
-                try:
-                    local_interface = canonical_interface_name(neighbor_data["local_interface"])
-                except KeyError as error:
-                    error.args = error.args + "Local interface is missing a name."
-                    self._handle_general_load_exception(
-                        error=error,
-                        hostname=hostname,
-                        data=neighbor_data,
-                        model_type="cable",
-                    )
-                    continue
-
-                try:
-                    remote_interface = canonical_interface_name(neighbor_data["remote_interface"])
-                except KeyError as error:
-                    error.args = error.args + "Remote interface is missing a name."
-                    self._handle_general_load_exception(
-                        error=error,
-                        hostname=hostname,
-                        data=neighbor_data,
-                        model_type="cable",
-                    )
-                    continue
-
-                try:
-                    remote_device = neighbor_data["remote_device"]
-                except KeyError as error:
-                    error.args = error.args + "Remote device is missing a name."
-                    self._handle_general_load_exception(
-                        error=error,
-                        hostname=hostname,
-                        data=neighbor_data,
-                        model_type="cable",
-                    )
-                    continue
-
-                if self.job.debug:
-                    self.job.logger.debug(f"Neighbor Data: {neighbor_data}")
-
-                # always put the alphabetically first device as termination a
-                if hostname < remote_device:
-                    termination_a_device = hostname
-                    termination_a_interface = local_interface
-                    termination_b_device = remote_device
-                    termination_b_interface = remote_interface
-                else:
-                    termination_a_device = remote_device
-                    termination_a_interface = remote_interface
-                    termination_b_device = hostname
-                    termination_b_interface = local_interface
-
-                network_cable = self.cable(
-                    diffsync=self,
-                    status__name="Connected",  # ask for default status in the job form
-                    termination_a__app_label="dcim",
-                    termination_a__model="interface",
-                    termination_a__device__name=termination_a_device,
-                    termination_a__name=termination_a_interface,
-                    termination_b__app_label="dcim",
-                    termination_b__model="interface",
-                    termination_b__device__name=termination_b_device,
-                    termination_b__name=termination_b_interface,
-                )
-                try:
-                    self.add(network_cable)
-                    if self.job.debug:
-                        self.job.logger.debug(f"Loaded Cable: {network_cable}")
-                except diffsync.exceptions.ObjectAlreadyExists:
-                    # object already in the diffsync store.
-                    pass
 
     def load(self):
         """Load network data."""
