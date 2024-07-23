@@ -241,11 +241,9 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         for device in self.job.devices_to_load:
             for cable in device.get_cables():
                 if cable.termination_b.device.name == "" or cable.termination_a.device.name == "":
-                    self._handle_general_load_exception(
-                        error="Device attached to a cable is missing a name. Devices must have a name to utilize cable onboarding.",
-                        hostname=device.name,
-                        data=cable,
-                        model_type="cable",
+                    self.job.logger.warning(
+                        f"Device attached to a cable is missing a name. Devices must have a name to utilize cable onboarding. "
+                        f"Skipping Cable: {cable}"
                     )
                     continue
                 if cable.termination_a.device.name < cable.termination_b.device.name:
