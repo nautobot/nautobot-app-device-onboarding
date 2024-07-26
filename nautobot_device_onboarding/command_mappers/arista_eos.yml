@@ -76,6 +76,7 @@ sync_network_data:
       - command: "show interfaces | json"
         parser: "none"
         jpath: 'interfaces."{{ current_key }}".description'  # yamllint disable-line rule:quoted-strings
+        iterable_type: "str"
   interfaces__link_status:
     commands:
       - command: "show interfaces | json"
