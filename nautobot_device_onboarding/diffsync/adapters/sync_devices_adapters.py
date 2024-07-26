@@ -295,7 +295,7 @@ class SyncDevicesNetworkAdapter(diffsync.DiffSync):
         """Verify that all of the fields returned from a device actually contain data."""
         fields_missing_data = []
         required_fields_from_device = ["device_type", "hostname", "mgmt_interface", "mask_length", "serial"]
-        if platform:  # platform is only retruned with device data if not provided on the job form/csv
+        if platform:  # platform is only returned with device data if not provided on the job form/csv
             required_fields_from_device.append("platform")
         for field in required_fields_from_device:
             data = device_data[ip_address]
