@@ -124,6 +124,8 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
     get_context_from_pre_processor = {}
     if command_info_dict.get("pre_processor"):
         for pre_processor_name, field_data in command_info_dict["pre_processor"].items():
+            if pre_processor_name == "vlan_map" and not sync_vlans:
+                continue
             if isinstance(field_data["commands"], dict):
                 # only one command is specified as a dict force it to a list.
                 loop_commands = [field_data["commands"]]
