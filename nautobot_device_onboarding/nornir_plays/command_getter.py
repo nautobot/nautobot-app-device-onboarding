@@ -53,7 +53,9 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables):
     all_commands = []
     for key, value in yaml_parsed_info.items():
         if key == "pre_processor":
-            for _, v in value.items():
+            for pre_processor, v in value.items():
+                if not sync_vlans and pre_processor == "vlan_map":
+                    continue
                 current_root_key = v.get("commands")
                 if isinstance(current_root_key, list):
                     # Means their is any "nested" structures. e.g multiple commands
@@ -94,7 +96,9 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables):
     return deduplicate_command_list(all_commands)
 
 
-def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_getter_job: str, **orig_job_kwargs):
+def netmiko_send_commands(
+    task: Task, command_getter_yaml_data: Dict, command_getter_job: str, logger, **orig_job_kwargs
+):
     """Run commands specified in PLATFORM_COMMAND_MAP."""
     if not task.host.platform:
         return Result(host=task.host, result=f"{task.host.name} has no platform set.", failed=True)
@@ -111,6 +115,17 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
         orig_job_kwargs.get("sync_vrfs", False),
         orig_job_kwargs.get("sync_cables", False),
     )
+    # if (
+    #     orig_job_kwargs.get("sync_cables", False)
+    #     and "cables" not in command_getter_yaml_data[task.host.platform][command_getter_job].keys()
+    # ):
+    #     return Result(
+    #         host=task.host,
+    #         result=f"{task.host.name} has missing definitions for cables in command_mapper YAML file.",
+    #         failed=True,
+    #     )
+
+    logger.debug(f"Commands to run: {commands}")
     # All commands in this for loop are running within 1 device connection.
     for result_idx, command in enumerate(commands):
         send_command_kwargs = {}
@@ -151,7 +166,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                     except Exception:
                         task.result.failed = False
         except NornirSubTaskError:
-            # We don't want to fail the entire subtask if SubTaskError is hit, set result to empty list and failt to False
+            # We don't want to fail the entire subtask if SubTaskError is hit, set result to empty list and failed to False
             # Handle this type or result latter in the ETL process.
             task.results[result_idx].result = []
             task.results[result_idx].failed = False
@@ -294,6 +309,7 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
                 command_getter_job="sync_network_data",
+                logger=logger,
                 **kwargs,
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
