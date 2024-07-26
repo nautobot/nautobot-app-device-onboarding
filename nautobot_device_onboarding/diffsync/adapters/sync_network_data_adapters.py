@@ -709,6 +709,9 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
     def load_cables(self):  # pylint: disable=inconsistent-return-statements
         """Load cables into the Diffsync store."""
         for hostname, device_data in self.job.command_getter_result.items():
+            if "cables" not in device_data:
+                self.job.logger.warning(f"No cable data found for {hostname}. Skipping cable load.")
+                return
             if self.job.debug:
                 self.job.logger.debug(f"Loading Cables from {hostname}")
                 self.job.logger.debug(f"Cable Data: {device_data['cables']}")
