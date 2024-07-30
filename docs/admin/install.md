@@ -39,7 +39,7 @@ Once installed, the app needs to be enabled in your Nautobot configuration. The 
 
 ```python
 # In your nautobot_config.py
-PLUGINS = ["nautobot_device_onboarding"]
+PLUGINS = ["nautobot_plugin_nornir", "nautobot_ssot", "nautobot_device_onboarding"]
 
 # PLUGINS_CONFIG = {
 #   "nautobot_device_onboarding": {
