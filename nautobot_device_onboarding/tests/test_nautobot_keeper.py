@@ -437,7 +437,7 @@ class NautobotKeeperTestCase(TestCase):
         self.assertEqual(nbk.nb_mgmt_ifname, intf)
 
     def test_ensure_primary_ip_not_exist(self):
-        """Verify ensure_primary_ip function when the IP address do not already exist."""
+        """Verify ensure_primary_ip function when the IP address does not already exist."""
         onboarding_kwargs = {
             "netdev_hostname": "device1",
             "netdev_nb_role_name": PLUGIN_SETTINGS["default_device_role"],
