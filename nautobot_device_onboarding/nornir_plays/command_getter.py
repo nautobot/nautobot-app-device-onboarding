@@ -115,15 +115,13 @@ def netmiko_send_commands(
         orig_job_kwargs.get("sync_vrfs", False),
         orig_job_kwargs.get("sync_cables", False),
     )
-    # if (
-    #     orig_job_kwargs.get("sync_cables", False)
-    #     and "cables" not in command_getter_yaml_data[task.host.platform][command_getter_job].keys()
-    # ):
-    #     return Result(
-    #         host=task.host,
-    #         result=f"{task.host.name} has missing definitions for cables in command_mapper YAML file.",
-    #         failed=True,
-    #     )
+    if (
+        orig_job_kwargs.get("sync_cables", False)
+        and "cables" not in command_getter_yaml_data[task.host.platform][command_getter_job].keys()
+    ):
+        logger.error(
+            f"{task.host.platform} has missing definitions for cables in command_mapper YAML file. Cables will not be loaded."
+        )
 
     logger.debug(f"Commands to run: {commands}")
     # All commands in this for loop are running within 1 device connection.
