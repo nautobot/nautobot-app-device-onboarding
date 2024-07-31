@@ -45,7 +45,6 @@ class TestGetCommandsToRun(unittest.TestCase):
             sync_cables=False,
         )
         expected_commands_to_run = [
-            {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vlan_id, name: vlan_name}"},
             {"command": "show version", "parser": "textfsm", "jpath": "[*].serial[]"},
             {
                 "command": "show interfaces",
@@ -79,7 +78,6 @@ class TestGetCommandsToRun(unittest.TestCase):
             sync_cables=False,
         )
         expected_commands_to_run = [
-            {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vlan_id, name: vlan_name}"},
             {"command": "show version", "parser": "textfsm", "jpath": "[*].serial[]"},
             {
                 "command": "show interfaces",
@@ -109,6 +107,7 @@ class TestGetCommandsToRun(unittest.TestCase):
                 "iterable_type": "dict",
             },
         ]
+        self.maxDiff = None
         self.assertEqual(get_commands_to_run, expected_commands_to_run)
 
     def test_deduplicate_command_list_sync_data_no_vrfs_with_vlans(self):
@@ -191,7 +190,6 @@ class TestGetCommandsToRun(unittest.TestCase):
             self.expected_data["sync_network_data"], sync_vlans=False, sync_vrfs=False, sync_cables=True
         )
         expected_commands_to_run = [
-            {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vlan_id, name: vlan_name}"},
             {"command": "show version", "parser": "textfsm", "jpath": "[*].serial[]"},
             {
                 "command": "show interfaces",
