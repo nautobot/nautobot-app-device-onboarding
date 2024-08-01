@@ -130,7 +130,7 @@ NETWORK_DATA_SCHEMA = {
     "required": ["serial", "interfaces"],
     "properties": {
         "serial": {
-            "type": "string",
+            "type": ["string", "integer"],
             "description": "Serial number of the network device",
             "minItems": 1,
         },
