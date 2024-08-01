@@ -2,7 +2,7 @@
 
 from django.contrib.contenttypes.models import ContentType
 from nautobot.dcim.choices import InterfaceModeChoices, InterfaceTypeChoices
-from nautobot.dcim.models import Device, DeviceType, Interface, Location, LocationType, Manufacturer, Platform
+from nautobot.dcim.models import Cable, Device, DeviceType, Interface, Location, LocationType, Manufacturer, Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Role, Secret, SecretsGroup, SecretsGroupAssociation, Status
 from nautobot.ipam.choices import IPAddressTypeChoices, PrefixTypeChoices
@@ -10,7 +10,7 @@ from nautobot.ipam.models import VLAN, VRF, IPAddress, IPAddressToInterface, Nam
 
 
 def sync_network_data_ensure_required_nautobot_objects():
-    """Ensure the requied Nautobot objects needed for testing exist."""
+    """Ensure the required Nautobot objects needed for testing Sync Data from Network exist."""
     testing_objects = {}
 
     status, _ = Status.objects.get_or_create(name="Active")
@@ -22,6 +22,7 @@ def sync_network_data_ensure_required_nautobot_objects():
     status.content_types.add(ContentType.objects.get_for_model(Interface))
     status.content_types.add(ContentType.objects.get_for_model(VLAN))
     status.content_types.add(ContentType.objects.get_for_model(VRF))
+    status.content_types.add(ContentType.objects.get_for_model(Cable))
     status.validated_save()
 
     username_secret, _ = Secret.objects.get_or_create(
@@ -165,7 +166,7 @@ def sync_network_data_ensure_required_nautobot_objects():
 
 
 def sync_devices_ensure_required_nautobot_objects():
-    """Ensure the requied Nautobot objects needed for testing exist."""
+    """Ensure the required Nautobot objects needed for Sync Device from Network testing exist."""
     testing_objects = {}
 
     status, _ = Status.objects.get_or_create(name="Active")
@@ -296,7 +297,7 @@ def sync_devices_ensure_required_nautobot_objects():
 
 
 def sync_devices_ensure_required_nautobot_objects__jobs_testing():
-    """Ensure the requied Nautobot objects needed for testing exist."""
+    """Ensure the required Nautobot objects needed for testing exist."""
     testing_objects = {}
 
     status, _ = Status.objects.get_or_create(name="Active")

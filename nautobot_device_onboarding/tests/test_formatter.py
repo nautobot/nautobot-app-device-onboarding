@@ -108,13 +108,14 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
                     platform="platform",
                 )
             },
-            defaults=Defaults(data={"sync_vlans": False, "sync_vrfs": False}),
+            defaults=Defaults(data={"sync_vlans": False, "sync_vrfs": False, "sync_cables": False}),
         )
 
     def test_perform_data_extraction_simple_host_values(self):
         self.assertEqual("198.51.100.1", self.host.name)
         self.assertFalse(self.host.defaults.data.get("sync_vlans"))
         self.assertFalse(self.host.defaults.data.get("sync_vrfs"))
+        self.assertFalse(self.host.defaults.data.get("sync_cables"))
 
     def test_extract_and_post_process_empty_command_result_str(self):
         parsed_command_output = ""

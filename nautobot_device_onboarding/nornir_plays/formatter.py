@@ -120,9 +120,12 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
     result_dict = {}
     sync_vlans = host.defaults.data.get("sync_vlans", False)
     sync_vrfs = host.defaults.data.get("sync_vrfs", False)
+    sync_cables = host.defaults.data.get("sync_cables", False)
     get_context_from_pre_processor = {}
     if command_info_dict.get("pre_processor"):
         for pre_processor_name, field_data in command_info_dict["pre_processor"].items():
+            if pre_processor_name == "vlan_map" and not sync_vlans:
+                continue
             if isinstance(field_data["commands"], dict):
                 # only one command is specified as a dict force it to a list.
                 loop_commands = [field_data["commands"]]
@@ -143,6 +146,8 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
             continue
         # If syncing vrfs isn't inscope remove the unneeded commands.
         if not sync_vrfs and ssot_field == "interfaces__vrf":
+            continue
+        if not sync_cables and ssot_field == "cables":
             continue
         if ssot_field == "pre_processor":
             continue

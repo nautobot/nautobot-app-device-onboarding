@@ -204,6 +204,28 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
                 self.assertEqual(interface_name, diffsync_obj.name)
                 self.assertEqual(interface_data["vrf"], diffsync_obj.vrf)
 
+    def test_load_cables(self):
+        """Test loading cable data returned from command getter into the diffsync store."""
+        self.sync_network_data_adapter.load_cables()
+        for hostname, device_data in self.job.command_getter_result.items():
+            for cable in device_data["cables"]:
+                if hostname < cable["remote_device"]:
+                    termination_a_device = hostname
+                    termination_a_interface = cable["local_interface"]
+                    termination_b_device = cable["remote_device"]
+                    termination_b_interface = cable["remote_interface"]
+                else:
+                    termination_a_device = cable["remote_device"]
+                    termination_a_interface = cable["remote_interface"]
+                    termination_b_device = hostname
+                    termination_b_interface = cable["local_interface"]
+                unique_id = f"dcim__interface__{termination_a_device}__{termination_a_interface}__dcim__interface__{termination_b_device}__{termination_b_interface}"
+                diffsync_obj = self.sync_network_data_adapter.get("cable", unique_id)
+                self.assertEqual(termination_a_device, diffsync_obj.termination_a__device__name)
+                self.assertEqual(termination_a_interface, diffsync_obj.termination_a__name)
+                self.assertEqual(termination_b_device, diffsync_obj.termination_b__device__name)
+                self.assertEqual(termination_b_interface, diffsync_obj.termination_b__name)
+
 
 class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
     """Test SyncNetworkDataNautobotAdapter class."""

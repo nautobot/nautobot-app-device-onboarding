@@ -533,6 +533,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
     debug = BooleanVar(description="Enable for more verbose logging.")
     sync_vlans = BooleanVar(default=False, description="Sync VLANs and interface VLAN assignments.")
     sync_vrfs = BooleanVar(default=False, description="Sync VRFs and interface VRF assignments.")
+    sync_cables = BooleanVar(default=False, description="Sync cables between interfaces via a LLDP or CDP.")
     namespace = ObjectVar(
         model=Namespace, required=True, description="The namespace for all IP addresses created or updated in the sync."
     )
@@ -606,6 +607,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         platform,
         sync_vlans,
         sync_vrfs,
+        sync_cables,
         *args,
         **kwargs,
     ):
@@ -623,12 +625,12 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         self.platform = platform
         self.sync_vlans = sync_vlans
         self.sync_vrfs = sync_vrfs
+        self.sync_cables = sync_cables
 
         # Check for last_network_data_sync CustomField
         if self.debug:
             self.logger.debug("Checking for last_network_data_sync custom field")
         try:
-
             cf = CustomField.objects.get(key="last_network_data_sync")
         except ObjectDoesNotExist:
             cf, _ = CustomField.objects.get_or_create(
@@ -672,7 +674,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         if len(filtered_devices_names) <= 300:
             self.logger.info(f"Devices: {filtered_devices_names}")
         else:
-            self.logger.warning("Over 300 devies were selected to sync")
+            self.logger.warning("Over 300 devices were selected to sync")
 
         self.job_result.task_kwargs = {
             "debug": debug,
@@ -683,6 +685,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
             "device_role": device_role,
             "sync_vlans": sync_vlans,
             "sync_vrfs": sync_vrfs,
+            "sync_cables": sync_cables,
         }
 
         super().run(dryrun, memory_profiling, *args, **kwargs)

@@ -116,3 +116,8 @@ sync_network_data:
         jpath: "[?contains(interface, '{{ current_key | abbreviated_interface_name  }}')].native_vlan"
         post_processor: "{% if obj | length > 0 %}{{ vlan_map | selectattr('id', 'eq', obj[0]) | list | tojson }}{% else %}{{ obj }}{% endif %}"
         iterable_type: "dict"
+  cables:
+    commands:
+      - command: "show cdp neighbors detail"
+        parser: "textfsm"
+        jpath: "[*].{local_interface:local_interface, remote_interface:neighbor_interface, remote_device:neighbor_name}"

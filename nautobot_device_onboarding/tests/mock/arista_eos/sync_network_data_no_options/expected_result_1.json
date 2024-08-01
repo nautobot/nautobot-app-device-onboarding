@@ -2,7 +2,7 @@
     "interfaces": {
         "Ethernet1": {
             "802.1Q_mode": "",
-            "description": [],
+            "description": "",
             "ip_addresses": [
                 {
                     "ip_address": "1.1.1.1",
@@ -17,7 +17,7 @@
         },
         "Ethernet2": {
             "802.1Q_mode": "access",
-            "description": [],
+            "description": "",
             "ip_addresses": [],
             "lag": [],
             "link_status": "True",
@@ -27,7 +27,7 @@
         },
         "Ethernet3": {
             "802.1Q_mode": "access",
-            "description": [],
+            "description": "",
             "ip_addresses": [],
             "lag": [],
             "link_status": "True",
@@ -37,7 +37,7 @@
         },
         "Ethernet4": {
             "802.1Q_mode": "tagged",
-            "description": [],
+            "description": "",
             "ip_addresses": [
                 {
                     "ip_address": "0.0.0.0",
@@ -52,7 +52,7 @@
         },
         "Management1": {
             "802.1Q_mode": "",
-            "description": [],
+            "description": "",
             "ip_addresses": [
                 {
                     "ip_address": "198.51.100.1",

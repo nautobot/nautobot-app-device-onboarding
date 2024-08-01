@@ -108,7 +108,7 @@ Optional Fields:
 
 ### Enhance Existing Device
 
-A existing devices data can be expanded to include additonal objects by:
+A existing devices data can be expanded to include additional objects by:
 
 - A SSoT job execution.
     - Via Jobs menu
@@ -141,6 +141,6 @@ Required Fields:
 
 ## Using Git(Datasources) to Override the Apps Defaults
 
-By utilizing the Nautobot core feature `Datasource` the command mappers, jpaths, post_processors for each platform can be overriden. This also gives an easy way for a user to add platform support without having to get those fixes directly upstreamed into this application.
+By utilizing the Nautobot core feature `Datasource` the command mappers, jpaths, post_processors for each platform can be overridden. This also gives an easy way for a user to add platform support without having to get those fixes directly upstreamed into this application.
 
 The format of these YAML files are and how to extend this application is covered in [App YAML Overrides](./app_yaml_overrides.md).

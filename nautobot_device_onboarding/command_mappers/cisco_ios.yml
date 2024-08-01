@@ -121,3 +121,9 @@ sync_network_data:
         jpath: "[?interface=='{{ current_key | abbreviated_interface_name }}'].{admin_mode: admin_mode, mode: mode, access_vlan: access_vlan, trunking_vlans: trunking_vlans, native_vlan: native_vlan}"
         post_processor: "{{ obj | get_vlan_data(vlan_map, 'untagged') | tojson }}"
         iterable_type: "dict"
+  cables:
+    commands:
+      - command: "show cdp neighbors detail"
+        parser: "textfsm"
+        jpath: "[*].{local_interface:local_interface, remote_interface:neighbor_interface, remote_device:neighbor_name}"
+        post_processor: "{% set result = [] %}{% for cable in obj %}{% set _=result.append({'local_interface': cable['local_interface'], 'remote_interface': cable['remote_interface'], 'remote_device': cable['remote_device'] | remove_fqdn }) %}{% endfor %}{{ result | tojson }}"
