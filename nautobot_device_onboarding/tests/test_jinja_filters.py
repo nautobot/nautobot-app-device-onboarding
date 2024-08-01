@@ -14,6 +14,7 @@ from nautobot_device_onboarding.jinja_filters import (
     map_interface_type,
     parse_junos_ip_address,
     port_mode_to_nautobot,
+    remove_fqdn,
 )
 
 
@@ -255,3 +256,7 @@ class TestJinjaFilters(unittest.TestCase):
         """Parse Junos IP and destination prefix."""
         data = [{"prefix_length": None, "ip_address": None}]
         self.assertEqual(parse_junos_ip_address(data), [])
+
+    def test_remove_fqdn(self):
+        """Remove the FQDN from the hostname."""
+        self.assertEqual(remove_fqdn("foo.example.com"), "foo")

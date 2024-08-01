@@ -110,3 +110,10 @@ sync_network_data:
         parser: "textfsm"
         jpath: "[?contains(interfaces, `{{ current_key }}`*)].{admin_mode: admin_mode, mode: mode, access_vlan: access_vlan, trunking_vlans: trunking_vlans, native_vlan: native_vlan}"
         post_processor: "{{ obj | get_vlan_data(vlan_map, 'untagged') | tojson }}"
+  cables:
+    commands:
+      - command: "show lldp neighbors | display json"
+        parser: "none"
+        jpath: '"lldp-neighbors-information"[]."lldp-neighbor-information"[].{local_interface: "lldp-local-port-id"[0].data, remote_interface: "lldp-remote-port-id"[0].data, remote_device: "lldp-remote-system-name"[0].data}'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{% set result = [] %}{% for cable in obj %}{% set _=result.append({'local_interface': cable['local_interface'], 'remote_interface': cable['remote_interface'], 'remote_device': cable['remote_device'] | remove_fqdn }) %}{% endfor %}{{ result | tojson }}"
+        iterable_type: "dict"

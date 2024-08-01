@@ -32,7 +32,7 @@ Navigate to the Device Onboarding Job: Jobs > Perform Device Onboarding (origina
 
 or
 
-Navigate to the SSoT dashboard and run `Sync Devices` to get basic device and information onboarding, followed by `Sync Network Data` to add additonal details from the network to these devices. E.g. Interfaces, IPs, VRFs, VLANs.
+Navigate to the SSoT dashboard and run `Sync Devices` to get basic device and information onboarding, followed by `Sync Network Data` to add additional details from the network to these devices. E.g. Interfaces, IPs, VRFs, VLANs.
 
 ## What are the next steps?
 

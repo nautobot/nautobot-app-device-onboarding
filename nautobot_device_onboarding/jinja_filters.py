@@ -180,3 +180,9 @@ def parse_junos_ip_address(item):
         if not item[0]["prefix_length"] and item[0]["ip_address"]:
             return [{"prefix_length": 32, "ip_address": item[0]["ip_address"][0]}]
     return []
+
+
+@library.filter
+def remove_fqdn(hostname):
+    """Remove the FQDN from the hostname."""
+    return hostname.split(".")[0]

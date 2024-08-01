@@ -10,6 +10,7 @@ from nautobot.dcim.models import Interface
 from nautobot.ipam.models import VLAN, VRF, IPAddress
 from nautobot_ssot.contrib import NautobotAdapter
 from netaddr import EUI, mac_unix_expanded
+from netutils.interface import canonical_interface_name
 
 from nautobot_device_onboarding.diffsync.models import sync_network_data_models
 from nautobot_device_onboarding.nornir_plays.command_getter import sync_network_data_command_getter
@@ -45,6 +46,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
     untagged_vlan_to_interface = sync_network_data_models.SyncNetworkDataUnTaggedVlanToInterface
     lag_to_interface = sync_network_data_models.SyncNetworkDataLagToInterface
     vrf_to_interface = sync_network_data_models.SyncNetworkDataVrfToInterface
+    cable = sync_network_data_models.SyncNetworkDataCable
 
     primary_ips = None
 
@@ -58,6 +60,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         "tagged_vlans_to_interface",
         "lag_to_interface",
         "vrf_to_interface",
+        "cable",
     ]
 
     def _cache_primary_ips(self, device_queryset):
@@ -229,6 +232,52 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
             network_vrf_to_interface.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
             self.add(network_vrf_to_interface)
 
+    def load_cables(self):
+        """
+        Load Cables into diffsync store.
+
+        Only cables returned by the CommandGetter job should be synced.
+        """
+        for device in self.job.devices_to_load:
+            for cable in device.get_cables():
+                if cable.termination_b.device.name == "" or cable.termination_a.device.name == "":
+                    self.job.logger.warning(
+                        f"Device attached to a cable is missing a name. Devices must have a name to utilize cable onboarding. "
+                        f"Skipping Cable: {cable}"
+                    )
+                    continue
+                if cable.termination_a.device.name < cable.termination_b.device.name:
+                    termination_a_device = cable.termination_a.device.name
+                    termination_a_interface = cable.termination_a.name
+                    termination_b_device = cable.termination_b.device.name
+                    termination_b_interface = cable.termination_b.name
+                else:
+                    termination_a_device = cable.termination_b.device.name
+                    termination_a_interface = cable.termination_b.name
+                    termination_b_device = cable.termination_a.device.name
+                    termination_b_interface = cable.termination_a.name
+
+                network_cable = self.cable(
+                    diffsync=self,
+                    status__name=cable.status.name,
+                    termination_a__app_label="dcim",
+                    termination_a__model="interface",
+                    termination_a__device__name=termination_a_device,
+                    termination_a__name=termination_a_interface,
+                    termination_b__app_label="dcim",
+                    termination_b__model="interface",
+                    termination_b__device__name=termination_b_device,
+                    termination_b__name=termination_b_interface,
+                )
+
+                try:
+                    self.add(network_cable)
+                    network_cable.pk = cable.pk
+                    if self.job.debug:
+                        self.job.logger.debug(f"Loaded Cable: {network_cable}")
+                except diffsync.exceptions.ObjectAlreadyExists:
+                    continue
+
     def load(self):
         """Generic implementation of the load function."""
         if not hasattr(self, "top_level") or not self.top_level:
@@ -255,6 +304,9 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
             elif model_name == "vrf_to_interface":
                 if self.job.sync_vrfs:
                     self.load_vrf_to_interface()
+            elif model_name == "cable":
+                if self.job.sync_cables:
+                    self.load_cables()
             else:
                 diffsync_model = self._get_diffsync_class(model_name)
                 self._load_objects(diffsync_model)
@@ -329,6 +381,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
     untagged_vlan_to_interface = sync_network_data_models.SyncNetworkDataUnTaggedVlanToInterface
     lag_to_interface = sync_network_data_models.SyncNetworkDataLagToInterface
     vrf_to_interface = sync_network_data_models.SyncNetworkDataVrfToInterface
+    cable = sync_network_data_models.SyncNetworkDataCable
 
     top_level = [
         "ip_address",
@@ -340,6 +393,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
         "tagged_vlans_to_interface",
         "lag_to_interface",
         "vrf_to_interface",
+        "cable",
     ]
 
     def _handle_failed_devices(self, device_data):
@@ -391,14 +445,14 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
         # verify data returned is a dict
         data_type_check = diffsync_utils.check_data_type(result)
         if self.job.debug:
-            self.job.logger.debug(f"CommandGetter data type check resut: {data_type_check}")
+            self.job.logger.debug(f"CommandGetter data type check result: {data_type_check}")
         if data_type_check:
             self._handle_failed_devices(device_data=result)
         else:
             self.job.logger.error(
                 "Data returned from CommandGetter is not the correct type. No devices will be onboarded"
             )
-            raise ValidationError("Unexpected data returend from CommandGetter.")
+            raise ValidationError("Unexpected data returned from CommandGetter.")
 
     def _process_mac_address(self, mac_address):
         """Convert a mac address to match the value stored by Nautobot."""
@@ -652,6 +706,102 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                     )
                     continue
 
+    def load_cables(self):  # pylint: disable=inconsistent-return-statements
+        """Load cables into the Diffsync store."""
+        for hostname, device_data in self.job.command_getter_result.items():
+            if "cables" not in device_data:
+                self.job.logger.warning(f"No cable data found for {hostname}. Skipping cable load.")
+                return
+            if self.job.debug:
+                self.job.logger.debug(f"Loading Cables from {hostname}")
+                self.job.logger.debug(f"Cable Data: {device_data['cables']}")
+
+            # last case check to make sure cable data is returned and returned in the correct format (list of dict)
+
+            try:
+                for neighbor_data in device_data["cables"]:
+                    try:
+                        local_interface = canonical_interface_name(neighbor_data["local_interface"])
+                    except KeyError as error:
+                        error.args = error.args + "Local interface is missing a name."
+                        self._handle_general_load_exception(
+                            error=error,
+                            hostname=hostname,
+                            data=neighbor_data,
+                            model_type="cable",
+                        )
+                        continue
+
+                    try:
+                        remote_interface = canonical_interface_name(neighbor_data["remote_interface"])
+                    except KeyError as error:
+                        error.args = error.args + "Remote interface is missing a name."
+                        self._handle_general_load_exception(
+                            error=error,
+                            hostname=hostname,
+                            data=neighbor_data,
+                            model_type="cable",
+                        )
+                        continue
+
+                    try:
+                        remote_device = neighbor_data["remote_device"]
+                    except KeyError as error:
+                        error.args = error.args + "Remote device is missing a name."
+                        self._handle_general_load_exception(
+                            error=error,
+                            hostname=hostname,
+                            data=neighbor_data,
+                            model_type="cable",
+                        )
+                        continue
+
+                    if self.job.debug:
+                        self.job.logger.debug(f"Neighbor Data: {neighbor_data}")
+
+                    # always put the alphabetically first device as termination a
+                    if hostname < remote_device:
+                        termination_a_device = hostname
+                        termination_a_interface = local_interface
+                        termination_b_device = remote_device
+                        termination_b_interface = remote_interface
+                    else:
+                        termination_a_device = remote_device
+                        termination_a_interface = remote_interface
+                        termination_b_device = hostname
+                        termination_b_interface = local_interface
+
+                    network_cable = self.cable(
+                        diffsync=self,
+                        status__name="Connected",  # ask for default status in the job form
+                        termination_a__app_label="dcim",
+                        termination_a__model="interface",
+                        termination_a__device__name=termination_a_device,
+                        termination_a__name=termination_a_interface,
+                        termination_b__app_label="dcim",
+                        termination_b__model="interface",
+                        termination_b__device__name=termination_b_device,
+                        termination_b__name=termination_b_interface,
+                    )
+                    try:
+                        self.add(network_cable)
+                        if self.job.debug:
+                            self.job.logger.debug(f"Loaded Cable: {network_cable}")
+                    except diffsync.exceptions.ObjectAlreadyExists:
+                        # object already in the diffsync store.
+                        pass
+            except KeyError as error:
+                error.args = (
+                    error.args
+                    + "Cable data/cable key is missing from the returned device data or returned data is not a list."
+                )
+                self._handle_general_load_exception(
+                    error=error,
+                    hostname=hostname,
+                    data=device_data,
+                    model_type="cable",
+                )
+
     def load(self):
         """Load network data."""
         self.execute_command_getter()
@@ -668,3 +818,5 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
         self.load_lag_to_interface()
         if self.job.sync_vrfs:
             self.load_vrf_to_interface()
+        if self.job.sync_cables:
+            self.load_cables()
