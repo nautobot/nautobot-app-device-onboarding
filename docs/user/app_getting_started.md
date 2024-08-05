@@ -26,6 +26,34 @@ Locations are the only other Nautobot prerequisite for the plugin to onboard a d
 !!! info
     There are a few other requirements for the new SSoT based jobs, but can also support some defaults.
 
+### Device Credentials Functionality
+
+For a full explanation see the [ADR](../dev/arch_decision.md#handling-the-nornir-inventory)
+
+The new SSoT based jobs each use their own Nornir inventories.
+
+- `Sync Devices from Network` - A empty inventory for Nornir is instantiated and the Nautobot secrets group selected at the job execution is injected into the on-demand inventory creation.
+- `Sync Data from Network` - Uses `nautobot-plugin-nornir` Nornir inventory plugin (the same one that Golden Config uses). This means you must have the following set in your nautobot_config PLUGIN_CONFIG section.
+
+!!! warn
+    Only the Nautobot Secrets credential provider (`CredentialsNautobotSecrets`) was implemented for the initial release of the plugin. `CredentialsEnvVars` and `CredentialsSettingsVars` are not supported currently.
+
+```python
+    "nautobot_plugin_nornir": {
+        "nornir_settings": {
+            "credentials": "nautobot_plugin_nornir.plugins.credentials.nautobot_secrets.CredentialsNautobotSecrets",
+            "runner": {
+                "plugin": "threaded",
+                "options": {
+                    "num_workers": 20,
+                },
+            },
+        },
+    },
+```
+!!! info
+    The main reason for mentioning this is that this has the possiblity of conflicting with Golden Config plugin settings if `CredentialsEnvVars` or `CredentialsSettingsVars` are in use. At this time the recommentation is to migrate to using Nautobot Secrets Groups, which is the general pattern Nautobot is moving towards into the future.
+
 ### Onboarding a Device
 
 Navigate to the Device Onboarding Job: Jobs > Perform Device Onboarding (original).

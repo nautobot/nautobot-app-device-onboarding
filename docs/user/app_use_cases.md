@@ -7,7 +7,7 @@ This document describes common use-cases and scenarios for this App utilizing th
 This App can be used in three general ways.
 
 1. Onboard a device with basic information. (Name, Serial, Device Type, Management IP + Interface)
-2. Take existing devices and enhace the data for each device by syncing in more metadata. (Interface, VLANs, VRFs etc.)
+2. Take existing devices and enhace the data for each device by syncing in more metadata. (Interface, VLANs, VRFs, Cabling, etc.)
 3. Both 1 and 2 in conjunction with each other.
 
 ### Preparation
