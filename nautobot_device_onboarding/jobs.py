@@ -35,6 +35,7 @@ from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
 from nautobot_device_onboarding.nornir_plays.command_getter import _parse_credentials, netmiko_send_commands
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
+from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import TroubleshootingProcessor
 from nautobot_device_onboarding.utils.helper import onboarding_task_fqdn_to_ip
 
@@ -720,6 +721,7 @@ class DeviceOnboardingTroubleshootingJob(Job):
         # Initiate Nornir instance with empty inventory
         compiled_results = {}
         try:
+            logger = NornirLogger(self.job.job_result, self.job.logger.getEffectiveLevel())
             with InitNornir(
                 runner=NORNIR_SETTINGS.get("runner"),
                 logging={"enabled": False},
@@ -736,6 +738,7 @@ class DeviceOnboardingTroubleshootingJob(Job):
                 if kwargs["ssot_job_type"] == "both":
                     kwargs.update({"sync_vrfs": True})
                     kwargs.update({"sync_vlans": True})
+                    kwargs.update({"sync_cables": True})
                     nr_with_processors.run(
                         task=netmiko_send_commands,
                         command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],
@@ -752,10 +755,12 @@ class DeviceOnboardingTroubleshootingJob(Job):
                     if kwargs["ssot_job_type"] == "sync_network_data":
                         kwargs.update({"sync_vrfs": True})
                         kwargs.update({"sync_vlans": True})
+                        kwargs.update({"sync_cables": True})
                     nr_with_processors.run(
                         task=netmiko_send_commands,
                         command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],
                         command_getter_job=kwargs["ssot_job_type"],
+                        logger=logger,
                         **kwargs,
                     )
         except Exception as err:  # pylint: disable=broad-exception-caught
