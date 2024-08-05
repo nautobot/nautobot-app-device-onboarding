@@ -268,6 +268,7 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
                 command_getter_job="sync_devices",
+                logger=logger,
                 **kwargs,
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
