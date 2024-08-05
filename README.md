@@ -51,8 +51,8 @@ Regardless, the Onboarding App greatly simplifies the onboarding process by allo
 
 |     Cabling          | Cisco IOS          | Cisco XE           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  |
 | ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: |
-|  Terminations A      | :test_tube: | :test_tube: | :test_tube: | :x: | :x: | :x: | :x: |
-|  Terminations B      | :test_tube: | :test_tube: | :test_tube: | :x: | :x: | :x: | :x: |
+|  Terminations A      | :test_tube: | :test_tube: | :test_tube: | :x: | :test_tube: | :x: | :x: |
+|  Terminations B      | :test_tube: | :test_tube: | :test_tube: | :x: | :test_tube: | :x: | :x: |
 
 | Legend |
 | :---- |
