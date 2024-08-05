@@ -1,4 +1,7 @@
-# Onboarding Extensions
+# Onboarding Extensions (Original)
+
+!!! warn
+    This is the original onboarding extensions.
 
 ## What are onboarding extensions?
 
@@ -47,4 +50,4 @@ The `ext_result` attribute allows to collect and store any data while the device
 
 ## Where do I find an example of onboarding extension ?
 
-Please check our example: [example_ios_set_device_role.py](https://github.com/nautobot/nautobot-plugin-device-onboarding/raw/develop/examples/example_ios_set_device_role.py).
+Please check our example: [example_ios_set_device_role.py](https://github.com/nautobot/nautobot-app-device-onboarding/raw/develop/examples/example_ios_set_device_role.py).

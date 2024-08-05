@@ -16,7 +16,7 @@ You need to disable automatic platform detection, specify the device platform ty
 
 ## Is it possible to disable the automatic creation of Device Type, Device Role or Platform?
 
-**Yes**! Using the plugin settings, it's possible to control individually the creation of `device_role`, `device_type`, `manufacturer` & `platform`.
+**Yes** (original)! Using the plugin settings, it's possible to control individually the creation of `device_role`, `device_type`, `manufacturer` & `platform`.
 
 ```python
 # configuration.py
@@ -32,12 +32,16 @@ PLUGINS_CONFIG = {
 }
 ```
 
+**Yes** (SSoT)! Using the job for input selections, it's possible to control individually the creation of `device_role`, `device_type`, `manufacturer` & `platform`.
+
 ## How can I update the default credentials used to connect to a device?
 
 By default, the plugin uses the credentials defined in the main `nautobot_config.py` for NAPALM (`NAPALM_USERNAME`/`NAPALM_PASSWORD`/`DEVICE_ARGS`). You can update the default credentials in `nautobot_config.py ` or you can provide specific one for each onboarding job via a SecretsGroup. If using SecretsGroup the Access Type for the associated Secrets must be `Generic` and at minimum associated Secrets for `Username` & `Password` are required with `Secret` being optional.
 
 !!! warning
-    If an enable secret is required for the remote device it must be set using above patters.
+    If an enable secret is required for the remote device it must be set using above patterns.
+
+For the SSoT onboarding based jobs SecretGroups are required.
 
 ## How can I update the optional arguments for NAPALM?
 
@@ -45,10 +49,7 @@ Optional arguments are often used to define a `secret` for Cisco devices and oth
 
 ## Does this app support the discovery and the creation of all interfaces and IP Addresses?
 
-**No**. The plugin will only discover and create the management interface and the management IP address. Importing all interfaces and IP addresses is a much larger problem that requires more preparation. This is out of scope of this project.
-
-!!! tip
-    We recommend Network Importer tool from Network to Code for a post-onboarding network state synchronization. See [its GitHub repository](https://github.com/networktocode/network-importer) for more details.
+**Yes**. The original Deivce Onboarding job/SSot Sync Devices will only discover and create the management interface and the management IP address. Importing all interfaces and IP addresses is available from the SSoT job (Sync Network Data).
 
 ## Does this app support the discovery of device based on fqdn?
 

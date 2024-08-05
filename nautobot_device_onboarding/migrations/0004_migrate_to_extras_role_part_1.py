@@ -1,5 +1,4 @@
 from django.db import migrations, models
-
 from nautobot.extras.models import RoleField
 
 

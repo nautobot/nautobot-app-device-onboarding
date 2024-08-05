@@ -1,4 +1,5 @@
 """Nautobot development configuration file."""
+
 import os
 import sys
 
@@ -74,9 +75,6 @@ CACHES = {
     }
 }
 
-# Redis Cacheops
-CACHEOPS_REDIS = parse_redis_connection(redis_database=1)
-
 #
 # Celery settings are not defined here because they can be overloaded with
 # environment variables. By default they use `CACHES["default"]["LOCATION"]`.
@@ -129,13 +127,24 @@ if not _TESTING:
 #
 
 # Enable installed Apps. Add the name of each App to the list.
-PLUGINS = ["nautobot_device_onboarding"]
+PLUGINS = ["nautobot_device_onboarding", "nautobot_ssot", "nautobot_plugin_nornir"]
 
 # Apps configuration settings. These settings are used by various Apps that the user may have installed.
 # Each key in the dictionary is the name of an installed App and its value is a dictionary of settings.
-# PLUGINS_CONFIG = {
-#     'nautobot_device_onboarding': {
-#         'foo': 'bar',
-#         'buzz': 'bazz'
-#     }
-# }
+PLUGINS_CONFIG = {
+    "nautobot_device_onboarding": {},
+    "nautobot_ssot": {
+        "hide_example_jobs": is_truthy(os.getenv("NAUTOBOT_SSOT_HIDE_EXAMPLE_JOBS")),
+    },
+    "nautobot_plugin_nornir": {
+        "nornir_settings": {
+            "credentials": "nautobot_plugin_nornir.plugins.credentials.nautobot_secrets.CredentialsNautobotSecrets",
+            "runner": {
+                "plugin": "threaded",
+                "options": {
+                    "num_workers": 20,
+                },
+            },
+        },
+    },
+}
