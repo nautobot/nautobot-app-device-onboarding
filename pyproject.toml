@@ -28,7 +28,7 @@ include = [
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
 napalm = ">=2.5.0, <5"
-zipp = "^3.4.0"
+zipp = "^3.19.1"
 nautobot = "^2.2.3"
 nautobot-ssot = "^2.6.0"
 nautobot-plugin-nornir = "^2.0.0"
