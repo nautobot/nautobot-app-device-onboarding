@@ -17,6 +17,49 @@ The `nautobot-device-onboarding` plugin is using the [netmiko](https://github.co
 
 Regardless, the Onboarding App greatly simplifies the onboarding process by allowing the user to specify a small amount of info and having the app populate a much larger amount of device data in Nautobot.
 
+### Support Matrix (Sync Devices From Network)
+
+|     Data Attribute      | Cisco IOS          | Cisco XE           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  |
+| ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: |
+| Hostname                | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
+| Platform                | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
+| Manufacturer            | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
+| Serial Number           | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
+| Device Type             | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
+| Mgmt Interface          | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
+| Mgmt IP Address         | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
+
+### Support Matrix (Sync Data From Network)
+
+|     Interfaces          | Cisco IOS          | Cisco XE           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  |
+| ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: |
+| Name           | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
+| IP Address     | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
+| Type           | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
+| MTU            | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
+| Description    | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
+| Mac Address    | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
+| Link Status    | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
+| 802.1Q mode    | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
+| Lag Member     | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
+| Vrf Membership | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
+
+|     VLANS          | Cisco IOS          | Cisco XE           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  |
+| ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: |
+| Untagged VLANs       | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
+| Tagged VLANs        | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
+
+|     Cabling          | Cisco IOS          | Cisco XE           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  |
+| ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: |
+|  Terminations A      | :test_tube: | :test_tube: | :test_tube: | :x: | :test_tube: | :x: | :x: |
+|  Terminations B      | :test_tube: | :test_tube: | :test_tube: | :x: | :test_tube: | :x: | :x: |
+
+| Legend |
+| :---- |
+| :white_check_mark: - Supported and stable. |
+| :x: - No current support. |
+| :test_tube: - Supported, but has limited testing. |
+
 ### Screenshots
 
 Device Onboarding is a Job that allows you to provide a few required pieces of information and onboard the device.
