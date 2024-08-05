@@ -6,4 +6,5 @@ This document describes external dependencies and prerequisites for this App to 
 
 ### From the App to Other Systems
 
-The App uses [netmiko](https://github.com/ktbyers/netmiko) and [NAPALM](https://napalm.readthedocs.io/en/latest/) libraries to connect to network devices. 
+- The App uses [netmiko](https://github.com/ktbyers/netmiko) and [NAPALM](https://napalm.readthedocs.io/en/latest/) libraries to connect to network devices. 
+- Git integrations(optional) allow a user to override default Command Getter YAML files.

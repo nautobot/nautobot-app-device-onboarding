@@ -1,5 +1,7 @@
 # Contributing to the App
 
+Pull requests are welcome and automatically built and tested against multiple version of Python and multiple version of Nautobot through GitHub Actions.
+
 The project is packaged with a light [development environment](dev_environment.md) based on `docker-compose` to help with the local development of the project and to run tests.
 
 The project is following Network to Code software development guidelines and is leveraging the following:

@@ -1,0 +1,118 @@
+---
+sync_devices:
+  hostname:
+    commands:
+      command: "show hostname"
+      parser: "textfsm"
+      jpath: "[*].hostname"
+  serial:
+    commands:
+      - command: "show version"
+        parser: "textfsm"
+        jpath: "[*].serial_number"
+  device_type:
+    commands:
+      - command: "show version"
+        parser: "textfsm"
+        jpath: "[*].model"
+  mgmt_interface:
+    commands:
+      - command: "show ip interface brief | json"
+        parser: "none"
+        jpath: "interfaces.*.{name: name, match_ip: interfaceAddress.ipAddr.address==`{{ obj }}`}[?match_ip].name"
+  mask_length:
+    commands:
+      - command: "show ip interface brief | json"
+        parser: "none"
+        jpath: "interfaces.*.interfaceAddress[?ipAddr.address==`{{ obj }}`].ipAddr.maskLen"
+        post_processor: "{{ obj[0] }}"
+        iterable_type: "int"
+sync_network_data:
+  pre_processor:
+    vlan_map:
+      commands:
+        - command: "show vlan configured-ports | json"
+          parser: "none"
+          jpath: "vlans"
+          post_processor: "{{ obj | flatten_dict_from_value('name') | tojson }}"
+  serial:
+    commands:
+      - command: "show version"
+        parser: "textfsm"
+        jpath: "[*].serial_number"
+  interfaces:
+    root_key: true
+    commands:
+      - command: "show interfaces | json"
+        parser: "none"
+        jpath: "interfaces.*.name"   # when root_key=true this extracted value is what becomes iterable in keys using __ under `current_key`.
+        post_processor: "{% set result={} %}{% for interface in obj %}{{ result.update({interface: {}}) or '' }}{% endfor %}{{ result | tojson }}"
+  interfaces__type:
+    commands:
+      - command: "show interfaces | json"
+        parser: "none"
+        jpath: 'interfaces."{{ current_key }}".hardware'   # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj | map_interface_type }}"
+  interfaces__ip_addresses:
+    commands:
+      - command: "show interfaces | json"
+        parser: "none"
+        jpath: 'interfaces."{{ current_key }}".interfaceAddress[].[{ip_address: primaryIp.address, prefix_length: primaryIp.maskLen }][]'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj | tojson }}"
+  interfaces__mtu:
+    commands:
+      - command: "show interfaces | json"
+        parser: "none"
+        jpath: 'interfaces."{{ current_key }}".[mtu]'   # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj[0] }}"
+        iterable_type: "str"
+  interfaces__mac_address:
+    commands:
+      - command: "show interfaces | json"
+        parser: "none"
+        jpath: 'interfaces."{{ current_key }}".physicalAddress'   # yamllint disable-line rule:quoted-strings
+  interfaces__description:
+    commands:
+      - command: "show interfaces | json"
+        parser: "none"
+        jpath: 'interfaces."{{ current_key }}".description'  # yamllint disable-line rule:quoted-strings
+        iterable_type: "str"
+  interfaces__link_status:
+    commands:
+      - command: "show interfaces | json"
+        parser: "none"
+        jpath: 'interfaces."{{ current_key }}".lineProtocolStatus'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj | interface_status_to_bool }}"
+  interfaces__802.1Q_mode:
+    commands:
+      - command: "show interfaces switchport | json"
+        parser: "none"
+        jpath: '{admin_mode: switchports."{{ current_key }}".switchportInfo.mode, mode: switchports."{{ current_key }}".switchportInfo.mode, trunking_vlans: switchports."{{ current_key }}".switchportInfo.trunkAllowedVlans}'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj | interface_mode_logic }}"
+        iterable_type: "str"
+  interfaces__lag:
+    commands:
+      - command: "show interfaces | json"
+        parser: "none"
+        jpath: 'interfaces."{{ current_key }}".interfaceMembership'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{% if obj | length > 0 %}{{ obj.split()[-1] }}{% else %}{{ obj }}{% endif %}"
+  interfaces__vrf:
+    commands:
+      - command: "show ip interface | json"
+        parser: "none"
+        jpath: "interfaces.*.{name: name, vrf: vrf}[?name==`{{ current_key }}`].{name: vrf}"
+        post_processor: "{% if obj | length > 0 %}{{ obj[0] | tojson }}{% else %}{{ obj }}{% endif %}"
+        iterable_type: "dict"
+  interfaces__tagged_vlans:
+    commands:
+      - command: "show interfaces switchport | json"
+        parser: "none"
+        jpath: '{admin_mode: switchports."{{ current_key }}".switchportInfo.mode, mode: switchports."{{ current_key }}".switchportInfo.mode, access_vlan: switchports."{{ current_key }}".switchportInfo.accessVlanId, trunking_vlans: switchports."{{ current_key }}".switchportInfo.trunkAllowedVlans, native_vlan: switchports."{{ current_key }}".switchportInfo.trunkingNativeVlanId}'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj | get_vlan_data(vlan_map, 'tagged') | tojson }}"
+  interfaces__untagged_vlan:
+    commands:
+      - command: "show interfaces switchport | json"
+        parser: "none"
+        jpath: '{admin_mode: switchports."{{ current_key }}".switchportInfo.mode, mode: switchports."{{ current_key }}".switchportInfo.mode, access_vlan: switchports."{{ current_key }}".switchportInfo.accessVlanId, trunking_vlans: switchports."{{ current_key }}".switchportInfo.trunkAllowedVlans, native_vlan: switchports."{{ current_key }}".switchportInfo.trunkingNativeVlanId}'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj | get_vlan_data(vlan_map, 'untagged') | tojson }}"
+        iterable_type: "dict"

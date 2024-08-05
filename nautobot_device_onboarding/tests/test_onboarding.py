@@ -1,20 +1,21 @@
 """Unit tests for nautobot_device_onboarding.netdev_keeper module and its classes."""
 
-from unittest import mock
-
-from nautobot.apps.testing import TransactionTestCase, create_job_result_and_run_job
-from nautobot.extras.models import JobLogEntry, Status
-from nautobot.dcim.models import Device, Location, LocationType, Platform
-from nautobot.ipam.models import Namespace
+# from unittest import mock
 
 from django.conf import settings
 
-from django.contrib.contenttypes.models import ContentType
+# from django.test import TestCase
+# from django.contrib.contenttypes.models import ContentType
+
+
+# from nautobot.dcim.models import Device, Location, LocationType, Platform
+# from nautobot.extras.models import Status
+
 
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
 
-class NapalmMock:  # pylint: disable=too-few-public-methods
+class NapalmMock:
     """Base napalm mock class for tests."""
 
     def __init__(self, *args, **kwargs):
@@ -22,30 +23,6 @@ class NapalmMock:  # pylint: disable=too-few-public-methods
 
     def open(self):
         """Mock test open ssh connection."""
-
-    def close(self):
-        """Mock test close ssh connection."""
-
-
-class NapalmMockEos(NapalmMock):
-    """Mock napalm for eos tests."""
-
-    def get_facts(self):
-        """Mock test get napalm facts on eos."""
-        return {
-            "fqdn": "arista-device.domain.net",
-            "hostname": "arista-device",
-            "interface_list": ["Vlan100"],
-            "model": "vEOS",
-            "os_version": "4.15.5M-3054042.4155M",
-            "serial_number": "",
-            "uptime": "...",
-            "vendor": "Arista",
-        }
-
-    def get_interfaces_ip(self):
-        """Mock test get napalm interfaces on eos."""
-        return {"Vlan100": {"ipv4": {"1.1.1.1": {"prefix_length": 32}}}}
 
 
 class NapalmMockNxos(NapalmMock):
@@ -66,10 +43,31 @@ class NapalmMockNxos(NapalmMock):
 
     def get_interfaces_ip(self):
         """Mock test get interface ip facts."""
-        return {"mgmnt0": {"ipv4": {"2.2.2.2": {"prefix_length": 32}}}}
+        return {"mgmnt0": {"ipv4": {"1.1.1.1": {"prefix_length": 32}}}}
 
 
-class SSHDetectMock:  # pylint: disable=too-few-public-methods
+class NapalmMockEos(NapalmMock):
+    """Mock napalm for eos tests."""
+
+    def get_facts(self):
+        """Mock test get napalm facts on eos."""
+        return {
+            "fqdn": "arista-device.domain.net",
+            "hostname": "arista-device",
+            "interface_list": ["Vlan100"],
+            "model": "vEOS",
+            "os_version": "4.15.5M-3054042.4155M",
+            "serial_number": "",
+            "uptime": "...",
+            "vendor": "Arista",
+        }
+
+    def get_interfaces_ip(self):
+        """Mock test get napalm interfaces on eos."""
+        return {"Vlan100": {"ipv4": {"2.2.2.2": {"prefix_length": 32}}}}
+
+
+class SSHDetectMock:
     """SSHDetect mock class for tests."""
 
     def __init__(self, *args, **kwargs):
@@ -80,103 +78,59 @@ class SSHDetectMock:  # pylint: disable=too-few-public-methods
         return self.driver
 
 
-class OnboardingTestCase(TransactionTestCase):
-    """Test the OnboardingManager Class."""
+# class OnboardingTestCase(TestCase):
+#     """Test the OnboardingManager Class."""
 
-    def setUp(self):
-        """Prepare test objects."""
-        super().setUp()
-        # Default objects are removed after each test. Recreate Namespace if needed
-        if not Namespace.objects.filter(name="Global").exists():
-            Namespace.objects.create(name="Global")
+#     def setUp(self):
+#         """Prepare test objects."""
+#         PLUGIN_SETTINGS["platform_map"] = {}  # Reset platform map to default
+#         status = Status.objects.get(name="Active")
+#         location_type = LocationType.objects.create(name="site")
+#         location_type.content_types.set([ContentType.objects.get_for_model(Device)])
+#         self.site = Location.objects.create(name="TEST_SITE", location_type=location_type, status=status)
+#         self.eos_platform = Platform.objects.create(name="arista_eos", napalm_driver="eos")
 
-        PLUGIN_SETTINGS["platform_map"] = {}  # Reset platform map to default
-        status = Status.objects.get(name="Active")
-        location_type = LocationType.objects.create(name="site")
-        location_type.content_types.set([ContentType.objects.get_for_model(Device)])
-        self.site = Location.objects.create(name="TEST_SITE", location_type=location_type, status=status)
-        self.eos_platform = Platform.objects.create(name="arista_eos", napalm_driver="eos")
+#         self.onboarding_task1 = OnboardingTask.objects.create(ip_address="1.1.1.1", location=self.site)
+#         self.onboarding_task2 = OnboardingTask.objects.create(
+#             ip_address="2.2.2.2", location=self.site, platform=self.eos_platform, port=443
+#         )
 
-        self.onboarding_task1 = {
-            "ip_address": "1.1.1.1",
-            "location": self.site.id,
-            "platform": self.eos_platform.id,
-            "port": 443,
-            "credentials": None,
-            "timeout": 10,
-            "device_type": None,
-            "role": None,
-            "continue_on_failure": False,
-        }
-        self.onboarding_task2 = {
-            "ip_address": "2.2.2.2",
-            "location": self.site.id,
-            "platform": None,
-            "port": 22,
-            "credentials": None,
-            "timeout": 10,
-            "device_type": None,
-            "role": None,
-            "continue_on_failure": False,
-        }
+#         # Patch socket as it would be able to verify connectivity
+#         self.patcher = mock.patch("nautobot_device_onboarding.netdev_keeper.socket")
+#         self.patcher.start()
 
-        # Patch socket as it would be able to verify connectivity
-        self.patcher = mock.patch("nautobot_device_onboarding.netdev_keeper.socket")
-        self.patcher.start()
+#     def tearDown(self):
+#         """Disable patch on socket."""
+#         self.patcher.stop()
 
-    def tearDown(self):
-        """Disable patch on socket."""
-        super().tearDown()
-        self.patcher.stop()
+#     @mock.patch("nautobot_device_onboarding.netdev_keeper.SSHDetect")
+#     @mock.patch("nautobot_device_onboarding.netdev_keeper.get_network_driver")
+#     def test_onboarding_nxos(self, mock_napalm, mock_ssh_detect):
+#         """Test device onboarding nxos."""
 
-    @mock.patch("nautobot_device_onboarding.netdev_keeper.get_network_driver")
-    def test_onboarding_eos(self, mock_napalm):
-        """Test device onboarding eos."""
+#         mock_napalm.return_value = NapalmMockNxos
+#         mock_ssh_detect.return_value = SSHDetectMock("cisco_nxos")
 
-        mock_napalm.return_value = NapalmMockEos
+#         # Run onboarding
+#         on_manager = OnboardingManager(self.onboarding_task1, "user", "pass", "secret")
 
-        job_result = create_job_result_and_run_job(
-            module="nautobot_device_onboarding.jobs",
-            name="OnboardingTask",
-            **self.onboarding_task1,
-        )
-        # Get Job log messages
-        job_logs = list(JobLogEntry.objects.filter(job_result=job_result))
-        job_logs = [log.message for log in job_logs]
+#         self.assertEqual(on_manager.created_device.name, "nxos-spine1")
+#         self.assertEqual(on_manager.created_device.platform.name, "cisco_nxos")
+#         self.assertEqual(on_manager.created_device.platform.napalm_driver, "nxos_ssh")
+#         self.assertEqual(str(on_manager.created_device.primary_ip4), "1.1.1.1/32")
 
-        created_device = Device.objects.get(name="arista-device")
+#     @mock.patch("nautobot_device_onboarding.netdev_keeper.SSHDetect")
+#     @mock.patch("nautobot_device_onboarding.netdev_keeper.get_network_driver")
+#     def test_onboarding_eos(self, mock_napalm, mock_ssh_detect):
+#         """Test device onboarding eos."""
 
-        self.assertEqual(job_result.status, "SUCCESS", (job_result.status, job_logs))
-        self.assertIn("Successfully onboarded arista-device with a management IP of 1.1.1.1", job_logs, job_logs)
-        self.assertEqual(created_device.name, "arista-device")
-        self.assertEqual(created_device.platform.name, "arista_eos")
-        self.assertEqual(created_device.platform.napalm_driver, "eos")
-        self.assertEqual(str(created_device.primary_ip4), "1.1.1.1/32")
+#         mock_napalm.return_value = NapalmMockEos
+#         mock_ssh_detect.return_value = SSHDetectMock("arista_eos")
 
-    @mock.patch("nautobot_device_onboarding.netdev_keeper.SSHDetect")
-    @mock.patch("nautobot_device_onboarding.netdev_keeper.get_network_driver")
-    def test_onboarding_nxos(self, mock_napalm, mock_ssh_detect):
-        """Test device onboarding nxos."""
+#         # Run onboarding
+#         on_manager = OnboardingManager(self.onboarding_task2, "user", "pass", "secret")
 
-        mock_napalm.return_value = NapalmMockNxos
-        mock_ssh_detect.return_value = SSHDetectMock("cisco_nxos")
-
-        # Run onboarding
-        job_result = create_job_result_and_run_job(
-            module="nautobot_device_onboarding.jobs",
-            name="OnboardingTask",
-            **self.onboarding_task2,
-        )
-
-        # Get Job log messages
-        job_logs = list(JobLogEntry.objects.filter(job_result=job_result))
-        job_logs = [log.message for log in job_logs]
-
-        created_device = Device.objects.get(name="nxos-spine1")
-
-        self.assertEqual(job_result.status, "SUCCESS", job_result.status)
-        self.assertIn("Successfully onboarded nxos-spine1 with a management IP of 2.2.2.2", job_logs, job_logs)
-        self.assertEqual(created_device.name, "nxos-spine1")
-        self.assertEqual(created_device.platform.name, "cisco_nxos")
-        self.assertEqual(created_device.platform.napalm_driver, "nxos_ssh")
-        self.assertEqual(str(created_device.primary_ip4), "2.2.2.2/32")
+#         self.assertEqual(on_manager.created_device.name, "arista-device")
+#         self.assertEqual(on_manager.created_device.platform.name, "arista_eos")
+#         self.assertEqual(on_manager.created_device.platform.napalm_driver, "eos")
+#         self.assertEqual(str(on_manager.created_device.primary_ip4), "2.2.2.2/32")

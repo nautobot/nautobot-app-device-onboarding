@@ -1,0 +1,10 @@
+ip_address_host,location_parent_name,location_name,namespace,port,timeout,set_mgmt_only,update_devices_without_primary_ip,device_role_name,device_status_name,interface_status_name,ip_address_status_name,secrets_group_name,platform_name
+10.1.1.10,Site C Parent,Site A,Global,22,30,TRUE,TRUE,Network,Active,Active,Active,test secrets group,cisco_ios
+10.1.1.11,Site A Parent,Site C,Global,22,30,TRUE,TRUE,Network,Active,Active,Active,test secrets group,cisco_ios
+10.1.1.12,Site A Parent,Site A,BadNamespace,22,30,TRUE,TRUE,Network,Active,Active,Active,test secrets group,cisco_ios
+10.1.1.13,Site A Parent,Site A,Global,22,30,TRUE,TRUE,BadRole,Active,Active,Active,test secrets group,cisco_ios
+10.1.1.14,Site A Parent,Site A,Global,22,30,TRUE,TRUE,Network,BadStatus,Active,Active,test secrets group,cisco_ios
+10.1.1.15,Site A Parent,Site A,Global,22,30,TRUE,TRUE,Network,Active,BadStatus,Active,test secrets group,cisco_ios
+10.1.1.16,Site A Parent,Site A,Global,22,30,TRUE,TRUE,Network,Active,Active,BadStatus,test secrets group,cisco_ios
+10.1.1.17,Site A Parent,Site A,Global,22,30,TRUE,TRUE,Network,Active,Active,Active,BadSecretsGroup,cisco_ios
+10.1.1.18,Site A Parent,Site A,Global,22,30,TRUE,TRUE,Network,Active,Active,Active,test secrets group,BadPlatform

@@ -1,0 +1,4 @@
+ip_address_host,location_parent_name,location_name,namespace,port,timeout,set_mgmt_only,update_devices_without_primary_ip,device_role_name,device_status_name,interface_status_name,ip_address_status_name,secrets_group_name,platform_name
+10.1.1.10,Site A Parent,Site A,Global,22,30,TRUE,TRUE,Network,Active,Active,Active,test secrets group,cisco_ios
+10.1.1.11,Site B Parent,Site B,Global,22,30,FALSE,FALSE,Network,Active,Active,Active,test secrets group,cisco_ios
+10.1.1.12,,Site A Parent,Global,22,30,FALSE,FALSE,Network,Active,Active,Active,test secrets group,cisco_ios

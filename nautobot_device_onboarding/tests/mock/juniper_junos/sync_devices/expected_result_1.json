@@ -1,0 +1,7 @@
+{
+    "device_type": "MX10-T",
+    "hostname": "JUNOS-PE1",
+    "mask_length": 32,
+    "mgmt_interface": "lo0.0",
+    "serial": "T9958"
+}

@@ -1,4 +1,7 @@
-# Onboarding Extensions
+# Onboarding Extensions (Original)
+
+!!! warn
+    This is the original onboarding extensions.
 
 ## What are onboarding extensions?
 
