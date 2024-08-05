@@ -47,7 +47,7 @@ Expose two new SSoT based Nautobot jobs to perform the syncing of data.
     - VRFs
         - VRF Names
         - Route Distinguishers (RD)
-    - Cabling (Coming soon...)
+    - Cabling
 
 !!! info
     For more information look at the provided jsonschema definitions for each of the jobs.

@@ -10,6 +10,13 @@ Here you will find detailed instructions on how to **install** and **configure**
 !!! note
     Please check the [dedicated page](compatibility_matrix.md) for a full compatibility matrix and the deprecation policy.
 
+### Application Dependencies
+
+Device onboarding 4.0 added two additional application dependencies.
+
+- [nautobot_ssot](https://docs.nautobot.com/projects/ssot/en/latest/)
+- [nautobot_plugin_nornir](https://docs.nautobot.com/projects/plugin-nornir/en/latest/)
+
 ### Access Requirements
 
 - The original OnboardingTask Job used NAPALM Credentials.
@@ -46,6 +53,22 @@ PLUGINS = ["nautobot_plugin_nornir", "nautobot_ssot", "nautobot_device_onboardin
 #     ADD YOUR SETTINGS HERE
 #   }
 # }
+```
+
+For the `Sync Data from Network` job to work the below must be added to the `PLUGINS_CONFIG`.
+
+```python
+    "nautobot_plugin_nornir": {
+        "nornir_settings": {
+            "credentials": "nautobot_plugin_nornir.plugins.credentials.nautobot_secrets.CredentialsNautobotSecrets",
+            "runner": {
+                "plugin": "threaded",
+                "options": {
+                    "num_workers": 20,
+                },
+            },
+        },
+    },
 ```
 
 Once the Nautobot configuration is updated, run the Post Upgrade command (`nautobot-server post_upgrade`) to run migrations and clear any cache:
