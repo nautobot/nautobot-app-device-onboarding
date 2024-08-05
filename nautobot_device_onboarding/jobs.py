@@ -721,7 +721,7 @@ class DeviceOnboardingTroubleshootingJob(Job):
         # Initiate Nornir instance with empty inventory
         compiled_results = {}
         try:
-            logger = NornirLogger(self.job.job_result, self.job.logger.getEffectiveLevel())
+            logger = NornirLogger(self.job_result, self.logger.getEffectiveLevel())
             with InitNornir(
                 runner=NORNIR_SETTINGS.get("runner"),
                 logging={"enabled": False},
