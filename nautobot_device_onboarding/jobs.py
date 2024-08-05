@@ -721,7 +721,7 @@ class DeviceOnboardingTroubleshootingJob(Job):
         # Initiate Nornir instance with empty inventory
         compiled_results = {}
         try:
-            logger = NornirLogger(self.job_result, self.logger.getEffectiveLevel())
+            logger = NornirLogger(self.job_result, self.job.logger.getEffectiveLevel())
             with InitNornir(
                 runner=NORNIR_SETTINGS.get("runner"),
                 logging={"enabled": False},
@@ -743,12 +743,14 @@ class DeviceOnboardingTroubleshootingJob(Job):
                         task=netmiko_send_commands,
                         command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],
                         command_getter_job="sync_devices",
+                        logger=logger,
                         **kwargs,
                     )
                     nr_with_processors.run(
                         task=netmiko_send_commands,
                         command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],
                         command_getter_job="sync_network_data",
+                        logger=logger,
                         **kwargs,
                     )
                 else:
