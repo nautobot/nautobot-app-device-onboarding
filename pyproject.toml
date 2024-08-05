@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-device-onboarding"
-version = "4.0.0rc2"
+version = "4.0.0"
 description = "A app for Nautobot to easily onboard new devices."
 authors = ["Network to Code, LLC <info@networktocode.com>"]
 license = "Apache-2.0"
@@ -36,6 +36,8 @@ jdiff = "^0.0.6"
 ntc-templates = "^6.0.0"
 nautobot-secrets-providers = "^2.0.1"
 python-tss-sdk = "*"
+# Netutils pin is needed for https://github.com/networktocode/netutils/pull/553
+netutils = "^1.9.1"
 
 [tool.poetry.group.dev.dependencies]
 bandit = "*"
