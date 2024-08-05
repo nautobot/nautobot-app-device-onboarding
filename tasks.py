@@ -48,7 +48,7 @@ namespace = Collection("nautobot_device_onboarding")
 namespace.configure(
     {
         "nautobot_device_onboarding": {
-            "nautobot_ver": "2.2.2",
+            "nautobot_ver": "2.2.3",
             "project_name": "nautobot-device-onboarding",
             "python_ver": "3.11",
             "local": False,
@@ -703,7 +703,7 @@ def autoformat(context):
         "output_format": "see https://docs.astral.sh/ruff/settings/#output-format",
     },
 )
-def ruff(context, action="lint", fix=False, output_format="text"):
+def ruff(context, action="lint", fix=False, output_format="full"):
     """Run ruff to perform code formatting and/or linting."""
     if action != "lint":
         command = "ruff format"
@@ -784,7 +784,9 @@ def unittest(
 @task
 def unittest_coverage(context):
     """Report on code test coverage as measured by 'invoke unittest'."""
-    command = "coverage report --skip-covered --include 'nautobot_device_onboarding/*' --omit *migrations*"
+    command = (
+        "coverage report --skip-covered --include 'nautobot_device_onboarding/*' --omit '*/migrations/*','*/tests/*'"
+    )
 
     run_command(context, command)
 

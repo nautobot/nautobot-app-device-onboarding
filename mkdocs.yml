@@ -81,11 +81,7 @@ markdown_extensions:
       anchor_linenums: true
   - "pymdownx.inlinehilite"
   - "pymdownx.snippets"
-  - "pymdownx.superfences":
-      custom_fences:
-        - name: "mermaid"
-          class: "mermaid"
-          format: !!python/name:pymdownx.superfences.fence_code_format
+  - "pymdownx.superfences"
   - "footnotes"
 plugins:
   - "search"
@@ -106,8 +102,10 @@ nav:
       - App Overview: "user/app_overview.md"
       - Getting Started: "user/app_getting_started.md"
       - Using the App: "user/app_use_cases.md"
+      - Using the App (Original): "user/app_use_cases_original.md"
       - Frequently Asked Questions: "user/faq.md"
       - External Interactions: "user/external_interactions.md"
+      - Detailed Design: "user/app_detailed_design.md"
   - Administrator Guide:
       - Install and Configure: "admin/install.md"
       - Upgrade: "admin/upgrade.md"
@@ -115,6 +113,7 @@ nav:
       - Compatibility Matrix: "admin/compatibility_matrix.md"
       - Release Notes:
           - "admin/release_notes/index.md"
+          - v4.0: "admin/release_notes/version_4.0.md"
           - v3.0: "admin/release_notes/version_3.0.md"
           - v2.0: "admin/release_notes/version_2.0.md"
           - v1.2: "admin/release_notes/version_1.2.md"
@@ -122,9 +121,11 @@ nav:
           - v1.0: "admin/release_notes/version_1.0.md"
   - Developer Guide:
       - Extending the App: "dev/extending.md"
+      - YAML Overrides: "user/app_yaml_overrides.md"
       - Onboarding Extensions: "dev/onboarding_extensions.md"
       - Contributing to the App: "dev/contributing.md"
       - Development Environment: "dev/dev_environment.md"
+      - Architecture Decision Records: "dev/arch_decision.md"
       - Code Reference:
           - "dev/code_reference/index.md"
           - Package: "dev/code_reference/package.md"

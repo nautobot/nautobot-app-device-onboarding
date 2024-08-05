@@ -6,8 +6,8 @@
 # -------------------------------------------------------------------------------------
 # !!! USE CAUTION WHEN MODIFYING LINES BELOW
 
-# Accepts a desired Nautobot version as build argument, default to 2.0.3
-ARG NAUTOBOT_VER="2.0.3"
+# Accepts a desired Nautobot version as build argument, default to 2.2.3
+ARG NAUTOBOT_VER="2.2.3"
 
 # Accepts a desired Python version as build argument, default to 3.11
 ARG PYTHON_VER="3.11"
@@ -28,7 +28,7 @@ ENV INVOKE_NAUTOBOT_DEVICE_ONBOARDING_LOCAL=true
 # Since this is only used for development and we don't ship this container, pinning Poetry back is not expressly necessary
 # We also don't need virtual environments in container
 RUN which poetry || curl -sSL https://install.python-poetry.org | python3 - && \
-    poetry config virtualenvs.create false
+  poetry config virtualenvs.create false
 
 # !!! USE CAUTION WHEN MODIFYING LINES ABOVE
 # -------------------------------------------------------------------------------------
