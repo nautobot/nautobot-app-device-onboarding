@@ -3,7 +3,7 @@
 from nautobot_device_onboarding.nautobot_keeper import NautobotKeeper
 
 
-class Onboarding:  # pylint: disable=too-few-public-methods
+class Onboarding:
     """Generic onboarding class."""
 
     def __init__(self):
@@ -16,7 +16,7 @@ class Onboarding:  # pylint: disable=too-few-public-methods
         raise NotImplementedError
 
 
-class StandaloneOnboarding(Onboarding):  # pylint: disable=too-few-public-methods
+class StandaloneOnboarding(Onboarding):
     """Standalone onboarding class."""
 
     def run(self, onboarding_kwargs):

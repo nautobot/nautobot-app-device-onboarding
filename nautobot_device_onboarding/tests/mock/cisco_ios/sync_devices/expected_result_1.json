@@ -1,0 +1,7 @@
+{
+    "device_type": "WS-C3560CX-12PC-S",
+    "hostname": "IOS-SW-1",
+    "mask_length": 28,
+    "mgmt_interface": "Vlan10",
+    "serial": "FOC2341Y2CQ"
+}

@@ -1,4 +1,5 @@
 """Unit tests for nautobot_device_onboarding.netdev_keeper module and its classes."""
+
 # from unittest import mock
 
 from django.conf import settings
@@ -14,7 +15,7 @@ from django.conf import settings
 PLUGIN_SETTINGS = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
 
-class NapalmMock:  # pylint: disable=too-few-public-methods
+class NapalmMock:
     """Base napalm mock class for tests."""
 
     def __init__(self, *args, **kwargs):
@@ -66,7 +67,7 @@ class NapalmMockEos(NapalmMock):
         return {"Vlan100": {"ipv4": {"2.2.2.2": {"prefix_length": 32}}}}
 
 
-class SSHDetectMock:  # pylint: disable=too-few-public-methods
+class SSHDetectMock:
     """SSHDetect mock class for tests."""
 
     def __init__(self, *args, **kwargs):

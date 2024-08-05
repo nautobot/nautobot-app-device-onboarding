@@ -10,25 +10,22 @@ Here you will find detailed instructions on how to **install** and **configure**
 !!! note
     Please check the [dedicated page](compatibility_matrix.md) for a full compatibility matrix and the deprecation policy.
 
+### Application Dependencies
+
+Device onboarding 4.0 added two additional application dependencies.
+
+- [nautobot_ssot](https://docs.nautobot.com/projects/ssot/en/latest/)
+- [nautobot_plugin_nornir](https://docs.nautobot.com/projects/plugin-nornir/en/latest/)
+
 ### Access Requirements
 
-#### NAPALM Credentials
-
-The Onboarding App uses NAPALM. You can configure a default NAPALM username and password in `nautobot_config.py`.
-
-When `NAPALM_USERNAME`, `NAPALM_PASSWORD` and `NAPALM_ARGS` are configured in `nautobot_config.py`, the user does not have to use the Credentials/SecretGroup fields in the Device Onboarding job, unless they wish to override the values in `nautobot_config.py`:
-
-```python
-# Credentials that Nautobot will use to authenticate to devices when connecting via NAPALM.
-NAPALM_USERNAME = "<napalm username>"
-NAPALM_PASSWORD = "<napalm pwd>"
-NAPALM_ARGS = {"secret": "<enable secret pwd>"}
-```
+- The original OnboardingTask Job used NAPALM Credentials.
+- The new SSoT based jobs use Nautobot Secrets in a similar method to other apps. This is a more flexible and supportable way for the future.
 
 ## Install Guide
 
 !!! note
-    App can be installed manually or using Python's `pip`. See the [nautobot documentation](https://nautobot.readthedocs.io/en/latest/plugins/#install-the-package) for more details. The pip package name for this plugin is [`nautobot-device-onboarding`](https://pypi.org/project/nautobot-device-onboarding/).
+    Apps can be installed manually or using Python's `pip`. See the [nautobot documentation](https://nautobot.readthedocs.io/en/latest/plugins/#install-the-package) for more details. The pip package name for this app is [`nautobot-device-onboarding`](https://pypi.org/project/nautobot-device-onboarding/).
 
 The app is available as a Python package via PyPI and can be installed with `pip`:
 
@@ -49,13 +46,29 @@ Once installed, the app needs to be enabled in your Nautobot configuration. The 
 
 ```python
 # In your nautobot_config.py
-PLUGINS = ["nautobot_device_onboarding"]
+PLUGINS = ["nautobot_plugin_nornir", "nautobot_ssot", "nautobot_device_onboarding"]
 
 # PLUGINS_CONFIG = {
 #   "nautobot_device_onboarding": {
 #     ADD YOUR SETTINGS HERE
 #   }
 # }
+```
+
+For the `Sync Data from Network` job to work the below must be added to the `PLUGINS_CONFIG`.
+
+```python
+    "nautobot_plugin_nornir": {
+        "nornir_settings": {
+            "credentials": "nautobot_plugin_nornir.plugins.credentials.nautobot_secrets.CredentialsNautobotSecrets",
+            "runner": {
+                "plugin": "threaded",
+                "options": {
+                    "num_workers": 20,
+                },
+            },
+        },
+    },
 ```
 
 Once the Nautobot configuration is updated, run the Post Upgrade command (`nautobot-server post_upgrade`) to run migrations and clear any cache:
@@ -74,14 +87,14 @@ Then restart (if necessary) the Nautobot services which may include:
 sudo systemctl restart nautobot nautobot-worker nautobot-scheduler
 ```
 
-## App Configuration
+## App Configuration (Original)
 
-Although the plugin can run without providing any settings, the plugin behavior can be controlled with the following list of settings defined in `nautobot_config.py`:
+Although the app can run without providing any settings, the app behavior can be controlled with the following list of settings defined in `nautobot_config.py`:
 
 - `create_platform_if_missing` boolean (default True). If True, a new platform object will be created if the platform discovered by netmiko do not already exist and is in the list of supported platforms (`cisco_ios`, `cisco_nxos`, `arista_eos`, `juniper_junos`, `cisco_xr`)
 - `create_device_type_if_missing` boolean (default True), If True, a new device type object will be created if the model discovered by Napalm do not match an existing device type.
 - `create_manufacturer_if_missing` boolean (default True), If True, a new manufacturer object will be created if the manufacturer discovered by Napalm is do not match an existing manufacturer, this option is only valid if `create_device_type_if_missing` is True as well.
-- `create_device_role_if_missing` boolean (default True), If True, a new device role object will be created if the device role provided was not provided as part of the onboarding and if the `default_device_role` do not already exist.
+- `create_device_role_if_missing` boolean (default True), If True, a new device role object will be created if the device role provided was not provided as part of the onboarding and if the `default_device_role` does not already exist.
 - `create_management_interface_if_missing` boolean (default True), If True, add management interface and IP address to the device. If False no management interfaces will be created, nor will the IP address be added to Nautobot, while the device will still get added.
 - `default_device_status` string (default "Active"), status assigned to a new device by default.
 - `default_ip_status` string (default "Active"), status assigned to a new device management IP.
@@ -91,6 +104,8 @@ Although the plugin can run without providing any settings, the plugin behavior 
 - `default_management_prefix_length` integer ( default 0), length of the prefix that will be used for the management IP address, if the IP can't be found.
 - `skip_device_type_on_update` boolean (default False), If True, an existing Nautobot device will not get its device type updated. If False, device type will be updated with one discovered on a device.
 - `skip_manufacturer_on_update` boolean (default False), If True, an existing Nautobot device will not get its manufacturer updated. If False, manufacturer will be updated with one discovered on a device.
+- `assign_secrets_group` boolean (default False), If True, the credentials used to connect to the device will be assigned as the secrets group for the device upon creation. If False, no secrets group will be assigned.
+- `set_management_only_interface` boolean (default False), If True, the interface that is created or updated will be set to management only. If False, the interface will be set to not be management only.
 - `platform_map` (dictionary), mapping of an **auto-detected** Netmiko platform to the **Nautobot slug** name of your Platform. The dictionary should be in the format:
     ```python
     {

@@ -4,11 +4,11 @@
         "full_name": "Network to Code, LLC",
         "email": "info@networktocode.com",
         "github_org": "nautobot",
-        "plugin_name": "nautobot_device_onboarding",
+        "app_name": "nautobot_device_onboarding",
         "verbose_name": "Device Onboarding",
-        "plugin_slug": "nautobot-device-onboarding",
-        "project_slug": "nautobot-plugin-device-onboarding",
-        "repo_url": "https://github.com/nautobot/nautobot-plugin-device-onboarding",
+        "app_slug": "nautobot-device-onboarding",
+        "project_slug": "nautobot-app-device-onboarding",
+        "repo_url": "https://github.com/nautobot/nautobot-app-device-onboarding",
         "base_url": "nautobot-device-onboarding",
         "min_nautobot_version": "2.0.3",
         "max_nautobot_version": "2.9999",
@@ -21,7 +21,7 @@
         "_drift_manager": {
             "template": "https://github.com/nautobot/cookiecutter-nautobot-app.git",
             "template_dir": "nautobot-app",
-            "template_ref": "develop",
+            "template_ref": "refs/tags/nautobot-app-v2.2.1",
             "cookie_dir": "",
             "branch_prefix": "drift-manager",
             "pull_request_strategy": "create",
@@ -29,7 +29,7 @@
                 "black"
             ],
             "draft": true,
-            "baked_commit_ref": "094719b3173bd24329c250c54c586b699be5f0c1"
+            "baked_commit_ref": "e99ba259e45876cf5a3432b7b02f95feac3ae6ad"
         }
     }
 }

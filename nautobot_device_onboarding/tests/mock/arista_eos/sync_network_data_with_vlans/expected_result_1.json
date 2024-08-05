@@ -1,0 +1,94 @@
+{
+    "interfaces": {
+        "Ethernet1": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "1.1.1.1",
+                    "prefix_length": 24
+                }
+            ],
+            "lag": [],
+            "link_status": "False",
+            "mac_address": "52:54:00:91:1e:bf",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {}
+        },
+        "Ethernet2": {
+            "802.1Q_mode": "access",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "52:54:00:15:b8:13",
+            "mtu": "9214",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": 1,
+                "name": "default"
+            }
+        },
+        "Ethernet3": {
+            "802.1Q_mode": "access",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "52:54:00:07:8d:69",
+            "mtu": "9214",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": 1,
+                "name": "default"
+            }
+        },
+        "Ethernet4": {
+            "802.1Q_mode": "tagged",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "0.0.0.0",
+                    "prefix_length": 0
+                }
+            ],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "52:54:00:91:1e:bf",
+            "mtu": "1500",
+            "tagged_vlans": [
+                {
+                    "id": "2",
+                    "name": "VLAN2"
+                }
+            ],
+            "type": "1000base-t",
+            "untagged_vlan": {
+                "id": 1,
+                "name": "default"
+            }
+        },
+        "Management1": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "198.51.100.1",
+                    "prefix_length": 24
+                }
+            ],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "52:54:00:0d:29:5c",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {}
+        }
+    },
+    "serial": "17E1C0B9EEFFCE88C2E0703E4A1D4FB0"
+}

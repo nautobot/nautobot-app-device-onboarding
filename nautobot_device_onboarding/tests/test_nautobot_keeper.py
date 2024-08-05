@@ -1,12 +1,14 @@
 """Unit tests for nautobot_device_onboarding.onboard module and its classes."""
+
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from nautobot.dcim.choices import InterfaceTypeChoices
-from nautobot.dcim.models import Location, LocationType, Manufacturer, DeviceType, Device, Interface, Platform
-from nautobot.extras.models import Role, Status, CustomField
-from nautobot.ipam.models import IPAddress
+from nautobot.dcim.models import Device, DeviceType, Interface, Location, LocationType, Manufacturer, Platform
 from nautobot.extras.choices import CustomFieldTypeChoices
+from nautobot.extras.models import CustomField, Role, Status
+from nautobot.extras.models.secrets import SecretsGroup
+from nautobot.ipam.models import IPAddress
 
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.nautobot_keeper import NautobotKeeper
@@ -435,7 +437,7 @@ class NautobotKeeperTestCase(TestCase):
         self.assertEqual(nbk.nb_mgmt_ifname, intf)
 
     def test_ensure_primary_ip_not_exist(self):
-        """Verify ensure_primary_ip function when the IP address do not already exist."""
+        """Verify ensure_primary_ip function when the IP address does not already exist."""
         onboarding_kwargs = {
             "netdev_hostname": "device1",
             "netdev_nb_role_name": PLUGIN_SETTINGS["default_device_role"],
@@ -563,3 +565,29 @@ class NautobotKeeperTestCase(TestCase):
         self.assertEqual(device.device_type.manufacturer.cf["cf_manufacturer"], "Foobar!")
         self.assertEqual(device.interfaces.get(name="Management0").cf["cf_interface"], "2016-06-23")
         self.assertEqual(device.primary_ip.cf["cf_ipaddress"], "http://example.com/")
+
+    def test_ensure_secret_group_exist(self):
+        "Verify secret group assignment to device when specified in plugin config."
+
+        PLUGIN_SETTINGS["assign_secrets_group"] = True
+        test_secret_group = SecretsGroup.objects.create(name="test_secret_group")
+
+        onboarding_kwargs = {
+            "netdev_hostname": "device1",
+            "netdev_nb_role_name": "switch",
+            "netdev_vendor": "Cisco",
+            "netdev_model": "c2960",
+            "netdev_nb_location_name": self.site1,
+            "netdev_netmiko_device_type": "cisco_ios",
+            "netdev_serial_number": "123456",
+            "netdev_mgmt_ip_address": "192.0.2.10",
+            "netdev_mgmt_ifname": "GigaEthernet0",
+            "netdev_nb_credentials": test_secret_group,
+        }
+
+        nbk = NautobotKeeper(**onboarding_kwargs)
+
+        nbk.ensure_device()
+
+        nbk.ensure_secret_group()
+        self.assertEqual(nbk.netdev_nb_credentials.name, test_secret_group.name)
