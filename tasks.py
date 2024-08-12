@@ -66,15 +66,11 @@ namespace.configure(
 
 
 def _is_compose_included(context, name):
-    return (
-        f"docker-compose.{name}.yml" in context.nautobot_device_onboarding.compose_files
-    )
+    return f"docker-compose.{name}.yml" in context.nautobot_device_onboarding.compose_files
 
 
 def _await_healthy_service(context, service):
-    container_id = docker_compose(
-        context, f"ps -q -- {service}", pty=False, echo=False, hide=True
-    ).stdout.strip()
+    container_id = docker_compose(context, f"ps -q -- {service}", pty=False, echo=False, hide=True).stdout.strip()
     _await_healthy_container(context, container_id)
 
 
@@ -134,9 +130,7 @@ def docker_compose(context, command, **kwargs):
     ]
 
     for compose_file in context.nautobot_device_onboarding.compose_files:
-        compose_file_path = os.path.join(
-            context.nautobot_device_onboarding.compose_dir, compose_file
-        )
+        compose_file_path = os.path.join(context.nautobot_device_onboarding.compose_dir, compose_file)
         compose_command_tokens.append(f' -f "{compose_file_path}"')
 
     compose_command_tokens.append(command)
@@ -175,9 +169,7 @@ def run_command(context, command, **kwargs):
         if "nautobot" in results.stdout:
             compose_command = f"exec{command_env_args} nautobot {command}"
         else:
-            compose_command = (
-                f"run{command_env_args} --rm --entrypoint='{command}' nautobot"
-            )
+            compose_command = f"run{command_env_args} --rm --entrypoint='{command}' nautobot"
 
         pty = kwargs.pop("pty", True)
 
@@ -202,9 +194,7 @@ def build(context, force_rm=False, cache=True):
     if force_rm:
         command += " --force-rm"
 
-    print(
-        f"Building Nautobot with Python {context.nautobot_device_onboarding.python_ver}..."
-    )
+    print(f"Building Nautobot with Python {context.nautobot_device_onboarding.python_ver}...")
     docker_compose(context, command)
 
 
@@ -256,9 +246,7 @@ def restart(context, service=""):
 def stop(context, service=""):
     """Stop specified or all services, if service is not specified, remove all containers."""
     print("Stopping Nautobot...")
-    docker_compose(
-        context, "stop" if service else "down --remove-orphans", service=service
-    )
+    docker_compose(context, "stop" if service else "down --remove-orphans", service=service)
 
 
 @task(
@@ -277,9 +265,7 @@ def destroy(context, volumes=True, import_db_file=""):
         return
 
     if not volumes:
-        raise ValueError(
-            "Cannot specify `--no-volumes` and `--import-db-file` arguments at the same time."
-        )
+        raise ValueError("Cannot specify `--no-volumes` and `--import-db-file` arguments at the same time.")
 
     print(f"Importing database file: {import_db_file}...")
 
@@ -296,16 +282,12 @@ def destroy(context, volumes=True, import_db_file=""):
         "db",
     ]
 
-    container_id = docker_compose(
-        context, " ".join(command), pty=False, echo=False, hide=True
-    ).stdout.strip()
+    container_id = docker_compose(context, " ".join(command), pty=False, echo=False, hide=True).stdout.strip()
     _await_healthy_container(context, container_id)
     print("Stopping database container...")
     context.run(f"docker stop {container_id}", pty=False, echo=False, hide=True)
 
-    print(
-        "Database import complete, you can start Nautobot with the following command:"
-    )
+    print("Database import complete, you can start Nautobot with the following command:")
     print("invoke start")
 
 
@@ -477,9 +459,7 @@ def dbshell(context, db_name="", input_file="", output_file="", query=""):
     if input_file and query:
         raise ValueError("Cannot specify both, `input_file` and `query` arguments")
     if output_file and not (input_file or query):
-        raise ValueError(
-            "`output_file` argument requires `input_file` or `query` argument"
-        )
+        raise ValueError("`output_file` argument requires `input_file` or `query` argument")
 
     env = {}
     if query:
@@ -617,9 +597,7 @@ def backup_db(context, db_name="", output_file="dump.sql", readable=True):
     docker_compose(context, " ".join(command), pty=False)
 
     print(50 * "=")
-    print(
-        "The database backup has been successfully completed and saved to the following file:"
-    )
+    print("The database backup has been successfully completed and saved to the following file:")
     print(output_file)
     print("You can import this database backup with the following command:")
     print(f"invoke import-db --input-file '{output_file}'")
@@ -733,13 +711,6 @@ def ruff(context, action=None, target=None, fix=False, output_format="concise"):
 
 
 @task
-def bandit(context):
-    """Run bandit to validate basic static code security analysis."""
-    command = "bandit --recursive . --configfile .bandit.yml"
-    run_command(context, command)
-
-
-@task
 def yamllint(context):
     """Run yamllint to validate formatting adheres to NTC defined YAML standards.
 
@@ -820,8 +791,6 @@ def tests(context, failfast=False, keepdb=False, lint_only=False):
     # Sorted loosely from fastest to slowest
     print("Running ruff...")
     ruff(context)
-    print("Running bandit...")
-    bandit(context)
     print("Running yamllint...")
     yamllint(context)
     print("Running poetry check...")
