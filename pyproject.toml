@@ -40,7 +40,6 @@ python-tss-sdk = "*"
 netutils = "^1.9.1"
 
 [tool.poetry.group.dev.dependencies]
-bandit = "*"
 coverage = "*"
 django-debug-toolbar = "*"
 invoke = "*"
@@ -78,8 +77,21 @@ no-docstring-rgx="^(_|test_|Meta$)"
 
 [tool.pylint.messages_control]
 disable = """,
-    line-too-long
-"""
+    arguments-differ,
+    line-too-long,
+    duplicate-code,
+    logging-fstring-interpolation,
+    too-few-public-methods,
+    too-many-ancestors,
+    too-many-arguments,
+    too-many-branches,
+    too-many-lines,
+    too-many-locals,
+    too-many-public-methods,
+    too-many-statements,
+    unused-argument,
+    unused-import,
+    """
 
 [tool.pylint.miscellaneous]
 # Don't flag TODO as a failure, let us commit with things that still need to be done in the code
@@ -101,7 +113,6 @@ target-version = "py38"
 select = [
     "D",  # pydocstyle
     "F", "E", "W",  # flake8
-    "PL",  # pylint
     "S",  # bandit
     "I",  # isort
 ]

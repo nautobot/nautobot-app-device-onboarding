@@ -77,9 +77,7 @@ class TestTransformWithGitRepo(TransactionTestCase):
         self.assertEqual(1, repo_count)
 
     @mock.patch("nautobot_device_onboarding.nornir_plays.transform.load_command_mappers_from_dir")
-    def test_pull_git_repository_and_refresh_data_with_valid_data(
-        self, mock_load_command_mappers, MockGitRepo
-    ):  # pylint:disable=invalid-name
+    def test_pull_git_repository_and_refresh_data_with_valid_data(self, mock_load_command_mappers, MockGitRepo):  # pylint:disable=invalid-name
         """
         The test_pull_git_repository_and_refresh_data job should succeed if valid data is present in the repo.
         """
