@@ -10,8 +10,8 @@ from nornir.core.inventory import ConnectionOptions, Defaults, Host
 
 from nautobot_device_onboarding.nornir_plays.formatter import (
     extract_and_post_process,
-    perform_data_extraction,
     normalize_processed_data,
+    perform_data_extraction,
 )
 from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info
 
