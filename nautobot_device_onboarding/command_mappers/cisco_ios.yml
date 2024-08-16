@@ -129,3 +129,15 @@ sync_network_data:
         parser: "textfsm"
         jpath: "[*].{local_interface:local_interface, remote_interface:neighbor_interface, remote_device:neighbor_name}"
         post_processor: "{% set result = [] %}{% for cable in obj %}{% set _=result.append({'local_interface': cable['local_interface'], 'remote_interface': cable['remote_interface'], 'remote_device': cable['remote_device'] | remove_fqdn }) %}{% endfor %}{{ result | tojson }}"
+  hosts:
+    commands:
+      - command: "show mac address-table"
+        parser: "textfsm"
+        jpath: "[*].{destination_address:destination_address, destination_port:destination_port}"
+        post_processor: "{% set result = [] %}{% for host in obj %}{% set _=result.append({'destination_address':host['destination_address'], 'destination_port':host['destination_port'] | canonical_interface_name_list}) %}{% endfor %}{{ result | tojson }}"
+  lldp_neighbor_ports:
+    commands:
+      - command: "show lldp neighbors"
+        parser: "textfsm"
+        jpath: "[*].local_interface"
+        post_processor: "{% set result = [] %}{% for neighbor in obj %}{% set _=result.append(neighbor | canonical_interface_name) %}{% endfor %}{{ result | tojson }}"
