@@ -1,11 +1,15 @@
 # pylint: disable=attribute-defined-outside-init
 """Device Onboarding Jobs."""
 
+import concurrent.futures
 import csv
+import ipaddress
 import json
 import logging
+import socket
 from io import StringIO
 
+import nmap3
 from diffsync.enum import DiffSyncFlags
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -15,7 +19,7 @@ from nautobot.core.celery import register_jobs
 from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.choices import CustomFieldTypeChoices, SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import CustomField, Role, SecretsGroup, SecretsGroupAssociation, Status
-from nautobot.ipam.models import Namespace
+from nautobot.ipam.models import Namespace, Prefix
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
@@ -212,6 +216,181 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
             self.username = settings.NAPALM_USERNAME
             self.password = settings.NAPALM_PASSWORD
             self.secret = settings.NAPALM_ARGS.get("secret", None)
+
+
+class FormEntry:  # pylint disable=too-few-public-method
+    """Class definition to use as Mixin for form definitions."""
+
+    debug = BooleanVar(description="Enable for more verbose debug logging", default=False)
+
+    threaded = BooleanVar(
+        description="Run job as threaded or serial",
+        label="Threaded",
+        default=False,
+    )
+
+    rdns_lookup = BooleanVar(
+        description="Perform reverse DNS lookups to get hostname",
+        label="Reverse DNS Lookup",
+        default=False,
+    )
+
+    os_identification = BooleanVar(
+        description="Perform OS Detection using NMap. (Requires Root and sigificantly increases discovery time)",
+        label="OS Identification",
+        default=False,
+    )
+
+    prefixes = MultiObjectVar(model=Prefix, description="Prefix to scan for active devices.")
+
+    ports = StringVar(
+        description="Which ports to scan on each IP. Both TCP and UDP will be scanned.",
+        label="Ports to Scan",
+        default="22,80,161,443",
+    )
+
+    num_threads = IntegerVar(
+        description="Number of IPs to scan at a time.",
+        label="Number of Threads",
+        default=10,
+    )
+
+
+class NetworkScanNmap(Job, FormEntry):
+    """Scan IP Range or Subnet for active devices."""
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Meta data for NetworkScanNmap."""
+
+        name = "NMAP Network Scan"
+        description = "Scan network prefix or ip range for active devices."
+        has_sensitive_variables = False
+
+    def scan_ip(self, ip, ports, rdns_lookup, os_identification):
+        """Scan a single IP address for both TCP and UDP ports."""
+        nmap = nmap3.NmapScanTechniques()
+        nmap_detection = nmap3.Nmap()
+        results = {}
+
+        try:
+            host_name = "Unknown"
+            host_os = "Unknown"
+
+            # Perform TCP and UDP scans
+            tcp_results = nmap.nmap_tcp_scan(ip, args=f"-p {ports}")
+            udp_results = nmap.nmap_udp_scan(ip, args=f"-p {ports}")
+
+            if rdns_lookup:
+                # Perform rDNS lookup
+                try:
+                    host_info = socket.gethostbyaddr(ip)
+                    host_name = host_info[0]  # Primary hostname
+                except socket.herror as e:
+                    self.logger.warning(f"Error looking up hostname via rDNS. {e}")
+                    self.logger.handlers[0].flush()
+                    host_name = "Unknown"
+
+            if os_identification:
+                try:
+                    host_os = nmap_detection.nmap_os_detection(ip)
+                except Exception as e:
+                    self.logger.warning(f"Error detecting device OS. {e}")
+                    self.logger.handlers[0].flush()
+                    host_os = "Unknown"
+
+            # Combine TCP, UDP, and rDNS results
+            results[ip] = {
+                "tcp": tcp_results.get(ip, {}).get("ports", []),
+                "udp": udp_results.get(ip, {}).get("ports", []),
+                "host_information": {"hostname": host_name, "host_os": host_os},
+            }
+
+        except Exception as e:
+            self.logger.error(f"Error scanning {ip}: {e}")
+            self.logger.handlers[0].flush()
+            raise
+
+        return results
+
+    def run(
+        self,
+        threaded,
+        rdns_lookup,
+        os_identification,
+        prefixes,
+        ports,
+        num_threads,
+        debug,
+        *args,
+        **kwargs,
+    ):
+        """Run jobs."""
+        self.debug = debug
+        self.prefixes = prefixes
+        self.ports = ports
+        self.num_threads = num_threads
+        self.rdns_lookup = rdns_lookup
+        self.os_identification = os_identification
+        self.threaded = threaded
+
+        results = {}
+
+        if not self.threaded:
+            for prefix in self.prefixes:
+                network = ipaddress.ip_network(prefix.prefix)
+
+                # Get a list of all IPs in the subnet
+                ip_list = [str(ip) for ip in network.hosts()]
+
+                for ip in ip_list:
+                    if self.debug:
+                        self.logger.debug(f"Scanning {ip}")
+
+                    # Update the results dictionary
+                    scan_result = self.scan_ip(
+                        ip=ip,
+                        ports=self.ports,
+                        rdns_lookup=self.rdns_lookup,
+                        os_identification=self.os_identification,
+                    )
+                    results.update(scan_result)
+
+            self.logger.info(f"Results: {results}")
+
+        else:
+            for prefix in self.prefixes:
+                network = ipaddress.ip_network(prefix.prefix)
+
+                # Get a list of all IPs in the subnet
+                ip_list = [str(ip) for ip in network.hosts()]
+
+                # Use a ThreadPoolExecutor to scan IPs concurrently
+                with concurrent.futures.ThreadPoolExecutor(max_workers=self.num_threads) as executor:
+                    future_to_ip = {}
+
+                    for ip in ip_list:
+                        if self.debug:
+                            self.logger.debug(f"Starting scan for IP: {ip}")
+
+                        # Submit the scanning task to the executor
+                        future = executor.submit(
+                            self.scan_ip,
+                            ip,
+                            self.ports,
+                            self.rdns_lookup,
+                            self.os_identification,
+                        )
+                        future_to_ip[future] = ip
+
+                    for future in concurrent.futures.as_completed(future_to_ip):
+                        ip = future_to_ip[future]
+                        try:
+                            ip_result = future.result()
+                            results.update(ip_result)
+                        except Exception as e:
+                            self.logger.error(f"Error with future for IP {ip}: {e}")
+
+            self.logger.info(f"Results: {results}")
 
 
 class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attributes
@@ -771,5 +950,5 @@ class DeviceOnboardingTroubleshootingJob(Job):
         return f"Successfully ran the following commands: {', '.join(list(compiled_results.keys()))}"
 
 
-jobs = [OnboardingTask, SSOTSyncDevices, SSOTSyncNetworkData, DeviceOnboardingTroubleshootingJob]
+jobs = [OnboardingTask, NetworkScanNmap, SSOTSyncDevices, SSOTSyncNetworkData, DeviceOnboardingTroubleshootingJob]
 register_jobs(*jobs)
