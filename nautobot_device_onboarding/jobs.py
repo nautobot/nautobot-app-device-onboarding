@@ -8,6 +8,7 @@ import json
 import logging
 import socket
 from io import StringIO
+from datetime import datetime
 
 import nmap3
 from diffsync.enum import DiffSyncFlags
@@ -19,12 +20,13 @@ from nautobot.core.celery import register_jobs
 from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.choices import CustomFieldTypeChoices, SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import CustomField, Role, SecretsGroup, SecretsGroupAssociation, Status
-from nautobot.ipam.models import Namespace, Prefix
+from nautobot.ipam.models import Namespace, Prefix, IPAddress
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
 from nornir.core.plugins.inventory import InventoryPluginRegister
 
+from nautobot_device_onboarding.models import DiscoveredGroup, DiscoveredIPAddress, DiscoveredPort
 from nautobot_device_onboarding.choices import SSOT_JOB_TO_COMMAND_CHOICE
 from nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters import (
     SyncDevicesNautobotAdapter,
@@ -62,6 +64,7 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
     ip_address = StringVar(
         description="IP Address/DNS Name of the device to onboard, specify in a comma separated list for multiple devices.",
         label="IP Address/FQDN",
+        required=False,
     )
     port = IntegerVar(default=22)
     timeout = IntegerVar(default=30)
@@ -123,6 +126,7 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
         self.device_type = data["device_type"]
         self.role = data["role"]
         self.credentials = data["credentials"]
+        self.discovered_ips = None
 
         self.logger.info("START: onboarding devices")
         # allows for itteration without having to spawn multiple jobs
@@ -223,6 +227,13 @@ class FormEntry:  # pylint disable=too-few-public-method
 
     debug = BooleanVar(description="Enable for more verbose debug logging", default=False)
 
+    discovered_group_name = StringVar(
+        description="Name of the group that discovered IPs will be associated with.",
+        label="Discovered Group Name",
+        default=f"DiscoveredGroup {datetime.now()}",
+        required=True,
+    )
+
     threaded = BooleanVar(
         description="Run job as threaded or serial",
         label="Threaded",
@@ -266,7 +277,7 @@ class NetworkScanNmap(Job, FormEntry):
         description = "Scan network prefix or ip range for active devices."
         has_sensitive_variables = False
 
-    def scan_ip(self, ip, ports, rdns_lookup, os_identification):
+    def scan_ip(self, ip, prefix, ports, rdns_lookup, os_identification):
         """Scan a single IP address for both TCP and UDP ports."""
         nmap = nmap3.NmapScanTechniques()
         nmap_detection = nmap3.Nmap()
@@ -300,6 +311,7 @@ class NetworkScanNmap(Job, FormEntry):
 
             # Combine TCP, UDP, and rDNS results
             results[ip] = {
+                "prefix": prefix,
                 "tcp": tcp_results.get(ip, {}).get("ports", []),
                 "udp": udp_results.get(ip, {}).get("ports", []),
                 "host_information": {"hostname": host_name, "host_os": host_os},
@@ -312,8 +324,52 @@ class NetworkScanNmap(Job, FormEntry):
 
         return results
 
+    def create_discovered_objects(self, ip, prefix, ports, extra_info):
+        """Create DiscoveredIP, DiscoveredGroup, and DiscoveredPort objects from discovery information."""
+        _prefix = Prefix.objects.get(prefix=str(prefix))
+
+        try:
+            _ip_address = IPAddress.objects.get(host=ip)
+        except IPAddress.DoesNotExist:
+            _ip_address = IPAddress.objects.create(
+                host=ip,
+                mask_length=_prefix.prefix_length,  # Use the prefix_length from the Prefix model
+                parent=_prefix,  # Associate the IPAddress with the Prefix
+                status=Status.objects.get(name="Active"),
+            )
+            _ip_address.validated_save()
+
+        self.logger.info(f"Creating DiscoveredGroup {self.discovered_group_name}")
+        _discovered_group, created = DiscoveredGroup.objects.get_or_create(
+            name=self.discovered_group_name
+        )
+        _discovered_group.validated_save()
+
+        self.logger.info(f"Creating DiscoveredIPAddress {_ip_address}")
+        _discovered_ip = DiscoveredIPAddress.objects.create(
+            discovered_group=_discovered_group,  # Use the correct field name
+            ip_address=_ip_address,
+            extra_info=extra_info,
+        )
+        _discovered_ip.validated_save()
+
+        # Optionally, handle ports here if necessary
+        for port in ports:
+            DiscoveredPort.objects.create(
+                discovered_ip_address=_discovered_ip,
+                protocol=port['protocol'],
+                port_id=port['portid'],
+                state=port['state'],
+                reason=port['reason'],
+                reason_ttl=port['reason_ttl'],
+                service=port.get('service', {}),
+                cpe=port.get('cpe', []),
+                scripts=port.get('scripts', []),
+            )
+
     def run(
         self,
+        discovered_group_name,
         threaded,
         rdns_lookup,
         os_identification,
@@ -326,6 +382,7 @@ class NetworkScanNmap(Job, FormEntry):
     ):
         """Run jobs."""
         self.debug = debug
+        self.discovered_group_name = discovered_group_name
         self.prefixes = prefixes
         self.ports = ports
         self.num_threads = num_threads
@@ -349,6 +406,7 @@ class NetworkScanNmap(Job, FormEntry):
                     # Update the results dictionary
                     scan_result = self.scan_ip(
                         ip=ip,
+                        prefix=prefix,
                         ports=self.ports,
                         rdns_lookup=self.rdns_lookup,
                         os_identification=self.os_identification,
@@ -376,6 +434,7 @@ class NetworkScanNmap(Job, FormEntry):
                         future = executor.submit(
                             self.scan_ip,
                             ip,
+                            ipaddress.ip_network(prefix.prefix),
                             self.ports,
                             self.rdns_lookup,
                             self.os_identification,
@@ -390,7 +449,19 @@ class NetworkScanNmap(Job, FormEntry):
                         except Exception as e:
                             self.logger.error(f"Error with future for IP {ip}: {e}")
 
-            self.logger.info(f"Results: {results}")
+            if self.debug:
+                self.logger.info(f"Results: {results}")
+
+            self.logger.info (f"Creating Discovered Objects...")
+            [
+                self.create_discovered_objects(
+                    ip=ip,
+                    prefix=data['prefix'],
+                    ports=data['tcp'] + data['udp'],
+                    extra_info=data['host_information']
+                )
+                for ip, data in results.items()
+            ]
 
 
 class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attributes
@@ -417,6 +488,12 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
     csv_file = FileVar(
         label="CSV File", required=False, description="If a file is provided all the options below will be ignored."
     )
+    discovered_group = ObjectVar(
+        model=DiscoveredGroup,
+        label="Discovery Group",
+        description="Discovery Group Generated by Discovery Scan Jobs.",
+        required=False,
+    )
     location = ObjectVar(
         model=Location,
         required=False,
@@ -424,6 +501,12 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         description="Assigned Location for all synced device(s)",
     )
     namespace = ObjectVar(model=Namespace, required=False, description="Namespace ip addresses belong to.")
+    discovered_group = ObjectVar(
+        model=DiscoveredGroup,
+        label="Discovery Group",
+        description="Discovery Group Generated by Discovery Scan Jobs.",
+        required=False,
+    )
     ip_addresses = StringVar(
         required=False,
         description="IP address of the device to sync, specify in a comma separated list for multiple devices.",
@@ -602,6 +685,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         memory_profiling,
         debug,
         csv_file,
+        discovered_group,
         location,
         namespace,
         ip_addresses,
@@ -634,6 +718,62 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 self.job_result.task_kwargs = {"debug": debug, "csv_file": self.task_kwargs_csv_data}
             else:
                 raise ValidationError(message="CSV check failed. No devices will be synced.")
+
+        elif discovered_group:
+            # Verify that all requried form inputs have been provided
+            required_inputs = {
+                "location": location,
+                "namespace": namespace,
+                "device_role": device_role,
+                "device_status": device_status,
+                "interface_status": interface_status,
+                "ip_address_status": ip_address_status,
+                "port": port,
+                "timeout": timeout,
+                "secrets_group": secrets_group,
+            }
+
+            missing_required_inputs = [
+                form_field for form_field, input_value in required_inputs.items() if not input_value
+            ]
+            if not missing_required_inputs:
+                pass
+            else:
+                self.logger.error(f"Missing requried inputs from job form: {missing_required_inputs}")
+                raise ValidationError(message=f"Missing required inputs {missing_required_inputs}")
+
+            self.location = location
+            self.namespace = namespace
+            _discovered_ips = (DiscoveredIPAddress.objects.get(discovered_group=discovered_group, marked_for_onboarding=True).values_list("ip_address", flat=True))
+            self.ip_addresses = [ip for ip in _discovered_ips]
+            self.set_mgmt_only = set_mgmt_only
+            self.update_devices_without_primary_ip = update_devices_without_primary_ip
+            self.device_role = device_role
+            self.device_status = device_status
+            self.interface_status = interface_status
+            self.ip_address_status = ip_address_status
+            self.port = port
+            self.timeout = timeout
+            self.secrets_group = secrets_group
+            self.platform = platform
+
+            self.job_result.task_kwargs = {
+                "debug": debug,
+                "location": location,
+                "namespace": namespace,
+                "ip_addresses": ip_addresses,
+                "set_mgmt_only": set_mgmt_only,
+                "update_devices_without_primary_ip": update_devices_without_primary_ip,
+                "device_role": device_role,
+                "device_status": device_status,
+                "interface_status": interface_status,
+                "ip_address_status": ip_address_status,
+                "port": port,
+                "timeout": timeout,
+                "secrets_group": secrets_group,
+                "platform": platform,
+                "csv_file": "",
+            }
 
         else:
             # Verify that all requried form inputs have been provided
