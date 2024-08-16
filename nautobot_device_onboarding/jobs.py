@@ -8,9 +8,9 @@ import json
 import logging
 import socket
 from io import StringIO
+from datetime import datetime
 
 import nmap3
-from datetime import datetime
 from diffsync.enum import DiffSyncFlags
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
