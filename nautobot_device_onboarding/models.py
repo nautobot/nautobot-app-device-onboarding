@@ -42,6 +42,12 @@ class DiscoveredIPAddress(PrimaryModel):
 
     discovered_group = models.ForeignKey(to=DiscoveredGroup, on_delete=models.PROTECT)
     ip_address = models.ForeignKey("ipam.IPAddress", on_delete=models.CASCADE, null=True)
+    marked_for_onboarding = models.BooleanField(
+        default=False,
+        verbose_name="Marked for onboarding",
+        help_text="IP Addresses that are ready for onboarding",
+    )
+    extra_info = models.JSONField(encoder=DjangoJSONEncoder, blank=True, default=dict)
 
 
 class DiscoveredPort(OrganizationalModel):
