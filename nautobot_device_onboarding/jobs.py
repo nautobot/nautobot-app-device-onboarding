@@ -15,18 +15,41 @@ from diffsync.enum import DiffSyncFlags
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from nautobot.apps.jobs import BooleanVar, ChoiceVar, FileVar, IntegerVar, Job, MultiObjectVar, ObjectVar, StringVar
+from nautobot.apps.jobs import (
+    BooleanVar,
+    ChoiceVar,
+    FileVar,
+    IntegerVar,
+    Job,
+    MultiObjectVar,
+    ObjectVar,
+    StringVar,
+)
 from nautobot.core.celery import register_jobs
 from nautobot.dcim.models import Device, DeviceType, Location, Platform
-from nautobot.extras.choices import CustomFieldTypeChoices, SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
-from nautobot.extras.models import CustomField, Role, SecretsGroup, SecretsGroupAssociation, Status
+from nautobot.extras.choices import (
+    CustomFieldTypeChoices,
+    SecretsGroupAccessTypeChoices,
+    SecretsGroupSecretTypeChoices,
+)
+from nautobot.extras.models import (
+    CustomField,
+    Role,
+    SecretsGroup,
+    SecretsGroupAssociation,
+    Status,
+)
 from nautobot.ipam.models import Namespace, Prefix, IPAddress
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
 from nornir.core.plugins.inventory import InventoryPluginRegister
 
-from nautobot_device_onboarding.models import DiscoveredGroup, DiscoveredIPAddress, DiscoveredPort
+from nautobot_device_onboarding.models import (
+    DiscoveredGroup,
+    DiscoveredIPAddress,
+    DiscoveredPort,
+)
 from nautobot_device_onboarding.choices import SSOT_JOB_TO_COMMAND_CHOICE
 from nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters import (
     SyncDevicesNautobotAdapter,
@@ -38,7 +61,10 @@ from nautobot_device_onboarding.diffsync.adapters.sync_network_data_adapters imp
 )
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
-from nautobot_device_onboarding.nornir_plays.command_getter import _parse_credentials, netmiko_send_commands
+from nautobot_device_onboarding.nornir_plays.command_getter import (
+    _parse_credentials,
+    netmiko_send_commands,
+)
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
@@ -69,7 +95,9 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
     port = IntegerVar(default=22)
     timeout = IntegerVar(default=30)
     credentials = ObjectVar(
-        model=SecretsGroup, required=False, description="SecretsGroup for Device connection credentials."
+        model=SecretsGroup,
+        required=False,
+        description="SecretsGroup for Device connection credentials.",
     )
     platform = ObjectVar(
         model=Platform,
@@ -136,7 +164,9 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
                 self._onboard(address=address)
             except OnboardException as err:
                 self.logger.exception(
-                    "The following exception occurred when attempting to onboard %s: %s", address, str(err)
+                    "The following exception occurred when attempting to onboard %s: %s",
+                    address,
+                    str(err),
                 )
                 if not data["continue_on_failure"]:
                     raise OnboardException(
@@ -154,9 +184,15 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
             username=self.username,
             password=self.password,
             secret=self.secret,
-            napalm_driver=self.platform.napalm_driver if self.platform and self.platform.napalm_driver else None,
+            napalm_driver=(
+                self.platform.napalm_driver
+                if self.platform and self.platform.napalm_driver
+                else None
+            ),
             optional_args=(
-                self.platform.napalm_args if self.platform and self.platform.napalm_args else settings.NAPALM_ARGS
+                self.platform.napalm_args
+                if self.platform and self.platform.napalm_args
+                else settings.NAPALM_ARGS
             ),
         )
         netdev.get_onboarding_facts()
@@ -167,10 +203,14 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
             "netdev_mgmt_ip_address": address,
             "netdev_nb_location_name": self.location.name,
             "netdev_nb_device_type_name": self.device_type,
-            "netdev_nb_role_name": self.role.name if self.role else PLUGIN_SETTINGS["default_device_role"],
+            "netdev_nb_role_name": (
+                self.role.name if self.role else PLUGIN_SETTINGS["default_device_role"]
+            ),
             "netdev_nb_role_color": PLUGIN_SETTINGS["default_device_role_color"],
             "netdev_nb_platform_name": self.platform.name if self.platform else None,
-            "netdev_nb_credentials": self.credentials if PLUGIN_SETTINGS["assign_secrets_group"] else None,
+            "netdev_nb_credentials": (
+                self.credentials if PLUGIN_SETTINGS["assign_secrets_group"] else None
+            ),
             # Kwargs discovered on the Onboarded Device:
             "netdev_hostname": netdev_dict["netdev_hostname"],
             "netdev_vendor": netdev_dict["netdev_vendor"],
@@ -183,16 +223,24 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
             "driver_addon_result": netdev_dict["driver_addon_result"],
         }
         onboarding_cls = netdev_dict["onboarding_class"]()
-        onboarding_cls.credentials = {"username": self.username, "password": self.password, "secret": self.secret}
+        onboarding_cls.credentials = {
+            "username": self.username,
+            "password": self.password,
+            "secret": self.secret,
+        }
         onboarding_cls.run(onboarding_kwargs=onboarding_kwargs)
         self.logger.info(
-            "Successfully onboarded %s with a management IP of %s", netdev_dict["netdev_hostname"], address
+            "Successfully onboarded %s with a management IP of %s",
+            netdev_dict["netdev_hostname"],
+            address,
         )
 
     def _parse_credentials(self, credentials):
         """Parse and return dictionary of credentials."""
         if credentials:
-            self.logger.info("Attempting to parse credentials from selected SecretGroup")
+            self.logger.info(
+                "Attempting to parse credentials from selected SecretGroup"
+            )
             try:
                 self.username = credentials.get_secret_value(
                     access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
@@ -213,10 +261,14 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
                 self.logger.exception(
                     "Unable to use SecretsGroup selected, ensure Access Type is set to Generic & at minimum Username & Password types are set."
                 )
-                raise OnboardException("fail-credentials - Unable to parse selected credentials.") from err
+                raise OnboardException(
+                    "fail-credentials - Unable to parse selected credentials."
+                ) from err
 
         else:
-            self.logger.info("Using napalm credentials configured in nautobot_config.py")
+            self.logger.info(
+                "Using napalm credentials configured in nautobot_config.py"
+            )
             self.username = settings.NAPALM_USERNAME
             self.password = settings.NAPALM_PASSWORD
             self.secret = settings.NAPALM_ARGS.get("secret", None)
@@ -225,7 +277,9 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
 class FormEntry:  # pylint disable=too-few-public-method
     """Class definition to use as Mixin for form definitions."""
 
-    debug = BooleanVar(description="Enable for more verbose debug logging", default=False)
+    debug = BooleanVar(
+        description="Enable for more verbose debug logging", default=False
+    )
 
     discovered_group_name = StringVar(
         description="Name of the group that discovered IPs will be associated with.",
@@ -252,7 +306,9 @@ class FormEntry:  # pylint disable=too-few-public-method
         default=False,
     )
 
-    prefixes = MultiObjectVar(model=Prefix, description="Prefix to scan for active devices.")
+    prefixes = MultiObjectVar(
+        model=Prefix, description="Prefix to scan for active devices."
+    )
 
     ports = StringVar(
         description="Which ports to scan on each IP. Both TCP and UDP will be scanned.",
@@ -357,14 +413,14 @@ class NetworkScanNmap(Job, FormEntry):
         for port in ports:
             DiscoveredPort.objects.create(
                 discovered_ip_address=_discovered_ip,
-                protocol=port['protocol'],
-                port_id=port['portid'],
-                state=port['state'],
-                reason=port['reason'],
-                reason_ttl=port['reason_ttl'],
-                service=port.get('service', {}),
-                cpe=port.get('cpe', []),
-                scripts=port.get('scripts', []),
+                protocol=port["protocol"],
+                port_id=port["portid"],
+                state=port["state"],
+                reason=port["reason"],
+                reason_ttl=port["reason_ttl"],
+                service=port.get("service", {}),
+                cpe=port.get("cpe", []),
+                scripts=port.get("scripts", []),
             )
 
     def run(
@@ -401,7 +457,7 @@ class NetworkScanNmap(Job, FormEntry):
 
                 for ip in ip_list:
                     if self.debug:
-                        self.logger.debug(f"Scanning {ip}")
+                        self.logger.debug(f"Scanning {ip} on ports {ports}.")
 
                     # Update the results dictionary
                     scan_result = self.scan_ip(
@@ -423,7 +479,9 @@ class NetworkScanNmap(Job, FormEntry):
                 ip_list = [str(ip) for ip in network.hosts()]
 
                 # Use a ThreadPoolExecutor to scan IPs concurrently
-                with concurrent.futures.ThreadPoolExecutor(max_workers=self.num_threads) as executor:
+                with concurrent.futures.ThreadPoolExecutor(
+                    max_workers=self.num_threads
+                ) as executor:
                     future_to_ip = {}
 
                     for ip in ip_list:
@@ -452,16 +510,16 @@ class NetworkScanNmap(Job, FormEntry):
             if self.debug:
                 self.logger.info(f"Results: {results}")
 
-            self.logger.info (f"Creating Discovered Objects...")
-            [
-                self.create_discovered_objects(
-                    ip=ip,
-                    prefix=data['prefix'],
-                    ports=data['tcp'] + data['udp'],
-                    extra_info=data['host_information']
-                )
-                for ip, data in results.items()
-            ]
+        self.logger.info(f"Creating Discovered Objects...")
+        [
+            self.create_discovered_objects(
+                ip=ip,
+                prefix=data["prefix"],
+                ports=data["tcp"] + data["udp"],
+                extra_info=data["host_information"],
+            )
+            for ip, data in results.items()
+        ]
 
 
 class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attributes
@@ -486,7 +544,9 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         description="Enable for more verbose logging.",
     )
     csv_file = FileVar(
-        label="CSV File", required=False, description="If a file is provided all the options below will be ignored."
+        label="CSV File",
+        required=False,
+        description="If a file is provided all the options below will be ignored.",
     )
     discovered_group = ObjectVar(
         model=DiscoveredGroup,
@@ -500,7 +560,9 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         query_params={"content_type": "dcim.device"},
         description="Assigned Location for all synced device(s)",
     )
-    namespace = ObjectVar(model=Namespace, required=False, description="Namespace ip addresses belong to.")
+    namespace = ObjectVar(
+        model=Namespace, required=False, description="Namespace ip addresses belong to."
+    )
     discovered_group = ObjectVar(
         model=DiscoveredGroup,
         label="Discovery Group",
@@ -550,7 +612,9 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         description="Status to be applied to all new synced IP addresses. This value does not update with additional syncs.",
     )
     secrets_group = ObjectVar(
-        model=SecretsGroup, required=False, description="SecretsGroup for device connection credentials."
+        model=SecretsGroup,
+        required=False,
+        description="SecretsGroup for device connection credentials.",
     )
     platform = ObjectVar(
         model=Platform,
@@ -595,11 +659,14 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 query = f"location_name: {row.get('location_name')}, location_parent_name: {row.get('location_parent_name')}"
                 if row.get("location_parent_name"):
                     location = Location.objects.get(
-                        name=row["location_name"].strip(), parent__name=row["location_parent_name"].strip()
+                        name=row["location_name"].strip(),
+                        parent__name=row["location_parent_name"].strip(),
                     )
                 else:
                     query = query = f"location_name: {row.get('location_name')}"
-                    location = Location.objects.get(name=row["location_name"].strip(), parent=None)
+                    location = Location.objects.get(
+                        name=row["location_name"].strip(), parent=None
+                    )
                 query = f"device_role: {row.get('device_role_name')}"
                 device_role = Role.objects.get(
                     name=row["device_role_name"].strip(),
@@ -642,27 +709,47 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 processed_csv_data[row["ip_address_host"]] = {}
                 processed_csv_data[row["ip_address_host"]]["location"] = location
                 processed_csv_data[row["ip_address_host"]]["namespace"] = namespace
-                processed_csv_data[row["ip_address_host"]]["port"] = int(row["port"].strip())
-                processed_csv_data[row["ip_address_host"]]["timeout"] = int(row["timeout"].strip())
-                processed_csv_data[row["ip_address_host"]]["set_mgmt_only"] = set_mgmgt_only
-                processed_csv_data[row["ip_address_host"]]["update_devices_without_primary_ip"] = (
-                    update_devices_without_primary_ip
+                processed_csv_data[row["ip_address_host"]]["port"] = int(
+                    row["port"].strip()
                 )
+                processed_csv_data[row["ip_address_host"]]["timeout"] = int(
+                    row["timeout"].strip()
+                )
+                processed_csv_data[row["ip_address_host"]][
+                    "set_mgmt_only"
+                ] = set_mgmgt_only
+                processed_csv_data[row["ip_address_host"]][
+                    "update_devices_without_primary_ip"
+                ] = update_devices_without_primary_ip
                 processed_csv_data[row["ip_address_host"]]["device_role"] = device_role
-                processed_csv_data[row["ip_address_host"]]["device_status"] = device_status
-                processed_csv_data[row["ip_address_host"]]["interface_status"] = interface_status
-                processed_csv_data[row["ip_address_host"]]["ip_address_status"] = ip_address_status
-                processed_csv_data[row["ip_address_host"]]["secrets_group"] = secrets_group
+                processed_csv_data[row["ip_address_host"]][
+                    "device_status"
+                ] = device_status
+                processed_csv_data[row["ip_address_host"]][
+                    "interface_status"
+                ] = interface_status
+                processed_csv_data[row["ip_address_host"]][
+                    "ip_address_status"
+                ] = ip_address_status
+                processed_csv_data[row["ip_address_host"]][
+                    "secrets_group"
+                ] = secrets_group
                 processed_csv_data[row["ip_address_host"]]["platform"] = platform
 
                 # Prepare ids to send to the job in celery
                 self.task_kwargs_csv_data[row["ip_address_host"]] = {}
-                self.task_kwargs_csv_data[row["ip_address_host"]]["port"] = int(row["port"].strip())
-                self.task_kwargs_csv_data[row["ip_address_host"]]["timeout"] = int(row["timeout"].strip())
+                self.task_kwargs_csv_data[row["ip_address_host"]]["port"] = int(
+                    row["port"].strip()
+                )
+                self.task_kwargs_csv_data[row["ip_address_host"]]["timeout"] = int(
+                    row["timeout"].strip()
+                )
                 self.task_kwargs_csv_data[row["ip_address_host"]]["secrets_group"] = (
                     secrets_group.id if secrets_group else ""
                 )
-                self.task_kwargs_csv_data[row["ip_address_host"]]["platform"] = platform.id if platform else ""
+                self.task_kwargs_csv_data[row["ip_address_host"]]["platform"] = (
+                    platform.id if platform else ""
+                )
                 row_count += 1
             except ObjectDoesNotExist as err:
                 self.logger.error(f"(row {sum([row_count, 1])}), {err} {query}")
@@ -715,9 +802,14 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 for ip_address in self.processed_csv_data:
                     self.ip_addresses.append(ip_address)
                 # prepare the task_kwargs needed by the CommandGetterDO job
-                self.job_result.task_kwargs = {"debug": debug, "csv_file": self.task_kwargs_csv_data}
+                self.job_result.task_kwargs = {
+                    "debug": debug,
+                    "csv_file": self.task_kwargs_csv_data,
+                }
             else:
-                raise ValidationError(message="CSV check failed. No devices will be synced.")
+                raise ValidationError(
+                    message="CSV check failed. No devices will be synced."
+                )
 
         elif discovered_group:
             # Verify that all requried form inputs have been provided
@@ -734,17 +826,25 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             }
 
             missing_required_inputs = [
-                form_field for form_field, input_value in required_inputs.items() if not input_value
+                form_field
+                for form_field, input_value in required_inputs.items()
+                if not input_value
             ]
             if not missing_required_inputs:
                 pass
             else:
-                self.logger.error(f"Missing requried inputs from job form: {missing_required_inputs}")
-                raise ValidationError(message=f"Missing required inputs {missing_required_inputs}")
+                self.logger.error(
+                    f"Missing requried inputs from job form: {missing_required_inputs}"
+                )
+                raise ValidationError(
+                    message=f"Missing required inputs {missing_required_inputs}"
+                )
 
             self.location = location
             self.namespace = namespace
-            _discovered_ips = (DiscoveredIPAddress.objects.get(discovered_group=discovered_group, marked_for_onboarding=True).values_list("ip_address", flat=True))
+            _discovered_ips = DiscoveredIPAddress.objects.get(
+                discovered_group=discovered_group, marked_for_onboarding=True
+            ).values_list("ip_address", flat=True)
             self.ip_addresses = [ip for ip in _discovered_ips]
             self.set_mgmt_only = set_mgmt_only
             self.update_devices_without_primary_ip = update_devices_without_primary_ip
@@ -791,13 +891,19 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             }
 
             missing_required_inputs = [
-                form_field for form_field, input_value in required_inputs.items() if not input_value
+                form_field
+                for form_field, input_value in required_inputs.items()
+                if not input_value
             ]
             if not missing_required_inputs:
                 pass
             else:
-                self.logger.error(f"Missing requried inputs from job form: {missing_required_inputs}")
-                raise ValidationError(message=f"Missing required inputs {missing_required_inputs}")
+                self.logger.error(
+                    f"Missing requried inputs from job form: {missing_required_inputs}"
+                )
+                raise ValidationError(
+                    message=f"Missing required inputs {missing_required_inputs}"
+                )
 
             self.location = location
             self.namespace = namespace
@@ -851,11 +957,19 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         description = "Synchronize extended device attribute information into Nautobot from one or more network devices. Information includes Interfaces, IP Addresses, Prefixes, VLANs and VRFs."
 
     debug = BooleanVar(description="Enable for more verbose logging.")
-    sync_vlans = BooleanVar(default=False, description="Sync VLANs and interface VLAN assignments.")
-    sync_vrfs = BooleanVar(default=False, description="Sync VRFs and interface VRF assignments.")
-    sync_cables = BooleanVar(default=False, description="Sync cables between interfaces via a LLDP or CDP.")
+    sync_vlans = BooleanVar(
+        default=False, description="Sync VLANs and interface VLAN assignments."
+    )
+    sync_vrfs = BooleanVar(
+        default=False, description="Sync VRFs and interface VRF assignments."
+    )
+    sync_cables = BooleanVar(
+        default=False, description="Sync cables between interfaces via a LLDP or CDP."
+    )
     namespace = ObjectVar(
-        model=Namespace, required=True, description="The namespace for all IP addresses created or updated in the sync."
+        model=Namespace,
+        required=True,
+        description="The namespace for all IP addresses created or updated in the sync.",
     )
     interface_status = ObjectVar(
         model=Status,
@@ -904,7 +1018,9 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         """Load network data adapter."""
         # do not load source data if the job form does not filter which devices to sync
         if self.filtered_devices:
-            self.source_adapter = SyncNetworkDataNetworkAdapter(job=self, sync=self.sync)
+            self.source_adapter = SyncNetworkDataNetworkAdapter(
+                job=self, sync=self.sync
+            )
             self.source_adapter.load()
 
     def load_target_adapter(self):
@@ -965,7 +1081,9 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
             if self.debug:
                 self.logger.debug("Custom field found or created")
         except Exception as err:  # pylint: disable=broad-exception-caught
-            self.logger.error(f"Failed to get or create last_network_data_sync custom field, {err}")
+            self.logger.error(
+                f"Failed to get or create last_network_data_sync custom field, {err}"
+            )
             return
 
         # Filter devices based on form input
@@ -981,7 +1099,9 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         if device_filter:  # prevent all devices from being returned by an empty filter
             self.filtered_devices = Device.objects.filter(**device_filter)
         else:
-            self.logger.error("No device filter options were provided, no devices will be synced.")
+            self.logger.error(
+                "No device filter options were provided, no devices will be synced."
+            )
 
         # Stop the job if no devices are returned after filtering
         if not self.filtered_devices:
@@ -989,7 +1109,9 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
             return
 
         # Log the devices that will be synced
-        filtered_devices_names = list(self.filtered_devices.values_list("name", flat=True))
+        filtered_devices_names = list(
+            self.filtered_devices.values_list("name", flat=True)
+        )
         self.logger.info(f"{len(filtered_devices_names)} devices will be synced")
         if len(filtered_devices_names) <= 300:
             self.logger.info(f"Devices: {filtered_devices_names}")
@@ -1035,7 +1157,9 @@ class DeviceOnboardingTroubleshootingJob(Job):
         ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
         port = kwargs["port"]
         platform = kwargs["platform"]
-        username, password, secret = _parse_credentials(kwargs["secrets_group"])  # pylint:disable=unused-variable
+        username, password, secret = _parse_credentials(
+            kwargs["secrets_group"]
+        )  # pylint:disable=unused-variable
 
         # Initiate Nornir instance with empty inventory
         compiled_results = {}
@@ -1053,21 +1177,27 @@ class DeviceOnboardingTroubleshootingJob(Job):
                         entered_ip, platform, port, username, password
                     )
                     nornir_obj.inventory.hosts.update(single_host_inventory_constructed)
-                nr_with_processors = nornir_obj.with_processors([TroubleshootingProcessor(compiled_results)])
+                nr_with_processors = nornir_obj.with_processors(
+                    [TroubleshootingProcessor(compiled_results)]
+                )
                 if kwargs["ssot_job_type"] == "both":
                     kwargs.update({"sync_vrfs": True})
                     kwargs.update({"sync_vlans": True})
                     kwargs.update({"sync_cables": True})
                     nr_with_processors.run(
                         task=netmiko_send_commands,
-                        command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],
+                        command_getter_yaml_data=nornir_obj.inventory.defaults.data[
+                            "platform_parsing_info"
+                        ],
                         command_getter_job="sync_devices",
                         logger=logger,
                         **kwargs,
                     )
                     nr_with_processors.run(
                         task=netmiko_send_commands,
-                        command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],
+                        command_getter_yaml_data=nornir_obj.inventory.defaults.data[
+                            "platform_parsing_info"
+                        ],
                         command_getter_job="sync_network_data",
                         logger=logger,
                         **kwargs,
@@ -1079,7 +1209,9 @@ class DeviceOnboardingTroubleshootingJob(Job):
                         kwargs.update({"sync_cables": True})
                     nr_with_processors.run(
                         task=netmiko_send_commands,
-                        command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],
+                        command_getter_yaml_data=nornir_obj.inventory.defaults.data[
+                            "platform_parsing_info"
+                        ],
                         command_getter_job=kwargs["ssot_job_type"],
                         logger=logger,
                         **kwargs,
@@ -1090,5 +1222,11 @@ class DeviceOnboardingTroubleshootingJob(Job):
         return f"Successfully ran the following commands: {', '.join(list(compiled_results.keys()))}"
 
 
-jobs = [OnboardingTask, NetworkScanNmap, SSOTSyncDevices, SSOTSyncNetworkData, DeviceOnboardingTroubleshootingJob]
+jobs = [
+    OnboardingTask,
+    NetworkScanNmap,
+    SSOTSyncDevices,
+    SSOTSyncNetworkData,
+    DeviceOnboardingTroubleshootingJob,
+]
 register_jobs(*jobs)

@@ -36,6 +36,9 @@ class DiscoveredGroup(OrganizationalModel):
 
     name = models.CharField(max_length=CHARFIELD_MAX_LENGTH, help_text="The name of the discovered group.", unique=True)
 
+    def __str__(self):
+        return self.name
+
 
 class DiscoveredIPAddress(PrimaryModel):
     """IP Addresses discovered in the given subnet by the NetworkScanNMAP Job."""
@@ -49,6 +52,12 @@ class DiscoveredIPAddress(PrimaryModel):
     )
     extra_info = models.JSONField(encoder=DjangoJSONEncoder, blank=True, default=dict)
 
+    def __str__(self):
+        return f"{self.discovered_group} - {self.ip_address}"
+
+    class Meta:
+        unique_together = ["discovered_group", "ip_address"]
+
 
 class DiscoveredPort(OrganizationalModel):
     """Port discovered on the discovered_ip_address."""
@@ -57,8 +66,14 @@ class DiscoveredPort(OrganizationalModel):
     protocol = models.CharField(choices=ProtocolTypeChoices, max_length=CHARFIELD_MAX_LENGTH, help_text="TCP/UDP")
     port_id = models.CharField(max_length=CHARFIELD_MAX_LENGTH, help_text="Port ID")
     state = models.CharField(choices=PortStateChoices, max_length=CHARFIELD_MAX_LENGTH, help_text="open/closed")
-    reason = models.CharField(max_length=CHARFIELD_MAX_LENGTH, help_text="The reason why the port is open or closed")
-    reason_ttl = models.CharField(max_length=CHARFIELD_MAX_LENGTH)
+    reason = models.CharField(max_length=CHARFIELD_MAX_LENGTH, help_text="The reason why the port is open or closed", blank=True)
+    reason_ttl = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=True)
     service = models.JSONField(encoder=DjangoJSONEncoder, blank=True, default=dict)
-    cpe = JSONArrayField(base_field=models.CharField(max_length=CHARFIELD_MAX_LENGTH))
-    scripts = JSONArrayField(base_field=models.CharField(max_length=CHARFIELD_MAX_LENGTH))
+    cpe = JSONArrayField(base_field=models.CharField(max_length=CHARFIELD_MAX_LENGTH), null=True, blank=True)
+    scripts = JSONArrayField(base_field=models.CharField(max_length=CHARFIELD_MAX_LENGTH), null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.protocol} port {self.port_id} from {self.discovered_ip_address}"
+
+    class Meta:
+        unique_together = ["discovered_ip_address", "protocol", "port_id"]

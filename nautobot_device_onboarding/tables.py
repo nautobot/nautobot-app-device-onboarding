@@ -1,12 +1,11 @@
 """Tables."""
-
 import json
 
 import django_tables2 as tables
 from django.utils.html import format_html
-
 from nautobot.core.tables import (
     BaseTable,
+    BooleanColumn,
     ButtonsColumn,
     ToggleColumn,
 )
@@ -24,8 +23,6 @@ class JSONExpandColumn(tables.Column):
             '<button type="button" class="json-toggle" onclick="toggleJson(this)">Show Extra Info</button>',
             formatted_json
         )
-
-
 class DiscoveredGroupTable(BaseTable):
     """DiscoverdGroup Table."""
 
@@ -45,30 +42,30 @@ class DiscoveredIPAddressTable(BaseTable):
     """DiscoveredIPAddress Table."""
 
     pk = ToggleColumn()
-    discovered_group = tables.Column(linkify=True, verbose_name="Discovered Group")
+    name = tables.TemplateColumn(template_code="""<a href="{% url 'plugins:nautobot_device_onboarding:discoveredipaddress' pk=record.pk %}">{{record}}</a>""")
+    discovered_group = tables.Column(linkify=True)
     ip_address = tables.Column(linkify=True)
-    marked_for_onboarding = tables.BooleanColumn()
+    marked_for_onboarding = BooleanColumn()
     extra_info = JSONExpandColumn()
 
     class Meta(BaseTable.Meta):
         """Meta options."""
 
         model = DiscoveredIPAddress
-        fields = ("pk",  "ip_address", "discovered_group", "marked_for_onboarding", "extra_info")
-        default_columns = ("pk", "ip_address", "discovered_group", "marked_for_onboarding", "extra_info")
-        template = "nautobot_device_onboarding/"
+        fields = ("pk", "name", "discovered_group", "ip_address", "marked_for_onboarding", "extra_info")
+        default_columns = ("pk", "name", "discovered_group", "ip_address", "marked_for_onboarding", "extra_info")
 
 
 class DiscoveredPortTable(BaseTable):
-    discovered_ip_address = tables.Column(linkify=True, verbose_name="Discovered IP Address", accessor="discovered_ip_address.ip_address")
+    """DiscoverdPort Table."""
+
+    pk = ToggleColumn()
+    port_id = tables.TemplateColumn(template_code="""<a href="{% url 'plugins:nautobot_device_onboarding:discoveredport' pk=record.pk %}">{{record.port_id}}</a>""")
+    discovered_ip_address = tables.Column(linkify=True)
     protocol = tables.Column()
-    port_id = tables.Column()
     state = tables.Column()
-    reason = tables.Column()
-    reason_ttl = tables.Column()
 
     class Meta(BaseTable.Meta):
         model = DiscoveredPort
-        fields = ("discovered_ip_address", "protocol", "port_id", "state", "reason", "reason_ttl")
-        default_columns = ("discovered_ip_address", "protocol", "port_id", "state", "reason", "reason_ttl")
-
+        fields = ("pk", "port_id", "discovered_ip_address", "protocol", "state", "service", "reason", "reason_ttl")
+        default_columns = ("pk", "port_id", "discovered_ip_address", "protocol", "state", "service", "reason", "reason_ttl")

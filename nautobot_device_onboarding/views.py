@@ -4,7 +4,7 @@ from nautobot.core.views import generic
 from nautobot.core.views.viewsets import NautobotUIViewSet
 from nautobot.core.views.generic import ObjectView
 
-from . import filters, tables
+from . import filters, tables, forms
 from .api import serializers
 from .models import DiscoveredGroup, DiscoveredIPAddress, DiscoveredPort
 
@@ -16,14 +16,7 @@ class DiscoveredGroupUIViewSet(NautobotUIViewSet):
     queryset = DiscoveredGroup.objects.all()
     serializer_class = serializers.DiscoveredGroupSerializer
     table_class = tables.DiscoveredGroupTable
-
-
-class DiscoveredGroupView(ObjectView):
-    """Detail view for a DiscoveredGroup."""
-
-    queryset = DiscoveredGroup.objects.all()
-    model = DiscoveredGroup
-    template_name = "nautobot_device_onboarding/discoveredgroup_detail.html"
+    form_class = forms.DiscoveredGroupForm
 
 
 class DiscoveredIPAddressUIViewSet(NautobotUIViewSet):
@@ -32,14 +25,8 @@ class DiscoveredIPAddressUIViewSet(NautobotUIViewSet):
     filterset_class = filters.DiscoveredIPAddressFilterSet
     queryset = DiscoveredIPAddress.objects.all()
     serializer_class = serializers.DiscoveredIPAddressSerializer
-    table_class = tables.DiscoveredIPAddressTable
-
-
-class DiscoveredIPAddressView(ObjectView):
-    """View for displaying the details of a DiscoveredIPAddress."""
-
-    queryset = DiscoveredIPAddress.objects.all()
-    template_name = "nautobot_device_onboarding/discoveredipaddress_detail.html"
+    table_class = tables.DiscoveredIPAddressGroupTable
+    form_class = forms.DiscoveredIPAddressForm
 
 
 class DiscoveredPortUIViewSet(NautobotUIViewSet):
@@ -49,3 +36,4 @@ class DiscoveredPortUIViewSet(NautobotUIViewSet):
     queryset = DiscoveredPort.objects.all()
     serializer_class = serializers.DiscoveredPortSerializer
     table_class = tables.DiscoveredPortTable
+    form_class = forms.DiscoveredPortForm
