@@ -38,7 +38,7 @@ class DiscoveredGroupTable(BaseTable):
         default_columns = ("pk", "name", "actions")
 
 
-class DiscoveredIPAddressGroupTable(BaseTable):
+class DiscoveredIPAddressTable(BaseTable):
     """DiscoverdIPAddress Table."""
 
     pk = ToggleColumn()

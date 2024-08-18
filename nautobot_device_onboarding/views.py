@@ -23,7 +23,7 @@ class DiscoveredIPAddressUIViewSet(NautobotUIViewSet):
     filterset_class = filters.DiscoveredIPAddressFilterSet
     queryset = DiscoveredIPAddress.objects.all()
     serializer_class = serializers.DiscoveredIPAddressSerializer
-    table_class = tables.DiscoveredIPAddressGroupTable
+    table_class = tables.DiscoveredIPAddressTable
     form_class = forms.DiscoveredIPAddressForm
 
 
