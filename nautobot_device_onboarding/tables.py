@@ -64,12 +64,10 @@ class DiscoveredPortTable(BaseTable):
     discovered_ip_address = tables.Column(linkify=True)
     protocol = tables.Column()
     state = tables.Column()
-    reason = tables.Column()
-    reason_ttl = tables.Column()
 
     class Meta(BaseTable.Meta):
         """Meta."""
 
         model = DiscoveredPort
-        fields = ("pk", "port_id", "discovered_ip_address", "protocol", "state", "reason", "reason_ttl")
-        default_columns = ("pk", "port_id", "discovered_ip_address", "protocol", "state", "reason", "reason_ttl")
+        fields = ("pk", "port_id", "discovered_ip_address", "protocol", "state", "service", "reason", "reason_ttl")
+        default_columns = ("pk", "port_id", "discovered_ip_address", "protocol", "state", "service", "reason", "reason_ttl")
