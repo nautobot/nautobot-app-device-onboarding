@@ -1,0 +1,47 @@
+{% extends 'generic/object_retrieve.html' %}
+{% load static %}
+{% load helpers %}
+
+{% block content_left_page %}
+  <div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Discovered Port</strong>
+    </div>
+    <table class="table table-hover panel-body attr-table">
+        <tr>
+            <td>Port ID</td>
+            <td>{{ object.port_id }}</td>
+        </tr>
+        <tr>
+            <td>Discovered IP Addresses</td>
+            <td>
+                {{ object.discovered_ip_address|hyperlinked_object}}
+            </td>
+        </tr>
+        <tr>
+            <td>Protocol</td>
+            <td>
+                {{ object.protocol }}
+            </td>
+        </tr>
+        <tr>
+            <td>State</td>
+            <td>
+                {{ object.state }}
+            </td>
+        </tr>
+        <tr>
+            <td>Reason</td>
+            <td>
+                {{ object.reason }}
+            </td>
+        </tr>
+        <tr>
+            <td>Reason TTL</td>
+            <td>
+                {{ object.reason_ttl }}
+            </td>
+        </tr>
+    </table>
+  </div>
+{% endblock %}

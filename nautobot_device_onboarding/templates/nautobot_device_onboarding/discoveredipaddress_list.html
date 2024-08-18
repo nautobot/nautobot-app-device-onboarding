@@ -1,0 +1,31 @@
+{% extends 'generic/object_list.html' %}
+{% load static %}
+
+{% block javascript %}
+  {{ block.super }}
+<script>
+  function toggleJson(button) {
+      console.log("Button clicked!");  // Debugging line
+      var jsonBlob = button.previousElementSibling;
+      if (jsonBlob.style.display === "none") {
+          jsonBlob.style.display = "block";
+          button.textContent = "Hide Extra Info";
+      } else {
+          jsonBlob.style.display = "none";
+          button.textContent = "Show Extra Info";
+      }
+  }
+</script>
+{% endblock javascript %}
+
+  <tr>
+    <td>
+        <div class="json-blob" style="display: none;">
+            {
+                "key": "value",
+                "another_key": "another_value"
+            }
+        </div>
+        <button type="button" class="json-toggle" onclick="toggleJson(this)">Show Extra Info</button>
+    </td>
+</tr>

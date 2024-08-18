@@ -1,0 +1,24 @@
+{% extends 'generic/object_retrieve.html' %}
+{% load static %}
+{% load helpers %}
+{% block content_left_page %}
+  <div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Discovered IP Address</strong>
+    </div>
+    <table class="table table-hover panel-body attr-table">
+      <tr>
+          <td>IP Address</td>
+          <td>{{ object.ip_address }}</td>
+      </tr>
+      <tr>
+          <td>Marked for Onboarding</td>
+          <td>{{ object.marked_for_onboarding|render_boolean }}</td>
+      </tr>
+      <tr>
+          <td>Extra Info</td>
+          <td>{{ object.extra_info|default_if_none:"No extra information available" }}</td>
+      </tr>
+    </table>
+  </div>
+{% endblock %}
