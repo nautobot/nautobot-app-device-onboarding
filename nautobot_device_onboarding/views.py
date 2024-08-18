@@ -1,6 +1,8 @@
 """Model UI Viewset."""
 
+from nautobot.core.views import generic
 from nautobot.core.views.viewsets import NautobotUIViewSet
+from nautobot.core.views.generic import ObjectView
 
 from . import filters, tables
 from .api import serializers
@@ -14,6 +16,14 @@ class DiscoveredGroupUIViewSet(NautobotUIViewSet):
     queryset = DiscoveredGroup.objects.all()
     serializer_class = serializers.DiscoveredGroupSerializer
     table_class = tables.DiscoveredGroupTable
+
+
+class DiscoveredGroupView(ObjectView):
+    """Detail view for a DiscoveredGroup."""
+
+    queryset = DiscoveredGroup.objects.all()
+    model = DiscoveredGroup
+    template_name = "nautobot_device_onboarding/discoveredgroup_detail.html"
 
 
 class DiscoveredIPAddressUIViewSet(NautobotUIViewSet):
