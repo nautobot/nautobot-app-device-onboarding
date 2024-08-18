@@ -32,7 +32,14 @@ class DiscoveredIPAddressUIViewSet(NautobotUIViewSet):
     filterset_class = filters.DiscoveredIPAddressFilterSet
     queryset = DiscoveredIPAddress.objects.all()
     serializer_class = serializers.DiscoveredIPAddressSerializer
-    table_class = tables.DiscoveredIPAddressGroupTable
+    table_class = tables.DiscoveredIPAddressTable
+
+
+class DiscoveredIPAddressView(ObjectView):
+    """View for displaying the details of a DiscoveredIPAddress."""
+
+    queryset = DiscoveredIPAddress.objects.all()
+    template_name = "nautobot_device_onboarding/discoveredipaddress_detail.html"
 
 
 class DiscoveredPortUIViewSet(NautobotUIViewSet):

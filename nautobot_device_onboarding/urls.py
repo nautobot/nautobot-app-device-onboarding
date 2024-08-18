@@ -15,4 +15,5 @@ router.register("discovered-ports", views.DiscoveredPortUIViewSet)
 
 urlpatterns = [
   path("discovered-groups/<uuid:pk>/", views.DiscoveredGroupView.as_view(), name="discoveredgroup-detail"),
+  path("discovered-ipaddresses/<uuid:pk>/", views.DiscoveredIPAddressView.as_view(), name="discoveredipaddress-detail"),
 ] + router.urls

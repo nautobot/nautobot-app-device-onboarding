@@ -1,6 +1,10 @@
 """Tables."""
 
+import json
+
 import django_tables2 as tables
+from django.utils.html import format_html
+
 from nautobot.core.tables import (
     BaseTable,
     ButtonsColumn,
@@ -8,6 +12,18 @@ from nautobot.core.tables import (
 )
 
 from .models import DiscoveredGroup, DiscoveredIPAddress, DiscoveredPort
+
+
+class JSONExpandColumn(tables.Column):
+    def render(self, value):
+        # Convert JSON to a formatted string
+        formatted_json = json.dumps(value, indent=2)
+        # Return HTML with a hidden JSON blob and a button to toggle its visibility
+        return format_html(
+            '<div class="json-blob" style="display: none;">{}</div>'
+            '<button type="button" class="json-toggle" onclick="toggleJson(this)">Show Extra Info</button>',
+            formatted_json
+        )
 
 
 class DiscoveredGroupTable(BaseTable):
@@ -25,19 +41,22 @@ class DiscoveredGroupTable(BaseTable):
         default_columns = ("pk", "name", "actions")
 
 
-class DiscoveredIPAddressGroupTable(BaseTable):
-    """DiscoverdIPAddress Table."""
+class DiscoveredIPAddressTable(BaseTable):
+    """DiscoveredIPAddress Table."""
 
     pk = ToggleColumn()
-    discovered_group = tables.Column(linkify=True)
+    discovered_group = tables.Column(linkify=True, verbose_name="Discovered Group")
     ip_address = tables.Column(linkify=True)
+    marked_for_onboarding = tables.BooleanColumn()
+    extra_info = JSONExpandColumn()
 
     class Meta(BaseTable.Meta):
-        """Meta."""
+        """Meta options."""
 
         model = DiscoveredIPAddress
-        fields = ("pk", "discovered_group", "ip_address")
-        default_columns = ("pk", "name", "ip_address")
+        fields = ("pk",  "ip_address", "discovered_group", "marked_for_onboarding", "extra_info")
+        default_columns = ("pk", "ip_address", "discovered_group", "marked_for_onboarding", "extra_info")
+        template = "nautobot_device_onboarding/"
 
 
 class DiscoveredPortTable(BaseTable):
