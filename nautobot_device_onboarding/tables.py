@@ -60,10 +60,7 @@ class DiscoveredIPAddressTable(BaseTable):
 
 
 class DiscoveredPortTable(BaseTable):
-    """DiscoverdPort Table."""
-
-    pk = ToggleColumn()
-    discovered_ip_address = tables.Column(linkify=True)
+    discovered_ip_address = tables.Column(linkify=True, verbose_name="Discovered IP Address", accessor="discovered_ip_address.ip_address")
     protocol = tables.Column()
     port_id = tables.Column()
     state = tables.Column()
@@ -71,8 +68,7 @@ class DiscoveredPortTable(BaseTable):
     reason_ttl = tables.Column()
 
     class Meta(BaseTable.Meta):
-        """Meta."""
-
         model = DiscoveredPort
-        fields = ("pk", "discovered_ip_address", "protocol", "port_id", "state", "reason", "reason_ttl")
-        default_columns = ("pk", "discovered_ip_address", "protocol", "port_id", "state", "reason", "reason_ttl")
+        fields = ("discovered_ip_address", "protocol", "port_id", "state", "reason", "reason_ttl")
+        default_columns = ("discovered_ip_address", "protocol", "port_id", "state", "reason", "reason_ttl")
+
