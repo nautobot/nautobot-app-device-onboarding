@@ -1,0 +1,17 @@
+{% extends 'generic/object_detail.html' %}
+{% load static %}
+{% block content_left_page %}
+  <div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Discovered Group</strong>
+    </div>
+    <h1>{{ object.name }}</h1>
+    <p>{{ object.description }}</p>
+    <h2>Associated IP Addresses</h2>
+    <ul>
+      {% for ip_address in object.discoveredipaddress_set.all %}
+        <li>{{ ip_address.ip_address }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock %}

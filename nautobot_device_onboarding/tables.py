@@ -54,7 +54,7 @@ class DiscoveredIPAddressTable(BaseTable):
     extra_info = JSONExpandColumn()
 
     class Meta(BaseTable.Meta):
-        """Meta."""
+        """Meta options."""
 
         model = DiscoveredIPAddress
         fields = ("pk", "name", "discovered_group", "ip_address", "marked_for_onboarding", "extra_info")
@@ -73,8 +73,6 @@ class DiscoveredPortTable(BaseTable):
     state = tables.Column()
 
     class Meta(BaseTable.Meta):
-        """Meta."""
-
         model = DiscoveredPort
         fields = ("pk", "port_id", "discovered_ip_address", "protocol", "state", "service", "reason", "reason_ttl")
         default_columns = (

@@ -1,6 +1,8 @@
 """Model UI Viewset."""
 
+from nautobot.core.views import generic
 from nautobot.core.views.viewsets import NautobotUIViewSet
+from nautobot.core.views.generic import ObjectView
 
 from . import filters, forms, tables
 from .api import serializers

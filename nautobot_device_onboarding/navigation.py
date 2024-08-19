@@ -22,7 +22,7 @@ items = [
 
 menu_items = (
     NavMenuTab(
-        name="Discovered Network",
+        name="Device Onboarding",
         weight=1000,
         groups=(NavMenuGroup(name="Discovered Models", weight=100, items=items),),
     ),

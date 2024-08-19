@@ -1,0 +1,14 @@
+{% extends 'generic/object_detail.html' %}
+{% load static %}
+{% block content_left_page %}
+  <div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Discovered IP Address</strong>
+    </div>
+    <h1>{{ object.ip_address }}</h1>
+    <p>Marked for onboarding: {{ object.marked_for_onboarding }}</p>
+    <h2>Extra Info</h2>
+    <pre>{{ object.extra_info|default_if_none:"No extra information available" }}</pre>
+    <!-- Add more fields as necessary -->
+  </div>
+{% endblock %}
