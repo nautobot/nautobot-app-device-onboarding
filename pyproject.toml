@@ -38,6 +38,7 @@ nautobot-secrets-providers = "^2.0.1"
 python-tss-sdk = "*"
 # Netutils pin is needed for https://github.com/networktocode/netutils/pull/553
 netutils = "^1.9.1"
+python3-nmap = "^1.6.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "*"

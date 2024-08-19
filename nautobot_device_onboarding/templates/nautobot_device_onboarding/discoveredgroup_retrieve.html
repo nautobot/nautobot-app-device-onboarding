@@ -1,0 +1,25 @@
+{% extends 'generic/object_retrieve.html' %}
+{% load static %}
+{% block content_left_page %}
+  <div class="panel panel-default">
+    <div class="panel-heading">
+        <strong>Discovered Group</strong>
+    </div>
+    <table class="table table-hover panel-body attr-table">
+        <tr>
+            <td>Name</td>
+            <td>{{ object.name }}</td>
+        </tr>
+        <tr>
+            <td>Associated IP Addresses</td>
+            <td>
+                <ul>
+                    {% for ip_address in object.discoveredipaddress_set.all %}
+                      <li><a href="{% url 'plugins:nautobot_device_onboarding:discoveredipaddress' pk=ip_address.pk %}">{{ ip_address }}</a></li>
+                    {% endfor %}
+                </ul>
+            </td>
+        </tr>
+    </table>
+  </div>
+{% endblock %}
