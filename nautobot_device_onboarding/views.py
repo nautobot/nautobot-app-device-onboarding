@@ -2,7 +2,7 @@
 
 from nautobot.core.views.viewsets import NautobotUIViewSet
 
-from . import filters, tables, forms
+from . import filters, forms, tables
 from .api import serializers
 from .models import DiscoveredGroup, DiscoveredIPAddress, DiscoveredPort
 

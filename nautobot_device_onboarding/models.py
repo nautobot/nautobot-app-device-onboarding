@@ -66,7 +66,9 @@ class DiscoveredPort(OrganizationalModel):
     protocol = models.CharField(choices=ProtocolTypeChoices, max_length=CHARFIELD_MAX_LENGTH, help_text="TCP/UDP")
     port_id = models.CharField(max_length=CHARFIELD_MAX_LENGTH, help_text="Port ID")
     state = models.CharField(choices=PortStateChoices, max_length=CHARFIELD_MAX_LENGTH, help_text="open/closed")
-    reason = models.CharField(max_length=CHARFIELD_MAX_LENGTH, help_text="The reason why the port is open or closed", blank=True)
+    reason = models.CharField(
+        max_length=CHARFIELD_MAX_LENGTH, help_text="The reason why the port is open or closed", blank=True
+    )
     reason_ttl = models.CharField(max_length=CHARFIELD_MAX_LENGTH, blank=True)
     service = models.JSONField(encoder=DjangoJSONEncoder, blank=True, default=dict)
     cpe = JSONArrayField(base_field=models.CharField(max_length=CHARFIELD_MAX_LENGTH), null=True, blank=True)
