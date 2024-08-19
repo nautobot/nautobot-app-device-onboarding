@@ -801,6 +801,8 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             self.secrets_group = secrets_group
             self.platform = platform
 
+            self.logger.info(f"IP Addresses: {self.ip_addresses}")
+
             self.job_result.task_kwargs = {
                 "debug": debug,
                 "location": location,
