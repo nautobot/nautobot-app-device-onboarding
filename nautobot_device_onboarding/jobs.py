@@ -789,7 +789,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             _discovered_ips = DiscoveredIPAddress.objects.filter(
                 discovered_group=discovered_group, marked_for_onboarding=True
             ).values_list("ip_address", flat=True)
-            self.ip_addresses = [ip for ip in _discovered_ips]
+            self.ip_addresses = [str(IPAddress.objects.get(id=ip).address) for ip in _discovered_ips]
             self.set_mgmt_only = set_mgmt_only
             self.update_devices_without_primary_ip = update_devices_without_primary_ip
             self.device_role = device_role
