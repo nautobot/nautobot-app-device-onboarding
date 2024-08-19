@@ -4,7 +4,7 @@ from nautobot.core.views import generic
 from nautobot.core.views.viewsets import NautobotUIViewSet
 from nautobot.core.views.generic import ObjectView
 
-from . import filters, tables, forms
+from . import filters, forms, tables
 from .api import serializers
 from .models import DiscoveredGroup, DiscoveredIPAddress, DiscoveredPort
 
@@ -25,7 +25,7 @@ class DiscoveredIPAddressUIViewSet(NautobotUIViewSet):
     filterset_class = filters.DiscoveredIPAddressFilterSet
     queryset = DiscoveredIPAddress.objects.all()
     serializer_class = serializers.DiscoveredIPAddressSerializer
-    table_class = tables.DiscoveredIPAddressGroupTable
+    table_class = tables.DiscoveredIPAddressTable
     form_class = forms.DiscoveredIPAddressForm
 
 

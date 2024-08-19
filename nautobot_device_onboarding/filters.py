@@ -8,6 +8,7 @@ from .models import DiscoveredGroup, DiscoveredIPAddress, DiscoveredPort
 
 class DiscoveredGroupFilterSet(NautobotFilterSet):
     """Filterset for DiscoveredGroup."""
+
     q = SearchFilter(
         filter_predicates={
             "name": "icontains",
@@ -25,11 +26,13 @@ class DiscoveredGroupFilterSet(NautobotFilterSet):
 
 class DiscoveredIPAddressFilterSet(NautobotFilterSet):
     """Filterset for IPAddress."""
+
     q = SearchFilter(
         filter_predicates={
             "discovered_group__name": "icontains",
         },
     )
+
     class Meta:
         """Filterset Meta."""
 
@@ -39,6 +42,7 @@ class DiscoveredIPAddressFilterSet(NautobotFilterSet):
 
 class DiscoveredPortFilterSet(NautobotFilterSet):
     """Filterset for Port."""
+
     q = SearchFilter(
         filter_predicates={
             "discovered_ip_address__discovered_group__name": "icontains",

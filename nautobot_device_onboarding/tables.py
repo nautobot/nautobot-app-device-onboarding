@@ -1,4 +1,5 @@
 """Tables."""
+
 import json
 
 import django_tables2 as tables
@@ -21,8 +22,10 @@ class JSONExpandColumn(tables.Column):
         return format_html(
             '<div class="json-blob" style="display: none;">{}</div>'
             '<button type="button" class="json-toggle" onclick="toggleJson(this)">Show Extra Info</button>',
-            formatted_json
+            formatted_json,
         )
+
+
 class DiscoveredGroupTable(BaseTable):
     """DiscoverdGroup Table."""
 
@@ -39,10 +42,12 @@ class DiscoveredGroupTable(BaseTable):
 
 
 class DiscoveredIPAddressTable(BaseTable):
-    """DiscoveredIPAddress Table."""
+    """DiscoverdIPAddress Table."""
 
     pk = ToggleColumn()
-    name = tables.TemplateColumn(template_code="""<a href="{% url 'plugins:nautobot_device_onboarding:discoveredipaddress' pk=record.pk %}">{{record}}</a>""")
+    name = tables.TemplateColumn(
+        template_code="""<a href="{% url 'plugins:nautobot_device_onboarding:discoveredipaddress' pk=record.pk %}">{{record}}</a>"""
+    )
     discovered_group = tables.Column(linkify=True)
     ip_address = tables.Column(linkify=True)
     marked_for_onboarding = BooleanColumn()
@@ -60,7 +65,9 @@ class DiscoveredPortTable(BaseTable):
     """DiscoverdPort Table."""
 
     pk = ToggleColumn()
-    port_id = tables.TemplateColumn(template_code="""<a href="{% url 'plugins:nautobot_device_onboarding:discoveredport' pk=record.pk %}">{{record.port_id}}</a>""")
+    port_id = tables.TemplateColumn(
+        template_code="""<a href="{% url 'plugins:nautobot_device_onboarding:discoveredport' pk=record.pk %}">{{record.port_id}}</a>"""
+    )
     discovered_ip_address = tables.Column(linkify=True)
     protocol = tables.Column()
     state = tables.Column()
@@ -68,4 +75,13 @@ class DiscoveredPortTable(BaseTable):
     class Meta(BaseTable.Meta):
         model = DiscoveredPort
         fields = ("pk", "port_id", "discovered_ip_address", "protocol", "state", "service", "reason", "reason_ttl")
-        default_columns = ("pk", "port_id", "discovered_ip_address", "protocol", "state", "service", "reason", "reason_ttl")
+        default_columns = (
+            "pk",
+            "port_id",
+            "discovered_ip_address",
+            "protocol",
+            "state",
+            "service",
+            "reason",
+            "reason_ttl",
+        )
