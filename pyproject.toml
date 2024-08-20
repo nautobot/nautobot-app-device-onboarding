@@ -34,7 +34,6 @@ nautobot-ssot = "^2.6.0"
 nautobot-plugin-nornir = "^2.0.0"
 jdiff = "^0.0.6"
 ntc-templates = "^6.0.0"
-nautobot-secrets-providers = "^2.0.1"
 python-tss-sdk = "*"
 # Netutils pin is needed for https://github.com/networktocode/netutils/pull/553
 netutils = "^1.9.1"
