@@ -3243,20 +3243,6 @@ text-unidecode = ">=1.3"
 unidecode = ["Unidecode (>=1.1.1)"]
 
 [[package]]
-name = "python-tss-sdk"
-version = "1.2.2"
-description = "The Delinea Secret Server Python SDK"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "python_tss_sdk-1.2.2-py3-none-any.whl", hash = "sha256:f69e5d9fba75b5835b9182402f8520294dd8e8abc4b4e0409080121bc06b5186"},
-    {file = "python_tss_sdk-1.2.2.tar.gz", hash = "sha256:2620d0002d794d4407f85b7521d69d73f865f348238e43f61418754a6aeb520e"},
-]
-
-[package.dependencies]
-requests = ">=2.12.5"
-
-[[package]]
 name = "python3-openid"
 version = "3.2.0"
 description = "OpenID support for modern servers and consumers."
@@ -4300,4 +4286,4 @@ all = []
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "f099c2bce8add1605cf2579336de02073c370a4304098b4e8dfc88ffed485a12"
+content-hash = "8ac22c9e70d945661feae6f306ede76e1c65e716b20fbbcba1337029f53148f1"
