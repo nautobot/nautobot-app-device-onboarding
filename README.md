@@ -21,44 +21,44 @@ Regardless, the Onboarding App greatly simplifies the onboarding process by allo
 
 |     Data Attribute      | Cisco IOS          | Cisco XE           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  |
 | ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: |
-| Hostname                | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
-| Platform                | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
-| Manufacturer            | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
-| Serial Number           | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
-| Device Type             | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
-| Mgmt Interface          | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
-| Mgmt IP Address         | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
+| Hostname                | &#9989; | &#9989; | &#9989; | &#9989; | &#9989; | &#9989; | &#x274C; |
+| Platform                | &#9989; | &#9989; | &#9989; | &#9989; | &#9989; | &#9989; | &#x274C; |
+| Manufacturer            | &#9989; | &#9989; | &#9989; | &#9989; | &#9989; | &#9989; | &#x274C; |
+| Serial Number           | &#9989; | &#9989; | &#9989; | &#9989; | &#9989; | &#9989; | &#x274C; |
+| Device Type             | &#9989; | &#9989; | &#9989; | &#9989; | &#9989; | &#9989; | &#x274C; |
+| Mgmt Interface          | &#9989; | &#9989; | &#9989; | &#9989; | &#9989; | &#9989; | &#x274C; |
+| Mgmt IP Address         | &#9989; | &#9989; | &#9989; | &#9989; | &#9989; | &#9989; | &#x274C; |
 
 ### Support Matrix (Sync Data From Network)
 
 |     Interfaces          | Cisco IOS          | Cisco XE           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  |
 | ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: |
-| Name           | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| IP Address     | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| Type           | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| MTU            | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| Description    | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| Mac Address    | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| Link Status    | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| 802.1Q mode    | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| Lag Member     | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| Vrf Membership | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
+| Name           | &#9989; | &#9989; | &#9989; | &#x274C; | &#9989; | &#9989; | &#x274C; |
+| IP Address     | &#9989; | &#9989; | &#9989; | &#x274C; | &#9989; | &#9989; | &#x274C; |
+| Type           | &#9989; | &#9989; | &#9989; | &#x274C; | &#9989; | &#9989; | &#x274C; |
+| MTU            | &#9989; | &#9989; | &#9989; | &#x274C; | &#9989; | &#9989; | &#x274C; |
+| Description    | &#9989; | &#9989; | &#9989; | &#x274C; | &#9989; | &#9989; | &#x274C; |
+| Mac Address    | &#9989; | &#9989; | &#9989; | &#x274C; | &#9989; | &#9989; | &#x274C; |
+| Link Status    | &#9989; | &#9989; | &#9989; | &#x274C; | &#9989; | &#9989; | &#x274C; |
+| 802.1Q mode    | &#9989; | &#9989; | &#9989; | &#x274C; | &#9989; | &#9989; | &#x274C; |
+| Lag Member     | &#9989; | &#9989; | &#9989; | &#x274C; | &#9989; | &#9989; | &#x274C; |
+| Vrf Membership | &#9989; | &#9989; | &#9989; | &#x274C; | &#9989; | &#9989; | &#x274C; |
 
 |     VLANS          | Cisco IOS          | Cisco XE           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  |
 | ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: |
-| Untagged VLANs       | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| Tagged VLANs        | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
+| Untagged VLANs       | &#9989; | &#9989; | &#9989; | &#x274C; | &#9989; | &#9989; | &#x274C; |
+| Tagged VLANs        | &#9989; | &#9989; | &#9989; | &#x274C; | &#9989; | &#9989; | &#x274C; |
 
 |     Cabling          | Cisco IOS          | Cisco XE           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  |
 | ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: |
-|  Terminations A      | :test_tube: | :test_tube: | :test_tube: | :x: | :test_tube: | :x: | :x: |
-|  Terminations B      | :test_tube: | :test_tube: | :test_tube: | :x: | :test_tube: | :x: | :x: |
+|  Terminations A      | &#129514; | &#129514; | &#129514; | &#x274C; | &#129514; | &#x274C; | &#x274C; |
+|  Terminations B      | &#129514; | &#129514; | &#129514; | &#x274C; | &#129514; | &#x274C; | &#x274C; |
 
 | Legend |
 | :---- |
-| :white_check_mark: - Supported and stable. |
-| :x: - No current support. |
-| :test_tube: - Supported, but has limited testing. |
+| &#9989; - Supported and stable. |
+| &#x274C; - No current support. |
+| &#129514; - Supported, but has limited testing. |
 
 ### Screenshots
 
