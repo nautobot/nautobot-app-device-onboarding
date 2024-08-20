@@ -51,8 +51,6 @@ yamllint = "*"
 toml = "*"
 Markdown = "*"
 towncrier = "~23.11.0"
-
-[tool.poetry.group.docs.dependencies]
 # Rendering docs to HTML
 mkdocs = "1.6.0"
 # Embedding YAML files into Markdown documents as tables
