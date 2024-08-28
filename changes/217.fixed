@@ -1,0 +1,2 @@
+Removed secrets-provider app dependency.
+Removed python-tss-sdk dependency.

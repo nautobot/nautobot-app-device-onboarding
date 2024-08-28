@@ -383,9 +383,9 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 processed_csv_data[row["ip_address_host"]]["port"] = int(row["port"].strip())
                 processed_csv_data[row["ip_address_host"]]["timeout"] = int(row["timeout"].strip())
                 processed_csv_data[row["ip_address_host"]]["set_mgmt_only"] = set_mgmgt_only
-                processed_csv_data[row["ip_address_host"]][
-                    "update_devices_without_primary_ip"
-                ] = update_devices_without_primary_ip
+                processed_csv_data[row["ip_address_host"]]["update_devices_without_primary_ip"] = (
+                    update_devices_without_primary_ip
+                )
                 processed_csv_data[row["ip_address_host"]]["device_role"] = device_role
                 processed_csv_data[row["ip_address_host"]]["device_status"] = device_status
                 processed_csv_data[row["ip_address_host"]]["interface_status"] = interface_status
