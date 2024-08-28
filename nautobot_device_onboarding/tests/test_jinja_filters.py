@@ -2,6 +2,7 @@
 
 import unittest
 import unittest.mock
+
 from nautobot_device_onboarding.jinja_filters import (
     extract_prefix,
     flatten_dict_from_value,

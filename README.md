@@ -8,7 +8,7 @@
   <a href="https://pypi.org/project/nautobot-device-onboarding/"><img src="https://img.shields.io/pypi/v/nautobot-device-onboarding"></a>
   <a href="https://pypi.org/project/nautobot-device-onboarding/"><img src="https://img.shields.io/pypi/dm/nautobot-device-onboarding"></a>
   <br>
-  A plugin for <a href="https://github.com/nautobot/nautobot">Nautobot</a> to easily onboard new devices.
+  An <a href="https://networktocode.com/nautobot-apps/">App</a> for <a href="https://nautobot.com/">Nautobot</a>.
 </p>
 
 ## Overview
@@ -21,44 +21,44 @@ Regardless, the Onboarding App greatly simplifies the onboarding process by allo
 
 |     Data Attribute      | Cisco IOS          | Cisco XE           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  |
 | ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: |
-| Hostname                | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
-| Platform                | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
-| Manufacturer            | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
-| Serial Number           | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
-| Device Type             | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
-| Mgmt Interface          | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
-| Mgmt IP Address         | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
+| Hostname                | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Platform                | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Manufacturer            | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Serial Number           | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Device Type             | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Mgmt Interface          | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Mgmt IP Address         | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
 
 ### Support Matrix (Sync Data From Network)
 
 |     Interfaces          | Cisco IOS          | Cisco XE           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  |
 | ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: |
-| Name           | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| IP Address     | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| Type           | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| MTU            | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| Description    | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| Mac Address    | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| Link Status    | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| 802.1Q mode    | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| Lag Member     | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| Vrf Membership | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
+| Name           | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| IP Address     | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Type           | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| MTU            | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Description    | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Mac Address    | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Link Status    | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| 802.1Q mode    | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Lag Member     | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Vrf Membership | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
 
 |     VLANS          | Cisco IOS          | Cisco XE           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  |
 | ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: |
-| Untagged VLANs       | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
-| Tagged VLANs        | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: | :white_check_mark: | :white_check_mark: | :x: |
+| Untagged VLANs       | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Tagged VLANs        | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
 
 |     Cabling          | Cisco IOS          | Cisco XE           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  |
 | ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: |
-|  Terminations A      | :test_tube: | :test_tube: | :test_tube: | :x: | :test_tube: | :x: | :x: |
-|  Terminations B      | :test_tube: | :test_tube: | :test_tube: | :x: | :test_tube: | :x: | :x: |
+|  Terminations A      | 🧪 | 🧪 | 🧪 | ❌ | 🧪 | ❌ | ❌ |
+|  Terminations B      | 🧪 | 🧪 | 🧪 | ❌ | 🧪 | ❌ | ❌ |
 
 | Legend |
 | :---- |
-| :white_check_mark: - Supported and stable. |
-| :x: - No current support. |
-| :test_tube: - Supported, but has limited testing. |
+| ✅ - Supported and stable. |
+| ❌ - No current support. |
+| 🧪 - Supported, but has limited testing. |
 
 ### Screenshots
 
