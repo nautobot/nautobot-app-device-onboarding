@@ -112,6 +112,7 @@ jobs:
           build-args: |
             NAUTOBOT_VER=${{ matrix.nautobot-version }}
             PYTHON_VER=${{ matrix.python-version }}
+            CI=true
       - name: "Copy credentials"
         run: "cp development/creds.example.env development/creds.env"
       - name: "Linting: pylint"
@@ -166,6 +167,7 @@ jobs:
           build-args: |
             NAUTOBOT_VER=${{ matrix.nautobot-version }}
             PYTHON_VER=${{ matrix.python-version }}
+            CI=true
       - name: "Copy credentials"
         run: "cp development/creds.example.env development/creds.env"
       - name: "Use Mysql invoke settings when needed"
