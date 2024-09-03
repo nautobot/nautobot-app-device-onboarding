@@ -87,7 +87,7 @@ sync_network_mock_data_valid = {
                 "link_status": True,
                 "802.1Q_mode": "",
                 "lag": "",
-                "untagged_vlan": "",
+                "untagged_vlan": {},
                 "tagged_vlans": [],
                 "vrf": {"name": "mgmt"},
             },

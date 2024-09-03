@@ -38,16 +38,16 @@ class SyncDevicesDevice(DiffSyncModel):
     location__name: str
     serial: str
 
-    device_type__model: Optional[str]
-    mask_length: Optional[int]
-    primary_ip4__host: Optional[str]
-    primary_ip4__status__name: Optional[str]
-    platform__name: Optional[str]
-    role__name: Optional[str]
-    secrets_group__name: Optional[str]
-    status__name: Optional[str]
+    device_type__model: Optional[str] = None
+    mask_length: Optional[int] = None
+    primary_ip4__host: Optional[str] = None
+    primary_ip4__status__name: Optional[str] = None
+    platform__name: Optional[str] = None
+    role__name: Optional[str] = None
+    secrets_group__name: Optional[str] = None
+    status__name: Optional[str] = None
 
-    interfaces: Optional[list]
+    interfaces: Optional[list] = None
 
     @classmethod
     def _get_or_create_device(cls, adapter, ids, attrs):
@@ -383,5 +383,5 @@ class SyncDevicesPlatform(NautobotModel):
 
     name: str
 
-    network_driver: Optional[str]
-    manufacturer__name: Optional[str]
+    network_driver: Optional[str] = None
+    manufacturer__name: Optional[str] = None

@@ -61,7 +61,7 @@ class SyncNetworkDataDevice(FilteredNautobotModel):
 
     last_network_data_sync: Annotated[
         Optional[str], CustomFieldAnnotation(key="last_network_data_sync", name="last_network_data_sync")
-    ]
+    ] = None
 
     interfaces: List["SyncNetworkDataInterface"] = []
 
@@ -118,15 +118,15 @@ class SyncNetworkDataInterface(FilteredNautobotModel):
     device__name: str
     name: str
 
-    status__name: Optional[str]
-    type: Optional[str]
-    mac_address: Optional[str]
-    mtu: Optional[str]
-    parent_interface__name: Optional[str]
-    lag__name: Optional[str]
-    mode: Optional[str]
-    enabled: Optional[bool]
-    description: Optional[str]
+    status__name: Optional[str] = None
+    type: Optional[str] = None
+    mac_address: Optional[str] = None
+    mtu: Optional[str] = None
+    parent_interface__name: Optional[str] = None
+    lag__name: Optional[str] = None
+    mode: Optional[str] = None
+    enabled: Optional[bool] = None
+    description: Optional[str] = None
 
 
 class SyncNetworkDataIPAddress(DiffSyncModel):
@@ -246,7 +246,7 @@ class SyncNetworkDataTaggedVlansToInterface(DiffSyncModel):
     device__name: str
     name: str
 
-    tagged_vlans: Optional[list]
+    tagged_vlans: Optional[list] = None
 
     @classmethod
     def _get_and_assign_tagged_vlans(cls, adapter, attrs, interface):
@@ -321,7 +321,7 @@ class SyncNetworkDataUnTaggedVlanToInterface(DiffSyncModel):
     device__name: str
     name: str
 
-    untagged_vlan: Optional[dict]
+    untagged_vlan: Optional[dict] = None
 
     @classmethod
     def _get_and_assign_untagged_vlan(cls, adapter, attrs, interface):
@@ -395,7 +395,7 @@ class SyncNetworkDataLagToInterface(DiffSyncModel):
     device__name: str
     name: str
 
-    lag__interface__name: Optional[str]
+    lag__interface__name: Optional[str] = None
 
     # TODO: move the create and update method locgic to a single utility function
     @classmethod
@@ -485,7 +485,7 @@ class SyncNetworkDataVrfToInterface(DiffSyncModel):
     device__name: str
     name: str
 
-    vrf: Optional[dict]
+    vrf: Optional[dict] = None
 
     @classmethod
     def _get_and_assign_vrf(cls, adapter, attrs, interface):
