@@ -29,7 +29,7 @@ class FilteredNautobotAdapter(NautobotAdapter):
     def _load_objects(self, diffsync_model):  # pylint: disable=protected-access
         """Given a diffsync model class, load a list of models from the database and return them."""
         parameter_names = self._get_parameter_names(diffsync_model)
-        for database_object in diffsync_model._get_queryset(diffsync=self):  # pylint: disable=protected-access
+        for database_object in diffsync_model._get_queryset(adapter=self):  # pylint: disable=protected-access
             self._load_single_object(database_object, diffsync_model, parameter_names)
 
 
@@ -99,7 +99,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
             parent__namespace__name=self.job.namespace.name,
         ):
             network_ip_address = self.ip_address(
-                diffsync=self,
+                adapter=self,
                 host=ip_address.host,
                 mask_length=ip_address.mask_length,
                 type=ip_address.type,
@@ -123,7 +123,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         """
         for vlan in VLAN.objects.all():
             network_vlan = self.vlan(
-                diffsync=self,
+                adapter=self,
                 name=vlan.name,
                 vid=vlan.vid,
                 location__name=vlan.location.name if vlan.location else "",
@@ -149,7 +149,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
                 tagged_vlans.append(vlan_dict)
 
             network_tagged_vlans_to_interface = self.tagged_vlans_to_interface(
-                diffsync=self,
+                adapter=self,
                 device__name=interface.device.name,
                 name=interface.name,
                 tagged_vlans=tagged_vlans,
@@ -170,7 +170,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
                 untagged_vlan["id"] = str(interface.untagged_vlan.vid)
 
             network_untagged_vlan_to_interface = self.untagged_vlan_to_interface(
-                diffsync=self,
+                adapter=self,
                 device__name=interface.device.name,
                 name=interface.name,
                 untagged_vlan=untagged_vlan,
@@ -186,7 +186,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         """
         for interface in Interface.objects.filter(device__in=self.job.devices_to_load):
             network_lag_to_interface = self.lag_to_interface(
-                diffsync=self,
+                adapter=self,
                 device__name=interface.device.name,
                 name=interface.name,
                 lag__interface__name=interface.lag.name if interface.lag else "",
@@ -202,7 +202,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         """
         for vrf in VRF.objects.all():
             network_vrf = self.vrf(
-                diffsync=self,
+                adapter=self,
                 name=vrf.name,
                 namespace__name=vrf.namespace.name,
             )
@@ -224,7 +224,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
                 vrf["name"] = interface.vrf.name
 
             network_vrf_to_interface = self.vrf_to_interface(
-                diffsync=self,
+                adapter=self,
                 device__name=interface.device.name,
                 name=interface.name,
                 vrf=vrf,
@@ -258,7 +258,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
                     termination_b_interface = cable.termination_a.name
 
                 network_cable = self.cable(
-                    diffsync=self,
+                    adapter=self,
                     status__name=cable.status.name,
                     termination_a__app_label="dcim",
                     termination_a__model="interface",
@@ -362,7 +362,7 @@ class MacUnixExpandedUppercase(mac_unix_expanded):
     word_fmt = "%.2X"
 
 
-class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
+class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
     """Adapter for loading Network data."""
 
     def __init__(self, *args, job, sync=None, **kwargs):
@@ -465,7 +465,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
         for hostname, device_data in self.job.command_getter_result.items():
             try:
                 network_device = self.device(
-                    diffsync=self,
+                    adapter=self,
                     name=hostname,
                     serial=device_data["serial"],
                     last_network_data_sync=datetime.datetime.now().date().isoformat(),
@@ -489,7 +489,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
     def load_interface(self, hostname, interface_name, interface_data):
         """Load an interface into the DiffSync store."""
         network_interface = self.interface(
-            diffsync=self,
+            adapter=self,
             name=interface_name,
             device__name=hostname,
             status__name=self.job.interface_status.name,
@@ -499,6 +499,8 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
             description=interface_data["description"],
             enabled=interface_data["link_status"],
             mode=interface_data["802.1Q_mode"],
+            parent_interface__name=None,
+            lag__name=None,
             # untagged_vlan__name=self._get_vlan_name(interface_data=interface_data),
         )
         self.add(network_interface)
@@ -518,7 +520,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                                 self.job.logger.debug(f"Loading {ip_address} from {interface_name} on {hostname}")
                             try:
                                 network_ip_address = self.ip_address(
-                                    diffsync=self,
+                                    adapter=self,
                                     host=ip_address["ip_address"],
                                     mask_length=int(ip_address["prefix_length"]),
                                     type="host",
@@ -553,7 +555,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                 for tagged_vlan in interface_data["tagged_vlans"]:
                     try:
                         network_vlan = self.vlan(
-                            diffsync=self,
+                            adapter=self,
                             name=tagged_vlan["name"],
                             vid=tagged_vlan["id"],
                             location__name=location_names.get(hostname, ""),
@@ -570,7 +572,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                 if interface_data["untagged_vlan"]:
                     try:
                         network_vlan = self.vlan(
-                            diffsync=self,
+                            adapter=self,
                             name=interface_data["untagged_vlan"]["name"],
                             vid=interface_data["untagged_vlan"]["id"],
                             location__name=location_names.get(hostname, ""),
@@ -594,7 +596,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                 if interface_data["vrf"]:
                     try:
                         network_vrf = self.vrf(
-                            diffsync=self,
+                            adapter=self,
                             name=interface_data["vrf"]["name"],
                             namespace__name=self.job.namespace.name,
                         )
@@ -615,7 +617,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                     if ip_address["ip_address"]:  # the ip_address and mask_length may be empty, skip these
                         try:
                             network_ip_address_to_interface = self.ipaddress_to_interface(
-                                diffsync=self,
+                                adapter=self,
                                 interface__device__name=hostname,
                                 interface__name=interface_name,
                                 ip_address__host=ip_address["ip_address"],
@@ -637,7 +639,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
             for interface_name, interface_data in device_data["interfaces"].items():
                 try:
                     network_tagged_vlans_to_interface = self.tagged_vlans_to_interface(
-                        diffsync=self,
+                        adapter=self,
                         device__name=hostname,
                         name=interface_name,
                         tagged_vlans=interface_data["tagged_vlans"],
@@ -656,7 +658,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
             for interface_name, interface_data in device_data["interfaces"].items():
                 try:
                     network_untagged_vlan_to_interface = self.untagged_vlan_to_interface(
-                        diffsync=self,
+                        adapter=self,
                         device__name=hostname,
                         name=interface_name,
                         untagged_vlan=interface_data["untagged_vlan"],
@@ -675,7 +677,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
             for interface_name, interface_data in device_data["interfaces"].items():
                 try:
                     network_lag_to_interface = self.lag_to_interface(
-                        diffsync=self,
+                        adapter=self,
                         device__name=hostname,
                         name=interface_name,
                         lag__interface__name=interface_data["lag"] if interface_data["lag"] else "",
@@ -694,7 +696,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
             for interface_name, interface_data in device_data["interfaces"].items():
                 try:
                     network_vrf_to_interface = self.vrf_to_interface(
-                        diffsync=self,
+                        adapter=self,
                         device__name=hostname,
                         name=interface_name,
                         vrf=interface_data["vrf"],
@@ -772,7 +774,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.DiffSync):
                         termination_b_interface = local_interface
 
                     network_cable = self.cable(
-                        diffsync=self,
+                        adapter=self,
                         status__name="Connected",  # ask for default status in the job form
                         termination_a__app_label="dcim",
                         termination_a__model="interface",

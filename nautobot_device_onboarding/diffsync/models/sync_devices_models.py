@@ -38,19 +38,19 @@ class SyncDevicesDevice(DiffSyncModel):
     location__name: str
     serial: str
 
-    device_type__model: Optional[str]
-    mask_length: Optional[int]
-    primary_ip4__host: Optional[str]
-    primary_ip4__status__name: Optional[str]
-    platform__name: Optional[str]
-    role__name: Optional[str]
-    secrets_group__name: Optional[str]
-    status__name: Optional[str]
+    device_type__model: Optional[str] = None
+    mask_length: Optional[int] = None
+    primary_ip4__host: Optional[str] = None
+    primary_ip4__status__name: Optional[str] = None
+    platform__name: Optional[str] = None
+    role__name: Optional[str] = None
+    secrets_group__name: Optional[str] = None
+    status__name: Optional[str] = None
 
-    interfaces: Optional[list]
+    interfaces: Optional[list] = None
 
     @classmethod
-    def _get_or_create_device(cls, diffsync, ids, attrs):
+    def _get_or_create_device(cls, adapter, ids, attrs):
         """Attempt to get a Device, create a new one if necessary."""
         device = None
         try:
@@ -60,25 +60,25 @@ class SyncDevicesDevice(DiffSyncModel):
             # (or doesn't exist) the matching device will be updated or skipped based on user preference.
 
             location = diffsync_utils.retrieve_submitted_value(
-                job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="location"
+                job=adapter.job, ip_address=attrs["primary_ip4__host"], query_string="location"
             )
             platform = Platform.objects.get(name=attrs["platform__name"])
             device = Device.objects.get(name=ids["name"], location=location)
             update_devices_without_primary_ip = diffsync_utils.retrieve_submitted_value(
-                job=diffsync.job,
+                job=adapter.job,
                 ip_address=attrs["primary_ip4__host"],
                 query_string="update_devices_without_primary_ip",
             )
             if update_devices_without_primary_ip:
-                diffsync.job.logger.warning(
+                adapter.job.logger.warning(
                     f"Device {device.name} at location {location.name} already exists in Nautobot "
                     "but the primary ip address either does not exist, or doesn't match an entered ip address. "
                     "This device will be updated. This update may result in multiple IP Address assignments "
                     "to an interface on the device."
                 )
-                device = cls._update_device_with_attrs(device, platform, ids, attrs, diffsync)
+                device = cls._update_device_with_attrs(device, platform, ids, attrs, adapter)
             else:
-                diffsync.job.logger.warning(
+                adapter.job.logger.warning(
                     f"Device {device.name} at location {location.name} already exists in Nautobot "
                     "but the primary ip address either does not exist, or doesn't match an entered ip address. "
                     "IP Address, this device will be skipped."
@@ -90,16 +90,16 @@ class SyncDevicesDevice(DiffSyncModel):
             device = Device(
                 location=location,
                 status=diffsync_utils.retrieve_submitted_value(
-                    job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="device_status"
+                    job=adapter.job, ip_address=attrs["primary_ip4__host"], query_string="device_status"
                 ),
                 role=diffsync_utils.retrieve_submitted_value(
-                    job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="device_role"
+                    job=adapter.job, ip_address=attrs["primary_ip4__host"], query_string="device_role"
                 ),
                 device_type=DeviceType.objects.get(model=attrs["device_type__model"]),
                 name=ids["name"],
                 platform=platform,
                 secrets_group=diffsync_utils.retrieve_submitted_value(
-                    job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="secrets_group"
+                    job=adapter.job, ip_address=attrs["primary_ip4__host"], query_string="secrets_group"
                 ),
                 serial=ids["serial"],
             )
@@ -107,7 +107,7 @@ class SyncDevicesDevice(DiffSyncModel):
         return device
 
     @classmethod
-    def _get_or_create_interface(cls, diffsync, device, ip_address, interface_name):
+    def _get_or_create_interface(cls, adapter, device, ip_address, interface_name):
         """Attempt to get a Device Interface, create a new one if necessary."""
         device_interface = None
         try:
@@ -120,21 +120,21 @@ class SyncDevicesDevice(DiffSyncModel):
                 device_interface = Interface(
                     name=interface_name,
                     mgmt_only=diffsync_utils.retrieve_submitted_value(
-                        job=diffsync.job, ip_address=ip_address, query_string="set_mgmt_only"
+                        job=adapter.job, ip_address=ip_address, query_string="set_mgmt_only"
                     ),
                     status=diffsync_utils.retrieve_submitted_value(
-                        job=diffsync.job, ip_address=ip_address, query_string="interface_status"
+                        job=adapter.job, ip_address=ip_address, query_string="interface_status"
                     ),
                     type=InterfaceTypeChoices.TYPE_OTHER,
                     device=device,
                 )
                 device_interface.validated_save()
             except Exception as err:
-                diffsync.job.logger.error(f"Device Interface could not be created, {err}")
+                adapter.job.logger.error(f"Device Interface could not be created, {err}")
         return device_interface
 
     @classmethod
-    def _get_or_create_ip_address_to_interface(cls, diffsync, interface, ip_address):
+    def _get_or_create_ip_address_to_interface(cls, adapter, interface, ip_address):
         """Attempt to get a Device Interface, create a new one if necessary."""
         interface_assignment = None
         try:
@@ -150,31 +150,31 @@ class SyncDevicesDevice(DiffSyncModel):
                 )
                 interface_assignment.validated_save()
             except Exception as err:
-                diffsync.job.logger.error(f"{ip_address} failed to assign to assign to interface {err}")
+                adapter.job.logger.error(f"{ip_address} failed to assign to assign to interface {err}")
         return interface_assignment
 
     @classmethod
-    def _update_device_with_attrs(cls, device, platform, ids, attrs, diffsync):
+    def _update_device_with_attrs(cls, device, platform, ids, attrs, adapter):
         """Update a Nautobot device instance with attrs."""
         device.location = diffsync_utils.retrieve_submitted_value(
-            job=diffsync.job,
+            job=adapter.job,
             ip_address=attrs["primary_ip4__host"],
             query_string="location",
         )
         device.status = diffsync_utils.retrieve_submitted_value(
-            job=diffsync.job,
+            job=adapter.job,
             ip_address=attrs["primary_ip4__host"],
             query_string="device_status",
         )
         device.role = diffsync_utils.retrieve_submitted_value(
-            job=diffsync.job,
+            job=adapter.job,
             ip_address=attrs["primary_ip4__host"],
             query_string="device_role",
         )
         device.device_type = DeviceType.objects.get(model=attrs["device_type__model"])
         device.platform = platform
         device.secrets_group = diffsync_utils.retrieve_submitted_value(
-            job=diffsync.job,
+            job=adapter.job,
             ip_address=attrs["primary_ip4__host"],
             query_string="secrets_group",
         )
@@ -194,10 +194,10 @@ class SyncDevicesDevice(DiffSyncModel):
                 ip_address=ip_address,
             )
             old_interface_assignment.delete()
-            if self.diffsync.job.debug:
-                self.diffsync.job.logger.debug(f"Interface assignment deleted: {old_interface_assignment}")
+            if self.adapter.job.debug:
+                self.adapter.job.logger.debug(f"Interface assignment deleted: {old_interface_assignment}")
         except MultipleObjectsReturned:
-            self.diffsync.job.logger.warning(
+            self.adapter.job.logger.warning(
                 f"{ip_address} is assigned to multiple interfaces. The primary IP Address for this "
                 "device will be assigned to an interface but duplicate assignments will remain."
             )
@@ -205,54 +205,54 @@ class SyncDevicesDevice(DiffSyncModel):
             pass
 
     @classmethod
-    def create(cls, diffsync, ids, attrs):
+    def create(cls, adapter, ids, attrs):
         """Create a new nautobot device using data scraped from a device."""
-        if diffsync.job.debug:
-            diffsync.job.logger.debug(f"Creating device {ids} with {attrs}")
+        if adapter.job.debug:
+            adapter.job.logger.debug(f"Creating device {ids} with {attrs}")
 
         # Get or create Device, Interface and IP Address
-        device = cls._get_or_create_device(diffsync, ids, attrs)
+        device = cls._get_or_create_device(adapter, ids, attrs)
         if device:
             ip_address = diffsync_utils.get_or_create_ip_address(
                 host=attrs["primary_ip4__host"],
                 mask_length=attrs["mask_length"],
                 namespace=diffsync_utils.retrieve_submitted_value(
-                    job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="namespace"
+                    job=adapter.job, ip_address=attrs["primary_ip4__host"], query_string="namespace"
                 ),
                 default_ip_status=diffsync_utils.retrieve_submitted_value(
-                    job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
+                    job=adapter.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
                 ),
                 default_prefix_status=diffsync_utils.retrieve_submitted_value(
-                    job=diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
+                    job=adapter.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
                 ),
-                job=diffsync.job,
+                job=adapter.job,
             )
             interface = cls._get_or_create_interface(
-                diffsync=diffsync,
+                adapter=adapter,
                 device=device,
                 ip_address=attrs["primary_ip4__host"],
                 interface_name=attrs["interfaces"][0],
             )
-            cls._get_or_create_ip_address_to_interface(diffsync=diffsync, ip_address=ip_address, interface=interface)
+            cls._get_or_create_ip_address_to_interface(adapter=adapter, ip_address=ip_address, interface=interface)
             # Assign primary IP Address to Device
             device.primary_ip4 = ip_address
 
             try:
                 device.validated_save()
             except ValidationError as err:
-                diffsync.job.logger.error(f"Failed to create or update Device: {ids['name']}, {err}")
+                adapter.job.logger.error(f"Failed to create or update Device: {ids['name']}, {err}")
                 raise ValidationError(err)
         else:
-            diffsync.job.logger.error(f"Failed create or update Device: {ids['name']}")
+            adapter.job.logger.error(f"Failed create or update Device: {ids['name']}")
 
-        return super().create(diffsync=diffsync, ids=ids, attrs=attrs)
+        return super().create(adapter=adapter, ids=ids, attrs=attrs)
 
     def update(self, attrs):
         """Update an existing nautobot device using data scraped from a device."""
         device = Device.objects.get(name=self.name, location__name=self.location__name)
 
-        if self.diffsync.job.debug:
-            self.diffsync.job.logger.debug(f"Updating {device.name} with attrs: {attrs}")
+        if self.adapter.job.debug:
+            self.adapter.job.logger.debug(f"Updating {device.name} with attrs: {attrs}")
         if attrs.get("device_type__model"):
             device.device_type = DeviceType.objects.get(model=attrs.get("device_type__model"))
         if attrs.get("platform__name"):
@@ -275,24 +275,24 @@ class SyncDevicesDevice(DiffSyncModel):
                     host=attrs["primary_ip4__host"],
                     mask_length=attrs["mask_length"],
                     namespace=diffsync_utils.retrieve_submitted_value(
-                        job=self.diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="namespace"
+                        job=self.adapter.job, ip_address=attrs["primary_ip4__host"], query_string="namespace"
                     ),
                     default_ip_status=diffsync_utils.retrieve_submitted_value(
-                        job=self.diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
+                        job=self.adapter.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
                     ),
                     default_prefix_status=diffsync_utils.retrieve_submitted_value(
-                        job=self.diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
+                        job=self.adapter.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
                     ),
-                    job=self.diffsync.job,
+                    job=self.adapter.job,
                 )
                 new_interface = self._get_or_create_interface(
-                    diffsync=self.diffsync,
+                    adapter=self.adapter,
                     device=device,
                     ip_address=attrs["primary_ip4__host"],
                     interface_name=attrs["interfaces"][0],
                 )
                 self._get_or_create_ip_address_to_interface(
-                    diffsync=self.diffsync, ip_address=ip_address, interface=new_interface
+                    adapter=self.adapter, ip_address=ip_address, interface=new_interface
                 )
                 device.primary_ip4 = ip_address
             # Update the interface only
@@ -301,13 +301,13 @@ class SyncDevicesDevice(DiffSyncModel):
                 self._remove_old_interface_assignment(device=device, ip_address=device.primary_ip4)
 
                 new_interface = self._get_or_create_interface(
-                    diffsync=self.diffsync,
+                    adapter=self.adapter,
                     device=device,
                     ip_address=self.primary_ip4__host,
                     interface_name=attrs["interfaces"][0],
                 )
                 self._get_or_create_ip_address_to_interface(
-                    diffsync=self.diffsync, ip_address=device.primary_ip4, interface=new_interface
+                    adapter=self.adapter, ip_address=device.primary_ip4, interface=new_interface
                 )
         else:
             # Update the primary ip address only
@@ -321,31 +321,31 @@ class SyncDevicesDevice(DiffSyncModel):
                     host=attrs["primary_ip4__host"],
                     mask_length=attrs["mask_length"],
                     namespace=diffsync_utils.retrieve_submitted_value(
-                        job=self.diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="namespace"
+                        job=self.adapter.job, ip_address=attrs["primary_ip4__host"], query_string="namespace"
                     ),
                     default_ip_status=diffsync_utils.retrieve_submitted_value(
-                        job=self.diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
+                        job=self.adapter.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
                     ),
                     default_prefix_status=diffsync_utils.retrieve_submitted_value(
-                        job=self.diffsync.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
+                        job=self.adapter.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
                     ),
-                    job=self.diffsync.job,
+                    job=self.adapter.job,
                 )
                 self._remove_old_interface_assignment(device=device, ip_address=device.primary_ip4)
                 existing_interface = self._get_or_create_interface(
-                    diffsync=self.diffsync,
+                    adapter=self.adapter,
                     device=device,
                     ip_address=new_ip_address,
                     interface_name=self.get_attrs()["interfaces"][0],
                 )
                 self._get_or_create_ip_address_to_interface(
-                    diffsync=self.diffsync, ip_address=new_ip_address, interface=existing_interface
+                    adapter=self.adapter, ip_address=new_ip_address, interface=existing_interface
                 )
                 device.primary_ip4 = new_ip_address
         try:
             device.validated_save()
         except ValidationError as err:
-            self.diffsync.job.logger.error(f"Device {device.name} failed to update, {err}")
+            self.adapter.job.logger.error(f"Device {device.name} failed to update, {err}")
         return super().update(attrs)
 
 
@@ -383,5 +383,5 @@ class SyncDevicesPlatform(NautobotModel):
 
     name: str
 
-    network_driver: Optional[str]
-    manufacturer__name: Optional[str]
+    network_driver: Optional[str] = None
+    manufacturer__name: Optional[str] = None
