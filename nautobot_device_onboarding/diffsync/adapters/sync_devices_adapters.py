@@ -17,7 +17,7 @@ from nautobot_device_onboarding.utils import diffsync_utils
 ParameterSet = FrozenSet[Tuple[str, Hashable]]
 
 
-class SyncDevicesNautobotAdapter(diffsync.DiffSync):
+class SyncDevicesNautobotAdapter(diffsync.Adapter):
     """Adapter for loading Nautobot data."""
 
     manufacturer = sync_devices_models.SyncDevicesManufacturer
@@ -62,7 +62,7 @@ class SyncDevicesNautobotAdapter(diffsync.DiffSync):
         for manufacturer in Manufacturer.objects.all():
             if self.job.debug:
                 self.job.logger.debug("Loading Manufacturer data from Nautobot...")
-            onboarding_manufacturer = self.manufacturer(diffsync=self, pk=manufacturer.pk, name=manufacturer.name)
+            onboarding_manufacturer = self.manufacturer(adapter=self, pk=manufacturer.pk, name=manufacturer.name)
             self.add(onboarding_manufacturer)
             if self.job.debug:
                 self.job.logger.debug(f"Manufacturer: {manufacturer.name} loaded.")
@@ -73,7 +73,7 @@ class SyncDevicesNautobotAdapter(diffsync.DiffSync):
             self.job.logger.debug("Loading Platform data from Nautobot...")
         for platform in Platform.objects.all():
             onboarding_platform = self.platform(
-                diffsync=self,
+                adapter=self,
                 pk=platform.pk,
                 name=platform.name,
                 network_driver=platform.network_driver if platform.network_driver else "",
@@ -89,7 +89,7 @@ class SyncDevicesNautobotAdapter(diffsync.DiffSync):
             self.job.logger.debug("Loading DeviceType data from Nautobot...")
         for device_type in DeviceType.objects.all():
             onboarding_device_type = self.device_type(
-                diffsync=self,
+                adapter=self,
                 pk=device_type.pk,
                 model=device_type.model,
                 part_number=device_type.part_number,
@@ -118,7 +118,7 @@ class SyncDevicesNautobotAdapter(diffsync.DiffSync):
             else:
                 interfaces = []
             onboarding_device = self.device(
-                diffsync=self,
+                adapter=self,
                 pk=device.pk,
                 device_type__model=device.device_type.model,
                 location__name=device.location.name,
@@ -145,7 +145,7 @@ class SyncDevicesNautobotAdapter(diffsync.DiffSync):
         self.load_devices()
 
 
-class SyncDevicesNetworkAdapter(diffsync.DiffSync):
+class SyncDevicesNetworkAdapter(diffsync.Adapter):
     """Adapter for loading device data from a network."""
 
     manufacturer = sync_devices_models.SyncDevicesManufacturer
@@ -235,7 +235,7 @@ class SyncDevicesNetworkAdapter(diffsync.DiffSync):
             onboarding_manufacturer = None
             try:
                 onboarding_manufacturer = self.manufacturer(
-                    diffsync=self,
+                    adapter=self,
                     name=self.device_data[ip_address]["manufacturer"],
                 )
             except KeyError as err:
@@ -256,7 +256,7 @@ class SyncDevicesNetworkAdapter(diffsync.DiffSync):
             onboarding_platform = None
             try:
                 onboarding_platform = self.platform(
-                    diffsync=self,
+                    adapter=self,
                     name=self.device_data[ip_address]["platform"],
                     manufacturer__name=self.device_data[ip_address]["manufacturer"],
                     network_driver=self.device_data[ip_address]["network_driver"],
@@ -279,7 +279,7 @@ class SyncDevicesNetworkAdapter(diffsync.DiffSync):
             onboarding_device_type = None
             try:
                 onboarding_device_type = self.device_type(
-                    diffsync=self,
+                    adapter=self,
                     model=self.device_data[ip_address]["device_type"],
                     part_number=self.device_data[ip_address]["device_type"],
                     manufacturer__name=self.device_data[ip_address]["manufacturer"],
@@ -334,7 +334,7 @@ class SyncDevicesNetworkAdapter(diffsync.DiffSync):
                 )
 
                 onboarding_device = self.device(
-                    diffsync=self,
+                    adapter=self,
                     device_type__model=self.device_data[ip_address]["device_type"],
                     location__name=location.name,
                     name=self.device_data[ip_address]["hostname"],
