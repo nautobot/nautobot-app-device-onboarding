@@ -57,7 +57,7 @@ class TestTransformWithGitRepo(TransactionTestCase):
         """Simple helper to populate a mock repo with some data."""
         os.makedirs(path, exist_ok=True)
         os.makedirs(os.path.join(path, "onboarding_command_mappers"), exist_ok=True)
-        with open(os.path.join(path, "onboarding_command_mappers", "foo_bar.yml"), "w", encoding="utf-8") as fd:
+        with open(os.path.join(path, "onboarding_command_mappers", "foo_bar.yml"), "w", encoding="utf-8") as fd:  # pylint:disable=invalid-name
             yaml.dump(
                 {
                     "sync_devices": {
