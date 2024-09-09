@@ -4,7 +4,7 @@ sync_devices:
     commands:
       - command: "show version | display json"
         parser: "none"
-        jpath: '"software-information"[]."host-name"[].data'  # yamllint disable-line rule:quoted-strings
+        jpath: '"multi-routing-engine-results"[]."multi-routing-engine-item"[]."software-information"[]."host-name"[].data || "software-information"[]."host-name"[].data'  # yamllint disable-line rule:quoted-strings
   serial:
     commands:
       - command: "show chassis hardware | display json"
