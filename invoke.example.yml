@@ -1,6 +1,6 @@
 ---
 nautobot_device_onboarding:
-  nautobot_ver: "2.0.3"
+  nautobot_ver: "2.2.3"
   python_ver: "3.11"
   # local: false
   # compose_dir: "/full/path/to/nautobot-app-device-onboarding/development"
