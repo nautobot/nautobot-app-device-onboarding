@@ -632,9 +632,9 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         if self.debug:
             self.logger.debug("Checking for last_network_data_sync custom field")
         try:
-            cf = CustomField.objects.get(key="last_network_data_sync")
+            cf = CustomField.objects.get(key="last_network_data_sync")  # pylint:disable=invalid-name
         except ObjectDoesNotExist:
-            cf, _ = CustomField.objects.get_or_create(
+            cf, _ = CustomField.objects.get_or_create(  # pylint:disable=invalid-name
                 label="Last Network Data Sync",
                 key="last_network_data_sync",
                 type=CustomFieldTypeChoices.TYPE_DATE,
