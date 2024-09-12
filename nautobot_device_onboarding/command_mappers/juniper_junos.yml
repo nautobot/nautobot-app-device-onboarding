@@ -5,16 +5,19 @@ sync_devices:
       - command: "show version | display json"
         parser: "none"
         jpath: '"multi-routing-engine-results"[]."multi-routing-engine-item"[]."software-information"[]."host-name"[].data || "software-information"[]."host-name"[].data'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj | unique | first }}"
   serial:
     commands:
       - command: "show chassis hardware | display json"
         parser: "none"
-        jpath: '"chassis-inventory"[]."chassis"[]."serial-number"[].data'  # yamllint disable-line rule:quoted-strings
+        jpath: '"multi-routing-engine-results"[]."multi-routing-engine-item"[]."chassis-inventory"[]."chassis"[]."serial-number"[].data || "chassis-inventory"[]."chassis"[]."serial-number"[].data'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj | unique | first }}"
   device_type:
     commands:
       - command: "show chassis hardware | display json"
         parser: "none"
-        jpath: '"chassis-inventory"[]."chassis"[]."description"[].data'  # yamllint disable-line rule:quoted-strings
+        jpath: '"multi-routing-engine-results"[]."multi-routing-engine-item"[]."chassis-inventory"[]."chassis"[]."description"[].data || "chassis-inventory"[]."chassis"[]."description"[].data'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj | unique | first }}"
   mgmt_interface:
     commands:
       - command: "show interfaces terse | display json"
@@ -33,7 +36,8 @@ sync_network_data:
     commands:
       - command: "show chassis hardware | display json"
         parser: "none"
-        jpath: '"chassis-inventory"[]."chassis"[]."serial-number"[].data'  # yamllint disable-line rule:quoted-strings
+        jpath: '"multi-routing-engine-results"[]."multi-routing-engine-item"[]."chassis-inventory"[]."chassis"[]."serial-number"[].data || "chassis-inventory"[]."chassis"[]."serial-number"[].data'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj | unique | first }}"
   interfaces:
     root_key: true
     commands:

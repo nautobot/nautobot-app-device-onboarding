@@ -1,0 +1,7 @@
+{
+    "device_type": "Virtual Chassis",
+    "hostname": "AUSLAB-SW01",
+    "mask_length": 23,
+    "mgmt_interface": "irb.16",
+    "serial": "PD3716441420"
+}
