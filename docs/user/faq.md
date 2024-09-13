@@ -74,3 +74,10 @@ Optional arguments are often used to define a `secret` for Cisco devices and oth
 ## Why don't I see a webhook generated when a new device is onboarded successfully?
 
 It's expected that any changes done asynchronously in Nautobot currently (within a worker) will not generate a webhook.
+
+## Why should I limit as much as possible the initial job?
+
+- No access to "all" data, such as config context.
+- Several assumptions made for Nornir inventory that would be different in all other Nornir inventory jobs.
+- An inventory created for each device.
+    - Causes additional SQL connections which may benefit from the use of `serial` runner.
