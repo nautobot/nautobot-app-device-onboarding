@@ -4,7 +4,7 @@ sync_devices:
     commands:
       - command: "display current | include sysname"
         parser: "raw"
-        jpath: "[*].hostname"
+        jpath: "[*].raw"
         post_processor: "{{ obj[0].lstrip().split(' ')[1] }}"
   serial:
     commands:
