@@ -156,6 +156,11 @@ def netmiko_send_commands(
                                 task.results[result_idx].result = []
                                 task.results[result_idx].failed = False
             else:
+                if command["parser"] == "raw":
+                    meh = json.loads({"hostname": current_result.result})
+                    print(meh)
+                    task.results[result_idx].result = meh
+                    task.results[result_idx].failed = False
                 if command["parser"] == "none":
                     try:
                         jsonified = json.loads(current_result.result)
