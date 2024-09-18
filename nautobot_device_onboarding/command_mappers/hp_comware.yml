@@ -21,7 +21,7 @@ sync_devices:
       - command: "display ip interface"
         parser: "textfsm"
         jpath: "[*].{interface: interface, ip_addr: ip_address[0]}"
-        post_processor: "{% for i in obj %}{% if i['ip_addr'] %}{% if '198' in i['ip_addr'] %}{{ i['interface'] }}{% endif %}{% endif %}{% endfor %}"
+        post_processor: "{% for i in obj %}{% if i['ip_addr'] %}{% if original_host in i['ip_addr'] %}{{ i['interface'] }}{% endif %}{% endif %}{% endfor %}"
   mask_length:
     commands:
       - command: "display ip interface"

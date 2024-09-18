@@ -61,7 +61,7 @@
         "protocol_status": "UP",
         "route_map": "",
         "ip_address": [
-          "198.51.100.1/29"
+          "10.51.100.1/29"
         ],
         "mtu": "1500"
       },
@@ -129,7 +129,7 @@
         "protocol_status": "UP",
         "route_map": "",
         "ip_address": [
-          "10.133.100.1/24"
+          "198.51.100.1/24"
         ],
         "mtu": "1500"
       },
