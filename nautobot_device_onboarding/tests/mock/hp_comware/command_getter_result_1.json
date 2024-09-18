@@ -1,9 +1,7 @@
 {
-    "display current | include sysname": [
-      {
-        "hostname": " sysname 133-SW-Core"
-      }
-    ],
+    "display current | include sysname": {
+        "raw": " sysname 133-SW-Core"
+      },
     "display device manuinfo": [
       {
         "chassis_id": "",

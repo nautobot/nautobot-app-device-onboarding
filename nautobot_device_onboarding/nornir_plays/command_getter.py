@@ -157,9 +157,8 @@ def netmiko_send_commands(
                                 task.results[result_idx].failed = False
             else:
                 if command["parser"] == "raw":
-                    meh = json.loads({"raw": current_result.result})
-                    print(meh)
-                    task.results[result_idx].result = meh
+                    raw = {"raw": current_result.result}
+                    task.results[result_idx].result = json.loads(json.dumps(raw))
                     task.results[result_idx].failed = False
                 if command["parser"] == "none":
                     try:
