@@ -28,3 +28,4 @@ sync_devices:
         parser: "textfsm"
         jpath: "[*].ip_address[?contains(@, `{{ obj }}`)][]"
         post_processor: "{{ obj[0].split('/')[1] }}"
+        iterable_type: "int"
