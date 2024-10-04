@@ -31,9 +31,11 @@ class FilteredNautobotAdapter(NautobotAdapter):
     def _load_objects(self, diffsync_model):  # pylint: disable=protected-access
         """Given a diffsync model class, load a list of models from the database and return them."""
         parameter_names = self._get_parameter_names(diffsync_model)
-        for database_object in diffsync_model._get_queryset(
+        for (
+            database_object
+        ) in diffsync_model._get_queryset(  # pylint: disable=protected-access
             adapter=self
-        ):  # pylint: disable=protected-access
+        ):
             self._load_single_object(database_object, diffsync_model, parameter_names)
 
 
@@ -561,12 +563,10 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
 
     def load_ip_addresses(self):
         """Load IP addresses into the DiffSync store."""
-        for (
+        for (  # pylint: disable=too-many-nested-blocks
             hostname,
             device_data,
-        ) in (
-            self.job.command_getter_result.items()
-        ):  # pylint: disable=too-many-nested-blocks
+        ) in self.job.command_getter_result.items():
             if self.job.debug:
                 self.job.logger.debug(f"Loading IP Addresses from {hostname}")
             # for interface in device_data["interfaces"]:
@@ -597,8 +597,8 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                                 )
                                 continue
                             except (
-                                Exception
-                            ) as err:  # pylint: disable=broad-exception-caught
+                                Exception  # pylint: disable=broad-exception-caught
+                            ) as err:
                                 self._handle_general_load_exception(
                                     error=err,
                                     hostname=hostname,
@@ -724,8 +724,8 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                             )
                             self.add(network_ip_address_to_interface)
                         except (
-                            Exception
-                        ) as err:  # pylint: disable=broad-exception-caught
+                            Exception  # pylint: disable=broad-exception-caught
+                        ) as err:
                             self._handle_general_load_exception(
                                 error=err,
                                 hostname=hostname,
