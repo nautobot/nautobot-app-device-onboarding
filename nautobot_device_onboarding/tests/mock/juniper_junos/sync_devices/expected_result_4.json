@@ -1,0 +1,7 @@
+{
+    "device_type": "SRX4200",
+    "hostname": "PEP-WLK-LAB02",
+    "mask_length": 23,
+    "mgmt_interface": "fxp0.0",
+    "serial": "DK4220AR0049"
+}

@@ -1,4 +1,47 @@
 {
+    "show configuration system host-name | display json": {
+        "configuration" : {
+            "@" : {
+                "junos:commit-seconds" : "1727289292", 
+                "junos:commit-localtime" : "2024-09-25 18:34:52 UTC", 
+                "junos:commit-user" : "phti"
+            }, 
+            "system" : {
+                "host-name" : "JUNOS-PE1"
+            }
+        }
+    },
+    "show system information | display json": {
+        "system-information" : [
+        {
+            "hardware-model" : [
+            {
+                "data" : "mx10-t"
+            }
+            ], 
+            "os-name" : [
+            {
+                "data" : "junos"
+            }
+            ], 
+            "os-version" : [
+            {
+                "data" : "21.2R3-S7.7"
+            }
+            ], 
+            "serial-number" : [
+            {
+                "data" : "T9958"
+            }
+            ], 
+            "host-name" : [
+            {
+                "data" : "JUNOS-PE1"
+            }
+            ]
+        }
+        ]
+    },
     "show interfaces routing-instance all terse | display json": {},
     "show version | display json": {
         "software-information": [
