@@ -175,7 +175,7 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
                 if len(field_nesting) > 1:
                     # Means there is "anticipated" data nesting `interfaces__mtu` means final data would be
                     # {"Ethernet1/1": {"mtu": <value>}}
-                    for current_key in root_key_pre:
+                    for current_key in root_key_post:
                         # current_key is a single iteration from the root_key extracted value. Typically we want this to be
                         # a list of data that we want to become our nested key. E.g. current_key "Ethernet1/1"
                         # These get passed into the render context for the template render to allow nested jpaths to use

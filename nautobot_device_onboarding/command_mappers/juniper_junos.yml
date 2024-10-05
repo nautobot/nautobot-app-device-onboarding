@@ -1,19 +1,11 @@
 ---
 sync_devices:
-  pre_processor:
-    re_map:
-      commands:
-        - command: "show version | display json"
-          parser: "none"
-          # {'SRX-LAB01': 'node0', 'SRX-LAB02': 'node1'} maybe none as well for non-multire chassis
-          jpath: '"multi-routing-engine-results"[]."multi-routing-engine-item"[].{hostname: "software-information"[]."host-name"[].data | [0], node: "re-name"[].data | [0]}  || [{hostname: "software-information"[]."host-name"[].data | [0], node:`none`}]'  # yamllint disable-line rule:quoted-strings
-          post_processor: "{% set result={} %}{% for re in obj %}{{ result.update({re['hostname']: re['node']}) or '' }}{% endfor %}{{ result | tojson }}"
   hostname:
     commands:
       - command: "show system information | display json"
         parser: "none"
-        jpath: '"system-information"[]."host-name"[].data'
-        post_processor: "{% set _=re_map.update({original_host: re_map[obj[0]]}) %}{{ obj | unique | first }}"
+        jpath: '"system-information"[]."host-name"[].data'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj | unique | first }}"
   serial:
     commands:
       - command: "show system information | display json"
@@ -34,16 +26,11 @@ sync_devices:
         post_processor: "{% for entry in obj %}{% if entry['ip'] %}{% for ipaddr in entry['ip'] %}{% if original_host in ipaddr %}{{ entry['name'] | first }}{% endif %}{% endfor %}{% endif %}{% endfor %}"
   mask_length:
     commands:
-      - command: "show interfaces | display json"
+      - command: "show configuration interfaces | display json"
         parser: "none"
-        jpath: '"interface-information"[]."physical-interface"[]."logical-interface"[]."address-family"[]."interface-address"[]."ifa-destination"[].data'
-        post_processor: "{% for entry in obj %}{% if '.'.join(original_host.split('.')[:3]) in entry %}{{ entry.split('/')[1] }}{% endif %}{% endfor %}"
+        jpath: "configuration.interfaces.interface[].unit[?family.inet.address[?contains(name, `{{ obj }}`)]][].family.*.address[][].name"
+        post_processor: "{{ obj[0].split('/')[1] }}"
         iterable_type: "int"
-      # - command: "show route protocol direct | display json"
-      #   parser: "none"
-      #   jpath: '"route-information"[]."route-table"[]."rt"[]."rt-destination"[].data'  # yamllint disable-line rule:quoted-strings
-      #   post_processor: "{% set mask = [] %}{% for ip_route in obj %}{% if ip_route | is_network %}{% if ip_route | ipaddress_network('version') == 4 %}{% if original_host | is_ip_within(ip_route) %}{% set _=mask.append(ip_route.split('/')[1]) %}{% endif %}{% endif %}{% endif %}{% endfor %}{{ mask | unique | first}}"
-      #   iterable_type: "int"
 sync_network_data:
   serial:
     commands:
@@ -54,11 +41,11 @@ sync_network_data:
   interfaces:
     root_key: true
     commands:
-      - command: "show interfaces | display json"
+      - command: "show configuration interfaces | display json"
         parser: "none"
         # when root_key=true this extracted value is what becomes interable in keys using __ under `current_key`.
-        jpath: '"interface-information"[]."physical-interface"[].[name[].data, "logical-interface"[].name[].data][][]'   # yamllint disable-line rule:quoted-strings
-        post_processor: "{% set result={} %}{% for interface in obj %}{{ result.update({interface: {}}) or '' }}{% endfor %}{{ result | tojson }}"
+        jpath: 'configuration.interfaces.interface[].{name: name, units:unit[].name}'   # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj | junos_get_valid_interfaces | tojson }}"
   interfaces__type:
     commands:
       - command: "show interfaces | display json"
