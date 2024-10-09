@@ -1,0 +1,7 @@
+{
+    "device_type": "EX4300-48P",
+    "hostname": "JUNOS_EX4300",
+    "mask_length": 23,
+    "mgmt_interface": "irb.16",
+    "serial": "PD3987654321"
+}
