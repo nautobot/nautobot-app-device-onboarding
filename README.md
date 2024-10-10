@@ -14,7 +14,7 @@ To avoid extra work and temporary links, make sure that publishing docs (or merg
   <img src="https://raw.githubusercontent.com/nautobot/nautobot-app-device-onboarding/develop/docs/images/icon-nautobot-device-onboarding.png" class="logo" height="200px">
   <br>
   <a href="https://github.com/nautobot/nautobot-app-device-onboarding/actions"><img src="https://github.com/nautobot/nautobot-app-device-onboarding/actions/workflows/ci.yml/badge.svg?branch=main"></a>
-  <a href="https://docs.nautobot.com/projects/device-onboarding/en/latest/"><img src="https://readthedocs.org/projects/nautobot-plugin-nautobot-device-onboarding/badge/"></a>
+  <a href="https://docs.nautobot.com/projects/device-onboarding/en/latest/"><img src="https://readthedocs.org/projects/nautobot-app-nautobot-device-onboarding/badge/"></a>
   <a href="https://pypi.org/project/nautobot-device-onboarding/"><img src="https://img.shields.io/pypi/v/nautobot-device-onboarding"></a>
   <a href="https://pypi.org/project/nautobot-device-onboarding/"><img src="https://img.shields.io/pypi/dm/nautobot-device-onboarding"></a>
   <br>
