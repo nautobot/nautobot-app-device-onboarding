@@ -34,9 +34,7 @@ class FilteredNautobotAdapter(NautobotAdapter):
         for (
             database_object
         ) in diffsync_model._get_queryset(  # pylint: disable=protected-access
-            adapter=self
-        ):
-            self._load_single_object(database_object, diffsync_model, parameter_names)
+
 
 
 class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):

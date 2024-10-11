@@ -427,7 +427,15 @@ class TestFormatterSyncDevices(unittest.TestCase):
 
     def test_add_platform_parsing_info_sane_defaults(self):
         # Note: This is also officially tested in test_transform, but secondary check here as well.
-        default_mappers = ["cisco_ios", "arista_eos", "cisco_wlc", "cisco_xe", "juniper_junos", "cisco_nxos"]
+        default_mappers = [
+            "cisco_ios",
+            "arista_eos",
+            "cisco_wlc",
+            "cisco_xe",
+            "juniper_junos",
+            "cisco_nxos",
+            "hp_comware",
+        ]
         self.assertEqual(sorted(default_mappers), list(sorted(self.platform_parsing_info.keys())))
 
     def test_create_inventory_host_per_platform(self):
@@ -510,6 +518,7 @@ class TestFormatterSyncNetworkDataNoOptions(unittest.TestCase):
     def test_perform_data_extraction_sync_network_data_no_options(self):
         supported_platforms = list(self.platform_parsing_info.keys())
         supported_platforms.remove("cisco_wlc")
+        supported_platforms.remove("hp_comware")
         for platform in supported_platforms:
             self.host.platform = platform
             current_test_dir = f"{MOCK_DIR}/{platform}/"
@@ -577,6 +586,7 @@ class TestFormatterSyncNetworkDataWithVrfs(unittest.TestCase):
     def test_perform_data_extraction_sync_network_data_with_vrfs(self):
         supported_platforms = list(self.platform_parsing_info.keys())
         supported_platforms.remove("cisco_wlc")
+        supported_platforms.remove("hp_comware")
         for platform in supported_platforms:
             self.host.platform = platform
             current_test_dir = f"{MOCK_DIR}/{platform}/"
@@ -644,6 +654,7 @@ class TestFormatterSyncNetworkDataWithVlans(unittest.TestCase):
     def test_perform_data_extraction_sync_network_data_with_vlans(self):
         supported_platforms = list(self.platform_parsing_info.keys())
         supported_platforms.remove("cisco_wlc")
+        supported_platforms.remove("hp_comware")
         for platform in supported_platforms:
             self.host.platform = platform
             current_test_dir = f"{MOCK_DIR}/{platform}/"
@@ -712,6 +723,7 @@ class TestFormatterSyncNetworkDataAll(unittest.TestCase):
     def test_perform_data_extraction_sync_network_data_all(self):
         supported_platforms = list(self.platform_parsing_info.keys())
         supported_platforms.remove("cisco_wlc")
+        supported_platforms.remove("hp_comware")
         for platform in supported_platforms:
             self.host.platform = platform
             current_test_dir = f"{MOCK_DIR}/{platform}/"
