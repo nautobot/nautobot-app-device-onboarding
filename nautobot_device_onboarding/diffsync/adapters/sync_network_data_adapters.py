@@ -13,7 +13,9 @@ from netaddr import EUI, mac_unix_expanded
 from netutils.interface import canonical_interface_name
 
 from nautobot_device_onboarding.diffsync.models import sync_network_data_models
-from nautobot_device_onboarding.nornir_plays.command_getter import sync_network_data_command_getter
+from nautobot_device_onboarding.nornir_plays.command_getter import (
+    sync_network_data_command_getter,
+)
 from nautobot_device_onboarding.utils import diffsync_utils
 
 app_settings = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
@@ -29,7 +31,9 @@ class FilteredNautobotAdapter(NautobotAdapter):
     def _load_objects(self, diffsync_model):  # pylint: disable=protected-access
         """Given a diffsync model class, load a list of models from the database and return them."""
         parameter_names = self._get_parameter_names(diffsync_model)
-        for database_object in diffsync_model._get_queryset(adapter=self):  # pylint: disable=protected-access
+        for database_object in diffsync_model._get_queryset(  # pylint: disable=protected-access
+            adapter=self
+        ):
             self._load_single_object(database_object, diffsync_model, parameter_names)
 
 
@@ -78,6 +82,12 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         """Convert interface mac_address to string."""
         if database_object.mac_address:
             return str(database_object.mac_address)
+        return ""
+
+    def load_param_mtu(self, parameter_name, database_object):
+        """Convert interface mtu to string."""
+        if database_object.mtu:
+            return str(database_object.mtu)
         return ""
 
     def load_ip_addresses(self):
@@ -440,7 +450,9 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
     def execute_command_getter(self):
         """Query devices for data."""
         result = sync_network_data_command_getter(
-            self.job.job_result, self.job.logger.getEffectiveLevel(), self.job.job_result.task_kwargs
+            self.job.job_result,
+            self.job.logger.getEffectiveLevel(),
+            self.job.job_result.task_kwargs,
         )
         # verify data returned is a dict
         data_type_check = diffsync_utils.check_data_type(result)
@@ -495,7 +507,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
             status__name=self.job.interface_status.name,
             type=interface_data["type"],
             mac_address=self._process_mac_address(mac_address=interface_data["mac_address"]),
-            mtu=interface_data["mtu"] if interface_data["mtu"] else 1500,
+            mtu=interface_data["mtu"] if interface_data["mtu"] else "1500",
             description=interface_data["description"],
             enabled=interface_data["link_status"],
             mode=interface_data["802.1Q_mode"],
@@ -508,7 +520,10 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
 
     def load_ip_addresses(self):
         """Load IP addresses into the DiffSync store."""
-        for hostname, device_data in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
+        for (  # pylint: disable=too-many-nested-blocks
+            hostname,
+            device_data,
+        ) in self.job.command_getter_result.items():
             if self.job.debug:
                 self.job.logger.debug(f"Loading IP Addresses from {hostname}")
             # for interface in device_data["interfaces"]:
@@ -534,9 +549,14 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                                     "DiffSync store. This is a duplicate IP Address."
                                 )
                                 continue
-                            except Exception as err:  # pylint: disable=broad-exception-caught
+                            except (
+                                Exception  # pylint: disable=broad-exception-caught
+                            ) as err:
                                 self._handle_general_load_exception(
-                                    error=err, hostname=hostname, data=device_data, model_type="ip_address"
+                                    error=err,
+                                    hostname=hostname,
+                                    data=device_data,
+                                    model_type="ip_address",
                                 )
                                 continue
 
@@ -546,7 +566,10 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
         for device in self.job.devices_to_load:
             location_names[device.name] = device.location.name
 
-        for hostname, device_data in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
+        for (
+            hostname,
+            device_data,
+        ) in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
             if self.job.debug:
                 self.job.logger.debug(f"Loading Vlans from {hostname}")
             # for interface in device_data["interfaces"]:
@@ -565,7 +588,10 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                         continue
                     except Exception as err:  # pylint: disable=broad-exception-caught
                         self._handle_general_load_exception(
-                            error=err, hostname=hostname, data=device_data, model_type="vlan"
+                            error=err,
+                            hostname=hostname,
+                            data=device_data,
+                            model_type="vlan",
                         )
                         continue
                 # check for untagged vlan and add if necessary
@@ -582,13 +608,19 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                         continue
                     except Exception as err:  # pylint: disable=broad-exception-caught
                         self._handle_general_load_exception(
-                            error=err, hostname=hostname, data=device_data, model_type="vlan"
+                            error=err,
+                            hostname=hostname,
+                            data=device_data,
+                            model_type="vlan",
                         )
                         continue
 
     def load_vrfs(self):
         """Load vrfs into the Diffsync store."""
-        for hostname, device_data in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
+        for (
+            hostname,
+            device_data,
+        ) in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
             if self.job.debug:
                 self.job.logger.debug(f"Loading Vrfs from {hostname}")
             # for interface in device_data["interfaces"]:
@@ -605,13 +637,19 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                         continue
                     except Exception as err:  # pylint: disable=broad-exception-caught
                         self._handle_general_load_exception(
-                            error=err, hostname=hostname, data=device_data, model_type="vrf"
+                            error=err,
+                            hostname=hostname,
+                            data=device_data,
+                            model_type="vrf",
                         )
                         continue
 
     def load_ip_address_to_interfaces(self):
         """Load ip address interface assignments into the Diffsync store."""
-        for hostname, device_data in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
+        for (
+            hostname,
+            device_data,
+        ) in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
             for interface_name, interface_data in device_data["interfaces"].items():
                 for ip_address in interface_data["ip_addresses"]:
                     if ip_address["ip_address"]:  # the ip_address and mask_length may be empty, skip these
@@ -626,9 +664,14 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                                 ),
                             )
                             self.add(network_ip_address_to_interface)
-                        except Exception as err:  # pylint: disable=broad-exception-caught
+                        except (
+                            Exception  # pylint: disable=broad-exception-caught
+                        ) as err:
                             self._handle_general_load_exception(
-                                error=err, hostname=hostname, data=device_data, model_type="ip_address to interface"
+                                error=err,
+                                hostname=hostname,
+                                data=device_data,
+                                model_type="ip_address to interface",
                             )
                             continue
 
@@ -647,7 +690,10 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                     self.add(network_tagged_vlans_to_interface)
                 except Exception as err:  # pylint: disable=broad-exception-caught
                     self._handle_general_load_exception(
-                        error=err, hostname=hostname, data=device_data, model_type="tagged vlan to interface"
+                        error=err,
+                        hostname=hostname,
+                        data=device_data,
+                        model_type="tagged vlan to interface",
                     )
                     continue
 
@@ -666,7 +712,10 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                     self.add(network_untagged_vlan_to_interface)
                 except Exception as err:  # pylint: disable=broad-exception-caught
                     self._handle_general_load_exception(
-                        error=err, hostname=hostname, data=device_data, model_type="untagged vlan to interface"
+                        error=err,
+                        hostname=hostname,
+                        data=device_data,
+                        model_type="untagged vlan to interface",
                     )
                     continue
 
@@ -680,12 +729,15 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                         adapter=self,
                         device__name=hostname,
                         name=interface_name,
-                        lag__interface__name=interface_data["lag"] if interface_data["lag"] else "",
+                        lag__interface__name=(interface_data["lag"] if interface_data["lag"] else ""),
                     )
                     self.add(network_lag_to_interface)
                 except Exception as err:  # pylint: disable=broad-exception-caught
                     self._handle_general_load_exception(
-                        error=err, hostname=hostname, data=device_data, model_type="lag to interface"
+                        error=err,
+                        hostname=hostname,
+                        data=device_data,
+                        model_type="lag to interface",
                     )
                     continue
 
@@ -704,7 +756,10 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                     self.add(network_vrf_to_interface)
                 except Exception as err:  # pylint: disable=broad-exception-caught
                     self._handle_general_load_exception(
-                        error=err, hostname=hostname, data=device_data, model_type="vrf to interface"
+                        error=err,
+                        hostname=hostname,
+                        data=device_data,
+                        model_type="vrf to interface",
                     )
                     continue
 
