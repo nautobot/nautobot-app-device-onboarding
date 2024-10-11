@@ -89,7 +89,7 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         """Processor for logging and data processing on subtask completed."""
         self.logger.info(
             f"Subtask {'failed' if result.failed else 'succeeded'}: {task.name}, {task.host}.",
-            extra={"object": task.host}
+            extra={"object": task.host},
         )
         if result.failed:
             for res in result:
