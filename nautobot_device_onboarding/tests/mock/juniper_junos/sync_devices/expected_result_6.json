@@ -1,0 +1,7 @@
+{
+    "device_type": "MX80",
+    "hostname": "JUNOS_MX80",
+    "mask_length": 32,
+    "mgmt_interface": "lo0.0",
+    "serial": "T9983"
+}
