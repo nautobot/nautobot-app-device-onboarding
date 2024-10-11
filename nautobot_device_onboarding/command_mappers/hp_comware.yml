@@ -1,0 +1,31 @@
+---
+sync_devices:
+  hostname:
+    commands:
+      - command: "display current | include sysname"
+        parser: "raw"
+        jpath: "raw"
+        post_processor: "{{ obj.lstrip().split(' ')[1] }}"
+  serial:
+    commands:
+      - command: "display device manuinfo"
+        parser: "textfsm"
+        jpath: "[?slot_type==`Slot`].device_serial_number"
+  device_type:
+    commands:
+      - command: "display device manuinfo"
+        parser: "textfsm"
+        jpath: "[?slot_type==`Slot`].device_name"
+  mgmt_interface:
+    commands:
+      - command: "display ip interface"
+        parser: "textfsm"
+        jpath: "[*].{interface: interface, ip_addr: ip_address[0]}"
+        post_processor: "{% for i in obj %}{% if i['ip_addr'] %}{% if original_host in i['ip_addr'] %}{{ i['interface'] }}{% endif %}{% endif %}{% endfor %}"
+  mask_length:
+    commands:
+      - command: "display ip interface"
+        parser: "textfsm"
+        jpath: "[*].ip_address[?contains(@, `{{ obj }}`)][]"
+        post_processor: "{{ obj[0].split('/')[1] }}"
+        iterable_type: "int"

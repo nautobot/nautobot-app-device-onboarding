@@ -9,8 +9,8 @@ There are only a few components to the file and they're described below:
 - `root key data name` - Is fully defined in the schema definition.
 - `commands` - List of commands to execute in order to get the required data.
 - `command` - Actual `show` command to execute.
-- `parser` - Whether to use a parser (textfsm, pyats, ttp, etc) alternatively `none` can be used if the platform supports some other method to return structured data. E.g. (`| display json`) or an equivalent.
-- `jpath` - The jmespath (specifically jdiffs implementation) to extract the data from the parsed json returned from parser.
+- `parser` - Whether to use a parser (textfsm, pyats, ttp, etc) alternatives are `none` which can be used if the platform supports some other method to return structured data. E.g. (`| display json`) or an equivalent, or `raw` which allows a command to be run and **NO** jmespath extraction to take place, this is useful when simple text extractions via the `post_processor` are good enough.
+- `jpath` - The jmespath (specifically jdiffs implementation) to extract the data from the parsed json returned from parser. If `raw` is used as the `parser` then `jpath` should also be set to `raw` which will be the dictionary key to extract the raw command data.
 - `post_processor` - Jinja2 capable code to further transform the returned data post jpath extraction.
 - `iterable_type` - A optional value to force a parsed result to a specific data type.
 

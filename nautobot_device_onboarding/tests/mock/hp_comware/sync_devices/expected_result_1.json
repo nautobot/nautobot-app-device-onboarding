@@ -1,0 +1,7 @@
+{
+    "device_type": "5510 24G 4SFP+ HI JH145A",
+    "hostname": "133-SW-Core",
+    "mask_length": 24,
+    "mgmt_interface": "Vlan-interface100",
+    "serial": "CN73H0Y0H9"
+}

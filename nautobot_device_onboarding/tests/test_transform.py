@@ -24,7 +24,15 @@ class TestTransformNoGitRepo(unittest.TestCase):
 
     def test_add_platform_parsing_info_sane_defaults(self):
         command_mappers = add_platform_parsing_info()
-        default_mappers = ["cisco_ios", "arista_eos", "cisco_wlc", "cisco_xe", "juniper_junos", "cisco_nxos"]
+        default_mappers = [
+            "cisco_ios",
+            "arista_eos",
+            "cisco_wlc",
+            "cisco_xe",
+            "juniper_junos",
+            "cisco_nxos",
+            "hp_comware",
+        ]
         self.assertEqual(sorted(default_mappers), list(sorted(command_mappers.keys())))
 
     def test_load_command_mappers_from_dir(self):
