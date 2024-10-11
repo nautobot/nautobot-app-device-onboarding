@@ -1,0 +1,2585 @@
+{
+    "interfaces": {
+        "ge-0/0/0": {
+            "802.1Q_mode": "",
+            "description": "TESTING AP108",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "False",
+            "mac_address": "9c:cc:83:50:b7:03",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/0.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "False",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/1": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:04",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/1.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/10": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "False",
+            "mac_address": "9c:cc:83:50:b7:0d",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/10.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "False",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/11": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:0e",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/11.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/12": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:0f",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/12.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/13": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:10",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/13.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/14": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:11",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/14.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/15": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:12",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/15.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/16": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:13",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/16.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/17": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:14",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/17.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/18": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:15",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/18.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/19": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:16",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/19.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/2": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:05",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/2.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/20": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:17",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/20.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/21": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:18",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/21.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/22": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:19",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/22.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/23": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:1a",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/23.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/24": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:1b",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/24.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/25": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:1c",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/25.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/26": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:1d",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/26.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/27": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:1e",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/27.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/28": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:1f",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/28.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/29": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:20",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/29.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/3": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:06",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/3.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/30": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:21",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/30.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/31": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:22",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/31.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/32": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:23",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/32.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/33": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:24",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/33.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/34": {
+            "802.1Q_mode": "",
+            "description": "ge-0/0/34|VFLAB-AP01+",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:25",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/34.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/35": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:26",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/35.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/36": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:27",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/36.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/37": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:28",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/37.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/38": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:29",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/38.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/39": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:2a",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/39.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/4": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:07",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/4.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/40": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:2b",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/40.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/41": {
+            "802.1Q_mode": "",
+            "description": "ge-0/0/41|AP04",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:2c",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/41.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/42": {
+            "802.1Q_mode": "",
+            "description": "ACMEVF-ZPE01",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:2d",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/42.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/43": {
+            "802.1Q_mode": "",
+            "description": "TRUST - TO FW02 PORT 6",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:2e",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/43.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/44": {
+            "802.1Q_mode": "",
+            "description": "TO FW01 MGMT",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:2f",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/44.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/45": {
+            "802.1Q_mode": "",
+            "description": "TRUST - TO FW01 PORT 7",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:30",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/45.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/46": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:31",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/46.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/47": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:32",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/47.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/5": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:08",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/5.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/6": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:09",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/6.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/7": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:0a",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/7.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/8": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:0b",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/8.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/0/9": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:0c",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/0/9.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/2/0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:37",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/2/0.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-0/2/1": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": [],
+            "mac_address": [],
+            "mtu": "",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/2/1.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": [],
+            "mac_address": [],
+            "mtu": "",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/2/2": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": [],
+            "mac_address": [],
+            "mtu": "",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/2/2.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": [],
+            "mac_address": [],
+            "mtu": "",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/2/3": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": [],
+            "mac_address": [],
+            "mtu": "",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-0/2/3.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": [],
+            "mac_address": [],
+            "mtu": "",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:83",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/0.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/1": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:84",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/1.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/10": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:8d",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/10.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/11": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:8e",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/11.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/12": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:8f",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/12.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/13": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:90",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/13.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/14": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:91",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/14.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/15": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:92",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/15.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/16": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:93",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/16.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/17": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:94",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/17.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/18": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:95",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/18.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/19": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:96",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/19.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/2": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:85",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/2.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/20": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:97",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/20.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/21": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:98",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/21.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/22": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:99",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/22.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/23": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:9a",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/23.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/24": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:9b",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/24.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/25": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:9c",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/25.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/26": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:9d",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/26.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/27": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:9e",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/27.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/28": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:9f",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/28.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/29": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:a0",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/29.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/3": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:86",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/3.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/30": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:a1",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/30.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/31": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:a2",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/31.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/32": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:a3",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/32.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/33": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:a4",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/33.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/34": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:a5",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/34.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/35": {
+            "802.1Q_mode": "",
+            "description": "ge-1/0/35|AP02",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:a6",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/35.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/36": {
+            "802.1Q_mode": "",
+            "description": "ge-1/0/36|AP03",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:a7",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/36.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/37": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:a8",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/37.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/38": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:a9",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/38.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/39": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:aa",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/39.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/4": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:87",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/4.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/40": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:ab",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/40.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/41": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:ac",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/41.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/42": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:ad",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/42.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/43": {
+            "802.1Q_mode": "",
+            "description": "TRUST - TO FW02 PORT 6",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:ae",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/43.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/44": {
+            "802.1Q_mode": "",
+            "description": "TO FW02 MGMT",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:af",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/44.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/45": {
+            "802.1Q_mode": "",
+            "description": "TRUST - TO FW02 PORT 7",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:b0",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/45.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/46": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:b1",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/46.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/47": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:b2",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/47.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/5": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:88",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/5.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/6": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:89",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/6.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/7": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:8a",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/7.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/8": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:8b",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/8.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/0/9": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:8c",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/0/9.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default-switch"
+            }
+        },
+        "ge-1/2/0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": [],
+            "mac_address": [],
+            "mtu": "",
+            "type": "other",
+            "vrf": {}
+        },
+        "ge-1/2/0.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": [],
+            "mac_address": [],
+            "mtu": "",
+            "type": "other",
+            "vrf": {}
+        },
+        "irb": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:b7:01",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "irb.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "fe80::9ecc:8300:50:b701",
+                    "prefix_length": "64"
+                }
+            ],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default"
+            }
+        },
+        "irb.16": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "198.51.100.1",
+                    "prefix_length": "23"
+                }
+            ],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default"
+            }
+        },
+        "vme": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "9c:cc:83:50:94:82",
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {}
+        },
+        "vme.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "fe80::9ecc:83ff:fe50:9482",
+                    "prefix_length": "64"
+                }
+            ],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "type": "other",
+            "vrf": {
+                "name": "default"
+            }
+        },
+        "xe-0/2/0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": [],
+            "mac_address": [],
+            "mtu": "",
+            "type": "other",
+            "vrf": {}
+        },
+        "xe-0/2/0.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": [],
+            "mac_address": [],
+            "mtu": "",
+            "type": "other",
+            "vrf": {}
+        },
+        "xe-0/2/1": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": [],
+            "mac_address": [],
+            "mtu": "",
+            "type": "other",
+            "vrf": {}
+        },
+        "xe-0/2/1.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": [],
+            "mac_address": [],
+            "mtu": "",
+            "type": "other",
+            "vrf": {}
+        },
+        "xe-0/2/2": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": [],
+            "mac_address": [],
+            "mtu": "",
+            "type": "other",
+            "vrf": {}
+        },
+        "xe-0/2/2.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": [],
+            "mac_address": [],
+            "mtu": "",
+            "type": "other",
+            "vrf": {}
+        },
+        "xe-0/2/3": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": [],
+            "mac_address": [],
+            "mtu": "",
+            "type": "other",
+            "vrf": {}
+        },
+        "xe-0/2/3.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": [],
+            "mac_address": [],
+            "mtu": "",
+            "type": "other",
+            "vrf": {}
+        }
+    },
+    "serial": "PD3987654321"
+}
