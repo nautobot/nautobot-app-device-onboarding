@@ -17,6 +17,8 @@ Device onboarding 4.0 added two additional application dependencies.
 - [nautobot_ssot](https://docs.nautobot.com/projects/ssot/en/latest/)
 - [nautobot_plugin_nornir](https://docs.nautobot.com/projects/plugin-nornir/en/latest/)
 
+!!! note both plugins have to be installed correctly with each properly nautobot-server post_upgrade for each one, having it on [PLUGINS] entries only does not cut it
+
 ### Access Requirements
 
 - The original OnboardingTask Job used NAPALM Credentials.
