@@ -63,26 +63,26 @@ def task(function=None, *args, **kwargs):
 
 
 def docker_compose(context, command, **kwargs):
-    """Helper function for running a specific docker-compose command with all appropriate parameters and environment.
+    """Helper function for running a specific docker compose command with all appropriate parameters and environment.
 
     Args:
         context (obj): Used to run specific commands
-        command (str): Command string to append to the "docker-compose ..." command, such as "build", "up", etc.
+        command (str): Command string to append to the "docker compose ..." command, such as "build", "up", etc.
         **kwargs: Passed through to the context.run() call.
     """
     build_env = {
-        # Note: 'docker-compose logs' will stop following after 60 seconds by default,
+        # Note: 'docker compose logs' will stop following after 60 seconds by default,
         # so we are overriding that by setting this environment variable.
         "COMPOSE_HTTP_TIMEOUT": context.nautobot_device_onboarding.compose_http_timeout,
         "NAUTOBOT_VER": context.nautobot_device_onboarding.nautobot_ver,
         "PYTHON_VER": context.nautobot_device_onboarding.python_ver,
     }
-    compose_command = f'docker-compose --project-name {context.nautobot_device_onboarding.project_name} --project-directory "{context.nautobot_device_onboarding.compose_dir}"'
+    compose_command = f'docker compose --project-name {context.nautobot_device_onboarding.project_name} --project-directory "{context.nautobot_device_onboarding.compose_dir}"'
     for compose_file in context.nautobot_device_onboarding.compose_files:
         compose_file_path = os.path.join(context.nautobot_device_onboarding.compose_dir, compose_file)
         compose_command += f' -f "{compose_file_path}"'
     compose_command += f" {command}"
-    print(f'Running docker-compose command "{command}"')
+    print(f'Running docker compose command "{command}"')
     return context.run(compose_command, env=build_env, **kwargs)
 
 
@@ -179,13 +179,13 @@ def vscode(context):
 
 @task(
     help={
-        "service": "Docker-compose service name to view (default: nautobot)",
+        "service": "Docker compose service name to view (default: nautobot)",
         "follow": "Follow logs",
         "tail": "Tail N number of lines or 'all'",
     }
 )
 def logs(context, service="nautobot", follow=False, tail=None):
-    """View the logs of a docker-compose service."""
+    """View the logs of a docker compose service."""
     command = "logs "
 
     if follow:
