@@ -44,7 +44,6 @@ class NautobotDeviceOnboardingConfig(NautobotAppConfig):
         "object_match_strategy": "loose",
     }
     caching_config = {}
-    docs_view_name = "plugins:nautobot_device_onboarding:docs"
 
 
 config = NautobotDeviceOnboardingConfig  # pylint:disable=invalid-name
