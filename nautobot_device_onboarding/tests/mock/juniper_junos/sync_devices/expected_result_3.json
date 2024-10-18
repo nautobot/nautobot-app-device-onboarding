@@ -1,0 +1,7 @@
+{
+    "device_type": "MX10-T",
+    "hostname": "JUNOS_MX10",
+    "mask_length": 28,
+    "mgmt_interface": "ge-1/0/0.2950",
+    "serial": "BC899"
+}

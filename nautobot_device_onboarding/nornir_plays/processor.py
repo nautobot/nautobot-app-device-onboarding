@@ -87,7 +87,17 @@ class CommandGetterProcessor(BaseLoggingProcessor):
 
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Processor for logging and data processing on subtask completed."""
-        self.logger.info(f"Subtask completed: {task.name}, {task.host}.", extra={"object": task.host})
+        self.logger.info(
+            f"Subtask {'failed' if result.failed else 'succeeded'}: {task.name}, {task.host}.",
+            extra={"object": task.host},
+        )
+        if result.failed:
+            for res in result:
+                if res.exception:
+                    self.logger.info(
+                        f"{host.name} an exception occured: {res.exception}.",
+                        extra={"object": host.name},
+                    )
 
     def subtask_instance_started(self, task: Task, host: Host) -> None:  # show command start
         """Processor for logging and data processing on subtask start."""

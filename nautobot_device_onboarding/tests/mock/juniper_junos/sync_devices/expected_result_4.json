@@ -1,0 +1,7 @@
+{
+    "device_type": "MX240",
+    "hostname": "JUNOS_MX240",
+    "mask_length": 32,
+    "mgmt_interface": "lo0.0",
+    "serial": "JN12342D2AFC"
+}

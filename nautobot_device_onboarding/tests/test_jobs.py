@@ -157,7 +157,7 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
             module="nautobot_device_onboarding.jobs", name="SSOTSyncNetworkData", **job_form_inputs
         )
 
-        self.assertEqual(job_result.status, JobResultStatusChoices.STATUS_SUCCESS)
+        self.assertEqual(job_result.status, JobResultStatusChoices.STATUS_SUCCESS, job_result.traceback)
         for returned_device_hostname, data in device_data.return_value.items():
             device = Device.objects.get(serial=data["serial"])
             self.assertEqual(device.name, returned_device_hostname)
