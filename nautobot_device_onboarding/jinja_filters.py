@@ -193,8 +193,8 @@ def junos_get_valid_interfaces(interfaces):
     """Get valid interfaces from Junos."""
     result = {}
     for interface in interfaces:
-        result[interface['name']] = {}
-        if interface['units']:
-            for unit in interface['units']:
+        result[interface["name"]] = {}
+        if interface["units"]:
+            for unit in interface["units"]:
                 result[f"{interface['name']}.{unit}"] = {}
     return result
