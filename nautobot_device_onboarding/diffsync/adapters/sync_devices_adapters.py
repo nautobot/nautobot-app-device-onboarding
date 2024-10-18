@@ -1,5 +1,6 @@
 """DiffSync adapters."""
 
+import socket
 from collections import defaultdict
 from typing import DefaultDict, Dict, FrozenSet, Hashable, Tuple, Type
 
@@ -11,7 +12,9 @@ from django.db.models import Model
 from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
 
 from nautobot_device_onboarding.diffsync.models import sync_devices_models
-from nautobot_device_onboarding.nornir_plays.command_getter import sync_devices_command_getter
+from nautobot_device_onboarding.nornir_plays.command_getter import (
+    sync_devices_command_getter,
+)
 from nautobot_device_onboarding.utils import diffsync_utils
 
 ParameterSet = FrozenSet[Tuple[str, Hashable]]
@@ -76,8 +79,8 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
                 adapter=self,
                 pk=platform.pk,
                 name=platform.name,
-                network_driver=platform.network_driver if platform.network_driver else "",
-                manufacturer__name=platform.manufacturer.name if platform.manufacturer else None,
+                network_driver=(platform.network_driver if platform.network_driver else ""),
+                manufacturer__name=(platform.manufacturer.name if platform.manufacturer else None),
             )
             self.add(onboarding_platform)
             if self.job.debug:
@@ -125,12 +128,12 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
                 name=device.name,
                 platform__name=device.platform.name if device.platform else "",
                 primary_ip4__host=device.primary_ip4.host if device.primary_ip4 else "",
-                primary_ip4__status__name=device.primary_ip4.status.name if device.primary_ip4 else "",
+                primary_ip4__status__name=(device.primary_ip4.status.name if device.primary_ip4 else ""),
                 role__name=device.role.name,
                 status__name=device.status.name,
-                secrets_group__name=device.secrets_group.name if device.secrets_group else "",
+                secrets_group__name=(device.secrets_group.name if device.secrets_group else ""),
                 interfaces=interfaces,
-                mask_length=device.primary_ip4.mask_length if device.primary_ip4 else None,
+                mask_length=(device.primary_ip4.mask_length if device.primary_ip4 else None),
                 serial=device.serial,
             )
             self.add(onboarding_device)
@@ -167,12 +170,17 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
         """Validate the format of each IP Address in a list of IP Addresses."""
         # Validate IP Addresses
         validation_successful = True
-        for ip_address in ip_addresses:
+        for i, ip_address in enumerate(ip_addresses):
             try:
                 netaddr.IPAddress(ip_address)
             except netaddr.AddrFormatError:
-                self.job.logger.error(f"[{ip_address}] is not a valid IP Address ")
-                validation_successful = False
+                try:
+                    resolved_ip = socket.gethostbyname(ip_address)
+                    self.job.logger.info(f"[{ip_address}] resolved to [{resolved_ip}]")
+                    ip_addresses[i] = resolved_ip
+                except socket.gaierror:
+                    self.job.logger.error(f"[{ip_address}] is not a valid IP Address or name.")
+                    validation_successful = False
         if validation_successful:
             return True
         raise netaddr.AddrConversionError
@@ -203,10 +211,14 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                         f"The selected platform, {self.job.platform} "
                         "does not have a network driver, please update the Platform."
                     )
-                    raise Exception("Platform.network_driver missing")  # pylint: disable=broad-exception-raised
+                    raise Exception(  # pylint: disable=broad-exception-raised
+                        "Platform.network_driver missing"
+                    )
 
         result = sync_devices_command_getter(
-            self.job.job_result, self.job.logger.getEffectiveLevel(), self.job.job_result.task_kwargs
+            self.job.job_result,
+            self.job.logger.getEffectiveLevel(),
+            self.job.job_result.task_kwargs,
         )
         if self.job.debug:
             self.job.logger.debug(f"Command Getter Result: {result}")
@@ -297,7 +309,13 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
     def _fields_missing_data(self, device_data, ip_address, platform):
         """Verify that all of the fields returned from a device actually contain data."""
         fields_missing_data = []
-        required_fields_from_device = ["device_type", "hostname", "mgmt_interface", "mask_length", "serial"]
+        required_fields_from_device = [
+            "device_type",
+            "hostname",
+            "mgmt_interface",
+            "mask_length",
+            "serial",
+        ]
         if platform:  # platform is only returned with device data if not provided on the job form/csv
             required_fields_from_device.append("platform")
         for field in required_fields_from_device:
@@ -321,7 +339,9 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                     job=self.job, ip_address=ip_address, query_string="platform"
                 )
                 primary_ip4__status = diffsync_utils.retrieve_submitted_value(
-                    job=self.job, ip_address=ip_address, query_string="ip_address_status"
+                    job=self.job,
+                    ip_address=ip_address,
+                    query_string="ip_address_status",
                 )
                 device_role = diffsync_utils.retrieve_submitted_value(
                     job=self.job, ip_address=ip_address, query_string="device_role"
@@ -338,7 +358,7 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                     device_type__model=self.device_data[ip_address]["device_type"],
                     location__name=location.name,
                     name=self.device_data[ip_address]["hostname"],
-                    platform__name=platform.name if platform else self.device_data[ip_address]["platform"],
+                    platform__name=(platform.name if platform else self.device_data[ip_address]["platform"]),
                     primary_ip4__host=ip_address,
                     primary_ip4__status__name=primary_ip4__status.name,
                     role__name=device_role.name,
