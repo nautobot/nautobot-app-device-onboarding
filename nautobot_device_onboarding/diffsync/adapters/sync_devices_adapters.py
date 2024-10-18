@@ -1,9 +1,9 @@
 """DiffSync adapters."""
 
+import socket
 from collections import defaultdict
 from typing import DefaultDict, Dict, FrozenSet, Hashable, Tuple, Type
 
-import socket
 import diffsync
 import netaddr
 from django.contrib.contenttypes.models import ContentType
