@@ -488,9 +488,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                 continue
             for interface_name, interface_data in device_data["interfaces"].items():
                 try:
-                    network_interface = self.load_interface(
-                        hostname, interface_name, interface_data
-                    )
+                    network_interface = self.load_interface(hostname, interface_name, interface_data)
                     network_device.add_child(network_interface)
                 except Exception as err:  # pylint: disable=broad-exception-caught
                     self._handle_general_load_exception(
