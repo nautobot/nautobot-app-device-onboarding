@@ -3,7 +3,7 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/nautobot/nautobot-app-device-onboarding/develop/docs/images/icon-DeviceOnboarding.png" class="logo" height="200px">
   <br>
-  <a href="https://github.com/nautobot/nautobot-app-device-onboarding/actions"><img src="https://github.com/nautobot/nautobot-app-device-onboarding/actions/workflows/ci.yml/badge.svg?branch=develop"></a>
+  <a href="https://github.com/nautobot/nautobot-app-device-onboarding/actions"><img src="https://github.com/nautobot/nautobot-app-device-onboarding/actions/workflows/ci.yml/badge.svg?branch=main"></a>
   <a href="https://docs.nautobot.com/projects/device-onboarding/en/latest/"><img src="https://readthedocs.org/projects/nautobot-plugin-device-onboarding/badge/"></a>
   <a href="https://pypi.org/project/nautobot-device-onboarding/"><img src="https://img.shields.io/pypi/v/nautobot-device-onboarding"></a>
   <a href="https://pypi.org/project/nautobot-device-onboarding/"><img src="https://img.shields.io/pypi/dm/nautobot-device-onboarding"></a>
@@ -19,15 +19,15 @@ Regardless, the Onboarding App greatly simplifies the onboarding process by allo
 
 ### Support Matrix (Sync Devices From Network)
 
-|     Data Attribute      | Cisco IOS          | Cisco XE           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  |
-| ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: |
-| Hostname                | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Platform                | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Manufacturer            | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Serial Number           | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Device Type             | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Mgmt Interface          | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Mgmt IP Address         | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
+|     Data Attribute      | Cisco IOS          | Cisco XE           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  | HP Comware |
+| ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: | :-: |
+| Hostname                | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | 🧪 |
+| Platform                | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | 🧪 |
+| Manufacturer            | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | 🧪 |
+| Serial Number           | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | 🧪 |
+| Device Type             | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | 🧪 |
+| Mgmt Interface          | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | 🧪 |
+| Mgmt IP Address         | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ | 🧪 |
 
 ### Support Matrix (Sync Data From Network)
 

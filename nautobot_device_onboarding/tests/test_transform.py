@@ -24,7 +24,15 @@ class TestTransformNoGitRepo(unittest.TestCase):
 
     def test_add_platform_parsing_info_sane_defaults(self):
         command_mappers = add_platform_parsing_info()
-        default_mappers = ["cisco_ios", "arista_eos", "cisco_wlc", "cisco_xe", "juniper_junos", "cisco_nxos"]
+        default_mappers = [
+            "cisco_ios",
+            "arista_eos",
+            "cisco_wlc",
+            "cisco_xe",
+            "juniper_junos",
+            "cisco_nxos",
+            "hp_comware",
+        ]
         self.assertEqual(sorted(default_mappers), list(sorted(command_mappers.keys())))
 
     def test_load_command_mappers_from_dir(self):
@@ -57,7 +65,7 @@ class TestTransformWithGitRepo(TransactionTestCase):
         """Simple helper to populate a mock repo with some data."""
         os.makedirs(path, exist_ok=True)
         os.makedirs(os.path.join(path, "onboarding_command_mappers"), exist_ok=True)
-        with open(os.path.join(path, "onboarding_command_mappers", "foo_bar.yml"), "w", encoding="utf-8") as fd:
+        with open(os.path.join(path, "onboarding_command_mappers", "foo_bar.yml"), "w", encoding="utf-8") as fd:  # pylint:disable=invalid-name
             yaml.dump(
                 {
                     "sync_devices": {

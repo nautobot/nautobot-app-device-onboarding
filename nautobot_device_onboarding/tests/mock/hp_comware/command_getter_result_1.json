@@ -1,0 +1,147 @@
+{
+    "display current | include sysname": {
+        "raw": " sysname 133-SW-Core"
+      },
+    "display device manuinfo": [
+      {
+        "chassis_id": "",
+        "slot_type": "Slot",
+        "slot_id": "1",
+        "device_name": "5510 24G 4SFP+ HI JH145A",
+        "device_serial_number": "CN73H0Y0H9",
+        "manufacturing_date": "2017-03-14",
+        "vendor_name": "HPE",
+        "mac_address": "40B9-3CA0-4B2D"
+      },
+      {
+        "chassis_id": "",
+        "slot_type": "Subslot",
+        "slot_id": "1",
+        "device_name": "HP 5130/5510 10GbE SFP+ 2p Module JH157A",
+        "device_serial_number": "CN83H1B0DN",
+        "manufacturing_date": "2018-04-06",
+        "vendor_name": "HPE",
+        "mac_address": ""
+      },
+      {
+        "chassis_id": "",
+        "slot_type": "Fan",
+        "slot_id": "1",
+        "device_name": "",
+        "device_serial_number": "",
+        "manufacturing_date": "",
+        "vendor_name": "",
+        "mac_address": ""
+      },
+      {
+        "chassis_id": "",
+        "slot_type": "Fan",
+        "slot_id": "2",
+        "device_name": "",
+        "device_serial_number": "",
+        "manufacturing_date": "",
+        "vendor_name": "",
+        "mac_address": ""
+      },
+      {
+        "chassis_id": "",
+        "slot_type": "Power",
+        "slot_id": "1",
+        "device_name": "HPE X361 150W AC Power Supply JD362B",
+        "device_serial_number": "CN70JW52NY",
+        "manufacturing_date": "2017-10-23",
+        "vendor_name": "HPE",
+        "mac_address": ""
+      }
+    ],
+    "display ip interface": [
+      {
+        "interface": "GigabitEthernet1/0/4",
+        "line_status": "UP",
+        "protocol_status": "UP",
+        "route_map": "",
+        "ip_address": [
+          "10.51.100.1/29"
+        ],
+        "mtu": "1500"
+      },
+      {
+        "interface": "M-GigabitEthernet0/0/0",
+        "line_status": "DOWN",
+        "protocol_status": "DOWN",
+        "route_map": "",
+        "ip_address": [],
+        "mtu": ""
+      },
+      {
+        "interface": "Vlan-interface16",
+        "line_status": "UP",
+        "protocol_status": "UP",
+        "route_map": "",
+        "ip_address": [
+          "10.133.16.1/22"
+        ],
+        "mtu": "1500"
+      },
+      {
+        "interface": "Vlan-interface20",
+        "line_status": "UP",
+        "protocol_status": "UP",
+        "route_map": "",
+        "ip_address": [
+          "10.133.20.1/23"
+        ],
+        "mtu": "1500"
+      },
+      {
+        "interface": "Vlan-interface32",
+        "line_status": "UP",
+        "protocol_status": "UP",
+        "route_map": "",
+        "ip_address": [
+          "10.133.32.1/24"
+        ],
+        "mtu": "1500"
+      },
+      {
+        "interface": "Vlan-interface64",
+        "line_status": "UP",
+        "protocol_status": "UP",
+        "route_map": "",
+        "ip_address": [
+          "10.133.64.1/23"
+        ],
+        "mtu": "1500"
+      },
+      {
+        "interface": "Vlan-interface68",
+        "line_status": "UP",
+        "protocol_status": "UP",
+        "route_map": "",
+        "ip_address": [
+          "10.133.68.1/23"
+        ],
+        "mtu": "1500"
+      },
+      {
+        "interface": "Vlan-interface100",
+        "line_status": "UP",
+        "protocol_status": "UP",
+        "route_map": "",
+        "ip_address": [
+          "198.51.100.1/24"
+        ],
+        "mtu": "1500"
+      },
+      {
+        "interface": "Vlan-interface102",
+        "line_status": "UP",
+        "protocol_status": "UP",
+        "route_map": "",
+        "ip_address": [
+          "10.133.102.1/24"
+        ],
+        "mtu": "1500"
+      }
+    ]
+  }
