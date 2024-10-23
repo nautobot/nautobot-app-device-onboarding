@@ -7,7 +7,7 @@ try:
 except ImportError:
     from typing_extensions import Annotated  # Python<3.9
 
-from diffsync import DiffSync, DiffSyncModel
+from diffsync import Adapter, DiffSyncModel
 from diffsync import exceptions as diffsync_exceptions
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
 from nautobot.dcim.choices import InterfaceTypeChoices
@@ -27,20 +27,20 @@ class FilteredNautobotModel(NautobotModel):
     """
 
     @classmethod
-    def _get_queryset(cls, diffsync: "DiffSync"):
+    def _get_queryset(cls, adapter: "Adapter"):
         """Get the queryset used to load the models data from Nautobot."""
         parameter_names = list(cls._identifiers) + list(cls._attributes)
         # Here we identify any foreign keys (i.e. fields with '__' in them) so that we can load them directly in the
         # first query if this function hasn't been overridden.
         prefetch_related_parameters = [parameter.split("__")[0] for parameter in parameter_names if "__" in parameter]
-        qs = cls.get_queryset(diffsync=diffsync)
+        qs = cls.get_queryset(adapter=adapter)
         return qs.prefetch_related(*prefetch_related_parameters)
 
     @classmethod
-    def get_queryset(cls, diffsync: "DiffSync"):
+    def get_queryset(cls, adapter: "Adapter"):
         """Get the queryset used to load the models data from Nautobot."""
         # Replace return with a filtered queryset.
-        # Access the job form inputs with diffsync ex: diffsync.job.location.name
+        # Access the job form inputs with adapter ex: adapter.job.location.name
         return cls._model.objects.all()
 
 
@@ -61,28 +61,28 @@ class SyncNetworkDataDevice(FilteredNautobotModel):
 
     last_network_data_sync: Annotated[
         Optional[str], CustomFieldAnnotation(key="last_network_data_sync", name="last_network_data_sync")
-    ]
+    ] = None
 
     interfaces: List["SyncNetworkDataInterface"] = []
 
     @classmethod
-    def _get_queryset(cls, diffsync: "DiffSync"):
+    def _get_queryset(cls, adapter: "Adapter"):
         """Get the queryset used to load the models data from Nautobot.
 
         job.command_getter_result contains the result from the CommandGetter job.
         Only devices that actually responded with data should be considered for the sync.
         """
-        return diffsync.job.devices_to_load
+        return adapter.job.devices_to_load
 
     @classmethod
-    def create(cls, diffsync, ids, attrs):
+    def create(cls, adapter, ids, attrs):
         """
         Do not create new devices.
 
         Network devices need to exist in Nautobot prior to syncing data and
         need to be included in the queryset generated based on job form inputs.
         """
-        diffsync.job.logger.error(
+        adapter.job.logger.error(
             f"Network device {ids} is not included in the Nautobot devices "
             "selected for syncing. This device either does not exist in Nautobot "
             "or was not included based on filter criteria provided on the job form."
@@ -91,7 +91,7 @@ class SyncNetworkDataDevice(FilteredNautobotModel):
 
     def delete(self):
         """Prevent device deletion."""
-        self.diffsync.job.logger.error(f"{self} will not be deleted.")
+        self.adapter.job.logger.error(f"{self} will not be deleted.")
         return None
 
 
@@ -118,15 +118,15 @@ class SyncNetworkDataInterface(FilteredNautobotModel):
     device__name: str
     name: str
 
-    status__name: Optional[str]
-    type: Optional[str]
-    mac_address: Optional[str]
-    mtu: Optional[str]
-    parent_interface__name: Optional[str]
-    lag__name: Optional[str]
-    mode: Optional[str]
-    enabled: Optional[bool]
-    description: Optional[str]
+    status__name: Optional[str] = None
+    type: Optional[str] = None
+    mac_address: Optional[str] = None
+    mtu: Optional[str] = None
+    parent_interface__name: Optional[str] = None
+    lag__name: Optional[str] = None
+    mode: Optional[str] = None
+    enabled: Optional[bool] = None
+    description: Optional[str] = None
 
 
 class SyncNetworkDataIPAddress(DiffSyncModel):
@@ -144,22 +144,22 @@ class SyncNetworkDataIPAddress(DiffSyncModel):
     status__name: str
 
     @classmethod
-    def create(cls, diffsync, ids, attrs):
+    def create(cls, adapter, ids, attrs):
         """Create a new IPAddress object."""
         diffsync_utils.get_or_create_ip_address(
             host=ids["host"],
             mask_length=attrs["mask_length"],
-            namespace=diffsync.job.namespace,
-            default_ip_status=diffsync.job.ip_address_status,
-            default_prefix_status=diffsync.job.default_prefix_status,
-            job=diffsync.job,
+            namespace=adapter.job.namespace,
+            default_ip_status=adapter.job.ip_address_status,
+            default_prefix_status=adapter.job.default_prefix_status,
+            job=adapter.job,
         )
-        return super().create(diffsync, ids, attrs)
+        return super().create(adapter, ids, attrs)
 
     def update(self, attrs):
         """Update an existing IPAddress object."""
         try:
-            ip_address = IPAddress.objects.get(host=self.host, parent__namespace=self.diffsync.job.namespace)
+            ip_address = IPAddress.objects.get(host=self.host, parent__namespace=self.adapter.job.namespace)
         except ObjectDoesNotExist as err:
             self.job.logger.error(f"{self} failed to update, {err}")
         if attrs.get("mask_length"):
@@ -188,9 +188,9 @@ class SyncNetworkDataIPAddressToInterface(FilteredNautobotModel):
     ip_address__host: str
 
     @classmethod
-    def _get_queryset(cls, diffsync: "DiffSync"):
+    def _get_queryset(cls, adapter: "Adapter"):
         """Get the queryset used to load the models data from Nautobot."""
-        return IPAddressToInterface.objects.filter(interface__device__in=diffsync.job.devices_to_load)
+        return IPAddressToInterface.objects.filter(interface__device__in=adapter.job.devices_to_load)
 
 
 class SyncNetworkDataVLAN(DiffSyncModel):
@@ -205,19 +205,19 @@ class SyncNetworkDataVLAN(DiffSyncModel):
     location__name: str
 
     @classmethod
-    def create(cls, diffsync, ids, attrs):
+    def create(cls, adapter, ids, attrs):
         """Create a new VLAN."""
         location = None
         try:
             location = Location.objects.get(name=ids["location__name"])
         except ObjectDoesNotExist:
-            diffsync.job.logger.warning(
+            adapter.job.logger.warning(
                 f"While creating VLAN {ids['vid']} - {ids['name']}, "
                 f"unable to find a Location with name: {ids['location__name']}. "
                 "This VLAN will be created without a Location"
             )
         except MultipleObjectsReturned:
-            diffsync.job.logger.warning(
+            adapter.job.logger.warning(
                 f"While creating VLAN {ids['vid']} - {ids['name']}, "
                 f"Multiple Locations were found with name: {ids['location__name']}. "
                 "This VLAN will be created without a Location"
@@ -231,9 +231,9 @@ class SyncNetworkDataVLAN(DiffSyncModel):
             )
             vlan.validated_save()
         except ValidationError as err:
-            diffsync.job.logger.error(f"VLAN {vlan} failed to create, {err}")
+            adapter.job.logger.error(f"VLAN {vlan} failed to create, {err}")
 
-        return super().create(diffsync, ids, attrs)
+        return super().create(adapter, ids, attrs)
 
 
 class SyncNetworkDataTaggedVlansToInterface(DiffSyncModel):
@@ -246,10 +246,10 @@ class SyncNetworkDataTaggedVlansToInterface(DiffSyncModel):
     device__name: str
     name: str
 
-    tagged_vlans: Optional[list]
+    tagged_vlans: Optional[list] = None
 
     @classmethod
-    def _get_and_assign_tagged_vlans(cls, diffsync, attrs, interface):
+    def _get_and_assign_tagged_vlans(cls, adapter, attrs, interface):
         """Loop through the tagged vlans for an interface and assign them."""
         for network_vlan in attrs["tagged_vlans"]:
             try:
@@ -258,7 +258,7 @@ class SyncNetworkDataTaggedVlansToInterface(DiffSyncModel):
                 )
                 interface.tagged_vlans.add(nautobot_vlan)
             except ObjectDoesNotExist:
-                diffsync.job.logger.error(
+                adapter.job.logger.error(
                     f"Failed to assign tagged vlan to {interface.device}:{interface}, unable to locate a vlan "
                     f"with attributes [name: {network_vlan['name']}, vid: {network_vlan['id']} "
                     f"location: {interface.device.location}]"
@@ -266,27 +266,27 @@ class SyncNetworkDataTaggedVlansToInterface(DiffSyncModel):
                 raise diffsync_exceptions.ObjectNotCreated
 
     @classmethod
-    def create(cls, diffsync, ids, attrs):
+    def create(cls, adapter, ids, attrs):
         """Assign tagged vlans to an interface."""
         if attrs.get("tagged_vlans"):
             try:
                 interface = Interface.objects.get(device__name=ids["device__name"], name=ids["name"])
             except ObjectDoesNotExist:
-                diffsync.job.logger.error(
+                adapter.job.logger.error(
                     f"Failed to assign tagged vlans {attrs['tagged_vlans']}. An interface with "
                     f"attributes: [device__name: {ids['device__name']} name: {ids['name']}] was not found."
                 )
                 raise diffsync_exceptions.ObjectNotCreated
-            cls._get_and_assign_tagged_vlans(diffsync, attrs, interface)
+            cls._get_and_assign_tagged_vlans(adapter, attrs, interface)
             if interface:
                 try:
                     interface.validated_save()
                 except ValidationError as err:
-                    diffsync.job.logger.error(
+                    adapter.job.logger.error(
                         f"Failed to assign tagged vlans {attrs['tagged_vlans']} to {interface} on {interface.device}, {err}"
                     )
                     raise diffsync_exceptions.ObjectNotCreated
-        return super().create(diffsync, ids, attrs)
+        return super().create(adapter, ids, attrs)
 
     def update(self, attrs):
         """Update tagged vlans."""
@@ -295,16 +295,16 @@ class SyncNetworkDataTaggedVlansToInterface(DiffSyncModel):
                 interface = Interface.objects.get(**self.get_identifiers())
                 interface.tagged_vlans.clear()
             except ObjectDoesNotExist:
-                self.diffsync.job.logger.error(
+                self.adapter.job.logger.error(
                     f"Failed to assign tagged vlans {attrs['tagged_vlans']}. An interface with "
                     f"attributes: [{self.get_identifiers}] was not found."
                 )
                 raise diffsync_exceptions.ObjectNotUpdated
-            self._get_and_assign_tagged_vlans(self.diffsync, attrs, interface)
+            self._get_and_assign_tagged_vlans(self.adapter, attrs, interface)
             try:
                 interface.validated_save()
             except ValidationError as err:
-                self.diffsync.job.logger.error(
+                self.adapter.job.logger.error(
                     f"Failed to assign tagged vlans {attrs['tagged_vlans']} to {interface} on {interface.device}, {err}"
                 )
                 raise diffsync_exceptions.ObjectNotUpdated
@@ -321,10 +321,10 @@ class SyncNetworkDataUnTaggedVlanToInterface(DiffSyncModel):
     device__name: str
     name: str
 
-    untagged_vlan: Optional[dict]
+    untagged_vlan: Optional[dict] = None
 
     @classmethod
-    def _get_and_assign_untagged_vlan(cls, diffsync, attrs, interface):
+    def _get_and_assign_untagged_vlan(cls, adapter, attrs, interface):
         """Assign an untagged vlan to an interface."""
         try:
             vlan = VLAN.objects.get(
@@ -334,7 +334,7 @@ class SyncNetworkDataUnTaggedVlanToInterface(DiffSyncModel):
             )
             interface.untagged_vlan = vlan
         except ObjectDoesNotExist:
-            diffsync.job.logger.error(
+            adapter.job.logger.error(
                 f"Failed to assign untagged vlan to {interface.device}:{interface}, unable to locate a vlan with "
                 f"attributes [name: {attrs['untagged_vlan']['name']}, vid: {attrs['untagged_vlan']['id']} "
                 f"location: {interface.device.location}]"
@@ -342,26 +342,26 @@ class SyncNetworkDataUnTaggedVlanToInterface(DiffSyncModel):
             raise diffsync_exceptions.ObjectNotCreated
 
     @classmethod
-    def create(cls, diffsync, ids, attrs):
+    def create(cls, adapter, ids, attrs):
         """Assign an untagged vlan to an interface."""
         if attrs.get("untagged_vlan"):
             try:
                 interface = Interface.objects.get(device__name=ids["device__name"], name=ids["name"])
             except ObjectDoesNotExist:
-                diffsync.job.logger.error(
+                adapter.job.logger.error(
                     f"Failed to assign untagged vlan {attrs['untagged_vlan']}. An interface with "
                     f"attributes: [device__name: {ids['device__name']} name: {ids['name']}] was not found."
                 )
                 raise diffsync_exceptions.ObjectNotCreated
-            cls._get_and_assign_untagged_vlan(diffsync, attrs, interface)
+            cls._get_and_assign_untagged_vlan(adapter, attrs, interface)
             try:
                 interface.validated_save()
             except ValidationError as err:
-                diffsync.job.logger.error(
+                adapter.job.logger.error(
                     f"Failed to assign untagged vlan {attrs['untagged_vlan']} to {interface} on {interface.device}, {err}"
                 )
                 raise diffsync_exceptions.ObjectNotCreated
-        return super().create(diffsync, ids, attrs)
+        return super().create(adapter, ids, attrs)
 
     def update(self, attrs):
         """Update the untagged vlan on an interface."""
@@ -369,16 +369,16 @@ class SyncNetworkDataUnTaggedVlanToInterface(DiffSyncModel):
             try:
                 interface = Interface.objects.get(**self.get_identifiers())
             except ObjectDoesNotExist:
-                self.diffsync.job.logger.error(
+                self.adapter.job.logger.error(
                     f"Failed to assign untagged vlan {attrs['untagged_vlan']}. An interface with "
                     f"attributes: [{self.get_identifiers}] was not found."
                 )
                 raise diffsync_exceptions.ObjectNotUpdated
-            self._get_and_assign_untagged_vlan(self.diffsync, attrs, interface)
+            self._get_and_assign_untagged_vlan(self.adapter, attrs, interface)
             try:
                 interface.validated_save()
             except ValidationError as err:
-                self.diffsync.job.logger.error(
+                self.adapter.job.logger.error(
                     f"Failed to assign untagged vlans {attrs['untagged_vlan']} to {interface} on {interface.device}, {err}"
                 )
                 raise diffsync_exceptions.ObjectNotUpdated
@@ -395,17 +395,17 @@ class SyncNetworkDataLagToInterface(DiffSyncModel):
     device__name: str
     name: str
 
-    lag__interface__name: Optional[str]
+    lag__interface__name: Optional[str] = None
 
     # TODO: move the create and update method locgic to a single utility function
     @classmethod
-    def create(cls, diffsync, ids, attrs):
+    def create(cls, adapter, ids, attrs):
         """Assign a lag to an interface."""
         if attrs["lag__interface__name"]:
             try:
                 interface = Interface.objects.get(device__name=ids["device__name"], name=ids["name"])
             except ObjectDoesNotExist:
-                diffsync.job.logger.error(
+                adapter.job.logger.error(
                     f"Failed to assign lag {attrs['lag__interface__name']}. An interface with "
                     f"attributes: [device__name: {ids['device__name']} name: {ids['name']}] was not found."
                 )
@@ -418,18 +418,18 @@ class SyncNetworkDataLagToInterface(DiffSyncModel):
                     interface.lag = lag_interface
                     interface.validated_save()
                 except ObjectDoesNotExist:
-                    diffsync.job.logger.error(
+                    adapter.job.logger.error(
                         f"Failed to assign lag to {interface.device}:{interface}, unable to locate a lag interface "
                         f"with attributes [name: {attrs['lag__interface__name']}, device: {interface.device.name} "
                         f"type: {InterfaceTypeChoices.TYPE_LAG}]"
                     )
                     raise diffsync_exceptions.ObjectNotCreated
                 except ValidationError as err:
-                    diffsync.job.logger.error(
+                    adapter.job.logger.error(
                         f"Failed to assign lag {lag_interface} to {interface} on {interface.device}, {err}"
                     )
                     raise diffsync_exceptions.ObjectNotCreated
-        return super().create(diffsync, ids, attrs)
+        return super().create(adapter, ids, attrs)
 
     def update(self, attrs):
         """Update and interface lag."""
@@ -437,7 +437,7 @@ class SyncNetworkDataLagToInterface(DiffSyncModel):
             try:
                 interface = Interface.objects.get(**self.get_identifiers())
             except ObjectDoesNotExist:
-                self.diffsync.job.logger.error(
+                self.adapter.job.logger.error(
                     f"Failed to assign untagged lag {attrs['lag__interface__name']}. "
                     f"An interface with attributes: [{self.get_identifiers}] was not found."
                 )
@@ -449,14 +449,14 @@ class SyncNetworkDataLagToInterface(DiffSyncModel):
             interface.lag = lag_interface
             interface.validated_save()
         except ObjectDoesNotExist:
-            self.diffsync.job.logger.error(
+            self.adapter.job.logger.error(
                 f"Failed to assign lag to {interface}, unable to locate a lag interface "
                 f"with attributes [name: {attrs['lag__interface__name']}, device: {interface.device.name} "
                 f"type: {InterfaceTypeChoices.TYPE_LAG}]"
             )
             raise diffsync_exceptions.ObjectNotUpdated
         except ValidationError as err:
-            self.diffsync.job.logger.error(
+            self.adapter.job.logger.error(
                 f"Failed to assign lag {lag_interface} to {interface} on {interface.device}, {err}"
             )
             raise diffsync_exceptions.ObjectNotUpdated
@@ -485,28 +485,28 @@ class SyncNetworkDataVrfToInterface(DiffSyncModel):
     device__name: str
     name: str
 
-    vrf: Optional[dict]
+    vrf: Optional[dict] = None
 
     @classmethod
-    def _get_and_assign_vrf(cls, diffsync, attrs, interface):
+    def _get_and_assign_vrf(cls, adapter, attrs, interface):
         """Assign a vrf to an interface."""
         try:
             vrf = VRF.objects.get(
                 name=attrs["vrf"]["name"],
-                namespace=diffsync.job.namespace,
+                namespace=adapter.job.namespace,
             )
         except ObjectDoesNotExist:
-            diffsync.job.logger.error(
+            adapter.job.logger.error(
                 f"Failed to assign vrf to {interface.device}:{interface}, unable to locate a vrf with attributes "
                 f"[name: {attrs['vrf']['name']} "
-                f"namespace: {diffsync.job.namespace}]"
+                f"namespace: {adapter.job.namespace}]"
             )
             raise diffsync_exceptions.ObjectNotCreated
         except MultipleObjectsReturned:
-            diffsync.job.logger.error(
+            adapter.job.logger.error(
                 f"Failed to assign vrf to {interface.device}:{interface}, there are multipple vrfs with attributes "
                 f"[name: {attrs['vrf']['name']} "
-                f"namespace: {diffsync.job.namespace}]. "
+                f"namespace: {adapter.job.namespace}]. "
                 "Unsure which to assign."
             )
             raise diffsync_exceptions.ObjectNotCreated
@@ -514,31 +514,31 @@ class SyncNetworkDataVrfToInterface(DiffSyncModel):
             vrf.devices.add(interface.device)
             vrf.validated_save()
         except Exception as err:
-            diffsync.logger.error(f"Failed to assign device: {interface.device} to vrf: {vrf}, {err}")
+            adapter.logger.error(f"Failed to assign device: {interface.device} to vrf: {vrf}, {err}")
             raise diffsync_exceptions.ObjectNotCreated
         interface.vrf = vrf
 
     @classmethod
-    def create(cls, diffsync, ids, attrs):
+    def create(cls, adapter, ids, attrs):
         """Assign a vrf to an interface."""
         if attrs.get("vrf"):
             try:
                 interface = Interface.objects.get(device__name=ids["device__name"], name=ids["name"])
             except ObjectDoesNotExist:
-                diffsync.job.logger.error(
+                adapter.job.logger.error(
                     f"Failed to assign vrf {attrs['vrf']}. An interface with attributes: "
                     f"[device__name: {ids['device__name']} name: {ids['name']}] was not found."
                 )
                 raise diffsync_exceptions.ObjectNotCreated
-            cls._get_and_assign_vrf(diffsync, attrs, interface)
+            cls._get_and_assign_vrf(adapter, attrs, interface)
             try:
                 interface.validated_save()
             except ValidationError as err:
-                diffsync.job.logger.error(
+                adapter.job.logger.error(
                     f"Failed to assign vrf {attrs['vrf']} to {interface} on {interface.device}, {err}"
                 )
                 raise diffsync_exceptions.ObjectNotCreated
-        return super().create(diffsync, ids, attrs)
+        return super().create(adapter, ids, attrs)
 
     def update(self, attrs):
         """Update the vrf on an interface."""
@@ -546,16 +546,16 @@ class SyncNetworkDataVrfToInterface(DiffSyncModel):
             try:
                 interface = Interface.objects.get(**self.get_identifiers())
             except ObjectDoesNotExist:
-                self.diffsync.job.logger.error(
+                self.adapter.job.logger.error(
                     f"Failed to assign vrf {attrs['vrf']['name']}. "
                     f"An interface with attributes: [{self.get_identifiers}] was not found."
                 )
                 raise diffsync_exceptions.ObjectNotUpdated
-            self._get_and_assign_vrf(self.diffsync, attrs, interface)
+            self._get_and_assign_vrf(self.adapter, attrs, interface)
             try:
                 interface.validated_save()
             except ValidationError as err:
-                self.diffsync.job.logger.error(
+                self.adapter.job.logger.error(
                     f"Failed to assign vrf {attrs['vrf']} to {interface} on {interface.device}, {err}"
                 )
                 raise diffsync_exceptions.ObjectNotUpdated
