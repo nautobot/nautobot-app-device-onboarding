@@ -29,6 +29,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - [#218](https://github.com/nautobot/nautobot-app-device-onboarding/issues/218) - Replaced all instances of emoji shortcodes with the unicode characters so they render correctly in docs.
 - [#238](https://github.com/nautobot/nautobot-app-device-onboarding/issues/238) - Added a fix for mtu as an integer rather than a string.
 - [#241](https://github.com/nautobot/nautobot-app-device-onboarding/issues/241) - Fixed Multiple RE support to Juniper parsing logic.
+- [#261](https://github.com/nautobot/nautobot-app-device-onboarding/issues/261) - Add general exception handling when loading interfaces into a DiffSync model. 
 
 ### Dependencies
 
