@@ -3,7 +3,19 @@
 !!! warning
     Nautobot Device Onboarding v4.0.0 completely revamps the applications design and framework. The original `OnboardingTask` job is still packaged with the app to provide a backwards compatible way for users that have used its extensions framework in the past to solve complex problems. However, that job is now hidden by default to avoid confusion with the two new SSoT based onboarding jobs that v4.0.0 exposes.
 
+## [v4.0.1 (2024-08-27)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.0.1)
 
+### Fixed
+
+- [#218](https://github.com/nautobot/nautobot-app-device-onboarding/pull/218) - Fixed Emoji shorthand to be unicode instead.
+
+### Dependencies
+
+- [#224](https://github.com/nautobot/nautobot-app-device-onboarding/pull/224) - Removed secrets provider dependency.
+
+### Housekeeping
+
+- [#216](https://github.com/nautobot/nautobot-app-device-onboarding/pull/216) - Rebaked Cookie.
 
 ## [v4.0.0 (2024-08-05)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.0.0)
 
