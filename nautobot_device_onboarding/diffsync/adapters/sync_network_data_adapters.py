@@ -486,10 +486,18 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
             except Exception as err:  # pylint: disable=broad-exception-caught
                 self._handle_general_load_exception(error=err, hostname=hostname, data=device_data, model_type="device")
                 continue
-            # for interface in device_data["interfaces"]:
             for interface_name, interface_data in device_data["interfaces"].items():
-                network_interface = self.load_interface(hostname, interface_name, interface_data)
-                network_device.add_child(network_interface)
+                try:
+                    network_interface = self.load_interface(hostname, interface_name, interface_data)
+                    network_device.add_child(network_interface)
+                except Exception as err:  # pylint: disable=broad-exception-caught
+                    self._handle_general_load_exception(
+                        error=err,
+                        hostname=hostname,
+                        data=device_data,
+                        model_type="interface",
+                    )
+                    continue
 
     # def _get_vlan_name(self, interface_data):
     #     """Given interface data returned from a device, process and return the vlan name."""
