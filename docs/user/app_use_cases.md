@@ -7,7 +7,7 @@ This document describes common use-cases and scenarios for this App utilizing th
 This App can be used in three general ways.
 
 1. Onboard a device with basic information. (Name, Serial, Device Type, Management IP + Interface)
-2. Take existing devices and enhace the data for each device by syncing in more metadata. (Interface, VLANs, VRFs, Cabling, etc.)
+2. Take existing devices and enhance the data for each device by syncing in more metadata. (Interface, VLANs, VRFs, Cabling, etc.)
 3. Both 1 and 2 in conjunction with each other.
 
 ### Preparation
@@ -90,7 +90,7 @@ The status of onboarding jobs can be viewed via the UI (Jobs > Job Results) or r
 
 To run the SSoT Sync Devices Job via the api:
 
-Post to `/api/extras/jobs/SSOTSyncDevices/run/` with the relevent onboarding data: 
+Post to `/api/extras/jobs/SSOTSyncDevices/run/` with the relevant onboarding data: 
 
 ```bash
 curl -X "POST" <nautobot URL>/api/extras/jobs/SSOTSyncDevices/run/ -H "Content-Type: application/json" -H "Authorization: Token $NAUTOBOT_TOKEN" -d '{"data": {"location": "<valid location UUID>", "ip_address": "<reachable IP to onboard>", "port": 22, "timeout": 30}}

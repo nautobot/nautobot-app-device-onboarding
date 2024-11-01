@@ -11,7 +11,9 @@ from django.db.models import Model
 from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
 
 from nautobot_device_onboarding.diffsync.models import sync_devices_models
-from nautobot_device_onboarding.nornir_plays.command_getter import sync_devices_command_getter
+from nautobot_device_onboarding.nornir_plays.command_getter import (
+    sync_devices_command_getter,
+)
 from nautobot_device_onboarding.utils import diffsync_utils
 
 ParameterSet = FrozenSet[Tuple[str, Hashable]]
@@ -54,7 +56,9 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
             return cached_object
         # As we are using `get` here, this will error if there is not exactly one object that corresponds to the
         # parameter set. We intentionally pass these errors through.
-        self._cache[model_cache_key][parameter_set] = model_class.objects.get(**dict(parameter_set))
+        self._cache[model_cache_key][parameter_set] = model_class.objects.get(
+            **dict(parameter_set)
+        )
         return self._cache[model_cache_key][parameter_set]
 
     def load_manufacturers(self):
@@ -62,7 +66,9 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
         for manufacturer in Manufacturer.objects.all():
             if self.job.debug:
                 self.job.logger.debug("Loading Manufacturer data from Nautobot...")
-            onboarding_manufacturer = self.manufacturer(adapter=self, pk=manufacturer.pk, name=manufacturer.name)
+            onboarding_manufacturer = self.manufacturer(
+                adapter=self, pk=manufacturer.pk, name=manufacturer.name
+            )
             self.add(onboarding_manufacturer)
             if self.job.debug:
                 self.job.logger.debug(f"Manufacturer: {manufacturer.name} loaded.")
@@ -76,8 +82,12 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
                 adapter=self,
                 pk=platform.pk,
                 name=platform.name,
-                network_driver=platform.network_driver if platform.network_driver else "",
-                manufacturer__name=platform.manufacturer.name if platform.manufacturer else None,
+                network_driver=(
+                    platform.network_driver if platform.network_driver else ""
+                ),
+                manufacturer__name=(
+                    platform.manufacturer.name if platform.manufacturer else None
+                ),
             )
             self.add(onboarding_platform)
             if self.job.debug:
@@ -104,7 +114,9 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
         if self.job.debug:
             self.job.logger.debug("Loading Device data from Nautobot...")
 
-        for device in Device.objects.filter(primary_ip4__host__in=self.job.ip_addresses):
+        for device in Device.objects.filter(
+            primary_ip4__host__in=self.job.ip_addresses
+        ):
             interface_list = []
             # Only interfaces with the device's primary ip should be considered for diff calculations
             # Ultimately, only the first matching interface is used but this list could support multiple
@@ -125,12 +137,18 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
                 name=device.name,
                 platform__name=device.platform.name if device.platform else "",
                 primary_ip4__host=device.primary_ip4.host if device.primary_ip4 else "",
-                primary_ip4__status__name=device.primary_ip4.status.name if device.primary_ip4 else "",
+                primary_ip4__status__name=(
+                    device.primary_ip4.status.name if device.primary_ip4 else ""
+                ),
                 role__name=device.role.name,
                 status__name=device.status.name,
-                secrets_group__name=device.secrets_group.name if device.secrets_group else "",
+                secrets_group__name=(
+                    device.secrets_group.name if device.secrets_group else ""
+                ),
                 interfaces=interfaces,
-                mask_length=device.primary_ip4.mask_length if device.primary_ip4 else None,
+                mask_length=(
+                    device.primary_ip4.mask_length if device.primary_ip4 else None
+                ),
                 serial=device.serial,
             )
             self.add(onboarding_device)
@@ -188,7 +206,9 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
         self.failed_ip_addresses = []
         for ip_address in device_data:
             if not device_data[ip_address]:
-                self.job.logger.error(f"{ip_address}: Connection or data error, this device will not be synced.")
+                self.job.logger.error(
+                    f"{ip_address}: Connection or data error, this device will not be synced."
+                )
                 self.failed_ip_addresses.append(ip_address)
         for ip_address in self.failed_ip_addresses:
             del device_data[ip_address]
@@ -203,16 +223,22 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                         f"The selected platform, {self.job.platform} "
                         "does not have a network driver, please update the Platform."
                     )
-                    raise Exception("Platform.network_driver missing")  # pylint: disable=broad-exception-raised
+                    raise Exception(
+                        "Platform.network_driver missing"
+                    )  # pylint: disable=broad-exception-raised
 
         result = sync_devices_command_getter(
-            self.job.job_result, self.job.logger.getEffectiveLevel(), self.job.job_result.task_kwargs
+            self.job.job_result,
+            self.job.logger.getEffectiveLevel(),
+            self.job.job_result.task_kwargs,
         )
         if self.job.debug:
             self.job.logger.debug(f"Command Getter Result: {result}")
         data_type_check = diffsync_utils.check_data_type(result)
         if self.job.debug:
-            self.job.logger.debug(f"CommandGetter data type check resut: {data_type_check}")
+            self.job.logger.debug(
+                f"CommandGetter data type check result: {data_type_check}"
+            )
         if data_type_check:
             self._handle_failed_devices(device_data=result)
         else:
@@ -220,7 +246,7 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                 "Data returned from CommandGetter is not the correct type. "
                 "No devices will be onboarded, check the CommandGetter job logs."
             )
-            raise ValidationError("Unexpected data returend from CommandGetter.")
+            raise ValidationError("Unexpected data returned from CommandGetter.")
 
     def _add_ip_address_to_failed_list(self, ip_address):
         """If an a model fails to load, add the ip address to the failed list for logging."""
@@ -297,8 +323,16 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
     def _fields_missing_data(self, device_data, ip_address, platform):
         """Verify that all of the fields returned from a device actually contain data."""
         fields_missing_data = []
-        required_fields_from_device = ["device_type", "hostname", "mgmt_interface", "mask_length", "serial"]
-        if platform:  # platform is only returned with device data if not provided on the job form/csv
+        required_fields_from_device = [
+            "device_type",
+            "hostname",
+            "mgmt_interface",
+            "mask_length",
+            "serial",
+        ]
+        if (
+            platform
+        ):  # platform is only returned with device data if not provided on the job form/csv
             required_fields_from_device.append("platform")
         for field in required_fields_from_device:
             data = device_data[ip_address]
@@ -311,7 +345,9 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
         for ip_address in self.device_data:
             if self.job.debug:
                 self.job.logger.debug(f"loading device data for {ip_address}")
-            platform = None  # If an excption is caught below, the platform must still be set.
+            platform = (
+                None  # If an exception is caught below, the platform must still be set.
+            )
             onboarding_device = None
             try:
                 location = diffsync_utils.retrieve_submitted_value(
@@ -321,7 +357,9 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                     job=self.job, ip_address=ip_address, query_string="platform"
                 )
                 primary_ip4__status = diffsync_utils.retrieve_submitted_value(
-                    job=self.job, ip_address=ip_address, query_string="ip_address_status"
+                    job=self.job,
+                    ip_address=ip_address,
+                    query_string="ip_address_status",
                 )
                 device_role = diffsync_utils.retrieve_submitted_value(
                     job=self.job, ip_address=ip_address, query_string="device_role"
@@ -338,7 +376,11 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                     device_type__model=self.device_data[ip_address]["device_type"],
                     location__name=location.name,
                     name=self.device_data[ip_address]["hostname"],
-                    platform__name=platform.name if platform else self.device_data[ip_address]["platform"],
+                    platform__name=(
+                        platform.name
+                        if platform
+                        else self.device_data[ip_address]["platform"]
+                    ),
                     primary_ip4__host=ip_address,
                     primary_ip4__status__name=primary_ip4__status.name,
                     role__name=device_role.name,
@@ -365,14 +407,16 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
             if fields_missing_data:
                 onboarding_device = None
                 self.job.logger.error(
-                    f"Unable to onbaord {ip_address}, returned data missing for {fields_missing_data}"
+                    f"Unable to onboard {ip_address}, returned data missing for {fields_missing_data}"
                 )
             else:
                 if onboarding_device:
                     try:
                         self.add(onboarding_device)
                         if self.job.debug:
-                            self.job.logger.debug(f"Device: {self.device_data[ip_address]['hostname']} loaded.")
+                            self.job.logger.debug(
+                                f"Device: {self.device_data[ip_address]['hostname']} loaded."
+                            )
                     except diffsync.ObjectAlreadyExists:
                         self.job.logger.error(
                             f"Device: {self.device_data[ip_address]['hostname']} has already been loaded! "
@@ -383,7 +427,9 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                 else:
                     self._add_ip_address_to_failed_list(ip_address=ip_address)
                     if self.job.debug:
-                        self.job.logger.debug(f"{ip_address} was added to the failed ip_address list")
+                        self.job.logger.debug(
+                            f"{ip_address} was added to the failed ip_address list"
+                        )
 
     def load(self):
         """Load network data."""

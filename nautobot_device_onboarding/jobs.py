@@ -121,7 +121,7 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
         self.credentials = data["credentials"]
 
         self.logger.info("START: onboarding devices")
-        # allows for itteration without having to spawn multiple jobs
+        # allows for iteration without having to spawn multiple jobs
         # Later refactor to use nautobot-plugin-nornir
         for address in data["ip_address"].replace(" ", "").split(","):
             try:
@@ -132,7 +132,7 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
                 )
                 if not data["continue_on_failure"]:
                     raise OnboardException(
-                        "fail-general - An exception occured and continue on failure was disabled."
+                        "fail-general - An exception occurred and continue on failure was disabled."
                     ) from err
 
     def _onboard(self, address):
