@@ -306,7 +306,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         self.target_adapter = SyncDevicesNautobotAdapter(job=self, sync=self.sync)
         self.target_adapter.load()
 
-    def _convert_sring_to_bool(self, string, header):
+    def _convert_string_to_bool(self, string, header):
         """Given a string of 'true' or 'false' convert to bool."""
         if string.lower() == "true":
             return True
@@ -369,10 +369,10 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                         name=row["platform_name"].strip(),
                     )
 
-                set_mgmgt_only = self._convert_sring_to_bool(
+                set_mgmt_only = self._convert_string_to_bool(
                     string=row["set_mgmt_only"].lower().strip(), header="set_mgmt_only"
                 )
-                update_devices_without_primary_ip = self._convert_sring_to_bool(
+                update_devices_without_primary_ip = self._convert_string_to_bool(
                     string=row["update_devices_without_primary_ip"].lower().strip(),
                     header="update_devices_without_primary_ip",
                 )
@@ -382,7 +382,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 processed_csv_data[row["ip_address_host"]]["namespace"] = namespace
                 processed_csv_data[row["ip_address_host"]]["port"] = int(row["port"].strip())
                 processed_csv_data[row["ip_address_host"]]["timeout"] = int(row["timeout"].strip())
-                processed_csv_data[row["ip_address_host"]]["set_mgmt_only"] = set_mgmgt_only
+                processed_csv_data[row["ip_address_host"]]["set_mgmt_only"] = set_mgmt_only
                 processed_csv_data[row["ip_address_host"]]["update_devices_without_primary_ip"] = (
                     update_devices_without_primary_ip
                 )
