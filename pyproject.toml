@@ -18,10 +18,11 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8,<3.12"
+# Used for local development
+nautobot = "^1.6.0"
 napalm = ">=2.5.0, <5"
 zipp = "^3.4.0"
-nautobot = "^1.4.0"
 
 [tool.poetry.dev-dependencies]
 bandit = "*"
@@ -43,7 +44,7 @@ mkdocs = "1.6.0"
 # Material for MkDocs theme
 mkdocs-material = "9.5.32"
 # Render custom markdown for version added/changed/remove notes
-mkdocs-version-annotations = "1.0.0"
+mkdocs-version-annotations = "1.0.1"
 # Automatic documentation from sources, for MkDocs
 mkdocstrings = "0.25.2"
 mkdocstrings-python = "1.10.8"
