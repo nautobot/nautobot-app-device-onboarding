@@ -3,6 +3,8 @@
 from netmiko import SSHDetect
 from nornir.core.inventory import ConnectionOptions, Host
 
+from nautobot_device_onboarding.constants import NETMIKO_EXTRAS
+
 
 def guess_netmiko_device_type(hostname, username, password, port):
     """Guess the device type of host, based on Netmiko."""
@@ -50,7 +52,7 @@ def _set_inventory(host_ip, platform, port, username, password):
                 username=username,
                 password=password,
                 platform=platform,
-                extras={"read_timeout_override": 30, "fast_cli": False},
+                extras=NETMIKO_EXTRAS,
             )
         },
     )

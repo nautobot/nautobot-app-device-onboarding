@@ -3,6 +3,13 @@
 from django.conf import settings
 from nautobot.dcim.utils import get_all_network_driver_mappings
 
+NETMIKO_EXTRAS = (
+    settings.PLUGINS_CONFIG.get("nautobot_plugin_nornir", {})
+    .get("connection_options", {})
+    .get("netmiko", {})
+    .get("extras", {})
+)
+
 PLUGIN_CFG = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
 # This mapping is only used for the original onboarding job.
