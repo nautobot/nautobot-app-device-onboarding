@@ -7,7 +7,7 @@ This document describes common use-cases and scenarios for this App utilizing th
 This App can be used in three general ways.
 
 1. Onboard a device with basic information. (Name, Serial, Device Type, Management IP + Interface)
-2. Take existing devices and enhace the data for each device by syncing in more metadata. (Interface, VLANs, VRFs, Cabling, etc.)
+2. Take existing devices and enhance the data for each device by syncing in more metadata. (Interface, VLANs, VRFs, Cabling, etc.)
 3. Both 1 and 2 in conjunction with each other.
 
 ### Preparation
@@ -76,6 +76,12 @@ During a successful onboarding process, a new device will be created in Nautobot
 
 This SSoT job supports a bulk CSV execution option to speed up this process.
 
+### Example CSV 
+```
+ip_address_host,location_name,device_role_name,namespace,device_status_name,interface_status_name,ip_address_status_name,secrets_group_name,platform_name,set_mgmt_only,update_devices_without_primary_ip,
+192.168.1.1,"Test Site",Onboarding,Global,Active,Active,Active,"test secret group",,False,True
+```
+
 ### Consult the Status of the Sync Network Devices SSoT Job
 
 The status of onboarding jobs can be viewed via the UI (Jobs > Job Results) or retrieved via API (`/api/extras/job-results/`) with each process corresponding to an individual Job-Result object.
@@ -84,8 +90,7 @@ The status of onboarding jobs can be viewed via the UI (Jobs > Job Results) or r
 
 To run the SSoT Sync Devices Job via the api:
 
-
-Post to `/api/extras/jobs/SSOTSyncDevices/run/` with the relevent onboarding data: 
+Post to `/api/extras/jobs/SSOTSyncDevices/run/` with the relevant onboarding data: 
 
 ```bash
 curl -X "POST" <nautobot URL>/api/extras/jobs/SSOTSyncDevices/run/ -H "Content-Type: application/json" -H "Authorization: Token $NAUTOBOT_TOKEN" -d '{"data": {"location": "<valid location UUID>", "ip_address": "<reachable IP to onboard>", "port": 22, "timeout": 30}}
@@ -108,7 +113,7 @@ Optional Fields:
 
 ### Enhance Existing Device
 
-A existing devices data can be expanded to include additional objects by:
+An existing device's data can be expanded to include additional objects by:
 
 - A SSoT job execution.
     - Via Jobs menu
@@ -128,8 +133,7 @@ The status of onboarding jobs can be viewed via the UI (Jobs > Job Results) or r
 
 To run the SSoT Sync Network Data Job via the api:
 
-
-Post to `/api/extras/jobs/SSOTSyncNetworkData/run/` with the relevent onboarding data: 
+Post to `/api/extras/jobs/SSOTSyncNetworkData/run/` with the relevant onboarding data: 
 
 ```bash
 curl -X "POST" <nautobot URL>/api/extras/jobs/SSOTSyncNetworkData/run/ -H "Content-Type: application/json" -H "Authorization: Token $NAUTOBOT_TOKEN" -d '{"data": {"devices": "<valid devices UUID>"}
