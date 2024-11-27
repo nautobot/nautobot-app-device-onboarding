@@ -1,0 +1,4 @@
+Fixed typos in function names, comments, and errors.
+Updated documentation to include an example CSV for bulk onboarding.
+Updated documentation to make yaml override placement and git repository more clear.
+Added a homepage to the app config.
