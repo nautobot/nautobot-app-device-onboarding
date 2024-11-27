@@ -145,6 +145,28 @@ Required Fields:
 
 ## Using Git(Datasources) to Override the Apps Defaults
 
+### YAML Overrides
+
 By utilizing the Nautobot core feature `Datasource` the command mappers, jpaths, post_processors for each platform can be overridden. This also gives an easy way for a user to add platform support without having to get those fixes directly upstreamed into this application.
 
 The format of these YAML files are and how to extend this application is covered in [App YAML Overrides](./app_yaml_overrides.md).
+
+
+### Parser Templates
+
+As this App continues to mature, support has been added to support `TTP`; with this addition the ability to add and/or override templates was required. This follows a similar pattern to the YAML overrides.
+
+!!! info
+    To avoid overly complicating the merge logic, the App will always prefer the template files loaded in from the git repository.
+
+File structure:
+```bash
+.
+├── README.md
+└── onboarding_command_mappers
+    └── parsers
+        └── ttp
+            └── <network_driver>_<command seperated by underscores>.ttp
+```
+
+When loading from a Git Repository this App is expecting a root directory called `onboarding_command_mappers`. Parser files should be located in a `parsers` directory followed by one additional directory; e.g., `ttp`. The template file names must be named `<network_driver>_<command_seperated_by_underscores>.ttp`.

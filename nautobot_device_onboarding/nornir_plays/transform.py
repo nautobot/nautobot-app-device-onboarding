@@ -22,6 +22,7 @@ def get_git_repo():
         return repository_record
     return None
 
+
 def add_platform_parsing_info():
     """Merges platform command mapper from repo or defaults."""
     repository_record = get_git_repo()
@@ -48,11 +49,14 @@ def load_command_mappers_from_dir(command_mappers_path):
 
 
 def load_files_with_precedence(filesystem_dir, parser_type):
+    """Utility to load files from filesystem and git repo with precedence."""
     file_paths = {}
     git_repo_dir = None
     repository_record = get_git_repo()
     if repository_record:
-        git_repo_dir = os.path.join(repository_record.filesystem_path, "onboarding_command_mappers", "parsers", parser_type)
+        git_repo_dir = os.path.join(
+            repository_record.filesystem_path, "onboarding_command_mappers", "parsers", parser_type
+        )
         # List files in the first directory and add to the dictionary
         if os.path.isdir(git_repo_dir):
             for file_name in os.listdir(git_repo_dir):

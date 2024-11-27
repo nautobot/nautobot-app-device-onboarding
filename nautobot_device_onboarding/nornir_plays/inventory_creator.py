@@ -50,10 +50,7 @@ def _set_inventory(host_ip, platform, port, username, password):
                 username=username,
                 password=password,
                 platform=platform,
-                extras={
-                    "read_timeout_override": 30,
-                    "fast_cli": False
-                }
+                extras={"read_timeout_override": 30, "fast_cli": False},
             )
         },
     )

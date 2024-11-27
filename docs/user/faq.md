@@ -49,7 +49,7 @@ Optional arguments are often used to define a `secret` for Cisco devices and oth
 
 ## Does this app support the discovery and the creation of all interfaces and IP Addresses?
 
-**Yes**. The original Deivce Onboarding job/SSot Sync Devices will only discover and create the management interface and the management IP address. Importing all interfaces and IP addresses is available from the SSoT job (Sync Network Data).
+**Yes**. The original Device Onboarding job/SSot Sync Devices will only discover and create the management interface and the management IP address. Importing all interfaces and IP addresses is available from the SSoT job (Sync Network Data).
 
 ## Does this app support the discovery of device based on fqdn?
 
