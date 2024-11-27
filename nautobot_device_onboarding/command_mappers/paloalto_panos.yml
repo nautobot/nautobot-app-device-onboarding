@@ -1,0 +1,33 @@
+---
+sync_devices:
+  hostname:
+    commands:
+      - command: "show system info"
+        parser: "ttp"
+        jpath: "[*].hostname"
+        post_processor: "{{ obj[0] }}"
+  serial:
+    commands:
+      - command: "show system info"
+        parser: "ttp"
+        jpath: "[*].serial"
+        post_processor: "{{ obj[0] }}"
+  device_type:
+    commands:
+      - command: "show system info"
+        parser: "ttp"
+        jpath: "[*].model"
+        post_processor: "{{ obj[0] }}"
+  mgmt_interface:
+    commands:
+      - command: "show interface management | match Name"
+        parser: "raw"
+        jpath: "raw"
+        post_processor: "{{ obj.split('Name: ')[1] }}"
+  mask_length:
+    commands:
+      - command: "show system info"
+        parser: "ttp"
+        jpath: "[*].netmask"
+        post_processor: "{{ obj[0] | netmask_to_cidr }}"
+        iterable_type: "int"

@@ -1,0 +1,4 @@
+Added TTP Parser support.
+Added ability to load TTP templates from Git Repository.
+Added TTP template precedence loading from Git Repository.
+Added Sync Device from Network support for Palo Alto Panos.

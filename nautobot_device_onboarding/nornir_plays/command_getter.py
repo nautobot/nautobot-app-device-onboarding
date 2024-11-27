@@ -1,6 +1,6 @@
 """CommandGetter."""
-
 import json
+import os
 from typing import Dict
 
 from django.conf import settings
@@ -8,6 +8,12 @@ from nautobot.dcim.models import Platform
 from nautobot.dcim.utils import get_all_network_driver_mappings
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import SecretsGroup
+from nautobot_device_onboarding.constants import SUPPORTED_COMMAND_PARSERS, SUPPORTED_NETWORK_DRIVERS
+from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
+from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
+from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
+from nautobot_device_onboarding.nornir_plays.processor import CommandGetterProcessor
+from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info, load_files_with_precedence
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
 from nornir import InitNornir
@@ -16,13 +22,9 @@ from nornir.core.plugins.inventory import InventoryPluginRegister
 from nornir.core.task import Result, Task
 from nornir_netmiko.tasks import netmiko_send_command
 from ntc_templates.parse import parse_output
+from ttp import ttp
 
-from nautobot_device_onboarding.constants import SUPPORTED_COMMAND_PARSERS, SUPPORTED_NETWORK_DRIVERS
-from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
-from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
-from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
-from nautobot_device_onboarding.nornir_plays.processor import CommandGetterProcessor
-from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info
+PARSER_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "parsers"))
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
@@ -153,6 +155,24 @@ def netmiko_send_commands(
                                 task.results[result_idx].result = parsed_output
                                 task.results[result_idx].failed = False
                             except Exception:  # https://github.com/networktocode/ntc-templates/issues/369
+                                task.results[result_idx].result = []
+                                task.results[result_idx].failed = False
+                        if command["parser"] == "ttp":
+                            try:
+                                # Parsing ttp ourselves instead of using netmikos use_<parser> function to be able to handle exceptions
+                                # ourselves.
+                                ttp_template_files = load_files_with_precedence(filesystem_dir=f"{PARSER_DIR}/ttp", parser_type="ttp")
+                                print(ttp_template_files)
+                                template_name = f"{task.host.platform}_{command['command'].replace(' ', '_')}.ttp"
+                                parser = ttp(
+                                    data=current_result.result,
+                                    template=ttp_template_files[template_name],
+                                )
+                                parser.parse()
+                                parsed_result = parser.result(format='json')[0]
+                                task.results[result_idx].result = json.loads(json.dumps(parsed_result))
+                                task.results[result_idx].failed = False
+                            except Exception:
                                 task.results[result_idx].result = []
                                 task.results[result_idx].failed = False
             else:
