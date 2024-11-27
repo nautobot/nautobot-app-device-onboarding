@@ -173,7 +173,8 @@ def netmiko_send_commands(
                                 )
                                 parser.parse()
                                 parsed_result = parser.result(format="json")[0]
-                                task.results[result_idx].result = json.loads(json.dumps(parsed_result))
+                                # task.results[result_idx].result = json.loads(json.dumps(parsed_result))
+                                task.results[result_idx].result = json.loads(parsed_result)
                                 task.results[result_idx].failed = False
                             except Exception:
                                 task.results[result_idx].result = []
