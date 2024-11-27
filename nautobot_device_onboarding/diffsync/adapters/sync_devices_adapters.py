@@ -224,7 +224,7 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
             self.job.logger.debug(f"Command Getter Result: {result}")
         data_type_check = diffsync_utils.check_data_type(result)
         if self.job.debug:
-            self.job.logger.debug(f"CommandGetter data type check resut: {data_type_check}")
+            self.job.logger.debug(f"CommandGetter data type check result: {data_type_check}")
         if data_type_check:
             self._handle_failed_devices(device_data=result)
         else:
@@ -232,7 +232,7 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                 "Data returned from CommandGetter is not the correct type. "
                 "No devices will be onboarded, check the CommandGetter job logs."
             )
-            raise ValidationError("Unexpected data returend from CommandGetter.")
+            raise ValidationError("Unexpected data returned from CommandGetter.")
 
     def _add_ip_address_to_failed_list(self, ip_address):
         """If an a model fails to load, add the ip address to the failed list for logging."""
@@ -329,7 +329,7 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
         for ip_address in self.device_data:
             if self.job.debug:
                 self.job.logger.debug(f"loading device data for {ip_address}")
-            platform = None  # If an excption is caught below, the platform must still be set.
+            platform = None  # If an exception is caught below, the platform must still be set.
             onboarding_device = None
             try:
                 location = diffsync_utils.retrieve_submitted_value(
@@ -385,7 +385,7 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
             if fields_missing_data:
                 onboarding_device = None
                 self.job.logger.error(
-                    f"Unable to onbaord {ip_address}, returned data missing for {fields_missing_data}"
+                    f"Unable to onboard {ip_address}, returned data missing for {fields_missing_data}"
                 )
             else:
                 if onboarding_device:
