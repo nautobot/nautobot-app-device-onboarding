@@ -81,3 +81,25 @@ It's expected that any changes done asynchronously in Nautobot currently (within
 - Several assumptions made for Nornir inventory that would be different in all other Nornir inventory jobs.
 - An inventory created for each device.
     - Causes additional SQL connections which may benefit from the use of `serial` runner.
+
+## How do I pass in extra connection options into Netmiko for the SSoT based jobs?
+
+Device Onboarding 4.0 uses Netmiko as the automation engine that queries the devices for information; more specifically, nornir-netmiko. To extend the device onboarding app to pass `extras` to the connection options the following can be added to `nautobot_plugin_nornir` `PLUGIN_CONFIG`.
+
+```python
+PLUGINS_CONFIG = {
+    "nautobot_device_onboarding": {},
+    "nautobot_plugin_nornir": {
+        "nornir_settings": {
+            "... omitted ..."},
+        "connection_options": {
+            "netmiko": {
+                "extras": {  # <==== passed into the connection setup.
+                    "fast_cli": False,
+                    "read_timeout_override": 30,
+                },
+            },
+        },
+    },
+}
+```
