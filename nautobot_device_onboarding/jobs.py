@@ -262,6 +262,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
 
         name = "Sync Devices From Network"
         description = "Synchronize basic device information into Nautobot from one or more network devices. Information includes Device Name, Serial Number, Management IP/Interface."
+        has_sensitive_variables = False
 
     debug = BooleanVar(
         default=False,
@@ -570,6 +571,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
 
         name = "Sync Network Data From Network"
         description = "Synchronize extended device attribute information into Nautobot from one or more network devices. Information includes Interfaces, IP Addresses, Prefixes, VLANs and VRFs."
+        has_sensitive_variables = False
 
     debug = BooleanVar(description="Enable for more verbose logging.")
     sync_vlans = BooleanVar(default=False, description="Sync VLANs and interface VLAN assignments.")

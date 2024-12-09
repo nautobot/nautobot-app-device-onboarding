@@ -1,5 +1,4 @@
 """CommandGetter."""
-import traceback
 import json
 from typing import Dict
 from netutils.ping import tcp_ping
@@ -127,7 +126,7 @@ def netmiko_send_commands(
             f"{task.host.platform} has missing definitions for cables in command_mapper YAML file. Cables will not be loaded."
         )
 
-    logger.debug(f"Commands to run: {commands}")
+    logger.debug(f"Commands to run: {[cmd['command'] for cmd in commands]}")
     # All commands in this for loop are running within 1 device connection.
     for result_idx, command in enumerate(commands):
         send_command_kwargs = {}
@@ -172,6 +171,12 @@ def netmiko_send_commands(
                     except Exception:
                         task.result.failed = False
         except NornirSubTaskError:
+            # These exceptions indicate that the device is unreachable or the credentials are incorrect.
+            # We should fail the task early to avoid trying all commands on a device that is unreachable.
+            if type(task.results[result_idx].exception).__name__ == "NetmikoAuthenticationException":
+                return Result(host=task.host, result=f"{task.host.name} failed authentication.", failed=True)
+            if type(task.results[result_idx].exception).__name__ == "NetmikoTimeoutException":
+                return Result(host=task.host, result=f"{task.host.name} SSH Timeout Occured.", failed=True)
             # We don't want to fail the entire subtask if SubTaskError is hit, set result to empty list and failed to False
             # Handle this type or result latter in the ETL process.
             task.results[result_idx].result = []
@@ -280,7 +285,6 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                 **kwargs,
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
-        traceback.print_exc()
         logger.info(f"Error During Sync Devices Command Getter: {err}")
     return compiled_results
 
