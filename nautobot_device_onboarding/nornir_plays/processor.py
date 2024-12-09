@@ -59,7 +59,7 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         if not self.data[host.name].get("failed"):
             for res in result[1:]:
                 parsed_command_outputs[res.name] = res.result
-            
+
             ready_for_ssot_data = extract_show_data(
                 host, parsed_command_outputs, task.params["command_getter_job"], self.kwargs["debug"]
             )

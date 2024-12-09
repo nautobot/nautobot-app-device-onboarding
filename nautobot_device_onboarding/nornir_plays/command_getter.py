@@ -1,7 +1,7 @@
 """CommandGetter."""
 import json
 from typing import Dict
-from netutils.ping import tcp_ping
+
 from django.conf import settings
 from nautobot.dcim.models import Platform
 from nautobot.dcim.utils import get_all_network_driver_mappings
@@ -9,6 +9,7 @@ from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupS
 from nautobot.extras.models import SecretsGroup
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
+from netutils.ping import tcp_ping
 from nornir import InitNornir
 from nornir.core.exceptions import NornirSubTaskError
 from nornir.core.plugins.inventory import InventoryPluginRegister
