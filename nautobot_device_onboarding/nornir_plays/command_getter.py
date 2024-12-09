@@ -1,4 +1,5 @@
 """CommandGetter."""
+
 import json
 from typing import Dict
 
@@ -109,9 +110,7 @@ def netmiko_send_commands(
             host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True
         )
     if not tcp_ping(task.host.hostname, task.host.port):
-        return Result(
-            host=task.host, result=f"{task.host.name} failed connectivity check via tcp_ping.", failed=True
-        )
+        return Result(host=task.host, result=f"{task.host.name} failed connectivity check via tcp_ping.", failed=True)
     task.host.data["platform_parsing_info"] = command_getter_yaml_data[task.host.platform]
     commands = _get_commands_to_run(
         command_getter_yaml_data[task.host.platform][command_getter_job],
