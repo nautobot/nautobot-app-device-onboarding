@@ -1,8 +1,8 @@
 """CommandGetter."""
-
+import traceback
 import json
 from typing import Dict
-
+from netutils.ping import tcp_ping
 from django.conf import settings
 from nautobot.dcim.models import Platform
 from nautobot.dcim.utils import get_all_network_driver_mappings
@@ -107,6 +107,10 @@ def netmiko_send_commands(
     if not command_getter_yaml_data[task.host.platform].get(command_getter_job):
         return Result(
             host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True
+        )
+    if not tcp_ping(task.host.hostname, task.host.port):
+        return Result(
+            host=task.host, result=f"{task.host.name} failed connectivity check via tcp_ping.", failed=True
         )
     task.host.data["platform_parsing_info"] = command_getter_yaml_data[task.host.platform]
     commands = _get_commands_to_run(
@@ -276,6 +280,7 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                 **kwargs,
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
+        traceback.print_exc()
         logger.info(f"Error During Sync Devices Command Getter: {err}")
     return compiled_results
 

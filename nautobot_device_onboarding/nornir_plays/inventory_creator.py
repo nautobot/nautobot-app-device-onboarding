@@ -10,7 +10,7 @@ def guess_netmiko_device_type(hostname, username, password, port):
     guessed_device_type = None
 
     remote_device = {
-        "device_type": "autodetect",
+        "device_type": "autodetect", 
         "host": hostname,
         "username": username,
         "password": password,
