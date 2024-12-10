@@ -1,0 +1,1 @@
+- Fixed Timeout and Authenticaiton failure detection to base netmiko_send_commands task.

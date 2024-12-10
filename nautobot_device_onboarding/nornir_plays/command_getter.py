@@ -11,6 +11,7 @@ from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupS
 from nautobot.extras.models import SecretsGroup
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
+from netutils.ping import tcp_ping
 from nornir import InitNornir
 from nornir.core.exceptions import NornirSubTaskError
 from nornir.core.plugins.inventory import InventoryPluginRegister
@@ -112,6 +113,11 @@ def netmiko_send_commands(
         return Result(
             host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True
         )
+    if orig_job_kwargs["connectivity_test"]:
+        if not tcp_ping(task.host.hostname, task.host.port):
+            return Result(
+                host=task.host, result=f"{task.host.name} failed connectivity check via tcp_ping.", failed=True
+            )
     task.host.data["platform_parsing_info"] = command_getter_yaml_data[task.host.platform]
     commands = _get_commands_to_run(
         command_getter_yaml_data[task.host.platform][command_getter_job],
@@ -127,7 +133,7 @@ def netmiko_send_commands(
             f"{task.host.platform} has missing definitions for cables in command_mapper YAML file. Cables will not be loaded."
         )
 
-    logger.debug(f"Commands to run: {commands}")
+    logger.debug(f"Commands to run: {[cmd['command'] for cmd in commands]}")
     # All commands in this for loop are running within 1 device connection.
     for result_idx, command in enumerate(commands):
         send_command_kwargs = {}
@@ -192,6 +198,12 @@ def netmiko_send_commands(
                     except Exception:
                         task.result.failed = False
         except NornirSubTaskError:
+            # These exceptions indicate that the device is unreachable or the credentials are incorrect.
+            # We should fail the task early to avoid trying all commands on a device that is unreachable.
+            if type(task.results[result_idx].exception).__name__ == "NetmikoAuthenticationException":
+                return Result(host=task.host, result=f"{task.host.name} failed authentication.", failed=True)
+            if type(task.results[result_idx].exception).__name__ == "NetmikoTimeoutException":
+                return Result(host=task.host, result=f"{task.host.name} SSH Timeout Occured.", failed=True)
             # We don't want to fail the entire subtask if SubTaskError is hit, set result to empty list and failed to False
             # Handle this type or result latter in the ETL process.
             task.results[result_idx].result = []

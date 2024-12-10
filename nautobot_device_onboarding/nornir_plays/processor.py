@@ -47,43 +47,44 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         )
         # If any main task resulted in a failed:True then add that key so ssot side can ignore that entry.
         if result[0].failed:
-            if task.params["command_getter_job"] == "sync_devices":
-                self.logger.info(
-                    f"{host.name} has no platform set. Removing it from the sync process.",
-                    extra={"object": host.name},
-                )
+            self.logger.info(
+                f"Netmiko Send Commands failed on {host.name} with result: {result[0].result}",
+                extra={"object": host.name},
+            )
+            if "has no platform set" in result[0].result:
                 del self.data[host.name]
             else:
                 self.data[host.name].update({"failed": True})
         # [1:] because result 1 is the (network_send_commands ) task which runs all the subtask, it has no result.
-        for res in result[1:]:
-            parsed_command_outputs[res.name] = res.result
+        if not self.data[host.name].get("failed"):
+            for res in result[1:]:
+                parsed_command_outputs[res.name] = res.result
 
-        ready_for_ssot_data = extract_show_data(
-            host, parsed_command_outputs, task.params["command_getter_job"], self.kwargs["debug"]
-        )
-        if task.params["command_getter_job"] == "sync_devices":
-            try:
-                validate(ready_for_ssot_data, NETWORK_DEVICES_SCHEMA)
-            except ValidationError as e:
-                if self.kwargs["debug"]:
-                    self.logger.debug(f"Schema validation failed for {host.name}. Error: {e}.")
-                self.data[host.name] = {"failed": True, "failed_reason": "Schema validation failed."}
-            else:
-                if self.kwargs["debug"]:
-                    self.logger.debug(f"Ready for ssot data: {host.name} {ready_for_ssot_data}")
-                self.data[host.name].update(ready_for_ssot_data)
-        elif task.params["command_getter_job"] == "sync_network_data":
-            try:
-                validate(ready_for_ssot_data, NETWORK_DATA_SCHEMA)
-            except ValidationError as err:
-                if self.kwargs["debug"]:
-                    self.logger.debug(f"Schema validation failed for {host.name} Error: {err}")
-                self.data[host.name] = {"failed": True, "failed_reason": "Schema validation failed."}
-            else:
-                if self.kwargs["debug"]:
-                    self.logger.debug(f"Ready for ssot data: {host.name} {ready_for_ssot_data}")
-                self.data[host.name].update(ready_for_ssot_data)
+            ready_for_ssot_data = extract_show_data(
+                host, parsed_command_outputs, task.params["command_getter_job"], self.kwargs["debug"]
+            )
+            if task.params["command_getter_job"] == "sync_devices":
+                try:
+                    validate(ready_for_ssot_data, NETWORK_DEVICES_SCHEMA)
+                except ValidationError as e:
+                    if self.kwargs["debug"]:
+                        self.logger.debug(f"Schema validation failed for {host.name}. Error: {e}.")
+                    self.data[host.name] = {"failed": True, "failed_reason": "Schema validation failed."}
+                else:
+                    if self.kwargs["debug"]:
+                        self.logger.debug(f"Ready for ssot data: {host.name} {ready_for_ssot_data}")
+                    self.data[host.name].update(ready_for_ssot_data)
+            elif task.params["command_getter_job"] == "sync_network_data":
+                try:
+                    validate(ready_for_ssot_data, NETWORK_DATA_SCHEMA)
+                except ValidationError as err:
+                    if self.kwargs["debug"]:
+                        self.logger.debug(f"Schema validation failed for {host.name} Error: {err}")
+                    self.data[host.name] = {"failed": True, "failed_reason": "Schema validation failed."}
+                else:
+                    if self.kwargs["debug"]:
+                        self.logger.debug(f"Ready for ssot data: {host.name} {ready_for_ssot_data}")
+                    self.data[host.name].update(ready_for_ssot_data)
 
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Processor for logging and data processing on subtask completed."""

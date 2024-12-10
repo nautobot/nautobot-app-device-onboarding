@@ -28,6 +28,7 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
 
         job_form_inputs = {
             "debug": True,
+            "connectivity_test": False,
             "dryrun": False,
             "csv_file": None,
             "location": self.testing_objects["location"].pk,
@@ -75,6 +76,7 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
 
         job_form_inputs = {
             "debug": True,
+            "connectivity_test": False,
             "dryrun": False,
             "csv_file": None,
             "location": self.testing_objects["location"].pk,
@@ -117,6 +119,7 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
 
         job_form_inputs = {
             "debug": True,
+            "connectivity_test": False,
             "dryrun": False,
             "csv_file": None,
             "location": self.testing_objects["location"].pk,
