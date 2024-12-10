@@ -3,6 +3,13 @@
 from django.conf import settings
 from nautobot.dcim.utils import get_all_network_driver_mappings
 
+NETMIKO_EXTRAS = (
+    settings.PLUGINS_CONFIG.get("nautobot_plugin_nornir", {})
+    .get("connection_options", {})
+    .get("netmiko", {})
+    .get("extras", {})
+)
+
 PLUGIN_CFG = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
 # This mapping is only used for the original onboarding job.
@@ -19,9 +26,8 @@ NETMIKO_TO_NAPALM_STATIC = {
 # This is used in the new SSoT based jobs.
 SUPPORTED_NETWORK_DRIVERS = list(get_all_network_driver_mappings().keys())
 
-# This is used in the new SSoT based jobs. Soon TPP, PYATS should be supported.
-# SUPPORTED_COMMAND_PARSERS = ["textfsm", "ttp", "pyats"]
-SUPPORTED_COMMAND_PARSERS = ["textfsm"]
+# This is used in the new SSoT based jobs. Soon PYATS should be supported.
+SUPPORTED_COMMAND_PARSERS = ["textfsm", "ttp"]
 
 # This should potentially be removed and used nautobot core directly choices.
 # from nautobot.dcim.choices import InterfaceTypeChoices
