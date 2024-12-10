@@ -49,6 +49,14 @@ The new SSoT based jobs each use their own Nornir inventories.
                 },
             },
         },
+        "connection_options": {
+            "netmiko": {
+                "extras": {  # <==== passed into the connection setup.
+                    "fast_cli": False,
+                    "read_timeout_override": 30,
+                },
+            },
+        },
     },
 ```
 !!! info

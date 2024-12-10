@@ -21,9 +21,10 @@ To learn how to extend the app, or update its default YAML definitions visit [Ex
     - Other required fields are selected in the job inputs form.
 
 2. The SSoT framework loads the Nautobot adapter information.
-3. The SSoT frameworks network adapter `load()` method calls nornir functionality.
+3. The SSoT frameworks network adapter `load()` method calls Nornir functionality.
     - The job inputs data is passed to the InitNornir initializer, because we only have basic information a custom `EmptyInventory` Nornir inventory plugin is packaged with the App. This get initialized in the `InitNornir` function, but actually initializes a true inventory that is empty.
     - Since `Platform` information may need to be auto-detected before adding a Nornir `Host` object to the inventory, a `create_inventory` function is executed that uses the SSH-Autodetect via Netmiko to try to determine the platform so it can be injected into the `Host` object.
+    - Load in the `PLUGIN_CONFIG` to see if extra connection options need to be added to the `Host` connection_option definition.
     - Finally, all the platform specific commands to run, along with all the jpath, `post_processor` information loaded from the platform specific YAML files must be injected into the Nornir data object to be accessible later in the extract, transform functions.
 4. Within the context of a Nornir `with_processor` context manager call the `netmiko_send_commands` Nornir task.
     - Access the loaded platform specific YAML data and deduplicate commands to avoid running the same command multiple times. E.g. Multiple required data attributes come from the same show command.

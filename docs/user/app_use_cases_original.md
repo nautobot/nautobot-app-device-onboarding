@@ -125,7 +125,7 @@ The status of onboarding jobs can be viewed via the UI (Jobs > Job Results) or r
 To run an onboarding task Job via the api:
 
 
-Post to `/api/extras/jobs/Perform%20Device%20Onboarding/run/` with the relevent onboarding data: 
+Post to `/api/extras/jobs/Perform%20Device%20Onboarding/run/` with the relevant onboarding data: 
 
 ```bash
 curl -X "POST" <nautobot URL>/api/extras/jobs/Perform%20Device%20Onboarding/run/ -H "Content-Type: application/json" -H "Authorization: Token $NAUTOBOT_TOKEN" -d '{"data": {"location": "<valid location UUID>", "ip_address": "<reachable IP to onboard>", "port": 22, "timeout": 30}}

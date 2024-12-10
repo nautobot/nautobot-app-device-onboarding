@@ -55,6 +55,29 @@ The Onboarding App will automatically create Platforms for vendor operating syst
 ![cisco_ios_platform](../images/platform_cisco_ios.png)
 ![juniper_junos_platform](../images/platform_juniper_junos.png)
 
+### Passing Custom Nornir Connection Options
+
+Device Onboarding 4.0 uses Netmiko as the automation engine that queries the devices for information; more specifically, nornir-netmiko. To extend the device onboarding app to pass `extras` to the connection options the following can be added to `nautobot_plugin_nornir` `PLUGIN_CONFIG`.
+
+```python
+PLUGINS_CONFIG = {
+    "nautobot_device_onboarding": {},
+    "nautobot_plugin_nornir": {
+        "nornir_settings": {
+            "... omitted ..."},
+        "connection_options": {
+            "netmiko": {
+                "extras": {  # <==== passed into the connection setup.
+                    "fast_cli": False,
+                    "read_timeout_override": 30,
+                },
+            },
+        },
+    },
+}
+```
+
+When the on-demand inventory is created for the `Sync Device from Network` job, the extras in the `netmiko` connection dictionary are added to the connection setup.
 
 # Use-cases and common workflows
 
@@ -145,6 +168,28 @@ Required Fields:
 
 ## Using Git(Datasources) to Override the Apps Defaults
 
+### YAML Overrides
+
 By utilizing the Nautobot core feature `Datasource` the command mappers, jpaths, post_processors for each platform can be overridden. This also gives an easy way for a user to add platform support without having to get those fixes directly upstreamed into this application.
 
 The format of these YAML files are and how to extend this application is covered in [App YAML Overrides](./app_yaml_overrides.md).
+
+
+### Parser Templates
+
+As this App continues to mature, support has been added to support `TTP`; with this addition the ability to add and/or override templates was required. This follows a similar pattern to the YAML overrides.
+
+!!! info
+    To avoid overly complicating the merge logic, the App will always prefer the template files loaded in from the git repository.
+
+File structure:
+```bash
+.
+├── README.md
+└── onboarding_command_mappers
+    └── parsers
+        └── ttp
+            └── <network_driver>_<command seperated by underscores>.ttp
+```
+
+When loading from a Git Repository this App is expecting a root directory called `onboarding_command_mappers`. Parser files should be located in a `parsers` directory followed by one additional directory; e.g., `ttp`. The template file names must be named `<network_driver>_<command_seperated_by_underscores>.ttp`.

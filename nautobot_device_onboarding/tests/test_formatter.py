@@ -16,6 +16,7 @@ from nautobot_device_onboarding.nornir_plays.formatter import (
 from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info
 
 MOCK_DIR = os.path.join("nautobot_device_onboarding", "tests", "mock")
+SYNC_DEVICES_ONLY = ["cisco_wlc", "hp_comware", "paloalto_panos"]
 
 
 def find_files_by_prefix(directory, prefix):
@@ -435,6 +436,7 @@ class TestFormatterSyncDevices(unittest.TestCase):
             "juniper_junos",
             "cisco_nxos",
             "hp_comware",
+            "paloalto_panos",
         ]
         self.assertEqual(sorted(default_mappers), list(sorted(self.platform_parsing_info.keys())))
 
@@ -517,8 +519,8 @@ class TestFormatterSyncNetworkDataNoOptions(unittest.TestCase):
 
     def test_perform_data_extraction_sync_network_data_no_options(self):
         supported_platforms = list(self.platform_parsing_info.keys())
-        supported_platforms.remove("cisco_wlc")
-        supported_platforms.remove("hp_comware")
+        for sync_only in SYNC_DEVICES_ONLY:
+            supported_platforms.remove(sync_only)
         for platform in supported_platforms:
             self.host.platform = platform
             current_test_dir = f"{MOCK_DIR}/{platform}/"
@@ -585,8 +587,8 @@ class TestFormatterSyncNetworkDataWithVrfs(unittest.TestCase):
 
     def test_perform_data_extraction_sync_network_data_with_vrfs(self):
         supported_platforms = list(self.platform_parsing_info.keys())
-        supported_platforms.remove("cisco_wlc")
-        supported_platforms.remove("hp_comware")
+        for sync_only in SYNC_DEVICES_ONLY:
+            supported_platforms.remove(sync_only)
         for platform in supported_platforms:
             self.host.platform = platform
             current_test_dir = f"{MOCK_DIR}/{platform}/"
@@ -653,8 +655,8 @@ class TestFormatterSyncNetworkDataWithVlans(unittest.TestCase):
 
     def test_perform_data_extraction_sync_network_data_with_vlans(self):
         supported_platforms = list(self.platform_parsing_info.keys())
-        supported_platforms.remove("cisco_wlc")
-        supported_platforms.remove("hp_comware")
+        for sync_only in SYNC_DEVICES_ONLY:
+            supported_platforms.remove(sync_only)
         for platform in supported_platforms:
             self.host.platform = platform
             current_test_dir = f"{MOCK_DIR}/{platform}/"
@@ -722,8 +724,8 @@ class TestFormatterSyncNetworkDataAll(unittest.TestCase):
 
     def test_perform_data_extraction_sync_network_data_all(self):
         supported_platforms = list(self.platform_parsing_info.keys())
-        supported_platforms.remove("cisco_wlc")
-        supported_platforms.remove("hp_comware")
+        for sync_only in SYNC_DEVICES_ONLY:
+            supported_platforms.remove(sync_only)
         for platform in supported_platforms:
             self.host.platform = platform
             current_test_dir = f"{MOCK_DIR}/{platform}/"

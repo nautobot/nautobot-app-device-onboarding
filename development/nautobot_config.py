@@ -147,5 +147,13 @@ PLUGINS_CONFIG = {
                 },
             },
         },
+        "connection_options": {
+            "netmiko": {
+                "extras": {
+                    "fast_cli": False,
+                    "read_timeout_override": 30,
+                },
+            },
+        },
     },
 }

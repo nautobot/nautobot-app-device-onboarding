@@ -15,9 +15,9 @@ This App provides sane defaults that have been tested, the command mapper files 
 The YAML file names must be named `<network_driver>.yml`.  Where network_driver must exist in the netutils mapping exposed from Nautobot core.
 
 ## File Placement
-The override files can either be placed directly into the python plugin command mappers directory (by default: `/opt/nautobot/lib64/python<python version>/site-packages/nautobot_device_onboarding/command_mappers/`) or by using a Git Data Source.
+The override files can either be placed directly into the python plugin command mappers directory (by default: `/opt/nautobot/lib64/python<python version>/site-packages/nautobot_device_onboarding/command_mappers/`) or by using a Git Datasources.
 
-### Git Data Source
+### Git Datasources
 
 File structure:
 ```bash

@@ -1,0 +1,14 @@
+{
+    "show system info": [
+        {
+            "hostname": "pa-220-2",
+            "ip_address": "10.1.100.73",
+            "model": "PA-220",
+            "netmask": "255.255.255.0",
+            "serial": "012801187338"
+        }
+    ],
+    "show interface management | match Name": {
+        "raw": "\nName: Management Interface"
+    }
+}
