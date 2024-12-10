@@ -262,10 +262,15 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
 
         name = "Sync Devices From Network"
         description = "Synchronize basic device information into Nautobot from one or more network devices. Information includes Device Name, Serial Number, Management IP/Interface."
+        has_sensitive_variables = False
 
     debug = BooleanVar(
         default=False,
         description="Enable for more verbose logging.",
+    )
+    connectivity_test = BooleanVar(
+        default=False,
+        description="Enable to test connectivity to the device(s) prior to attempting onboarding.",
     )
     csv_file = FileVar(
         label="CSV File",
@@ -550,6 +555,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 "secrets_group": secrets_group,
                 "platform": platform,
                 "csv_file": "",
+                "connectivity_test": kwargs["connectivity_test"],
             }
         super().run(dryrun, memory_profiling, *args, **kwargs)
 
@@ -570,8 +576,13 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
 
         name = "Sync Network Data From Network"
         description = "Synchronize extended device attribute information into Nautobot from one or more network devices. Information includes Interfaces, IP Addresses, Prefixes, VLANs and VRFs."
+        has_sensitive_variables = False
 
     debug = BooleanVar(description="Enable for more verbose logging.")
+    connectivity_test = BooleanVar(
+        default=False,
+        description="Enable to test connectivity to the device(s) prior to attempting onboarding.",
+    )
     sync_vlans = BooleanVar(default=False, description="Sync VLANs and interface VLAN assignments.")
     sync_vrfs = BooleanVar(default=False, description="Sync VRFs and interface VRF assignments.")
     sync_cables = BooleanVar(default=False, description="Sync cables between interfaces via a LLDP or CDP.")
@@ -731,6 +742,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
             "sync_vlans": sync_vlans,
             "sync_vrfs": sync_vrfs,
             "sync_cables": sync_cables,
+            "connectivity_test": kwargs["connectivity_test"],
         }
 
         super().run(dryrun, memory_profiling, *args, **kwargs)
