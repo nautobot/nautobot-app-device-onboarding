@@ -55,6 +55,29 @@ The Onboarding App will automatically create Platforms for vendor operating syst
 ![cisco_ios_platform](../images/platform_cisco_ios.png)
 ![juniper_junos_platform](../images/platform_juniper_junos.png)
 
+### Passing Custom Nornir Connection Options
+
+Device Onboarding 4.0 uses Netmiko as the automation engine that queries the devices for information; more specifically, nornir-netmiko. To extend the device onboarding app to pass `extras` to the connection options the following can be added to `nautobot_plugin_nornir` `PLUGIN_CONFIG`.
+
+```python
+PLUGINS_CONFIG = {
+    "nautobot_device_onboarding": {},
+    "nautobot_plugin_nornir": {
+        "nornir_settings": {
+            "... omitted ..."},
+        "connection_options": {
+            "netmiko": {
+                "extras": {  # <==== passed into the connection setup.
+                    "fast_cli": False,
+                    "read_timeout_override": 30,
+                },
+            },
+        },
+    },
+}
+```
+
+When the on-demand inventory is created for the `Sync Device from Network` job, the extras in the `netmiko` connection dictionary are added to the connection setup.
 
 # Use-cases and common workflows
 
