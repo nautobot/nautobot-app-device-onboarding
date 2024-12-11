@@ -275,7 +275,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
     csv_file = FileVar(
         label="CSV File",
         required=False,
-        description="If a file is provided all the options below will be ignored.",
+        description="If a file is provided, all the options in the manual input tab will be disabled.",
     )
     location = ObjectVar(
         model=Location,
@@ -336,6 +336,8 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         required=False,
         description="Device platform. Define ONLY to override auto-recognition of platform.",
     )
+
+    template_name = "nautobot_device_onboarding/ssot_sync_devices.html"
 
     def load_source_adapter(self):
         """Load onboarding network adapter."""
