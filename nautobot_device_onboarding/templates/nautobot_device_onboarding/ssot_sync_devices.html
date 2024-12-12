@@ -42,33 +42,35 @@
   {{ block.super }}
   <script>
     const csvInput = document.getElementById('id_csv_file');
-    const manual_required_fields = ["id_location", "id_namespace", "id_ip_addresses", "id_device_role", "id_device_status", "id_interface_status", "id_ip_address_status", "id_port", "id_timeout", "id_secrets_group"]
+    const manualRequiredFields = [
+      "id_location", "id_namespace", "id_ip_addresses", "id_device_role", 
+      "id_device_status", "id_interface_status", "id_ip_address_status", 
+      "id_port", "id_timeout", "id_secrets_group"
+    ];
+
+    function setFieldRequired(field, isRequired) {
+      const element = document.getElementById(field);
+      element.required = isRequired;
+      const label = document.querySelector(`label[for="${field}"]`);
+      if (isRequired) {
+        label.classList.add('required');
+      } else {
+        label.classList.remove('required');
+      }
+    }
 
     $(document).ready(function() {
-      $('.nav-tabs a').on('shown.bs.tab', function(e) {
-        var activeTab = $(e.target).attr('href');
+      manualRequiredFields.forEach(field => setFieldRequired(field, true));
 
-        if (activeTab === '#job_manual_input') {
-          csvInput.value = '';
-          csvInput.required = false;
-          document.querySelector('label[for="id_csv_file"]').classList.remove('required');
-          for (const field of manual_required_fields) {
-            const element = document.getElementById(field);
-            element.required = true;
-            const label = document.querySelector(`label[for="${field}"]`);
-            label.classList.add('required');
-          }
-        }
-        else {
-          for (const field of manual_required_fields) {
-            const element = document.getElementById(field);
-            element.required = false;
-            const label = document.querySelector(`label[for="${field}"]`);
-            label.classList.remove('required');
-          }
-          csvInput.required = true;
-          document.querySelector('label[for="id_csv_file"]').classList.add('required');
-        }
+      $('.nav-tabs a').on('shown.bs.tab', function(e) {
+        const activeTab = $(e.target).attr('href');
+        const isManualInputTab = activeTab === '#job_manual_input';
+
+        csvInput.value = '';
+        csvInput.required = !isManualInputTab;
+        document.querySelector('label[for="id_csv_file"]').classList.toggle('required', !isManualInputTab);
+
+        manualRequiredFields.forEach(field => setFieldRequired(field, isManualInputTab));
       });
     });
   </script>
