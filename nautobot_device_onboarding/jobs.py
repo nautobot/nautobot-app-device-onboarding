@@ -527,7 +527,6 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 self.logger.error(f"Missing requried inputs from job form: {missing_required_inputs}")
                 raise ValidationError(message=f"Missing required inputs {missing_required_inputs}")
 
-
             self.location = location
             self.namespace = namespace
             self.ip_addresses = ip_addresses.replace(" ", "").split(",")
