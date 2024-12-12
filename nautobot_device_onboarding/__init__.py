@@ -45,6 +45,7 @@ class NautobotDeviceOnboardingConfig(NautobotAppConfig):
     }
     caching_config = {}
     docs_view_name = "plugins:nautobot_device_onboarding:docs"
+    config_view_name = "plugins:nautobot_device_onboarding:config"
     home_view_name = "extras:job_list"  # Jobs only for now. May change in the future.
 
 
