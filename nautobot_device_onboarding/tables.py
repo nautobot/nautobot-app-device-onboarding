@@ -1,8 +1,7 @@
 """Tables for Nautobot Device Onboarding."""
 
 import django_tables2 as tables
-from nautobot.apps.tables import (BaseTable, ButtonsColumn, StatusTableMixin,
-                                  ToggleColumn, ColoredLabelColumn,)
+from nautobot.apps.tables import BaseTable, ColoredLabelColumn, ToggleColumn
 
 from nautobot_device_onboarding import models
 
@@ -43,14 +42,6 @@ class OnboardingConfigSyncDevicesTable(BaseTable):
         default_columns = (
             "name",
             "preferred_config",
-            "default_namespace",
-            "default_device_role",
-            "default_secrets_group",
-            "default_device_status",
-            "default_interface_status",
-            "default_ip_address_status",
-            "default_port",
-            "default_timeout",
         )
 
 
@@ -91,13 +82,4 @@ class OnboardingConfigSyncNetworkDataFromNetworkTable(BaseTable):
         default_columns = (
             "name",
             "preferred_config",
-            "default_connectivity_test",
-            "default_sync_vlans",
-            "default_sync_vrfs",
-            "default_sync_cables",
-            "default_namespace",
-            "default_interface_status",
-            "default_ip_address_status",
-            "default_prefix_status",
-            "sync_vlans_location_type",
         )

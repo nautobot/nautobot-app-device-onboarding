@@ -4,18 +4,23 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('nautobot_device_onboarding', '0010_initial'),
+        ("nautobot_device_onboarding", "0010_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='onboardingconfigsyncdevices',
-            options={'verbose_name': 'Onboarding Config - Sync Devices', 'verbose_name_plural': 'Onboarding Configs - Sync Devices'},
+            name="onboardingconfigsyncdevices",
+            options={
+                "verbose_name": "Onboarding Config - Sync Devices",
+                "verbose_name_plural": "Onboarding Configs - Sync Devices",
+            },
         ),
         migrations.AlterModelOptions(
-            name='onboardingconfigsyncnetworkdatafromnetwork',
-            options={'verbose_name': 'Onboarding Config - Sync Network Data', 'verbose_name_plural': 'Onboarding Configs - Sync Network Data'},
+            name="onboardingconfigsyncnetworkdatafromnetwork",
+            options={
+                "verbose_name": "Onboarding Config - Sync Network Data",
+                "verbose_name_plural": "Onboarding Configs - Sync Network Data",
+            },
         ),
     ]

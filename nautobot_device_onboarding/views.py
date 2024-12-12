@@ -1,8 +1,10 @@
 """Django views for Onboarding."""
 
-from nautobot.apps.views import NautobotUIViewSet, ObjectView, ObjectListView, GenericView
 from django.shortcuts import render
-from nautobot_device_onboarding import models, tables, forms
+from nautobot.apps.views import GenericView, NautobotUIViewSet
+
+from nautobot_device_onboarding import forms, models, tables
+
 
 class OnboardingConfigSyncDevicesUIViewSet(NautobotUIViewSet):
     """Onboarding view for Sync Devices configs."""
@@ -15,6 +17,7 @@ class OnboardingConfigSyncDevicesUIViewSet(NautobotUIViewSet):
     queryset = models.OnboardingConfigSyncDevices.objects.all()
     serializer_class = None
     table_class = tables.OnboardingConfigSyncDevicesTable
+
 
 class OnboardingConfigSyncNetworkDataFromNetworkUIViewSet(NautobotUIViewSet):
     """Onboarding view for Sync Devices configs."""
@@ -43,12 +46,23 @@ class OnboardingConfigView(GenericView):
         sync_network_data_queryset = self.sync_network_data_class.objects.all()
         sync_devices_table = self.sync_devices_table_class(sync_devices_queryset, orderable=False)
         sync_network_data_table = self.sync_network_data_table_class(sync_network_data_queryset, orderable=False)
+        sync_devices_preferred_config = sync_devices_queryset.filter(preferred_config=True).first()
+        sync_network_data_preferred_config = sync_network_data_queryset.filter(preferred_config=True).first()
         return render(
-            request, "onboarding_config.html", 
+            request,
+            "onboarding_config.html",
             {
+                "sync_devices_preferred_config": sync_devices_preferred_config,
+                "sync_network_data_preferred_config": sync_network_data_preferred_config,
                 "tables": {
-                    "Sync Devices from Network Configurations": sync_devices_table, 
-                    "Sync Network Data from Network Configurations": sync_network_data_table, 
-                }
-            }
-    )
+                    "Sync Devices from Network Configurations": {
+                        "add_url": "plugins:nautobot_device_onboarding:onboardingconfigsyncdevices_add",
+                        "table": sync_devices_table,
+                    },
+                    "Sync Network Data from Network Configurations": {
+                        "add_url": "plugins:nautobot_device_onboarding:onboardingconfigsyncnetworkdatafromnetwork_add",
+                        "table": sync_network_data_table,
+                    },
+                },
+            },
+        )

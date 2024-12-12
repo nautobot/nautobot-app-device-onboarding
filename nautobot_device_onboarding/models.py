@@ -1,15 +1,19 @@
 """Models for Natobot Device Onboarding."""
 
 from django.db import models
+
 # Nautobot imports
 from nautobot.apps.models import PrimaryModel
+
 from nautobot_device_onboarding.choices import VLANLocationSyncTypeChoices
+
 
 class OnboardingConfigSyncDevices(PrimaryModel):  # pylint: disable=too-many-ancestors
     """Settings used by the Nautobot Device Onboarding app when running Sync Devices From Network."""
 
     name = models.CharField(max_length=100, unique=True)
     preferred_config = models.BooleanField(default=False)
+    default_connectivity_test = models.BooleanField(default=False)
     default_namespace = models.ForeignKey(
         to="ipam.Namespace",
         on_delete=models.PROTECT,
@@ -59,11 +63,12 @@ class OnboardingConfigSyncDevices(PrimaryModel):  # pylint: disable=too-many-anc
         null=True,
     )
     default_port = models.IntegerField(
-        blank=True, null=True,
+        blank=True,
+        null=True,
     )
     default_timeout = models.IntegerField(
-        blank=True, null=True,
-
+        blank=True,
+        null=True,
     )
 
     class Meta:
@@ -75,7 +80,7 @@ class OnboardingConfigSyncDevices(PrimaryModel):  # pylint: disable=too-many-anc
     def __str__(self):
         """Stringify instance."""
         return self.name
-    
+
 
 class OnboardingConfigSyncNetworkDataFromNetwork(PrimaryModel):  # pylint: disable=too-many-ancestors
     """Settings used by the Nautobot Device Onboarding app when running Sync Network Data From Network."""
@@ -115,9 +120,7 @@ class OnboardingConfigSyncNetworkDataFromNetwork(PrimaryModel):  # pylint: disab
         null=True,
     )
     sync_vlans_location_type = models.CharField(
-        choices=VLANLocationSyncTypeChoices, 
-        max_length=50, 
-        default=VLANLocationSyncTypeChoices.SINGLE_LOCATION
+        choices=VLANLocationSyncTypeChoices, max_length=50, default=VLANLocationSyncTypeChoices.SINGLE_LOCATION
     )
 
     class Meta:

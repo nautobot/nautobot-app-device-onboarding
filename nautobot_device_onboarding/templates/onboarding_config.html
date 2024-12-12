@@ -1,44 +1,193 @@
-{% extends 'base.html' %}
+{% extends 'config_base.html' %}
 {% load django_tables2 %}
 {% load helpers %}
 
-{% block header %}
-    <h1>{% block title %}Device Onboarding Configuration{% endblock %}</h1>
-{% endblock header %}
-
-{% block content %}
-    {% for table_name, table in tables.items %}
+{% block content_left_page %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <strong>Sync Devices Preferred Config</strong>
+        </div>
+        <table class="table table-hover panel-body attr-table">
+            <tr>
+                <td>Name</td>
+                <td>
+                    {{ sync_devices_preferred_config.name | placeholder }}
+                </td>
+            </tr>
+            <tr>
+                <td>Connectivity Test</td>
+                <td>
+                    {{ object.default_connectivity_test | placeholder }}
+                </td>
+            </tr>
+            <tr>
+                <td>Namespace</td>
+                <td>
+                    {{ sync_devices_preferred_config.default_namespace | placeholder }}
+                </td>
+            </tr>
+            </tr>
+                <td>Device Role</td>
+                <td>
+                    {{ sync_devices_preferred_config.default_device_role | placeholder }}
+                </td>
+            <tr>
+            </tr>
+                <td>Secrets Group</td>
+                <td>
+                    {{ sync_devices_preferred_config.default_secrets_group | placeholder }}
+                </td>
+            <tr>
+            </tr>
+                <td>Platform</td>
+                <td>
+                    {{ sync_devices_preferred_config.default_platform | placeholder }}
+                </td>
+            <tr>
+            <tr>
+                <td>Device Status</td>
+                <td>
+                    {{ sync_devices_preferred_config.default_device_status | hyperlinked_object_with_color }}
+                </td>
+            <tr>
+            <tr>
+                <td>Interface Status</td>
+                <td>
+                    {{ sync_devices_preferred_config.default_interface_status | hyperlinked_object_with_color }}
+                </td>
+            <tr>
+            <tr>
+                <td>IP Address Status</td>
+                <td>
+                    {{ sync_devices_preferred_config.default_ip_address_status | hyperlinked_object_with_color }}
+                </td>
+            <tr>
+            </tr>   
+                <td>Port</td>
+                <td>
+                    {{ sync_devices_preferred_config.default_port | placeholder }}
+                </td>
+            <tr>
+            </tr>   
+                <td>Timeout</td>
+                <td>
+                    {{ sync_devices_preferred_config.default_timeout | placeholder }}
+                </td>
+            <tr>
+        </table>
+    </div>
+{% endblock content_left_page %}
+{% block content_right_page %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <strong>Sync Network Data Preferred Config</strong>
+        </div>
+        <table class="table table-hover panel-body attr-table">
+            <tr>
+                <td>Name</td>
+                <td>
+                    {{ sync_network_data_preferred_config.name | placeholder }}
+                </td>
+            </tr>
+            <tr>
+                <td>Connectivity Test</td>
+                <td>
+                    {{ sync_network_data_preferred_config.default_connectivity_test | placeholder }}
+                </td>
+            </tr>
+            </tr>
+                <td>Sync VLANS</td>
+                <td>
+                    {{ sync_network_data_preferred_config.default_sync_vlans | placeholder }}
+                </td>
+            <tr>
+            </tr>
+                <td>Secrets Sync VRFs</td>
+                <td>
+                    {{ sync_network_data_preferred_config.default_sync_vrfs | placeholder }}
+                </td>
+            <tr>
+            </tr>
+                <td>Sync Cables</td>
+                <td>
+                    {{ sync_network_data_preferred_config.default_sync_cables | placeholder }}
+                </td>
+            <tr>
+            <tr>
+                <td>Namespace</td>
+                <td>
+                    {{ sync_network_data_preferred_config.default_namespace | placeholder }}
+                </td>
+            </tr>
+            <tr>
+                <td>Interface Status</td>
+                <td>
+                    {{ sync_network_data_preferred_config.default_interface_status | hyperlinked_object_with_color }}
+                </td>
+            </tr>
+            <tr>
+                <td>IP Address Status</td>
+                <td>
+                    {{ sync_network_data_preferred_config.default_ip_address_status | hyperlinked_object_with_color }}
+                </td>
+            </tr>
+            <tr>
+                <td>Prefix Status</td>
+                <td>
+                    {{ sync_network_data_preferred_config.default_prefix_status | hyperlinked_object_with_color }}
+                </td>
+            </tr>
+            <tr>
+                <td>Sync VLANs Location Type</td>
+                <td>
+                    {% if sync_network_data_preferred_config.sync_vlans_location_type == 'single_location' %}
+                        One location assignment per VLAN
+                    {% elif sync_network_data_preferred_config.sync_vlans_location_type == 'multiple_location' %}
+                        Multiplpe location assignments per VLAN
+                    {% else %}
+                        {{ sync_network_data_preferred_config.sync_vlans_location_type | placeholder}}
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+    </div>
+{% endblock content_right_page %}
+{% block content_full_width_page %}
+    {% for table_name, data in tables.items %}
+        <a href="{% url data.add_url %}" class="btn btn-primary pull-right">
+            <span class="mdi mdi-plus-thick" aria-hidden="true">Add Config</span>
+        </a>
         <h2>{{ table_name }}</h2>
         <div class="table-responsive">
-            <table{% if table.attrs %} {{ table.attrs.as_html }}{% endif %}>
-                {% if table.show_header %}
+            <table{% if data.table.attrs %} {{ data.table.attrs.as_html }}{% endif %}>
+                {% if data.table.show_header %}
                     <thead>
                         <tr>
-                            {% for column in table.columns %}
+                            {% for column in data.table.columns %}
                                 <th {{ column.attrs.th.as_html }}>{{ column.header }}</th>
                             {% endfor %}
                         </tr>
                     </thead>
                 {% endif %}
                 <tbody>
-                    {% for row in table.page.object_list|default:table.rows %}
+                    {% for row in data.table.page.object_list|default:data.table.rows %}
                         <tr {{ row.attrs.as_html }}>
                             {% for column, cell in row.items %}
                                 <td {{ column.attrs.td.as_html }}>{{ cell }}</td>
                             {% endfor %}
                         </tr>
                     {% empty %}
-                        {% if table.empty_text %}
+                        {% if data.table.empty_text %}
                             <tr>
-                                <td colspan="{{ table.columns|length }}" class="text-center text-muted">&mdash; {{ table.empty_text }} &mdash;</td>
+                                <td colspan="{{ data.table.columns|length }}" class="text-center text-muted">&mdash; {{ data.table.empty_text }} &mdash;</td>
                             </tr>
                         {% endif %}
                     {% endfor %}
                 </tbody>
-                {% if table.has_footer %}
+                {% if data.table.has_footer %}
                     <tfoot>
                         <tr>
-                            {% for column in table.columns %}
+                            {% for column in data.table.columns %}
                                 <td>{{ column.footer }}</td>
                             {% endfor %}
                         </tr>
@@ -47,4 +196,4 @@
             </table>
         </div>
     {% endfor %}
-{% endblock content %}
+{% endblock content_full_width_page %}

@@ -12,9 +12,7 @@ from django.db.models import Model
 from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
 
 from nautobot_device_onboarding.diffsync.models import sync_devices_models
-from nautobot_device_onboarding.nornir_plays.command_getter import (
-    sync_devices_command_getter,
-)
+from nautobot_device_onboarding.nornir_plays.command_getter import sync_devices_command_getter
 from nautobot_device_onboarding.utils import diffsync_utils
 
 ParameterSet = FrozenSet[Tuple[str, Hashable]]

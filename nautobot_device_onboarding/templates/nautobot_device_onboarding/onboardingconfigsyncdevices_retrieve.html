@@ -1,0 +1,88 @@
+
+{% extends 'generic/object_retrieve.html' %}
+{% load helpers %}
+{% block breadcrumbs %}
+<li>{{ object|hyperlinked_object }}</li>
+{% endblock breadcrumbs %}
+{% block buttons %}
+    {{ block.super }}
+    &nbsp;
+    <a href="{% url 'plugins:nautobot_device_onboarding:config' %}" class="btn btn-primary pull-right">
+        <span class="mdi mdi-arrow-right" aria-hidden="true">Return to Configs</span>
+    </a>
+{% endblock buttons %}
+{% block content_left_page %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <strong>Onboarding Config - Sync Network Data From Network</strong>
+        </div>
+        <table class="table table-hover panel-body attr-table">
+            <tr>
+                <td>Name</td>
+                <td>
+                    {{ object.name | placeholder }}
+                </td>
+            </tr>
+            <tr>
+                <td>Connectivity Test</td>
+                <td>
+                    {{ object.default_connectivity_test | placeholder }}
+                </td>
+            </tr>
+            <tr>
+                <td>Namespace</td>
+                <td>
+                    {{ object.default_namespace | placeholder }}
+                </td>
+            </tr>
+            </tr>
+                <td>Device Role</td>
+                <td>
+                    {{ object.default_device_role | placeholder }}
+                </td>
+            <tr>
+            </tr>
+                <td>Secrets Group</td>
+                <td>
+                    {{ object.default_secrets_group | placeholder }}
+                </td>
+            <tr>
+            </tr>
+                <td>Platform</td>
+                <td>
+                    {{ object.default_platform | placeholder }}
+                </td>
+            <tr>
+            <tr>
+                <td>Device Status</td>
+                <td>
+                    {{ object.default_device_status | hyperlinked_object_with_color }}
+                </td>
+            <tr>
+            <tr>
+                <td>Interface Status</td>
+                <td>
+                    {{ object.default_interface_status | hyperlinked_object_with_color }}
+                </td>
+            <tr>
+            <tr>
+                <td>IP Address Status</td>
+                <td>
+                    {{ object.default_ip_address_status | hyperlinked_object_with_color }}
+                </td>
+            <tr>
+            </tr>   
+                <td>Port</td>
+                <td>
+                    {{ object.default_port | placeholder }}
+                </td>
+            <tr>
+            </tr>   
+                <td>Timeout</td>
+                <td>
+                    {{ object.default_timeout | placeholder }}
+                </td>
+            <tr>
+        </table>
+    </div>
+{% endblock content_left_page %}

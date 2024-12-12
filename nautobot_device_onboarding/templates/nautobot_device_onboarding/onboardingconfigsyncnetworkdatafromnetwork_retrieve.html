@@ -1,0 +1,88 @@
+
+{% extends 'generic/object_retrieve.html' %}
+{% load helpers %}
+{% block breadcrumbs %}
+<li>{{ object|hyperlinked_object }}</li>
+{% endblock breadcrumbs %}
+{% block buttons %}
+    {{ block.super }}
+    &nbsp;
+    <a href="{% url 'plugins:nautobot_device_onboarding:config' %}" class="btn btn-primary pull-right">
+        <span class="mdi mdi-arrow-right" aria-hidden="true">Return to Configs</span>
+    </a>
+{% endblock buttons %}
+{% block content_left_page %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <strong>Onboarding Config - Sync Network Data From Network</strong>
+        </div>
+        <table class="table table-hover panel-body attr-table">
+            <tr>
+                <td>Name</td>
+                <td>
+                    {{ object.name | placeholder }}
+                </td>
+            </tr>
+            <tr>
+                <td>Connectivity Test</td>
+                <td>
+                    {{ object.default_connectivity_test | placeholder }}
+                </td>
+            </tr>
+            </tr>
+                <td>Sync VLANS</td>
+                <td>
+                    {{ object.default_sync_vlans | placeholder }}
+                </td>
+            <tr>
+            </tr>
+                <td>Secrets Sync VRFs</td>
+                <td>
+                    {{ object.default_sync_vrfs | placeholder }}
+                </td>
+            <tr>
+            </tr>
+                <td>Sync Cables</td>
+                <td>
+                    {{ object.default_sync_cables | placeholder }}
+                </td>
+            <tr>
+            <tr>
+                <td>Namespace</td>
+                <td>
+                    {{ object.default_namespace | placeholder }}
+                </td>
+            </tr>
+            <tr>
+                <td>Interface Status</td>
+                <td>
+                    {{ object.default_interface_status | hyperlinked_object_with_color }}
+                </td>
+            </tr>
+            <tr>
+                <td>IP Address Status</td>
+                <td>
+                    {{ object.default_ip_address_status | hyperlinked_object_with_color }}
+                </td>
+            </tr>
+            <tr>
+                <td>Prefix Status</td>
+                <td>
+                    {{ object.default_prefix_status | hyperlinked_object_with_color }}
+                </td>
+            </tr>
+            <tr>
+                <td>Sync VLANs Location Type</td>
+                <td>
+                    {% if object.sync_vlans_location_type == 'single_location' %}
+                        One location assignment per VLAN
+                    {% elif object.sync_vlans_location_type == 'multiple_location' %}
+                        Multiplpe location assignments per VLAN
+                    {% else %}
+                        {{ object.sync_vlans_location_type | placeholder}}
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+    </div>
+{% endblock content_left_page %}

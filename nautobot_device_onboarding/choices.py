@@ -1,6 +1,6 @@
 """Choices used througout the app."""
-from nautobot.core.choices import ChoiceSet
 
+from nautobot.core.choices import ChoiceSet
 
 SSOT_JOB_TO_COMMAND_CHOICE = (
     ("sync_devices", "Sync Devices"),
@@ -8,7 +8,10 @@ SSOT_JOB_TO_COMMAND_CHOICE = (
     ("both", "Both"),
 )
 
+
 class VLANLocationSyncTypeChoices(ChoiceSet):
+    """Choices for VLAN Location Sync Type."""
+
     SINGLE_LOCATION = "single_location"
     MULTIPLE_LOCATION = "multiple_location"
 

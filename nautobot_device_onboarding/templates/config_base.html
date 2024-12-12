@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block header %}
+    <h1>{% block title %}Device Onboarding Configuration{% endblock %}</h1>
+{% endblock header %}
+
+{% block content %}
+<div class="tab-content">
+    <div class="row">
+        <div class="col-md-6">
+            {% block content_left_page %}{% endblock content_left_page %}
+        </div>
+        <div class="col-md-6">
+            {% block content_right_page %}{% endblock content_right_page %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            {% block content_full_width_page %}{% endblock content_full_width_page %}
+        </div>
+    </div>
+{% endblock content %}

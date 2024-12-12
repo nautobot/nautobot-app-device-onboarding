@@ -13,9 +13,7 @@ from netaddr import EUI, mac_unix_expanded
 from netutils.interface import canonical_interface_name
 
 from nautobot_device_onboarding.diffsync.models import sync_network_data_models
-from nautobot_device_onboarding.nornir_plays.command_getter import (
-    sync_network_data_command_getter,
-)
+from nautobot_device_onboarding.nornir_plays.command_getter import sync_network_data_command_getter
 from nautobot_device_onboarding.utils import diffsync_utils
 
 app_settings = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
