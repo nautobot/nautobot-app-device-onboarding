@@ -504,6 +504,30 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 raise ValidationError(message="CSV check failed. No devices will be synced.")
 
         else:
+            # Verify that all requried form inputs have been provided, this is here in case the form is not used
+            required_inputs = {
+                "location": location,
+                "namespace": namespace,
+                "ip_addresses": ip_addresses,
+                "device_role": device_role,
+                "device_status": device_status,
+                "interface_status": interface_status,
+                "ip_address_status": ip_address_status,
+                "port": port,
+                "timeout": timeout,
+                "secrets_group": secrets_group,
+            }
+
+            missing_required_inputs = [
+                form_field for form_field, input_value in required_inputs.items() if not input_value
+            ]
+            if not missing_required_inputs:
+                pass
+            else:
+                self.logger.error(f"Missing requried inputs from job form: {missing_required_inputs}")
+                raise ValidationError(message=f"Missing required inputs {missing_required_inputs}")
+
+
             self.location = location
             self.namespace = namespace
             self.ip_addresses = ip_addresses.replace(" ", "").split(",")
