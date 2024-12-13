@@ -199,7 +199,7 @@ When loading from a Git Repository this App is expecting a root directory called
 ### Textfsm Parser Extensions
 
 !!! info
-    To avoid overly complicating the merge logic, the App will always prefer the template files loaded in from the git repository. If a template isn't found in the git repository it will try_fallback to using native ntc-templates directory.
+    To avoid overly complicating the merge logic, the App will always prefer the template files loaded in from the git repository. If a template isn't found in the git repository it will fallback to using native ntc-templates directory.
 
 File structure:
 ```bash
@@ -209,7 +209,7 @@ File structure:
     └── parsers
         └── textfsm
             └── <network_driver>_<command seperated by underscores>.textfsm
-            |__ index
+            └── index
 ```
 
 !!! warn
@@ -224,7 +224,7 @@ For example:
     └── parsers
         └── textfsm
             └── cisco_ios_show_version.textfsm
-            |__ index
+            └── index
 ```
 
 Where index file is:
