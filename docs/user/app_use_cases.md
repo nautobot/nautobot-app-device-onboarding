@@ -179,6 +179,8 @@ The format of these YAML files are and how to extend this application is covered
 
 As this App continues to mature, support has been added to support `TTP`; with this addition the ability to add and/or override templates was required. This follows a similar pattern to the YAML overrides.
 
+### TTP Parser Extensions
+
 !!! info
     To avoid overly complicating the merge logic, the App will always prefer the template files loaded in from the git repository.
 
@@ -193,3 +195,42 @@ File structure:
 ```
 
 When loading from a Git Repository this App is expecting a root directory called `onboarding_command_mappers`. Parser files should be located in a `parsers` directory followed by one additional directory; e.g., `ttp`. The template file names must be named `<network_driver>_<command_seperated_by_underscores>.ttp`.
+
+### Textfsm Parser Extensions
+
+!!! info
+    To avoid overly complicating the merge logic, the App will always prefer the template files loaded in from the git repository. If a template isn't found in the git repository it will fallback to using native ntc-templates directory.
+
+File structure:
+```bash
+.
+├── README.md
+└── onboarding_command_mappers
+    └── parsers
+        └── textfsm
+            └── <network_driver>_<command seperated by underscores>.textfsm
+            └── index
+```
+
+!!! warn
+    The repository **must** have an index file as is always expected with textfsm.
+
+When loading from a Git Repository this App is expecting a root directory called `onboarding_command_mappers`. Parser files should be located in a `parsers` directory followed by one additional directory; e.g., `textfsm`. The template file names must be named `<network_driver>_<command_seperated_by_underscores>.ttp` and the index file must exist and must be defined appropriately.
+
+For example:
+
+```
+└── onboarding_command_mappers
+    └── parsers
+        └── textfsm
+            └── cisco_ios_show_version.textfsm
+            └── index
+```
+
+Where index file is:
+
+```
+Template, Hostname, Platform, Command
+
+cisco_ios_show_version.textfsm, .*, cisco_ios, sh[[ow]] ver[[sion]]
+```
