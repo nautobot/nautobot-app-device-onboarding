@@ -3,10 +3,11 @@
 import json
 import os
 import unittest
+
 import yaml
 from nornir.core.inventory import ConnectionOptions, Defaults, Host
-from nautobot_device_onboarding.nornir_plays.formatter import extract_and_post_process
 
+from nautobot_device_onboarding.nornir_plays.formatter import extract_and_post_process
 
 MOCK_DIR = os.path.join("nautobot_device_onboarding", "tests", "mock")
 
