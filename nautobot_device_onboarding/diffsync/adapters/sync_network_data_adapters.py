@@ -602,8 +602,8 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                             model_type="vlan",
                         )
                         continue
-                # check for untagged vlan and add if necessary
-                if interface_data["untagged_vlan"]:
+                # check for untagged vlan and add if necessary, skip VLAN 0
+                if interface_data["untagged_vlan"] and interface_data["untagged_vlan"]["id"] != "0":
                     try:
                         network_vlan = self.vlan(
                             adapter=self,
@@ -711,13 +711,16 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
             # for interface in device_data["interfaces"]:
             for interface_name, interface_data in device_data["interfaces"].items():
                 try:
-                    network_untagged_vlan_to_interface = self.untagged_vlan_to_interface(
-                        adapter=self,
-                        device__name=hostname,
-                        name=interface_name,
-                        untagged_vlan=interface_data["untagged_vlan"],
-                    )
-                    self.add(network_untagged_vlan_to_interface)
+                    if interface_data["untagged_vlan"]["id"] != "0":
+                        network_untagged_vlan_to_interface = self.untagged_vlan_to_interface(
+                            adapter=self,
+                            device__name=hostname,
+                            name=interface_name,
+                            untagged_vlan=interface_data["untagged_vlan"],
+                        )
+                        self.add(network_untagged_vlan_to_interface)
+                    else:
+                        continue
                 except Exception as err:  # pylint: disable=broad-exception-caught
                     self._handle_general_load_exception(
                         error=err,
