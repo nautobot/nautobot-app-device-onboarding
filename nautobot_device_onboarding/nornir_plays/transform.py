@@ -23,6 +23,19 @@ def get_git_repo():
     return None
 
 
+def get_git_repo_parser_path(parser_type):
+    """Get the git repo object."""
+    repository_record = get_git_repo()
+    if repository_record:
+        repo_data_dir = os.path.join(
+            repository_record.filesystem_path, "onboarding_command_mappers", "parsers", parser_type
+        )
+        if os.path.isdir(repo_data_dir):
+            return repo_data_dir
+        return None
+    return None
+
+
 def add_platform_parsing_info():
     """Merges platform command mapper from repo or defaults."""
     repository_record = get_git_repo()
@@ -51,18 +64,13 @@ def load_command_mappers_from_dir(command_mappers_path):
 def load_files_with_precedence(filesystem_dir, parser_type):
     """Utility to load files from filesystem and git repo with precedence."""
     file_paths = {}
-    git_repo_dir = None
-    repository_record = get_git_repo()
-    if repository_record:
-        git_repo_dir = os.path.join(
-            repository_record.filesystem_path, "onboarding_command_mappers", "parsers", parser_type
-        )
-        # List files in the first directory and add to the dictionary
-        if os.path.isdir(git_repo_dir):
-            for file_name in os.listdir(git_repo_dir):
-                file_path = os.path.join(git_repo_dir, file_name)
-                if os.path.isfile(file_path):
-                    file_paths[file_name] = file_path
+    git_repo_dir = get_git_repo_parser_path(parser_type)
+    # List files in the first directory and add to the dictionary
+    if git_repo_dir:
+        for file_name in os.listdir(git_repo_dir):
+            file_path = os.path.join(git_repo_dir, file_name)
+            if os.path.isfile(file_path):
+                file_paths[file_name] = file_path
 
     # List files in the second directory and add to the dictionary if not already present
     for file_name in os.listdir(filesystem_dir):
