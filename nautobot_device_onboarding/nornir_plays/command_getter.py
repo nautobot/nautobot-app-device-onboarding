@@ -30,6 +30,7 @@ from nautobot_device_onboarding.nornir_plays.transform import (
     get_git_repo_parser_path,
     load_files_with_precedence,
 )
+from nautobot_device_onboarding.utils.helper import check_for_required_file
 
 PARSER_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "parsers"))
 
@@ -159,6 +160,11 @@ def netmiko_send_commands(
                             try:
                                 # Look for custom textfsm templates in the git repo
                                 git_template_dir = get_git_repo_parser_path(parser_type="textfsm")
+                                if not check_for_required_file(git_template_dir, "index"):
+                                    logger.debug(
+                                        f"Unable to find required index file in {git_template_dir} for textfsm parsing. Falling back to default templates."
+                                    )
+                                    git_template_dir = None
                                 # Parsing textfsm ourselves instead of using netmikos use_<parser> function to be able to handle exceptions
                                 # ourselves. Default for netmiko is if it can't parse to return raw text which is tougher to handle.
                                 parsed_output = parse_output(
