@@ -25,7 +25,11 @@ from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInvento
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import CommandGetterProcessor
-from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info, load_files_with_precedence
+from nautobot_device_onboarding.nornir_plays.transform import (
+    add_platform_parsing_info,
+    get_git_repo_parser_path,
+    load_files_with_precedence,
+)
 
 PARSER_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "parsers"))
 
@@ -153,12 +157,16 @@ def netmiko_send_commands(
                     else:
                         if command["parser"] == "textfsm":
                             try:
+                                # Look for custom textfsm templates in the git repo
+                                git_template_dir = get_git_repo_parser_path(parser_type="textfsm")
                                 # Parsing textfsm ourselves instead of using netmikos use_<parser> function to be able to handle exceptions
                                 # ourselves. Default for netmiko is if it can't parse to return raw text which is tougher to handle.
                                 parsed_output = parse_output(
                                     platform=get_all_network_driver_mappings()[task.host.platform]["ntc_templates"],
+                                    template_dir=git_template_dir if git_template_dir else None,
                                     command=command["command"],
                                     data=current_result.result,
+                                    try_fallback=bool(git_template_dir),
                                 )
                                 task.results[result_idx].result = parsed_output
                                 task.results[result_idx].failed = False
