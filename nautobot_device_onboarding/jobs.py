@@ -504,7 +504,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 raise ValidationError(message="CSV check failed. No devices will be synced.")
 
         else:
-            # Verify that all requried form inputs have been provided, this is here in case the form is not used
+            # Verify that all required form inputs have been provided, this is here in case the form is not used
             required_inputs = {
                 "location": location,
                 "namespace": namespace,
