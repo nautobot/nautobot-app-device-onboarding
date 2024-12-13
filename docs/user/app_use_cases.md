@@ -79,6 +79,102 @@ PLUGINS_CONFIG = {
 
 When the on-demand inventory is created for the `Sync Device from Network` job, the extras in the `netmiko` connection dictionary are added to the connection setup.
 
+### Using SSH PubKey Authentication
+
+In the case where you want to use SSH Public Key authentication that can be accomplished by adding the additional arguments into Netmiko. This is done using the plugin configuration.
+
+1. Create the ssh key on the Nautobot worker server/container.
+
+2. Add the Netmiko Extras to the configuration.
+
+```python
+PLUGINS_CONFIG = {
+    "nautobot_device_onboarding": {},
+    "nautobot_ssot": {
+        "hide_example_jobs": True,
+    },
+    "nautobot_plugin_nornir": {
+        "nornir_settings": {
+            "credentials": "nautobot_plugin_nornir.plugins.credentials.nautobot_secrets.CredentialsNautobotSecrets",
+            "runner": {
+                "plugin": "threaded",
+                "options": {
+                    "num_workers": 20,
+                },
+            },
+        },
+        "connection_options": {
+            "netmiko": {
+                "extras": {
+                    "use_keys": True,
+                    "key_file": "/root/.ssh/id_rsa.pub",
+                    "disabled_algorithms": {"pubkeys": ["rsa-sha2-256", "rsa-sha2-512"]},
+                },
+            },
+        },
+    },
+}
+```
+
+3. Make a secrets group in Nautobot which still had all the elements (username and password), where the username is accurate, a bogus password can be used as its ignored by the backend processing. For example, set the password to the username secret since its ignore.
+
+4. Run the jobs and ssh public key authentication will be used.
+
+### Using SSH Proxy Jumphost
+
+In the case where you want to use a SSH proxy jumphost, it can be accomplished by adding the additional arguments into Netmiko. This is done using the plugin configuration.
+
+1. Follow the standard Jumphost proxy setup to create the ssh_config file with the proper settings.
+
+For example:
+
+```
+root@fcdc254e2a36:/source# cat /root/.ssh/config
+
+host jumphost
+  IdentitiesOnly yes
+  IdentityFile ~/.ssh/id_rsa
+  User ntc
+  HostName 10.1.1.10
+
+host * !jumphost
+  User admin
+  KexAlgorithms +diffie-hellman-group1-sha1,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1
+  HostKeyAlgorithms +ssh-rsa
+  ProxyCommand ssh -F /root/.ssh/config -W %h:%p jumphost
+```
+
+2. Add the Netmiko Extras to the configuration.
+
+```python
+PLUGINS_CONFIG = {
+    "nautobot_device_onboarding": {},
+    "nautobot_ssot": {
+        "hide_example_jobs": True,
+    },
+    "nautobot_plugin_nornir": {
+        "nornir_settings": {
+            "credentials": "nautobot_plugin_nornir.plugins.credentials.nautobot_secrets.CredentialsNautobotSecrets",
+            "runner": {
+                "plugin": "threaded",
+                "options": {
+                    "num_workers": 20,
+                },
+            },
+        },
+        "connection_options": {
+            "netmiko": {
+                "extras": {
+                    "ssh_config_file": "/root/.ssh/config",
+                },
+            },
+        },
+    },
+}
+```
+
+3. Run the jobs and the ssh config will be used and the connection will be proxied through the jumphost.
+
 # Use-cases and common workflows
 
 ## Onboarding a Device
