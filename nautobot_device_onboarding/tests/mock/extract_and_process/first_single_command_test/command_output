@@ -1,0 +1,28 @@
+[
+    {
+        "software_image": "C3560CX-UNIVERSALK9-M",
+        "version": "15.2(7)E9",
+        "release": "fc1",
+        "rommon": "Bootstrap",
+        "hostname": "IOS-SW-1",
+        "uptime": "18 hours, 30 minutes",
+        "uptime_years": "",
+        "uptime_weeks": "",
+        "uptime_days": "",
+        "uptime_hours": "18",
+        "uptime_minutes": "30",
+        "reload_reason": "power-on",
+        "running_image": "c3560cx-universalk9-mz.152-7.E9.bin",
+        "hardware": [
+            "WS-C3560CX-12PC-S"
+        ],
+        "serial": [
+            "FOC2341Y2CQ"
+        ],
+        "config_register": "0xF",
+        "mac_address": [
+            "6C:71:0D:1D:35:80"
+        ],
+        "restarted": "20:40:50 UTC Thu May 30 2024"
+    }
+]
