@@ -275,7 +275,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
     csv_file = FileVar(
         label="CSV File",
         required=False,
-        description="If a file is provided all the options below will be ignored.",
+        description="If a file is provided, all the options in the manual input tab will be disabled.",
     )
     location = ObjectVar(
         model=Location,
@@ -336,6 +336,8 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         required=False,
         description="Device platform. Define ONLY to override auto-recognition of platform.",
     )
+
+    template_name = "nautobot_device_onboarding/ssot_sync_devices.html"
 
     def load_source_adapter(self):
         """Load onboarding network adapter."""
@@ -502,7 +504,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 raise ValidationError(message="CSV check failed. No devices will be synced.")
 
         else:
-            # Verify that all requried form inputs have been provided
+            # Verify that all required form inputs have been provided, this is here in case the form is not used
             required_inputs = {
                 "location": location,
                 "namespace": namespace,

@@ -1,0 +1,77 @@
+{% extends 'extras/job.html' %}
+{% load form_helpers %}
+
+{% block job_form %}
+
+{% render_form job_form excluded_fields="['location', 'namespace', 'ip_addresses', 'device_role', 'device_status', 'interface_status', 'ip_address_status', 'port', 'timeout', 'secrets_group', 'platform', 'set_mgmt_only', 'update_devices_without_primary_ip', 'csv_file']" %}
+
+    {% with csv_tab_active=form.initial.csv_input %}
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation"{% if not csv_tab_active %} class="active"{% endif %}>
+            <a href="#job_manual_input" role="tab" data-toggle="tab">Manual Input</a>
+        </li>
+        <li role="presentation"{% if csv_tab_active %} class="active"{% endif %}>
+            <a href="#job_csv_input" role="tab" data-toggle="tab">CSV Input</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div id="job_manual_input" class="tab-pane{% if not csv_tab_active %} active{% endif %}">
+            {% render_field job_form.location %}
+            {% render_field job_form.namespace %}
+            {% render_field job_form.ip_addresses %}
+            {% render_field job_form.port %}
+            {% render_field job_form.timeout %}
+            {% render_field job_form.set_mgmt_only %}
+            {% render_field job_form.update_devices_without_primary_ip %}
+            {% render_field job_form.device_role %}
+            {% render_field job_form.device_status %}
+            {% render_field job_form.interface_status %}
+            {% render_field job_form.ip_address_status %}
+            {% render_field job_form.secrets_group %}
+            {% render_field job_form.platform %}
+        </div>
+        <div id="job_csv_input" class="tab-pane{% if csv_tab_active %} active{% endif %}">
+            {% render_field job_form.csv_file %}
+        </div>
+    </div>
+    {% endwith %}
+
+{% endblock job_form %}
+
+{% block javascript %}
+  {{ block.super }}
+  <script>
+    const csvInput = document.getElementById('id_csv_file');
+    const manualRequiredFields = [
+      "id_location", "id_namespace", "id_ip_addresses", "id_device_role", 
+      "id_device_status", "id_interface_status", "id_ip_address_status", 
+      "id_port", "id_timeout", "id_secrets_group"
+    ];
+
+    function setFieldRequired(fieldId, isRequired) {
+      const element = document.getElementById(fieldId);
+      element.required = isRequired;
+      const label = document.querySelector(`label[for="${fieldId}"]`);
+      if (isRequired) {
+        label.classList.add('required');
+      } else {
+        label.classList.remove('required');
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      manualRequiredFields.forEach(field => setFieldRequired(field, true));
+
+      $('.nav-tabs a').on('shown.bs.tab', function(e) {
+        const activeTab = $(e.target).attr('href');
+        const isManualInputTab = activeTab === '#job_manual_input';
+
+        csvInput.value = '';
+        csvInput.required = !isManualInputTab;
+        document.querySelector('label[for="id_csv_file"]').classList.toggle('required', !isManualInputTab);
+
+        manualRequiredFields.forEach(field => setFieldRequired(field, isManualInputTab));
+      });
+    });
+  </script>
+{% endblock javascript %}
