@@ -18,39 +18,39 @@ class OnboardingConfigSyncDevicesForm(NautobotModelForm):  # pylint: disable=too
         label="Preferred Config",
         widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
     )
-    default_connectivity_test = forms.BooleanField(
+    connectivity_test = forms.BooleanField(
         required=False,
         label="Connectivity Test",
         widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
     )
-    default_namespace = DynamicModelChoiceField(
+    namespace = DynamicModelChoiceField(
         queryset=Namespace.objects.all(),
         required=False,
     )
-    default_device_role = DynamicModelChoiceField(
+    device_role = DynamicModelChoiceField(
         queryset=Role.objects.all(),
         query_params={"content_types": "dcim.device"},
         required=False,
     )
-    default_secrets_group = DynamicModelChoiceField(
+    secrets_group = DynamicModelChoiceField(
         queryset=SecretsGroup.objects.all(),
         required=False,
     )
-    default_platform = DynamicModelChoiceField(
+    platform = DynamicModelChoiceField(
         queryset=Platform.objects.all(),
         required=False,
     )
-    default_device_status = DynamicModelChoiceField(
+    device_status = DynamicModelChoiceField(
         queryset=Status.objects.all(),
         query_params={"content_types": "dcim.device"},
         required=False,
     )
-    default_interface_status = DynamicModelChoiceField(
+    interface_status = DynamicModelChoiceField(
         queryset=Status.objects.all(),
         query_params={"content_types": "dcim.interface"},
         required=False,
     )
-    default_ip_address_status = DynamicModelChoiceField(
+    ip_address_status = DynamicModelChoiceField(
         queryset=Status.objects.all(),
         query_params={"content_types": "ipam.ipaddress"},
         required=False,
@@ -63,31 +63,31 @@ class OnboardingConfigSyncDevicesForm(NautobotModelForm):  # pylint: disable=too
         fields = [
             "name",
             "preferred_config",
-            "default_connectivity_test",
-            "default_namespace",
-            "default_device_role",
-            "default_secrets_group",
-            "default_device_status",
-            "default_interface_status",
-            "default_ip_address_status",
-            "default_port",
-            "default_timeout",
+            "connectivity_test",
+            "namespace",
+            "device_role",
+            "secrets_group",
+            "device_status",
+            "interface_status",
+            "ip_address_status",
+            "port",
+            "timeout",
         ]
 
 
 class OnboardingConfigSyncNetworkDataFromNetworkForm(NautobotModelForm):  # pylint: disable=too-many-ancestors
     """OnboardingConfigSyncNetworkDataFromNetwork creation/edit form."""
 
-    default_namespace = DynamicModelChoiceField(
+    namespace = DynamicModelChoiceField(
         queryset=Namespace.objects.all(),
         required=False,
     )
-    default_interface_status = DynamicModelChoiceField(
+    interface_status = DynamicModelChoiceField(
         queryset=Status.objects.all(),
         query_params={"content_types": "dcim.interface"},
         required=False,
     )
-    default_ip_address_status = DynamicModelChoiceField(
+    ip_address_status = DynamicModelChoiceField(
         queryset=Status.objects.all(),
         query_params={"content_types": "ipam.ipaddress"},
         required=False,
@@ -102,22 +102,22 @@ class OnboardingConfigSyncNetworkDataFromNetworkForm(NautobotModelForm):  # pyli
         label="Preferred Config",
         widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
     )
-    default_connectivity_test = forms.BooleanField(
+    connectivity_test = forms.BooleanField(
         required=False,
         label="Connectivity Test",
         widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
     )
-    default_sync_vlans = forms.BooleanField(
+    sync_vlans = forms.BooleanField(
         required=False,
         label="Sync VLANs",
         widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
     )
-    default_sync_vrfs = forms.BooleanField(
+    sync_vrfs = forms.BooleanField(
         required=False,
         label="Sync VRFs",
         widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
     )
-    default_sync_cables = forms.BooleanField(
+    sync_cables = forms.BooleanField(
         required=False,
         label="Sync Cables",
         widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
@@ -130,13 +130,13 @@ class OnboardingConfigSyncNetworkDataFromNetworkForm(NautobotModelForm):  # pyli
         fields = [
             "name",
             "preferred_config",
-            "default_connectivity_test",
-            "default_sync_vlans",
-            "default_sync_vrfs",
-            "default_sync_cables",
-            "default_namespace",
-            "default_interface_status",
-            "default_ip_address_status",
+            "connectivity_test",
+            "sync_vlans",
+            "sync_vrfs",
+            "sync_cables",
+            "namespace",
+            "interface_status",
+            "ip_address_status",
             "default_prefix_status",
             "sync_vlans_location_type",
         ]

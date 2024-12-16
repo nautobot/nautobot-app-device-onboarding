@@ -1,6 +1,6 @@
 # pylint: disable=attribute-defined-outside-init
 """Device Onboarding Jobs."""
-
+from nautobot.extras.forms import JobForm
 import csv
 import json
 import logging
@@ -10,8 +10,10 @@ from diffsync.enum import DiffSyncFlags
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.forms.fields import BooleanField, IntegerField
 from nautobot.apps.jobs import BooleanVar, ChoiceVar, FileVar, IntegerVar, Job, MultiObjectVar, ObjectVar, StringVar
 from nautobot.core.celery import register_jobs
+from nautobot.core.forms.fields import DynamicModelChoiceField, DynamicModelMultipleChoiceField 
 from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.choices import CustomFieldTypeChoices, SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import CustomField, Role, SecretsGroup, SecretsGroupAssociation, Status
@@ -243,26 +245,83 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         description = "Synchronize basic device information into Nautobot from one or more network devices. Information includes Device Name, Serial Number, Management IP/Interface."
         has_sensitive_variables = False
 
-    def get_field_config(default_config_name, preferred_config):
+    @classmethod
+    def as_form_class(cls):
+        """
+        Dynamically generate a Django form class corresponding to the variables in this Job.
+
+        In most cases you should use `.as_form()` instead of calling this method directly.
+        """
+        preferred_config = models.OnboardingConfigSyncDevices.objects.filter(preferred_config=True).first()
+        fields = {name: var.as_field() for name, var in cls._get_vars().items()}
+        fallback_defaults = {
+            "port": 22, 
+            "timeout": 30,
+        }
+
+        for field_name, field in fields.items():
+            # An Attribute error here means the field is not present in the preferred config model or
+            # that a preferred config has not been defined.
+
+            # The values in 'fallback_defaults' will be used if no preferred config is set, or if 
+            # a default value is needed for a field not defined on the config model.
+            try:
+                getattr(preferred_config, field_name)
+            except AttributeError:
+                if field_name in fallback_defaults:
+                    field.initial = fallback_defaults.get(field_name)
+                continue
+            if type(field) == DynamicModelChoiceField:
+                field.initial = cls.get_field_config(
+                    field_name=field_name, 
+                    preferred_config=preferred_config, 
+                    default_value_type="id"
+                )
+            elif type(field) == DynamicModelMultipleChoiceField:
+                field.initial = cls.get_field_config(
+                    field_name=field_name, 
+                    preferred_config=preferred_config, 
+                    default_value_type="id_list"
+                )
+            elif type(field) == BooleanField:
+                field.initial = cls.get_field_config(
+                    field_name=field_name, 
+                    preferred_config=preferred_config, 
+                    default_value_type="boolean"
+                )
+                # field.initial = True
+            elif type(field) == IntegerField:
+                field.initial = cls.get_field_config(
+                    field_name=field_name, 
+                    preferred_config=preferred_config, 
+                    default_value_type="integer"
+                )
+            else:
+                continue
+        return type("JobForm", (JobForm,), fields)
+
+    def get_field_config(field_name, preferred_config, default_value_type=None):
         """Get default config for a given job form field."""
         if preferred_config:
-            if getattr(preferred_config, default_config_name):
-                return getattr(preferred_config, default_config_name)
-        # If a config value is not provided for port or timeout, use sane defaults
-        if default_config_name == "default_port":
-            return 22
-        if default_config_name == "default_timeout":
-            return 30
+            if getattr(preferred_config, field_name):
+                if default_value_type == "id":
+                    return str(getattr(preferred_config, field_name).id)
+                elif default_value_type == "boolean":
+                    return getattr(preferred_config, field_name)
+                elif default_value_type == "integer":
+                    return getattr(preferred_config, field_name)
+            # elif getattr(preferred_config, field_name):
+            #     if default_value_type == "id_list":
+                    # TODO: Add support for DynamicModelMultipleChoiceField
+                # If the default value does not need to processed before rendering to the form,
+                # just return the stored value as is
         return ""
-
-    preferred_config = models.OnboardingConfigSyncDevices.objects.filter(preferred_config=True).first()
 
     debug = BooleanVar(
         default=False,
         description="Enable for more verbose logging.",
     )
     connectivity_test = BooleanVar(
-        default=get_field_config("default_connectivity_test", preferred_config),
         description="Enable to test connectivity to the device(s) prior to attempting onboarding.",
     )
     csv_file = FileVar(
@@ -279,7 +338,6 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
     namespace = ObjectVar(
         model=Namespace,
         required=False,
-        default=get_field_config("default_namespace", preferred_config),
         description="Namespace ip addresses belong to.",
     )
     ip_addresses = StringVar(
@@ -289,9 +347,8 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
     )
     port = IntegerVar(
         required=False,
-        default=get_field_config("default_connectivity_test", preferred_config),
     )
-    timeout = IntegerVar(required=False, default=30)
+    timeout = IntegerVar(required=False)
     set_mgmt_only = BooleanVar(
         default=True,
         label="Set Management Only",
@@ -306,21 +363,18 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         model=Role,
         query_params={"content_types": "dcim.device"},
         required=False,
-        default=get_field_config("default_device_role", preferred_config),
         description="Role to be applied to all synced devices.",
     )
     device_status = ObjectVar(
         model=Status,
         query_params={"content_types": "dcim.device"},
         required=False,
-        default=get_field_config("default_device_status", preferred_config),
         description="Status to be applied to all synced devices.",
     )
     interface_status = ObjectVar(
         model=Status,
         query_params={"content_types": "dcim.interface"},
         required=False,
-        default=get_field_config("default_interface_status", preferred_config),
         description="Status to be applied to all new synced device interfaces. This value does not update with additional syncs.",
     )
     ip_address_status = ObjectVar(
@@ -328,19 +382,16 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         model=Status,
         query_params={"content_types": "ipam.ipaddress"},
         required=False,
-        default=get_field_config("default_ip_address_status", preferred_config),
         description="Status to be applied to all new synced IP addresses. This value does not update with additional syncs.",
     )
     secrets_group = ObjectVar(
         model=SecretsGroup,
         required=False,
-        default=get_field_config("default_secrets_group", preferred_config),
         description="SecretsGroup for device connection credentials.",
     )
     platform = ObjectVar(
         model=Platform,
         required=False,
-        default=get_field_config("default_platform", preferred_config),
         description="Device platform. Define ONLY to override auto-recognition of platform.",
     )
 
@@ -585,48 +636,100 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         description = "Synchronize extended device attribute information into Nautobot from one or more network devices. Information includes Interfaces, IP Addresses, Prefixes, VLANs and VRFs."
         has_sensitive_variables = False
 
-    def get_field_config(default_config_name, preferred_config):
+    @classmethod
+    def as_form_class(cls):
+        """
+        Dynamically generate a Django form class corresponding to the variables in this Job.
+
+        In most cases you should use `.as_form()` instead of calling this method directly.
+        """
+        preferred_config = models.OnboardingConfigSyncNetworkDataFromNetwork.objects.filter(preferred_config=True).first()
+        fields = {name: var.as_field() for name, var in cls._get_vars().items()}
+        fallback_defaults = {
+            "port": 22, 
+            "timeout": 30,
+        }
+
+        for field_name, field in fields.items():
+            # An Attribute error here means the field is not present in the preferred config model or
+            # that a preferred config has not been defined.
+
+            # The values in 'fallback_defaults' will be used if no preferred config is set, or if 
+            # a default value is needed for a field not defined on the config model.
+            try:
+                getattr(preferred_config, field_name)
+            except AttributeError:
+                if field_name in fallback_defaults:
+                    field.initial = fallback_defaults.get(field_name)
+                continue
+            if type(field) == DynamicModelChoiceField:
+                field.initial = cls.get_field_config(
+                    field_name=field_name, 
+                    preferred_config=preferred_config, 
+                    default_value_type="id"
+                )
+            elif type(field) == DynamicModelMultipleChoiceField:
+                field.initial = cls.get_field_config(
+                    field_name=field_name, 
+                    preferred_config=preferred_config, 
+                    default_value_type="id_list"
+                )
+            elif type(field) == BooleanField:
+                field.initial = cls.get_field_config(
+                    field_name=field_name, 
+                    preferred_config=preferred_config, 
+                    default_value_type="boolean"
+                )
+                # field.initial = True
+            elif type(field) == IntegerField:
+                field.initial = cls.get_field_config(
+                    field_name=field_name, 
+                    preferred_config=preferred_config, 
+                    default_value_type="integer"
+                )
+            else:
+                continue
+        return type("JobForm", (JobForm,), fields)
+
+    def get_field_config(field_name, preferred_config, default_value_type=None):
         """Get default config for a given job form field."""
         if preferred_config:
-            if getattr(preferred_config, default_config_name):
-                return getattr(preferred_config, default_config_name)
-        # If a config value is not provided for port or timeout, use sane defaults
-        if default_config_name == "default_port":
-            return 22
-        if default_config_name == "default_timeout":
-            return 30
+            if getattr(preferred_config, field_name):
+                if default_value_type == "id":
+                    return str(getattr(preferred_config, field_name).id)
+                elif default_value_type == "boolean":
+                    return getattr(preferred_config, field_name)
+                elif default_value_type == "integer":
+                    return getattr(preferred_config, field_name)
+            # elif getattr(preferred_config, field_name):
+            #     if default_value_type == "id_list":
+                    # TODO: Add support for DynamicModelMultipleChoiceField
+                # If the default value does not need to processed before rendering to the form,
+                # just return the stored value as is
         return ""
-
-    preferred_config = models.OnboardingConfigSyncNetworkDataFromNetwork.objects.filter(preferred_config=True).first()
-
+    
     debug = BooleanVar(description="Enable for more verbose logging.")
     connectivity_test = BooleanVar(
-        default=get_field_config("default_connectivity_test", preferred_config),
         description="Enable to test connectivity to the device(s) prior to attempting onboarding.",
     )
     sync_vlans = BooleanVar(
-        default=get_field_config("default_sync_vlans", preferred_config),
         description="Sync VLANs and interface VLAN assignments.",
     )
     sync_vrfs = BooleanVar(
-        default=get_field_config("default_sync_vrfs", preferred_config),
         description="Sync VRFs and interface VRF assignments.",
     )
     sync_cables = BooleanVar(
-        default=get_field_config("default_sync_cables", preferred_config),
         description="Sync cables between interfaces via a LLDP or CDP.",
     )
     namespace = ObjectVar(
         model=Namespace,
         required=True,
-        default=get_field_config("default_namespace", preferred_config),
         description="The namespace for all IP addresses created or updated in the sync.",
     )
     interface_status = ObjectVar(
         model=Status,
         query_params={"content_types": "dcim.interface"},
         required=True,
-        default=get_field_config("default_interface_status", preferred_config),
         description="Status to be applied to all synced device interfaces. This will update existing interface statuses.",
     )
     ip_address_status = ObjectVar(
@@ -634,7 +737,6 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         model=Status,
         query_params={"content_types": "ipam.ipaddress"},
         required=True,
-        default=get_field_config("default_ip_address_status", preferred_config),
         description="Status to be applied to all synced IP addresses. This will update existing IP address statuses",
     )
 
@@ -642,7 +744,6 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         model=Status,
         query_params={"content_types": "ipam.prefix"},
         required=True,
-        default=get_field_config("default_prefix_status", preferred_config),
         description="Status to be applied to all new created prefixes. Prefix status does not update with additional syncs.",
     )
     devices = MultiObjectVar(

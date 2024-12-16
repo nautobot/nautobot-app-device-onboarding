@@ -13,60 +13,60 @@ class OnboardingConfigSyncDevices(PrimaryModel):  # pylint: disable=too-many-anc
 
     name = models.CharField(max_length=100, unique=True)
     preferred_config = models.BooleanField(default=False)
-    default_connectivity_test = models.BooleanField(default=False)
-    default_namespace = models.ForeignKey(
+    connectivity_test = models.BooleanField(default=False)
+    namespace = models.ForeignKey(
         to="ipam.Namespace",
         on_delete=models.PROTECT,
         related_name="sync_devices_onboarding_configs",
         blank=True,
         null=True,
     )
-    default_device_role = models.ForeignKey(
+    device_role = models.ForeignKey(
         to="extras.Role",
         on_delete=models.PROTECT,
         related_name="sync_devices_onboarding_configs",
         blank=True,
         null=True,
     )
-    default_secrets_group = models.ForeignKey(
+    secrets_group = models.ForeignKey(
         to="extras.SecretsGroup",
         on_delete=models.PROTECT,
         related_name="sync_devices_onboarding_configs",
         blank=True,
         null=True,
     )
-    default_platform = models.ForeignKey(
+    platform = models.ForeignKey(
         to="dcim.Platform",
         on_delete=models.PROTECT,
         blank=True,
         null=True,
     )
-    default_device_status = models.ForeignKey(
+    device_status = models.ForeignKey(
         to="extras.Status",
         on_delete=models.PROTECT,
         related_name="+",
         blank=True,
         null=True,
     )
-    default_interface_status = models.ForeignKey(
+    interface_status = models.ForeignKey(
         to="extras.Status",
         on_delete=models.PROTECT,
         related_name="+",
         blank=True,
         null=True,
     )
-    default_ip_address_status = models.ForeignKey(
+    ip_address_status = models.ForeignKey(
         to="extras.Status",
         on_delete=models.PROTECT,
         related_name="+",
         blank=True,
         null=True,
     )
-    default_port = models.IntegerField(
+    port = models.IntegerField(
         blank=True,
         null=True,
     )
-    default_timeout = models.IntegerField(
+    timeout = models.IntegerField(
         blank=True,
         null=True,
     )
@@ -87,25 +87,25 @@ class OnboardingConfigSyncNetworkDataFromNetwork(PrimaryModel):  # pylint: disab
 
     name = models.CharField(max_length=100, unique=True)
     preferred_config = models.BooleanField(default=False)
-    default_connectivity_test = models.BooleanField(default=False)
-    default_sync_vlans = models.BooleanField(default=False)
-    default_sync_vrfs = models.BooleanField(default=False)
-    default_sync_cables = models.BooleanField(default=False)
-    default_namespace = models.ForeignKey(
+    connectivity_test = models.BooleanField(default=False)
+    sync_vlans = models.BooleanField(default=False)
+    sync_vrfs = models.BooleanField(default=False)
+    sync_cables = models.BooleanField(default=False)
+    namespace = models.ForeignKey(
         to="ipam.Namespace",
         on_delete=models.PROTECT,
         related_name="sync_network_data_onboarding_configs",
         blank=True,
         null=True,
     )
-    default_interface_status = models.ForeignKey(
+    interface_status = models.ForeignKey(
         to="extras.Status",
         on_delete=models.PROTECT,
         related_name="+",
         blank=True,
         null=True,
     )
-    default_ip_address_status = models.ForeignKey(
+    ip_address_status = models.ForeignKey(
         to="extras.Status",
         on_delete=models.PROTECT,
         related_name="+",
