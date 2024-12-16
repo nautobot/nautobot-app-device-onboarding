@@ -81,6 +81,18 @@ class OnboardingConfigSyncDevices(PrimaryModel):  # pylint: disable=too-many-anc
         """Stringify instance."""
         return self.name
 
+    def save(self, *args, **kwargs):
+        """
+        Overrides the save method to ensure only config is "preferred".
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+        """
+        if self.preferred_config:
+            OnboardingConfigSyncDevices.objects.exclude(pk=self.pk).update(preferred_config=False)
+        super().save(*args, **kwargs)
+
 
 class OnboardingConfigSyncNetworkDataFromNetwork(PrimaryModel):  # pylint: disable=too-many-ancestors
     """Settings used by the Nautobot Device Onboarding app when running Sync Network Data From Network."""
@@ -132,3 +144,15 @@ class OnboardingConfigSyncNetworkDataFromNetwork(PrimaryModel):  # pylint: disab
     def __str__(self):
         """Stringify instance."""
         return self.name
+    
+    def save(self, *args, **kwargs):
+        """
+        Overrides the save method to ensure only config is "preferred".
+
+        Args:
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+        """
+        if self.preferred_config:
+            OnboardingConfigSyncNetworkDataFromNetwork.objects.exclude(pk=self.pk).update(preferred_config=False)
+        super().save(*args, **kwargs)
