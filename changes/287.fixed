@@ -1,0 +1,1 @@
+- Fix conditional logic to only show job log entries when git repo is used.
