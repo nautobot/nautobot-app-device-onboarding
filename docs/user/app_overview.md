@@ -9,7 +9,7 @@ This [Nautobot](https://github.com/nautobot/nautobot) App allows to easily onboa
 
 ## Description/Overview
 
-This section descibes the new implementaiton (SSoT Implementation) and the Original implementation.
+This section describes the new implementation (SSoT Implementation) and the original implementation.
 
 ### New SSoT Implementation
 
