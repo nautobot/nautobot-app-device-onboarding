@@ -55,6 +55,7 @@ class OnboardingConfigSyncNetworkDataFromNetworkTable(BaseTable):
     sync_vlans = tables.Column(linkify=True, verbose_name="Sync VLANs")
     sync_vrfs = tables.Column(linkify=True, verbose_name="Sync VRFs")
     sync_cables = tables.Column(linkify=True, verbose_name="Sync Cables")
+    sync_software = tables.Column(linkify=True, verbose_name="Sync Cables")
     namespace = tables.Column(linkify=True, verbose_name="Namespace")
     interface_status = ColoredLabelColumn(linkify=True, verbose_name="Interface Status")
     ip_address_status = ColoredLabelColumn(linkify=True, verbose_name="IP Address Status")
@@ -71,6 +72,7 @@ class OnboardingConfigSyncNetworkDataFromNetworkTable(BaseTable):
             "sync_vlans",
             "sync_vrfs",
             "sync_cables",
+            "sync_software",
             "namespace",
             "interface_status",
             "ip_address_status",

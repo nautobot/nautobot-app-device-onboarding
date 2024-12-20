@@ -122,6 +122,11 @@ class OnboardingConfigSyncNetworkDataFromNetworkForm(NautobotModelForm):  # pyli
         label="Sync Cables",
         widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
     )
+    sync_software = forms.BooleanField(
+        required=False,
+        label="Sync Software",
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+    )
 
     class Meta:
         """Meta attributes."""
@@ -134,6 +139,7 @@ class OnboardingConfigSyncNetworkDataFromNetworkForm(NautobotModelForm):  # pyli
             "sync_vlans",
             "sync_vrfs",
             "sync_cables",
+            "sync_software",
             "namespace",
             "interface_status",
             "ip_address_status",

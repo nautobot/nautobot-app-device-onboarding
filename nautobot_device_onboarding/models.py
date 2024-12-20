@@ -103,6 +103,7 @@ class OnboardingConfigSyncNetworkDataFromNetwork(PrimaryModel):  # pylint: disab
     sync_vlans = models.BooleanField(default=False)
     sync_vrfs = models.BooleanField(default=False)
     sync_cables = models.BooleanField(default=False)
+    sync_software = models.BooleanField(default=False)
     namespace = models.ForeignKey(
         to="ipam.Namespace",
         on_delete=models.PROTECT,
@@ -144,7 +145,7 @@ class OnboardingConfigSyncNetworkDataFromNetwork(PrimaryModel):  # pylint: disab
     def __str__(self):
         """Stringify instance."""
         return self.name
-    
+
     def save(self, *args, **kwargs):
         """
         Overrides the save method to ensure only config is "preferred".

@@ -1,6 +1,6 @@
 # pylint: disable=attribute-defined-outside-init
 """Device Onboarding Jobs."""
-from nautobot.extras.forms import JobForm
+
 import csv
 import json
 import logging
@@ -13,9 +13,10 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.forms.fields import BooleanField, IntegerField
 from nautobot.apps.jobs import BooleanVar, ChoiceVar, FileVar, IntegerVar, Job, MultiObjectVar, ObjectVar, StringVar
 from nautobot.core.celery import register_jobs
-from nautobot.core.forms.fields import DynamicModelChoiceField, DynamicModelMultipleChoiceField 
+from nautobot.core.forms.fields import DynamicModelChoiceField, DynamicModelMultipleChoiceField
 from nautobot.dcim.models import Device, DeviceType, Location, Platform
 from nautobot.extras.choices import CustomFieldTypeChoices, SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
+from nautobot.extras.forms import JobForm
 from nautobot.extras.models import CustomField, Role, SecretsGroup, SecretsGroupAssociation, Status
 from nautobot.ipam.models import Namespace
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
@@ -227,8 +228,133 @@ class OnboardingTask(Job):  # pylint: disable=too-many-instance-attributes
             self.secret = settings.NAPALM_ARGS.get("secret", None)
 
 
-class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attributes
+class JobFormDefaultConfigMixin:
+    """
+    Mixin class to provide default configuration values for job form fields.
+
+    This mixin is used to automatically populate job form fields with default values
+    based on a preferred configuration model. It also supports fallback default values
+    if the preferred configuration does not provide a value.
+
+    The config model attributes should share the same name as the form field inputs.
+    An model containing the default configuration and fallback default dictionary must be provided as
+    class attributes.
+
+    Attributes:
+        config_model (class): The preferred configuration model containing default values.
+        fallback_defaults (dict): A dictionary of fallback default values if the preferred configuration does not provide a value.
+
+    Methods:
+        get_field_config(field_name, preferred_config, default_value_type=None, fallback_defaults=None):
+            Retrieve the default configuration value for a given job form field.
+
+    fallback defaults example:
+        fallback_defaults = {
+            "port": 22,
+            "timeout": 30,
+        }
+    """
+
+    @classmethod
+    def as_form_class(cls):
+        """
+        Dynamically generate a Django form class corresponding to the variables in this Job.
+
+        In most cases you should use `.as_form()` instead of calling this method directly.
+        """
+        fields = {name: var.as_field() for name, var in cls._get_vars().items()}
+        # The values in 'fallback_defaults' will be used if no preferred config is set, or if
+        # a default value is needed for a field not defined on the config model.
+        preferred_config = cls.config_model.objects.filter(preferred_config=True).first()
+
+        for field_name, field in fields.items():
+            # An Attribute error here means the field is not present in the preferred config model
+            try:
+                getattr(preferred_config, field_name)
+            except AttributeError:
+                if field_name in cls.fallback_defaults:
+                    field.initial = cls.fallback_defaults.get(field_name)
+                continue
+            if isinstance(field, DynamicModelChoiceField):
+                field.initial = cls.get_field_config(
+                    field_name=field_name,
+                    preferred_config=preferred_config,
+                    default_value_type="id",
+                    fallback_defaults=cls.fallback_defaults,
+                )
+            elif isinstance(field, BooleanField):
+                field.initial = cls.get_field_config(
+                    field_name=field_name,
+                    preferred_config=preferred_config,
+                    default_value_type="boolean",
+                    fallback_defaults=cls.fallback_defaults,
+                )
+            elif isinstance(field, IntegerField):
+                field.initial = cls.get_field_config(
+                    field_name=field_name,
+                    preferred_config=preferred_config,
+                    default_value_type="integer",
+                    fallback_defaults=cls.fallback_defaults,
+                )
+            elif isinstance(field, DynamicModelMultipleChoiceField):
+                field.initial = cls.get_field_config(
+                    field_name=field_name,
+                    preferred_config=preferred_config,
+                    default_value_type="id_list",
+                    fallback_defaults=cls.fallback_defaults,
+                )
+            else:
+                continue
+        return type("JobForm", (JobForm,), fields)
+
+    def get_field_config(field_name, preferred_config, default_value_type=None, fallback_defaults=None):
+        """
+        Retrieve the default configuration value for a given job form field.
+
+        Args:
+            field_name (str): The name of the field for which to retrieve the default value.
+            preferred_config (object): The preferred configuration object containing default values.
+            default_value_type (str, optional): The type of the default value. Can be "id", "boolean", or "integer".
+            fallback_defaults (dict, optional): A dictionary of fallback default values if the preferred configuration does not provide a value.
+
+        Returns:
+            str or int or bool: The default value for the field, based on the preferred configuration or fallback defaults.
+        """
+        if preferred_config:
+            if default_value_type == "id":
+                default_value = getattr(preferred_config, field_name)
+                if not default_value:
+                    if fallback_defaults:
+                        if field_name in fallback_defaults.keys():
+                            return fallback_defaults.get(field_name)
+                    else:
+                        return default_value
+                else:
+                    return str(default_value.id)
+            elif default_value_type in ("boolean", "integer"):
+                default_value = getattr(preferred_config, field_name)
+                if not default_value:
+                    if fallback_defaults:
+                        if field_name in fallback_defaults.keys():
+                            return fallback_defaults.get(field_name)
+                    else:
+                        return default_value
+                else:
+                    return default_value
+            # elif getattr(preferred_config, field_name):
+            #     if default_value_type == "id_list":
+            # TODO: Add support for DynamicModelMultipleChoiceField
+        return ""
+
+
+class SSOTSyncDevices(JobFormDefaultConfigMixin, DataSource):  # pylint: disable=too-many-instance-attributes
     """Job for syncing basic device info from a network into Nautobot."""
+
+    config_model = models.OnboardingConfigSyncDevices
+    fallback_defaults = {
+        "port": 22,
+        "timeout": 30,
+    }
 
     def __init__(self, *args, **kwargs):
         """Initialize SSoTSyncDevices."""
@@ -244,78 +370,6 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         name = "Sync Devices From Network"
         description = "Synchronize basic device information into Nautobot from one or more network devices. Information includes Device Name, Serial Number, Management IP/Interface."
         has_sensitive_variables = False
-
-    @classmethod
-    def as_form_class(cls):
-        """
-        Dynamically generate a Django form class corresponding to the variables in this Job.
-
-        In most cases you should use `.as_form()` instead of calling this method directly.
-        """
-        preferred_config = models.OnboardingConfigSyncDevices.objects.filter(preferred_config=True).first()
-        fields = {name: var.as_field() for name, var in cls._get_vars().items()}
-        fallback_defaults = {
-            "port": 22, 
-            "timeout": 30,
-        }
-
-        for field_name, field in fields.items():
-            # An Attribute error here means the field is not present in the preferred config model or
-            # that a preferred config has not been defined.
-
-            # The values in 'fallback_defaults' will be used if no preferred config is set, or if 
-            # a default value is needed for a field not defined on the config model.
-            try:
-                getattr(preferred_config, field_name)
-            except AttributeError:
-                if field_name in fallback_defaults:
-                    field.initial = fallback_defaults.get(field_name)
-                continue
-            if type(field) == DynamicModelChoiceField:
-                field.initial = cls.get_field_config(
-                    field_name=field_name, 
-                    preferred_config=preferred_config, 
-                    default_value_type="id"
-                )
-            elif type(field) == DynamicModelMultipleChoiceField:
-                field.initial = cls.get_field_config(
-                    field_name=field_name, 
-                    preferred_config=preferred_config, 
-                    default_value_type="id_list"
-                )
-            elif type(field) == BooleanField:
-                field.initial = cls.get_field_config(
-                    field_name=field_name, 
-                    preferred_config=preferred_config, 
-                    default_value_type="boolean"
-                )
-                # field.initial = True
-            elif type(field) == IntegerField:
-                field.initial = cls.get_field_config(
-                    field_name=field_name, 
-                    preferred_config=preferred_config, 
-                    default_value_type="integer"
-                )
-            else:
-                continue
-        return type("JobForm", (JobForm,), fields)
-
-    def get_field_config(field_name, preferred_config, default_value_type=None):
-        """Get default config for a given job form field."""
-        if preferred_config:
-            if getattr(preferred_config, field_name):
-                if default_value_type == "id":
-                    return str(getattr(preferred_config, field_name).id)
-                elif default_value_type == "boolean":
-                    return getattr(preferred_config, field_name)
-                elif default_value_type == "integer":
-                    return getattr(preferred_config, field_name)
-            # elif getattr(preferred_config, field_name):
-            #     if default_value_type == "id_list":
-                    # TODO: Add support for DynamicModelMultipleChoiceField
-                # If the default value does not need to processed before rendering to the form,
-                # just return the stored value as is
-        return ""
 
     debug = BooleanVar(
         default=False,
@@ -618,8 +672,11 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         super().run(dryrun, memory_profiling, *args, **kwargs)
 
 
-class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attributes
+class SSOTSyncNetworkData(JobFormDefaultConfigMixin, DataSource):  # pylint: disable=too-many-instance-attributes
     """Job syncing extended device attributes into Nautobot."""
+
+    config_model = models.OnboardingConfigSyncNetworkDataFromNetwork
+    fallback_defaults = {}
 
     def __init__(self, *args, **kwargs):
         """Initialize SSOTSyncNetworkData."""
@@ -636,78 +693,6 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         description = "Synchronize extended device attribute information into Nautobot from one or more network devices. Information includes Interfaces, IP Addresses, Prefixes, VLANs and VRFs."
         has_sensitive_variables = False
 
-    @classmethod
-    def as_form_class(cls):
-        """
-        Dynamically generate a Django form class corresponding to the variables in this Job.
-
-        In most cases you should use `.as_form()` instead of calling this method directly.
-        """
-        preferred_config = models.OnboardingConfigSyncNetworkDataFromNetwork.objects.filter(preferred_config=True).first()
-        fields = {name: var.as_field() for name, var in cls._get_vars().items()}
-        fallback_defaults = {
-            "port": 22, 
-            "timeout": 30,
-        }
-
-        for field_name, field in fields.items():
-            # An Attribute error here means the field is not present in the preferred config model or
-            # that a preferred config has not been defined.
-
-            # The values in 'fallback_defaults' will be used if no preferred config is set, or if 
-            # a default value is needed for a field not defined on the config model.
-            try:
-                getattr(preferred_config, field_name)
-            except AttributeError:
-                if field_name in fallback_defaults:
-                    field.initial = fallback_defaults.get(field_name)
-                continue
-            if type(field) == DynamicModelChoiceField:
-                field.initial = cls.get_field_config(
-                    field_name=field_name, 
-                    preferred_config=preferred_config, 
-                    default_value_type="id"
-                )
-            elif type(field) == DynamicModelMultipleChoiceField:
-                field.initial = cls.get_field_config(
-                    field_name=field_name, 
-                    preferred_config=preferred_config, 
-                    default_value_type="id_list"
-                )
-            elif type(field) == BooleanField:
-                field.initial = cls.get_field_config(
-                    field_name=field_name, 
-                    preferred_config=preferred_config, 
-                    default_value_type="boolean"
-                )
-                # field.initial = True
-            elif type(field) == IntegerField:
-                field.initial = cls.get_field_config(
-                    field_name=field_name, 
-                    preferred_config=preferred_config, 
-                    default_value_type="integer"
-                )
-            else:
-                continue
-        return type("JobForm", (JobForm,), fields)
-
-    def get_field_config(field_name, preferred_config, default_value_type=None):
-        """Get default config for a given job form field."""
-        if preferred_config:
-            if getattr(preferred_config, field_name):
-                if default_value_type == "id":
-                    return str(getattr(preferred_config, field_name).id)
-                elif default_value_type == "boolean":
-                    return getattr(preferred_config, field_name)
-                elif default_value_type == "integer":
-                    return getattr(preferred_config, field_name)
-            # elif getattr(preferred_config, field_name):
-            #     if default_value_type == "id_list":
-                    # TODO: Add support for DynamicModelMultipleChoiceField
-                # If the default value does not need to processed before rendering to the form,
-                # just return the stored value as is
-        return ""
-    
     debug = BooleanVar(description="Enable for more verbose logging.")
     connectivity_test = BooleanVar(
         description="Enable to test connectivity to the device(s) prior to attempting onboarding.",
