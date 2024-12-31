@@ -64,11 +64,7 @@ The new SSoT based jobs each use their own Nornir inventories.
 
 ### Onboarding a Device
 
-Navigate to the Device Onboarding Job: Jobs > Perform Device Onboarding (original).
-
-or
-
-Navigate to the SSoT dashboard and run `Sync Devices` to get basic device and information onboarding, followed by `Sync Network Data` to add additional details from the network to these devices. E.g. Interfaces, IPs, VRFs, VLANs.
+Navigate to the `Jobs` page from the nautobot navigation bar. Run `Sync Devices From Network` to get basic device and information onboarding, followed by `Sync Network Data From Network` to add additional details from the network to these devices. E.g. Interfaces, IPs, VRFs, VLANs.
 
 ## What are the next steps?
 
