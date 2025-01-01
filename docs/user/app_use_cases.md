@@ -107,7 +107,7 @@ PLUGINS_CONFIG = {
             "netmiko": {
                 "extras": {
                     "use_keys": True,
-                    "key_file": "/root/.ssh/id_rsa.pub",
+                    "key_file": "/root/.ssh/id_rsa",
                     "disabled_algorithms": {"pubkeys": ["rsa-sha2-256", "rsa-sha2-512"]},
                 },
             },
@@ -116,7 +116,7 @@ PLUGINS_CONFIG = {
 }
 ```
 
-3. Make a secrets group in Nautobot which still had all the elements (username and password), where the username is accurate, a bogus password can be used as its ignored by the backend processing. For example, set the password to the username secret since its ignore.
+3. Make a secrets group in Nautobot which has the accurate `username` to use along with the key specified in configuration above.
 
 4. Run the jobs and ssh public key authentication will be used.
 

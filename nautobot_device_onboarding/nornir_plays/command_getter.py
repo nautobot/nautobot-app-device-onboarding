@@ -2,13 +2,13 @@
 
 import json
 import os
-from typing import Dict
+from typing import Dict, Tuple, Union
 
 from django.conf import settings
 from nautobot.dcim.models import Platform
 from nautobot.dcim.utils import get_all_network_driver_mappings
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
-from nautobot.extras.models import SecretsGroup
+from nautobot.extras.models import SecretsGroup, SecretsGroupAssociation
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
 from netutils.ping import tcp_ping
@@ -224,8 +224,10 @@ def netmiko_send_commands(
             task.results[result_idx].failed = False
 
 
-def _parse_credentials(credentials):
-    """Parse and return dictionary of credentials."""
+def _parse_credentials(credentials: Union[SecretsGroup,None], logger: NornirLogger=None) -> Tuple[str, str]:
+    """Parse creds from either secretsgroup or settings, return tuple of username/password."""
+    username, password = None, None
+
     if credentials:
         try:
             username = credentials.get_secret_value(
@@ -236,20 +238,22 @@ def _parse_credentials(credentials):
                 access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
                 secret_type=SecretsGroupSecretTypeChoices.TYPE_PASSWORD,
             )
-            try:
-                secret = credentials.get_secret_value(
-                    access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
-                    secret_type=SecretsGroupSecretTypeChoices.TYPE_SECRET,
-                )
-            except Exception:  # pylint: disable=broad-exception-caught
-                secret = None
-        except Exception:  # pylint: disable=broad-exception-caught
-            return (None, None, None)
+        except SecretsGroupAssociation.DoesNotExist:
+            pass
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logger.debug(f"Error processing credentials from secrets group {credentials.name}: {e}")
+            pass
     else:
         username = settings.NAPALM_USERNAME
         password = settings.NAPALM_PASSWORD
-        secret = settings.NAPALM_ARGS.get("secret", None)
-    return (username, password, secret)
+
+    missing_creds = []
+    for cred_var in ['username', 'password']:
+        if not locals().get(cred_var, None):
+            missing_creds.append(cred_var)
+    if missing_creds:
+        logger.debug(f"Missing credentials for {missing_creds}")
+    return (username, password)
 
 
 def sync_devices_command_getter(job_result, log_level, kwargs):
@@ -265,7 +269,7 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
         port = kwargs["port"]
         # timeout = kwargs["timeout"]
         platform = kwargs["platform"]
-        username, password, secret = _parse_credentials(kwargs["secrets_group"])
+        username, password = _parse_credentials(kwargs["secrets_group"], logger=logger)
 
     # Initiate Nornir instance with empty inventory
     try:
@@ -297,7 +301,7 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                         if new_secrets_group != loaded_secrets_group:
                             logger.info(f"Parsing credentials from Secrets Group: {new_secrets_group.name}")
                             loaded_secrets_group = new_secrets_group
-                            username, password, secret = _parse_credentials(loaded_secrets_group)
+                            username, password = _parse_credentials(loaded_secrets_group, logger=logger)
                             if not (username and password):
                                 logger.error(f"Unable to onboard {entered_ip}, failed to parse credentials")
                         single_host_inventory_constructed, exc_info = _set_inventory(

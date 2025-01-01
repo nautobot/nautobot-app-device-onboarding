@@ -2,10 +2,15 @@
 
 import os
 import unittest
+from unittest.mock import MagicMock, patch
 
 import yaml
+from nautobot.core.testing import TransactionTestCase
+from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
+from nautobot.extras.models import Secret, SecretsGroup, SecretsGroupAssociation
 
-from nautobot_device_onboarding.nornir_plays.command_getter import _get_commands_to_run
+from nautobot_device_onboarding.nornir_plays.command_getter import _get_commands_to_run, _parse_credentials
+from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 
 MOCK_DIR = os.path.join("nautobot_device_onboarding", "tests", "mock")
 
@@ -217,3 +222,46 @@ class TestGetCommandsToRun(unittest.TestCase):
             },
         ]
         self.assertEqual(get_commands_to_run, expected_commands_to_run)
+
+@patch("nautobot_device_onboarding.nornir_plays.command_getter.NornirLogger", MagicMock())
+class TestSSHCredParsing(TransactionTestCase):
+    databases = ("default", "job_logs")
+
+    def setUp(self):  # pylint: disable=invalid-name
+        """Initialize test case."""
+        username_secret, _ = Secret.objects.get_or_create(
+            name="username", provider="environment-variable", parameters={"variable": "DEVICE_USER"}
+        )
+        password_secret, _ = Secret.objects.get_or_create(
+            name="password", provider="environment-variable", parameters={"variable": "DEVICE_PASS"}
+        )
+        self.secrets_group, _ = SecretsGroup.objects.get_or_create(name="test secrets group")
+        SecretsGroupAssociation.objects.get_or_create(
+            secrets_group=self.secrets_group,
+            secret=username_secret,
+            access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
+            secret_type=SecretsGroupSecretTypeChoices.TYPE_USERNAME,
+        )
+        SecretsGroupAssociation.objects.get_or_create(
+            secrets_group=self.secrets_group,
+            secret=password_secret,
+            access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
+            secret_type=SecretsGroupSecretTypeChoices.TYPE_PASSWORD,
+        )
+
+    @patch.dict(os.environ, {"DEVICE_USER": "admin", "DEVICE_PASS": "worstP$$w0rd"})
+    def test_parse_user_and_pass(self):
+        """Extract correct user and password from secretgroup env-vars"""
+        assert _parse_credentials(credentials=self.secrets_group, logger=NornirLogger(job_result={}, log_level=1)) == ("admin", "worstP$$w0rd")
+
+    @patch.dict(os.environ, {"DEVICE_USER": "admin"})
+    def test_parse_user_missing_pass(self):
+        """Extract just the username without bailing out if password is missing"""
+        mock_job_result = MagicMock()
+        assert _parse_credentials(credentials=self.secrets_group, logger=NornirLogger(job_result=mock_job_result, log_level=1)) == ("admin", None)
+        mock_job_result.log.assert_called_with("Missing credentials for ['password']", level_choice='debug')
+
+    @patch('nautobot_device_onboarding.nornir_plays.command_getter.settings', MagicMock(NAPALM_USERNAME='napalm_admin',NAPALM_PASSWORD='napalamP$$w0rd'))
+    def test_parse_napalm_creds(self):
+        """When no secrets group is provided, fallback to napalm creds"""
+        assert _parse_credentials(credentials=None, logger=NornirLogger(job_result=None, log_level=1)) == ('napalm_admin', 'napalamP$$w0rd')

@@ -1,14 +1,16 @@
 """Inventory Creator and Helpers."""
 
+from typing import Dict, Tuple, Union
+
 from netmiko import SSHDetect
 from nornir.core.inventory import ConnectionOptions, Host
 
 from nautobot_device_onboarding.constants import NETMIKO_EXTRAS
 
 
-def guess_netmiko_device_type(hostname, username, password, port):
+def guess_netmiko_device_type(hostname: str, username: str, password: str, port: str) -> Tuple[str, Union[Exception, None]]:
     """Guess the device type of host, based on Netmiko."""
-    netmiko_optional_args = {"port": port}
+    netmiko_optional_args = {"port": port, **NETMIKO_EXTRAS}
     guessed_device_type = None
 
     remote_device = {
@@ -30,7 +32,7 @@ def guess_netmiko_device_type(hostname, username, password, port):
     return guessed_device_type, guessed_exc
 
 
-def _set_inventory(host_ip, platform, port, username, password):
+def _set_inventory(host_ip: str, platform: str, port: str, username: str, password: str) -> Tuple[Dict, Union[Exception, None]]:
     """Construct Nornir Inventory."""
     inv = {}
     if platform:

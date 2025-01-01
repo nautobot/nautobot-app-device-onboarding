@@ -152,6 +152,8 @@ PLUGINS_CONFIG = {
                 "extras": {
                     "fast_cli": False,
                     "read_timeout_override": 30,
+                    "use_keys": True,
+                    "key_file": "/source/.ssh_test/id_rsa",
                 },
             },
         },
