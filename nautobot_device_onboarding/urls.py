@@ -5,7 +5,6 @@ from django.urls import path
 from django.views.generic import RedirectView
 from nautobot.apps.urls import NautobotUIViewSetRouter
 
-
 # Uncomment the following line if you have views to import
 # from nautobot_device_onboarding import views
 
