@@ -342,7 +342,7 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
 
         with InitNornir(
             runner=NORNIR_SETTINGS.get("runner"),
-            logging={"enabled": False},
+            logging={"enabled": True},
             inventory={
                 "plugin": "nautobot-inventory",
                 "options": {
