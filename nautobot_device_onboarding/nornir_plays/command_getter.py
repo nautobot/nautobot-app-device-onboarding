@@ -344,7 +344,7 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
             runner=NORNIR_SETTINGS.get("runner"),
             logging={"enabled": False},
             inventory={
-                "plugin": "empty-inventory",
+                "plugin": "nautobot-inventory",
                 "options": {
                     "credentials_class": NORNIR_SETTINGS.get("credentials"),
                     "queryset": qs,
