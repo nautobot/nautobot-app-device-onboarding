@@ -362,9 +362,11 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
         #     },
         # ) as nornir_obj:
 
-        username, password, secret = (
-            _parse_credentials(kwargs["secrets_group"])
-        )
+        # username, password, secret = (
+        #     _parse_credentials(kwargs["secrets_group"])
+        # )
+
+        import os
 
         with InitNornir(
             runner=NORNIR_SETTINGS.get("runner"),
@@ -376,8 +378,8 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
             single_host_inventory_constructed, _ = _set_inventory(
                 "10.111.34.13",
                 "cisco_nxos",
-                username,
-                password,
+                os.getenv("NETWORK_DEVICE_USERNAME"),
+                os.getenv("NETWORK_DEVICE_PASSWORD"),
             )
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
             nr_with_processors.run(
