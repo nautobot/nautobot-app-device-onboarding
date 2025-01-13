@@ -709,7 +709,8 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         # Filter devices based on form input
         device_filter = {}
         if self.devices:
-            device_filter["id__in"] = [device.id for device in devices]
+            #device_filter["id__in"] = [device.id for device in devices]
+            device_filter["pk__in"] = [device.id for device in devices]
         if self.location:
             device_filter["location"] = location
         if self.device_role:
