@@ -344,7 +344,7 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
             runner=NORNIR_SETTINGS.get("runner"),
             logging={"enabled": False},
             inventory={
-                "plugin": "nautobot-inventory",
+                "plugin": "empty-inventory",
                 "options": {
                     "credentials_class": NORNIR_SETTINGS.get("credentials"),
                     "queryset": qs,
@@ -360,10 +360,6 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
         ) as nornir_obj:
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
             creds = nr_with_processors.inventory.defaults.data["platform_parsing_info"]
-            logger.error(f"creds: {creds}")
-            logger.error(nr_with_processors.inventory)
-            logger.error(nr_with_processors.inventory.defaults)
-            logger.error(nr_with_processors.inventory.defaults.data)
 
             test = nr_with_processors.run(
                 task=netmiko_send_commands,
