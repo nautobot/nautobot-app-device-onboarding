@@ -726,6 +726,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
             self.logger.info("No devices returned based on filter selections.")
             return
 
+        self.logger.error(f"Device Filter -> {device_filter}")
         self.logger.error(f"Filtered Devices -> {self.filtered_devices}")
 
         # Log the devices that will be synced
