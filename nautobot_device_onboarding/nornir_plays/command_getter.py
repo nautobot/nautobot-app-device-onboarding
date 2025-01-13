@@ -339,6 +339,8 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
         qs = kwargs["devices"]
         if not qs:
             return None
+        
+        raise ValueError(qs)
         with InitNornir(
             runner=NORNIR_SETTINGS.get("runner"),
             logging={"enabled": False},
