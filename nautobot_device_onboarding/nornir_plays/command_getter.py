@@ -343,24 +343,42 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
         if not qs:
             return None
 
+        # with InitNornir(
+        #     runner=NORNIR_SETTINGS.get("runner"),
+        #     logging={"enabled": False},
+        #     inventory={
+        #         "plugin": "nautobot-inventory",
+        #         "options": {
+        #             "credentials_class": NORNIR_SETTINGS.get("credentials"),
+        #             "queryset": qs,
+        #             "defaults": {
+        #                 "platform_parsing_info": add_platform_parsing_info(),
+        #                 "network_driver_mappings": SUPPORTED_NETWORK_DRIVERS,
+        #                 "sync_vlans": kwargs["sync_vlans"],
+        #                 "sync_vrfs": kwargs["sync_vrfs"],
+        #                 "sync_cables": kwargs["sync_cables"],
+        #             },
+        #         },
+        #     },
+        # ) as nornir_obj:
+
+        username, password, secret = (
+            _parse_credentials(kwargs["secrets_group"])
+        )
+
         with InitNornir(
             runner=NORNIR_SETTINGS.get("runner"),
             logging={"enabled": False},
             inventory={
-                "plugin": "nautobot-inventory",
-                "options": {
-                    "credentials_class": NORNIR_SETTINGS.get("credentials"),
-                    "queryset": qs,
-                    "defaults": {
-                        "platform_parsing_info": add_platform_parsing_info(),
-                        "network_driver_mappings": SUPPORTED_NETWORK_DRIVERS,
-                        "sync_vlans": kwargs["sync_vlans"],
-                        "sync_vrfs": kwargs["sync_vrfs"],
-                        "sync_cables": kwargs["sync_cables"],
-                    },
-                },
+                "plugin": "empty-inventory",
             },
         ) as nornir_obj:
+            single_host_inventory_constructed, _ = _set_inventory(
+                "10.111.34.13",
+                "cisco_nxos",
+                username,
+                password,
+            )
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
             nr_with_processors.run(
                 task=netmiko_send_commands,
