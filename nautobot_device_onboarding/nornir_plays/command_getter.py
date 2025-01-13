@@ -381,6 +381,7 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
                 os.getenv("NETWORK_DEVICE_USERNAME"),
                 os.getenv("NETWORK_DEVICE_PASSWORD"),
             )
+            nornir_obj.inventory.hosts.update(single_host_inventory_constructed)
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
             nr_with_processors.run(
                 task=netmiko_send_commands,
