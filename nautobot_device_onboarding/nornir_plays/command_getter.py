@@ -32,6 +32,9 @@ from nautobot_device_onboarding.nornir_plays.transform import (
 )
 from nautobot_device_onboarding.utils.helper import check_for_required_file
 
+from nautobot_plugin_nornir.plugins.credentials.nautobot_secrets import CredentialsNautobotSecrets
+
+
 PARSER_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "parsers"))
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
@@ -342,11 +345,12 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
 
         with InitNornir(
             runner=NORNIR_SETTINGS.get("runner"),
-            logging={"enabled": True},
+            logging={"enabled": False},
             inventory={
                 "plugin": "nautobot-inventory",
                 "options": {
-                    "credentials_class": NORNIR_SETTINGS.get("credentials"),
+                    #"credentials_class": NORNIR_SETTINGS.get("credentials"),
+                    "credentials_class": CredentialsNautobotSecrets,
                     "queryset": qs,
                     "defaults": {
                         "platform_parsing_info": add_platform_parsing_info(),
@@ -359,11 +363,9 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
             },
         ) as nornir_obj:
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
-            creds = nr_with_processors.inventory.defaults.data["platform_parsing_info"]
-
-            test = nr_with_processors.run(
+            nr_with_processors.run(
                 task=netmiko_send_commands,
-                command_getter_yaml_data=creds,
+                command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
                 command_getter_job="sync_network_data",
                 logger=logger,
                 **kwargs,
