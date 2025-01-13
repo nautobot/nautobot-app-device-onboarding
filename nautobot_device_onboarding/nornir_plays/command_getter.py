@@ -378,6 +378,7 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
             single_host_inventory_constructed, _ = _set_inventory(
                 "10.111.34.13",
                 "cisco_nxos",
+                "22",
                 os.getenv("NETWORK_DEVICE_USERNAME"),
                 os.getenv("NETWORK_DEVICE_PASSWORD"),
             )
