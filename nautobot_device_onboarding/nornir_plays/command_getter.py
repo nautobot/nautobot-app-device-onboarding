@@ -360,7 +360,21 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
                 },
             },
         ) as nornir_obj:
+            logger.error(f"Nornir obj -> {nornir_obj}")
+            try:
+                logger.error(f"Nornir obj dict -> {nornir_obj.__dict__}")
+            except:
+                pass
+            
+            
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
+            logger.error(f"Nornir -> {nr_with_processors}")
+            logger.error(f"Nornir (Dir) -> {dir(nr_with_processors)}")
+            try:
+                logger.error(f"Nornir (dict) -> {nr_with_processors.__dict__}")
+            except:
+                pass
+
             nr_with_processors.run(
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
