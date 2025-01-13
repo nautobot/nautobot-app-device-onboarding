@@ -340,7 +340,7 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
         if not qs:
             return None
 
-        logger.error(qs)
+        logger.error(f"Queryset -> {qs}")
 
         with InitNornir(
             runner=NORNIR_SETTINGS.get("runner"),
