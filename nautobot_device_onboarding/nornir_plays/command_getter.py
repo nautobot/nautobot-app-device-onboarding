@@ -349,8 +349,7 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
             inventory={
                 "plugin": "nautobot-inventory",
                 "options": {
-                    #"credentials_class": NORNIR_SETTINGS.get("credentials"),
-                    "credentials_class": CredentialsNautobotSecrets,
+                    "credentials_class": NORNIR_SETTINGS.get("credentials"),
                     "queryset": qs,
                     "defaults": {
                         "platform_parsing_info": add_platform_parsing_info(),
