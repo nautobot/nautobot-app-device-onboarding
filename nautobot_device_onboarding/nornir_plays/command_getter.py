@@ -340,8 +340,6 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
         if not qs:
             return None
 
-        logger.error(f"Queryset -> {type(qs)}")
-
         with InitNornir(
             runner=NORNIR_SETTINGS.get("runner"),
             logging={"enabled": False},
@@ -361,14 +359,20 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
             },
         ) as nornir_obj:
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
+            creds = nr_with_processors.inventory.defaults.data["platform_parsing_info"]
+            logger.error(f"creds: {creds}")
+            logger.error(nr_with_processors.inventory)
+            logger.error(nr_with_processors.inventory.defaults)
+            logger.error(nr_with_processors.inventory.defaults.data)
+
             test = nr_with_processors.run(
                 task=netmiko_send_commands,
-                command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
+                command_getter_yaml_data=creds,
                 command_getter_job="sync_network_data",
                 logger=logger,
                 **kwargs,
             )
-            logger.error(f"post run -> {test}")
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info(f"Error During Sync Network Data Command Getter: {err}")
+    logger.error(f"compiled results: {compiled_results}")
     return compiled_results
