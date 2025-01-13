@@ -727,7 +727,15 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
             return
 
         self.logger.error(f"Device Filter -> {device_filter}")
-        self.logger.error(f"Filtered Devices -> {self.filtered_devices}")
+        self.logger.error(f"Filtered Devices -> {self.filtered_devices.__dict__}")
+        try:
+            self.logger.error(f"Filtered Devices (Dict) -> {self.filtered_devices.__dict__}")
+        except Exception:
+            pass
+        try:
+            self.logger.error(f"Filtered Devices (Dir) -> {dir(self.filtered_devices)}")
+        except Exception:
+            pass
 
         # Log the devices that will be synced
         filtered_devices_names = list(self.filtered_devices.values_list("name", flat=True))
