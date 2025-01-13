@@ -370,10 +370,8 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
             logger.error(f"Nornir -> {nr_with_processors}")
             logger.error(f"Nornir (Dir) -> {dir(nr_with_processors)}")
-            try:
-                logger.error(f"Nornir (dict) -> {nr_with_processors.__dict__}")
-            except:
-                pass
+            for key, value in nr_with_processors.__dict__.items():
+                logger.error(f"{key}: Type: {type(value)} | {value}")
 
             nr_with_processors.run(
                 task=netmiko_send_commands,
