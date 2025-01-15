@@ -1,7 +1,7 @@
 """Diffsync models."""
 
-from uuid import UUID
 from typing import List, Optional
+from uuid import UUID
 
 try:
     from typing import Annotated  # Python>=3.9
@@ -12,7 +12,7 @@ from diffsync import Adapter, DiffSyncModel
 from diffsync import exceptions as diffsync_exceptions
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
 from nautobot.dcim.choices import InterfaceTypeChoices
-from nautobot.dcim.models import Cable, Device, Interface, Location, SoftwareVersion
+from nautobot.dcim.models import Cable, Device, Interface, Location, Platform, SoftwareVersion
 from nautobot.extras.models import Status
 from nautobot.ipam.models import VLAN, VRF, IPAddress, IPAddressToInterface
 from nautobot_ssot.contrib import CustomFieldAnnotation, NautobotModel
@@ -593,7 +593,7 @@ class SyncNetworkDataCable(FilteredNautobotModel):
     status__name: str
 
 
-class SyncNetworkSoftwareVersion(FilteredNautobotModel):
+class SyncNetworkSoftwareVersion(DiffSyncModel):
     """Shared data model representing a software version."""
 
     _modelname = "software_version"
@@ -609,6 +609,35 @@ class SyncNetworkSoftwareVersion(FilteredNautobotModel):
     platform__name: str
 
     pk: Optional[UUID] = None
+
+    @classmethod
+    def create(cls, adapter, ids, attrs):
+        """Create a new software version."""
+        try:
+            platform = Platform.objects.get(name=ids["platform__name"])
+        except ObjectDoesNotExist:
+            adapter.job.logger.error(
+                f"Failed to create software version {ids['version']}. An platform with name: "
+                f"{ids['platform__name']} was not found."
+            )
+            raise diffsync_exceptions.ObjectNotCreated
+        try:
+            software_version = SoftwareVersion(
+                version=ids["version"],
+                platform=platform,
+                status=Status.objects.get(name="Active"),
+            )
+            software_version.validated_save()
+        except ValidationError as err:
+            adapter.job.logger.error(f"Software version {software_version} failed to create, {err}")
+            raise diffsync_exceptions.ObjectNotCreated
+
+        return super().create(adapter, ids, attrs)
+
+    def delete(self):
+        """Prevent software version deletion."""
+        self.adapter.job.logger.error(f"{self} will not be deleted.")
+        return None
 
 
 class SyncNetworkSoftwareVersionToDevice(DiffSyncModel):
@@ -628,32 +657,33 @@ class SyncNetworkSoftwareVersionToDevice(DiffSyncModel):
 
     def _get_and_assign_sofware_version(self, adapter, attrs):
         """Assign a software version to a device."""
-        if attrs.get("software_version"):
-            try:
-                device = Device.objects.get(**self.get_identifiers())
-            except ObjectDoesNotExist:
-                adapter.job.logger.error(
-                    f"Failed to assign software version to {self.name}. An device with name: "
-                    f"{self.name} was not found."
-                )
-                raise diffsync_exceptions.ObjectNotCreated
-            try:
-                software_version = SoftwareVersion.objects.get(
-                    version=attrs["software_version__version"], platform=device.platform
-                )
-                device.software_version = software_version
-            except ObjectDoesNotExist:
-                adapter.job.logger.error(
-                    f"Failed to assign software version to {self.name}. An software version with name: "
-                    f"{self.name} was not found."
-                )
-                raise diffsync_exceptions.ObjectNotUpdated
-
-            software_version.validated_save()
+        try:
+            device = Device.objects.get(**self.get_identifiers())
+        except ObjectDoesNotExist:
+            adapter.job.logger.error(
+                f"Failed to assign software version to {self.name}. An device with name: " f"{self.name} was not found."
+            )
+            raise diffsync_exceptions.ObjectNotCreated
+        try:
+            software_version = SoftwareVersion.objects.get(
+                version=attrs["software_version__version"], platform=device.platform
+            )
+            device.software_version = software_version
+        except ObjectDoesNotExist:
+            adapter.job.logger.error(
+                f"Failed to assign software version to {self.name}. An software version with name: "
+                f"{self.name} was not found."
+            )
+            raise diffsync_exceptions.ObjectNotUpdated
+        try:
+            device.validated_save()
+        except ValidationError as err:
+            adapter.job.logger.error(f"Software version {software_version} failed to assign, {err}")
+            raise diffsync_exceptions.ObjectNotUpdated
 
     def update(self, attrs):
         """Update an existing SoftwareVersionToDevice object."""
-        if attrs.get("software_version"):
+        if attrs.get("software_version__version"):
             try:
                 self._get_and_assign_sofware_version(self.adapter, attrs)
             except ObjectDoesNotExist as err:

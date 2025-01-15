@@ -294,7 +294,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
 
     def load_software_versions(self):
         """Load Software Versions into the Diffsync store."""
-        for software_version in SoftwareVersion.objects.filter(devices__in=self.job.devices_to_load):
+        for software_version in SoftwareVersion.objects.all():
             network_software_version = self.software_version(
                 adapter=self,
                 version=software_version.version,
@@ -921,7 +921,6 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
         ) in self.job.command_getter_result.items():
             if self.job.debug:
                 self.job.logger.debug(f"Loading Software Versions from {hostname}")
-            self.job.logger.info(f"device_data: {device_data}")
             if device_data["software_version"]:
                 device = Device.objects.get(serial=device_data["serial"])
                 try:
