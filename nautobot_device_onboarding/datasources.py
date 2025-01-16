@@ -25,7 +25,8 @@ def refresh_git_command_mappers(repository_record, job_result, delete=False):  #
     repo_data_dir = Path(repository_record.filesystem_path) / ONBOARDING_COMMAND_MAPPERS_REPOSITORY_FOLDER
     if not repo_data_dir.exists():
         job_result.log(
-            f"Command mapper repo folder does not exist. Create a sub folder in the repository at {repo_data_dir}",
+            "Command mapper repo folder does not exist. "  # pylint: disable=consider-using-f-string
+            "Create a sub folder in the repository at %s" % repo_data_dir,
             repository_record,
             level_choice=LogLevelChoices.LOG_WARNING,
         )
