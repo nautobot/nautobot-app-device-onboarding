@@ -777,7 +777,7 @@ class DeviceOnboardingTroubleshootingJob(Job):
         username, password, secret = (  # pylint:disable=unused-variable
             _parse_credentials(kwargs["secrets_group"])
         )
-
+        kwargs["connectivity_test"] = False
         # Initiate Nornir instance with empty inventory
         compiled_results = {}
         try:
