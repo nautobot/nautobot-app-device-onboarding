@@ -17,7 +17,7 @@ def get_git_repo():
     """Get the git repo object."""
     if (
         GitRepository.objects.filter(
-            provided_contents=["nautobot_device_onboarding.onboarding_command_mappers"]
+            provided_contents__contains="nautobot_device_onboarding.onboarding_command_mappers"
         ).count()
         == 1
     ):
