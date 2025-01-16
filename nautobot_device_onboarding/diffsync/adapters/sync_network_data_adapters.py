@@ -6,7 +6,7 @@ import diffsync
 from diffsync.enum import DiffSyncModelFlags
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from nautobot.dcim.models import Interface, SoftwareVersion, Device
+from nautobot.dcim.models import Device, Interface, SoftwareVersion
 from nautobot.ipam.models import VLAN, VRF, IPAddress
 from nautobot_ssot.contrib import NautobotAdapter
 from netaddr import EUI, mac_unix_expanded
