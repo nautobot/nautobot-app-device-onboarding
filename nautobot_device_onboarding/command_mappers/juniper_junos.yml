@@ -126,4 +126,3 @@ sync_network_data:
       - command: "show system information | display json"
         parser: "none"
         jpath: '"system-information"[]."os-version"[].data'  # yamllint disable-line rule:quoted-strings
-        
