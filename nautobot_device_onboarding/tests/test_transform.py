@@ -11,6 +11,7 @@ from nautobot.core.testing import TransactionTestCase, run_job_for_testing
 from nautobot.extras.choices import JobResultStatusChoices
 from nautobot.extras.models import GitRepository, JobResult
 
+from nautobot_device_onboarding.constants import ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER
 from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info, load_command_mappers_from_dir
 
 MOCK_DIR = os.path.join("nautobot_device_onboarding", "tests", "mock")
@@ -32,6 +33,7 @@ class TestTransformNoGitRepo(unittest.TestCase):
             "juniper_junos",
             "cisco_nxos",
             "hp_comware",
+            "paloalto_panos",
         ]
         self.assertEqual(sorted(default_mappers), list(sorted(command_mappers.keys())))
 
@@ -55,7 +57,7 @@ class TestTransformWithGitRepo(TransactionTestCase):
             name="Test Git Repository",
             slug=self.repo_slug,
             remote_url="http://localhost/git.git",
-            provided_contents=["nautobot_device_onboarding.onboarding_command_mappers"],
+            provided_contents=[ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER],
         )
         self.repo.save()
         self.job_result = JobResult.objects.create(name=self.repo.name)
@@ -80,7 +82,7 @@ class TestTransformWithGitRepo(TransactionTestCase):
 
     def test_git_repo_was_created(self, MockGitRepo):  # pylint:disable=invalid-name
         repo_count = GitRepository.objects.filter(
-            provided_contents=["nautobot_device_onboarding.onboarding_command_mappers"]
+            provided_contents=[ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER]
         ).count()
         self.assertEqual(1, repo_count)
 
