@@ -1,5 +1,6 @@
 """General helper functions for the app."""
 
+import os
 import socket
 
 import netaddr
@@ -85,3 +86,23 @@ def onboarding_task_fqdn_to_ip(address):
         except socket.gaierror as err:
             # DNS Lookup has failed, Raise an exception for unable to complete DNS lookup
             raise OnboardException(f"fail-dns - ERROR failed to complete DNS lookup: {address}") from err
+
+
+def check_for_required_file(directory, filename):
+    """
+    Checks if a file named 'filename' exists within the specified directory.
+
+    Args:
+        directory: The path to the directory to check.
+        filename: The name of the file to check for.
+
+    Returns:
+        True if the 'index' file exists in the directory, False otherwise.
+    """
+    try:
+        for f_name in os.listdir(directory):
+            if f_name == filename:
+                return True
+        return False
+    except FileNotFoundError:
+        return False

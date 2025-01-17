@@ -1,28 +1,38 @@
 """CommandGetter."""
 
 import json
-from typing import Dict
+import os
+from typing import Dict, Tuple, Union
 
 from django.conf import settings
 from nautobot.dcim.models import Platform
 from nautobot.dcim.utils import get_all_network_driver_mappings
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
-from nautobot.extras.models import SecretsGroup
+from nautobot.extras.models import SecretsGroup, SecretsGroupAssociation
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
+from netutils.ping import tcp_ping
 from nornir import InitNornir
 from nornir.core.exceptions import NornirSubTaskError
 from nornir.core.plugins.inventory import InventoryPluginRegister
 from nornir.core.task import Result, Task
 from nornir_netmiko.tasks import netmiko_send_command
 from ntc_templates.parse import parse_output
+from ttp import ttp
 
 from nautobot_device_onboarding.constants import SUPPORTED_COMMAND_PARSERS, SUPPORTED_NETWORK_DRIVERS
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import CommandGetterProcessor
-from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info
+from nautobot_device_onboarding.nornir_plays.transform import (
+    add_platform_parsing_info,
+    get_git_repo_parser_path,
+    load_files_with_precedence,
+)
+from nautobot_device_onboarding.utils.helper import check_for_required_file
+
+PARSER_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "parsers"))
 
 InventoryPluginRegister.register("nautobot-inventory", NautobotORMInventory)
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
@@ -108,6 +118,11 @@ def netmiko_send_commands(
         return Result(
             host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True
         )
+    if orig_job_kwargs["connectivity_test"]:
+        if not tcp_ping(task.host.hostname, task.host.port):
+            return Result(
+                host=task.host, result=f"{task.host.name} failed connectivity check via tcp_ping.", failed=True
+            )
     task.host.data["platform_parsing_info"] = command_getter_yaml_data[task.host.platform]
     commands = _get_commands_to_run(
         command_getter_yaml_data[task.host.platform][command_getter_job],
@@ -123,7 +138,7 @@ def netmiko_send_commands(
             f"{task.host.platform} has missing definitions for cables in command_mapper YAML file. Cables will not be loaded."
         )
 
-    logger.debug(f"Commands to run: {commands}")
+    logger.debug(f"Commands to run: {[cmd['command'] for cmd in commands]}")
     # All commands in this for loop are running within 1 device connection.
     for result_idx, command in enumerate(commands):
         send_command_kwargs = {}
@@ -143,16 +158,46 @@ def netmiko_send_commands(
                     else:
                         if command["parser"] == "textfsm":
                             try:
+                                # Look for custom textfsm templates in the git repo
+                                git_template_dir = get_git_repo_parser_path(parser_type="textfsm")
+                                if git_template_dir:
+                                    if not check_for_required_file(git_template_dir, "index"):
+                                        logger.debug(
+                                            f"Unable to find required index file in {git_template_dir} for textfsm parsing. Falling back to default templates."
+                                        )
+                                        git_template_dir = None
                                 # Parsing textfsm ourselves instead of using netmikos use_<parser> function to be able to handle exceptions
                                 # ourselves. Default for netmiko is if it can't parse to return raw text which is tougher to handle.
                                 parsed_output = parse_output(
                                     platform=get_all_network_driver_mappings()[task.host.platform]["ntc_templates"],
+                                    template_dir=git_template_dir if git_template_dir else None,
                                     command=command["command"],
                                     data=current_result.result,
+                                    try_fallback=bool(git_template_dir),
                                 )
                                 task.results[result_idx].result = parsed_output
                                 task.results[result_idx].failed = False
                             except Exception:  # https://github.com/networktocode/ntc-templates/issues/369
+                                task.results[result_idx].result = []
+                                task.results[result_idx].failed = False
+                        if command["parser"] == "ttp":
+                            try:
+                                # Parsing ttp ourselves instead of using netmikos use_<parser> function to be able to handle exceptions
+                                # ourselves.
+                                ttp_template_files = load_files_with_precedence(
+                                    filesystem_dir=f"{PARSER_DIR}/ttp", parser_type="ttp"
+                                )
+                                template_name = f"{task.host.platform}_{command['command'].replace(' ', '_')}.ttp"
+                                parser = ttp(
+                                    data=current_result.result,
+                                    template=ttp_template_files[template_name],
+                                )
+                                parser.parse()
+                                parsed_result = parser.result(format="json")[0]
+                                # task.results[result_idx].result = json.loads(json.dumps(parsed_result))
+                                task.results[result_idx].result = json.loads(parsed_result)
+                                task.results[result_idx].failed = False
+                            except Exception:
                                 task.results[result_idx].result = []
                                 task.results[result_idx].failed = False
             else:
@@ -168,14 +213,22 @@ def netmiko_send_commands(
                     except Exception:
                         task.result.failed = False
         except NornirSubTaskError:
+            # These exceptions indicate that the device is unreachable or the credentials are incorrect.
+            # We should fail the task early to avoid trying all commands on a device that is unreachable.
+            if type(task.results[result_idx].exception).__name__ == "NetmikoAuthenticationException":
+                return Result(host=task.host, result=f"{task.host.name} failed authentication.", failed=True)
+            if type(task.results[result_idx].exception).__name__ == "NetmikoTimeoutException":
+                return Result(host=task.host, result=f"{task.host.name} SSH Timeout Occured.", failed=True)
             # We don't want to fail the entire subtask if SubTaskError is hit, set result to empty list and failed to False
             # Handle this type or result latter in the ETL process.
             task.results[result_idx].result = []
             task.results[result_idx].failed = False
 
 
-def _parse_credentials(credentials):
-    """Parse and return dictionary of credentials."""
+def _parse_credentials(credentials: Union[SecretsGroup, None], logger: NornirLogger = None) -> Tuple[str, str]:
+    """Parse creds from either secretsgroup or settings, return tuple of username/password."""
+    username, password = None, None
+
     if credentials:
         try:
             username = credentials.get_secret_value(
@@ -186,20 +239,22 @@ def _parse_credentials(credentials):
                 access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
                 secret_type=SecretsGroupSecretTypeChoices.TYPE_PASSWORD,
             )
-            try:
-                secret = credentials.get_secret_value(
-                    access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
-                    secret_type=SecretsGroupSecretTypeChoices.TYPE_SECRET,
-                )
-            except Exception:  # pylint: disable=broad-exception-caught
-                secret = None
-        except Exception:  # pylint: disable=broad-exception-caught
-            return (None, None, None)
+        except SecretsGroupAssociation.DoesNotExist:
+            pass
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logger.debug(f"Error processing credentials from secrets group {credentials.name}: {e}")
+            pass
     else:
         username = settings.NAPALM_USERNAME
         password = settings.NAPALM_PASSWORD
-        secret = settings.NAPALM_ARGS.get("secret", None)
-    return (username, password, secret)
+
+    missing_creds = []
+    for cred_var in ["username", "password"]:
+        if not locals().get(cred_var, None):
+            missing_creds.append(cred_var)
+    if missing_creds:
+        logger.debug(f"Missing credentials for {missing_creds}")
+    return (username, password)
 
 
 def sync_devices_command_getter(job_result, log_level, kwargs):
@@ -215,7 +270,7 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
         port = kwargs["port"]
         # timeout = kwargs["timeout"]
         platform = kwargs["platform"]
-        username, password, secret = _parse_credentials(kwargs["secrets_group"])
+        username, password = _parse_credentials(kwargs["secrets_group"], logger=logger)
 
     # Initiate Nornir instance with empty inventory
     try:
@@ -247,7 +302,7 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                         if new_secrets_group != loaded_secrets_group:
                             logger.info(f"Parsing credentials from Secrets Group: {new_secrets_group.name}")
                             loaded_secrets_group = new_secrets_group
-                            username, password, secret = _parse_credentials(loaded_secrets_group)
+                            username, password = _parse_credentials(loaded_secrets_group, logger=logger)
                             if not (username and password):
                                 logger.error(f"Unable to onboard {entered_ip}, failed to parse credentials")
                         single_host_inventory_constructed, exc_info = _set_inventory(

@@ -29,6 +29,7 @@ class SSOTSyncDevicesTestCase(TransactionTestCase):
 
         job_form_inputs = {
             "debug": True,
+            "connectivity_test": False,
             "dryrun": False,
             "csv_file": None,
             "location": self.testing_objects["location_1"].pk,
@@ -139,6 +140,7 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
 
         job_form_inputs = {
             "debug": True,
+            "connectivity_test": False,
             "dryrun": False,
             "sync_vlans": True,
             "sync_vrfs": True,

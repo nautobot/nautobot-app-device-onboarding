@@ -9,13 +9,13 @@ This [Nautobot](https://github.com/nautobot/nautobot) App allows to easily onboa
 
 ## Description/Overview
 
-This section descibes the new implementaiton (SSoT Implementation) and the Original implementation.
+This section describes the new implementation (SSoT Implementation) and the original implementation.
 
 ### New SSoT Implementation
 
 The new implementation of device onboarding in this app is utilizing the SSoT framework; the main reasons for providing the new mechanisms were to solve the following challenges:
 
-- Make it easier to extending and add additonal vendor/OS support.
+- Make it easier to extending and add additional vendor/OS support.
 - Collapse this app and the external [Network Importer](https://github.com/networktocode/network-importer) into the same Nautobot app for simplified device onboarding with more object support.'
     - Remove the Batfish dependency.
 - Re-use backend plugins and libraries such as `nautobot-app-nornir` to provide the a similar feeling to other plugins like `nautobot-app-golden-config`.
@@ -24,7 +24,7 @@ The new implementation of device onboarding in this app is utilizing the SSoT fr
 
 Expose two new SSoT based Nautobot jobs to perform the syncing of data.
 
-1. `Sync Devices From Network` - Takes mininum inputs nearly identical to the original job (IP, Locaiton, SecretGroup), and create a device with bare minium information to be able to manage a device. This job syncs data from the network itself and creates a device with the follow attributes.
+1. `Sync Devices From Network` - Takes minimum inputs nearly identical to the original job (IP, Location, SecretGroup), and create a device with bare minium information to be able to manage a device. This job syncs data from the network itself and creates a device with the follow attributes.
     - Hostname
     - Serial Number
     - Device Type
@@ -56,7 +56,7 @@ Additional References:
 
 - For more information see [App Use Cases](./app_use_cases.md).
 - To understand the lower level details of how the Network-SSoT framework is designed see [Network-SSoT Design](./app_detailed_design.md)
-- To learn how to add additonal platform/OS support visit [Extending](./external_interactions.md).
+- To learn how to add additional platform/OS support visit [Extending](./external_interactions.md).
 
 ### Original Implementation
 

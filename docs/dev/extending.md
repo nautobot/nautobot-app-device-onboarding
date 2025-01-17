@@ -13,7 +13,7 @@ Please see the dedicated FAQ for [device onboarding extensions](onboarding_exten
 
 ## Extending SSoT jobs (Sync Devices From Network, and Sync Network Data From Network)
 
-Extending the platform support for the SSoT specific jobs should be accomplished with adding a yaml file that defines commands, jdiff jmespaths, and post_processors. A PR into this library is welcomed, but this app exposes the Nautobot core datasource capabilities to be able to load in overrides from a Git repository.
+Extending the platform support for the SSoT specific jobs should be accomplished with adding a yaml file that defines commands, jdiff, jmespaths, and post_processors. A PR into this library is welcomed, but this app exposes the Nautobot core datasource capabilities to be able to load in overrides from a Git repository.
 
 ### Adding Platform/OS Support
 
