@@ -1,2 +1,0 @@
-- Fix incorrect "no platform set" error which was catching all errors.
-- Properly skip command extraction when command_getter fails.
