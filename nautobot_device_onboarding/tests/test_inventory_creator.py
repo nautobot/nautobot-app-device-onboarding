@@ -1,7 +1,7 @@
 """Test ability to create an inventory."""
 
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from nautobot.dcim.models import Platform
 
@@ -45,3 +45,19 @@ class TestInventoryCreator(unittest.TestCase):
         inv, exception = _set_inventory(self.host_ip, self.platform, self.port, self.username, self.password)
         self.assertEqual(inv["198.51.100.1"].platform, self.platform.name)
         self.assertIsNone(exception)
+
+    @patch("nautobot_device_onboarding.nornir_plays.inventory_creator.NETMIKO_EXTRAS", {"custom_setting": "enabled"})
+    @patch("nautobot_device_onboarding.nornir_plays.inventory_creator.SSHDetect")
+    def test_guess_netmiko_pass_netmiko_extras(self, mock_sshdetect: MagicMock):
+        """Ensure that we are passing additional Netmiko extras to the SSHDetect method.
+        These would have been fed in via the user in the nautobot configuration file."""
+        mock_sshdetect.return_value.autodetect.return_value = "cisco_ios"
+        guess_netmiko_device_type(self.hostname, self.username, self.password, self.port)
+        mock_sshdetect.mock_calls[0].assert_called_with(
+            device_type="autodetect",
+            host=self.hostname,
+            username=self.username,
+            password=self.password,
+            port=22,
+            custom_setting="enabled",
+        )

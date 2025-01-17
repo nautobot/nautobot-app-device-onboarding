@@ -774,7 +774,7 @@ class DeviceOnboardingTroubleshootingJob(Job):
         ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
         port = kwargs["port"]
         platform = kwargs["platform"]
-        username, password, secret = (  # pylint:disable=unused-variable
+        username, password = (  # pylint:disable=unused-variable
             _parse_credentials(kwargs["secrets_group"])
         )
         kwargs["connectivity_test"] = False

@@ -30,19 +30,7 @@ If `Platform`, `Device Type` and/or `Role` are not provided, the plugin will try
 
 The `nautobot-device-onboarding` apps `Sync Devices` job recognizes platform types with a Netmiko SSH Autodetect mechanism. The user may need to specify additional information for platforms where Netmiko's `ssh_autodetect` feature does not work.
 
-[Here is the list](https://github.com/ktbyers/netmiko/blob/v3.4.0/netmiko/ssh_autodetect.py#L50) of platforms supported by `ssh_autodetect`.
-
-The `nautobot-device-onboarding` app can be used with any devices that are supported by NAPALM. Even custom NAPALM driver plugins can be used with a bit of effort.
-
-The table below shows which common platforms will be SSH auto-detected by default.
-
-|Platform     |Platform Autodetect|
---------------|--------------------
-Juniper/Junos | Yes (when running Netconf over SSH)|
-Cisco IOS-XE  |Yes|
-Cisco NXOS (ssh) | Yes|
-Cisco NXOS (nxapi)| No|
-Arista EOS | No|
+[Here is the list](https://github.com/ktbyers/netmiko/blob/7ef6eff0175104e796ae9d97d31dc70a6ffca079/netmiko/ssh_autodetect.py#L55) of platforms supported by `ssh_autodetect`.
 
 For the platforms where SSH auto-detection does not work, the user will need to:
 
@@ -107,7 +95,7 @@ PLUGINS_CONFIG = {
             "netmiko": {
                 "extras": {
                     "use_keys": True,
-                    "key_file": "/root/.ssh/id_rsa.pub",
+                    "key_file": "/root/.ssh/id_rsa",
                     "disabled_algorithms": {"pubkeys": ["rsa-sha2-256", "rsa-sha2-512"]},
                 },
             },
@@ -116,7 +104,7 @@ PLUGINS_CONFIG = {
 }
 ```
 
-3. Make a secrets group in Nautobot which still had all the elements (username and password), where the username is accurate, a bogus password can be used as its ignored by the backend processing. For example, set the password to the username secret since its ignore.
+3. Make a secrets group in Nautobot which has the accurate `username` to use along with the key specified in configuration above.
 
 4. Run the jobs and ssh public key authentication will be used.
 
