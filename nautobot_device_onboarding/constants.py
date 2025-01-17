@@ -48,3 +48,9 @@ INTERFACE_TYPE_MAP_STATIC = {
     "FastEthernet": "100base-fx",
     "ethernet": "1000base-t",
 }
+
+# The git repository data source content identifier for custom command mappers.
+ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER = "nautobot_device_onboarding.onboarding_command_mappers"
+
+# The git repository data source folder name for custom command mappers.
+ONBOARDING_COMMAND_MAPPERS_REPOSITORY_FOLDER = "onboarding_command_mappers"
