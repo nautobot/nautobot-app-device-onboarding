@@ -1,1 +1,0 @@
-Makes fixes to platform detection so that netmiko ssh pubkey auth settings are applied.
