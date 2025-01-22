@@ -177,8 +177,8 @@ def sync_network_data_ensure_required_nautobot_objects():
     testing_objects["vlan_2"] = vlan_2
     testing_objects["vrf_1"] = vrf_1
     testing_objects["vrf_2"] = vrf_2
-    # testing_objects["software_version_1"] = software_version_1
-    # testing_objects["software_version_2"] = software_version_2
+    testing_objects["software_version_1"] = software_version_1
+    testing_objects["software_version_2"] = software_version_2
 
     return testing_objects
 
