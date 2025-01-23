@@ -161,7 +161,7 @@ class SyncNetworkDataIPAddress(DiffSyncModel):
         try:
             ip_address = IPAddress.objects.get(host=self.host, parent__namespace=self.adapter.job.namespace)
         except ObjectDoesNotExist as err:
-            self.job.logger.error(f"{self} failed to update, {err}")
+            self.adapter.job.logger.error(f"{self} failed to update, {err}")
         if attrs.get("mask_length"):
             ip_address.mask_length = attrs["mask_length"]
         if attrs.get("status__name"):
@@ -171,7 +171,7 @@ class SyncNetworkDataIPAddress(DiffSyncModel):
         try:
             ip_address.validated_save()
         except ValidationError as err:
-            self.job.logger.error(f"{self} failed to update, {err}")
+            self.adapter.job.logger.error(f"{self} failed to update, {err}")
 
         return super().update(attrs)
 
