@@ -1,0 +1,1 @@
+Fixed error with logging message in SyncNetworkDataIPAddress.update()
