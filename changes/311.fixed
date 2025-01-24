@@ -1,0 +1,1 @@
+Fixed issue with Lags, VRFs and Untagged Vlans not being removed from interfaces
