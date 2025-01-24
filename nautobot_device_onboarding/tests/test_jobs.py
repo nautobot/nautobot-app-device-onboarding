@@ -145,6 +145,7 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
             "sync_vlans": True,
             "sync_vrfs": True,
             "sync_cables": True,
+            "sync_software_version": True,
             "namespace": self.testing_objects["namespace"].pk,
             "interface_status": self.testing_objects["status"].pk,
             "ip_address_status": self.testing_objects["status"].pk,
