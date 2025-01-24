@@ -150,7 +150,7 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
             continue
         if not sync_cables and ssot_field == "cables":
             continue
-        if not sync_software_version and ssot_field == "software_versions":
+        if not sync_software_version and ssot_field == "software_version":
             continue
         if ssot_field == "pre_processor":
             continue
