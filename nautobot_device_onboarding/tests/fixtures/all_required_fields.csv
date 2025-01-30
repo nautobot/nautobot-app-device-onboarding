@@ -1,0 +1,2 @@
+ip_address_host,location_name,device_role_name,namespace,device_status_name,interface_status_name,ip_address_status_name,secrets_group_name,set_mgmt_only,update_devices_without_primary_ip,port,timeout
+172.23.0.8,Site A Parent,Network,Global,Active,Active,Active,test secrets group,True,False,22,30

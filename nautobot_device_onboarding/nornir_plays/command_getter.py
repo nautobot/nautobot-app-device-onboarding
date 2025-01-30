@@ -118,7 +118,7 @@ def netmiko_send_commands(
         return Result(
             host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True
         )
-    if orig_job_kwargs["connectivity_test"]:
+    if orig_job_kwargs.get("connectivity_test", False):
         if not tcp_ping(task.host.hostname, task.host.port):
             return Result(
                 host=task.host, result=f"{task.host.name} failed connectivity check via tcp_ping.", failed=True
