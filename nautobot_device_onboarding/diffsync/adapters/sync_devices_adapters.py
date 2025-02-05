@@ -6,6 +6,7 @@ from typing import DefaultDict, Dict, FrozenSet, Hashable, Tuple, Type
 
 import diffsync
 import netaddr
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db.models import Model
@@ -15,9 +16,12 @@ from nautobot_device_onboarding.diffsync.models import sync_devices_models
 from nautobot_device_onboarding.nornir_plays.command_getter import (
     sync_devices_command_getter,
 )
+from nautobot_device_onboarding.tests.fixtures import sync_devices_fixture
 from nautobot_device_onboarding.utils import diffsync_utils
 
 ParameterSet = FrozenSet[Tuple[str, Hashable]]
+
+app_settings = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
 
 
 class SyncDevicesNautobotAdapter(diffsync.Adapter):
@@ -214,12 +218,15 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                     raise Exception(  # pylint: disable=broad-exception-raised
                         "Platform.network_driver missing"
                     )
-
-        result = sync_devices_command_getter(
-            self.job.job_result,
-            self.job.logger.getEffectiveLevel(),
-            self.job.job_result.task_kwargs,
-        )
+        if app_settings.get("local_testing"):  # return test data if local testing is enabled
+            self.job.logger.warning("Local testing is enabled, using mock data.")
+            result = sync_devices_fixture.sync_devices_mock_data_valid
+        else:
+            result = sync_devices_command_getter(
+                self.job.job_result,
+                self.job.logger.getEffectiveLevel(),
+                self.job.job_result.task_kwargs,
+            )
         if self.job.debug:
             self.job.logger.debug(f"Command Getter Result: {result}")
         data_type_check = diffsync_utils.check_data_type(result)
