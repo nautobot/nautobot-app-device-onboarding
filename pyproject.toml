@@ -62,6 +62,8 @@ mkdocstrings = "0.25.2"
 mkdocstrings-python = "1.10.8"
 griffe = "1.1.1"
 towncrier = "~23.6.0"
+# Used in integration tests
+fakenos = { git = "https://github.com/fakenos/fakenos", branch = "master" }
 
 [tool.poetry.extras]
 all = [
