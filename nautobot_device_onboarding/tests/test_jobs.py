@@ -1,11 +1,13 @@
 """Test Jobs."""
 
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
+from django.core.files.base import ContentFile
 from nautobot.apps.testing import create_job_result_and_run_job
 from nautobot.core.testing import TransactionTestCase
 from nautobot.dcim.models import Device, Interface, Manufacturer, Platform
 from nautobot.extras.choices import JobResultStatusChoices
+from nautobot.extras.models import FileProxy
 
 from nautobot_device_onboarding import jobs
 from nautobot_device_onboarding.tests import utils
@@ -119,6 +121,52 @@ class SSOTSyncDevicesTestCase(TransactionTestCase):
         with open("nautobot_device_onboarding/tests/fixtures/onboarding_csv_fixture_empty.csv", "rb") as csv_file:
             processed_csv_data = onboarding_job._process_csv_data(csv_file=csv_file)  # pylint: disable=protected-access
         self.assertEqual(processed_csv_data, None)
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
+    @patch.dict("os.environ", {"DEVICE_USER": "test_user", "DEVICE_PASS": "test_password"})
+    def test_csv_process_pass_connectivity_test_flag(self, mock_sync_devices_command_getter):
+        """Ensure the 'connectivity_test' option is passed to the command_getter when a CSV is in-play."""
+        with open("nautobot_device_onboarding/tests/fixtures/all_required_fields.csv", "rb") as csv_file:
+            csv_contents = csv_file.read()
+
+        job_form_inputs = {
+            "debug": True,
+            "connectivity_test": "AnyWackyValueHere",
+            "dryrun": False,
+            "csv_file": FileProxy.objects.create(
+                name="onboarding.csv", file=ContentFile(csv_contents, name="onboarding.csv")
+            ).id,
+            "location": None,
+            "namespace": None,
+            "ip_addresses": None,
+            "port": None,
+            "timeout": None,
+            "set_mgmt_only": None,
+            "update_devices_without_primary_ip": None,
+            "device_role": None,
+            "device_status": None,
+            "interface_status": None,
+            "ip_address_status": None,
+            "secrets_group": None,
+            "platform": None,
+            "memory_profiling": False,
+        }
+
+        create_job_result_and_run_job(
+            module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
+        )
+        self.assertEqual(
+            mock_sync_devices_command_getter.mock_calls[0].args,
+            (
+                ANY,
+                10,
+                {
+                    "debug": True,
+                    "connectivity_test": "AnyWackyValueHere",
+                    "csv_file": {"172.23.0.8": {"port": 22, "timeout": 30, "secrets_group": ANY, "platform": ""}},
+                },
+            ),
+        )
 
 
 class SSOTSyncNetworkDataTestCase(TransactionTestCase):
