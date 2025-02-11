@@ -4,6 +4,7 @@ import json
 import logging
 from json.decoder import JSONDecodeError
 
+import jinja2
 from django.template import engines
 from django.utils.module_loading import import_string
 from jdiff import extract_data_from_json
@@ -106,7 +107,12 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
         # j2 context data changes obj(hostname) -> extracted_value for post_processor
         j2_data_context["obj"] = extracted_value
         template = j2_env.from_string(yaml_command_element["post_processor"])
-        extracted_processed = template.render(**j2_data_context)
+        try:
+            extracted_processed = template.render(**j2_data_context)
+        except jinja2.exceptions.UndefinedError:
+            raise ValueError(
+                f"Failure Jinja parsing, context: {j2_data_context}. processor: {yaml_command_element['post_processor']}"
+            )
     else:
         extracted_processed = extracted_value
     post_processed_data = normalize_processed_data(extracted_processed, iter_type)

@@ -1,13 +1,18 @@
 """Test Jobs."""
 
+import os
 from unittest.mock import ANY, patch
 
 from django.core.files.base import ContentFile
+from django.test import override_settings
+from fakenos import FakeNOS
+from fakenos.core.host import Host
 from nautobot.apps.testing import create_job_result_and_run_job
 from nautobot.core.testing import TransactionTestCase
 from nautobot.dcim.models import Device, Interface, Manufacturer, Platform
 from nautobot.extras.choices import JobResultStatusChoices
 from nautobot.extras.models import FileProxy
+from nautobot.ipam.models import IPAddress
 
 from nautobot_device_onboarding import jobs
 from nautobot_device_onboarding.tests import utils
@@ -174,6 +179,10 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
 
     databases = ("default", "job_logs")
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
     def setUp(self):  # pylint: disable=invalid-name
         """Initialize test case."""
         # Setup Nautobot Objects
@@ -236,3 +245,53 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
 
                 if interface_data["vrf"]:
                     self.assertEqual(interface.vrf.name, interface_data["vrf"]["name"])
+
+    @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
+    @patch.dict("os.environ", {"DEVICE_USER": "admin", "DEVICE_PASS": "admin"})
+    def test_sync_network_devices_with_full_ssh(self):
+        """Use the fakeNOS library to expand test coverage to cover SSH connectivity."""
+        job_form_inputs = {
+            "debug": False,
+            "connectivity_test": False,
+            "dryrun": False,
+            "csv_file": None,
+            "location": self.testing_objects["location"].pk,
+            "namespace": self.testing_objects["namespace"].pk,
+            "ip_addresses": "127.0.0.1",
+            "port": 6222,
+            "timeout": 30,
+            "set_mgmt_only": True,
+            "update_devices_without_primary_ip": True,
+            "device_role": self.testing_objects["device_role"].pk,
+            "device_status": self.testing_objects["status"].pk,
+            "interface_status": self.testing_objects["status"].pk,
+            "ip_address_status": self.testing_objects["status"].pk,
+            "default_prefix_status": self.testing_objects["status"].pk,
+            "secrets_group": self.testing_objects["secrets_group"].pk,
+            "platform": self.testing_objects["platform_1"].pk,
+            "memory_profiling": False,
+        }
+        current_file_path = os.path.dirname(os.path.abspath(__file__))
+        fake_ios_inventory = {
+            "hosts": {
+                "dev1": {
+                    "username": "admin",
+                    "password": "admin",
+                    "platform": "tweaked_cisco_ios",
+                    "port": 6222,
+                }
+            }
+        }
+        # This is hacky, theres clearly a bug in the fakenos library
+        # https://github.com/fakenos/fakenos/issues/19
+        with patch.object(Host, "_check_if_platform_is_supported"):
+            with FakeNOS(
+                inventory=fake_ios_inventory, plugins=[os.path.join(current_file_path, "fakenos/custom_ios.yaml")]
+            ):
+                create_job_result_and_run_job(
+                    module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
+                )
+
+        newly_imported_device = Device.objects.get(name="fake-ios-01")
+        self.assertEqual(str(IPAddress.objects.get(id=newly_imported_device.primary_ip4_id)), "127.0.0.1/32")
+        self.assertEqual(newly_imported_device.serial, "991UCMIHG4UAJ1J010CQG")
