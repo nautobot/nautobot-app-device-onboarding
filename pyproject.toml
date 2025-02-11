@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-device-onboarding"
-version = "4.2.0"
+version = "4.2.1"
 description = "A app for Nautobot to easily onboard new devices."
 authors = ["Network to Code, LLC <info@networktocode.com>"]
 license = "Apache-2.0"
@@ -34,7 +34,7 @@ nautobot = "^2.2.3"
 nautobot-ssot = "^3.0.0"
 nautobot-plugin-nornir = "^2.0.0"
 jdiff = "^0.0.6"
-ntc-templates = "^6.0.0"
+ntc-templates = "^7.0.0"
 # Netutils pin is needed for https://github.com/networktocode/netutils/pull/553
 netutils = "^1.9.1"
 ttp = "^0.9.0"
@@ -62,6 +62,8 @@ mkdocstrings = "0.25.2"
 mkdocstrings-python = "1.10.8"
 griffe = "1.1.1"
 towncrier = "~23.6.0"
+# Used in integration tests
+fakenos = { git = "https://github.com/fakenos/fakenos", branch = "master" }
 
 [tool.poetry.extras]
 all = [

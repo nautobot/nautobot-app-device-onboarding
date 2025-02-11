@@ -157,12 +157,13 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
                 vlan_dict["name"] = vlan.name
                 vlan_dict["id"] = str(vlan.vid)
                 tagged_vlans.append(vlan_dict)
+            sorted_tagged_vlans = sorted(tagged_vlans, key=lambda x: x["id"])
 
             network_tagged_vlans_to_interface = self.tagged_vlans_to_interface(
                 adapter=self,
                 device__name=interface.device.name,
                 name=interface.name,
-                tagged_vlans=tagged_vlans,
+                tagged_vlans=sorted_tagged_vlans,
             )
             network_tagged_vlans_to_interface.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
             self.add(network_tagged_vlans_to_interface)
@@ -606,24 +607,26 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                 if interface_data["untagged_vlan"] and interface_data["untagged_vlan"].get("id") == "0":
                     self.job.logger.warning("Interface with untagged vlan 0 found. Skipping untagged vlan load.")
                     continue
-                try:
-                    network_vlan = self.vlan(
-                        adapter=self,
-                        name=interface_data["untagged_vlan"]["name"],
-                        vid=interface_data["untagged_vlan"]["id"],
-                        location__name=location_names.get(hostname, ""),
-                    )
-                    self.add(network_vlan)
-                except diffsync.exceptions.ObjectAlreadyExists:
-                    continue
-                except Exception as err:  # pylint: disable=broad-exception-caught
-                    self._handle_general_load_exception(
-                        error=err,
-                        hostname=hostname,
-                        data=device_data,
-                        model_type="vlan",
-                    )
-                    continue
+
+                if interface_data["untagged_vlan"]:
+                    try:
+                        network_vlan = self.vlan(
+                            adapter=self,
+                            name=interface_data["untagged_vlan"]["name"],
+                            vid=interface_data["untagged_vlan"]["id"],
+                            location__name=location_names.get(hostname, ""),
+                        )
+                        self.add(network_vlan)
+                    except diffsync.exceptions.ObjectAlreadyExists:
+                        continue
+                    except Exception as err:  # pylint: disable=broad-exception-caught
+                        self._handle_general_load_exception(
+                            error=err,
+                            hostname=hostname,
+                            data=device_data,
+                            model_type="vlan",
+                        )
+                        continue
 
     def load_vrfs(self):
         """Load vrfs into the Diffsync store."""
@@ -691,11 +694,12 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
             # for interface in device_data["interfaces"]:
             for interface_name, interface_data in device_data["interfaces"].items():
                 try:
+                    sorted_tagged_vlans = sorted(interface_data["tagged_vlans"], key=lambda x: x["id"])
                     network_tagged_vlans_to_interface = self.tagged_vlans_to_interface(
                         adapter=self,
                         device__name=hostname,
                         name=interface_name,
-                        tagged_vlans=interface_data["tagged_vlans"],
+                        tagged_vlans=sorted_tagged_vlans,
                     )
                     self.add(network_tagged_vlans_to_interface)
                 except Exception as err:  # pylint: disable=broad-exception-caught
@@ -710,7 +714,6 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
     def load_untagged_vlan_to_interface(self):
         """Load untagged vlan to interface assignments into the Diffsync store."""
         for hostname, device_data in self.job.command_getter_result.items():
-            # for interface in device_data["interfaces"]:
             for interface_name, interface_data in device_data["interfaces"].items():
                 try:
                     if interface_data["untagged_vlan"] and interface_data["untagged_vlan"].get("id") == "0":
@@ -758,7 +761,6 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
     def load_vrf_to_interface(self):
         """Load Vrf to interface assignments into the Diffsync store."""
         for hostname, device_data in self.job.command_getter_result.items():
-            # for interface in device_data["interfaces"]:
             for interface_name, interface_data in device_data["interfaces"].items():
                 try:
                     network_vrf_to_interface = self.vrf_to_interface(
