@@ -1,1 +1,0 @@
-Fixed issue running a sync job via CSV would raise an exception.
