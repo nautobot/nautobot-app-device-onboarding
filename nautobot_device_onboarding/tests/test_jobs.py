@@ -1,6 +1,5 @@
 """Test Jobs."""
 
-
 import os
 from unittest.mock import ANY, patch
 
