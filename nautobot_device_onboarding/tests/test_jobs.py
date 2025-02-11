@@ -3,13 +3,12 @@
 import os
 from unittest.mock import ANY, patch
 
+from django.core.files.base import ContentFile
 from django.test import override_settings
 from fakenos import FakeNOS
 from fakenos.core.host import Host
-from django.core.files.base import ContentFile
-
 from nautobot.apps.testing import create_job_result_and_run_job
-from nautobot.core.testing import TransactionTestCaseA
+from nautobot.core.testing import TransactionTestCase
 from nautobot.dcim.models import Device, Interface, Manufacturer, Platform
 from nautobot.extras.choices import JobResultStatusChoices
 from nautobot.extras.models import FileProxy
