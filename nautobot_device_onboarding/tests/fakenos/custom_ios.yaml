@@ -1,0 +1,69 @@
+---
+name: "tweaked_cisco_ios"
+initial_prompt: "{base_prompt}>"
+enable_prompt: "{base_prompt}#"
+config_prompt: "{base_prompt}(config)#"
+commands:
+  enable:
+    output: "null"
+    new_prompt: "{base_prompt}#"
+    help: "enter enable mode"
+    prompt: "{base_prompt}>"
+  show interfaces:
+    output:
+      "TenGigabitEthernet1/1/15 is up, line protocol is down (disabled)\n  Hardware\
+      \ is Ten Gigabit Ethernet Port, address is 6c41.6aba.b44e (bia 6c41.6aba.b44e)\n\
+      \  Internet address is 127.0.0.1/32\n  MTU 1500 bytes, BW 10000000 Kbit/sec,\
+      \ DLY 10 usec,\n     reliability 255/255, txload 1/255, rxload 1/255\n  Encapsulation\
+      \ ARPA, loopback not set\n  Keepalive set (10 sec)\n  Full-duplex, Auto-speed,\
+      \ link type is auto, media type is No XCVR\n  input flow-control is off, output\
+      \ flow-control is off\n  ARP type: ARPA, ARP Timeout 04:00:00\n  Last input\
+      \ never, output never, output hang never\n  Last clearing of \"show interface\"\
+      \ counters never\n  Input queue: 0/2000/0/0 (size/max/drops/flushes); Total\
+      \ output drops: 0\n  Queueing strategy: fifo\n  Output queue: 0/40 (size/max)\n\
+      \  5 minute input rate 0 bits/sec, 0 packets/sec\n  5 minute output rate 0\
+      \ bits/sec, 0 packets/sec\n     0 packets input, 0 bytes, 0 no buffer\n     \
+      \ Received 0 broadcasts (0 multicasts)\n     0 runts, 0 giants, 0 throttles\n\
+      \     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored\n     0 input packets\
+      \ with dribble condition detected\n     0 packets output, 0 bytes, 0 underruns\n\
+      \     0 output errors, 0 collisions, 1 interface resets\n     0 unknown protocol\
+      \ drops\n     0 babbles, 0 late collision, 0 deferred\n     0 lost carrier,\
+      \ 0 no carrier\n     0 output buffer failures, 0 output buffers swapped out"
+    help: "execute the command 'show interfaces'"
+    prompt:
+      - "{base_prompt}>"
+      - "{base_prompt}#"
+  show version:
+    output:
+      "Cisco IOS Software, IOSv Software (VIOS-ADVENTERPRISEK9-M), Version 15.8(3)M2,\
+      \ RELEASE SOFTWARE (fc2)\nTechnical Support: http://www.cisco.com/techsupport\n\
+      \ Copyright (c) 1986-2019 by Cisco Systems, Inc.\nCompiled Thu 28-Mar-19 14:06\
+      \ by prod_rel_team\n\n\nROM: Bootstrap program is IOSv\n\nfake-ios-01 uptime is 1\
+      \ week, 3 days, 16 hours, 11 minutes\nSystem returned to ROM by reload\nSystem\
+      \ image file is \"flash0:/vios-adventerprisek9-m\"\nLast reload reason: Unknown\
+      \ reason\n \n\n\nThis product contains cryptographic features and is subject\
+      \ to United\n States and local country laws governing import, export, transfer\
+      \ and\nuse. Delivery of Cisco cryptographic products does not imply\nthird-party\
+      \ authority to import, export, distribute or use encryption.\nImporters, exporters,\
+      \ distributors and users are responsible for\ncompliance with U.S. and local\
+      \ country laws. By using this product you\nagree to comply with applicable laws\
+      \ and regulations. If you are unable\nto comply with U.S. and local laws, return\
+      \ this product immediately.\n \nA summary of U.S. laws governing Cisco cryptographic\
+      \ products may be found at:\nhttp://www.cisco.com/wwl/export/crypto/tool/stqrg.html\n\
+      \nIf you require further assistance please contact us by sending email to\n\
+      export@cisco.com.\n \nCisco IOSv (revision 1.0) with  with 460137K/62464K bytes\
+      \ of memory.\nProcessor board ID 991UCMIHG4UAJ1J010CQG\n4 Gigabit Ethernet interfaces\n\
+      DRAM configuration is 72 bits wide with parity disabled.\n256K bytes of non-volatile\
+      \ configuration memory.\n2097152K bytes of ATA System CompactFlash 0 (Read/Write)\n\
+      0K bytes of ATA CompactFlash 1 (Read/Write)\n11217K bytes of ATA CompactFlash\
+      \ 2 (Read/Write)\n 0K bytes of ATA CompactFlash 3 (Read/Write)\n\n\n\nConfiguration\
+      \ register is 0x0"
+    help: "execute the command 'show version'"
+    prompt:
+      - "{base_prompt}>"
+      - "{base_prompt}#"
+  _default_:
+    output: "% Invalid input detected at '^' marker."
+    help: "Output to print for unknown commands"
+  terminal width 511: {"output":"", "help":"Set terminal width to 511"}
+  terminal length 0: {"output":"", "help":"Set terminal length to 0"}
