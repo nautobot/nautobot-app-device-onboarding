@@ -20,7 +20,7 @@ from nornir_netmiko.tasks import netmiko_send_command
 from ntc_templates.parse import parse_output
 from ttp import ttp
 
-from nautobot_device_onboarding.constants import SUPPORTED_COMMAND_PARSERS, SUPPORTED_NETWORK_DRIVERS
+from nautobot_device_onboarding.constants import SUPPORTED_COMMAND_PARSERS
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
@@ -112,7 +112,7 @@ def netmiko_send_commands(
     """Run commands specified in PLATFORM_COMMAND_MAP."""
     if not task.host.platform:
         return Result(host=task.host, result=f"{task.host.name} has no platform set.", failed=True)
-    if task.host.platform not in SUPPORTED_NETWORK_DRIVERS or not "cisco_wlc_ssh":
+    if task.host.platform not in get_all_network_driver_mappings().keys() or not "cisco_wlc_ssh":
         return Result(host=task.host, result=f"{task.host.name} has a unsupported platform set.", failed=True)
     if not command_getter_yaml_data[task.host.platform].get(command_getter_job):
         return Result(
@@ -354,7 +354,7 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
                     "queryset": qs,
                     "defaults": {
                         "platform_parsing_info": add_platform_parsing_info(),
-                        "network_driver_mappings": SUPPORTED_NETWORK_DRIVERS,
+                        "network_driver_mappings": list(get_all_network_driver_mappings().keys()),
                         "sync_vlans": kwargs["sync_vlans"],
                         "sync_vrfs": kwargs["sync_vrfs"],
                         "sync_cables": kwargs["sync_cables"],
