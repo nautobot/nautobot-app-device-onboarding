@@ -15,7 +15,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
-- [#320](https://github.com/nautobot/nautobot-app-device-onboarding/issues/320) - Fixed app startup crashing nautobot during startup in some cases.
+- [#320](https://github.com/nautobot/nautobot-app-device-onboarding/issues/320) - Fixed app startup crashing Nautobot during startup in some cases.
 
 ## [v4.2.1 (2025-02-11)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.2.1)
 
