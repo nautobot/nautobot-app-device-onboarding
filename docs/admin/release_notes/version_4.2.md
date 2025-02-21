@@ -7,8 +7,32 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Release Overview
 
-- Major features or milestones
-- Changes to compatibility with Nautobot and/or other apps, libraries etc.
+- [#200](https://github.com/nautobot/nautobot-app-device-onboarding/issues/200) - Added basic connectivity checker using Netutils tcp_ping method.
+- [#274](https://github.com/nautobot/nautobot-app-device-onboarding/issues/274) - Added TTP Parser support.
+- [#274](https://github.com/nautobot/nautobot-app-device-onboarding/issues/274) - Added Sync Device from Network support for Palo Alto Panos.
+
+## [v4.2.2 (2025-02-19)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.2.2)
+
+### Fixed
+
+- [#320](https://github.com/nautobot/nautobot-app-device-onboarding/issues/320) - Fixed app startup crashing Nautobot during startup in some cases.
+
+## [v4.2.1 (2025-02-11)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.2.1)
+
+### Fixed
+
+- [#306](https://github.com/nautobot/nautobot-app-device-onboarding/issues/306) - Fixed error with logging message in SyncNetworkDataIPAddress.update()
+- [#311](https://github.com/nautobot/nautobot-app-device-onboarding/issues/311) - Fixed issue with Lags, VRFs and Untagged Vlans not being removed from interfaces
+- [#313](https://github.com/nautobot/nautobot-app-device-onboarding/issues/313) - Fixed issue running a sync job via CSV would raise an exception.
+
+### Dependencies
+
+- [#307](https://github.com/nautobot/nautobot-app-device-onboarding/issues/307) - Updated ntc-templates to 7.x
+
+### Housekeeping
+
+- [#315](https://github.com/nautobot/nautobot-app-device-onboarding/issues/315) - Added fake SSH devices to tests to increase coverage.
+
 
 ## [v4.2.0 (2025-01-17)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.2.0)
 
