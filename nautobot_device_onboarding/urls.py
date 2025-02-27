@@ -10,6 +10,7 @@ from nautobot.apps.urls import NautobotUIViewSetRouter
 # from nautobot_device_onboarding import views
 
 
+app_name = "nautobot_device_onboarding"
 router = NautobotUIViewSetRouter()
 
 # Here is an example of how to register a viewset, you will want to replace views.NautobotDeviceOnboardingUIViewSet with your viewset
