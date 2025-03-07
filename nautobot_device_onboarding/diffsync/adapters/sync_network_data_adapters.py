@@ -251,9 +251,18 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         """
         for device in self.job.devices_to_load:
             for cable in device.get_cables():
+                if cable.termination_a.type != "dcim.interface" or cable.termination_b.type != "dcim.interface":
+                    self.job.logger.warning(
+                        f"Skipping Cable: {cable}. Only cables with interface terminations are supported."
+                    )
+                    continue
+                if not cable.termination_a.device or not cable.termination_b.device:
+                    self.job.logger.warning(
+                        f"Skipping Cable: {cable}. Only cables connected to devices are support (e.g. Circuit Terminations)."
+                    )
                 if cable.termination_b.device.name == "" or cable.termination_a.device.name == "":
                     self.job.logger.warning(
-                        f"Device attached to a cable is missing a name. Devices must have a name to utilize cable onboarding. "
+                        f"Device attached to a cable is missing a name. Devices must have a name to utilize cable onboarding."
                         f"Skipping Cable: {cable}"
                     )
                     continue
