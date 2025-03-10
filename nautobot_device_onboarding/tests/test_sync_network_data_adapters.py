@@ -2,9 +2,8 @@
 
 from unittest.mock import MagicMock, patch
 
-from nautobot.dcim.models import Cable
 from nautobot.core.testing import TransactionTestCase
-from nautobot.dcim.models import Device, Interface
+from nautobot.dcim.models import Cable, Device, Interface
 from nautobot.extras.models import JobResult
 from nautobot.ipam.models import VLAN, VRF, IPAddress
 

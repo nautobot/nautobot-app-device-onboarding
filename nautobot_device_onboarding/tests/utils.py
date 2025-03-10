@@ -1,7 +1,7 @@
 """Testing utilites."""
 
 from django.contrib.contenttypes.models import ContentType
-from nautobot.circuits.models import Circuit, CircuitType, Provider, CircuitTermination
+from nautobot.circuits.models import Circuit, CircuitTermination, CircuitType, Provider
 from nautobot.dcim.choices import InterfaceModeChoices, InterfaceTypeChoices
 from nautobot.dcim.models import Cable, Device, DeviceType, Interface, Location, LocationType, Manufacturer, Platform
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
@@ -157,7 +157,7 @@ def sync_network_data_ensure_required_nautobot_objects():
     circuit_termination_1, _ = CircuitTermination.objects.get_or_create(
         circuit=circuit_1,
         term_side="A",
-        location=location,   
+        location=location,
     )
 
     cable_to_circuit_1 = Cable.objects.get_or_create(
@@ -188,6 +188,7 @@ def sync_network_data_ensure_required_nautobot_objects():
     testing_objects["vlan_2"] = vlan_2
     testing_objects["vrf_1"] = vrf_1
     testing_objects["vrf_2"] = vrf_2
+    testing_objects["cable_to_circuit"] = cable_to_circuit_1
 
     return testing_objects
 
