@@ -258,7 +258,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
                     continue
                 if not cable.termination_a.device or not cable.termination_b.device:
                     self.job.logger.warning(
-                        f"Skipping Cable: {cable}. Only cables connected to devices are support (e.g. Circuit Terminations)."
+                        f"Skipping Cable: {cable}. Only cables connected to device interfaces are supported."
                     )
                 if cable.termination_b.device.name == "" or cable.termination_a.device.name == "":
                     self.job.logger.warning(
