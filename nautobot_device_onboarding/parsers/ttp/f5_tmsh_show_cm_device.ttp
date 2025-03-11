@@ -1,0 +1,2 @@
+Hostname {{ mgmt_hostname }}
+Mgmt IP {{ mgmt_ip }}
