@@ -5,6 +5,7 @@ sync_devices:
       - command: "show cm device"
         parser: "ttp"
         jpath: "[]|[?mgmt_ip==`{{ obj }}`].mgmt_hostname"
+        post_processor: "{{ obj[0] }}"
         interable_type: "str"
   serial:
     commands:
