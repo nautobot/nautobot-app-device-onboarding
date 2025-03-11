@@ -11,6 +11,17 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - [#274](https://github.com/nautobot/nautobot-app-device-onboarding/issues/274) - Added TTP Parser support.
 - [#274](https://github.com/nautobot/nautobot-app-device-onboarding/issues/274) - Added Sync Device from Network support for Palo Alto Panos.
 
+## [v4.2.3 (2025-03-11)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.2.3)
+
+### Fixed
+
+- [#326](https://github.com/nautobot/nautobot-app-device-onboarding/issues/326) - Fixed error from ingesting existing cable attached to a circuit.
+
+### Housekeeping
+
+- Rebaked from the cookie `nautobot-app-v2.4.2`.
+
+
 ## [v4.2.2 (2025-02-19)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.2.2)
 
 ### Fixed
