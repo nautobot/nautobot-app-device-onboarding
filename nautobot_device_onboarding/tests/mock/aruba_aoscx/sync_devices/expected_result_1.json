@@ -1,0 +1,7 @@
+{
+    "device_type": "JL664A 6300M 24G 4SFP56 Swch         ",
+    "hostname": "SW-CORE",
+    "mask_length": 24,
+    "mgmt_interface": "vlan100",
+    "serial": "SG9BKN123V"
+}
