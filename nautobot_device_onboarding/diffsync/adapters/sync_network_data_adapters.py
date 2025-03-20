@@ -6,7 +6,7 @@ import diffsync
 from diffsync.enum import DiffSyncModelFlags
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from nautobot.dcim.models import Interface
+from nautobot.dcim.models import Device, Interface, SoftwareVersion
 from nautobot.ipam.models import VLAN, VRF, IPAddress
 from nautobot_ssot.contrib import NautobotAdapter
 from netaddr import EUI, mac_unix_expanded
@@ -51,6 +51,8 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
     lag_to_interface = sync_network_data_models.SyncNetworkDataLagToInterface
     vrf_to_interface = sync_network_data_models.SyncNetworkDataVrfToInterface
     cable = sync_network_data_models.SyncNetworkDataCable
+    software_version = sync_network_data_models.SyncNetworkSoftwareVersion
+    software_version_to_device = sync_network_data_models.SyncNetworkSoftwareVersionToDevice
 
     primary_ips = None
 
@@ -65,6 +67,8 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         "lag_to_interface",
         "vrf_to_interface",
         "cable",
+        "software_version",
+        "software_version_to_device",
     ]
 
     def _cache_primary_ips(self, device_queryset):
@@ -157,12 +161,13 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
                 vlan_dict["name"] = vlan.name
                 vlan_dict["id"] = str(vlan.vid)
                 tagged_vlans.append(vlan_dict)
+            sorted_tagged_vlans = sorted(tagged_vlans, key=lambda x: x["id"])
 
             network_tagged_vlans_to_interface = self.tagged_vlans_to_interface(
                 adapter=self,
                 device__name=interface.device.name,
                 name=interface.name,
-                tagged_vlans=tagged_vlans,
+                tagged_vlans=sorted_tagged_vlans,
             )
             network_tagged_vlans_to_interface.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
             self.add(network_tagged_vlans_to_interface)
@@ -250,9 +255,18 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         """
         for device in self.job.devices_to_load:
             for cable in device.get_cables():
+                if cable.termination_a.type != "dcim.interface" or cable.termination_b.type != "dcim.interface":
+                    self.job.logger.warning(
+                        f"Skipping Cable: {cable}. Only cables with interface terminations are supported."
+                    )
+                    continue
+                if not cable.termination_a.device or not cable.termination_b.device:
+                    self.job.logger.warning(
+                        f"Skipping Cable: {cable}. Only cables connected to device interfaces are supported."
+                    )
                 if cable.termination_b.device.name == "" or cable.termination_a.device.name == "":
                     self.job.logger.warning(
-                        f"Device attached to a cable is missing a name. Devices must have a name to utilize cable onboarding. "
+                        f"Device attached to a cable is missing a name. Devices must have a name to utilize cable onboarding."
                         f"Skipping Cable: {cable}"
                     )
                     continue
@@ -288,6 +302,32 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
                 except diffsync.exceptions.ObjectAlreadyExists:
                     continue
 
+    def load_software_versions(self):
+        """Load Software Versions into the Diffsync store."""
+        for software_version in SoftwareVersion.objects.all():
+            network_software_version = self.software_version(
+                adapter=self,
+                version=software_version.version,
+                platform__name=software_version.platform.name,
+            )
+            try:
+                network_software_version.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
+                self.add(network_software_version)
+            except diffsync.exceptions.ObjectAlreadyExists:
+                continue
+
+    def load_software_version_to_device(self):
+        """Load Software Version to Device assignments into the Diffsync store."""
+        for device in self.job.devices_to_load:
+            network_software_version_to_device = self.software_version_to_device(
+                adapter=self,
+                name=device.name,
+                serial=device.serial,
+                software_version__version=device.software_version.version if device.software_version else "",
+            )
+            network_software_version_to_device.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
+            self.add(network_software_version_to_device)
+
     def load(self):
         """Generic implementation of the load function."""
         if not hasattr(self, "top_level") or not self.top_level:
@@ -317,6 +357,12 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
             elif model_name == "cable":
                 if self.job.sync_cables:
                     self.load_cables()
+            elif model_name == "software_version":
+                if self.job.sync_software_version:
+                    self.load_software_versions()
+            elif model_name == "software_version_to_device":
+                if self.job.sync_software_version:
+                    self.load_software_version_to_device()
             else:
                 diffsync_model = self._get_diffsync_class(model_name)
                 self._load_objects(diffsync_model)
@@ -392,6 +438,8 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
     lag_to_interface = sync_network_data_models.SyncNetworkDataLagToInterface
     vrf_to_interface = sync_network_data_models.SyncNetworkDataVrfToInterface
     cable = sync_network_data_models.SyncNetworkDataCable
+    software_version = sync_network_data_models.SyncNetworkSoftwareVersion
+    software_version_to_device = sync_network_data_models.SyncNetworkSoftwareVersionToDevice
 
     top_level = [
         "ip_address",
@@ -404,6 +452,8 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
         "lag_to_interface",
         "vrf_to_interface",
         "cable",
+        "software_version",
+        "software_version_to_device",
     ]
 
     def _handle_failed_devices(self, device_data):
@@ -606,24 +656,26 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                 if interface_data["untagged_vlan"] and interface_data["untagged_vlan"].get("id") == "0":
                     self.job.logger.warning("Interface with untagged vlan 0 found. Skipping untagged vlan load.")
                     continue
-                try:
-                    network_vlan = self.vlan(
-                        adapter=self,
-                        name=interface_data["untagged_vlan"]["name"],
-                        vid=interface_data["untagged_vlan"]["id"],
-                        location__name=location_names.get(hostname, ""),
-                    )
-                    self.add(network_vlan)
-                except diffsync.exceptions.ObjectAlreadyExists:
-                    continue
-                except Exception as err:  # pylint: disable=broad-exception-caught
-                    self._handle_general_load_exception(
-                        error=err,
-                        hostname=hostname,
-                        data=device_data,
-                        model_type="vlan",
-                    )
-                    continue
+
+                if interface_data["untagged_vlan"]:
+                    try:
+                        network_vlan = self.vlan(
+                            adapter=self,
+                            name=interface_data["untagged_vlan"]["name"],
+                            vid=interface_data["untagged_vlan"]["id"],
+                            location__name=location_names.get(hostname, ""),
+                        )
+                        self.add(network_vlan)
+                    except diffsync.exceptions.ObjectAlreadyExists:
+                        continue
+                    except Exception as err:  # pylint: disable=broad-exception-caught
+                        self._handle_general_load_exception(
+                            error=err,
+                            hostname=hostname,
+                            data=device_data,
+                            model_type="vlan",
+                        )
+                        continue
 
     def load_vrfs(self):
         """Load vrfs into the Diffsync store."""
@@ -691,11 +743,12 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
             # for interface in device_data["interfaces"]:
             for interface_name, interface_data in device_data["interfaces"].items():
                 try:
+                    sorted_tagged_vlans = sorted(interface_data["tagged_vlans"], key=lambda x: x["id"])
                     network_tagged_vlans_to_interface = self.tagged_vlans_to_interface(
                         adapter=self,
                         device__name=hostname,
                         name=interface_name,
-                        tagged_vlans=interface_data["tagged_vlans"],
+                        tagged_vlans=sorted_tagged_vlans,
                     )
                     self.add(network_tagged_vlans_to_interface)
                 except Exception as err:  # pylint: disable=broad-exception-caught
@@ -710,7 +763,6 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
     def load_untagged_vlan_to_interface(self):
         """Load untagged vlan to interface assignments into the Diffsync store."""
         for hostname, device_data in self.job.command_getter_result.items():
-            # for interface in device_data["interfaces"]:
             for interface_name, interface_data in device_data["interfaces"].items():
                 try:
                     if interface_data["untagged_vlan"] and interface_data["untagged_vlan"].get("id") == "0":
@@ -758,7 +810,6 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
     def load_vrf_to_interface(self):
         """Load Vrf to interface assignments into the Diffsync store."""
         for hostname, device_data in self.job.command_getter_result.items():
-            # for interface in device_data["interfaces"]:
             for interface_name, interface_data in device_data["interfaces"].items():
                 try:
                     network_vrf_to_interface = self.vrf_to_interface(
@@ -873,6 +924,46 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                     model_type="cable",
                 )
 
+    def load_software_versions(self):
+        """Load software versions into the Diffsync store."""
+        for (  # pylint: disable=too-many-nested-blocks
+            hostname,
+            device_data,
+        ) in self.job.command_getter_result.items():
+            if self.job.debug:
+                self.job.logger.debug(f"Loading Software Versions from {hostname}")
+            if device_data["software_version"]:
+                device = Device.objects.get(serial=device_data["serial"])
+                try:
+                    network_software_version = self.software_version(
+                        adapter=self,
+                        platform__name=device.platform.name,
+                        version=device_data["software_version"],
+                    )
+                    self.add(network_software_version)
+                except diffsync.exceptions.ObjectAlreadyExists:
+                    continue
+
+    def load_software_version_to_device(self):
+        """Load software version to device assignments into the Diffsync store."""
+        for (  # pylint: disable=too-many-nested-blocks
+            hostname,
+            device_data,
+        ) in self.job.command_getter_result.items():
+            if self.job.debug:
+                self.job.logger.debug(f"Loading Software Version to Device assignments from {hostname}")
+            if device_data["software_version"]:
+                try:
+                    network_software_version_to_device = self.software_version_to_device(
+                        adapter=self,
+                        name=hostname,
+                        serial=device_data["serial"],
+                        software_version__version=device_data["software_version"],
+                    )
+                    self.add(network_software_version_to_device)
+                except diffsync.exceptions.ObjectAlreadyExists:
+                    continue
+
     def load(self):
         """Load network data."""
         self.execute_command_getter()
@@ -891,3 +982,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
             self.load_vrf_to_interface()
         if self.job.sync_cables:
             self.load_cables()
+        if self.job.sync_software_version:
+            self.load_software_versions()
+        if self.job.sync_software_version:
+            self.load_software_version_to_device()

@@ -488,6 +488,11 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         self.memory_profiling = memory_profiling
         self.debug = debug
 
+        self.job_result.task_kwargs = {
+            "debug": debug,
+            "connectivity_test": kwargs["connectivity_test"],
+        }
+
         if csv_file:
             self.processed_csv_data = self._process_csv_data(csv_file=csv_file)
             if self.processed_csv_data:
@@ -496,10 +501,11 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 for ip_address in self.processed_csv_data:
                     self.ip_addresses.append(ip_address)
                 # prepare the task_kwargs needed by the CommandGetterDO job
-                self.job_result.task_kwargs = {
-                    "debug": debug,
-                    "csv_file": self.task_kwargs_csv_data,
-                }
+                self.job_result.task_kwargs.update(
+                    {
+                        "csv_file": self.task_kwargs_csv_data,
+                    }
+                )
             else:
                 raise ValidationError(message="CSV check failed. No devices will be synced.")
 
@@ -541,24 +547,24 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             self.secrets_group = secrets_group
             self.platform = platform
 
-            self.job_result.task_kwargs = {
-                "debug": debug,
-                "location": location,
-                "namespace": namespace,
-                "ip_addresses": ip_addresses,
-                "set_mgmt_only": set_mgmt_only,
-                "update_devices_without_primary_ip": update_devices_without_primary_ip,
-                "device_role": device_role,
-                "device_status": device_status,
-                "interface_status": interface_status,
-                "ip_address_status": ip_address_status,
-                "port": port,
-                "timeout": timeout,
-                "secrets_group": secrets_group,
-                "platform": platform,
-                "csv_file": "",
-                "connectivity_test": kwargs["connectivity_test"],
-            }
+            self.job_result.task_kwargs.update(
+                {
+                    "location": location,
+                    "namespace": namespace,
+                    "ip_addresses": ip_addresses,
+                    "set_mgmt_only": set_mgmt_only,
+                    "update_devices_without_primary_ip": update_devices_without_primary_ip,
+                    "device_role": device_role,
+                    "device_status": device_status,
+                    "interface_status": interface_status,
+                    "ip_address_status": ip_address_status,
+                    "port": port,
+                    "timeout": timeout,
+                    "secrets_group": secrets_group,
+                    "platform": platform,
+                    "csv_file": "",
+                }
+            )
         super().run(dryrun, memory_profiling, *args, **kwargs)
 
 
@@ -588,6 +594,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
     sync_vlans = BooleanVar(default=False, description="Sync VLANs and interface VLAN assignments.")
     sync_vrfs = BooleanVar(default=False, description="Sync VRFs and interface VRF assignments.")
     sync_cables = BooleanVar(default=False, description="Sync cables between interfaces via a LLDP or CDP.")
+    sync_software_version = BooleanVar(default=False, description="Sync software version from device.")
     namespace = ObjectVar(
         model=Namespace,
         required=True,
@@ -664,6 +671,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         sync_vlans,
         sync_vrfs,
         sync_cables,
+        sync_software_version,
         *args,
         **kwargs,
     ):
@@ -682,6 +690,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         self.sync_vlans = sync_vlans
         self.sync_vrfs = sync_vrfs
         self.sync_cables = sync_cables
+        self.sync_software_version = sync_software_version
 
         # Check for last_network_data_sync CustomField
         if self.debug:
@@ -744,6 +753,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
             "sync_vlans": sync_vlans,
             "sync_vrfs": sync_vrfs,
             "sync_cables": sync_cables,
+            "sync_software_version": sync_software_version,
             "connectivity_test": kwargs["connectivity_test"],
         }
 
@@ -799,6 +809,7 @@ class DeviceOnboardingTroubleshootingJob(Job):
                     kwargs.update({"sync_vrfs": True})
                     kwargs.update({"sync_vlans": True})
                     kwargs.update({"sync_cables": True})
+                    kwargs.update({"sync_software_version": True})
                     nr_with_processors.run(
                         task=netmiko_send_commands,
                         command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],
@@ -818,6 +829,7 @@ class DeviceOnboardingTroubleshootingJob(Job):
                         kwargs.update({"sync_vrfs": True})
                         kwargs.update({"sync_vlans": True})
                         kwargs.update({"sync_cables": True})
+                        kwargs.update({"sync_software_version": True})
                     nr_with_processors.run(
                         task=netmiko_send_commands,
                         command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],

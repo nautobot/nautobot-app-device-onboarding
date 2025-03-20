@@ -20,7 +20,7 @@ from nornir_netmiko.tasks import netmiko_send_command
 from ntc_templates.parse import parse_output
 from ttp import ttp
 
-from nautobot_device_onboarding.constants import SUPPORTED_COMMAND_PARSERS, SUPPORTED_NETWORK_DRIVERS
+from nautobot_device_onboarding.constants import SUPPORTED_COMMAND_PARSERS
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
@@ -58,7 +58,7 @@ def deduplicate_command_list(data):
     return unique_list
 
 
-def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables):
+def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables, sync_software_version):
     """Using merged command mapper info and look up all commands that need to be run."""
     all_commands = []
     for key, value in yaml_parsed_info.items():
@@ -78,30 +78,36 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables):
             # Deduplicate commands + parser key
             current_root_key = value.get("commands")
             if isinstance(current_root_key, list):
-                # Means their is any "nested" structures. e.g multiple commands
+                # Means there is a "nested" structures. e.g. multiple commands
                 for command in value["commands"]:
-                    # If syncing vlans isn't inscope don't run the unneeded commands.
+                    # If syncing vlans isn't in scope don't run the unneeded commands.
                     if not sync_vlans and key in ["interfaces__tagged_vlans", "interfaces__untagged_vlan"]:
                         continue
-                    # If syncing vrfs isn't inscope remove the unneeded commands.
+                    # If syncing vrfs isn't in scope remove the unneeded commands.
                     if not sync_vrfs and key == "interfaces__vrf":
                         continue
-                    # If syncing cables isn't inscope remove the unneeded commands.
+                    # If syncing cables isn't in scope remove the unneeded commands.
                     if not sync_cables and key == "cables":
+                        continue
+                    # If syncing software_versions isn't in scope remove the unneeded commands.
+                    if not sync_software_version and key == "software_version":
                         continue
                     all_commands.append(command)
             else:
                 if isinstance(current_root_key, dict):
-                    # If syncing vlans isn't inscope don't run the unneeded commands.
+                    # Means there isn't a "nested" structures. e.g. 1 command
+                    # If syncing vlans isn't in scope don't run the unneeded commands.
                     if not sync_vlans and key in ["interfaces__tagged_vlans", "interfaces__untagged_vlan"]:
                         continue
-                    # If syncing vrfs isn't inscope remove the unneeded commands.
+                    # If syncing vrfs isn't in scope remove the unneeded commands.
                     if not sync_vrfs and key == "interfaces__vrf":
                         continue
-                    # If syncing cables isn't inscope remove the unneeded commands.
+                    # If syncing cables isn't in scope remove the unneeded commands.
                     if not sync_cables and key == "cables":
                         continue
-                    # Means their isn't a "nested" structures. e.g 1 command
+                    # If syncing software_versions isn't in scope remove the unneeded commands.
+                    if not sync_software_version and key == "software_version":
+                        continue
                     all_commands.append(current_root_key)
     return deduplicate_command_list(all_commands)
 
@@ -112,13 +118,13 @@ def netmiko_send_commands(
     """Run commands specified in PLATFORM_COMMAND_MAP."""
     if not task.host.platform:
         return Result(host=task.host, result=f"{task.host.name} has no platform set.", failed=True)
-    if task.host.platform not in SUPPORTED_NETWORK_DRIVERS or not "cisco_wlc_ssh":
+    if task.host.platform not in get_all_network_driver_mappings().keys() or not "cisco_wlc_ssh":
         return Result(host=task.host, result=f"{task.host.name} has a unsupported platform set.", failed=True)
     if not command_getter_yaml_data[task.host.platform].get(command_getter_job):
         return Result(
             host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True
         )
-    if orig_job_kwargs["connectivity_test"]:
+    if orig_job_kwargs.get("connectivity_test", False):
         if not tcp_ping(task.host.hostname, task.host.port):
             return Result(
                 host=task.host, result=f"{task.host.name} failed connectivity check via tcp_ping.", failed=True
@@ -129,6 +135,7 @@ def netmiko_send_commands(
         orig_job_kwargs.get("sync_vlans", False),
         orig_job_kwargs.get("sync_vrfs", False),
         orig_job_kwargs.get("sync_cables", False),
+        orig_job_kwargs.get("sync_software_version", False),
     )
     if (
         orig_job_kwargs.get("sync_cables", False)
@@ -354,10 +361,11 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
                     "queryset": qs,
                     "defaults": {
                         "platform_parsing_info": add_platform_parsing_info(),
-                        "network_driver_mappings": SUPPORTED_NETWORK_DRIVERS,
+                        "network_driver_mappings": list(get_all_network_driver_mappings().keys()),
                         "sync_vlans": kwargs["sync_vlans"],
                         "sync_vrfs": kwargs["sync_vrfs"],
                         "sync_cables": kwargs["sync_cables"],
+                        "sync_software_version": kwargs["sync_software_version"],
                     },
                 },
             },
