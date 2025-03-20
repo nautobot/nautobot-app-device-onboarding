@@ -1,1 +1,0 @@
-- Fixed adding invalid VLAN 0 to Diffsync Store causing Sync Data job to fail.

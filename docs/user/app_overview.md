@@ -49,6 +49,7 @@ Expose two new SSoT based Nautobot jobs to perform the syncing of data.
         - Route Distinguishers (RD)
     - Cabling
     - Software Version
+    - Cabling (**Note** Cables attached to Circuits will be skipped)
 
 !!! info
     For more information look at the provided jsonschema definitions for each of the jobs.

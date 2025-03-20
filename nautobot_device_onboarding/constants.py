@@ -1,7 +1,6 @@
 """Constants for nautobot_device_onboarding app."""
 
 from django.conf import settings
-from nautobot.dcim.utils import get_all_network_driver_mappings
 
 NETMIKO_EXTRAS = (
     settings.PLUGINS_CONFIG.get("nautobot_plugin_nornir", {})
@@ -22,9 +21,6 @@ NETMIKO_TO_NAPALM_STATIC = {
     "cisco_xr": "iosxr",
 }
 
-
-# This is used in the new SSoT based jobs.
-SUPPORTED_NETWORK_DRIVERS = list(get_all_network_driver_mappings().keys())
 
 # This is used in the new SSoT based jobs. Soon PYATS should be supported.
 SUPPORTED_COMMAND_PARSERS = ["textfsm", "ttp"]
@@ -48,3 +44,9 @@ INTERFACE_TYPE_MAP_STATIC = {
     "FastEthernet": "100base-fx",
     "ethernet": "1000base-t",
 }
+
+# The git repository data source content identifier for custom command mappers.
+ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER = "nautobot_device_onboarding.onboarding_command_mappers"
+
+# The git repository data source folder name for custom command mappers.
+ONBOARDING_COMMAND_MAPPERS_REPOSITORY_FOLDER = "onboarding_command_mappers"

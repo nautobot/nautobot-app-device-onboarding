@@ -5,6 +5,11 @@ import os
 import yaml
 from nautobot.extras.models import GitRepository
 
+from nautobot_device_onboarding.constants import (
+    ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER,
+    ONBOARDING_COMMAND_MAPPERS_REPOSITORY_FOLDER,
+)
+
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "command_mappers"))
 
 
@@ -12,12 +17,12 @@ def get_git_repo():
     """Get the git repo object."""
     if (
         GitRepository.objects.filter(
-            provided_contents=["nautobot_device_onboarding.onboarding_command_mappers"]
+            provided_contents__contains="nautobot_device_onboarding.onboarding_command_mappers"
         ).count()
         == 1
     ):
         repository_record = GitRepository.objects.filter(
-            provided_contents=["nautobot_device_onboarding.onboarding_command_mappers"]
+            provided_contents=[ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER]
         ).first()
         return repository_record
     return None
@@ -40,7 +45,7 @@ def add_platform_parsing_info():
     """Merges platform command mapper from repo or defaults."""
     repository_record = get_git_repo()
     if repository_record:
-        repo_data_dir = os.path.join(repository_record.filesystem_path, "onboarding_command_mappers")
+        repo_data_dir = os.path.join(repository_record.filesystem_path, ONBOARDING_COMMAND_MAPPERS_REPOSITORY_FOLDER)
         command_mappers_repo_path = load_command_mappers_from_dir(repo_data_dir)
     else:
         command_mappers_repo_path = {}

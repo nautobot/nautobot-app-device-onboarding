@@ -2,13 +2,13 @@
 
 import json
 import os
-from typing import Dict
+from typing import Dict, Tuple, Union
 
 from django.conf import settings
 from nautobot.dcim.models import Platform
 from nautobot.dcim.utils import get_all_network_driver_mappings
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
-from nautobot.extras.models import SecretsGroup
+from nautobot.extras.models import SecretsGroup, SecretsGroupAssociation
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_plugin_nornir.plugins.inventory.nautobot_orm import NautobotORMInventory
 from netutils.ping import tcp_ping
@@ -20,7 +20,7 @@ from nornir_netmiko.tasks import netmiko_send_command
 from ntc_templates.parse import parse_output
 from ttp import ttp
 
-from nautobot_device_onboarding.constants import SUPPORTED_COMMAND_PARSERS, SUPPORTED_NETWORK_DRIVERS
+from nautobot_device_onboarding.constants import SUPPORTED_COMMAND_PARSERS
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
@@ -118,7 +118,7 @@ def netmiko_send_commands(
     """Run commands specified in PLATFORM_COMMAND_MAP."""
     if not task.host.platform:
         return Result(host=task.host, result=f"{task.host.name} has no platform set.", failed=True)
-    if task.host.platform not in SUPPORTED_NETWORK_DRIVERS or not "cisco_wlc_ssh":
+    if task.host.platform not in get_all_network_driver_mappings().keys() or not "cisco_wlc_ssh":
         return Result(host=task.host, result=f"{task.host.name} has a unsupported platform set.", failed=True)
     if not command_getter_yaml_data[task.host.platform].get(command_getter_job):
         return Result(
@@ -167,11 +167,12 @@ def netmiko_send_commands(
                             try:
                                 # Look for custom textfsm templates in the git repo
                                 git_template_dir = get_git_repo_parser_path(parser_type="textfsm")
-                                if not check_for_required_file(git_template_dir, "index"):
-                                    logger.debug(
-                                        f"Unable to find required index file in {git_template_dir} for textfsm parsing. Falling back to default templates."
-                                    )
-                                    git_template_dir = None
+                                if git_template_dir:
+                                    if not check_for_required_file(git_template_dir, "index"):
+                                        logger.debug(
+                                            f"Unable to find required index file in {git_template_dir} for textfsm parsing. Falling back to default templates."
+                                        )
+                                        git_template_dir = None
                                 # Parsing textfsm ourselves instead of using netmikos use_<parser> function to be able to handle exceptions
                                 # ourselves. Default for netmiko is if it can't parse to return raw text which is tougher to handle.
                                 parsed_output = parse_output(
@@ -231,8 +232,10 @@ def netmiko_send_commands(
             task.results[result_idx].failed = False
 
 
-def _parse_credentials(credentials):
-    """Parse and return dictionary of credentials."""
+def _parse_credentials(credentials: Union[SecretsGroup, None], logger: NornirLogger = None) -> Tuple[str, str]:
+    """Parse creds from either secretsgroup or settings, return tuple of username/password."""
+    username, password = None, None
+
     if credentials:
         try:
             username = credentials.get_secret_value(
@@ -243,20 +246,22 @@ def _parse_credentials(credentials):
                 access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
                 secret_type=SecretsGroupSecretTypeChoices.TYPE_PASSWORD,
             )
-            try:
-                secret = credentials.get_secret_value(
-                    access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
-                    secret_type=SecretsGroupSecretTypeChoices.TYPE_SECRET,
-                )
-            except Exception:  # pylint: disable=broad-exception-caught
-                secret = None
-        except Exception:  # pylint: disable=broad-exception-caught
-            return (None, None, None)
+        except SecretsGroupAssociation.DoesNotExist:
+            pass
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logger.debug(f"Error processing credentials from secrets group {credentials.name}: {e}")
+            pass
     else:
         username = settings.NAPALM_USERNAME
         password = settings.NAPALM_PASSWORD
-        secret = settings.NAPALM_ARGS.get("secret", None)
-    return (username, password, secret)
+
+    missing_creds = []
+    for cred_var in ["username", "password"]:
+        if not locals().get(cred_var, None):
+            missing_creds.append(cred_var)
+    if missing_creds:
+        logger.debug(f"Missing credentials for {missing_creds}")
+    return (username, password)
 
 
 def sync_devices_command_getter(job_result, log_level, kwargs):
@@ -272,7 +277,7 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
         port = kwargs["port"]
         # timeout = kwargs["timeout"]
         platform = kwargs["platform"]
-        username, password, secret = _parse_credentials(kwargs["secrets_group"])
+        username, password = _parse_credentials(kwargs["secrets_group"], logger=logger)
 
     # Initiate Nornir instance with empty inventory
     try:
@@ -304,7 +309,7 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                         if new_secrets_group != loaded_secrets_group:
                             logger.info(f"Parsing credentials from Secrets Group: {new_secrets_group.name}")
                             loaded_secrets_group = new_secrets_group
-                            username, password, secret = _parse_credentials(loaded_secrets_group)
+                            username, password = _parse_credentials(loaded_secrets_group, logger=logger)
                             if not (username and password):
                                 logger.error(f"Unable to onboard {entered_ip}, failed to parse credentials")
                         single_host_inventory_constructed, exc_info = _set_inventory(
@@ -356,7 +361,7 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
                     "queryset": qs,
                     "defaults": {
                         "platform_parsing_info": add_platform_parsing_info(),
-                        "network_driver_mappings": SUPPORTED_NETWORK_DRIVERS,
+                        "network_driver_mappings": list(get_all_network_driver_mappings().keys()),
                         "sync_vlans": kwargs["sync_vlans"],
                         "sync_vrfs": kwargs["sync_vrfs"],
                         "sync_cables": kwargs["sync_cables"],

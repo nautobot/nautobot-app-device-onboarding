@@ -488,6 +488,11 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         self.memory_profiling = memory_profiling
         self.debug = debug
 
+        self.job_result.task_kwargs = {
+            "debug": debug,
+            "connectivity_test": kwargs["connectivity_test"],
+        }
+
         if csv_file:
             self.processed_csv_data = self._process_csv_data(csv_file=csv_file)
             if self.processed_csv_data:
@@ -496,10 +501,11 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 for ip_address in self.processed_csv_data:
                     self.ip_addresses.append(ip_address)
                 # prepare the task_kwargs needed by the CommandGetterDO job
-                self.job_result.task_kwargs = {
-                    "debug": debug,
-                    "csv_file": self.task_kwargs_csv_data,
-                }
+                self.job_result.task_kwargs.update(
+                    {
+                        "csv_file": self.task_kwargs_csv_data,
+                    }
+                )
             else:
                 raise ValidationError(message="CSV check failed. No devices will be synced.")
 
@@ -541,24 +547,24 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             self.secrets_group = secrets_group
             self.platform = platform
 
-            self.job_result.task_kwargs = {
-                "debug": debug,
-                "location": location,
-                "namespace": namespace,
-                "ip_addresses": ip_addresses,
-                "set_mgmt_only": set_mgmt_only,
-                "update_devices_without_primary_ip": update_devices_without_primary_ip,
-                "device_role": device_role,
-                "device_status": device_status,
-                "interface_status": interface_status,
-                "ip_address_status": ip_address_status,
-                "port": port,
-                "timeout": timeout,
-                "secrets_group": secrets_group,
-                "platform": platform,
-                "csv_file": "",
-                "connectivity_test": kwargs["connectivity_test"],
-            }
+            self.job_result.task_kwargs.update(
+                {
+                    "location": location,
+                    "namespace": namespace,
+                    "ip_addresses": ip_addresses,
+                    "set_mgmt_only": set_mgmt_only,
+                    "update_devices_without_primary_ip": update_devices_without_primary_ip,
+                    "device_role": device_role,
+                    "device_status": device_status,
+                    "interface_status": interface_status,
+                    "ip_address_status": ip_address_status,
+                    "port": port,
+                    "timeout": timeout,
+                    "secrets_group": secrets_group,
+                    "platform": platform,
+                    "csv_file": "",
+                }
+            )
         super().run(dryrun, memory_profiling, *args, **kwargs)
 
 
@@ -778,10 +784,10 @@ class DeviceOnboardingTroubleshootingJob(Job):
         ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
         port = kwargs["port"]
         platform = kwargs["platform"]
-        username, password, secret = (  # pylint:disable=unused-variable
+        username, password = (  # pylint:disable=unused-variable
             _parse_credentials(kwargs["secrets_group"])
         )
-
+        kwargs["connectivity_test"] = False
         # Initiate Nornir instance with empty inventory
         compiled_results = {}
         try:
