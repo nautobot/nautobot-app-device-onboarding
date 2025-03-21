@@ -576,7 +576,7 @@ class SyncNetworkDataVrfToInterface(DiffSyncModel):
             vrf.validated_save()
             interface.vrf = vrf
         except Exception as err:
-            adapter.logger.error(f"Failed to assign device: [{interface.device}] to vrf: [{vrf}], {err}")
+            adapter.job.logger.error(f"Failed to assign device: [{interface.device}] to vrf: [{vrf}], {err}")
             if diff_method_type == "create":
                 raise diffsync_exceptions.ObjectNotCreated(err)
             if diff_method_type == "update":
