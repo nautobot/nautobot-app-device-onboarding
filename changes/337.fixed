@@ -1,0 +1,1 @@
+Fixed logging call from an invalid path to the correct one.
