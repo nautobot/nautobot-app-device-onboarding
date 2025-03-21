@@ -5,6 +5,7 @@ import datetime
 import diffsync
 from diffsync.enum import DiffSyncModelFlags
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from nautobot.dcim.models import Interface
 from nautobot.ipam.models import VLAN, VRF, IPAddress
@@ -249,9 +250,13 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
 
         Only cables returned by the CommandGetter job should be synced.
         """
+        dcim_interface_content_type = ContentType.objects.get_for_model(Interface)
         for device in self.job.devices_to_load:
             for cable in device.get_cables():
-                if cable.termination_a.type != "dcim.interface" or cable.termination_b.type != "dcim.interface":
+                if (
+                    cable.termination_a_type != dcim_interface_content_type
+                    or cable.termination_b_type != dcim_interface_content_type
+                ):
                     self.job.logger.warning(
                         f"Skipping Cable: {cable}. Only cables with interface terminations are supported."
                     )
