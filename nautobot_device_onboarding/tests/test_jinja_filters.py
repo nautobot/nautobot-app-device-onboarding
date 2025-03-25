@@ -238,15 +238,14 @@ class TestJinjaFilters(unittest.TestCase):
         expected = [{"prefix_length": "31", "ip_address": "10.65.229.106"}]
         self.assertEqual(parse_junos_ip_address(data), expected)
 
-    @unittest.skip("Need to correct assert used for list of dictionaries.")
     def test_parse_junos_ip_address_values_as_list_multiple(self):
         """Parse Junos IP and destination prefix."""
         data = [{"prefix_length": ["10.65.133.0/29", "10.65.133.0/29"], "ip_address": ["10.65.133.1", "10.65.133.3"]}]
         expected = [
             {"prefix_length": "29", "ip_address": "10.65.133.1"},
-            {"ip_address": "10.65.133.3", "prefix_length": "29"},
+            {"prefix_length": "29", "ip_address": "10.65.133.3"},
         ]
-        self.assertEqual(parse_junos_ip_address(data), expected)
+        self.assertCountEqual(parse_junos_ip_address(data), expected)
 
     def test_parse_junos_ip_address_values_as_empty_list(self):
         """Parse Junos IP and destination prefix."""
