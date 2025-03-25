@@ -4,6 +4,7 @@ import logging
 from itertools import chain
 
 from django_jinja import library
+from netutils.ip import is_ip
 from netutils.vlan import vlanconfig_to_list
 
 from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC
@@ -174,11 +175,27 @@ def parse_junos_ip_address(item):
     """
     if isinstance(item, list) and len(item) > 0:
         if item[0]["prefix_length"] and item[0]["ip_address"]:
-            return [
-                {"prefix_length": item[0]["prefix_length"][0].split("/")[-1], "ip_address": item[0]["ip_address"][0]}
-            ]
+            result = []
+            for i in range(len(item[0]["ip_address"])):
+                prefix = item[0]["prefix_length"][i].split("/")[-1]
+                result.append(
+                    {
+                        "prefix_length": prefix,
+                        "ip_address": item[0]["ip_address"][i],
+                    }
+                )
+            return result
         if not item[0]["prefix_length"] and item[0]["ip_address"]:
-            return [{"prefix_length": 32, "ip_address": item[0]["ip_address"][0]}]
+            result = []
+            for i in range(len(item[0]["ip_address"])):
+                if is_ip(item[0]["ip_address"][i]):
+                    result.append(
+                        {
+                            "prefix_length": 32,
+                            "ip_address": item[0]["ip_address"][i],
+                        }
+                    )
+            return result
     return []
 
 
