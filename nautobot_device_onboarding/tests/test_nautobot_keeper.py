@@ -563,7 +563,7 @@ class NautobotKeeperTestCase(TestCase):
         self.assertEqual(device.device_type.cf["cf_devicetype"], 5)
         # # Does not pass on MySQL for some reason, the cf_devicerole is not set for the device role
         # # Skipping this for now as we will be removing this soon.
-        # self.assertEqual(device.role.cf["cf_devicerole"], 10)  
+        # self.assertEqual(device.role.cf["cf_devicerole"], 10)
 
         self.assertEqual(device.device_type.manufacturer.cf["cf_manufacturer"], "Foobar!")
         self.assertEqual(device.interfaces.get(name="Management0").cf["cf_interface"], "2016-06-23")
