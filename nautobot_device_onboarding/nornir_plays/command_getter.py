@@ -176,6 +176,7 @@ def netmiko_send_commands(
                                     try_fallback=bool(git_template_dir),
                                 )
                                 task.results[result_idx].result = parsed_output
+                                logger.debug(f"Gary output: {parsed_output}")
                                 task.results[result_idx].failed = False
                             except Exception:  # https://github.com/networktocode/ntc-templates/issues/369
                                 task.results[result_idx].result = []

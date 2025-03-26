@@ -34,7 +34,8 @@ nautobot = "^2.2.3"
 nautobot-ssot = "^3.0.0"
 nautobot-plugin-nornir = "^2.0.0"
 jdiff = "^0.0.6"
-ntc-templates = "^7.0.0"
+# TODO: replace with pypy once https://github.com/networktocode/ntc-templates/pull/2092 is merged
+ntc-templates = { git = "https://github.com/garymccann/ntc-templates.git", rev = "u/garymccann-fix-xr7" }
 # Netutils pin is needed for https://github.com/networktocode/netutils/pull/553
 netutils = "^1.9.1"
 ttp = "^0.9.0"

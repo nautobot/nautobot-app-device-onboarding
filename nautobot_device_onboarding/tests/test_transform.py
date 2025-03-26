@@ -30,11 +30,14 @@ class TestTransformNoGitRepo(unittest.TestCase):
             "arista_eos",
             "cisco_wlc",
             "cisco_xe",
+            "cisco_xr",
             "juniper_junos",
             "cisco_nxos",
             "hp_comware",
             "paloalto_panos",
         ]
+        print("Gary")
+        print(list(sorted(command_mappers.keys())))
         self.assertEqual(sorted(default_mappers), list(sorted(command_mappers.keys())))
 
     def test_load_command_mappers_from_dir(self):

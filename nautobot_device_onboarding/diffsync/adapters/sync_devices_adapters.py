@@ -288,6 +288,7 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
         for ip_address in self.device_data:
             if self.job.debug:
                 self.job.logger.debug(f"loading device_type data for {ip_address}")
+                self.job.logger.debug(f"loading device_type data for {self.device_data}")
             onboarding_device_type = None
             try:
                 onboarding_device_type = self.device_type(
