@@ -17,6 +17,7 @@ from nautobot_device_onboarding.diffsync.models import sync_network_data_models
 from nautobot_device_onboarding.nornir_plays.command_getter import (
     sync_network_data_command_getter,
 )
+from nautobot_device_onboarding.tests.fixtures import sync_network_data_fixture
 from nautobot_device_onboarding.utils import diffsync_utils
 
 app_settings = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
@@ -130,9 +131,11 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         """
         Load Vlans into the Diffsync store.
 
-        Only Vlans that were returned by the CommandGetter job should be synced.
+        Only Vlans that share locations with devices included in the sync should be loaded.
         """
-        for vlan in VLAN.objects.all():
+        # TODO: update this to support multiple locaitons per vlan after the setting for this feature has been added.
+        location_ids = list(self.job.devices_to_load.values_list("location__id", flat=True))
+        for vlan in VLAN.objects.filter(location__in=location_ids):
             network_vlan = self.vlan(
                 adapter=self,
                 name=vlan.name,
@@ -464,11 +467,15 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
 
     def execute_command_getter(self):
         """Query devices for data."""
-        result = sync_network_data_command_getter(
-            self.job.job_result,
-            self.job.logger.getEffectiveLevel(),
-            self.job.job_result.task_kwargs,
-        )
+        if app_settings.get("local_testing"):  # return test data if local testing is enabled
+            self.job.logger.warning("Local testing is enabled, using mock data.")
+            result = sync_network_data_fixture.sync_network_mock_data_valid
+        else:
+            result = sync_network_data_command_getter(
+                self.job.job_result,
+                self.job.logger.getEffectiveLevel(),
+                self.job.job_result.task_kwargs,
+            )
         # verify data returned is a dict
         data_type_check = diffsync_utils.check_data_type(result)
         if self.job.debug:
@@ -595,7 +602,6 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
         ) in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
             if self.job.debug:
                 self.job.logger.debug(f"Loading Vlans from {hostname}")
-            # for interface in device_data["interfaces"]:
             for _, interface_data in device_data["interfaces"].items():
                 # add tagged vlans
                 for tagged_vlan in interface_data["tagged_vlans"]:
