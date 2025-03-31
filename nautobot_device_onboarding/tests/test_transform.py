@@ -36,8 +36,6 @@ class TestTransformNoGitRepo(unittest.TestCase):
             "hp_comware",
             "paloalto_panos",
         ]
-        print("Gary")
-        print(list(sorted(command_mappers.keys())))
         self.assertEqual(sorted(default_mappers), list(sorted(command_mappers.keys())))
 
     def test_load_command_mappers_from_dir(self):
