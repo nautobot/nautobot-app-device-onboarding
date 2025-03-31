@@ -132,7 +132,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
 
         Only Vlans that share locations with devices included in the sync should be loaded.
         """
-        # TODO: update this to support multiple locaitons per vlan after the setting for this feature has been added.
+        # TODO: update this to support multiple locations per VLAN after the setting for this feature has been added.
         location_ids = list(self.job.devices_to_load.values_list("location__id", flat=True))
         for vlan in VLAN.objects.filter(location__in=location_ids):
             network_vlan = self.vlan(
