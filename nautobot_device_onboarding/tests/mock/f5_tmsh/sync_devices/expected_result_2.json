@@ -1,0 +1,7 @@
+{
+    "device_type": "BIG-IP vCMP Guest",
+    "hostname": "f502mgmt-dmz-external.acme.net",
+    "mask_length": 24,
+    "mgmt_interface": "1/mgmt",
+    "serial": "chs401603s"
+}
