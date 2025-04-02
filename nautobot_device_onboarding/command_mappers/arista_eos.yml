@@ -116,3 +116,8 @@ sync_network_data:
         jpath: '{admin_mode: switchports."{{ current_key }}".switchportInfo.mode, mode: switchports."{{ current_key }}".switchportInfo.mode, access_vlan: switchports."{{ current_key }}".switchportInfo.accessVlanId, trunking_vlans: switchports."{{ current_key }}".switchportInfo.trunkAllowedVlans, native_vlan: switchports."{{ current_key }}".switchportInfo.trunkingNativeVlanId}'  # yamllint disable-line rule:quoted-strings
         post_processor: "{{ obj | get_vlan_data(vlan_map, 'untagged') | tojson }}"
         iterable_type: "dict"
+  software_version:
+    commands:
+      - command: "show version"
+        parser: "textfsm"
+        jpath: "[*].image"
