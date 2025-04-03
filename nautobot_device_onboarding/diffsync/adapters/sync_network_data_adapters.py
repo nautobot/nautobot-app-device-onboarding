@@ -17,7 +17,6 @@ from nautobot_device_onboarding.diffsync.models import sync_network_data_models
 from nautobot_device_onboarding.nornir_plays.command_getter import (
     sync_network_data_command_getter,
 )
-from nautobot_device_onboarding.tests.fixtures import sync_network_data_fixture
 from nautobot_device_onboarding.utils import diffsync_utils
 
 app_settings = settings.PLUGINS_CONFIG["nautobot_device_onboarding"]
@@ -467,15 +466,11 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
 
     def execute_command_getter(self):
         """Query devices for data."""
-        if app_settings.get("local_testing"):  # return test data if local testing is enabled
-            self.job.logger.warning("Local testing is enabled, using mock data.")
-            result = sync_network_data_fixture.sync_network_mock_data_valid
-        else:
-            result = sync_network_data_command_getter(
-                self.job.job_result,
-                self.job.logger.getEffectiveLevel(),
-                self.job.job_result.task_kwargs,
-            )
+        result = sync_network_data_command_getter(
+            self.job.job_result,
+            self.job.logger.getEffectiveLevel(),
+            self.job.job_result.task_kwargs,
+        )
         # verify data returned is a dict
         data_type_check = diffsync_utils.check_data_type(result)
         if self.job.debug:
