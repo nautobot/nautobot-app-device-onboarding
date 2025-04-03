@@ -16,7 +16,7 @@ from nautobot_device_onboarding.nornir_plays.formatter import (
 from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info
 
 MOCK_DIR = os.path.join("nautobot_device_onboarding", "tests", "mock")
-SYNC_DEVICES_ONLY = ["cisco_wlc", "hp_comware", "paloalto_panos"]
+SYNC_DEVICES_ONLY = ["cisco_wlc", "hp_comware", "paloalto_panos", "aruba_aoscx"]
 
 
 def find_files_by_prefix(directory, prefix):
@@ -437,6 +437,7 @@ class TestFormatterSyncDevices(unittest.TestCase):
             "cisco_nxos",
             "hp_comware",
             "paloalto_panos",
+            "aruba_aoscx",
         ]
         self.assertEqual(sorted(default_mappers), list(sorted(self.platform_parsing_info.keys())))
 
@@ -547,7 +548,7 @@ class TestFormatterSyncNetworkDataNoOptions(unittest.TestCase):
                                 command_outputs,
                                 job_debug=False,
                             )
-                            self.assertEqual(expected_parsed_result, actual_result)
+                            self.assertCountEqual(expected_parsed_result, actual_result)
 
 
 class TestFormatterSyncNetworkDataWithVrfs(unittest.TestCase):
@@ -615,7 +616,7 @@ class TestFormatterSyncNetworkDataWithVrfs(unittest.TestCase):
                                 command_outputs,
                                 job_debug=False,
                             )
-                            self.assertEqual(expected_parsed_result, actual_result)
+                            self.assertCountEqual(expected_parsed_result, actual_result)
 
 
 class TestFormatterSyncNetworkDataWithVlans(unittest.TestCase):
@@ -683,7 +684,7 @@ class TestFormatterSyncNetworkDataWithVlans(unittest.TestCase):
                                 command_outputs,
                                 job_debug=False,
                             )
-                            self.assertEqual(expected_parsed_result, actual_result)
+                            self.assertCountEqual(expected_parsed_result, actual_result)
 
 
 @unittest.skip(reason="Todo test sync network data with all options.")

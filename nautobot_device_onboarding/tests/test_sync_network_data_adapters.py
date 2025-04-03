@@ -2,8 +2,9 @@
 
 from unittest.mock import MagicMock, patch
 
+from django.contrib.contenttypes.models import ContentType
 from nautobot.core.testing import TransactionTestCase
-from nautobot.dcim.models import Device, Interface
+from nautobot.dcim.models import Cable, Device, Interface
 from nautobot.extras.models import JobResult
 from nautobot.ipam.models import VLAN, VRF, IPAddress
 
@@ -348,6 +349,30 @@ class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
             diffsync_obj = self.sync_network_data_adapter.get("vrf", unique_id)
             self.assertEqual(vrf.name, diffsync_obj.name)
             self.assertEqual(self.job.namespace.name, diffsync_obj.namespace__name)
+
+    def test_load_cables(self):
+        """Test loading Nautobot cable data into the diffsync store."""
+        dcim_interface_content_type = ContentType.objects.get_for_model(Interface)
+
+        with self.assertLogs(self.job.logger, level="WARNING") as logs:
+            self.sync_network_data_adapter.load_cables()
+            for cable in Cable.objects.all():
+                if (
+                    cable.termination_a_type != dcim_interface_content_type
+                    or cable.termination_b_type != dcim_interface_content_type
+                ):
+                    self.assertIn(
+                        f"WARNING:nautobot_device_onboarding.jobs:Skipping Cable: {cable}. Only cables with interface terminations are supported.",
+                        logs.output[0],
+                    )
+                    continue
+                unique_id = f"dcim__interface__{cable.termination_a.device.name}__{cable.termination_a.name}__dcim__interface__{cable.termination_b.device.name}__{cable.termination_b.name}"
+                diffsync_obj = self.sync_network_data_adapter.get("cable", unique_id)
+                self.assertEqual(cable.termination_a.device.name, diffsync_obj.termination_a__device__name)
+                self.assertEqual(cable.termination_a.name, diffsync_obj.termination_a__name)
+                self.assertEqual(cable.termination_b.device.name, diffsync_obj.termination_b__device__name)
+                self.assertEqual(cable.termination_b.name, diffsync_obj.termination_b__name)
+            # self.assertIn(f"WARNING - Skipping Cable: #{cable}. Only cables with interface terminations are supported.", logs.output[0])
 
     def test_load_vrf_to_interface(self):
         """Test loading Nautobot vrf interface assignments into the Diffsync store."""
