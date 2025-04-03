@@ -887,6 +887,43 @@ class DeviceOnboardingDiscoveryJob(Job):
 
         return active_targets
 
+    def _test(self):
+        for prefix in self.prefixes:
+            network = ipaddress.ip_network(prefix.prefix)
+
+            # Get a list of all IPs in the subnet
+            ip_list = [str(ip) for ip in network.hosts()]
+
+            # Use a ThreadPoolExecutor to scan IPs concurrently
+            with concurrent.futures.ThreadPoolExecutor(max_workers=self.num_threads) as executor:
+                future_to_ip = {}
+
+                for ip in ip_list:
+                    if self.debug:
+                        self.logger.debug(f"Starting scan for IP: {ip}")
+
+                    # Submit the scanning task to the executor
+                    future = executor.submit(
+                        self.scan_ip,
+                        ip,
+                        ipaddress.ip_network(prefix.prefix),
+                        self.ports,
+                        self.rdns_lookup,
+                        self.os_identification,
+                    )
+                    future_to_ip[future] = ip
+
+                for future in concurrent.futures.as_completed(future_to_ip):
+                    ip = future_to_ip[future]
+                    try:
+                        ip_result = future.result()
+                        results.update(ip_result)
+                    except Exception as e:
+                        self.logger.error(f"Error with future for IP {ip}: {e}")
+
+        if self.debug:
+            self.logger.info(f"Results: {results}")
+
     def _parse_credentials(self, credentials):
         """Parse and return dictionary of credentials."""
         self.logger.info("Attempting to parse credentials from selected SecretGroup")
