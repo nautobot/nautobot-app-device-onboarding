@@ -130,9 +130,11 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         """
         Load Vlans into the Diffsync store.
 
-        Only Vlans that were returned by the CommandGetter job should be synced.
+        Only Vlans that share locations with devices included in the sync should be loaded.
         """
-        for vlan in VLAN.objects.all():
+        # TODO: update this to support multiple locations per VLAN after the setting for this feature has been added.
+        location_ids = list(self.job.devices_to_load.values_list("location__id", flat=True))
+        for vlan in VLAN.objects.filter(location__in=location_ids):
             network_vlan = self.vlan(
                 adapter=self,
                 name=vlan.name,
@@ -595,7 +597,6 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
         ) in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
             if self.job.debug:
                 self.job.logger.debug(f"Loading Vlans from {hostname}")
-            # for interface in device_data["interfaces"]:
             for _, interface_data in device_data["interfaces"].items():
                 # add tagged vlans
                 for tagged_vlan in interface_data["tagged_vlans"]:
