@@ -33,8 +33,9 @@ from nautobot.extras.models import (
     SecretsGroup,
     SecretsGroupAssociation,
     Status,
+    Tag,
 )
-from nautobot.ipam.models import Namespace
+from nautobot.ipam.models import Namespace, Prefix
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
@@ -60,6 +61,10 @@ from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inven
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import TroubleshootingProcessor
 from nautobot_device_onboarding.utils.helper import onboarding_task_fqdn_to_ip
+
+from netmiko import SSHDetect
+from scapy.all import IP, TCP, sr1, sr, conf
+
 
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
 
@@ -837,10 +842,165 @@ class DeviceOnboardingTroubleshootingJob(Job):
         return f"Successfully ran the following commands: {', '.join(list(compiled_results.keys()))}"
 
 
+class DeviceOnboardingDiscoveryJob(Job):
+    """Job to Discover Network Devices and queue for actual Onboarding."""
+
+    prefix_tag = ObjectVar(model=Tag, required=True)
+    secrets_groups = MultiObjectVar(
+        model=SecretsGroup,
+        required=True,
+        description="SecretsGroup for device connection credentials.",
+    )
+
+    class Meta:
+        """Meta object."""
+
+        name = "Discovers devices within networks and runs onboarding."
+        description = "Scan network prefixes and onboard devices."
+        has_sensitive_variables = False
+        hidden = False
+
+    def _get_active_targets(self):
+        active_targets = set()
+        autodiscovery_prefixes = Prefix.objects.filter(tags__in=[self.prefix_tag])
+
+        # TODO(mzb): Prevent already existing devices from being scanned
+
+        # Send SYN packet to target IPs and SSH port
+        syn_packet = IP(dst=[str(p) for p in autodiscovery_prefixes]) / TCP(dport=22, flags="S")
+
+        # Send packet and wait for a response
+        response = sr(syn_packet, timeout=3, verbose=1)[0]
+
+        # Check if there is a response
+        if response:
+            for sent, received in response:
+                # Check if the response is a SYN-ACK (port is open)
+                if received.haslayer(TCP) and received[TCP].flags == 18:  # SYN-ACK flag is 0x12, or 18 in decimal
+                    self.logger.info(f"Port {sent.dst}:{sent.dport} is OPEN")
+                    active_targets.add(sent.dst)
+                # Check if the response is an RST (port is closed)
+                elif received.haslayer(TCP) and received[TCP].flags & 0x04 == 4:  # RST flag is 0x04, or 4 in decimal
+                    self.logger.info(f"Port {sent.dst}:{sent.dport} is CLOSED")
+        # else:
+        #     print(f"Port {target_port} is filtered (no response)")
+
+        return active_targets
+
+    def _parse_credentials(self, credentials):
+        """Parse and return dictionary of credentials."""
+        self.logger.info("Attempting to parse credentials from selected SecretGroup")
+        try:
+            self.username = credentials.get_secret_value(
+                access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
+                secret_type=SecretsGroupSecretTypeChoices.TYPE_USERNAME,
+            )
+            self.password = credentials.get_secret_value(
+                access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
+                secret_type=SecretsGroupSecretTypeChoices.TYPE_PASSWORD,
+            )
+        except SecretsGroupAssociation.DoesNotExist as err:
+            self.logger.exception(
+                "Unable to use SecretsGroup selected, ensure Access Type is set to Generic & at minimum Username & Password types are set."
+            )
+            raise OnboardException("fail-credentials - Unable to parse selected credentials.") from err
+
+    def _guess_netmiko_device_type(self, hostname):
+        """Guess the device type of host, based on Netmiko."""
+        netmiko_optional_args = {"port": 22}  # , **NETMIKO_EXTRAS}
+        guessed_device_type = None
+
+        working_credentials = None
+
+        for secret_group in self.secrets_groups:
+            self._parse_credentials(credentials=secret_group)
+            guessed_exc = None
+
+            remote_device = {
+                "device_type": "autodetect",
+                "host": hostname,
+                "username": self.username,
+                "password": self.password,
+                **netmiko_optional_args,
+            }
+
+            try:
+                guesser = SSHDetect(**remote_device)
+                guessed_device_type = guesser.autodetect()
+                working_credentials = secret_group
+
+                break
+
+            except Exception as err:  # pylint: disable=broad-exception-caught
+                guessed_device_type = None
+                guessed_exc = err
+
+        return guessed_device_type, guessed_exc, working_credentials
+
+    def run(self, prefix_tag, secrets_groups, *args, **kwargs):  # pragma: no cover
+        """Process discovering devices."""
+        self.prefix_tag = prefix_tag
+        self.secrets_groups = secrets_groups
+
+        onboarding_requests = []
+        for active_target in self._get_active_targets():
+            guessed_device_type, guessed_exc, working_credentials = self._guess_netmiko_device_type(hostname=active_target)
+            if working_credentials and guessed_exc is None:
+                onboarding_requests.append([active_target, working_credentials])
+
+        return onboarding_requests
+
+    def on_success(self, retval, task_id, args, kwargs):
+        """Success handler.
+
+        Run by the worker if the task executes successfully.
+
+        Arguments:
+            retval (Any): The return value of the task.
+            task_id (str): Unique id of the executed task.
+            args (Tuple): Original arguments for the executed task.
+            kwargs (Dict): Original keyword arguments for the executed task.
+
+        Returns:
+            (None): The return value of this handler is ignored.
+        """
+        from nautobot.extras.models import Job, JobResult
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        try:
+            user = User.objects.get(username="admin")
+        except User.DoesNotExist as exc:
+            raise CommandError("No such user") from exc
+        for val in retval:
+            data = {
+                "location": Location.objects.get(name="Temp").id,
+                "namespace": Namespace.objects.first().id,
+                "ip_addresses": val[0],
+                "port": 22,
+                "timeout": 10,
+                "device_role": Role.objects.get(name="Generic").id,
+                "device_status": Status.objects.get(name="Active").id,
+                "ip_address_status": Status.objects.get(name="Active").id,
+                "secrets_group": val[1].pk,
+                'dryrun': False,
+                'memory_profiling': False,
+                'debug': False,
+                'csv_file': None,
+                'set_mgmt_only': False,
+                'update_devices_without_primary_ip': True,
+                'interface_status': Status.objects.get(name="Active").id,
+                'platform': None,
+                "connectivity_test": False,
+            }
+            job = Job.objects.get(name="Sync Devices From Network")
+            JobResult.enqueue_job(job, user,  **data)
+
+
 jobs = [
     OnboardingTask,
     SSOTSyncDevices,
     SSOTSyncNetworkData,
     DeviceOnboardingTroubleshootingJob,
+    DeviceOnboardingDiscoveryJob,
 ]
 register_jobs(*jobs)
