@@ -467,22 +467,3 @@ To run an individual test, you can run any or all of the following:
 ➜ invoke ruff
 ➜ invoke pylint
 ```
-
-### Mocking data
-
-To aid in testing and development it is possible to prevent the app from attempting to contact devices and instead use fixture data. To enable this feature, add the following setting to PLUGINS_CONFIG in `nautobot config.py`
-
-```python
-PLUGINS_CONFIG = {
-    "nautobot_device_onboarding": {
-        "local_testing": True  # If True, load data from testing fixutres instead of devices
-    }
-}
-```
-
-Local testing will force the app to pull data from from one of two fixture files depending on the job being run. The data in these files can be easily manipulated to simulate various returns from the command getter.
-
-| Job | Fixture File | Dictionary Name |
-| --- | --- | --- |
-| Sync Devices from Network | tests/fixtures/sync_devices_fixture.py | sync_devices_mock_data_single_device_valid |
-| Sync Network Data from Network | tests/fixtures/sync_network_data_fixture.py | sync_network_mock_data_valid |
