@@ -1,7 +1,10 @@
 # pylint: disable=attribute-defined-outside-init
 """Device Onboarding Jobs."""
 
+
+import concurrent.futures
 import csv
+import ipaddress
 import json
 import logging
 from io import StringIO
@@ -16,6 +19,7 @@ from nautobot.apps.jobs import (
     FileVar,
     IntegerVar,
     Job,
+    MultiChoiceVar,
     MultiObjectVar,
     ObjectVar,
     StringVar,
@@ -847,6 +851,7 @@ class DeviceOnboardingDiscoveryJob(Job):
     """Job to Discover Network Devices and queue for actual Onboarding."""
 
     prefix_tag = ObjectVar(model=Tag, required=True)
+    protocols = MultiChoiceVar(choices=AutodiscoveryProtocolTypeChoices, required=True)
     secrets_groups = MultiObjectVar(
         model=SecretsGroup,
         required=True,
@@ -922,7 +927,7 @@ class DeviceOnboardingDiscoveryJob(Job):
             ip_list = [str(ip) for ip in network.hosts()]
 
             # Use a ThreadPoolExecutor to scan IPs concurrently
-            with concurrent.futures.ThreadPoolExecutor(max_workers=self.num_threads) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
                 future_to_ip = {}
 
                 for ip in ip_list:
@@ -933,23 +938,23 @@ class DeviceOnboardingDiscoveryJob(Job):
                     future = executor.submit(
                         self._probe_target,
                         ip,
-                        ipaddress.ip_network(prefix.prefix),
-                        self.ports,
-                        self.rdns_lookup,
-                        self.os_identification,
+                        self.protocols
                     )
                     future_to_ip[future] = ip
 
                 for future in concurrent.futures.as_completed(future_to_ip):
                     ip = future_to_ip[future]
                     try:
-                        ip_result = future.result()
-                        results.update(ip_result)
+                        # ip_result = future.result()
+                        # results.update(ip_result)
+                        results[ip] = future.result()
                     except Exception as e:
                         self.logger.error(f"Error with future for IP {ip}: {e}")
 
         if self.debug:
             self.logger.info(f"Results: {results}")
+
+        return results
 
     def _parse_credentials(self, credentials):
         """Parse and return dictionary of credentials."""
@@ -1001,18 +1006,21 @@ class DeviceOnboardingDiscoveryJob(Job):
 
         return guessed_device_type, guessed_exc, working_credentials
 
-    def run(self, prefix_tag, secrets_groups, *args, **kwargs):  # pragma: no cover
+    def run(self, prefix_tag, secrets_groups, protocols, *args, **kwargs):  # pragma: no cover
         """Process discovering devices."""
         self.secrets_groups = secrets_groups
 
         # TODO(mzb): Initial filtering is with tags, can extend to Location/Role/Status too.
         self.prefixes = Prefix.objects.filter(tags__in=[prefix_tag])
+        self.protocols = protocols
 
-        onboarding_requests = []
-        for active_target in self._get_active_targets():
-            guessed_device_type, guessed_exc, working_credentials = self._guess_netmiko_device_type(hostname=active_target)
-            if working_credentials and guessed_exc is None:
-                onboarding_requests.append([active_target, working_credentials])
+        self._test()
+
+        # onboarding_requests = []
+        # for active_target in self._get_active_targets():
+        #     guessed_device_type, guessed_exc, working_credentials = self._guess_netmiko_device_type(hostname=active_target)
+        #     if working_credentials and guessed_exc is None:
+        #         onboarding_requests.append([active_target, working_credentials])
 
         return onboarding_requests
 
