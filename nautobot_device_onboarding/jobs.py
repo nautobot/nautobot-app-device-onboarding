@@ -41,7 +41,8 @@ from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
 from nornir.core.plugins.inventory import InventoryPluginRegister
 
-from nautobot_device_onboarding.choices import SSOT_JOB_TO_COMMAND_CHOICE
+from nautobot_device_onboarding.choices import SSOT_JOB_TO_COMMAND_CHOICE, AutodiscoveryProtocolTypeChoices
+from nautobot_device_onboarding.constants import AUTODISCOVERY_PORTS_SSH
 from nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters import (
     SyncDevicesNautobotAdapter,
     SyncDevicesNetworkAdapter,
@@ -887,8 +888,34 @@ class DeviceOnboardingDiscoveryJob(Job):
 
         return active_targets
 
+    def _probe_ssh(self, ip_address):
+        """SSH specific test. """
+        from netutils.ping import tcp_ping  # TODO(mzb): move
+        ssh_port_results = {}
+
+        for ssh_port in AUTODISCOVERY_PORTS_SSH:
+            ssh_port_results[ssh_port] = tcp_ping(ip_address, ssh_port)
+
+        return ssh_port_results
+
+    def _probe_target(self, ip_address, protocols):
+        """Test if $ports are open on $ip_address.
+        Returns:
+            {$protocol_name: {port_number: bool}
+            {"ssh": {22: True}}
+        """
+        result = {}
+
+        for protocol in protocols:
+            if protocol == AutodiscoveryProtocolTypeChoices.SSH:
+                result["ssh"] = self._probe_ssh(ip_address=ip_address)  # TODO(mzb): getattr for monkey patching
+
+        return result
+
     def _test(self):
-        for prefix in self.prefixes:
+        results = {}
+
+        for prefix in self.prefixes:  # Hackaton contribution by Hanlin and team.
             network = ipaddress.ip_network(prefix.prefix)
 
             # Get a list of all IPs in the subnet
@@ -904,7 +931,7 @@ class DeviceOnboardingDiscoveryJob(Job):
 
                     # Submit the scanning task to the executor
                     future = executor.submit(
-                        self.scan_ip,
+                        self._probe_target,
                         ip,
                         ipaddress.ip_network(prefix.prefix),
                         self.ports,
@@ -976,8 +1003,10 @@ class DeviceOnboardingDiscoveryJob(Job):
 
     def run(self, prefix_tag, secrets_groups, *args, **kwargs):  # pragma: no cover
         """Process discovering devices."""
-        self.prefix_tag = prefix_tag
         self.secrets_groups = secrets_groups
+
+        # TODO(mzb): Initial filtering is with tags, can extend to Location/Role/Status too.
+        self.prefixes = Prefix.objects.filter(tags__in=[prefix_tag])
 
         onboarding_requests = []
         for active_target in self._get_active_targets():
