@@ -160,7 +160,7 @@ def sync_network_data_ensure_required_nautobot_objects():
         location=location,
     )
 
-    cable_to_circuit_1 = Cable.objects.get_or_create(
+    cable_to_circuit_1, _ = Cable.objects.get_or_create(
         termination_a_type=ContentType.objects.get_for_model(Interface),
         termination_a_id=interface_4.id,
         termination_b_type=ContentType.objects.get_for_model(CircuitTermination),
