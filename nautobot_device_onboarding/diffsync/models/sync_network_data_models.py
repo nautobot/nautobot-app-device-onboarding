@@ -210,18 +210,18 @@ class SyncNetworkDataVLAN(DiffSyncModel):
         location = None
         try:
             location = Location.objects.get(name=ids["location__name"])
-        except ObjectDoesNotExist:
-            adapter.job.logger.warning(
+        except ObjectDoesNotExist as err:
+            adapter.job.logger.error(
                 f"While creating VLAN {ids['vid']} - {ids['name']}, "
-                f"unable to find a Location with name: {ids['location__name']}. "
-                "This VLAN will be created without a Location"
+                f"unable to find a Location with name: {ids['location__name']}."
             )
-        except MultipleObjectsReturned:
-            adapter.job.logger.warning(
+            raise diffsync_exceptions.ObjectNotCreated(err)
+        except MultipleObjectsReturned as err:
+            adapter.job.logger.error(
                 f"While creating VLAN {ids['vid']} - {ids['name']}, "
-                f"Multiple Locations were found with name: {ids['location__name']}. "
-                "This VLAN will be created without a Location"
+                f"Multiple Locations were found with name: {ids['location__name']}."
             )
+            raise diffsync_exceptions.ObjectNotCreated(err)
         try:
             vlan = VLAN(
                 name=ids["name"],
@@ -232,6 +232,7 @@ class SyncNetworkDataVLAN(DiffSyncModel):
             vlan.validated_save()
         except ValidationError as err:
             adapter.job.logger.error(f"VLAN {vlan} failed to create, {err}")
+            raise diffsync_exceptions.ObjectNotCreated(err)
 
         return super().create(adapter, ids, attrs)
 
@@ -576,7 +577,7 @@ class SyncNetworkDataVrfToInterface(DiffSyncModel):
             vrf.validated_save()
             interface.vrf = vrf
         except Exception as err:
-            adapter.logger.error(f"Failed to assign device: [{interface.device}] to vrf: [{vrf}], {err}")
+            adapter.job.logger.error(f"Failed to assign device: [{interface.device}] to vrf: [{vrf}], {err}")
             if diff_method_type == "create":
                 raise diffsync_exceptions.ObjectNotCreated(err)
             if diff_method_type == "update":

@@ -5,6 +5,7 @@ import datetime
 import diffsync
 from diffsync.enum import DiffSyncModelFlags
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from nautobot.dcim.models import Interface
 from nautobot.ipam.models import VLAN, VRF, IPAddress
@@ -129,9 +130,11 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         """
         Load Vlans into the Diffsync store.
 
-        Only Vlans that were returned by the CommandGetter job should be synced.
+        Only Vlans that share locations with devices included in the sync should be loaded.
         """
-        for vlan in VLAN.objects.all():
+        # TODO: update this to support multiple locations per VLAN after the setting for this feature has been added.
+        location_ids = list(self.job.devices_to_load.values_list("location__id", flat=True))
+        for vlan in VLAN.objects.filter(location__in=location_ids):
             network_vlan = self.vlan(
                 adapter=self,
                 name=vlan.name,
@@ -249,9 +252,13 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
 
         Only cables returned by the CommandGetter job should be synced.
         """
+        dcim_interface_content_type = ContentType.objects.get_for_model(Interface)
         for device in self.job.devices_to_load:
             for cable in device.get_cables():
-                if cable.termination_a.type != "dcim.interface" or cable.termination_b.type != "dcim.interface":
+                if (
+                    cable.termination_a_type != dcim_interface_content_type
+                    or cable.termination_b_type != dcim_interface_content_type
+                ):
                     self.job.logger.warning(
                         f"Skipping Cable: {cable}. Only cables with interface terminations are supported."
                     )
@@ -590,7 +597,6 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
         ) in self.job.command_getter_result.items():  # pylint: disable=too-many-nested-blocks
             if self.job.debug:
                 self.job.logger.debug(f"Loading Vlans from {hostname}")
-            # for interface in device_data["interfaces"]:
             for _, interface_data in device_data["interfaces"].items():
                 # add tagged vlans
                 for tagged_vlan in interface_data["tagged_vlans"]:
