@@ -1,4 +1,6 @@
 """Choices used througout the app."""
+from nautobot.core.choices import ChoiceSet
+
 
 SSOT_JOB_TO_COMMAND_CHOICE = (
     ("sync_devices", "Sync Devices"),
@@ -14,8 +16,4 @@ class AutodiscoveryProtocolTypeChoices(ChoiceSet):
 
     CHOICES = (
         (SSH, "ssh"),
-    )
-
-    AUTODISCOVERY_PORTS = (
-        (SSH, [22]),
     )

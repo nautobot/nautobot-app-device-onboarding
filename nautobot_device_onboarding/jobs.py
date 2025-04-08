@@ -41,12 +41,13 @@ from nautobot.extras.models import (
 )
 from nautobot.ipam.models import Namespace, Prefix
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
+from netutils.ping import tcp_ping
 from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
 from nornir.core.plugins.inventory import InventoryPluginRegister
 
 from nautobot_device_onboarding.choices import SSOT_JOB_TO_COMMAND_CHOICE, AutodiscoveryProtocolTypeChoices
-from nautobot_device_onboarding.constants import AUTODISCOVERY_PORTS_SSH
+from nautobot_device_onboarding.constants import AUTODISCOVERY_PORTS
 from nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters import (
     SyncDevicesNautobotAdapter,
     SyncDevicesNetworkAdapter,
@@ -849,6 +850,10 @@ class DeviceOnboardingTroubleshootingJob(Job):
 
 class DeviceOnboardingDiscoveryJob(Job):
     """Job to Discover Network Devices and queue for actual Onboarding."""
+    debug = BooleanVar(
+        default=False,
+        description="Enable for more verbose logging.",
+    )
 
     prefix_tag = ObjectVar(model=Tag, required=True)
     protocols = MultiChoiceVar(choices=AutodiscoveryProtocolTypeChoices, required=True)
@@ -856,6 +861,16 @@ class DeviceOnboardingDiscoveryJob(Job):
         model=SecretsGroup,
         required=True,
         description="SecretsGroup for device connection credentials.",
+    )
+    scanning_threads_count = IntegerVar(
+        description="Number of IPs to scan at a time.",
+        label="Number of Threads",
+        default=8,
+    )
+    login_threads_count = IntegerVar(
+        description="Number of simultaneous SSH logins.",
+        label="Number of sim. SSH logins. Good luck ISE.",
+        default=2,
     )
 
     class Meta:
@@ -866,95 +881,51 @@ class DeviceOnboardingDiscoveryJob(Job):
         has_sensitive_variables = False
         hidden = False
 
-    def _get_active_targets(self):
-        active_targets = set()
-        autodiscovery_prefixes = Prefix.objects.filter(tags__in=[self.prefix_tag])
+    def _scan_target_ip(self, target_ip, protocols):
+        """Scan target IP Address for open protocol-ports."""
+        return {protocol: getattr(self, f"_scan_target_{protocol}")(target_ip=target_ip) for protocol in protocols}
 
-        # TODO(mzb): Prevent already existing devices from being scanned
+    def _scan_target_ssh(self, target_ip):
+        """Scan target IP address for TCP-SSH ports."""
+        ssh_targets = []
 
-        # Send SYN packet to target IPs and SSH port
-        syn_packet = IP(dst=[str(p) for p in autodiscovery_prefixes]) / TCP(dport=22, flags="S")
+        for target_ssh_port in AUTODISCOVERY_PORTS[AutodiscoveryProtocolTypeChoices.SSH]:
+            if tcp_ping(target_ip, target_ssh_port):  # Report only opened ports.
+                open_ssh_port = {
+                    "port": target_ssh_port,
+                    "is_open": True,
+                    "protocol": AutodiscoveryProtocolTypeChoices.SSH,
+                }
 
-        # Send packet and wait for a response
-        response = sr(syn_packet, timeout=3, verbose=1)[0]
+                ssh_targets.append(open_ssh_port)
 
-        # Check if there is a response
-        if response:
-            for sent, received in response:
-                # Check if the response is a SYN-ACK (port is open)
-                if received.haslayer(TCP) and received[TCP].flags == 18:  # SYN-ACK flag is 0x12, or 18 in decimal
-                    self.logger.info(f"Port {sent.dst}:{sent.dport} is OPEN")
-                    active_targets.add(sent.dst)
-                # Check if the response is an RST (port is closed)
-                elif received.haslayer(TCP) and received[TCP].flags & 0x04 == 4:  # RST flag is 0x04, or 4 in decimal
-                    self.logger.info(f"Port {sent.dst}:{sent.dport} is CLOSED")
-        # else:
-        #     print(f"Port {target_port} is filtered (no response)")
+        return ssh_targets
 
-        return active_targets
+    def _scan(self):
+        """Scan the selected IP Addresses for open protocol-ports."""
+        scan_result = {}
 
-    def _probe_ssh(self, ip_address):
-        """SSH specific test. """
-        from netutils.ping import tcp_ping  # TODO(mzb): move
-        ssh_port_results = {}
+        with concurrent.futures.ThreadPoolExecutor(max_workers=self.scanning_threads_count) as executor:
+            future_to_ip = {}
 
-        for ssh_port in AUTODISCOVERY_PORTS_SSH:
-            ssh_port_results[ssh_port] = tcp_ping(ip_address, ssh_port)
+            for target_ip in self.targets:
+                if self.debug:
+                    self.logger.debug(f"Starting scan for IP: {target_ip}")
 
-        return ssh_port_results
+                future = executor.submit(self._scan_target_ip, target_ip, self.protocols)
+                future_to_ip[future] = target_ip
 
-    def _probe_target(self, ip_address, protocols):
-        """Test if $ports are open on $ip_address.
-        Returns:
-            {$protocol_name: {port_number: bool}
-            {"ssh": {22: True}}
-        """
-        result = {}
-
-        for protocol in protocols:
-            if protocol == AutodiscoveryProtocolTypeChoices.SSH:
-                result["ssh"] = self._probe_ssh(ip_address=ip_address)  # TODO(mzb): getattr for monkey patching
-
-        return result
-
-    def _test(self):
-        results = {}
-
-        for prefix in self.prefixes:  # Hackaton contribution by Hanlin and team.
-            network = ipaddress.ip_network(prefix.prefix)
-
-            # Get a list of all IPs in the subnet
-            ip_list = [str(ip) for ip in network.hosts()]
-
-            # Use a ThreadPoolExecutor to scan IPs concurrently
-            with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-                future_to_ip = {}
-
-                for ip in ip_list:
-                    if self.debug:
-                        self.logger.debug(f"Starting scan for IP: {ip}")
-
-                    # Submit the scanning task to the executor
-                    future = executor.submit(
-                        self._probe_target,
-                        ip,
-                        self.protocols
-                    )
-                    future_to_ip[future] = ip
-
-                for future in concurrent.futures.as_completed(future_to_ip):
-                    ip = future_to_ip[future]
-                    try:
-                        # ip_result = future.result()
-                        # results.update(ip_result)
-                        results[ip] = future.result()
-                    except Exception as e:
-                        self.logger.error(f"Error with future for IP {ip}: {e}")
+            for future in concurrent.futures.as_completed(future_to_ip):
+                target_ip = future_to_ip[future]
+                try:
+                    scan_result[target_ip] = future.result()
+                except Exception as e:
+                    self.logger.error(f"Error with future for IP {target_ip}: {e}")
 
         if self.debug:
-            self.logger.info(f"Results: {results}")
+            self.logger.info(f"Results: {scan_result}")
 
-        return results
+        return scan_result
 
     def _parse_credentials(self, credentials):
         """Parse and return dictionary of credentials."""
@@ -974,12 +945,11 @@ class DeviceOnboardingDiscoveryJob(Job):
             )
             raise OnboardException("fail-credentials - Unable to parse selected credentials.") from err
 
-    def _guess_netmiko_device_type(self, hostname):
+    def _guess_netmiko_device_type(self, hostname, port):
         """Guess the device type of host, based on Netmiko."""
-        netmiko_optional_args = {"port": 22}  # , **NETMIKO_EXTRAS}
+        netmiko_optional_args = {"port": port}  # , **NETMIKO_EXTRAS}
         guessed_device_type = None
-
-        working_credentials = None
+        valid_credentials = None
 
         for secret_group in self.secrets_groups:
             self._parse_credentials(credentials=secret_group)
@@ -996,7 +966,7 @@ class DeviceOnboardingDiscoveryJob(Job):
             try:
                 guesser = SSHDetect(**remote_device)
                 guessed_device_type = guesser.autodetect()
-                working_credentials = secret_group
+                valid_credentials = secret_group
 
                 break
 
@@ -1004,17 +974,76 @@ class DeviceOnboardingDiscoveryJob(Job):
                 guessed_device_type = None
                 guessed_exc = err
 
-        return guessed_device_type, guessed_exc, working_credentials
+        return guessed_device_type, guessed_exc, valid_credentials
 
-    def run(self, prefix_tag, secrets_groups, protocols, *args, **kwargs):  # pragma: no cover
+    def _get_target_details(self, target_ip, target_port_details):
+        """Get target IP and protocol-port details."""
+        target_details = {**target_port_details}
+        target_details["ip"] = target_ip
+
+        # Dispatch SSH Manually
+        if target_port_details["protocol"] == AutodiscoveryProtocolTypeChoices.SSH:
+            guessed_device_type, guessed_exc, valid_credentials = self._guess_netmiko_device_type(
+                hostname=target_ip,
+                port=target_details["port"]
+            )
+            target_details["platform"] = guessed_device_type
+            target_details["exception"] = guessed_exc
+            target_details["valid_credentials"] = valid_credentials
+
+        return target_details
+
+    def _get_targets_details(self, scan_result):
+        """Get target IPs details and find valid credentials for an open protocol-port."""
+        results = {}
+
+        # Use a ThreadPoolExecutor to scan IPs concurrently
+        with concurrent.futures.ThreadPoolExecutor(max_workers=self.login_threads_count) as executor:
+            future_to_ip = {}
+
+            for target_ip in scan_result:
+                for target_port_details in scan_result[target_ip]:
+                    target_port = target_port_details["port"]
+                    if self.debug:
+                        self.logger.debug(f"Starting get_details for IP: {target_ip}:{target_port}")
+
+                    future = executor.submit(self._get_target_details, target_ip, target_port_details)
+                    future_to_ip[future] = f"{target_ip}:{target_port}"
+
+            for future in concurrent.futures.as_completed(future_to_ip):
+                host = future_to_ip[future]
+                try:
+                    results[host] = future.result()
+                except Exception as e:
+                    self.logger.error(f"Error with future for IP {host}: {e}")
+
+        if self.debug:
+            self.logger.info(f"Results: {results}")
+
+        return results
+
+    def run(self, debug, num_threads, num_ssh_threads, prefix_tag, secrets_groups, protocols, *args, **kwargs):  # pragma: no cover
         """Process discovering devices."""
+        self.debug = debug
         self.secrets_groups = secrets_groups
+        self.scanning_threads_count = num_threads
+        self.login_threads_count = num_ssh_threads
 
-        # TODO(mzb): Initial filtering is with tags, can extend to Location/Role/Status too.
-        self.prefixes = Prefix.objects.filter(tags__in=[prefix_tag])
+        # TODO(mzb): Introduce "skip" / blacklist tag too.
+        # TODO(mzb): Skip devices with primary_ip4 set.
+        self.targets = set()
+        for prefix in Prefix.objects.filter(tags__in=[prefix_tag]):  # TODO(mzb): Initial filtering is with tags, can extend to Location/Role/Status too.
+            network = ipaddress.ip_network(prefix.prefix)
+            # Get a list of all IPs in the subnet
+            for ip in network.hosts():
+                self.targets.add(str(ip))
+
         self.protocols = protocols
 
-        self._test()
+        scan_result = self._scan()
+        ssh_result = self._get_targets_details(scan_result)
+
+        return ssh_result
 
         # onboarding_requests = []
         # for active_target in self._get_active_targets():
@@ -1022,7 +1051,7 @@ class DeviceOnboardingDiscoveryJob(Job):
         #     if working_credentials and guessed_exc is None:
         #         onboarding_requests.append([active_target, working_credentials])
 
-        return onboarding_requests
+        # return onboarding_requests
 
     def on_success(self, retval, task_id, args, kwargs):
         """Success handler.
