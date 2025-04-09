@@ -72,7 +72,6 @@ from nautobot_device_onboarding.nornir_plays.processor import TroubleshootingPro
 from nautobot_device_onboarding.utils.helper import onboarding_task_fqdn_to_ip
 
 from netmiko import SSHDetect
-from scapy.all import IP, TCP, sr1, sr, conf
 
 
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
@@ -1063,6 +1062,7 @@ class DeviceOnboardingDiscoveryJob(Job):
             **kwargs
         ):  # pragma: no cover
         """Process discovering devices."""
+        self.logger.debug(self)
         self.debug = debug
         self.secrets_groups = secrets_groups
         self.scanning_threads_count = scanning_threads_count
@@ -1095,6 +1095,7 @@ class DeviceOnboardingDiscoveryJob(Job):
         return ssh_result
 
     def on_success(self, retval, task_id, args, kwargs):
+        """Start Onboarding job for discovered targets."""
         User = get_user_model()
         try:
             user = User.objects.get(username="admin")
