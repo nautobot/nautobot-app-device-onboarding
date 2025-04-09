@@ -10,6 +10,31 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - [#200](https://github.com/nautobot/nautobot-app-device-onboarding/issues/200) - Added basic connectivity checker using Netutils tcp_ping method.
 - [#274](https://github.com/nautobot/nautobot-app-device-onboarding/issues/274) - Added TTP Parser support.
 - [#274](https://github.com/nautobot/nautobot-app-device-onboarding/issues/274) - Added Sync Device from Network support for Palo Alto Panos.
+- [#340](https://github.com/nautobot/nautobot-app-device-onboarding/issues/340) - Add Aruba AOSCX support for Sync Devices from Network Job.
+- [#278](https://github.com/nautobot/nautobot-app-device-onboarding/issues/278) - Optimized VLAN loading into diffsync from Nautbot
+- [#278](https://github.com/nautobot/nautobot-app-device-onboarding/issues/278) - Improved error handling when creating VLANs
+
+## [v4.2.4 (2025-04-08)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.2.4)
+
+### Added
+
+- [#326](https://github.com/nautobot/nautobot-app-device-onboarding/issues/326) - Added testing for cable termination type when adding cables to diffsync store.
+- [#340](https://github.com/nautobot/nautobot-app-device-onboarding/issues/340) - Add Aruba AOSCX support for Sync Devices from Network Job.
+
+### Changed
+
+- [#278](https://github.com/nautobot/nautobot-app-device-onboarding/issues/278) - Optimized VLAN loading into diffsync from Nautbot
+- [#278](https://github.com/nautobot/nautobot-app-device-onboarding/issues/278) - Improved error handling when creating VLANs
+
+### Fixed
+
+- [#326](https://github.com/nautobot/nautobot-app-device-onboarding/issues/326) - Fixed incorrect call to cable termination type.
+- [#337](https://github.com/nautobot/nautobot-app-device-onboarding/issues/337) - Fixed logging call from an invalid path to the correct one.
+- [#346](https://github.com/nautobot/nautobot-app-device-onboarding/issues/346) - Fixed Juniper IP addresses not syncing secondary IP addresses.
+
+### Housekeeping
+
+- [#341](https://github.com/nautobot/nautobot-app-device-onboarding/issues/341) - Add MySQL testing back to the CI configuration.
 
 ## [v4.2.3 (2025-03-11)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.2.3)
 
