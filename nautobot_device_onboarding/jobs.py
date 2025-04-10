@@ -34,7 +34,6 @@ from nautobot.extras.choices import (
 )
 from nautobot.extras.models import (
     CustomField,
-    Job,
     JobResult,
     Role,
     SecretsGroup,
@@ -42,7 +41,7 @@ from nautobot.extras.models import (
     Status,
     Tag,
 )
-from nautobot.ipam.models import Namespace, Prefix
+from nautobot.ipam.models import IPAddress, IPAddressToInterface, Namespace, Prefix
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from netutils.ping import tcp_ping
 from nautobot_ssot.jobs.base import DataSource
@@ -856,13 +855,15 @@ class DeviceOnboardingDiscoveryJob(Job):
         default=False,
         description="Enable for more verbose logging.",
     )
-    prefix_tag = ObjectVar(
-        model=Tag,
+    prefixes = ObjectVar(
+        model=Prefix,
         required=True,
+        description="Prefixes to be searched for devices missing in Nautobot inventory.",
     )
     protocols = MultiChoiceVar(
         choices=AutodiscoveryProtocolTypeChoices,
         required=True,
+        description="Discovery protocols.",
     )
     secrets_groups = MultiObjectVar(
         model=SecretsGroup,
@@ -885,7 +886,9 @@ class DeviceOnboardingDiscoveryJob(Job):
     device_status = SSOTSyncDevices.device_status
     interface_status = SSOTSyncDevices.interface_status
     ip_address_status = SSOTSyncDevices.ip_address_status
-
+    set_mgmt_only = SSOTSyncDevices.set_mgmt_only
+    update_devices_without_primary_ip = SSOTSyncDevices.update_devices_without_primary_ip
+    
     class Meta:
         """Meta object."""
 
@@ -1001,7 +1004,7 @@ class DeviceOnboardingDiscoveryJob(Job):
         return guessed_platform, exception, valid_credentials
 
     def _get_target_details(self, target_ip, target_port_details):
-        """Get target IP and protocol-port details."""
+        """Get open protocol-port details on target IP."""
         target_details = {**target_port_details}
         target_details["ip"] = target_ip
 
@@ -1045,11 +1048,13 @@ class DeviceOnboardingDiscoveryJob(Job):
 
         return results
 
-    def run(self, 
-            debug, 
+    def run(self,
+            dryrun,
+            memory_profiling,
+            debug,
             scanning_threads_count, 
             login_threads_count, 
-            prefix_tag, 
+            prefixes,
             secrets_groups, 
             protocols,
             location,
@@ -1058,12 +1063,18 @@ class DeviceOnboardingDiscoveryJob(Job):
             device_status,
             interface_status,
             ip_address_status,
+            set_mgmt_only,
+            update_devices_without_primary_ip,
             *args,
             **kwargs
         ):  # pragma: no cover
         """Process discovering devices."""
-        self.logger.debug(self)
+        self.dryrun = dryrun
+        self.memory_profiling = memory_profiling
         self.debug = debug
+
+        self.prefixes = prefixes
+        self.protocols = protocols
         self.secrets_groups = secrets_groups
         self.scanning_threads_count = scanning_threads_count
         self.login_threads_count = login_threads_count
@@ -1075,17 +1086,23 @@ class DeviceOnboardingDiscoveryJob(Job):
         self.device_status = device_status
         self.interface_status = interface_status
         self.ip_address_status = ip_address_status
+        self.set_mgmt_only = set_mgmt_only
+        self.update_devices_without_primary_ip = update_devices_without_primary_ip
 
         # TODO(mzb): Introduce "skip" / blacklist tag too.
-        # TODO(mzb): Skip devices with primary_ip4 set.
-        self.targets = set()
-        for prefix in Prefix.objects.filter(tags__in=[prefix_tag]):  # TODO(mzb): Initial filtering is with tags, can extend to Location/Role/Status too.
+
+        self.targets = set()  # Ensure IP uniqueness
+
+        for prefix in self.prefixes:
             network = ipaddress.ip_network(prefix.prefix)
+
             # Get a list of all IPs in the subnet
             for ip in network.hosts():
-                self.targets.add(str(ip))
+                # Skip IP Addresses already assigned to an interface
+                if IPAddressToInterface.objects.filter(ip_address__in=IPAddress.objects.filter(host=ip)):
+                    continue
 
-        self.protocols = protocols
+                self.targets.add(str(ip))
 
         scan_result = self._scan()
         self.logger.info(scan_result)
@@ -1096,11 +1113,7 @@ class DeviceOnboardingDiscoveryJob(Job):
 
     def on_success(self, retval, task_id, args, kwargs):
         """Start Onboarding job for discovered targets."""
-        User = get_user_model()
-        try:
-            user = User.objects.get(username="admin")
-        except User.DoesNotExist as exc:
-            raise CommandError("No such user") from exc
+
         for val in retval:
             data = {
                 "location": self.location.id,
@@ -1112,18 +1125,18 @@ class DeviceOnboardingDiscoveryJob(Job):
                 "device_status": self.device_status.id,
                 "ip_address_status": self.ip_address_status.id,
                 "secrets_group": retval[val]["credentials"].id,
-                'dryrun': False,
-                'memory_profiling': False,
-                'debug': False,
-                'csv_file': None,
-                'set_mgmt_only': False,
-                'update_devices_without_primary_ip': True,
-                'interface_status': self.interface_status.id,
-                'platform': None,
+                "dryrun": self.dryrun,
+                "memory_profiling": self.memory_profiling,
+                "debug": self.debug,
+                "csv_file": None,
+                "set_mgmt_only": self.set_mgmt_only,
+                "update_devices_without_primary_ip": self.update_devices_without_primary_ip,
+                "interface_status": self.interface_status.id,
+                "platform": None,
                 "connectivity_test": False,
             }
             job = Job.objects.get(name="Sync Devices From Network")
-            JobResult.enqueue_job(job, user,  **data)
+            JobResult.enqueue_job(job, self.user,  **data)
 
 
 jobs = [
