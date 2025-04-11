@@ -214,7 +214,6 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                     raise Exception(  # pylint: disable=broad-exception-raised
                         "Platform.network_driver missing"
                     )
-
         result = sync_devices_command_getter(
             self.job.job_result,
             self.job.logger.getEffectiveLevel(),
