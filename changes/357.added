@@ -1,0 +1,1 @@
+Added improved error messaging for device object `get()` call in the `update()` method of `SyncDevicesDevice`
