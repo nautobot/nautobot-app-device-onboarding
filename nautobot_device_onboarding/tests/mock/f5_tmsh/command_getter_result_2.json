@@ -1,0 +1,29 @@
+{
+    "show cm device": [
+        [
+            {
+                "mgmt_hostname": "f501mgmt-dmz.acme.net",
+                "mgmt_ip": "10.248.212.190"
+            },
+            {
+                "mgmt_hostname": "f502mgmt-dmz-external.acme.net",
+                "mgmt_ip": "198.51.100.1"
+            }
+        ]
+    ],
+    "show sys hardware": [
+        {
+            "model_type": "BIG-IP vCMP Guest",
+            "serial_number": "chs401603s"
+        }
+    ],
+    "show net interface | grep mgmt | grep up": {
+        "raw": "1/mgmt      up  539.3G   65.9G  264.8M   34.7M      0     0   100TX-FD\n3/mgmt      up  495.0G   37.9G  240.4M   18.1M      0     0   100TX-FD"
+    },
+    "show sys cluster": [
+        {
+            "mgmt_ip": "198.51.100.1",
+            "mgmt_mask": "24"
+        }
+    ]
+}
