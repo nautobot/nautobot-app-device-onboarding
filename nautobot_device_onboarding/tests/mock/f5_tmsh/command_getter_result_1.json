@@ -1,0 +1,23 @@
+{
+    "show cm device": [
+        {
+            "mgmt_hostname": "f501mgmt-cluster.acme.net",
+            "mgmt_ip": "198.51.100.1"
+        }
+    ],
+    "show sys hardware": [
+        {
+            "model_type": "BIG-IP VPR-B2250",
+            "serial_number": "chs401567s"
+        }
+    ],
+    "show net interface | grep mgmt | grep up": {
+        "raw": "1/mgmt        up    2.6T    2.6T    1.4G  813.0M       0       0    1000T-FD\n2/mgmt        up    1.9T    1.8T    1.0G  576.3M       0       0    1000T-FD\n3/mgmt        up    1.8T    1.6T  990.3M  527.3M       0       0    1000T-FD\n4/mgmt        up    1.6T  114.0G  788.1M   53.8M       0       0    1000T-FD"
+    },
+    "show sys cluster": [
+        {
+            "mgmt_ip": "198.51.100.1",
+            "mgmt_mask": "24"
+        }
+    ]
+}

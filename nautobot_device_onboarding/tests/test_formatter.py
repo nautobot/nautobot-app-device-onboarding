@@ -16,7 +16,7 @@ from nautobot_device_onboarding.nornir_plays.formatter import (
 from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info
 
 MOCK_DIR = os.path.join("nautobot_device_onboarding", "tests", "mock")
-SYNC_DEVICES_ONLY = ["cisco_wlc", "hp_comware", "paloalto_panos", "aruba_aoscx"]
+SYNC_DEVICES_ONLY = ["cisco_wlc", "hp_comware", "paloalto_panos", "f5_tmsh", "aruba_aoscx"]
 
 
 def find_files_by_prefix(directory, prefix):
@@ -437,6 +437,7 @@ class TestFormatterSyncDevices(unittest.TestCase):
             "cisco_nxos",
             "hp_comware",
             "paloalto_panos",
+            "f5_tmsh",
             "aruba_aoscx",
         ]
         self.assertEqual(sorted(default_mappers), list(sorted(self.platform_parsing_info.keys())))

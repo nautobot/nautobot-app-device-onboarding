@@ -1,0 +1,8 @@
+<group name="_">
+Platform {{ _start_ }}
+  Name  {{ model_type | ORPHRASE }}
+{{ _end_ }}
+System Information {{ _start_ }}
+  Chassis Serial  {{ serial_number | ORPHRASE }}
+{{ _end_ }}
+</group>
