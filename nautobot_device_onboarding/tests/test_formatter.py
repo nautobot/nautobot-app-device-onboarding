@@ -19,7 +19,6 @@ MOCK_DIR = os.path.join("nautobot_device_onboarding", "tests", "mock")
 SYNC_DEVICES_ONLY = ["cisco_wlc", "hp_comware", "paloalto_panos", "f5_tmsh", "aruba_aoscx"]
 
 
-
 def find_files_by_prefix(directory, prefix):
     """Finds all files within a directory whose names start with the given prefix.
 
