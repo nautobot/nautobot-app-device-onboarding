@@ -1,0 +1,34 @@
+---
+sync_devices:
+  hostname:
+    commands:
+      - command: "show system"
+        parser: "textfsm"
+        jpath: "[*].hostname"
+  serial:
+    commands:
+      - command: "show system"
+        parser: "textfsm"
+        jpath: "[*].serial[]"
+        post_processor: "{{ obj | unique | first }}"
+        iterable_type: "str"
+  device_type:
+    commands:
+      - command: "show system"
+        parser: "textfsm"
+        jpath: "[*].product[]"
+        post_processor: "{{ obj | unique | first }}"
+        iterable_type: "str"
+  mgmt_interface:
+    commands:
+      - command: "show interface"
+        parser: "textfsm"
+        jpath: "[?contains(ip_address, `{{ obj }}/`)].{name: interface, enabled: link_status}"
+        post_processor: "{{ (obj | selectattr('enabled', 'eq', 'up') | list | first ).name }}"
+  mask_length:
+    commands:
+      - command: "show interface"
+        parser: "textfsm"
+        jpath: "[?contains(ip_address, `{{ obj }}/`)].ip_address"
+        post_processor: "{{ obj[0].split('/')[1] }}"
+        iterable_type: "int"
