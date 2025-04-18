@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-device-onboarding"
-version = "4.2.5a0"
+version = "5.0.0a0"
 description = "A app for Nautobot to easily onboard new devices."
 authors = ["Network to Code, LLC <info@networktocode.com>"]
 license = "Apache-2.0"
@@ -12,7 +12,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -27,12 +26,15 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.13"
+python = ">=3.9.2,<3.13"
 napalm = ">=2.5.0, <5"
 zipp = "^3.4.0"
-nautobot = "^2.2.3"
-nautobot-ssot = "^3.0.0"
-nautobot-plugin-nornir = "^2.0.0"
+nautobot = {git = "https://github.com/nautobot/nautobot.git", rev = "next"}
+# nautobot = "^3.0.0"  # TODO: Uncomment after v3.0.0 is released
+nautobot-ssot = {git = "https://github.com/nautobot/nautobot-app-ssot.git", rev = "next-3.0"}
+# nautobot-ssot = "^4.0.0"  # TODO: Uncomment after v4.0.0 is released
+nautobot-plugin-nornir = {git = "https://github.com/nautobot/nautobot-app-nornir.git", rev = "next-3.0"}
+# nautobot-plugin-nornir = "^3.0.0"  # TODO: Uncomment after v3.0.0 is released
 jdiff = "^0.0.6"
 ntc-templates = "^7.0.0"
 # Netutils pin is needed for https://github.com/networktocode/netutils/pull/553
@@ -106,7 +108,7 @@ notes = """,
 
 [tool.pylint-nautobot]
 supported_nautobot_versions = [
-    "2.0.3"
+    "3.0.0"
 ]
 
 [tool.ruff]

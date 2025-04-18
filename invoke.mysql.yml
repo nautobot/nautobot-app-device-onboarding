@@ -1,7 +1,7 @@
 ---
 nautobot_device_onboarding:
   project_name: "nautobot-device-onboarding"
-  nautobot_ver: "2.0.3"
+  nautobot_ver: "next"  # TODO: Change to 3.0.0 after v3.0.0 is released
   local: false
   python_ver: "3.11"
   compose_dir: "development"
