@@ -1,6 +1,10 @@
 """Constants for nautobot_device_onboarding app."""
 
 from django.conf import settings
+from netutils.data_files.protocol_mappings import PROTOCOLS as NETUTILS_PROTOCOLS
+
+from .choices import AutodiscoveryProtocolTypeChoices
+
 
 NETMIKO_EXTRAS = (
     settings.PLUGINS_CONFIG.get("nautobot_plugin_nornir", {})
@@ -50,3 +54,7 @@ ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER = "nautobot_device_onboarding.onbo
 
 # The git repository data source folder name for custom command mappers.
 ONBOARDING_COMMAND_MAPPERS_REPOSITORY_FOLDER = "onboarding_command_mappers"
+
+AUTODISCOVERY_PORTS = {
+    AutodiscoveryProtocolTypeChoices.SSH: [NETUTILS_PROTOCOLS["ssh"]["port_number"]],
+}
