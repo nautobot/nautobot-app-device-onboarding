@@ -33,7 +33,7 @@ zipp = "^3.4.0"
 nautobot = "^2.2.3"
 nautobot-ssot = "^3.0.0"
 nautobot-plugin-nornir = "^2.0.0"
-jdiff = "^0.0.6"
+jdiff = ">=0.0.6,<1.0.0"
 ntc-templates = "^7.0.0"
 # Netutils pin is needed for https://github.com/networktocode/netutils/pull/553
 netutils = "^1.9.1"
