@@ -158,7 +158,8 @@ NETWORK_DATA_SCHEMA = {
                     "ip_addresses",
                     "mac_address",
                     "mtu",
-                    "description" "link_status",
+                    "description",
+                    "link_status",
                     "802.1Q_mode",
                 ],
                 "properties": {
