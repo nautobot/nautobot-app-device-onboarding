@@ -68,6 +68,8 @@ mkdocstrings-python = "1.10.8"
 mkdocs-autorefs = "1.2.0"
 griffe = "1.1.1"
 towncrier = ">=23.6.0,<=24.8.0"
+# Used in integration tests
+fakenos = { git = "https://github.com/fakenos/fakenos", branch = "master" }
 to-json-schema = "*"
 jsonschema = "*"
 
