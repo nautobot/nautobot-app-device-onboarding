@@ -874,6 +874,16 @@ files = [
 ]
 
 [[package]]
+name = "detect"
+version = "2020.12.3"
+description = "detect OS and Python versions"
+optional = false
+python-versions = "*"
+files = [
+    {file = "detect-2020.12.3.tar.gz", hash = "sha256:eecd6c41c17072b4db8dbfa850d979bda40b33b4f349ab4378205bceb74d712e"},
+]
+
+[[package]]
 name = "diffsync"
 version = "2.0.1"
 description = "Library to easily sync/diff/update 2 different data sources"
@@ -1409,6 +1419,30 @@ files = [
 
 [package.extras]
 tests = ["asttokens (>=2.1.0)", "coverage", "coverage-enable-subprocess", "ipython", "littleutils", "pytest", "rich"]
+
+[[package]]
+name = "fakenos"
+version = "1.1.0"
+description = "Fake Network Operating System"
+optional = false
+python-versions = ">=3.8,<3.13"
+files = []
+develop = false
+
+[package.dependencies]
+detect = "2020.12.*"
+paramiko = "<4.0"
+pydantic = "<3.0"
+pyyaml = "<7.0"
+
+[package.extras]
+test = []
+
+[package.source]
+type = "git"
+url = "https://github.com/fakenos/fakenos"
+reference = "master"
+resolved_reference = "70713d43f8263b986577977e3851fd6465c150ed"
 
 [[package]]
 name = "future"
@@ -4914,4 +4948,4 @@ all = []
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.13"
-content-hash = "b6a020f89c05b1383e88ec85e8dcb56d490a3e97a6d689085ec004c55fea5891"
+content-hash = "f594d4606c03e0deaa0c08be43d45909f8e23e2fd50ac678b178c0ec77e87db0"
