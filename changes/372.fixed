@@ -1,1 +1,0 @@
-Fixed bug when loading Nautobot Vlans with multiple locations assigned. Only Vlans with 1 location will be considered for the sync.
