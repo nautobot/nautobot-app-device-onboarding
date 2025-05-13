@@ -138,6 +138,10 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
             if (
                 vlan.locations.count() > 1
             ):  # TODO: A conditional check will be needed here to support multiple locations per VLAN
+                if self.job.debug:
+                    self.job.logger.debug(
+                        f"Vlan {vlan.name} has multiple locations. Skipping Vlan load for {vlan.name}."
+                    )
                 continue
             network_vlan = self.vlan(
                 adapter=self,
