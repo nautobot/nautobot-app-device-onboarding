@@ -594,6 +594,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
     sync_vlans = BooleanVar(default=False, description="Sync VLANs and interface VLAN assignments.")
     sync_vrfs = BooleanVar(default=False, description="Sync VRFs and interface VRF assignments.")
     sync_cables = BooleanVar(default=False, description="Sync cables between interfaces via a LLDP or CDP.")
+    sync_software_version = BooleanVar(default=False, description="Sync software version from device.")
     namespace = ObjectVar(
         model=Namespace,
         required=True,
@@ -670,6 +671,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         sync_vlans,
         sync_vrfs,
         sync_cables,
+        sync_software_version,
         *args,
         **kwargs,
     ):
@@ -688,6 +690,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         self.sync_vlans = sync_vlans
         self.sync_vrfs = sync_vrfs
         self.sync_cables = sync_cables
+        self.sync_software_version = sync_software_version
 
         # Check for last_network_data_sync CustomField
         if self.debug:
@@ -750,6 +753,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
             "sync_vlans": sync_vlans,
             "sync_vrfs": sync_vrfs,
             "sync_cables": sync_cables,
+            "sync_software_version": sync_software_version,
             "connectivity_test": kwargs["connectivity_test"],
         }
 
@@ -805,6 +809,7 @@ class DeviceOnboardingTroubleshootingJob(Job):
                     kwargs.update({"sync_vrfs": True})
                     kwargs.update({"sync_vlans": True})
                     kwargs.update({"sync_cables": True})
+                    kwargs.update({"sync_software_version": True})
                     nr_with_processors.run(
                         task=netmiko_send_commands,
                         command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],
@@ -824,6 +829,7 @@ class DeviceOnboardingTroubleshootingJob(Job):
                         kwargs.update({"sync_vrfs": True})
                         kwargs.update({"sync_vlans": True})
                         kwargs.update({"sync_cables": True})
+                        kwargs.update({"sync_software_version": True})
                     nr_with_processors.run(
                         task=netmiko_send_commands,
                         command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],

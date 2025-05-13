@@ -3,7 +3,17 @@
 from django.contrib.contenttypes.models import ContentType
 from nautobot.circuits.models import Circuit, CircuitTermination, CircuitType, Provider
 from nautobot.dcim.choices import InterfaceModeChoices, InterfaceTypeChoices
-from nautobot.dcim.models import Cable, Device, DeviceType, Interface, Location, LocationType, Manufacturer, Platform
+from nautobot.dcim.models import (
+    Cable,
+    Device,
+    DeviceType,
+    Interface,
+    Location,
+    LocationType,
+    Manufacturer,
+    Platform,
+    SoftwareVersion,
+)
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Role, Secret, SecretsGroup, SecretsGroupAssociation, Status
 from nautobot.ipam.choices import IPAddressTypeChoices, PrefixTypeChoices
@@ -23,6 +33,7 @@ def sync_network_data_ensure_required_nautobot_objects():
     status.content_types.add(ContentType.objects.get_for_model(VLAN))
     status.content_types.add(ContentType.objects.get_for_model(VRF))
     status.content_types.add(ContentType.objects.get_for_model(Cable))
+    status.content_types.add(ContentType.objects.get_for_model(SoftwareVersion))
     status.content_types.add(ContentType.objects.get_for_model(Circuit))
     status.validated_save()
 
@@ -86,6 +97,8 @@ def sync_network_data_ensure_required_nautobot_objects():
     vlan_2, _ = VLAN.objects.get_or_create(vid=50, name="vlan50", location=location, status=status)
     vrf_1, _ = VRF.objects.get_or_create(name="mgmt", namespace=namespace)
     vrf_2, _ = VRF.objects.get_or_create(name="vrf2", namespace=namespace)
+    software_version_1, _ = SoftwareVersion.objects.get_or_create(version="16.12.4", platform=platform_1, status=status)
+    software_version_2, _ = SoftwareVersion.objects.get_or_create(version="3.12R.4", platform=platform_2, status=status)
 
     device_type, _ = DeviceType.objects.get_or_create(model="CSR1000V17", manufacturer=manufacturer)
     device_1, _ = Device.objects.get_or_create(
@@ -97,6 +110,7 @@ def sync_network_data_ensure_required_nautobot_objects():
         role=device_role,
         platform=platform_1,
         secrets_group=secrets_group,
+        software_version=software_version_1,
     )
     device_2, _ = Device.objects.get_or_create(
         name="demo-cisco-2",
@@ -107,6 +121,7 @@ def sync_network_data_ensure_required_nautobot_objects():
         role=device_role,
         platform=platform_2,
         secrets_group=secrets_group,
+        software_version=software_version_2,
     )
     device_3, _ = Device.objects.get_or_create(
         name="demo-cisco-3",
@@ -117,6 +132,7 @@ def sync_network_data_ensure_required_nautobot_objects():
         role=device_role,
         platform=platform_2,
         secrets_group=secrets_group,
+        software_version=software_version_2,
     )
     interface_1, _ = Interface.objects.get_or_create(
         device=device_1, name="GigabitEthernet1", status=status, type=InterfaceTypeChoices.TYPE_VIRTUAL
@@ -188,6 +204,8 @@ def sync_network_data_ensure_required_nautobot_objects():
     testing_objects["vlan_2"] = vlan_2
     testing_objects["vrf_1"] = vrf_1
     testing_objects["vrf_2"] = vrf_2
+    testing_objects["software_version_1"] = software_version_1
+    testing_objects["software_version_2"] = software_version_2
     testing_objects["cable_to_circuit"] = cable_to_circuit_1
 
     return testing_objects

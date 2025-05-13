@@ -249,7 +249,14 @@ class SyncDevicesDevice(DiffSyncModel):
 
     def update(self, attrs):
         """Update an existing nautobot device using data scraped from a device."""
-        device = Device.objects.get(name=self.name, location__name=self.location__name)
+        try:
+            device = Device.objects.get(name=self.name, location__name=self.location__name)
+        except MultipleObjectsReturned as exc:
+            raise MultipleObjectsReturned(
+                f"Multiple devices found with name {self.name} and location {self.location__name}"
+            ) from exc
+        except ObjectDoesNotExist as exc:
+            raise ObjectDoesNotExist(f"Device {self.name} does not exist at {self.location__name}") from exc
 
         if self.adapter.job.debug:
             self.adapter.job.logger.debug(f"Updating {device.name} with attrs: {attrs}")
