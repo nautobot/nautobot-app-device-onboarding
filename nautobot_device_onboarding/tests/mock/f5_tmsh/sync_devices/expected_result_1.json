@@ -1,0 +1,7 @@
+{
+    "device_type": "BIG-IP VPR-B2250",
+    "hostname": "f501mgmt-cluster.acme.net",
+    "mask_length": 24,
+    "mgmt_interface": "1/mgmt",
+    "serial": "chs401567s"
+}
