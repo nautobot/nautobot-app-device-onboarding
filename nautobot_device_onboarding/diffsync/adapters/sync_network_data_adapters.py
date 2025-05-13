@@ -138,7 +138,15 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         """
         # TODO: update this to support multiple locations per VLAN after the setting for this feature has been added.
         location_ids = list(self.job.devices_to_load.values_list("location__id", flat=True))
-        for vlan in VLAN.objects.filter(location__in=location_ids):
+        for vlan in VLAN.objects.filter(locations__in=location_ids):
+            if (
+                vlan.locations.count() > 1
+            ):  # TODO: A conditional check will be needed here to support multiple locations per VLAN
+                if self.job.debug:
+                    self.job.logger.debug(
+                        f"Vlan {vlan.name} has multiple locations. Skipping Vlan load for {vlan.name}."
+                    )
+                continue
             network_vlan = self.vlan(
                 adapter=self,
                 name=vlan.name,
