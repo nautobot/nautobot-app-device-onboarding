@@ -121,3 +121,8 @@ sync_network_data:
         jpath: '"lldp-neighbors-information"[]."lldp-neighbor-information"[].{local_interface: "lldp-local-port-id"[0].data, remote_interface: "lldp-remote-port-id"[0].data, remote_device: "lldp-remote-system-name"[0].data}'  # yamllint disable-line rule:quoted-strings
         post_processor: "{% set result = [] %}{% for cable in obj %}{% set _=result.append({'local_interface': cable['local_interface'], 'remote_interface': cable['remote_interface'], 'remote_device': cable['remote_device'] | remove_fqdn }) %}{% endfor %}{{ result | tojson }}"
         iterable_type: "dict"
+  software_version:
+    commands:
+      - command: "show system information | display json"
+        parser: "none"
+        jpath: '"system-information"[]."os-version"[].data'  # yamllint disable-line rule:quoted-strings

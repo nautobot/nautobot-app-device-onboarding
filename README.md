@@ -44,7 +44,8 @@ Regardless, the Onboarding App greatly simplifies the onboarding process by allo
 | Link Status    | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
 | 802.1Q mode    | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
 | Lag Member     | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
-| VRF Membership | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Vrf Membership | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
+| Software Version | ✅ | ✅ | ✅ | ❌ | ✅ | ✅ | ❌ |
 
 |     VLANS          | Cisco IOS          | Cisco XE           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  |
 | ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: |

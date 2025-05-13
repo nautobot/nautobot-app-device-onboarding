@@ -109,6 +109,7 @@ sync_network_mock_data_valid = {
                 "remote_interface": "GigabitEthernet3",
             },
         ],
+        "software_version": "16.12.4",
     },
     "demo-cisco-2": {
         "serial": "9ABUXU5882222",
@@ -190,6 +191,7 @@ sync_network_mock_data_valid = {
                 "remote_interface": "GigabitEthernet3",
             },
         ],
+        "software_version": "3.12R.4",
     },
 }
 failed_device = {"demo-cisco-3": {"failed": True, "failed_reason": "Authentication failure"}}
