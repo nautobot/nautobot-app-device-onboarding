@@ -29,6 +29,7 @@ class TestGetCommandsToRun(unittest.TestCase):
             sync_vlans=False,
             sync_vrfs=False,
             sync_cables=False,
+            sync_software_version=False,
         )
         expected_commands_to_run = [
             {"command": "show version", "jpath": "[*].hostname", "parser": "textfsm"},
@@ -48,6 +49,7 @@ class TestGetCommandsToRun(unittest.TestCase):
             sync_vlans=False,
             sync_vrfs=False,
             sync_cables=False,
+            sync_software_version=False,
         )
         expected_commands_to_run = [
             {"command": "show version", "parser": "textfsm", "jpath": "[*].serial[]"},
@@ -81,6 +83,7 @@ class TestGetCommandsToRun(unittest.TestCase):
             sync_vlans=False,
             sync_vrfs=True,
             sync_cables=False,
+            sync_software_version=False,
         )
         expected_commands_to_run = [
             {"command": "show version", "parser": "textfsm", "jpath": "[*].serial[]"},
@@ -121,6 +124,7 @@ class TestGetCommandsToRun(unittest.TestCase):
             sync_vlans=True,
             sync_vrfs=False,
             sync_cables=False,
+            sync_software_version=False,
         )
         expected_commands_to_run = [
             {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vlan_id, name: vlan_name}"},
@@ -155,6 +159,7 @@ class TestGetCommandsToRun(unittest.TestCase):
             sync_vlans=True,
             sync_vrfs=True,
             sync_cables=False,
+            sync_software_version=False,
         )
         expected_commands_to_run = [
             {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vlan_id, name: vlan_name}"},
@@ -191,7 +196,11 @@ class TestGetCommandsToRun(unittest.TestCase):
 
     def test_deduplicate_command_list_sync_data_cables(self):
         get_commands_to_run = _get_commands_to_run(
-            self.expected_data["sync_network_data"], sync_vlans=False, sync_vrfs=False, sync_cables=True
+            self.expected_data["sync_network_data"],
+            sync_vlans=False,
+            sync_vrfs=False,
+            sync_cables=True,
+            sync_software_version=False,
         )
         expected_commands_to_run = [
             {"command": "show version", "parser": "textfsm", "jpath": "[*].serial[]"},

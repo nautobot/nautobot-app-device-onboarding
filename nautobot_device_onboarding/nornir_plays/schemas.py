@@ -216,5 +216,9 @@ NETWORK_DATA_SCHEMA = {
                 },
             },
         },
+        "software_version": {
+            "type": "string",
+            "description": "Software version of the device",
+        },
     },
 }
