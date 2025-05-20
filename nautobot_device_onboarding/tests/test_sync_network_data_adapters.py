@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 from django.contrib.contenttypes.models import ContentType
 from nautobot.core.testing import TransactionTestCase
-from nautobot.dcim.models import Cable, Device, Interface
+from nautobot.dcim.models import Cable, Device, Interface, SoftwareVersion
 from nautobot.extras.models import JobResult
 from nautobot.ipam.models import VLAN, VRF, IPAddress
 
@@ -41,6 +41,7 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
         self.job.namespace = self.testing_objects["namespace"]
         self.job.sync_vlans = True
         self.job.sync_vrfs = True
+        self.job.sync_software_version = True
         self.job.debug = True
         self.job.devices_to_load = None
 
@@ -227,6 +228,25 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
                 self.assertEqual(termination_b_device, diffsync_obj.termination_b__device__name)
                 self.assertEqual(termination_b_interface, diffsync_obj.termination_b__name)
 
+    def test_load_software_versions(self):
+        """Test loading software version data returned from command getter into the diffsync store."""
+        self.sync_network_data_adapter.load_software_versions()
+        for _, device_data in self.job.command_getter_result.items():
+            device_data = self.job.command_getter_result["demo-cisco-1"]
+            device = Device.objects.get(serial=device_data["serial"])
+            unique_id = f"{device_data['software_version']}__{device.platform}"
+            diffsync_obj = self.sync_network_data_adapter.get("software_version", unique_id)
+            self.assertEqual("cisco_ios", diffsync_obj.platform__name)
+            self.assertEqual(device_data["software_version"], diffsync_obj.version)
+
+    def test_load_software_version_to_device(self):
+        self.sync_network_data_adapter.load_software_version_to_device()
+        for _, device_data in self.job.command_getter_result.items():
+            device = Device.objects.get(serial=device_data["serial"])
+            unique_id = f"{device.name}__{device.serial}"
+            diffsync_obj = self.sync_network_data_adapter.get("software_version_to_device", unique_id)
+            self.assertEqual(device_data["software_version"], diffsync_obj.software_version__version)
+
 
 class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
     """Test SyncNetworkDataNautobotAdapter class."""
@@ -386,6 +406,23 @@ class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
             self.assertEqual(interface.device.name, diffsync_obj.device__name)
             self.assertEqual(interface.name, diffsync_obj.name)
             self.assertEqual(vrf, diffsync_obj.vrf)
+
+    def test_load_software_versions(self):
+        """Test loading Nautobot software version data into the diffsync store."""
+        self.sync_network_data_adapter.load_software_versions()
+        for software_version in SoftwareVersion.objects.all():
+            unique_id = f"{software_version.version}__{software_version.platform.name}"
+            diffsync_obj = self.sync_network_data_adapter.get("software_version", unique_id)
+            self.assertEqual(software_version.platform.name, diffsync_obj.platform__name)
+            self.assertEqual(software_version.version, diffsync_obj.version)
+
+    def test_load_software_version_to_device(self):
+        """Test loading Nautobot software version device assignments into the Diffsync store."""
+        self.sync_network_data_adapter.load_software_version_to_device()
+        for device in Device.objects.filter(name__in=["demo-cisco-1", "demo-cisco-2"]):
+            unique_id = f"{device.name}__{device.serial}"
+            diffsync_obj = self.sync_network_data_adapter.get("software_version_to_device", unique_id)
+            self.assertEqual(device.software_version.version, diffsync_obj.software_version__version)
 
     def test_sync_complete(self):
         """Test primary ip re-assignment if deleted during the sync."""
