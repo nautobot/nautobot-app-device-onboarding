@@ -10,19 +10,6 @@ from nautobot.extras.models import RoleField
 class Migration(migrations.Migration):
     initial = True
 
-    replaces = [
-        ("nautobot_device_onboarding", "0001_initial"),
-        ("nautobot_device_onboarding", "0004_migrate_to_extras_role_part_1"),
-        ("nautobot_device_onboarding", "0004_migrate_to_extras_role_part_2"),
-        ("nautobot_device_onboarding", "0004_migrate_to_extras_role_part_3"),
-        ("nautobot_device_onboarding", "0005_migrate_site_to_location_part_1"),
-        ("nautobot_device_onboarding", "0005_migrate_site_to_location_part_2"),
-        ("nautobot_device_onboarding", "0005_migrate_site_to_location_part_3"),
-        ("nautobot_device_onboarding", "0006_update_model_fields_part_1"),
-        ("nautobot_device_onboarding", "0006_update_model_fields_part_2"),
-        ("nautobot_device_onboarding", "0006_update_model_fields_part_3"),
-    ]
-
     dependencies = [
         ("dcim", "0049_remove_slugs_and_change_device_primary_ip_fields"),
         ("extras", "0098_rename_data_jobresult_result"),

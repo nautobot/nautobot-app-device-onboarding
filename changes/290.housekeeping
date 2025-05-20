@@ -1,0 +1,1 @@
+Squashed all migrations into a single noop migration for new installs since all models have been removed.
