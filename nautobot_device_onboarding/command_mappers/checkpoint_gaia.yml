@@ -1,0 +1,33 @@
+---
+sync_devices:
+  hostname:
+    commands:
+      - command: "show domain name"
+        parser: "textfsm"
+        jpath: "[*].domain_name"
+  serial:
+    commands:
+      - command: "show asset all"
+        parser: "textfsm"
+        jpath: "[*].serial_number[]"
+        post_processor: "{{ obj | unique | first }}"
+        iterable_type: "str"
+  device_type:
+    commands:
+      - command: "show asset all"
+        parser: "textfsm"
+        jpath: "[*].model[]"
+        post_processor: "{{ obj | unique | first }}"
+        iterable_type: "str"
+  mgmt_interface:
+    commands:
+      - command: "show interfaces all"
+        parser: "textfsm"
+        jpath: "[?ip_address=='{{ obj }}'].interface || [`Mgmt`]"
+  mask_length:
+    commands:
+      - command: "show interfaces all"
+        parser: "textfsm"
+        jpath: "[?ip_address=='{{ obj }}'].subnet"
+        post_processor: "{% if '/' in obj[0] %}{{ obj[0].split('/')[1] }}{% else %}31{% endif %}"
+        iterable_type: "int"
