@@ -9,6 +9,7 @@ import json
 import logging
 from io import StringIO
 
+from datetime import datetime
 from diffsync.enum import DiffSyncFlags
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -59,6 +60,7 @@ from nautobot_device_onboarding.diffsync.adapters.sync_network_data_adapters imp
     SyncNetworkDataNetworkAdapter,
 )
 from nautobot_device_onboarding.exceptions import OnboardException
+from nautobot_device_onboarding.models import DiscoveredDevice
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
 from nautobot_device_onboarding.nornir_plays.command_getter import (
     _parse_credentials,
@@ -348,6 +350,11 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         required=False,
         description="Device platform. Define ONLY to override auto-recognition of platform.",
     )
+    discovered_devices = MultiObjectVar(
+        model=DiscoveredDevice,
+        required=False,
+        description="Discovered Devices to onboard.",
+    )
 
     template_name = "nautobot_device_onboarding/ssot_sync_devices.html"
 
@@ -473,6 +480,57 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
 
         return processed_csv_data
 
+    def _process_discovered_devices(self, discovered_devices):
+        processed_csv_data = {}
+        self.task_kwargs_csv_data = {}
+        for device in discovered_devices:
+            query = "location"
+            location = device.location
+            query = f"device_role"
+            device_role = device.device_role
+            query = f"namespace"
+            namespace = device.ip_address.parent.namespace
+            query = f"device_status"
+            device_status = device.device_status
+            query = f"interface_status"
+            interface_status = device.interface_status
+            query = f"ip_address_status"
+            ip_address_status = device.ip_address.status
+            query = f"secrets_group"
+            secrets_group = device.ssh_credentials
+            query = f"platform"
+            platform = device.discovered_platform
+
+            set_mgmt_only = True #TODO: fix
+            update_devices_without_primary_ip = False #TODO: fix
+
+            processed_csv_data[device.ip_address.host] = {}
+            processed_csv_data[device.ip_address.host]["location"] = location
+            processed_csv_data[device.ip_address.host]["namespace"] = namespace
+            processed_csv_data[device.ip_address.host]["port"] = device.ssh_port
+            processed_csv_data[device.ip_address.host]["timeout"] = 30 # TODO: user input
+            processed_csv_data[device.ip_address.host]["set_mgmt_only"] = set_mgmt_only
+            processed_csv_data[device.ip_address.host]["update_devices_without_primary_ip"] = (
+                update_devices_without_primary_ip
+            )
+            processed_csv_data[device.ip_address.host]["device_role"] = device_role
+            processed_csv_data[device.ip_address.host]["device_status"] = device_status
+            processed_csv_data[device.ip_address.host]["interface_status"] = interface_status
+            processed_csv_data[device.ip_address.host]["ip_address_status"] = ip_address_status
+            processed_csv_data[device.ip_address.host]["secrets_group"] = secrets_group
+            processed_csv_data[device.ip_address.host]["platform"] = platform
+
+            # Prepare ids to send to the job in celery
+            self.task_kwargs_csv_data[device.ip_address.host] = {}
+            self.task_kwargs_csv_data[device.ip_address.host]["port"] = device.ssh_port
+            self.task_kwargs_csv_data[device.ip_address.host]["timeout"] = 30 # TODO: user input
+            self.task_kwargs_csv_data[device.ip_address.host]["secrets_group"] = (
+                secrets_group.id if secrets_group else ""
+            )
+            self.task_kwargs_csv_data[device.ip_address.host]["platform"] = platform.id if platform else ""
+
+        return processed_csv_data
+
     def run(
         self,
         dryrun,
@@ -492,6 +550,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         timeout,
         secrets_group,
         platform,
+        discovered_devices,
         *args,
         **kwargs,
     ):
@@ -520,7 +579,21 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 )
             else:
                 raise ValidationError(message="CSV check failed. No devices will be synced.")
-
+        elif discovered_devices:
+            self.processed_csv_data = self._process_discovered_devices(discovered_devices=discovered_devices)
+            if self.processed_csv_data:
+                # create a list of ip addresses for processing in the adapter
+                self.ip_addresses = []
+                for ip_address in self.processed_csv_data:
+                    self.ip_addresses.append(ip_address)
+                # prepare the task_kwargs needed by the CommandGetterDO job
+                self.job_result.task_kwargs.update(
+                    {
+                        "csv_file": self.task_kwargs_csv_data,
+                    }
+                )
+            else:
+                raise ValidationError(message="Discovered Device check failed. No devices will be synced.")
         else:
             # Verify that all required form inputs have been provided, this is here in case the form is not used
             required_inputs = {
@@ -855,7 +928,7 @@ class DeviceOnboardingDiscoveryJob(Job):
         default=False,
         description="Enable for more verbose logging.",
     )
-    prefixes = ObjectVar(
+    prefixes = MultiObjectVar(
         model=Prefix,
         required=True,
         description="Prefixes to be searched for devices missing in Nautobot inventory.",
@@ -880,14 +953,14 @@ class DeviceOnboardingDiscoveryJob(Job):
         label="Number of sim. SSH logins..",
         default=2,
     )
-    location = SSOTSyncNetworkData.location
+    # location = SSOTSyncNetworkData.location
     namespace = SSOTSyncDevices.namespace
-    device_role = SSOTSyncDevices.device_role
-    device_status = SSOTSyncDevices.device_status
-    interface_status = SSOTSyncDevices.interface_status
-    ip_address_status = SSOTSyncDevices.ip_address_status
-    set_mgmt_only = SSOTSyncDevices.set_mgmt_only
-    update_devices_without_primary_ip = SSOTSyncDevices.update_devices_without_primary_ip
+    # device_role = SSOTSyncDevices.device_role
+    # device_status = SSOTSyncDevices.device_status
+    # interface_status = SSOTSyncDevices.interface_status
+    # ip_address_status = SSOTSyncDevices.ip_address_status
+    # set_mgmt_only = SSOTSyncDevices.set_mgmt_only
+    # update_devices_without_primary_ip = SSOTSyncDevices.update_devices_without_primary_ip
     
     class Meta:
         """Meta object."""
@@ -1039,7 +1112,7 @@ class DeviceOnboardingDiscoveryJob(Job):
             for future in concurrent.futures.as_completed(future_to_ip):
                 host = future_to_ip[future]
                 try:
-                    results[host] = future.result()
+                    results[host.split(":")[0]] = future.result()
                 except Exception as e:
                     self.logger.error(f"Error with future for IP {host}: {e}")
 
@@ -1048,29 +1121,55 @@ class DeviceOnboardingDiscoveryJob(Job):
 
         return results
 
+    def _update_discovered_devices(self, results):
+        discovered_status = Status.objects.get(name="Discovered")
+        now = datetime.now()
+        for host in self.targets:
+            # get ipaddress object for host
+            # if ipaddress has discovered device then see if it responded or not
+            # else only create discovered device if tcp_ping response
+            try:
+                ipaddress = IPAddress.objects.get(host=host, mask_length=32)
+            except IPAddress.DoesNotExist:
+                if host not in results: # if the host isn't in results (meaning tcp_ping failed), don't create the ip address
+                    continue
+                ipaddress = IPAddress.objects.create(host=host, mask_length=32, status=discovered_status)
+            discovered_device, _ = DiscoveredDevice.objects.get_or_create(ip_address=ipaddress)
+            if host in results:
+                discovered_device.tcp_response = True
+                discovered_device.last_successful_tcp_response = now
+                if results[host]["credentials"] != None:
+                    discovered_device.ssh_response = True
+                    discovered_device.last_successful_ssh_response = now
+                    discovered_device.ssh_port = results[host]["port"]
+                    discovered_device.ssh_credentials = results[host]["credentials"]
+                    try:
+                        discovered_device.discovered_platform = Platform.objects.get(network_driver=results[host]["platform"]) # TODO: i don't think this is right for all cases
+                    except:
+                        self.logger.info(f'Platform {results[host]["platform"]} does not exist within Nautobot.')
+                        discovered_device.discovered_platform = None
+            else:
+                discovered_device.tcp_response = False
+                discovered_device.ssh_response = False
+            discovered_device.validated_save()
+        return
+
+
     def run(self,
-            dryrun,
-            memory_profiling,
+            # memory_profiling,
             debug,
             scanning_threads_count, 
             login_threads_count, 
             prefixes,
             secrets_groups, 
             protocols,
-            location,
             namespace,
-            device_role,
-            device_status,
-            interface_status,
-            ip_address_status,
-            set_mgmt_only,
-            update_devices_without_primary_ip,
             *args,
             **kwargs
         ):  # pragma: no cover
         """Process discovering devices."""
-        self.dryrun = dryrun
-        self.memory_profiling = memory_profiling
+        # self.dryrun = dryrun
+        # self.memory_profiling = memory_profiling
         self.debug = debug
 
         self.prefixes = prefixes
@@ -1080,14 +1179,14 @@ class DeviceOnboardingDiscoveryJob(Job):
         self.login_threads_count = login_threads_count
 
         # Pass through to onboarding task
-        self.location = location
+        # self.location = location
         self.namespace = namespace
-        self.device_role = device_role
-        self.device_status = device_status
-        self.interface_status = interface_status
-        self.ip_address_status = ip_address_status
-        self.set_mgmt_only = set_mgmt_only
-        self.update_devices_without_primary_ip = update_devices_without_primary_ip
+        # self.device_role = device_role
+        # self.device_status = device_status
+        # self.interface_status = interface_status
+        # self.ip_address_status = ip_address_status
+        # self.set_mgmt_only = set_mgmt_only
+        # self.update_devices_without_primary_ip = update_devices_without_primary_ip
 
         # TODO(mzb): Introduce "skip" / blacklist tag too.
 
@@ -1098,8 +1197,8 @@ class DeviceOnboardingDiscoveryJob(Job):
 
             # Get a list of all IPs in the subnet
             for ip in network.hosts():
-                # Skip IP Addresses already assigned to an interface
-                if IPAddressToInterface.objects.filter(ip_address__in=IPAddress.objects.filter(host=ip)):
+                # Skip IP Addresses already assigned to an interface # TODO: keeping this?
+                if IPAddressToInterface.objects.filter(ip_address__in=IPAddress.objects.filter(host=str(ip))):
                     continue
 
                 self.targets.add(str(ip))
@@ -1109,34 +1208,36 @@ class DeviceOnboardingDiscoveryJob(Job):
         ssh_result = self._get_targets_details(scan_result)
         self.logger.info(ssh_result)
 
-        return ssh_result
+        discovered_result = self._update_discovered_devices(ssh_result)
 
-    def on_success(self, retval, task_id, args, kwargs):
-        """Start Onboarding job for discovered targets."""
+        return discovered_result
 
-        for val in retval:
-            data = {
-                "location": self.location.id,
-                "namespace": self.namespace.id,
-                "ip_addresses": retval[val]["ip"],
-                "port": retval[val]["port"].id,
-                "timeout": 10,
-                "device_role": self.device_role.id,
-                "device_status": self.device_status.id,
-                "ip_address_status": self.ip_address_status.id,
-                "secrets_group": retval[val]["credentials"].id,
-                "dryrun": self.dryrun,
-                "memory_profiling": self.memory_profiling,
-                "debug": self.debug,
-                "csv_file": None,
-                "set_mgmt_only": self.set_mgmt_only,
-                "update_devices_without_primary_ip": self.update_devices_without_primary_ip,
-                "interface_status": self.interface_status.id,
-                "platform": None,
-                "connectivity_test": False,
-            }
-            job = Job.objects.get(name="Sync Devices From Network")
-            JobResult.enqueue_job(job, self.user,  **data)
+    # def on_success(self, retval, task_id, args, kwargs):
+    #     """Start Onboarding job for discovered targets."""
+
+    #     for val in retval:
+    #         data = {
+    #             "location": self.location.id,
+    #             "namespace": self.namespace.id,
+    #             "ip_addresses": retval[val]["ip"],
+    #             "port": retval[val]["port"].id,
+    #             "timeout": 10,
+    #             "device_role": self.device_role.id,
+    #             "device_status": self.device_status.id,
+    #             "ip_address_status": self.ip_address_status.id,
+    #             "secrets_group": retval[val]["credentials"].id,
+    #             "dryrun": self.dryrun,
+    #             "memory_profiling": self.memory_profiling,
+    #             "debug": self.debug,
+    #             "csv_file": None,
+    #             "set_mgmt_only": self.set_mgmt_only,
+    #             "update_devices_without_primary_ip": self.update_devices_without_primary_ip,
+    #             "interface_status": self.interface_status.id,
+    #             "platform": None,
+    #             "connectivity_test": False,
+    #         }
+    #         job = Job.objects.get(name="Sync Devices From Network")
+    #         JobResult.enqueue_job(job, self.user,  **data)
 
 
 jobs = [
