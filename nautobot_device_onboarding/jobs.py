@@ -489,13 +489,13 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             query = f"device_role"
             device_role = device.device_role
             query = f"namespace"
-            namespace = device.ip_address.parent.namespace
+            namespace = device.namespace
             query = f"device_status"
             device_status = device.device_status
             query = f"interface_status"
             interface_status = device.interface_status
             query = f"ip_address_status"
-            ip_address_status = device.ip_address.status
+            ip_address_status = device.ip_address_status
             query = f"secrets_group"
             secrets_group = device.ssh_credentials
             query = f"platform"
@@ -504,30 +504,30 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             set_mgmt_only = True #TODO: fix
             update_devices_without_primary_ip = False #TODO: fix
 
-            processed_csv_data[device.ip_address.host] = {}
-            processed_csv_data[device.ip_address.host]["location"] = location
-            processed_csv_data[device.ip_address.host]["namespace"] = namespace
-            processed_csv_data[device.ip_address.host]["port"] = device.ssh_port
-            processed_csv_data[device.ip_address.host]["timeout"] = 30 # TODO: user input
-            processed_csv_data[device.ip_address.host]["set_mgmt_only"] = set_mgmt_only
-            processed_csv_data[device.ip_address.host]["update_devices_without_primary_ip"] = (
+            processed_csv_data[device.ip_address] = {}
+            processed_csv_data[device.ip_address]["location"] = location
+            processed_csv_data[device.ip_address]["namespace"] = namespace
+            processed_csv_data[device.ip_address]["port"] = device.ssh_port
+            processed_csv_data[device.ip_address]["timeout"] = 30 # TODO: user input
+            processed_csv_data[device.ip_address]["set_mgmt_only"] = set_mgmt_only
+            processed_csv_data[device.ip_address]["update_devices_without_primary_ip"] = (
                 update_devices_without_primary_ip
             )
-            processed_csv_data[device.ip_address.host]["device_role"] = device_role
-            processed_csv_data[device.ip_address.host]["device_status"] = device_status
-            processed_csv_data[device.ip_address.host]["interface_status"] = interface_status
-            processed_csv_data[device.ip_address.host]["ip_address_status"] = ip_address_status
-            processed_csv_data[device.ip_address.host]["secrets_group"] = secrets_group
-            processed_csv_data[device.ip_address.host]["platform"] = platform
+            processed_csv_data[device.ip_address]["device_role"] = device_role
+            processed_csv_data[device.ip_address]["device_status"] = device_status
+            processed_csv_data[device.ip_address]["interface_status"] = interface_status
+            processed_csv_data[device.ip_address]["ip_address_status"] = ip_address_status
+            processed_csv_data[device.ip_address]["secrets_group"] = secrets_group
+            processed_csv_data[device.ip_address]["platform"] = platform
 
             # Prepare ids to send to the job in celery
-            self.task_kwargs_csv_data[device.ip_address.host] = {}
-            self.task_kwargs_csv_data[device.ip_address.host]["port"] = device.ssh_port
-            self.task_kwargs_csv_data[device.ip_address.host]["timeout"] = 30 # TODO: user input
-            self.task_kwargs_csv_data[device.ip_address.host]["secrets_group"] = (
+            self.task_kwargs_csv_data[device.ip_address] = {}
+            self.task_kwargs_csv_data[device.ip_address]["port"] = device.ssh_port
+            self.task_kwargs_csv_data[device.ip_address]["timeout"] = 30 # TODO: user input
+            self.task_kwargs_csv_data[device.ip_address]["secrets_group"] = (
                 secrets_group.id if secrets_group else ""
             )
-            self.task_kwargs_csv_data[device.ip_address.host]["platform"] = platform.id if platform else ""
+            self.task_kwargs_csv_data[device.ip_address]["platform"] = platform.id if platform else ""
 
         return processed_csv_data
 
@@ -954,7 +954,7 @@ class DeviceOnboardingDiscoveryJob(Job):
         default=2,
     )
     # location = SSOTSyncNetworkData.location
-    namespace = SSOTSyncDevices.namespace
+    # namespace = SSOTSyncDevices.namespace
     # device_role = SSOTSyncDevices.device_role
     # device_status = SSOTSyncDevices.device_status
     # interface_status = SSOTSyncDevices.interface_status
@@ -1128,13 +1128,9 @@ class DeviceOnboardingDiscoveryJob(Job):
             # get ipaddress object for host
             # if ipaddress has discovered device then see if it responded or not
             # else only create discovered device if tcp_ping response
-            try:
-                ipaddress = IPAddress.objects.get(host=host, mask_length=32)
-            except IPAddress.DoesNotExist:
-                if host not in results: # if the host isn't in results (meaning tcp_ping failed), don't create the ip address
-                    continue
-                ipaddress = IPAddress.objects.create(host=host, mask_length=32, status=discovered_status)
-            discovered_device, _ = DiscoveredDevice.objects.get_or_create(ip_address=ipaddress)
+            if host not in results:
+                continue
+            discovered_device, _ = DiscoveredDevice.objects.get_or_create(ip_address=host)
             if host in results:
                 discovered_device.tcp_response = True
                 discovered_device.last_successful_tcp_response = now
@@ -1145,9 +1141,12 @@ class DeviceOnboardingDiscoveryJob(Job):
                     discovered_device.ssh_credentials = results[host]["credentials"]
                     try:
                         discovered_device.discovered_platform = Platform.objects.get(network_driver=results[host]["platform"]) # TODO: i don't think this is right for all cases
-                    except:
-                        self.logger.info(f'Platform {results[host]["platform"]} does not exist within Nautobot.')
+                    except Platform.DoesNotExist:
                         discovered_device.discovered_platform = None
+                        self.logger.info(f'Network Driver {results[host]["platform"]} does not exist within Nautobot.', extra={"object": discovered_device})
+                    except Platform.MultipleObjectsReturned:
+                        discovered_device.discovered_platform = Platform.objects.filter(network_driver=results[host]["platform"]).first()
+                        self.logger.info(f'Network Driver {results[host]["platform"]} exists on multiple platforms, choosing {discovered_device.discovered_platform.name} as default.', extra={"object": discovered_device})
             else:
                 discovered_device.tcp_response = False
                 discovered_device.ssh_response = False
@@ -1163,7 +1162,6 @@ class DeviceOnboardingDiscoveryJob(Job):
             prefixes,
             secrets_groups, 
             protocols,
-            namespace,
             *args,
             **kwargs
         ):  # pragma: no cover
@@ -1180,7 +1178,7 @@ class DeviceOnboardingDiscoveryJob(Job):
 
         # Pass through to onboarding task
         # self.location = location
-        self.namespace = namespace
+        # self.namespace = namespace
         # self.device_role = device_role
         # self.device_status = device_status
         # self.interface_status = interface_status

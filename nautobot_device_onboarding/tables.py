@@ -23,9 +23,11 @@ class DiscoveredDeviceTable(BaseTable):
             "ssh_credentials",
             "discovered_platform",
             "location",
+            "namespace",
             "device_role",
             "device_status",
             "interface_status",
+            "ip_address_status"
         )
         default_columns = (
             "pk",
@@ -34,7 +36,9 @@ class DiscoveredDeviceTable(BaseTable):
             "ssh_response",
             "discovered_platform",
             "location",
+            "namespace",
             "device_role",
             "device_status",
             "interface_status",
+            "ip_address_status"
         )
