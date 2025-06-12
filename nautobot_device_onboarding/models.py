@@ -12,6 +12,7 @@ class DiscoveredDevice(PrimaryModel):
     last_successful_ssh_response = DateTimeField(blank=True, null=True)
     ssh_port = PositiveIntegerField(blank=True, null=True)
     ssh_credentials = ForeignKey(to="extras.SecretsGroup", on_delete=SET_NULL, related_name="+", blank=True, null=True)
+    ssh_timeout = PositiveIntegerField(default=30, blank=True, null=True)
     discovered_platform = ForeignKey(to="dcim.platform", on_delete=SET_NULL, related_name="+", blank=True, null=True)
 
     location = ForeignKey(to="dcim.Location", on_delete=SET_NULL, related_name="+", blank=True, null=True)

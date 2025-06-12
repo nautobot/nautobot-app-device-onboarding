@@ -1,0 +1,8 @@
+{% extends 'generic/object_list.html' %}
+{% load helpers %}
+
+{% block bulk_buttons %}
+<button type="submit" name="_sync" formaction="{% url 'plugins:nautobot_device_onboarding:discovereddevice_syncdevices' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="btn btn-success btn-sm">
+    <span class="mdi mdi-sync" aria-hidden="true"></span> Sync Selected Devices
+</button>
+{% endblock %}

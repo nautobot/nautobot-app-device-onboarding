@@ -484,31 +484,23 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         processed_csv_data = {}
         self.task_kwargs_csv_data = {}
         for device in discovered_devices:
-            query = "location"
             location = device.location
-            query = f"device_role"
             device_role = device.device_role
-            query = f"namespace"
             namespace = device.namespace
-            query = f"device_status"
             device_status = device.device_status
-            query = f"interface_status"
             interface_status = device.interface_status
-            query = f"ip_address_status"
             ip_address_status = device.ip_address_status
-            query = f"secrets_group"
             secrets_group = device.ssh_credentials
-            query = f"platform"
             platform = device.discovered_platform
 
-            set_mgmt_only = True #TODO: fix
-            update_devices_without_primary_ip = False #TODO: fix
+            set_mgmt_only = True
+            update_devices_without_primary_ip = False
 
             processed_csv_data[device.ip_address] = {}
             processed_csv_data[device.ip_address]["location"] = location
             processed_csv_data[device.ip_address]["namespace"] = namespace
             processed_csv_data[device.ip_address]["port"] = device.ssh_port
-            processed_csv_data[device.ip_address]["timeout"] = 30 # TODO: user input
+            processed_csv_data[device.ip_address]["timeout"] = device.ssh_timeout
             processed_csv_data[device.ip_address]["set_mgmt_only"] = set_mgmt_only
             processed_csv_data[device.ip_address]["update_devices_without_primary_ip"] = (
                 update_devices_without_primary_ip
@@ -523,7 +515,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             # Prepare ids to send to the job in celery
             self.task_kwargs_csv_data[device.ip_address] = {}
             self.task_kwargs_csv_data[device.ip_address]["port"] = device.ssh_port
-            self.task_kwargs_csv_data[device.ip_address]["timeout"] = 30 # TODO: user input
+            self.task_kwargs_csv_data[device.ip_address]["timeout"] = device.ssh_timeout
             self.task_kwargs_csv_data[device.ip_address]["secrets_group"] = (
                 secrets_group.id if secrets_group else ""
             )

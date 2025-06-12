@@ -7,4 +7,5 @@ class DiscoveredDeviceFilterSet(NautobotFilterSet):
         model = DiscoveredDevice
         fields = [
             "id",
+            "ip_address"
         ]
