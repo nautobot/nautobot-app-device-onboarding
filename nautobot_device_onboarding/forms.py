@@ -1,16 +1,32 @@
-from nautobot.apps.forms import NautobotFilterForm, NautobotModelForm, DateTimePicker, NautobotBulkEditForm, DynamicModelChoiceField
+from nautobot.apps.forms import NautobotFilterForm, NautobotModelForm, NautobotBulkEditForm, DynamicModelChoiceField, StaticSelect2, DynamicModelMultipleChoiceField
+from nautobot.core.forms.constants import BOOLEAN_WITH_BLANK_CHOICES
 from nautobot_device_onboarding.models import DiscoveredDevice
 from nautobot.extras.models import SecretsGroup, Status, Role
-from nautobot.dcim.models import Location
-from nautobot.ipam.models import Namespace
+from nautobot.dcim.models import Location, Platform
+from nautobot.ipam.models import Namespace, Prefix
 from django import forms
 
 class DiscoveredDeviceFilterForm(NautobotFilterForm):
     model = DiscoveredDevice
+
+    prefix = DynamicModelChoiceField(queryset=Prefix.objects.all(), required=False, label="Prefix")
+    tcp_response = forms.NullBooleanField(
+        required=False,
+        label="Has a TCP Response?",
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+    )
+    ssh_response = forms.NullBooleanField(
+        required=False,
+        label="Has a SSH Response?",
+        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+    )
+    ssh_credentials = DynamicModelMultipleChoiceField(queryset=SecretsGroup.objects.all(), required=False, label="SSH Credentials")
+    discovered_platform = DynamicModelMultipleChoiceField(queryset=Platform.objects.all(), required=False, label="Discoverd Platform")
     
     class Meta:
         fields = [
             "ip_address",
+            "prefix",
             "tcp_response",
             "last_successful_tcp_response",
             "ssh_response",
