@@ -162,6 +162,43 @@ def get_vlan_data(item, vlan_mapping, tag_type):  # pylint: disable=too-many-ret
             ]
     return []
 
+@library.filter
+def parse_cisco_xe_show_ip_interface(item):
+
+    """Parse Cisco XE show ip interface
+
+    The first IP address is considered the primary IP address, and subsequent addresses are secondary.
+
+    Example:
+    [
+        {
+            "IP_ADDRESS": [
+                "192.168.178.240",
+                "192.168.178.120"
+            ],
+            "PREFIX_LENGTH": [
+                "24",
+                "24"
+            ],
+        }
+    ]
+
+    """
+    if isinstance(item, list) and len(item) > 0:
+        result = []
+        for interface in item:
+            for i in range(len(interface["ip_address"])):
+                if interface["ip_address"][i] and interface["prefix_length"][i]:
+                    ip = {
+                        "prefix_length": interface["prefix_length"][i],
+                        "ip_address": interface["ip_address"][i]
+                    }
+                    if i > 0:
+                        ip["role"] = "Secondary"
+                    result.append(ip)
+        return result
+    return []
+        
 
 @library.filter
 def parse_junos_ip_address(item):

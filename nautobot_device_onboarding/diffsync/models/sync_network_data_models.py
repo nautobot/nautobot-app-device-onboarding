@@ -13,7 +13,7 @@ from diffsync import exceptions as diffsync_exceptions
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
 from nautobot.dcim.choices import InterfaceTypeChoices
 from nautobot.dcim.models import Cable, Device, Interface, Location, Platform, SoftwareVersion
-from nautobot.extras.models import Status
+from nautobot.extras.models import Status, Role
 from nautobot.ipam.models import VLAN, VRF, IPAddress, IPAddressToInterface
 from nautobot_ssot.contrib import CustomFieldAnnotation, NautobotModel
 
@@ -135,7 +135,7 @@ class SyncNetworkDataIPAddress(DiffSyncModel):
 
     _modelname = "ip_address"
     _identifiers = ("host",)
-    _attributes = ("type", "ip_version", "mask_length", "status__name")
+    _attributes = ("type", "ip_version", "mask_length", "status__name", "role__name")
 
     host: str
 
@@ -143,6 +143,7 @@ class SyncNetworkDataIPAddress(DiffSyncModel):
     type: str
     ip_version: int
     status__name: str
+    role__name: Optional[str]
 
     @classmethod
     def create(cls, adapter, ids, attrs):
@@ -152,6 +153,7 @@ class SyncNetworkDataIPAddress(DiffSyncModel):
             mask_length=attrs["mask_length"],
             namespace=adapter.job.namespace,
             default_ip_status=adapter.job.ip_address_status,
+            default_ip_role=Role.objects.get(name="Secondary"),
             default_prefix_status=adapter.job.default_prefix_status,
             job=adapter.job,
         )
@@ -167,6 +169,8 @@ class SyncNetworkDataIPAddress(DiffSyncModel):
             ip_address.mask_length = attrs["mask_length"]
         if attrs.get("status__name"):
             ip_address.status = Status.objects.get(name=attrs["status__name"])
+        if attrs.get("role__name"):
+            ip_address.role = Role.objects.get(name=attrs["role__name"])
         if attrs.get("ip_version"):
             ip_address.ip_version = attrs["ip_version"]
         try:

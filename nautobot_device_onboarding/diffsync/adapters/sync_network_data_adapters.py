@@ -120,6 +120,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
                 type=ip_address.type,
                 ip_version=ip_address.ip_version,
                 status__name=ip_address.status.name,
+                role__name=ip_address.role.name if ip_address.role else "",
             )
             try:
                 network_ip_address.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
@@ -614,6 +615,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                                     type="host",
                                     ip_version=4,
                                     status__name=self.job.ip_address_status.name,
+                                    role__name=ip_address.get("role", ""),
                                 )
                                 self.add(network_ip_address)
                             except diffsync.exceptions.ObjectAlreadyExists:
