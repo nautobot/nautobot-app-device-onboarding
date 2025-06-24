@@ -153,7 +153,7 @@ class SyncNetworkDataIPAddress(DiffSyncModel):
             mask_length=attrs["mask_length"],
             namespace=adapter.job.namespace,
             default_ip_status=adapter.job.ip_address_status,
-            default_ip_role=Role.objects.get(name="Secondary"),
+            default_ip_role=Role.objects.get(name=""),
             default_prefix_status=adapter.job.default_prefix_status,
             job=adapter.job,
         )
