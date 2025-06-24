@@ -61,7 +61,7 @@ def get_or_create_prefix(host, mask_length, default_status, namespace, job=None)
     return prefix
 
 
-def get_or_create_ip_address(host, mask_length, namespace, default_ip_status, default_prefix_status, job=None):
+def get_or_create_ip_address(host, mask_length, namespace, default_ip_status, default_ip_role, default_prefix_status, job=None):
     """Attempt to get a Nautobot IPAddress, and create a new one if necessary."""
     ip_address = None
 
@@ -76,6 +76,7 @@ def get_or_create_ip_address(host, mask_length, namespace, default_ip_status, de
                 address=f"{host}/{mask_length}",
                 namespace=namespace,
                 status=default_ip_status,
+                role=default_ip_role,
             )
             ip_address.validated_save()
         except ValidationError:
@@ -88,6 +89,7 @@ def get_or_create_ip_address(host, mask_length, namespace, default_ip_status, de
             ip_address = IPAddress.objects.create(
                 address=f"{host}/{mask_length}",
                 status=default_ip_status,
+                role=default_ip_role,
                 parent=prefix,
             )
         try:
