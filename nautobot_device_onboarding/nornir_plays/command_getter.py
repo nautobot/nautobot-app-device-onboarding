@@ -261,9 +261,9 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
     """Nornir play to run show commands for sync_devices ssot job."""
     logger = NornirLogger(job_result, log_level)
 
-    if kwargs["csv_file"]:  # ip_addreses will be keys in a dict
+    if kwargs["input_data"]:  # ip_addreses will be keys in a dict
         ip_addresses = []
-        for ip_address in kwargs["csv_file"]:
+        for ip_address in kwargs["input_data"]:
             ip_addresses.append(ip_address)
     else:
         ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
@@ -285,15 +285,15 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
             loaded_secrets_group = None
             for entered_ip in ip_addresses:
-                if kwargs["csv_file"]:
+                if kwargs["input_data"]:
                     # get platform if one was provided via csv
                     platform = None
-                    platform_id = kwargs["csv_file"][entered_ip]["platform"]
+                    platform_id = kwargs["input_data"][entered_ip]["platform"]
                     if platform_id:
                         platform = Platform.objects.get(id=platform_id)
 
                     # parse secrets from secrets groups provided via csv
-                    secrets_group_id = kwargs["csv_file"][entered_ip]["secrets_group"]
+                    secrets_group_id = kwargs["input_data"][entered_ip]["secrets_group"]
                     if secrets_group_id:
                         new_secrets_group = SecretsGroup.objects.get(id=secrets_group_id)
                         # only update the credentials if the secrets_group specified on a csv row
@@ -308,7 +308,7 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                         single_host_inventory_constructed, exc_info = _set_inventory(
                             host_ip=entered_ip,
                             platform=platform,
-                            port=kwargs["csv_file"][entered_ip]["port"],
+                            port=kwargs["input_data"][entered_ip]["port"],
                             username=username,
                             password=password,
                         )

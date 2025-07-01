@@ -266,8 +266,8 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
     def __init__(self, *args, **kwargs):
         """Initialize SSoTSyncDevices."""
         super().__init__(*args, **kwargs)
-        self.processed_csv_data = {}
-        self.task_kwargs_csv_data = {}
+        self.processed_input_data = {}
+        self.task_kwargs_input_data = {}
 
         self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
 
@@ -386,8 +386,8 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         csv_reader = csv.DictReader(StringIO(decoded_csv_file))
         self.logger.info("Processing CSV data...")
         processing_failed = False
-        processed_csv_data = {}
-        self.task_kwargs_csv_data = {}
+        processed_input_data = {}
+        self.task_kwargs_input_data = {}
         row_count = 1
         for row in csv_reader:
             query = None
@@ -440,30 +440,30 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                     header="update_devices_without_primary_ip",
                 )
 
-                processed_csv_data[row["ip_address_host"]] = {}
-                processed_csv_data[row["ip_address_host"]]["location"] = location
-                processed_csv_data[row["ip_address_host"]]["namespace"] = namespace
-                processed_csv_data[row["ip_address_host"]]["port"] = int(row["port"].strip())
-                processed_csv_data[row["ip_address_host"]]["timeout"] = int(row["timeout"].strip())
-                processed_csv_data[row["ip_address_host"]]["set_mgmt_only"] = set_mgmt_only
-                processed_csv_data[row["ip_address_host"]]["update_devices_without_primary_ip"] = (
+                processed_input_data[row["ip_address_host"]] = {}
+                processed_input_data[row["ip_address_host"]]["location"] = location
+                processed_input_data[row["ip_address_host"]]["namespace"] = namespace
+                processed_input_data[row["ip_address_host"]]["port"] = int(row["port"].strip())
+                processed_input_data[row["ip_address_host"]]["timeout"] = int(row["timeout"].strip())
+                processed_input_data[row["ip_address_host"]]["set_mgmt_only"] = set_mgmt_only
+                processed_input_data[row["ip_address_host"]]["update_devices_without_primary_ip"] = (
                     update_devices_without_primary_ip
                 )
-                processed_csv_data[row["ip_address_host"]]["device_role"] = device_role
-                processed_csv_data[row["ip_address_host"]]["device_status"] = device_status
-                processed_csv_data[row["ip_address_host"]]["interface_status"] = interface_status
-                processed_csv_data[row["ip_address_host"]]["ip_address_status"] = ip_address_status
-                processed_csv_data[row["ip_address_host"]]["secrets_group"] = secrets_group
-                processed_csv_data[row["ip_address_host"]]["platform"] = platform
+                processed_input_data[row["ip_address_host"]]["device_role"] = device_role
+                processed_input_data[row["ip_address_host"]]["device_status"] = device_status
+                processed_input_data[row["ip_address_host"]]["interface_status"] = interface_status
+                processed_input_data[row["ip_address_host"]]["ip_address_status"] = ip_address_status
+                processed_input_data[row["ip_address_host"]]["secrets_group"] = secrets_group
+                processed_input_data[row["ip_address_host"]]["platform"] = platform
 
                 # Prepare ids to send to the job in celery
-                self.task_kwargs_csv_data[row["ip_address_host"]] = {}
-                self.task_kwargs_csv_data[row["ip_address_host"]]["port"] = int(row["port"].strip())
-                self.task_kwargs_csv_data[row["ip_address_host"]]["timeout"] = int(row["timeout"].strip())
-                self.task_kwargs_csv_data[row["ip_address_host"]]["secrets_group"] = (
+                self.task_kwargs_input_data[row["ip_address_host"]] = {}
+                self.task_kwargs_input_data[row["ip_address_host"]]["port"] = int(row["port"].strip())
+                self.task_kwargs_input_data[row["ip_address_host"]]["timeout"] = int(row["timeout"].strip())
+                self.task_kwargs_input_data[row["ip_address_host"]]["secrets_group"] = (
                     secrets_group.id if secrets_group else ""
                 )
-                self.task_kwargs_csv_data[row["ip_address_host"]]["platform"] = platform.id if platform else ""
+                self.task_kwargs_input_data[row["ip_address_host"]]["platform"] = platform.id if platform else ""
                 row_count += 1
             except ObjectDoesNotExist as err:
                 self.logger.error(f"(row {sum([row_count, 1])}), {err} {query}")
@@ -473,16 +473,16 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 self.logger.error(f"(row {sum([row_count, 1])}), {err}")
                 row_count += 1
         if processing_failed:
-            processed_csv_data = None
+            processed_input_data = None
         if row_count <= 1:
             self.logger.error("The CSV file is empty!")
-            processed_csv_data = None
+            processed_input_data = None
 
-        return processed_csv_data
+        return processed_input_data
 
     def _process_discovered_devices(self, discovered_devices):
-        processed_csv_data = {}
-        self.task_kwargs_csv_data = {}
+        processed_input_data = {}
+        self.task_kwargs_input_data = {}
         for device in discovered_devices:
             location = device.location
             device_role = device.device_role
@@ -493,35 +493,36 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             secrets_group = device.ssh_credentials
             platform = device.discovered_platform
 
+            # TODO: would like to get this from form
             set_mgmt_only = True
             update_devices_without_primary_ip = False
 
-            processed_csv_data[device.ip_address] = {}
-            processed_csv_data[device.ip_address]["location"] = location
-            processed_csv_data[device.ip_address]["namespace"] = namespace
-            processed_csv_data[device.ip_address]["port"] = device.ssh_port
-            processed_csv_data[device.ip_address]["timeout"] = device.ssh_timeout
-            processed_csv_data[device.ip_address]["set_mgmt_only"] = set_mgmt_only
-            processed_csv_data[device.ip_address]["update_devices_without_primary_ip"] = (
+            processed_input_data[device.ip_address] = {}
+            processed_input_data[device.ip_address]["location"] = location
+            processed_input_data[device.ip_address]["namespace"] = namespace
+            processed_input_data[device.ip_address]["port"] = device.ssh_port
+            processed_input_data[device.ip_address]["timeout"] = device.ssh_timeout
+            processed_input_data[device.ip_address]["set_mgmt_only"] = set_mgmt_only
+            processed_input_data[device.ip_address]["update_devices_without_primary_ip"] = (
                 update_devices_without_primary_ip
             )
-            processed_csv_data[device.ip_address]["device_role"] = device_role
-            processed_csv_data[device.ip_address]["device_status"] = device_status
-            processed_csv_data[device.ip_address]["interface_status"] = interface_status
-            processed_csv_data[device.ip_address]["ip_address_status"] = ip_address_status
-            processed_csv_data[device.ip_address]["secrets_group"] = secrets_group
-            processed_csv_data[device.ip_address]["platform"] = platform
+            processed_input_data[device.ip_address]["device_role"] = device_role
+            processed_input_data[device.ip_address]["device_status"] = device_status
+            processed_input_data[device.ip_address]["interface_status"] = interface_status
+            processed_input_data[device.ip_address]["ip_address_status"] = ip_address_status
+            processed_input_data[device.ip_address]["secrets_group"] = secrets_group
+            processed_input_data[device.ip_address]["platform"] = platform
 
             # Prepare ids to send to the job in celery
-            self.task_kwargs_csv_data[device.ip_address] = {}
-            self.task_kwargs_csv_data[device.ip_address]["port"] = device.ssh_port
-            self.task_kwargs_csv_data[device.ip_address]["timeout"] = device.ssh_timeout
-            self.task_kwargs_csv_data[device.ip_address]["secrets_group"] = (
+            self.task_kwargs_input_data[device.ip_address] = {}
+            self.task_kwargs_input_data[device.ip_address]["port"] = device.ssh_port
+            self.task_kwargs_input_data[device.ip_address]["timeout"] = device.ssh_timeout
+            self.task_kwargs_input_data[device.ip_address]["secrets_group"] = (
                 secrets_group.id if secrets_group else ""
             )
-            self.task_kwargs_csv_data[device.ip_address]["platform"] = platform.id if platform else ""
+            self.task_kwargs_input_data[device.ip_address]["platform"] = platform.id if platform else ""
 
-        return processed_csv_data
+        return processed_input_data
 
     def run(
         self,
@@ -557,31 +558,31 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         }
 
         if csv_file:
-            self.processed_csv_data = self._process_csv_data(csv_file=csv_file)
-            if self.processed_csv_data:
+            self.processed_input_data = self._process_csv_data(csv_file=csv_file)
+            if self.processed_input_data:
                 # create a list of ip addresses for processing in the adapter
                 self.ip_addresses = []
-                for ip_address in self.processed_csv_data:
+                for ip_address in self.processed_input_data:
                     self.ip_addresses.append(ip_address)
                 # prepare the task_kwargs needed by the CommandGetterDO job
                 self.job_result.task_kwargs.update(
                     {
-                        "csv_file": self.task_kwargs_csv_data,
+                        "input_data": self.task_kwargs_input_data,
                     }
                 )
             else:
                 raise ValidationError(message="CSV check failed. No devices will be synced.")
         elif discovered_devices:
-            self.processed_csv_data = self._process_discovered_devices(discovered_devices=discovered_devices)
-            if self.processed_csv_data:
+            self.processed_input_data = self._process_discovered_devices(discovered_devices=discovered_devices)
+            if self.processed_input_data:
                 # create a list of ip addresses for processing in the adapter
                 self.ip_addresses = []
-                for ip_address in self.processed_csv_data:
+                for ip_address in self.processed_input_data:
                     self.ip_addresses.append(ip_address)
                 # prepare the task_kwargs needed by the CommandGetterDO job
                 self.job_result.task_kwargs.update(
                     {
-                        "csv_file": self.task_kwargs_csv_data,
+                        "input_data": self.task_kwargs_input_data,
                     }
                 )
             else:
@@ -1114,16 +1115,13 @@ class DeviceOnboardingDiscoveryJob(Job):
         return results
 
     def _update_discovered_devices(self, results):
-        discovered_status = Status.objects.get(name="Discovered")
         now = datetime.now()
         for host in self.targets:
             # get ipaddress object for host
             # if ipaddress has discovered device then see if it responded or not
             # else only create discovered device if tcp_ping response
-            if host not in results:
-                continue
-            discovered_device, _ = DiscoveredDevice.objects.get_or_create(ip_address=host)
             if host in results:
+                discovered_device, _ = DiscoveredDevice.objects.get_or_create(ip_address=host)
                 discovered_device.tcp_response = True
                 discovered_device.last_successful_tcp_response = now
                 if results[host]["credentials"] != None:
@@ -1140,8 +1138,12 @@ class DeviceOnboardingDiscoveryJob(Job):
                         discovered_device.discovered_platform = Platform.objects.filter(network_driver=results[host]["platform"]).first()
                         self.logger.info(f'Network Driver {results[host]["platform"]} exists on multiple platforms, choosing {discovered_device.discovered_platform.name} as default.', extra={"object": discovered_device})
             else:
-                discovered_device.tcp_response = False
-                discovered_device.ssh_response = False
+                try:
+                    discovered_device = DiscoveredDevice.objects.get(ip_address=host)
+                    discovered_device.tcp_response = False
+                    discovered_device.ssh_response = False
+                except DiscoveredDevice.DoesNotExist:
+                    continue
             discovered_device.validated_save()
         return
 
@@ -1201,33 +1203,6 @@ class DeviceOnboardingDiscoveryJob(Job):
         discovered_result = self._update_discovered_devices(ssh_result)
 
         return discovered_result
-
-    # def on_success(self, retval, task_id, args, kwargs):
-    #     """Start Onboarding job for discovered targets."""
-
-    #     for val in retval:
-    #         data = {
-    #             "location": self.location.id,
-    #             "namespace": self.namespace.id,
-    #             "ip_addresses": retval[val]["ip"],
-    #             "port": retval[val]["port"].id,
-    #             "timeout": 10,
-    #             "device_role": self.device_role.id,
-    #             "device_status": self.device_status.id,
-    #             "ip_address_status": self.ip_address_status.id,
-    #             "secrets_group": retval[val]["credentials"].id,
-    #             "dryrun": self.dryrun,
-    #             "memory_profiling": self.memory_profiling,
-    #             "debug": self.debug,
-    #             "csv_file": None,
-    #             "set_mgmt_only": self.set_mgmt_only,
-    #             "update_devices_without_primary_ip": self.update_devices_without_primary_ip,
-    #             "interface_status": self.interface_status.id,
-    #             "platform": None,
-    #             "connectivity_test": False,
-    #         }
-    #         job = Job.objects.get(name="Sync Devices From Network")
-    #         JobResult.enqueue_job(job, self.user,  **data)
 
 
 jobs = [
