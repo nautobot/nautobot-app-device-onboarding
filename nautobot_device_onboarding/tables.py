@@ -15,6 +15,7 @@ class DiscoveredDeviceTable(BaseTable):
         fields = (
             "pk",
             "ip_address",
+            "hostname",
             "tcp_response",
             "last_successful_tcp_response",
             "ssh_response",
@@ -22,23 +23,12 @@ class DiscoveredDeviceTable(BaseTable):
             "ssh_port",
             "ssh_credentials",
             "discovered_platform",
-            "location",
-            "namespace",
-            "device_role",
-            "device_status",
-            "interface_status",
-            "ip_address_status"
         )
         default_columns = (
             "pk",
             "ip_address",
+            "hostname",
             "tcp_response",
             "ssh_response",
             "discovered_platform",
-            "location",
-            "namespace",
-            "device_role",
-            "device_status",
-            "interface_status",
-            "ip_address_status"
         )

@@ -18,6 +18,7 @@ class DiscoveredDeviceFilterSet(NautobotFilterSet):
         fields = [
             "id",
             "ip_address",
+            "hostname",
             "prefix",
             "tcp_response",
             "last_successful_tcp_response",
@@ -26,10 +27,4 @@ class DiscoveredDeviceFilterSet(NautobotFilterSet):
             "ssh_port",
             "ssh_credentials",
             "discovered_platform",
-            "location",
-            "namespace",
-            "device_role",
-            "device_status",
-            "interface_status",
-            "ip_address_status"
         ]
