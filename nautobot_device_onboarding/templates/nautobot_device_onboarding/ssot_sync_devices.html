@@ -5,40 +5,42 @@
 
 {% render_form job_form excluded_fields="['location', 'namespace', 'ip_addresses', 'device_role', 'device_status', 'interface_status', 'ip_address_status', 'port', 'timeout', 'secrets_group', 'platform', 'set_mgmt_only', 'update_devices_without_primary_ip', 'csv_file', 'discovered_devices']" %}
 
-    {% with csv_tab_active=form.initial.csv_input %}
+    {% with csv_tab_active=job_form.initial.csv_input discovered_tab_active=job_form.initial.discovered_devices %}
     <ul class="nav nav-tabs" role="tablist">
-        <li role="presentation"{% if not csv_tab_active %} class="active"{% endif %}>
+        <li role="presentation"{% if not csv_tab_active and not discovered_tab_active %} class="active"{% endif %}>
             <a href="#job_manual_input" role="tab" data-toggle="tab">Manual Input</a>
         </li>
         <li role="presentation"{% if csv_tab_active %} class="active"{% endif %}>
             <a href="#job_csv_input" role="tab" data-toggle="tab">CSV Input</a>
         </li>
-        <li role="presentation"{% if csv_tab_active %} class="active"{% endif %}>
+        <li role="presentation"{% if discovered_tab_active %} class="active"{% endif %}>
             <a href="#job_discovered_devices" role="tab" data-toggle="tab">Discovered Devices</a>
         </li>
     </ul>
     <div class="tab-content">
-        <div id="job_manual_input" class="tab-pane{% if not csv_tab_active %} active{% endif %}">
-            {% render_field job_form.location %}
-            {% render_field job_form.namespace %}
+        <div id="job_manual_input" class="tab-pane{% if not csv_tab_active and not discovered_tab_active %} active{% endif %}">
             {% render_field job_form.ip_addresses %}
             {% render_field job_form.port %}
             {% render_field job_form.timeout %}
-            {% render_field job_form.set_mgmt_only %}
-            {% render_field job_form.update_devices_without_primary_ip %}
-            {% render_field job_form.device_role %}
-            {% render_field job_form.device_status %}
-            {% render_field job_form.interface_status %}
-            {% render_field job_form.ip_address_status %}
-            {% render_field job_form.secrets_group %}
             {% render_field job_form.platform %}
+            {% render_field job_form.secrets_group %}
         </div>
         <div id="job_csv_input" class="tab-pane{% if csv_tab_active %} active{% endif %}">
             {% render_field job_form.csv_file %}
         </div>
-        <div id="job_discovered_devices" class="tab-pane{% if csv_tab_active %} active{% endif %}">
+        <div id="job_discovered_devices" class="tab-pane{% if discovered_tab_active %} active{% endif %}">
             {% render_field job_form.discovered_devices %}
         </div>
+    </div>
+    <div id="job_required_data">
+      {% render_field job_form.location %}
+      {% render_field job_form.namespace %}
+      {% render_field job_form.set_mgmt_only %}
+      {% render_field job_form.update_devices_without_primary_ip %}
+      {% render_field job_form.device_role %}
+      {% render_field job_form.device_status %}
+      {% render_field job_form.interface_status %}
+      {% render_field job_form.ip_address_status %}
     </div>
     {% endwith %}
 
@@ -55,6 +57,11 @@
       "id_port", "id_timeout", "id_secrets_group"
     ];
 
+    const discoveryRequiredFields = [
+      "id_location", "id_namespace", "id_discovered_devices", "id_device_role", 
+      "id_device_status", "id_interface_status", "id_ip_address_status"
+    ];
+
     function setFieldRequired(fieldId, isRequired) {
       const element = document.getElementById(fieldId);
       element.required = isRequired;
@@ -66,25 +73,48 @@
       }
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
-      manualRequiredFields.forEach(field => setFieldRequired(field, true));
-
-      $('.nav-tabs a').on('shown.bs.tab', function(e) {
-        const activeTab = $(e.target).attr('href');
+    function handleRequiredFields(activeTab) {{
+        // const activeTab = $(e.target).attr('href');
         const isManualInputTab = activeTab === '#job_manual_input';
         const isCSVFileTab = activeTab === '#job_csv_input';
         const isDiscoveredTab = activeTab === '#job_discovered_devices';
+
+        if (isManualInputTab) {
+          discoveryRequiredFields.forEach(field => setFieldRequired(field, isDiscoveredTab));
+          manualRequiredFields.forEach(field => setFieldRequired(field, isManualInputTab));
+        }
+        else {
+          manualRequiredFields.forEach(field => setFieldRequired(field, isManualInputTab));
+          discoveryRequiredFields.forEach(field => setFieldRequired(field, isDiscoveredTab));
+        }
+
+        if (isCSVFileTab) {
+          document.getElementById("job_required_data").style.visibility = 'hidden';
+        } else {
+          document.getElementById("job_required_data").style.visibility = 'visible';
+        }
 
         csvInput.value = '';
         csvInput.required = isCSVFileTab;
         document.querySelector('label[for="id_csv_file"]').classList.toggle('required', isCSVFileTab);
 
-        discoveredInput.value = '';
+        // discoveredInput.value = '';
         discoveredInput.required = isDiscoveredTab;
         document.querySelector('label[for="id_discovered_devices"]').classList.toggle('required', isDiscoveredTab);
+      }
+    };
 
-        manualRequiredFields.forEach(field => setFieldRequired(field, isManualInputTab));
-      });
+    document.addEventListener("DOMContentLoaded", function() {
+
+      $('.nav-tabs a').on('shown.bs.tab', function(e) {const activeTab = $(e.target).attr('href'); handleRequiredFields(activeTab)} );
+      // find active tab on load and set required fields accordingly
+      // skip i=0 as that is the "run" tab
+      let tabs = $('.nav-tabs a')
+      for (let i=1; i<tabs.length; i++) {
+        if (tabs[i].parentElement.className == "active"){
+          handleRequiredFields(tabs[i].getAttribute('href'));
+        }
+      }
     });
   </script>
 {% endblock javascript %}

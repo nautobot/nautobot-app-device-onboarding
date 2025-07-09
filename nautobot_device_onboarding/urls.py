@@ -18,6 +18,7 @@ router.register("discovereddevice", views.DiscoveredDeviceViewSet)
 
 urlpatterns = [
     path("docs/", RedirectView.as_view(url=static("nautobot_device_onboarding/docs/index.html")), name="docs"),
+    path("discovered_device_sync/run/", views.DiscoveryJobRunView.as_view(), name="discover_run"),
 ]
 
 urlpatterns += router.urls

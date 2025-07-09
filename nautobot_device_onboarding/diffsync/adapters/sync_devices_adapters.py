@@ -204,7 +204,7 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
 
     def execute_command_getter(self):
         """Start the CommandGetterDO job to query devices for data."""
-        if not self.job.processed_csv_data:
+        if not self.job.processed_input_data:
             if self.job.platform:
                 if not self.job.platform.network_driver:
                     self.job.logger.error(

@@ -480,22 +480,20 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
 
         return processed_input_data
 
-    def _process_discovered_devices(self, discovered_devices):
+    def _process_discovered_devices(self, discovered_devices, inputs):
         processed_input_data = {}
         self.task_kwargs_input_data = {}
+        location = inputs["location"]
+        device_role = inputs["device_role"]
+        namespace = inputs["namespace"]
+        device_status = inputs["device_status"]
+        interface_status = inputs["interface_status"]
+        ip_address_status = inputs["ip_address_status"]
+        set_mgmt_only = True
+        update_devices_without_primary_ip = False
         for device in discovered_devices:
-            location = device.location
-            device_role = device.device_role
-            namespace = device.namespace
-            device_status = device.device_status
-            interface_status = device.interface_status
-            ip_address_status = device.ip_address_status
             secrets_group = device.ssh_credentials
             platform = device.discovered_platform
-
-            # TODO: would like to get this from form
-            set_mgmt_only = True
-            update_devices_without_primary_ip = False
 
             processed_input_data[device.ip_address] = {}
             processed_input_data[device.ip_address]["location"] = location
@@ -573,7 +571,26 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             else:
                 raise ValidationError(message="CSV check failed. No devices will be synced.")
         elif discovered_devices:
-            self.processed_input_data = self._process_discovered_devices(discovered_devices=discovered_devices)
+            # Verify that all required form inputs have been provided, this is here in case the form is not used
+            required_inputs = {
+                "location": location,
+                "namespace": namespace,
+                "device_role": device_role,
+                "device_status": device_status,
+                "interface_status": interface_status,
+                "ip_address_status": ip_address_status,
+            }
+            missing_required_inputs = [
+                form_field for form_field, input_value in required_inputs.items() if not input_value
+            ]
+            if not missing_required_inputs:
+                pass
+            else:
+                self.logger.error(f"Missing requried inputs from job form: {missing_required_inputs}")
+                raise ValidationError(message=f"Missing required inputs {missing_required_inputs}")
+            required_inputs.update({"set_mgmt_only": set_mgmt_only, "update_devices_without_primary_ip": update_devices_without_primary_ip})
+            
+            self.processed_input_data = self._process_discovered_devices(discovered_devices=discovered_devices, inputs=required_inputs)
             if self.processed_input_data:
                 # create a list of ip addresses for processing in the adapter
                 self.ip_addresses = []

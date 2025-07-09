@@ -24,7 +24,7 @@ class TestDiffSyncUtils(TestCase):
         # Setup Nautobot Objectsself.
         self.testing_objects = utils.sync_network_data_ensure_required_nautobot_objects()
         self.command_getter_result = sync_network_data_fixture.sync_network_mock_data_valid
-        self.processed_csv_data = {
+        self.processed_input_data = {
             "10.1.1.10": {
                 "location": self.testing_objects["location"],
                 "namespace": self.testing_objects["namespace"],
@@ -56,7 +56,7 @@ class TestDiffSyncUtils(TestCase):
         }
         self.mock_job = MagicMock()
         self.mock_job.location = self.testing_objects["location"]
-        self.mock_job.processed_csv_data = self.processed_csv_data
+        self.mock_job.processed_input_data = self.processed_input_data
         self.mock_job.location.name = "Site B"
         self.mock_job.logger.error.return_value = None
         self.mock_job.logger.warning.return_value = None
@@ -135,6 +135,6 @@ class TestDiffSyncUtils(TestCase):
         location = retrieve_submitted_value(job=self.mock_job, ip_address="10.1.1.10", query_string="location")
         self.assertEqual(self.testing_objects["location"].name, location.name)
 
-        self.mock_job.processed_csv_data = None
+        self.mock_job.processed_input_data = None
         location = retrieve_submitted_value(job=self.mock_job, ip_address="10.1.1.10", query_string="location")
         self.assertEqual(self.mock_job.location.name, location.name)
