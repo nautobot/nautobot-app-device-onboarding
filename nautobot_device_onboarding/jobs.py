@@ -48,6 +48,7 @@ from netutils.ping import tcp_ping
 from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
 from nornir.core.plugins.inventory import InventoryPluginRegister
+from nornir.core.inventory import Host
 
 from nautobot_device_onboarding.choices import SSOT_JOB_TO_COMMAND_CHOICE, AutodiscoveryProtocolTypeChoices
 from nautobot_device_onboarding.constants import AUTODISCOVERY_PORTS
@@ -65,6 +66,8 @@ from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
 from nautobot_device_onboarding.nornir_plays.command_getter import (
     _parse_credentials,
     netmiko_send_commands,
+    sync_devices_command_getter,
+    scan_target_ssh
 )
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
@@ -948,7 +951,12 @@ class DeviceOnboardingDiscoveryJob(Job):
         required=True,
         description="Discovery protocols.",
     )
-    secrets_groups = MultiObjectVar(
+    # secrets_groups = MultiObjectVar(
+    #     model=SecretsGroup,
+    #     required=True,
+    #     description="SecretsGroup for device connection credentials.",
+    # )
+    secrets_group = ObjectVar(
         model=SecretsGroup,
         required=True,
         description="SecretsGroup for device connection credentials.",
@@ -980,180 +988,54 @@ class DeviceOnboardingDiscoveryJob(Job):
         has_sensitive_variables = False
         hidden = False
 
-    def _scan_target_ip(self, target_ip, protocols):
-        """Scan target IP Address for open protocol-ports."""
-        open_ports = []
-        for protocol in protocols:
-            open_ports.extend(getattr(self, f"_scan_target_{protocol}")(target_ip=target_ip))
-
-        return open_ports
-
-    def _scan_target_ssh(self, target_ip):
-        """Scan target IP address for TCP-SSH ports."""
-        ssh_targets = []
-
-        for target_ssh_port in AUTODISCOVERY_PORTS[AutodiscoveryProtocolTypeChoices.SSH]:
-            self.logger.info(target_ssh_port)
-            if tcp_ping(target_ip, target_ssh_port):  # Report only opened ports.
-                self.logger.info(target_ssh_port)
-
-                open_ssh_port = {
-                    "port": target_ssh_port,
-                    "is_open": True,
-                    "protocol": AutodiscoveryProtocolTypeChoices.SSH,
-                }
-
-                ssh_targets.append(open_ssh_port)
-
-        return ssh_targets
-
-    def _scan(self):
-        """Scan the selected IP Addresses for open protocol-ports - dispatcher method."""
-        scan_result = {}
-
-        with concurrent.futures.ThreadPoolExecutor(max_workers=self.scanning_threads_count) as executor:
-            future_to_ip = {}
-
+    def _tcp_ping_ssh_nornir(self):
+        with InitNornir(inventory={"plugin": "empty-inventory"}) as nornir_obj:
             for target_ip in self.targets:
-                if self.debug:
-                    self.logger.debug(f"Starting scan for IP: {target_ip}")
-
-                future = executor.submit(self._scan_target_ip, target_ip, self.protocols)
-                future_to_ip[future] = target_ip
-
-            for future in concurrent.futures.as_completed(future_to_ip):
-                target_ip = future_to_ip[future]
-                try:
-                    scan_result[target_ip] = future.result()
-                except Exception as e:
-                    self.logger.error(f"Error with future for IP {target_ip}: {e}")
-
-        if self.debug:
-            self.logger.info(f"Results: {scan_result}")
-
-        return scan_result
-
-    def _parse_credentials(self, credentials):
-        """Parse and return dictionary of credentials."""
-        if self.debug:
-            self.logger.debug("Attempting to parse credentials from selected SecretGroup")
-
-        try:
-            username = credentials.get_secret_value(
-                access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
-                secret_type=SecretsGroupSecretTypeChoices.TYPE_USERNAME,
+                host = Host(name=target_ip, hostname=target_ip, port=22)
+                nornir_obj.inventory.hosts.update({target_ip: host})
+            results = nornir_obj.run(
+                task=scan_target_ssh
             )
-            password = credentials.get_secret_value(
-                access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
-                secret_type=SecretsGroupSecretTypeChoices.TYPE_PASSWORD,
-            )
-            return username, password
-        except SecretsGroupAssociation.DoesNotExist as err:
-            self.logger.exception(
-                "Unable to use SecretsGroup selected, ensure Access Type is set to Generic & at minimum Username & Password types are set."
-            )
-            raise OnboardException("fail-credentials - Unable to parse selected credentials.") from err
-
-    def _get_target_details_ssh(self, hostname, port):
-        """Guess the device platform of host, based on SSH."""
-        netmiko_optional_args = {"port": port}  # , **NETMIKO_EXTRAS}
-        guessed_platform = None
-        valid_credentials = None
-
-        for secret_group in self.secrets_groups:
-            username, password = _parse_credentials(credentials=secret_group)
-            exception = None
-
-            remote_device = {
-                "device_type": "autodetect",
-                "host": hostname,
-                "username": username,
-                "password": password,
-                **netmiko_optional_args,
-            }
-
-            try:
-                guesser = SSHDetect(**remote_device)
-                guessed_platform = guesser.autodetect()
-                valid_credentials = secret_group
-
-                break
-
-            except Exception as err:  # pylint: disable=broad-exception-caught
-                guessed_platform = None
-                valid_credentials = None
-                exception = err
-
-        return guessed_platform, exception, valid_credentials
-
-    def _get_target_details(self, target_ip, target_port_details):
-        """Get open protocol-port details on target IP."""
-        target_details = {**target_port_details}
-        target_details["ip"] = target_ip
-
-        # Dispatch SSH
-        if target_port_details["protocol"] == AutodiscoveryProtocolTypeChoices.SSH:
-            guessed_platform, exception, credentials = self._get_target_details_ssh(
-                hostname=target_ip,
-                port=target_details["port"]
-            )
-            target_details["platform"] = guessed_platform
-            target_details["exception"] = exception
-            target_details["credentials"] = credentials
-
-        return target_details
-
-    def _get_targets_details(self, scan_result):
-        """Get target IPs details and find valid credentials for an open protocol-port - dispatcher method."""
-        results = {}
-
-        with concurrent.futures.ThreadPoolExecutor(max_workers=self.login_threads_count) as executor:
-            future_to_ip = {}
-
-            for target_ip in scan_result:
-                for target_port_details in scan_result[target_ip]:
-                    target_port = target_port_details["port"]
-                    if self.debug:
-                        self.logger.debug(f"Starting get_details for IP: {target_ip}:{target_port}")
-
-                    future = executor.submit(self._get_target_details, target_ip, target_port_details)
-                    future_to_ip[future] = f"{target_ip}:{target_port}"
-
-            for future in concurrent.futures.as_completed(future_to_ip):
-                host = future_to_ip[future]
-                try:
-                    results[host.split(":")[0]] = future.result()
-                except Exception as e:
-                    self.logger.error(f"Error with future for IP {host}: {e}")
-
-        if self.debug:
-            self.logger.info(f"Results: {results}")
-
         return results
 
-    def _update_discovered_devices(self, results):
+
+    def _nornir_target_details(self, responded_tcp):
+        nornir_data = {
+            "input_data": None,
+            "ip_addresses": ",".join(responded_tcp),
+            "port": 22,
+            "platform": None,
+            "secrets_group": self.secrets_group
+        }
+        return sync_devices_command_getter(self.job_result, "DEBUG", nornir_data)
+
+    def _update_discovered_devices(self, responded_tcp, nornir_results):
         now = datetime.now()
         for host in self.targets:
             # get ipaddress object for host
             # if ipaddress has discovered device then see if it responded or not
             # else only create discovered device if tcp_ping response
-            if host in results:
+            mgmt = {device.primary_ip4.host: device for device in Device.objects.filter(primary_ip4__isnull=False)}
+            if host in responded_tcp:
                 discovered_device, _ = DiscoveredDevice.objects.get_or_create(ip_address=host)
                 discovered_device.tcp_response = True
                 discovered_device.last_successful_tcp_response = now
-                if results[host]["credentials"] != None:
+                if host in nornir_results:
+                    results = nornir_results[host]
                     discovered_device.ssh_response = True
                     discovered_device.last_successful_ssh_response = now
-                    discovered_device.ssh_port = results[host]["port"]
-                    discovered_device.ssh_credentials = results[host]["credentials"]
+                    discovered_device.ssh_port = 22
+                    discovered_device.ssh_credentials = self.secrets_group
+                    if "hostname" in results:
+                        discovered_device.hostname = results["hostname"]
                     try:
-                        discovered_device.discovered_platform = Platform.objects.get(network_driver=results[host]["platform"]) # TODO: i don't think this is right for all cases
+                        discovered_device.discovered_platform = Platform.objects.get(network_driver=results["platform"]) # TODO: i don't think this is right for all cases
                     except Platform.DoesNotExist:
                         discovered_device.discovered_platform = None
-                        self.logger.info(f'Network Driver {results[host]["platform"]} does not exist within Nautobot.', extra={"object": discovered_device})
+                        self.logger.info(f'Network Driver {results["platform"]} does not exist within Nautobot.', extra={"object": discovered_device})
                     except Platform.MultipleObjectsReturned:
-                        discovered_device.discovered_platform = Platform.objects.filter(network_driver=results[host]["platform"]).first()
-                        self.logger.info(f'Network Driver {results[host]["platform"]} exists on multiple platforms, choosing {discovered_device.discovered_platform.name} as default.', extra={"object": discovered_device})
+                        discovered_device.discovered_platform = Platform.objects.filter(network_driver=results["platform"]).first()
+                        self.logger.info(f'Network Driver {results["platform"]} exists on multiple platforms, choosing {discovered_device.discovered_platform.name} as default.', extra={"object": discovered_device})
             else:
                 try:
                     discovered_device = DiscoveredDevice.objects.get(ip_address=host)
@@ -1161,6 +1043,8 @@ class DeviceOnboardingDiscoveryJob(Job):
                     discovered_device.ssh_response = False
                 except DiscoveredDevice.DoesNotExist:
                     continue
+            if host in mgmt:
+                discovered_device.device = mgmt[host]
             discovered_device.validated_save()
         return
 
@@ -1171,7 +1055,7 @@ class DeviceOnboardingDiscoveryJob(Job):
             scanning_threads_count, 
             login_threads_count, 
             prefixes,
-            secrets_groups, 
+            secrets_group, 
             protocols,
             *args,
             **kwargs
@@ -1183,7 +1067,7 @@ class DeviceOnboardingDiscoveryJob(Job):
 
         self.prefixes = prefixes
         self.protocols = protocols
-        self.secrets_groups = secrets_groups
+        self.secrets_group = secrets_group
         self.scanning_threads_count = scanning_threads_count
         self.login_threads_count = login_threads_count
 
@@ -1212,12 +1096,14 @@ class DeviceOnboardingDiscoveryJob(Job):
 
                 self.targets.add(str(ip))
 
-        scan_result = self._scan()
+        scan_result = self._tcp_ping_ssh_nornir()
         self.logger.info(scan_result)
-        ssh_result = self._get_targets_details(scan_result)
+        self.logger.info(scan_result["172.25.0.10"][0].result)
+        responded_tcp = [key for key, value in scan_result.items() if len(value[0].result) > 0]
+        ssh_result = self._nornir_target_details(responded_tcp)
         self.logger.info(ssh_result)
 
-        discovered_result = self._update_discovered_devices(ssh_result)
+        discovered_result = self._update_discovered_devices(responded_tcp, ssh_result)
 
         return discovered_result
 

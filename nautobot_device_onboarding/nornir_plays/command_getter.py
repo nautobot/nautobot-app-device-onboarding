@@ -30,6 +30,8 @@ from nautobot_device_onboarding.nornir_plays.transform import (
     get_git_repo_parser_path,
     load_files_with_precedence,
 )
+from nautobot_device_onboarding.choices import AutodiscoveryProtocolTypeChoices
+from nautobot_device_onboarding.constants import AUTODISCOVERY_PORTS
 from nautobot_device_onboarding.utils.helper import check_for_required_file
 
 PARSER_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "parsers"))
@@ -373,3 +375,20 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info(f"Error During Sync Network Data Command Getter: {err}")
     return compiled_results
+
+def scan_target_ssh(task):
+    """Scan target IP address for TCP-SSH ports."""
+    ssh_targets = []
+
+    for target_ssh_port in AUTODISCOVERY_PORTS[AutodiscoveryProtocolTypeChoices.SSH]:
+        if tcp_ping(task.host.name, target_ssh_port):  # Report only opened ports.
+
+            open_ssh_port = {
+                "port": target_ssh_port,
+                "is_open": True,
+                "protocol": AutodiscoveryProtocolTypeChoices.SSH,
+            }
+
+            ssh_targets.append(open_ssh_port)
+
+    return ssh_targets
