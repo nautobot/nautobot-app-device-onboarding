@@ -3,6 +3,6 @@
 
 {% block bulk_buttons %}
 <button type="submit" name="_sync" formaction="{% url 'plugins:nautobot_device_onboarding:discovereddevice_syncdevices' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}#job_discovered_devices" class="btn btn-success btn-sm">
-    <span class="mdi mdi-sync" aria-hidden="true"></span> Sync Selected Devices
+    <span class="mdi mdi-sync" aria-hidden="true"></span> Onboard Selected Devices
 </button>
 {% endblock %}

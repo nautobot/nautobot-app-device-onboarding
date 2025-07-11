@@ -7,8 +7,9 @@ class DiscoveredDeviceTable(BaseTable):
     pk = ToggleColumn()
     ip_address = tables.Column(
         linkify=lambda record: record.get_absolute_url(), 
-        verbose_name="Discovered IP Address",
+        verbose_name="IP Address",
     )
+    discovered_platform = tables.Column(verbose_name="Platform")
 
     class Meta(BaseTable.Meta):
         model = DiscoveredDevice

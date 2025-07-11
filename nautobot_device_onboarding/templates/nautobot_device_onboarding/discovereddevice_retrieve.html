@@ -45,34 +45,6 @@
                         <td>SSH Credentials</td>
                         <td>{{ object.ssh_credentials|placeholder }}</td>
                     </tr>
-                    <tr>
-                        <td>Device Location</td>
-                        <td>{{ object.location|placeholder }}</td>
-                    </tr>
-                    <tr>
-                        <td>IP Address Namespace</td>
-                        <td>{{ object.namespace|placeholder }}</td>
-                    </tr>
-                    <tr>
-                        <td>Device Role</td>
-                        <td>{{ object.device_role|placeholder }}</td>
-                    </tr>
-                    <tr>
-                        <td>Device Status</td>
-                        <td>
-                            <span class="label" style="color: {{ object.device_status.color|fgcolor }}; 
-                                background-color: #{{ object.device_status.color }}">{{ object.device_status.name|placeholder }}
-                            </span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Interface Status</td>
-                        <td>
-                            <span class="label" style="color: {{ object.interface_status.color|fgcolor }}; 
-                                background-color: #{{ object.interface_status.color }}">{{ object.interface_status.name|placeholder }}
-                            </span>
-                        </td>
-                    </tr>
                 </table>
             </div>
 {% endblock content_right_page %}
