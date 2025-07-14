@@ -12,6 +12,7 @@ from nautobot.extras.choices import JobQueueTypeChoices
 from nautobot.extras.views import JobRunView
 from django.contrib import messages
 
+
 class DiscoveredDeviceViewSet(NautobotUIViewSet):
     queryset = models.DiscoveredDevice.objects.all()
     table_class = tables.DiscoveredDeviceTable
@@ -34,9 +35,9 @@ class DiscoveredDeviceViewSet(NautobotUIViewSet):
             return DiscoveryJobRunView().get(request, class_path=jobs.SSOTSyncDevices.class_path, discovered_pks=pks)
         else:
             return DiscoveryJobRunView().post(request, class_path=jobs.SSOTSyncDevices.class_path, *args, **kwargs)
-    
-class DiscoveryJobRunView(JobRunView):
 
+
+class DiscoveryJobRunView(JobRunView):
     def get(self, request, class_path=None, pk=None, discovered_pks=None):
         job_model = self._get_job_model_or_404(class_path, pk)
         print(request)
@@ -76,7 +77,7 @@ class DiscoveryJobRunView(JobRunView):
                     )
             if discovered_pks:
                 initial.update({"discovered_devices": discovered_pks})
-                print('yurp')
+                print("yurp")
 
             template_name = "extras/job.html"
             job_form = job_class.as_form(initial=initial)

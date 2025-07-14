@@ -4,15 +4,15 @@ from nautobot.ipam.models import Prefix
 from django_filters import ModelChoiceFilter
 import ipaddress
 
-class DiscoveredDeviceFilterSet(NautobotFilterSet):
 
+class DiscoveredDeviceFilterSet(NautobotFilterSet):
     prefix = ModelChoiceFilter(queryset=Prefix.objects.all(), method="get_ips_by_prefix")
 
     # TODO: this runs really inefficiently for large prefixes
     def get_ips_by_prefix(self, queryset, name, value):
         network = ipaddress.ip_network(value.prefix)
         return queryset.filter(ip_address__in=[str(ip) for ip in network.hosts()])
-    
+
     class Meta:
         model = DiscoveredDevice
         fields = [

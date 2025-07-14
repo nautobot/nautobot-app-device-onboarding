@@ -376,13 +376,13 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
         logger.info(f"Error During Sync Network Data Command Getter: {err}")
     return compiled_results
 
+
 def scan_target_ssh(task):
     """Scan target IP address for TCP-SSH ports."""
     ssh_targets = []
 
     for target_ssh_port in AUTODISCOVERY_PORTS[AutodiscoveryProtocolTypeChoices.SSH]:
         if tcp_ping(task.host.name, target_ssh_port):  # Report only opened ports.
-
             open_ssh_port = {
                 "port": target_ssh_port,
                 "is_open": True,

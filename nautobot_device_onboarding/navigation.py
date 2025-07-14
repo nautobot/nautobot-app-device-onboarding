@@ -14,8 +14,8 @@ menu_items = (
                         name="Discovered Devices",
                         permissions=["nautobot_device_onboarding.view_discovereddevice"],
                     ),
-                )
+                ),
             ),
-        )
+        ),
     ),
 )

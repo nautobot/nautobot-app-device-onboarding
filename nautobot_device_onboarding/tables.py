@@ -2,11 +2,11 @@ import django_tables2 as tables
 from nautobot.apps.tables import BaseTable, ToggleColumn
 from nautobot_device_onboarding.models import DiscoveredDevice
 
-class DiscoveredDeviceTable(BaseTable):
 
+class DiscoveredDeviceTable(BaseTable):
     pk = ToggleColumn()
     ip_address = tables.Column(
-        linkify=lambda record: record.get_absolute_url(), 
+        linkify=lambda record: record.get_absolute_url(),
         verbose_name="IP Address",
     )
     discovered_platform = tables.Column(verbose_name="Platform")

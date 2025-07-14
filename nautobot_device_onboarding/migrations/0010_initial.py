@@ -9,38 +9,67 @@ import uuid
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('dcim', '0062_module_data_migration'),
-        ('extras', '0113_saved_views'),
-        ('nautobot_device_onboarding', '0009_remove_models'),
+        ("dcim", "0062_module_data_migration"),
+        ("extras", "0113_saved_views"),
+        ("nautobot_device_onboarding", "0009_remove_models"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='DiscoveredDevice',
+            name="DiscoveredDevice",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False, unique=True)),
-                ('created', models.DateTimeField(auto_now_add=True, null=True)),
-                ('last_updated', models.DateTimeField(auto_now=True, null=True)),
-                ('_custom_field_data', models.JSONField(blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder)),
-                ('ip_address', models.GenericIPAddressField(unique=True)),
-                ('tcp_response', models.BooleanField(default=False)),
-                ('last_successful_tcp_response', models.DateTimeField(blank=True, null=True)),
-                ('ssh_response', models.BooleanField(default=False)),
-                ('last_successful_ssh_response', models.DateTimeField(blank=True, null=True)),
-                ('ssh_port', models.PositiveIntegerField(blank=True, null=True)),
-                ('ssh_timeout', models.PositiveIntegerField(blank=True, default=30, null=True)),
-                ('hostname', models.CharField(blank=True, max_length=255, null=True)),
-                ('discovered_platform', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='dcim.platform')),
-                ('ssh_credentials', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='+', to='extras.secretsgroup')),
-                ('tags', nautobot.core.models.fields.TagsField(through='extras.TaggedItem', to='extras.Tag')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4, editable=False, primary_key=True, serialize=False, unique=True
+                    ),
+                ),
+                ("created", models.DateTimeField(auto_now_add=True, null=True)),
+                ("last_updated", models.DateTimeField(auto_now=True, null=True)),
+                (
+                    "_custom_field_data",
+                    models.JSONField(blank=True, default=dict, encoder=django.core.serializers.json.DjangoJSONEncoder),
+                ),
+                ("ip_address", models.GenericIPAddressField(unique=True)),
+                ("tcp_response", models.BooleanField(default=False)),
+                ("last_successful_tcp_response", models.DateTimeField(blank=True, null=True)),
+                ("ssh_response", models.BooleanField(default=False)),
+                ("last_successful_ssh_response", models.DateTimeField(blank=True, null=True)),
+                ("ssh_port", models.PositiveIntegerField(blank=True, null=True)),
+                ("ssh_timeout", models.PositiveIntegerField(blank=True, default=30, null=True)),
+                ("hostname", models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "discovered_platform",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to="dcim.platform",
+                    ),
+                ),
+                (
+                    "ssh_credentials",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="+",
+                        to="extras.secretsgroup",
+                    ),
+                ),
+                ("tags", nautobot.core.models.fields.TagsField(through="extras.TaggedItem", to="extras.Tag")),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
-            bases=(nautobot.extras.models.mixins.DynamicGroupMixin, nautobot.extras.models.mixins.NotesMixin, models.Model),
+            bases=(
+                nautobot.extras.models.mixins.DynamicGroupMixin,
+                nautobot.extras.models.mixins.NotesMixin,
+                models.Model,
+            ),
         ),
     ]

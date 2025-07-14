@@ -1,7 +1,6 @@
 # pylint: disable=attribute-defined-outside-init
 """Device Onboarding Jobs."""
 
-
 import concurrent.futures
 import csv
 import ipaddress
@@ -67,7 +66,7 @@ from nautobot_device_onboarding.nornir_plays.command_getter import (
     _parse_credentials,
     netmiko_send_commands,
     sync_devices_command_getter,
-    scan_target_ssh
+    scan_target_ssh,
 )
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
@@ -518,9 +517,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             self.task_kwargs_input_data[device.ip_address] = {}
             self.task_kwargs_input_data[device.ip_address]["port"] = device.ssh_port
             self.task_kwargs_input_data[device.ip_address]["timeout"] = device.ssh_timeout
-            self.task_kwargs_input_data[device.ip_address]["secrets_group"] = (
-                secrets_group.id if secrets_group else ""
-            )
+            self.task_kwargs_input_data[device.ip_address]["secrets_group"] = secrets_group.id if secrets_group else ""
             self.task_kwargs_input_data[device.ip_address]["platform"] = platform.id if platform else ""
 
         return processed_input_data
@@ -591,9 +588,13 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             else:
                 self.logger.error(f"Missing requried inputs from job form: {missing_required_inputs}")
                 raise ValidationError(message=f"Missing required inputs {missing_required_inputs}")
-            required_inputs.update({"set_mgmt_only": set_mgmt_only, "update_devices_without_primary_ip": update_devices_without_primary_ip})
-            
-            self.processed_input_data = self._process_discovered_devices(discovered_devices=discovered_devices, inputs=required_inputs)
+            required_inputs.update(
+                {"set_mgmt_only": set_mgmt_only, "update_devices_without_primary_ip": update_devices_without_primary_ip}
+            )
+
+            self.processed_input_data = self._process_discovered_devices(
+                discovered_devices=discovered_devices, inputs=required_inputs
+            )
             if self.processed_input_data:
                 # create a list of ip addresses for processing in the adapter
                 self.ip_addresses = []
@@ -937,6 +938,7 @@ class DeviceOnboardingTroubleshootingJob(Job):
 
 class DeviceOnboardingDiscoveryJob(Job):
     """Job to Discover Network Devices and queue for actual Onboarding."""
+
     debug = BooleanVar(
         default=False,
         description="Enable for more verbose logging.",
@@ -979,7 +981,7 @@ class DeviceOnboardingDiscoveryJob(Job):
     # ip_address_status = SSOTSyncDevices.ip_address_status
     # set_mgmt_only = SSOTSyncDevices.set_mgmt_only
     # update_devices_without_primary_ip = SSOTSyncDevices.update_devices_without_primary_ip
-    
+
     class Meta:
         """Meta object."""
 
@@ -993,11 +995,8 @@ class DeviceOnboardingDiscoveryJob(Job):
             for target_ip in self.targets:
                 host = Host(name=target_ip, hostname=target_ip, port=22)
                 nornir_obj.inventory.hosts.update({target_ip: host})
-            results = nornir_obj.run(
-                task=scan_target_ssh
-            )
+            results = nornir_obj.run(task=scan_target_ssh)
         return results
-
 
     def _nornir_target_details(self, responded_tcp):
         nornir_data = {
@@ -1005,7 +1004,7 @@ class DeviceOnboardingDiscoveryJob(Job):
             "ip_addresses": ",".join(responded_tcp),
             "port": 22,
             "platform": None,
-            "secrets_group": self.secrets_group
+            "secrets_group": self.secrets_group,
         }
         return sync_devices_command_getter(self.job_result, "DEBUG", nornir_data)
 
@@ -1029,13 +1028,23 @@ class DeviceOnboardingDiscoveryJob(Job):
                     if "hostname" in results:
                         discovered_device.hostname = results["hostname"]
                     try:
-                        discovered_device.discovered_platform = Platform.objects.get(network_driver=results["platform"]) # TODO: i don't think this is right for all cases
+                        discovered_device.discovered_platform = Platform.objects.get(
+                            network_driver=results["platform"]
+                        )  # TODO: i don't think this is right for all cases
                     except Platform.DoesNotExist:
                         discovered_device.discovered_platform = None
-                        self.logger.info(f'Network Driver {results["platform"]} does not exist within Nautobot.', extra={"object": discovered_device})
+                        self.logger.info(
+                            f'Network Driver {results["platform"]} does not exist within Nautobot.',
+                            extra={"object": discovered_device},
+                        )
                     except Platform.MultipleObjectsReturned:
-                        discovered_device.discovered_platform = Platform.objects.filter(network_driver=results["platform"]).first()
-                        self.logger.info(f'Network Driver {results["platform"]} exists on multiple platforms, choosing {discovered_device.discovered_platform.name} as default.', extra={"object": discovered_device})
+                        discovered_device.discovered_platform = Platform.objects.filter(
+                            network_driver=results["platform"]
+                        ).first()
+                        self.logger.info(
+                            f'Network Driver {results["platform"]} exists on multiple platforms, choosing {discovered_device.discovered_platform.name} as default.',
+                            extra={"object": discovered_device},
+                        )
             else:
                 try:
                     discovered_device = DiscoveredDevice.objects.get(ip_address=host)
@@ -1048,18 +1057,18 @@ class DeviceOnboardingDiscoveryJob(Job):
             discovered_device.validated_save()
         return
 
-
-    def run(self,
-            # memory_profiling,
-            debug,
-            scanning_threads_count, 
-            login_threads_count, 
-            prefixes,
-            secrets_group, 
-            protocols,
-            *args,
-            **kwargs
-        ):  # pragma: no cover
+    def run(
+        self,
+        # memory_profiling,
+        debug,
+        scanning_threads_count,
+        login_threads_count,
+        prefixes,
+        secrets_group,
+        protocols,
+        *args,
+        **kwargs,
+    ):  # pragma: no cover
         """Process discovering devices."""
         # self.dryrun = dryrun
         # self.memory_profiling = memory_profiling

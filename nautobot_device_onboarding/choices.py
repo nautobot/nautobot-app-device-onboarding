@@ -1,4 +1,5 @@
 """Choices used througout the app."""
+
 from nautobot.core.choices import ChoiceSet
 
 
@@ -14,6 +15,4 @@ class AutodiscoveryProtocolTypeChoices(ChoiceSet):
 
     SSH = "ssh"
 
-    CHOICES = (
-        (SSH, "ssh"),
-    )
+    CHOICES = ((SSH, "ssh"),)

@@ -1,10 +1,20 @@
-from nautobot.apps.forms import NautobotFilterForm, NautobotModelForm, NautobotBulkEditForm, DynamicModelChoiceField, StaticSelect2, DynamicModelMultipleChoiceField
+"""Device Onboarding model forms."""
+
+from nautobot.apps.forms import (
+    NautobotFilterForm,
+    NautobotModelForm,
+    NautobotBulkEditForm,
+    DynamicModelChoiceField,
+    StaticSelect2,
+    DynamicModelMultipleChoiceField,
+)
 from nautobot.core.forms.constants import BOOLEAN_WITH_BLANK_CHOICES
 from nautobot_device_onboarding.models import DiscoveredDevice
-from nautobot.extras.models import SecretsGroup, Status, Role
-from nautobot.dcim.models import Location, Platform
-from nautobot.ipam.models import Namespace, Prefix
+from nautobot.extras.models import SecretsGroup
+from nautobot.dcim.models import Platform
+from nautobot.ipam.models import Prefix
 from django import forms
+
 
 class DiscoveredDeviceFilterForm(NautobotFilterForm):
     model = DiscoveredDevice
@@ -20,9 +30,13 @@ class DiscoveredDeviceFilterForm(NautobotFilterForm):
         label="Has a SSH Response?",
         widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
     )
-    ssh_credentials = DynamicModelMultipleChoiceField(queryset=SecretsGroup.objects.all(), required=False, label="SSH Credentials")
-    discovered_platform = DynamicModelMultipleChoiceField(queryset=Platform.objects.all(), required=False, label="Discoverd Platform")
-    
+    ssh_credentials = DynamicModelMultipleChoiceField(
+        queryset=SecretsGroup.objects.all(), required=False, label="SSH Credentials"
+    )
+    discovered_platform = DynamicModelMultipleChoiceField(
+        queryset=Platform.objects.all(), required=False, label="Discoverd Platform"
+    )
+
     class Meta:
         fields = [
             "ip_address",
@@ -37,9 +51,11 @@ class DiscoveredDeviceFilterForm(NautobotFilterForm):
             "discovered_platform",
         ]
 
-class DiscoveredDeviceForm(NautobotModelForm):
 
-    ssh_credentials = DynamicModelChoiceField(queryset=SecretsGroup.objects.all(), to_field_name="name", required=False, label="SSH Credentials")
+class DiscoveredDeviceForm(NautobotModelForm):
+    ssh_credentials = DynamicModelChoiceField(
+        queryset=SecretsGroup.objects.all(), to_field_name="name", required=False, label="SSH Credentials"
+    )
 
     class Meta:
         model = DiscoveredDevice
@@ -55,10 +71,12 @@ class DiscoveredDeviceForm(NautobotModelForm):
             "discovered_platform",
         ]
 
-class DiscoveredDeviceBulkEditForm(NautobotBulkEditForm):
 
+class DiscoveredDeviceBulkEditForm(NautobotBulkEditForm):
     pk = forms.ModelMultipleChoiceField(queryset=DiscoveredDevice.objects.all(), widget=forms.MultipleHiddenInput)
-    ssh_credentials = DynamicModelChoiceField(queryset=SecretsGroup.objects.all(), to_field_name="name", required=False, label="SSH Credentials")
+    ssh_credentials = DynamicModelChoiceField(
+        queryset=SecretsGroup.objects.all(), to_field_name="name", required=False, label="SSH Credentials"
+    )
 
     class Meta:
         model = DiscoveredDevice
