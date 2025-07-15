@@ -40,8 +40,6 @@ class DiscoveredDeviceViewSet(NautobotUIViewSet):
 class DiscoveryJobRunView(JobRunView):
     def get(self, request, class_path=None, pk=None, discovered_pks=None):
         job_model = self._get_job_model_or_404(class_path, pk)
-        print(request)
-        print(discovered_pks)
         try:
             job_class = get_job(job_model.class_path, reload=True)
             if job_class is None:
@@ -77,7 +75,6 @@ class DiscoveryJobRunView(JobRunView):
                     )
             if discovered_pks:
                 initial.update({"discovered_devices": discovered_pks})
-                print("yurp")
 
             template_name = "extras/job.html"
             job_form = job_class.as_form(initial=initial)
@@ -104,5 +101,4 @@ class DiscoveryJobRunView(JobRunView):
                 "schedule_form": schedule_form,
             },
         )
-        print(dir(response))
         return response
