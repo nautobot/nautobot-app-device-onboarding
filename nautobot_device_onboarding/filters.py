@@ -21,10 +21,10 @@ class DiscoveredDeviceFilterSet(NautobotFilterSet):
             "hostname",
             "prefix",
             "tcp_response",
-            "last_successful_tcp_response",
+            "tcp_response_datetime",
             "ssh_response",
-            "last_successful_ssh_response",
+            "ssh_response_datetime",
             "ssh_port",
             "ssh_credentials",
-            "discovered_platform",
+            "network_driver",
         ]

@@ -33,7 +33,7 @@ class DiscoveredDeviceFilterForm(NautobotFilterForm):
     ssh_credentials = DynamicModelMultipleChoiceField(
         queryset=SecretsGroup.objects.all(), required=False, label="SSH Credentials"
     )
-    discovered_platform = DynamicModelMultipleChoiceField(
+    network_driver = DynamicModelMultipleChoiceField(
         queryset=Platform.objects.all(), required=False, label="Discoverd Platform"
     )
 
@@ -43,12 +43,12 @@ class DiscoveredDeviceFilterForm(NautobotFilterForm):
             "hostname",
             "prefix",
             "tcp_response",
-            "last_successful_tcp_response",
+            "tcp_response_datetime",
             "ssh_response",
-            "last_successful_ssh_response",
+            "ssh_response_datetime",
             "ssh_port",
             "ssh_credentials",
-            "discovered_platform",
+            "network_driver",
         ]
 
 
@@ -63,12 +63,12 @@ class DiscoveredDeviceForm(NautobotModelForm):
             "ip_address",
             "hostname",
             "tcp_response",
-            "last_successful_tcp_response",
+            "tcp_response_datetime",
             "ssh_response",
-            "last_successful_ssh_response",
+            "ssh_response_datetime",
             "ssh_port",
             "ssh_credentials",
-            "discovered_platform",
+            "network_driver",
         ]
 
 

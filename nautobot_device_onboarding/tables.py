@@ -9,7 +9,11 @@ class DiscoveredDeviceTable(BaseTable):
         linkify=lambda record: record.get_absolute_url(),
         verbose_name="IP Address",
     )
-    discovered_platform = tables.Column(verbose_name="Platform")
+    network_driver = tables.Column(verbose_name="Platform")
+    device = tables.Column(
+        linkify=lambda record: record.device.get_absolute_url() if record.device else None,
+        verbose_name="IP Address",
+    )
 
     class Meta(BaseTable.Meta):
         model = DiscoveredDevice
@@ -18,12 +22,15 @@ class DiscoveredDeviceTable(BaseTable):
             "ip_address",
             "hostname",
             "tcp_response",
-            "last_successful_tcp_response",
+            "tcp_response_datetime",
             "ssh_response",
-            "last_successful_ssh_response",
+            "ssh_response_datetime",
             "ssh_port",
             "ssh_credentials",
-            "discovered_platform",
+            "network_driver",
+            "device",
+            "serial",
+            "device_type",
         )
         default_columns = (
             "pk",
@@ -31,5 +38,5 @@ class DiscoveredDeviceTable(BaseTable):
             "hostname",
             "tcp_response",
             "ssh_response",
-            "discovered_platform",
+            "network_driver",
         )

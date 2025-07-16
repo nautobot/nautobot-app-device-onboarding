@@ -495,7 +495,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         update_devices_without_primary_ip = False
         for device in discovered_devices:
             secrets_group = device.ssh_credentials
-            platform = device.discovered_platform
+            platform = device.network_driver
 
             processed_input_data[device.ip_address] = {}
             processed_input_data[device.ip_address]["location"] = location
@@ -973,14 +973,6 @@ class DeviceOnboardingDiscoveryJob(Job):
         label="Number of sim. SSH logins..",
         default=2,
     )
-    # location = SSOTSyncNetworkData.location
-    # namespace = SSOTSyncDevices.namespace
-    # device_role = SSOTSyncDevices.device_role
-    # device_status = SSOTSyncDevices.device_status
-    # interface_status = SSOTSyncDevices.interface_status
-    # ip_address_status = SSOTSyncDevices.ip_address_status
-    # set_mgmt_only = SSOTSyncDevices.set_mgmt_only
-    # update_devices_without_primary_ip = SSOTSyncDevices.update_devices_without_primary_ip
 
     class Meta:
         """Meta object."""
@@ -1018,33 +1010,20 @@ class DeviceOnboardingDiscoveryJob(Job):
             if host in responded_tcp:
                 discovered_device, _ = DiscoveredDevice.objects.get_or_create(ip_address=host)
                 discovered_device.tcp_response = True
-                discovered_device.last_successful_tcp_response = now
+                discovered_device.tcp_response_datetime = now
                 if host in nornir_results:
                     results = nornir_results[host]
                     discovered_device.ssh_response = True
-                    discovered_device.last_successful_ssh_response = now
+                    discovered_device.ssh_response_datetime = now
                     discovered_device.ssh_port = 22
                     discovered_device.ssh_credentials = self.secrets_group
+                    discovered_device.network_driver = results["platform"]
                     if "hostname" in results:
                         discovered_device.hostname = results["hostname"]
-                    try:
-                        discovered_device.discovered_platform = Platform.objects.get(
-                            network_driver=results["platform"]
-                        )  # TODO: i don't think this is right for all cases
-                    except Platform.DoesNotExist:
-                        discovered_device.discovered_platform = None
-                        self.logger.info(
-                            f'Network Driver {results["platform"]} does not exist within Nautobot.',
-                            extra={"object": discovered_device},
-                        )
-                    except Platform.MultipleObjectsReturned:
-                        discovered_device.discovered_platform = Platform.objects.filter(
-                            network_driver=results["platform"]
-                        ).first()
-                        self.logger.info(
-                            f'Network Driver {results["platform"]} exists on multiple platforms, choosing {discovered_device.discovered_platform.name} as default.',
-                            extra={"object": discovered_device},
-                        )
+                    if "serial" in results:
+                        discovered_device.serial = results["serial"]
+                    if "device_type" in results:
+                        discovered_device.device_type = results["device_type"]
             else:
                 try:
                     discovered_device = DiscoveredDevice.objects.get(ip_address=host)
