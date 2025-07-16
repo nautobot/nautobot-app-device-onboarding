@@ -27,4 +27,7 @@ class DiscoveredDeviceFilterSet(NautobotFilterSet):
             "ssh_port",
             "ssh_credentials",
             "network_driver",
+            "device",
+            "serial",
+            "device_type",
         ]

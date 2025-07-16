@@ -49,6 +49,9 @@ class DiscoveredDeviceFilterForm(NautobotFilterForm):
             "ssh_port",
             "ssh_credentials",
             "network_driver",
+            "device",
+            "serial",
+            "device_type",
         ]
 
 
@@ -69,6 +72,9 @@ class DiscoveredDeviceForm(NautobotModelForm):
             "ssh_port",
             "ssh_credentials",
             "network_driver",
+            "device",
+            "serial",
+            "device_type",
         ]
 
 

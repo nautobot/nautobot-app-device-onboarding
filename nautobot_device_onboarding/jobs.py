@@ -465,7 +465,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 self.task_kwargs_input_data[row["ip_address_host"]]["secrets_group"] = (
                     secrets_group.id if secrets_group else ""
                 )
-                self.task_kwargs_input_data[row["ip_address_host"]]["platform"] = platform.id if platform else ""
+                self.task_kwargs_input_data[row["ip_address_host"]]["platform"] = platform
                 row_count += 1
             except ObjectDoesNotExist as err:
                 self.logger.error(f"(row {sum([row_count, 1])}), {err} {query}")
@@ -495,7 +495,9 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         update_devices_without_primary_ip = False
         for device in discovered_devices:
             secrets_group = device.ssh_credentials
-            platform = device.network_driver
+            platform = platform = Platform.objects.get(
+                name=device.network_driver,
+            )
 
             processed_input_data[device.ip_address] = {}
             processed_input_data[device.ip_address]["location"] = location
@@ -1071,8 +1073,8 @@ class DeviceOnboardingDiscoveryJob(Job):
                 self.targets.add(str(ip))
 
         scan_result = self._tcp_ping_ssh_nornir()
-        self.logger.info(scan_result)
         responded_tcp = [key for key, value in scan_result.items() if len(value[0].result) > 0]
+        self.logger.info(responded_tcp)
         ssh_result = self._nornir_target_details(responded_tcp)
         self.logger.info(ssh_result)
 

@@ -9,10 +9,9 @@ class DiscoveredDeviceTable(BaseTable):
         linkify=lambda record: record.get_absolute_url(),
         verbose_name="IP Address",
     )
-    network_driver = tables.Column(verbose_name="Platform")
     device = tables.Column(
         linkify=lambda record: record.device.get_absolute_url() if record.device else None,
-        verbose_name="IP Address",
+        verbose_name="Device",
     )
 
     class Meta(BaseTable.Meta):
