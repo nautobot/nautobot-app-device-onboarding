@@ -29,6 +29,7 @@ class DiscoveredDevice(PrimaryModel):
     hostname = CharField(blank=True, null=True, max_length=CHARFIELD_MAX_LENGTH)
     serial = CharField(blank=True, null=True, max_length=CHARFIELD_MAX_LENGTH)
     device_type = CharField(blank=True, null=True, max_length=CHARFIELD_MAX_LENGTH)
+    inventory_status = CharField(blank=True, null=True, max_length=CHARFIELD_MAX_LENGTH)
 
     def __str__(self):
         if self.hostname:

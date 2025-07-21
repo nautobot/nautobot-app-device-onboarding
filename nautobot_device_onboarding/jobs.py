@@ -14,6 +14,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.db.models import Q
 from nautobot.apps.jobs import (
     BooleanVar,
     ChoiceVar,
@@ -1005,27 +1006,46 @@ class DeviceOnboardingDiscoveryJob(Job):
     def _update_discovered_devices(self, responded_tcp, nornir_results):
         now = datetime.now()
         for host in self.targets:
+            query = Device.objects.filter(primary_ip4__host=host)
             # get ipaddress object for host
             # if ipaddress has discovered device then see if it responded or not
             # else only create discovered device if tcp_ping response
-            mgmt = {device.primary_ip4.host: device for device in Device.objects.filter(primary_ip4__isnull=False)}
             if host in responded_tcp:
                 discovered_device, _ = DiscoveredDevice.objects.get_or_create(ip_address=host)
                 discovered_device.tcp_response = True
                 discovered_device.tcp_response_datetime = now
                 if host in nornir_results:
                     results = nornir_results[host]
+                    hostname_found = "hostname" in results
+                    serial_found = "serial" in results
                     discovered_device.ssh_response = True
                     discovered_device.ssh_response_datetime = now
                     discovered_device.ssh_port = 22
                     discovered_device.ssh_credentials = self.secrets_group
                     discovered_device.network_driver = results["platform"]
-                    if "hostname" in results:
-                        discovered_device.hostname = results["hostname"]
-                    if "serial" in results:
-                        discovered_device.serial = results["serial"]
                     if "device_type" in results:
                         discovered_device.device_type = results["device_type"]
+                    if hostname_found:
+                        discovered_device.hostname = results["hostname"]
+                        query = query.filter(Q(name=discovered_device.hostname))
+                    if serial_found:
+                        discovered_device.serial = results["serial"]
+                        query = query.filter(Q(serial=discovered_device.serial))
+                    devices = query.all()
+                    if devices.count() == 1:
+                        device = devices[0]
+                        if device.hostname == discovered_device.hostname \
+                        and device.primary_ip.host == discovered_device.ip_address \
+                        and device.serial == discovered_device.serial:
+                            discovered_device.inventory_status = "Inventoried"
+                            discovered_device.device = device
+                        else:
+                            discovered_device.inventory_status = "Partially Inventoried"
+                    else:
+                        if devices.count() > 1:
+                            discovered_device.inventory_status = "Partially Inventoried"
+                        else:
+                            discovered_device.inventory_status = "Pending Inventory"
             else:
                 try:
                     discovered_device = DiscoveredDevice.objects.get(ip_address=host)
@@ -1033,8 +1053,6 @@ class DeviceOnboardingDiscoveryJob(Job):
                     discovered_device.ssh_response = False
                 except DiscoveredDevice.DoesNotExist:
                     continue
-            if host in mgmt:
-                discovered_device.device = mgmt[host]
             discovered_device.validated_save()
         return
 

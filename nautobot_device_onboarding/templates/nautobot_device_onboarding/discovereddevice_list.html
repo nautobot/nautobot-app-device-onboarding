@@ -5,4 +5,41 @@
 <button type="submit" name="_sync" formaction="{% url 'plugins:nautobot_device_onboarding:discovereddevice_syncdevices' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}#job_discovered_devices" class="btn btn-success btn-sm">
     <span class="mdi mdi-sync" aria-hidden="true"></span> Onboard Selected Devices
 </button>
-{% endblock %}
+{% endblock bulk_buttons %}
+{% block header_extra %}
+{% with inventory_status=request.GET.inventory_status %}
+<ul class="nav nav-tabs" role="tablist">
+<li role="presentation"{% if not inventory_status %} class="active"{% endif %}>
+    <a href="#tab_all_devices" role="tab" data-toggle="tab">All Discovered Devices</a>
+</li>
+<li role="presentation"{% if inventory_status == 'Inventoried' %} class="active"{% endif %}>
+    <a href="#tab_inventoried" role="tab" data-toggle="tab">Inventoried</a>
+</li>
+<li role="presentation"{% if inventory_status == 'Partially Inventoried' %} class="active"{% endif %}>
+    <a href="#tab_partial" role="tab" data-toggle="tab">Partially Inventoried</a>
+</li><li role="presentation"{% if inventory_status == 'Pending Inventory' %} class="active"{% endif %}>
+    <a href="#tab_pending" role="tab" data-toggle="tab">Pending Inventory</a>
+</li>
+</ul>
+{% endwith %}
+{% endblock header_extra %}
+
+{% block javascript %}
+  {{ block.super }}
+  <script>
+    function handleActiveTab(activeTab) {
+        var url = new URL(window.location.href);
+        if (activeTab == "#tab_inventoried") url.searchParams.set("inventory_status", "Inventoried");
+        else if (activeTab == "#tab_partial") url.searchParams.set("inventory_status", "Partially Inventoried");
+        else if (activeTab == "#tab_pending") url.searchParams.set("inventory_status", "Pending Inventory");
+        else url.searchParams.delete("inventory_status");
+        window.location.href = url.href;
+    };
+
+    document.addEventListener("DOMContentLoaded", function() {
+
+      $('.nav-tabs a').on('shown.bs.tab', function(e) {const activeTab = $(e.target).attr('href'); handleActiveTab(activeTab)} );
+
+    });
+  </script>
+{% endblock javascript %}

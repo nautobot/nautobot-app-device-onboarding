@@ -52,6 +52,7 @@ class DiscoveredDeviceFilterForm(NautobotFilterForm):
             "device",
             "serial",
             "device_type",
+            "inventory_status"
         ]
 
 
@@ -75,6 +76,7 @@ class DiscoveredDeviceForm(NautobotModelForm):
             "device",
             "serial",
             "device_type",
+            "inventory_status"
         ]
 
 

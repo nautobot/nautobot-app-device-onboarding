@@ -30,4 +30,5 @@ class DiscoveredDeviceFilterSet(NautobotFilterSet):
             "device",
             "serial",
             "device_type",
+            "inventory_status",
         ]
