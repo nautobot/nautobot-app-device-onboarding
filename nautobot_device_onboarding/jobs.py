@@ -1,13 +1,13 @@
 # pylint: disable=attribute-defined-outside-init
 """Device Onboarding Jobs."""
 
-import concurrent.futures
 import csv
 import ipaddress
 import json
 import logging
 from io import StringIO
-
+from constance import config as constance_config
+from typing import List
 from datetime import datetime
 from diffsync.enum import DiffSyncFlags
 from django.conf import settings
@@ -984,77 +984,121 @@ class DeviceOnboardingDiscoveryJob(Job):
         description = "Scan network prefixes and onboard devices."
         has_sensitive_variables = False
         hidden = False
+    
+    def _get_constance_port_values(self, config_name) -> List[int]:
+        return getattr(constance_config, f"nautobot_device_onboarding__{config_name}").split(",")
+
+    def _tcp_ping(self):
+        results = {}
+        if AutodiscoveryProtocolTypeChoices.SSH in self.protocols:
+            ssh_results = self._tcp_ping_ssh_nornir()
+            ips_responded = []
+            parsed_ssh_results = {}
+            for host, result in ssh_results.items():
+                ip, port = host.split(":")
+                if result.result and ip not in ips_responded: # only add the first instance of port that responds
+                    if port in parsed_ssh_results:
+                        ip_list = parsed_ssh_results[port]
+                        ip_list.append(ip)
+                    else:
+                        ip_list = [ip]
+                    parsed_ssh_results.update({port: ip_list})
+            
+            results.update({AutodiscoveryProtocolTypeChoices.SSH: parsed_ssh_results})
+        return results
 
     def _tcp_ping_ssh_nornir(self):
+        ports = self._get_constance_port_values("SSH_PORTS")
         with InitNornir(inventory={"plugin": "empty-inventory"}) as nornir_obj:
             for target_ip in self.targets:
-                host = Host(name=target_ip, hostname=target_ip, port=22)
-                nornir_obj.inventory.hosts.update({target_ip: host})
+                for port in ports:
+                    host = Host(name=f"{target_ip}:{port}", hostname=target_ip, port=port)
+                    nornir_obj.inventory.hosts.update({host.name: host})
             results = nornir_obj.run(task=scan_target_ssh)
         return results
 
-    def _nornir_target_details(self, responded_tcp):
+    def _attempt_connection(self, results):
+        data = {}
+        if AutodiscoveryProtocolTypeChoices.SSH in results:
+            data[AutodiscoveryProtocolTypeChoices.SSH] = {}
+            for port, ip_list in results[AutodiscoveryProtocolTypeChoices.SSH].items():
+                data[AutodiscoveryProtocolTypeChoices.SSH].update({port: self._nornir_ssh_target_details(ip_list, port)})
+        return data
+
+    def _nornir_ssh_target_details(self, ips, port):
         nornir_data = {
             "input_data": None,
-            "ip_addresses": ",".join(responded_tcp),
-            "port": 22,
+            "ip_addresses": ",".join(ips),
+            "port": int(port),
             "platform": None,
             "secrets_group": self.secrets_group,
         }
         return sync_devices_command_getter(self.job_result, "DEBUG", nornir_data)
-
-    def _update_discovered_devices(self, responded_tcp, nornir_results):
+    
+    def _update_discovered_devices(self, connection_attempts):
         now = datetime.now()
-        for host in self.targets:
-            query = Device.objects.filter(primary_ip4__host=host)
-            # get ipaddress object for host
-            # if ipaddress has discovered device then see if it responded or not
-            # else only create discovered device if tcp_ping response
-            if host in responded_tcp:
-                discovered_device, _ = DiscoveredDevice.objects.get_or_create(ip_address=host)
-                discovered_device.tcp_response = True
-                discovered_device.tcp_response_datetime = now
-                if host in nornir_results:
-                    results = nornir_results[host]
-                    hostname_found = "hostname" in results
-                    serial_found = "serial" in results
-                    discovered_device.ssh_response = True
-                    discovered_device.ssh_response_datetime = now
-                    discovered_device.ssh_port = 22
-                    discovered_device.ssh_credentials = self.secrets_group
-                    discovered_device.network_driver = results["platform"]
-                    if "device_type" in results:
-                        discovered_device.device_type = results["device_type"]
-                    if hostname_found:
-                        discovered_device.hostname = results["hostname"]
-                        query = query.filter(Q(name=discovered_device.hostname))
-                    if serial_found:
-                        discovered_device.serial = results["serial"]
-                        query = query.filter(Q(serial=discovered_device.serial))
-                    devices = query.all()
-                    if devices.count() == 1:
-                        device = devices[0]
-                        if device.hostname == discovered_device.hostname \
-                        and device.primary_ip.host == discovered_device.ip_address \
-                        and device.serial == discovered_device.serial:
-                            discovered_device.inventory_status = "Inventoried"
-                            discovered_device.device = device
-                        else:
-                            discovered_device.inventory_status = "Partially Inventoried"
-                    else:
-                        if devices.count() > 1:
-                            discovered_device.inventory_status = "Partially Inventoried"
-                        else:
-                            discovered_device.inventory_status = "Pending Inventory"
+        connected_ips = []
+        for protocol in self.protocols:
+            if protocol in connection_attempts:
+                for port, host_results in connection_attempts[protocol].items():
+                    for host, result in host_results.items():
+                        connected_ips.append(host)
+                        self._update_discovered_device_for_protocol(host, port, result, now, protocol)
+        self._update_unreachable_devices(connected_ips)
+
+    def _update_discovered_device_for_protocol(self, host, port, results, now, protocol):
+        query = Device.objects.filter(primary_ip4__host=host)
+        discovered_device, _ = DiscoveredDevice.objects.get_or_create(ip_address=host)
+        discovered_device.tcp_response = True
+        discovered_device.tcp_response_datetime = now
+        hostname_found = "hostname" in results
+        serial_found = "serial" in results
+        if hasattr(discovered_device, f"{protocol}_response"):
+            setattr(discovered_device, f"{protocol}_response", True)
+        if hasattr(discovered_device, f"{protocol}_response_datetime"):
+            setattr(discovered_device, f"{protocol}_response_datetime", now)
+        if hasattr(discovered_device, f"{protocol}_port"):
+            setattr(discovered_device, f"{protocol}_port", int(port))
+        if hasattr(discovered_device, f"{protocol}_credentials"):
+            setattr(discovered_device, f"{protocol}_credentials", self.secrets_group)
+        discovered_device.network_driver = results["platform"]
+        if "device_type" in results:
+            discovered_device.device_type = results["device_type"]
+        if hostname_found:
+            discovered_device.hostname = results["hostname"]
+            query = query.filter(Q(name=discovered_device.hostname))
+        if serial_found:
+            discovered_device.serial = results["serial"]
+            query = query.filter(Q(serial=discovered_device.serial))
+        devices = query.all()
+        if devices.count() == 1:
+            device = devices[0]
+            if device.hostname == discovered_device.hostname \
+            and device.primary_ip.host == discovered_device.ip_address \
+            and device.serial == discovered_device.serial:
+                discovered_device.inventory_status = "Inventoried"
+                discovered_device.device = device
             else:
-                try:
-                    discovered_device = DiscoveredDevice.objects.get(ip_address=host)
-                    discovered_device.tcp_response = False
-                    discovered_device.ssh_response = False
-                except DiscoveredDevice.DoesNotExist:
-                    continue
-            discovered_device.validated_save()
+                discovered_device.inventory_status = "Partially Inventoried"
+        else:
+            if devices.count() > 1:
+                discovered_device.inventory_status = "Partially Inventoried"
+            else:
+                discovered_device.inventory_status = "Pending Inventory"
+        discovered_device.validated_save()
         return
+
+    def _update_unreachable_devices(self, reachable_ips):
+        for ip in self.targets:
+            if ip not in reachable_ips:
+                try:
+                    discovered_device = DiscoveredDevice.objects.get(ip_address=ip)
+                    discovered_device.tcp_response = False
+                    for protocol in self.protocols:
+                        setattr(discovered_device, f"{protocol}_response", False)
+                    discovered_device.validated_save()
+                except (DiscoveredDevice.DoesNotExist, DiscoveredDevice.MultipleObjectsReturned):
+                    continue
 
     def run(
         self,
@@ -1090,15 +1134,13 @@ class DeviceOnboardingDiscoveryJob(Job):
             for ip in network.hosts():
                 self.targets.add(str(ip))
 
-        scan_result = self._tcp_ping_ssh_nornir()
-        responded_tcp = [key for key, value in scan_result.items() if len(value[0].result) > 0]
-        self.logger.info(responded_tcp)
-        ssh_result = self._nornir_target_details(responded_tcp)
-        self.logger.info(ssh_result)
+        scan_result = self._tcp_ping()
+        self.logger.info(scan_result)
+        connection_attempts = self._attempt_connection(scan_result)
 
-        discovered_result = self._update_discovered_devices(responded_tcp, ssh_result)
+        self._update_discovered_devices(connection_attempts)
 
-        return discovered_result
+        # return discovered_result
 
 
 jobs = [

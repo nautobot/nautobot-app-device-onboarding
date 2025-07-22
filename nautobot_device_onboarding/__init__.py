@@ -3,7 +3,7 @@
 # Metadata is inherited from Nautobot. If not including Nautobot in the environment, this should be added
 from importlib import metadata
 
-from nautobot.apps import NautobotAppConfig
+from nautobot.apps import NautobotAppConfig, ConstanceConfigItem
 
 __version__ = metadata.version(__name__)
 
@@ -46,6 +46,12 @@ class NautobotDeviceOnboardingConfig(NautobotAppConfig):
     caching_config = {}
     docs_view_name = "plugins:nautobot_device_onboarding:docs"
     home_view_name = "extras:job_list"  # Jobs only for now. May change in the future.
+    constance_config = {
+        "SSH_PORTS": ConstanceConfigItem(
+            default="22", 
+            help_text="Comma separated list of ports to attempt SSH connection over.  Ports are tried in the order given."
+        ),
+    }
 
 
 config = NautobotDeviceOnboardingConfig  # pylint:disable=invalid-name

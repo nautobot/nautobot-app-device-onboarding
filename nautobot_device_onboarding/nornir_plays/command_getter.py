@@ -379,16 +379,7 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
 
 def scan_target_ssh(task):
     """Scan target IP address for TCP-SSH ports."""
-    ssh_targets = []
-
-    for target_ssh_port in AUTODISCOVERY_PORTS[AutodiscoveryProtocolTypeChoices.SSH]:
-        if tcp_ping(task.host.name, target_ssh_port):  # Report only opened ports.
-            open_ssh_port = {
-                "port": target_ssh_port,
-                "is_open": True,
-                "protocol": AutodiscoveryProtocolTypeChoices.SSH,
-            }
-
-            ssh_targets.append(open_ssh_port)
-
-    return ssh_targets
+    try:
+        return tcp_ping(task.host.hostname, task.host.port)
+    except ConnectionRefusedError as e:
+        return False
