@@ -3,7 +3,7 @@
 import json
 import os
 from typing import Dict, Tuple, Union
-
+import traceback
 from django.conf import settings
 from nautobot.dcim.models import Platform
 from nautobot.dcim.utils import get_all_network_driver_mappings
@@ -333,6 +333,7 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                 **kwargs,
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
+        logger.info(f"{traceback.print_exc()}")
         logger.info(f"Error During Sync Devices Command Getter: {err}")
     return compiled_results
 

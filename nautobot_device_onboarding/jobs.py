@@ -946,10 +946,9 @@ class DeviceOnboardingDiscoveryJob(Job):
         default=False,
         description="Enable for more verbose logging.",
     )
-    prefixes = MultiObjectVar(
-        model=Prefix,
+    prefixes = StringVar(
         required=True,
-        description="Prefixes to be searched for devices missing in Nautobot inventory.",
+        description="Comma separated list of prefixes to be searched",
     )
     protocols = MultiChoiceVar(
         choices=AutodiscoveryProtocolTypeChoices,
@@ -976,6 +975,11 @@ class DeviceOnboardingDiscoveryJob(Job):
         label="Number of sim. SSH logins..",
         default=2,
     )
+    ssh_ports = StringVar(
+        default="22", 
+        description="Comma separated list of ports to attempt SSH connection over.  Ports are tried in the order given.",
+        label="SSH Ports"
+    )
 
     class Meta:
         """Meta object."""
@@ -984,9 +988,6 @@ class DeviceOnboardingDiscoveryJob(Job):
         description = "Scan network prefixes and onboard devices."
         has_sensitive_variables = False
         hidden = False
-    
-    def _get_constance_port_values(self, config_name) -> List[int]:
-        return getattr(constance_config, f"nautobot_device_onboarding__{config_name}").split(",")
 
     def _tcp_ping(self):
         results = {}
@@ -1008,10 +1009,9 @@ class DeviceOnboardingDiscoveryJob(Job):
         return results
 
     def _tcp_ping_ssh_nornir(self):
-        ports = self._get_constance_port_values("SSH_PORTS")
         with InitNornir(inventory={"plugin": "empty-inventory"}) as nornir_obj:
             for target_ip in self.targets:
-                for port in ports:
+                for port in self.ssh_ports:
                     host = Host(name=f"{target_ip}:{port}", hostname=target_ip, port=port)
                     nornir_obj.inventory.hosts.update({host.name: host})
             results = nornir_obj.run(task=scan_target_ssh)
@@ -1032,6 +1032,7 @@ class DeviceOnboardingDiscoveryJob(Job):
             "port": int(port),
             "platform": None,
             "secrets_group": self.secrets_group,
+            "debug": self.debug,
         }
         return sync_devices_command_getter(self.job_result, "DEBUG", nornir_data)
     
@@ -1047,7 +1048,7 @@ class DeviceOnboardingDiscoveryJob(Job):
         self._update_unreachable_devices(connected_ips)
 
     def _update_discovered_device_for_protocol(self, host, port, results, now, protocol):
-        query = Device.objects.filter(primary_ip4__host=host)
+        query = Q(primary_ip4__host=host)
         discovered_device, _ = DiscoveredDevice.objects.get_or_create(ip_address=host)
         discovered_device.tcp_response = True
         discovered_device.tcp_response_datetime = now
@@ -1066,15 +1067,15 @@ class DeviceOnboardingDiscoveryJob(Job):
             discovered_device.device_type = results["device_type"]
         if hostname_found:
             discovered_device.hostname = results["hostname"]
-            query = query.filter(Q(name=discovered_device.hostname))
+            query |= Q(name=discovered_device.hostname)
         if serial_found:
             discovered_device.serial = results["serial"]
-            query = query.filter(Q(serial=discovered_device.serial))
-        devices = query.all()
+            query |= Q(serial=discovered_device.serial)
+        devices = Device.objects.filter(query)
         if devices.count() == 1:
             device = devices[0]
-            if device.hostname == discovered_device.hostname \
-            and device.primary_ip.host == discovered_device.ip_address \
+            if device.name == discovered_device.hostname \
+            and device.primary_ip and device.primary_ip.host == discovered_device.ip_address \
             and device.serial == discovered_device.serial:
                 discovered_device.inventory_status = "Inventoried"
                 discovered_device.device = device
@@ -1109,6 +1110,7 @@ class DeviceOnboardingDiscoveryJob(Job):
         prefixes,
         secrets_group,
         protocols,
+        ssh_ports,
         *args,
         **kwargs,
     ):  # pragma: no cover
@@ -1117,23 +1119,23 @@ class DeviceOnboardingDiscoveryJob(Job):
         # self.memory_profiling = memory_profiling
         self.debug = debug
 
-        self.prefixes = prefixes
+        self.prefixes = prefixes.split(",")
         self.protocols = protocols
         self.secrets_group = secrets_group
         self.scanning_threads_count = scanning_threads_count
         self.login_threads_count = login_threads_count
+        self.ssh_ports = [int(port) for port in ssh_ports.split(",")]
 
         # TODO(mzb): Introduce "skip" / blacklist tag too.
 
         self.targets = set()  # Ensure IP uniqueness
 
         for prefix in self.prefixes:
-            network = ipaddress.ip_network(prefix.prefix)
+            network = ipaddress.ip_network(prefix)
 
             # Get a list of all IPs in the subnet
             for ip in network.hosts():
                 self.targets.add(str(ip))
-
         scan_result = self._tcp_ping()
         self.logger.info(scan_result)
         connection_attempts = self._attempt_connection(scan_result)
