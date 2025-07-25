@@ -18,6 +18,17 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - [#357](https://github.com/nautobot/nautobot-app-device-onboarding/issues/357) - Added improved error messaging for device object `get()` call in the `update()` method of `SyncDevicesDevice`
 - [#372](https://github.com/nautobot/nautobot-app-device-onboarding/issues/372) - Fixed bug when loading Nautobot Vlans with multiple locations assigned. Only Vlans with 1 location will be considered for the sync.
 
+## [v4.2.6 (2025-07-25)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.2.6a0)
+
+### Fixed
+
+- [#385](https://github.com/nautobot/nautobot-app-device-onboarding/issues/385) - Fixed bug causing exessive logging noise
+- [#386](https://github.com/nautobot/nautobot-app-device-onboarding/issues/386) - Add 10GEChannel to INTERFACE_TYPE_MAP_STATIC so that port-channel interfaces with this hardware type are recognized as type LAG.
+
+### Housekeeping
+
+- Rebaked from the cookie `nautobot-app-v2.5.0`.
+
 ## [v4.2.5 (2025-05-13)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.2.5)
 
 ### Added
