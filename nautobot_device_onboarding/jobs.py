@@ -29,6 +29,7 @@ from nautobot.extras.choices import (
 )
 from nautobot.extras.models import (
     CustomField,
+    DynamicGroup,
     Role,
     SecretsGroup,
     SecretsGroupAssociation,
@@ -642,6 +643,11 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         required=False,
         description="Only update devices with the selected platform.",
     )
+    dynamic_group = ObjectVar(
+        model=DynamicGroup,
+        required=False,
+        description="Only update devices that belong to this Dynamic Group.",
+    )
 
     def load_source_adapter(self):
         """Load network data adapter."""
@@ -668,6 +674,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         devices,
         device_role,
         platform,
+        dynamic_group,
         sync_vlans,
         sync_vrfs,
         sync_cables,
@@ -687,6 +694,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         self.devices = devices
         self.device_role = device_role
         self.platform = platform
+        self.dynamic_group = dynamic_group
         self.sync_vlans = sync_vlans
         self.sync_vrfs = sync_vrfs
         self.sync_cables = sync_cables
@@ -727,6 +735,12 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
             device_filter["platform"] = platform
         if device_filter:  # prevent all devices from being returned by an empty filter
             self.filtered_devices = Device.objects.filter(**device_filter)
+        if self.dynamic_group:
+            # Get all Device IDs in that DynamicGroup
+            group_device_ids = self.dynamic_group.members.values_list("id", flat=True)
+            # Overwrite (or set) the id__in filter so we only get devices in that group
+            device_filter["id__in"] = list(group_device_ids)
+
         else:
             self.logger.error("No device filter options were provided, no devices will be synced.")
 
