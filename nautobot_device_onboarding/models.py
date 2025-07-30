@@ -103,6 +103,8 @@ class ProbedDeviceServices:
         }
         return {**base, **discovery_dict}
 
+from collections import defaultdict
+from typing import Iterator
 
 class ProbedDeviceStore:
     def __init__(self):
@@ -133,18 +135,53 @@ class ProbedDeviceStore:
     #     key = DeviceService(ip, port, service)
     #     return self._entries.get(key)
 
-    def filter(
-        self,
-        service: Optional[Literal['ssh', 'snmp', 'api']] = None,
-        port_status: Optional[str] = None,
-        service_status: Optional[str] = None
-    ) -> list[ProbedDeviceServices]:
-        return [
-            entry for entry in self._entries.values()
-            if (service is None or entry.service.service == service)
-            and (port_status is None or entry.port_status == port_status)
-            and (service_status is None or entry.service_status == service_status)
-        ]
+    def filter(self, **kwargs) -> list['ProbedDeviceServices']:
+        def match(entry) -> bool:
+            for key, value in kwargs.items():
+                if key.endswith("__in"):
+                    attr = key[:-4]
+                    if getattr(entry, attr, None) not in value:
+                        return False
+                elif key.endswith("__not"):
+                    attr = key[:-5]
+                    if getattr(entry, attr, None) == value:
+                        return False
+                else:
+                    if getattr(entry, key, None) != value:
+                        return False
+            return True
+
+        return [entry for entry in self._entries.values() if match(entry)]
+
+    # def group_by_ip_and_service(self) -> dict[tuple[str, str], list[ProbedDeviceServices]]:
+    #     grouped = defaultdict(list)
+    #
+    #     for entry in self._entries.values():
+    #         key = (entry.service.ip, entry.service.service)
+    #         grouped[key].append(entry)
+    #
+    #     return grouped
+
+    from collections import defaultdict
+
+    def reachable_and_unreachable_ips(self, service: Optional[str] = None) -> tuple[set[str], set[str]]:
+        status_by_ip = defaultdict(list)
+
+        for entry in self._entries.values():
+            if service is None or entry.service.service == service:
+                status_by_ip[entry.service.ip].append(entry.port_status)
+
+        reachable = {ip for ip, statuses in status_by_ip.items() if "open" in statuses}
+        unreachable = set(status_by_ip.keys()) - reachable
+        return reachable, unreachable
+
+    def reachable_ips(self, service: Optional[str] = None) -> set[str]:
+        reachable, _ = self.reachable_and_unreachable_ips(service)
+        return reachable
+
+    def unreachable_ips(self, service: Optional[str] = None) -> set[str]:
+        _, unreachable = self.reachable_and_unreachable_ips(service)
+        return unreachable
 
     def to_json(self) -> str:
         return json.dumps(

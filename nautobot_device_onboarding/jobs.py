@@ -1040,6 +1040,25 @@ class DeviceOnboardingDiscoveryJob(Job):
                     ...
                 ...
 
+    def update_discovery_inventory(self):
+        reachable_ssh_ips, unreachable_ssh_ips = self.reachable_and_unreachable_ips(service="ssh")
+
+        # Unreachable IPs for SSH
+        if unreachable_ssh_ips:
+            DiscoveredDevice.objects.filter(ip_address__in=unreachable_ssh_ips).update(ssh_response=False)
+
+        # Successfully connected device
+        for device_service in self.probed_device_store.filter(service="ssh", port_status="open", service_status="ok"):
+            ...
+
+        # Invalid credentials or other issues
+        for device_service in self.probed_device_store.filter(service="ssh", port_status="open", service_status__not="ok"):
+            if device_service.service.ip not in reachable_ssh_ips:  # SSH is not available on any checked ports.
+                ...
+            else:  # Some other SSH port is
+                ...
+
+
     def _update_discovered_device_for_protocol(self, host, port, results, now, protocol):
         query = Q(primary_ip4__host=host)
         discovered_device, _ = DiscoveredDevice.objects.get_or_create(ip_address=host)
@@ -1064,6 +1083,7 @@ class DeviceOnboardingDiscoveryJob(Job):
         if serial_found:
             discovered_device.serial = results["serial"]
             query |= Q(serial=discovered_device.serial)
+
         devices = Device.objects.filter(query)
         if devices.count() == 1:
             device = devices[0]
@@ -1081,18 +1101,6 @@ class DeviceOnboardingDiscoveryJob(Job):
                 discovered_device.inventory_status = "Pending Inventory"
         discovered_device.validated_save()
         return
-
-    def _update_unreachable_devices(self, reachable_ips):
-        for ip in self.targets:
-            if ip not in reachable_ips:
-                try:
-                    discovered_device = DiscoveredDevice.objects.get(ip_address=ip)
-                    discovered_device.tcp_response = False
-                    for protocol in self.protocols:
-                        setattr(discovered_device, f"{protocol}_response", False)
-                    discovered_device.validated_save()
-                except (DiscoveredDevice.DoesNotExist, DiscoveredDevice.MultipleObjectsReturned):
-                    continue
 
     def run(
         self,
