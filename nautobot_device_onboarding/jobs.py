@@ -74,6 +74,7 @@ from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inven
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import TroubleshootingProcessor
 from nautobot_device_onboarding.utils.helper import onboarding_task_fqdn_to_ip
+from nautobot_device_onboarding.models import ProbedDeviceStore, DeviceService, ProbedDeviceServices
 
 from netmiko import SSHDetect
 
@@ -989,63 +990,50 @@ class DeviceOnboardingDiscoveryJob(Job):
         has_sensitive_variables = False
         hidden = False
 
-    def _tcp_ping(self):
-        results = {}
-        if AutodiscoveryProtocolTypeChoices.SSH in self.protocols:
-            ssh_results = self._tcp_ping_ssh_nornir()
-            ips_responded = []
-            parsed_ssh_results = {}
-            for host, result in ssh_results.items():
-                ip, port = host.split(":")
-                if result.result and ip not in ips_responded: # only add the first instance of port that responds
-                    if port in parsed_ssh_results:
-                        ip_list = parsed_ssh_results[port]
-                        ip_list.append(ip)
-                    else:
-                        ip_list = [ip]
-                    parsed_ssh_results.update({port: ip_list})
-            
-            results.update({AutodiscoveryProtocolTypeChoices.SSH: parsed_ssh_results})
-        return results
-
-    def _tcp_ping_ssh_nornir(self):
+    def ssh_ping(self):
         with InitNornir(inventory={"plugin": "empty-inventory"}) as nornir_obj:
-            for target_ip in self.targets:
-                for port in self.ssh_ports:
-                    host = Host(name=f"{target_ip}:{port}", hostname=target_ip, port=port)
-                    nornir_obj.inventory.hosts.update({host.name: host})
-            results = nornir_obj.run(task=scan_target_ssh)
-        return results
+            for device_service in self.probed_device_store.filter(service="ssh"):
+                host = Host(name=str(device_service), hostname=device_service.ip, port=device_service.port)
+                nornir_obj.inventory.hosts.update({host.name: host})
 
-    def _attempt_connection(self, results):
-        data = {}
-        if AutodiscoveryProtocolTypeChoices.SSH in results:
-            data[AutodiscoveryProtocolTypeChoices.SSH] = {}
-            for port, ip_list in results[AutodiscoveryProtocolTypeChoices.SSH].items():
-                data[AutodiscoveryProtocolTypeChoices.SSH].update({port: self._nornir_ssh_target_details(ip_list, port)})
-        return data
+            ping_results = nornir_obj.run(task=scan_target_ssh)
 
-    def _nornir_ssh_target_details(self, ips, port):
-        nornir_data = {
-            "input_data": None,
-            "ip_addresses": ",".join(ips),
-            "port": int(port),
-            "platform": None,
-            "secrets_group": self.secrets_group,
-            "debug": self.debug,
-        }
-        return sync_devices_command_getter(self.job_result, "DEBUG", nornir_data)
-    
-    def _update_discovered_devices(self, connection_attempts):
-        now = datetime.now()
-        connected_ips = []
-        for protocol in self.protocols:
-            if protocol in connection_attempts:
-                for port, host_results in connection_attempts[protocol].items():
-                    for host, result in host_results.items():
-                        connected_ips.append(host)
-                        self._update_discovered_device_for_protocol(host, port, result, now, protocol)
-        self._update_unreachable_devices(connected_ips)
+            for host, result in ping_results.items():
+                device_service = DeviceService.from_string(host)
+                probed_device_service = self.probed_device_store[device_service]
+
+                if result.result:
+                    probed_device_service.port_status = "open"
+                else:
+                    probed_device_service.port_status = "unreachable"
+
+    def ssh_connect(self):
+        with InitNornir(inventory={"plugin": "empty-inventory"}) as nornir_obj:
+            for device_service in self.probed_device_store.filter(service="ssh", port_status="open"):
+                host = Host(name=str(device_service), hostname=device_service.ip, port=device_service.port)
+                nornir_obj.inventory.hosts.update({host.name: host})
+
+            connect_results = nr_with_processors.run(
+                task=netmiko_send_commands,
+                command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
+                command_getter_job="sync_devices",
+                # logger=logger,
+                # **kwargs,
+            )
+
+            for host, result in connect_results.items():
+                ...
+
+    # def _update_discovered_devices(self, connection_attempts):
+    #     now = datetime.now()
+    #     connected_ips = []
+    #     for protocol in self.protocols:
+    #         if protocol in connection_attempts:
+    #             for port, host_results in connection_attempts[protocol].items():
+    #                 for host, result in host_results.items():
+    #                     connected_ips.append(host)
+    #                     self._update_discovered_device_for_protocol(host, port, result, now, protocol)
+    #     self._update_unreachable_devices(connected_ips)
 
     def _update_discovered_device_for_protocol(self, host, port, results, now, protocol):
         query = Q(primary_ip4__host=host)
@@ -1128,16 +1116,20 @@ class DeviceOnboardingDiscoveryJob(Job):
 
         # TODO(mzb): Introduce "skip" / blacklist tag too.
 
-        self.targets = set()  # Ensure IP uniqueness
+        self.probed_device_store = ProbedDeviceStore()
 
-        for prefix in self.prefixes:
-            network = ipaddress.ip_network(prefix)
+        _unique_ips = {str(ip) for prefix in self.prefixes for ip in ipaddress.ip_network(prefix).hosts()}
 
-            # Get a list of all IPs in the subnet
-            for ip in network.hosts():
-                self.targets.add(str(ip))
-        scan_result = self._tcp_ping()
-        self.logger.info(scan_result)
+        if AutodiscoveryProtocolTypeChoices.SSH in self.protocols:
+            for ip in _unique_ips:
+                for ssh_port in self.ssh_ports:
+                    self.probed_device_store.add_or_update(
+                        ProbedDeviceServices(
+                            service=DeviceService.from_args(ip=ip, port=ssh_port, service=AutodiscoveryProtocolTypeChoices.SSH))
+                    )
+
+        scan_result = self.ssh_ping()
+
         connection_attempts = self._attempt_connection(scan_result)
 
         self._update_discovered_devices(connection_attempts)
