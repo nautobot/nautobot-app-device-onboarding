@@ -74,7 +74,7 @@ from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inven
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import TroubleshootingProcessor
 from nautobot_device_onboarding.utils.helper import onboarding_task_fqdn_to_ip
-from nautobot_device_onboarding.models import ProbedDeviceStore, DeviceService, ProbedDeviceServices
+from nautobot_device_onboarding.models import ProbedDeviceStore, DeviceService, ProbedDeviceServices, DiscoveryResult
 
 from netmiko import SSHDetect
 
@@ -1013,6 +1013,7 @@ class DeviceOnboardingDiscoveryJob(Job):
                 host = Host(name=str(device_service), hostname=device_service.ip, port=device_service.port)
                 nornir_obj.inventory.hosts.update({host.name: host})
 
+            # TODO(mzb): Fix
             connect_results = nr_with_processors.run(
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
@@ -1022,18 +1023,22 @@ class DeviceOnboardingDiscoveryJob(Job):
             )
 
             for host, result in connect_results.items():
-                ...
+                device_service = DeviceService.from_string(host)
+                probed_device_service = self.probed_device_store[device_service]
 
-    # def _update_discovered_devices(self, connection_attempts):
-    #     now = datetime.now()
-    #     connected_ips = []
-    #     for protocol in self.protocols:
-    #         if protocol in connection_attempts:
-    #             for port, host_results in connection_attempts[protocol].items():
-    #                 for host, result in host_results.items():
-    #                     connected_ips.append(host)
-    #                     self._update_discovered_device_for_protocol(host, port, result, now, protocol)
-    #     self._update_unreachable_devices(connected_ips)
+                if result:
+                    discovery_result = DiscoveryResult()
+
+                    discovery_result.hostname = result["hostname"]
+                    discovery_result.serial_number = result["serial_number"]
+                    discovery_result.device_model = result["device_model"]
+
+                    probed_device_service.service_status = "ok"
+                    probed_device_service.discovery_result = discovery_result
+                else:
+                    # TODO(mzb): Finalize exceptions and other cases
+                    ...
+                ...
 
     def _update_discovered_device_for_protocol(self, host, port, results, now, protocol):
         query = Q(primary_ip4__host=host)
