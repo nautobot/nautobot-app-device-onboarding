@@ -992,8 +992,8 @@ class DeviceOnboardingDiscoveryJob(Job):
 
     def ssh_ping(self):
         with InitNornir(inventory={"plugin": "empty-inventory"}) as nornir_obj:
-            for device_service in self.probed_device_store.filter(service="ssh"):
-                host = Host(name=str(device_service), hostname=device_service.ip, port=device_service.port)
+            for probed_service in self.probed_device_store.filter(service="ssh"):
+                host = Host(name=str(probed_service.service), hostname=probed_service.service.ip, port=probed_service.service.port)
                 nornir_obj.inventory.hosts.update({host.name: host})
 
             ping_results = nornir_obj.run(task=scan_target_ssh)
@@ -1041,19 +1041,64 @@ class DeviceOnboardingDiscoveryJob(Job):
                 ...
 
     def update_discovery_inventory(self):
-        reachable_ssh_ips, unreachable_ssh_ips = self.reachable_and_unreachable_ips(service="ssh")
+        reachable_ssh_ips, unreachable_ssh_ips = self.probed_device_store.reachable_and_unreachable_ips(service="ssh")
 
         # Unreachable IPs for SSH
         if unreachable_ssh_ips:
-            DiscoveredDevice.objects.filter(ip_address__in=unreachable_ssh_ips).update(ssh_response=False)
+            DiscoveredDevice.objects.filter(ip_address__in=unreachable_ssh_ips).update(ssh_response=False, ssh_response_datetime=datetime.now())
 
-        # Successfully connected device
-        for device_service in self.probed_device_store.filter(service="ssh", port_status="open", service_status="ok"):
+        # IPs with at least one SSH Service open:
+        connected_services = self.probed_device_store.filter(service="ssh", port_status="open", service_status="ok")
+        connected_services_ips = {service.service.ip for service in connected_services}
+
+        # IPs with SSH open but without successful collection (deduplicate):
+        not_connected_services = [service for service in
+                                  self.probed_device_store.filter(service="ssh", port_status="open",
+                                                                  service_status__not="ok") if
+                                  service.service.ip not in connected_services_ips]
+
+        # Unreachable IPs
+        not_connected_ports = self.probed_device_store.filter(service="ssh", port_status__not="open")
+        not_connected_ports_ips = {service.service.ip for service in not_connected_ports
+                                   if (service.service.ip not in not_connected_services_ips) and (
+                                               service.service.ip not in connected_services_ips)
+                                   }
+
+        for connected_service in connected_services:
+            _, _ = DiscoveredDevice.objects.update_or_create(
+                ip_address=connected_service.service.ip,
+                defaults={
+                    "ssh_response": True,
+                    "ssh_response_datetime": datetime.now(),
+                    "ssh_credentials": self.secrets_group,
+                    "ssh_port": connected_service.service.port,
+                    "hostname": connected_service.discovery_result.hostname,
+                    "serial": connected_service.discovery_result.serial,
+                    "device_model": connected_service.discovery_result.device_model,
+                    "network_driver": connected_service.discovery_result.network_driver,
+                }
+            )
             ...
 
-        # Invalid credentials or other issues
+        for not_connected_service in not_connected_services:
+            _, _ = DiscoveredDevice.objects.update_or_create(
+                ip_address=not_connected_service.service.ip,
+                defaults={
+                    "ssh_response": True,
+                    "ssh_response_datetime": datetime.now(),
+                    "ssh_credentials": None,
+                    "ssh_port": not_connected_service.service.port,
+                    "hostname": "",
+                    "serial": "",
+                    "device_model": "",
+                    "network_driver": "",
+                }
+            )
+            ...
+
+
         for device_service in self.probed_device_store.filter(service="ssh", port_status="open", service_status__not="ok"):
-            if device_service.service.ip not in reachable_ssh_ips:  # SSH is not available on any checked ports.
+            if device_service.service.ip not in not_connected_services_ips:  # SSH is not available on any checked ports.
                 ...
             else:  # Some other SSH port is
                 ...

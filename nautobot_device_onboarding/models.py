@@ -66,7 +66,8 @@ class DeviceService:
 class DiscoveryResult:
     hostname: Optional[str] = None
     device_model: Optional[str] = None
-    serial_number: Optional[str] = None
+    serial: Optional[str] = None
+    network_driver: Optional[str] = None
 
 
 @dataclass
