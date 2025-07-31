@@ -1041,29 +1041,25 @@ class DeviceOnboardingDiscoveryJob(Job):
                 ...
 
     def update_discovery_inventory(self):
-        reachable_ssh_ips, unreachable_ssh_ips = self.probed_device_store.reachable_and_unreachable_ips(service="ssh")
-
-        # Unreachable IPs for SSH
-        if unreachable_ssh_ips:
-            DiscoveredDevice.objects.filter(ip_address__in=unreachable_ssh_ips).update(ssh_response=False, ssh_response_datetime=datetime.now())
-
         # IPs with at least one SSH Service open:
         connected_services = self.probed_device_store.filter(service="ssh", port_status="open", service_status="ok")
         connected_services_ips = {service.service.ip for service in connected_services}
 
         # IPs with SSH open but without successful collection (deduplicate):
-        not_connected_services = [service for service in
-                                  self.probed_device_store.filter(service="ssh", port_status="open",
-                                                                  service_status__not="ok") if
-                                  service.service.ip not in connected_services_ips]
+        services_with_issues = [service for service in
+                                self.probed_device_store.filter(service="ssh", port_status="open",
+                                                                service_status__not="ok") if
+                                service.service.ip not in connected_services_ips]
+        not_connected_services_ips = {service.service.ip for service in services_with_issues}
 
         # Unreachable IPs
-        not_connected_ports = self.probed_device_store.filter(service="ssh", port_status__not="open")
-        not_connected_ports_ips = {service.service.ip for service in not_connected_ports
-                                   if (service.service.ip not in not_connected_services_ips) and (
-                                               service.service.ip not in connected_services_ips)
-                                   }
+        unreachable_services = [service for service in
+                                self.probed_device_store.filter(service="ssh", port_status__not="open")
+                                if (service.service.ip not in not_connected_services_ips) and
+                                (service.service.ip not in connected_services_ips)]
+        unreachable_services_ips = {service.service.ip for service in unreachable_services}
 
+        # Update Connected services
         for connected_service in connected_services:
             _, _ = DiscoveredDevice.objects.update_or_create(
                 ip_address=connected_service.service.ip,
@@ -1078,56 +1074,49 @@ class DeviceOnboardingDiscoveryJob(Job):
                     "network_driver": connected_service.discovery_result.network_driver,
                 }
             )
-            ...
 
-        for not_connected_service in not_connected_services:
+        for service_with_issue in services_with_issues:
             _, _ = DiscoveredDevice.objects.update_or_create(
-                ip_address=not_connected_service.service.ip,
+                ip_address=service_with_issue.service.ip,
                 defaults={
-                    "ssh_response": True,
+                    "ssh_response": True,  # Rename to ssh_login ? or ssh_status ?
                     "ssh_response_datetime": datetime.now(),
                     "ssh_credentials": None,
-                    "ssh_port": not_connected_service.service.port,
-                    "hostname": "",
-                    "serial": "",
-                    "device_model": "",
-                    "network_driver": "",
+                    "ssh_port": service_with_issue.service.port,
                 }
             )
-            ...
 
-
-        for device_service in self.probed_device_store.filter(service="ssh", port_status="open", service_status__not="ok"):
-            if device_service.service.ip not in not_connected_services_ips:  # SSH is not available on any checked ports.
-                ...
-            else:  # Some other SSH port is
-                ...
+        DiscoveredDevice.objects.filter(ip_address__in=unreachable_services_ips).update(
+            ssh_response=False,  # Rename to ssh_login ? or ssh_status ?
+            ssh_response_datetime=datetime.now(),
+            ssh_credentials=None,
+        )
 
 
     def _update_discovered_device_for_protocol(self, host, port, results, now, protocol):
-        query = Q(primary_ip4__host=host)
-        discovered_device, _ = DiscoveredDevice.objects.get_or_create(ip_address=host)
-        discovered_device.tcp_response = True
-        discovered_device.tcp_response_datetime = now
-        hostname_found = "hostname" in results
-        serial_found = "serial" in results
-        if hasattr(discovered_device, f"{protocol}_response"):
-            setattr(discovered_device, f"{protocol}_response", True)
-        if hasattr(discovered_device, f"{protocol}_response_datetime"):
-            setattr(discovered_device, f"{protocol}_response_datetime", now)
-        if hasattr(discovered_device, f"{protocol}_port"):
-            setattr(discovered_device, f"{protocol}_port", int(port))
-        if hasattr(discovered_device, f"{protocol}_credentials"):
-            setattr(discovered_device, f"{protocol}_credentials", self.secrets_group)
-        discovered_device.network_driver = results["platform"]
-        if "device_type" in results:
-            discovered_device.device_type = results["device_type"]
-        if hostname_found:
-            discovered_device.hostname = results["hostname"]
-            query |= Q(name=discovered_device.hostname)
-        if serial_found:
-            discovered_device.serial = results["serial"]
-            query |= Q(serial=discovered_device.serial)
+        # query = Q(primary_ip4__host=host)
+        # discovered_device, _ = DiscoveredDevice.objects.get_or_create(ip_address=host)
+        # discovered_device.tcp_response = True
+        # discovered_device.tcp_response_datetime = now
+        # hostname_found = "hostname" in results
+        # serial_found = "serial" in results
+        # if hasattr(discovered_device, f"{protocol}_response"):
+        #     setattr(discovered_device, f"{protocol}_response", True)
+        # if hasattr(discovered_device, f"{protocol}_response_datetime"):
+        #     setattr(discovered_device, f"{protocol}_response_datetime", now)
+        # if hasattr(discovered_device, f"{protocol}_port"):
+        #     setattr(discovered_device, f"{protocol}_port", int(port))
+        # if hasattr(discovered_device, f"{protocol}_credentials"):
+        #     setattr(discovered_device, f"{protocol}_credentials", self.secrets_group)
+        # discovered_device.network_driver = results["platform"]
+        # if "device_type" in results:
+        #     discovered_device.device_type = results["device_type"]
+        # if hostname_found:
+        #     discovered_device.hostname = results["hostname"]
+        #     query |= Q(name=discovered_device.hostname)
+        # if serial_found:
+        #     discovered_device.serial = results["serial"]
+        #     query |= Q(serial=discovered_device.serial)
 
         devices = Device.objects.filter(query)
         if devices.count() == 1:

@@ -17,14 +17,28 @@ from django.db.models import (
 )
 
 
+class SshIssuesChoices(ChoiceSet):
+    """Styling choices for custom banners."""
+
+    INVALID_CREDENTIALS = "invalid_credentials"
+    INVALID_COMMAND = "invalid_command"
+    PORT_CLOSED = "port_closed"
+    PARSE_ERROR = "parse_error"
+
+    CHOICES = (
+        (INVALID_CREDENTIALS, "Invalid credentials"),
+        (PORT_CLOSED, "Port closed"),
+        (PARSE_ERROR, "Parse error"),
+        (INVALID_COMMAND, "Invalid command"),
+    )
+
+
 class DiscoveredDevice(PrimaryModel):
     ip_address = GenericIPAddressField(unique=True)
 
-    tcp_response = BooleanField(default=False)
-    tcp_response_datetime = DateTimeField(blank=True, null=True)
-
     ssh_response = BooleanField(default=False)
     ssh_response_datetime = DateTimeField(blank=True, null=True)
+    ssh_issue = ChoiceField(choices=SshIssuesChoices.CHOICES)
     ssh_port = PositiveIntegerField(blank=True, null=True)
     ssh_credentials = ForeignKey(to="extras.SecretsGroup", on_delete=SET_NULL, related_name="+", blank=True, null=True)
     ssh_timeout = PositiveIntegerField(default=30, blank=True, null=True)
