@@ -177,26 +177,26 @@ class ProbedDeviceStore:
     #
     #     return grouped
 
-    from collections import defaultdict
-
-    def reachable_and_unreachable_ips(self, service: Optional[str] = None) -> tuple[set[str], set[str]]:
-        status_by_ip = defaultdict(list)
-
-        for entry in self._entries.values():
-            if service is None or entry.service.service == service:
-                status_by_ip[entry.service.ip].append(entry.port_status)
-
-        reachable = {ip for ip, statuses in status_by_ip.items() if "open" in statuses}
-        unreachable = set(status_by_ip.keys()) - reachable
-        return reachable, unreachable
-
-    def reachable_ips(self, service: Optional[str] = None) -> set[str]:
-        reachable, _ = self.reachable_and_unreachable_ips(service)
-        return reachable
-
-    def unreachable_ips(self, service: Optional[str] = None) -> set[str]:
-        _, unreachable = self.reachable_and_unreachable_ips(service)
-        return unreachable
+    # from collections import defaultdict
+    #
+    # def reachable_and_unreachable_ips(self, service: Optional[str] = None) -> tuple[set[str], set[str]]:
+    #     status_by_ip = defaultdict(list)
+    #
+    #     for entry in self._entries.values():
+    #         if service is None or entry.service.service == service:
+    #             status_by_ip[entry.service.ip].append(entry.port_status)
+    #
+    #     reachable = {ip for ip, statuses in status_by_ip.items() if "open" in statuses}
+    #     unreachable = set(status_by_ip.keys()) - reachable
+    #     return reachable, unreachable
+    #
+    # def reachable_ips(self, service: Optional[str] = None) -> set[str]:
+    #     reachable, _ = self.reachable_and_unreachable_ips(service)
+    #     return reachable
+    #
+    # def unreachable_ips(self, service: Optional[str] = None) -> set[str]:
+    #     _, unreachable = self.reachable_and_unreachable_ips(service)
+    #     return unreachable
 
     def to_json(self) -> str:
         return json.dumps(
