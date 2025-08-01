@@ -134,6 +134,10 @@
                 {
                     "ip_address": "123.65.132.201",
                     "prefix_length": "29"
+                },
+                {
+                    "ip_address": "123.65.132.203",
+                    "prefix_length": "29"
                 }
             ],
             "lag": [],
@@ -472,6 +476,10 @@
             "ip_addresses": [
                 {
                     "ip_address": "123.65.226.112",
+                    "prefix_length": 32
+                },
+                {
+                    "ip_address": "fe80::5a00:bb0f:fc8c:11ff",
                     "prefix_length": 32
                 }
             ],
