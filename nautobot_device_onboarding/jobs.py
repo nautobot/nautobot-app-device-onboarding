@@ -1009,11 +1009,14 @@ class DeviceOnboardingDiscoveryJob(Job):
 
     def ssh_connect(self):
         with InitNornir(inventory={"plugin": "empty-inventory"}) as nornir_obj:
-            for device_service in self.probed_device_store.filter(service="ssh", port_status="open"):
-                host = Host(name=str(device_service), hostname=device_service.ip, port=device_service.port)
+            for probed_service in self.probed_device_store.filter(service="ssh", port_status="open"):
+                host = Host(name=str(probed_service), hostname=probed_service.service.ip, port=probed_service.service.port)
                 nornir_obj.inventory.hosts.update({host.name: host})
 
             # TODO(mzb): Fix
+            logger = NornirLogger(job_result, log_level)
+            compiled_results = {}
+            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
             connect_results = nr_with_processors.run(
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
@@ -1023,8 +1026,8 @@ class DeviceOnboardingDiscoveryJob(Job):
             )
 
             for host, result in connect_results.items():
-                device_service = DeviceService.from_string(host)
-                probed_device_service = self.probed_device_store[device_service]
+                probed_service = DeviceService.from_string(host)
+                probed_device_service = self.probed_device_store[probed_service]
 
                 if result:
                     discovery_result = DiscoveryResult()
