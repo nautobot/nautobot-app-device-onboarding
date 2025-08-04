@@ -20,11 +20,11 @@ class DiscoveredDeviceFilterForm(NautobotFilterForm):
     model = DiscoveredDevice
 
     prefix = DynamicModelChoiceField(queryset=Prefix.objects.all(), required=False, label="Prefix")
-    tcp_response = forms.NullBooleanField(
-        required=False,
-        label="Has a TCP Response?",
-        widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
-    )
+    # tcp_response = forms.NullBooleanField(
+    #     required=False,
+    #     label="Has a TCP Response?",
+    #     widget=StaticSelect2(choices=BOOLEAN_WITH_BLANK_CHOICES),
+    # )
     ssh_response = forms.NullBooleanField(
         required=False,
         label="Has a SSH Response?",
@@ -42,8 +42,8 @@ class DiscoveredDeviceFilterForm(NautobotFilterForm):
             "ip_address",
             "hostname",
             "prefix",
-            "tcp_response",
-            "tcp_response_datetime",
+            # "tcp_response",
+            # "tcp_response_datetime",
             "ssh_response",
             "ssh_response_datetime",
             "ssh_port",
@@ -66,8 +66,8 @@ class DiscoveredDeviceForm(NautobotModelForm):
         fields = [
             "ip_address",
             "hostname",
-            "tcp_response",
-            "tcp_response_datetime",
+            # "tcp_response",
+            # "tcp_response_datetime",
             "ssh_response",
             "ssh_response_datetime",
             "ssh_port",

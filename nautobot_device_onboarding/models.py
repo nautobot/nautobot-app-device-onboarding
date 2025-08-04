@@ -16,6 +16,7 @@ from django.db.models import (
     CharField,
 )
 
+from nautobot.core.choices import ChoiceSet
 
 class SshIssuesChoices(ChoiceSet):
     """Styling choices for custom banners."""
@@ -38,7 +39,7 @@ class DiscoveredDevice(PrimaryModel):
 
     ssh_response = BooleanField(default=False)
     ssh_response_datetime = DateTimeField(blank=True, null=True)
-    ssh_issue = ChoiceField(choices=SshIssuesChoices.CHOICES)
+    ssh_issue = CharField(choices=SshIssuesChoices.CHOICES, blank=True, null=True, max_length=CHARFIELD_MAX_LENGTH)
     ssh_port = PositiveIntegerField(blank=True, null=True)
     ssh_credentials = ForeignKey(to="extras.SecretsGroup", on_delete=SET_NULL, related_name="+", blank=True, null=True)
     ssh_timeout = PositiveIntegerField(default=30, blank=True, null=True)
@@ -62,11 +63,14 @@ class DeviceService:
     ip: str
     port: int
     service: Literal['ssh', 'snmp', 'api']
+
     def __str__(self) -> str:
         return f"{self.ip}:{self.port}:{self.service}"
+
     @classmethod
     def from_args(cls, ip, port, service):
         return cls(ip, port, service)
+
     @classmethod
     def from_string(cls, value: str):
         try:

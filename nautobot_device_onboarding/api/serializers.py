@@ -7,5 +7,5 @@ class DiscoveredDeviceSerializer(NautobotModelSerializer):
         model = DiscoveredDevice
         fields = [
             "ip_address",
-            "tcp_response",
+            # "tcp_response",
         ]
