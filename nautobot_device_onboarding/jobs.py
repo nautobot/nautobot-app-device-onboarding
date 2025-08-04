@@ -77,6 +77,7 @@ from nautobot_device_onboarding.utils.helper import onboarding_task_fqdn_to_ip
 from nautobot_device_onboarding.models import ProbedDeviceStore, DeviceService, ProbedDeviceServices, DiscoveryResult
 
 from netmiko import SSHDetect
+from nautobot_device_onboarding.nornir_plays.processor import CommandGetterProcessor
 
 
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
@@ -1013,15 +1014,14 @@ class DeviceOnboardingDiscoveryJob(Job):
                 host = Host(name=str(probed_service), hostname=probed_service.service.ip, port=probed_service.service.port)
                 nornir_obj.inventory.hosts.update({host.name: host})
 
-            # TODO(mzb): Fix
-            logger = NornirLogger(job_result, log_level)
+            logger = NornirLogger(job_result=self.job_result, log_level=self.logger.getEffectiveLevel())
             compiled_results = {}
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
             connect_results = nr_with_processors.run(
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
                 command_getter_job="sync_devices",
-                # logger=logger,
+                logger=logger,
                 # **kwargs,
             )
 
