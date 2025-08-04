@@ -1010,19 +1010,34 @@ class DeviceOnboardingDiscoveryJob(Job):
 
     def ssh_connect(self):
         with InitNornir(inventory={"plugin": "empty-inventory"}) as nornir_obj:
+            logger = NornirLogger(job_result=self.job_result, log_level=self.logger.getEffectiveLevel())
+            compiled_results = {}
+            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
+
             for probed_service in self.probed_device_store.filter(service="ssh", port_status="open"):
                 host = Host(name=str(probed_service), hostname=probed_service.service.ip, port=probed_service.service.port)
                 nornir_obj.inventory.hosts.update({host.name: host})
 
-            logger = NornirLogger(job_result=self.job_result, log_level=self.logger.getEffectiveLevel())
-            compiled_results = {}
-            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
+                single_host_inventory_constructed, exc_info = _set_inventory(
+                    host_ip=probed_service.service.ip,
+                    platform="",
+                    port=probed_service.service.port,
+                    username="",  # TODO(mzb)
+                    password="",  # TODO(mzb)
+                )
+
+                if exc_info:
+                    logger.error(f"Unable to onboard {probed_service.service.ip}, failed with exception {exc_info}")
+
+                nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
+
+            kwargs={}
             connect_results = nr_with_processors.run(
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
                 command_getter_job="sync_devices",
                 logger=logger,
-                # **kwargs,
+                **kwargs,
             )
 
             for host, result in connect_results.items():
