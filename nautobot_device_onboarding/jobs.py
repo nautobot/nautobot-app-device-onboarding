@@ -1012,6 +1012,7 @@ class DeviceOnboardingDiscoveryJob(Job):
         with InitNornir(inventory={"plugin": "empty-inventory"}) as nornir_obj:
             logger = NornirLogger(job_result=self.job_result, log_level=self.logger.getEffectiveLevel())
             compiled_results = {}
+            kwargs={"debug": self.debug}
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
 
             for probed_service in self.probed_device_store.filter(service="ssh", port_status="open"):
@@ -1031,7 +1032,6 @@ class DeviceOnboardingDiscoveryJob(Job):
 
                 nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
 
-            kwargs={}
             connect_results = nr_with_processors.run(
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
@@ -1111,48 +1111,48 @@ class DeviceOnboardingDiscoveryJob(Job):
         )
 
 
-    def _update_discovered_device_for_protocol(self, host, port, results, now, protocol):
-        # query = Q(primary_ip4__host=host)
-        # discovered_device, _ = DiscoveredDevice.objects.get_or_create(ip_address=host)
-        # discovered_device.tcp_response = True
-        # discovered_device.tcp_response_datetime = now
-        # hostname_found = "hostname" in results
-        # serial_found = "serial" in results
-        # if hasattr(discovered_device, f"{protocol}_response"):
-        #     setattr(discovered_device, f"{protocol}_response", True)
-        # if hasattr(discovered_device, f"{protocol}_response_datetime"):
-        #     setattr(discovered_device, f"{protocol}_response_datetime", now)
-        # if hasattr(discovered_device, f"{protocol}_port"):
-        #     setattr(discovered_device, f"{protocol}_port", int(port))
-        # if hasattr(discovered_device, f"{protocol}_credentials"):
-        #     setattr(discovered_device, f"{protocol}_credentials", self.secrets_group)
-        # discovered_device.network_driver = results["platform"]
-        # if "device_type" in results:
-        #     discovered_device.device_type = results["device_type"]
-        # if hostname_found:
-        #     discovered_device.hostname = results["hostname"]
-        #     query |= Q(name=discovered_device.hostname)
-        # if serial_found:
-        #     discovered_device.serial = results["serial"]
-        #     query |= Q(serial=discovered_device.serial)
-
-        devices = Device.objects.filter(query)
-        if devices.count() == 1:
-            device = devices[0]
-            if device.name == discovered_device.hostname \
-            and device.primary_ip and device.primary_ip.host == discovered_device.ip_address \
-            and device.serial == discovered_device.serial:
-                discovered_device.inventory_status = "Inventoried"
-                discovered_device.device = device
-            else:
-                discovered_device.inventory_status = "Partially Inventoried"
-        else:
-            if devices.count() > 1:
-                discovered_device.inventory_status = "Partially Inventoried"
-            else:
-                discovered_device.inventory_status = "Pending Inventory"
-        discovered_device.validated_save()
-        return
+    # def _update_discovered_device_for_protocol(self, host, port, results, now, protocol):
+    #     # query = Q(primary_ip4__host=host)
+    #     # discovered_device, _ = DiscoveredDevice.objects.get_or_create(ip_address=host)
+    #     # discovered_device.tcp_response = True
+    #     # discovered_device.tcp_response_datetime = now
+    #     # hostname_found = "hostname" in results
+    #     # serial_found = "serial" in results
+    #     # if hasattr(discovered_device, f"{protocol}_response"):
+    #     #     setattr(discovered_device, f"{protocol}_response", True)
+    #     # if hasattr(discovered_device, f"{protocol}_response_datetime"):
+    #     #     setattr(discovered_device, f"{protocol}_response_datetime", now)
+    #     # if hasattr(discovered_device, f"{protocol}_port"):
+    #     #     setattr(discovered_device, f"{protocol}_port", int(port))
+    #     # if hasattr(discovered_device, f"{protocol}_credentials"):
+    #     #     setattr(discovered_device, f"{protocol}_credentials", self.secrets_group)
+    #     # discovered_device.network_driver = results["platform"]
+    #     # if "device_type" in results:
+    #     #     discovered_device.device_type = results["device_type"]
+    #     # if hostname_found:
+    #     #     discovered_device.hostname = results["hostname"]
+    #     #     query |= Q(name=discovered_device.hostname)
+    #     # if serial_found:
+    #     #     discovered_device.serial = results["serial"]
+    #     #     query |= Q(serial=discovered_device.serial)
+    #
+    #     devices = Device.objects.filter(query)
+    #     if devices.count() == 1:
+    #         device = devices[0]
+    #         if device.name == discovered_device.hostname \
+    #         and device.primary_ip and device.primary_ip.host == discovered_device.ip_address \
+    #         and device.serial == discovered_device.serial:
+    #             discovered_device.inventory_status = "Inventoried"
+    #             discovered_device.device = device
+    #         else:
+    #             discovered_device.inventory_status = "Partially Inventoried"
+    #     else:
+    #         if devices.count() > 1:
+    #             discovered_device.inventory_status = "Partially Inventoried"
+    #         else:
+    #             discovered_device.inventory_status = "Pending Inventory"
+    #     discovered_device.validated_save()
+    #     return
 
     def run(
         self,
