@@ -17,6 +17,11 @@ from django.db.models import (
 )
 
 from nautobot.core.choices import ChoiceSet
+from nornir.core.inventory import Host
+from nornir.core.inventory import ConnectionOptions, Host
+
+from nautobot_device_onboarding.constants import NETMIKO_EXTRAS
+
 
 class SshIssuesChoices(ChoiceSet):
     """Styling choices for custom banners."""
@@ -107,12 +112,40 @@ class ProbedDeviceServices:
         'discovery_issue',
     ]] = None
 
+    ssh_username: Optional[str] = None
+    ssh_password: Optional[str] = None
+    ssh_timeout: Optional[int] = None
     network_driver: Optional[str] = None
-
+    hostname: Optional[str] = None
+    device_model: Optional[str] = None
+    serial: Optional[str] = None
 
     banner: str = ""
     last_seen: str = ""
-    discovery_result: DiscoveryResult = field(default_factory=DiscoveryResult)
+    # discovery_result: DiscoveryResult = field(default_factory=DiscoveryResult)
+
+    def __str__(self) -> str:
+        return f"{self.service.ip}:{self.service.port}:{self.service.name}"
+
+    def to_nornir_host(self, name_eq_ip=False):
+        return Host(
+            name=str(self.service) if not name_eq_ip else self.service.ip,
+            hostname=self.service.ip,
+            port=self.service.port,
+            username=self.ssh_username,
+            password=self.ssh_password,
+            platform=self.network_driver,
+            connection_options={
+                "netmiko": ConnectionOptions(
+                    hostname=self.service.ip,
+                    port=self.service.port,
+                    username=self.ssh_username,
+                    password=self.ssh_password,
+                    platform=self.network_driver,
+                    extras=NETMIKO_EXTRAS,
+                )
+            },
+        )
 
     def to_dict(self):
         base = {

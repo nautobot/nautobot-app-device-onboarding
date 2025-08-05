@@ -27,6 +27,7 @@ class CommandGetterProcessor(BaseLoggingProcessor):
                 "platform": host.platform,
                 "manufacturer": host.platform.split("_")[0].title() if host.platform else "PLACEHOLDER",
                 "network_driver": host.platform,
+                "port": host.port,
             }
 
     def task_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
