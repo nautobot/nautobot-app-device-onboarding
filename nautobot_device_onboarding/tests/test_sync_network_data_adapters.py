@@ -3,7 +3,7 @@
 from unittest.mock import MagicMock, patch
 
 from django.contrib.contenttypes.models import ContentType
-from nautobot.core.testing import TransactionTestCase
+from nautobot.apps.testing import TransactionTestCase
 from nautobot.dcim.models import Cable, Device, Interface, SoftwareVersion
 from nautobot.extras.models import JobResult
 from nautobot.ipam.models import VLAN, VRF, IPAddress

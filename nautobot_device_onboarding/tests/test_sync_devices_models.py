@@ -2,8 +2,7 @@
 
 from unittest.mock import patch
 
-from nautobot.apps.testing import create_job_result_and_run_job
-from nautobot.core.testing import TransactionTestCase
+from nautobot.apps.testing import TransactionTestCase, create_job_result_and_run_job
 from nautobot.dcim.models import Device, Interface
 from nautobot.extras.choices import JobResultStatusChoices
 

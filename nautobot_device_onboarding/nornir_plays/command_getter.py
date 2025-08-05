@@ -112,9 +112,7 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables, s
     return deduplicate_command_list(all_commands)
 
 
-def netmiko_send_commands(
-    task: Task, command_getter_yaml_data: Dict, command_getter_job: str, logger, **orig_job_kwargs
-):
+def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_getter_job: str, logger, nautobot_job):
     """Run commands specified in PLATFORM_COMMAND_MAP."""
     if not task.host.platform:
         return Result(host=task.host, result=f"{task.host.name} has no platform set.", failed=True)
@@ -124,7 +122,7 @@ def netmiko_send_commands(
         return Result(
             host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True
         )
-    if orig_job_kwargs.get("connectivity_test", False):
+    if nautobot_job.connectivity_test:
         if not tcp_ping(task.host.hostname, task.host.port):
             return Result(
                 host=task.host, result=f"{task.host.name} failed connectivity check via tcp_ping.", failed=True
@@ -132,13 +130,13 @@ def netmiko_send_commands(
     task.host.data["platform_parsing_info"] = command_getter_yaml_data[task.host.platform]
     commands = _get_commands_to_run(
         command_getter_yaml_data[task.host.platform][command_getter_job],
-        orig_job_kwargs.get("sync_vlans", False),
-        orig_job_kwargs.get("sync_vrfs", False),
-        orig_job_kwargs.get("sync_cables", False),
-        orig_job_kwargs.get("sync_software_version", False),
+        getattr(nautobot_job, "sync_vlans", False),
+        getattr(nautobot_job, "sync_vrfs", False),
+        getattr(nautobot_job, "sync_cables", False),
+        getattr(nautobot_job, "sync_software_version", False),
     )
     if (
-        orig_job_kwargs.get("sync_cables", False)
+        getattr(nautobot_job, "sync_cables", False)
         and "cables" not in command_getter_yaml_data[task.host.platform][command_getter_job].keys()
     ):
         logger.error(
@@ -264,20 +262,18 @@ def _parse_credentials(credentials: Union[SecretsGroup, None], logger: NornirLog
     return (username, password)
 
 
-def sync_devices_command_getter(job_result, log_level, kwargs):
+def sync_devices_command_getter(job, log_level):
     """Nornir play to run show commands for sync_devices ssot job."""
-    logger = NornirLogger(job_result, log_level)
+    logger = NornirLogger(job.job_result, log_level)
 
-    if kwargs["csv_file"]:  # ip_addreses will be keys in a dict
-        ip_addresses = []
-        for ip_address in kwargs["csv_file"]:
-            ip_addresses.append(ip_address)
+    if job.processed_csv_data:  # ip_addreses will be keys in a dict
+        ip_addresses = list(job.processed_csv_data.keys())
     else:
-        ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
-        port = kwargs["port"]
+        ip_addresses = job.ip_addresses
+        port = job.port
         # timeout = kwargs["timeout"]
-        platform = kwargs["platform"]
-        username, password = _parse_credentials(kwargs["secrets_group"], logger=logger)
+        platform = job.platform
+        username, password = _parse_credentials(job.secrets_group, logger=logger)
 
     # Initiate Nornir instance with empty inventory
     try:
@@ -289,18 +285,18 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                 "plugin": "empty-inventory",
             },
         ) as nornir_obj:
-            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
+            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, job)])
             loaded_secrets_group = None
             for entered_ip in ip_addresses:
-                if kwargs["csv_file"]:
+                if job.processed_csv_data:
                     # get platform if one was provided via csv
                     platform = None
-                    platform_id = kwargs["csv_file"][entered_ip]["platform"]
+                    platform_id = job.processed_csv_data[entered_ip]["platform"]
                     if platform_id:
                         platform = Platform.objects.get(id=platform_id)
 
                     # parse secrets from secrets groups provided via csv
-                    secrets_group_id = kwargs["csv_file"][entered_ip]["secrets_group"]
+                    secrets_group_id = job.processed_csv_data[entered_ip]["secrets_group"]
                     if secrets_group_id:
                         new_secrets_group = SecretsGroup.objects.get(id=secrets_group_id)
                         # only update the credentials if the secrets_group specified on a csv row
@@ -315,7 +311,7 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                         single_host_inventory_constructed, exc_info = _set_inventory(
                             host_ip=entered_ip,
                             platform=platform,
-                            port=kwargs["csv_file"][entered_ip]["port"],
+                            port=job.processed_csv_data[entered_ip]["port"],
                             username=username,
                             password=password,
                         )
@@ -335,20 +331,20 @@ def sync_devices_command_getter(job_result, log_level, kwargs):
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
                 command_getter_job="sync_devices",
                 logger=logger,
-                **kwargs,
+                nautobot_job=job,
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info(f"Error During Sync Devices Command Getter: {err}")
     return compiled_results
 
 
-def sync_network_data_command_getter(job_result, log_level, kwargs):
+def sync_network_data_command_getter(job, log_level):
     """Nornir play to run show commands for sync_network_data ssot job."""
-    logger = NornirLogger(job_result, log_level)
+    logger = NornirLogger(job.job_result, log_level)
 
     try:
         compiled_results = {}
-        qs = kwargs["devices"]
+        qs = job.devices
         if not qs:
             return None
         with InitNornir(
@@ -362,21 +358,21 @@ def sync_network_data_command_getter(job_result, log_level, kwargs):
                     "defaults": {
                         "platform_parsing_info": add_platform_parsing_info(),
                         "network_driver_mappings": list(get_all_network_driver_mappings().keys()),
-                        "sync_vlans": kwargs["sync_vlans"],
-                        "sync_vrfs": kwargs["sync_vrfs"],
-                        "sync_cables": kwargs["sync_cables"],
-                        "sync_software_version": kwargs["sync_software_version"],
+                        "sync_vlans": job.sync_vlans,
+                        "sync_vrfs": job.sync_vrfs,
+                        "sync_cables": job.sync_cables,
+                        "sync_software_version": job.sync_software_version,
                     },
                 },
             },
         ) as nornir_obj:
-            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
+            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, job)])
             nr_with_processors.run(
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
                 command_getter_job="sync_network_data",
                 logger=logger,
-                **kwargs,
+                nautobot_job=job,
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
         logger.info(f"Error During Sync Network Data Command Getter: {err}")

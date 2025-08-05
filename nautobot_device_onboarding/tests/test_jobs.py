@@ -7,12 +7,12 @@ from django.core.files.base import ContentFile
 from django.test import override_settings
 from fakenos import FakeNOS
 from fakenos.core.host import Host
+from nautobot.apps.jobs import Job as JobClass
 from nautobot.apps.testing import create_job_result_and_run_job
 from nautobot.core.testing import TransactionTestCase
 from nautobot.dcim.models import Device, Interface, Manufacturer, Platform
 from nautobot.extras.choices import JobResultStatusChoices
 from nautobot.extras.models import FileProxy
-from nautobot.ipam.models import IPAddress
 
 from nautobot_device_onboarding import jobs
 from nautobot_device_onboarding.tests import utils
@@ -160,18 +160,17 @@ class SSOTSyncDevicesTestCase(TransactionTestCase):
         create_job_result_and_run_job(
             module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
         )
-        self.assertEqual(
-            mock_sync_devices_command_getter.mock_calls[0].args,
-            (
-                ANY,
-                10,
-                {
-                    "debug": True,
-                    "connectivity_test": "AnyWackyValueHere",
-                    "csv_file": {"172.23.0.8": {"port": 22, "timeout": 30, "secrets_group": ANY, "platform": ""}},
-                },
-            ),
-        )
+        job = mock_sync_devices_command_getter.mock_calls[0].args[0]
+        log_level = mock_sync_devices_command_getter.mock_calls[0].args[1]
+        self.assertIsInstance(job, JobClass)
+        self.assertEqual(job.connectivity_test, "AnyWackyValueHere")
+        self.assertEqual(job.debug, True)
+        self.assertSequenceEqual(list(job.processed_csv_data.keys()), ["172.23.0.8"])
+        self.assertEqual(job.processed_csv_data["172.23.0.8"]["port"], 22)
+        self.assertEqual(job.processed_csv_data["172.23.0.8"]["timeout"], 30)
+        self.assertEqual(job.processed_csv_data["172.23.0.8"]["secrets_group"], ANY)
+        self.assertEqual(job.processed_csv_data["172.23.0.8"]["platform"], None)
+        self.assertEqual(log_level, 10)
 
 
 class SSOTSyncNetworkDataTestCase(TransactionTestCase):
@@ -258,7 +257,7 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
             "csv_file": None,
             "location": self.testing_objects["location"].pk,
             "namespace": self.testing_objects["namespace"].pk,
-            "ip_addresses": "127.0.0.1",
+            "ip_addresses": "localhost",
             "port": 6222,
             "timeout": 30,
             "set_mgmt_only": True,
@@ -289,10 +288,12 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
             with FakeNOS(
                 inventory=fake_ios_inventory, plugins=[os.path.join(current_file_path, "fakenos/custom_ios.yaml")]
             ):
-                create_job_result_and_run_job(
+                job_result = create_job_result_and_run_job(
                     module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
                 )
 
+        self.assertEqual(job_result.status, JobResultStatusChoices.STATUS_SUCCESS, msg=job_result.traceback)
+        self.assertTrue(job_result.job_log_entries.filter(message=r"[{localhost}] resolved to [{127.0.0.1}]").exists())
         newly_imported_device = Device.objects.get(name="fake-ios-01")
-        self.assertEqual(str(IPAddress.objects.get(id=newly_imported_device.primary_ip4_id)), "127.0.0.1/32")
+        self.assertEqual(str(newly_imported_device.primary_ip4), "127.0.0.1/32")
         self.assertEqual(newly_imported_device.serial, "991UCMIHG4UAJ1J010CQG")

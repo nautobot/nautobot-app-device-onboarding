@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock
 
-from nautobot.core.testing import TestCase
+from nautobot.apps.testing import TestCase
 from nautobot.ipam.models import IPAddress, Prefix
 
 from nautobot_device_onboarding.tests import utils
@@ -19,47 +19,48 @@ from nautobot_device_onboarding.utils.diffsync_utils import (
 class TestDiffSyncUtils(TestCase):
     """Test Diffsync Utils functions."""
 
-    def setUp(self):  # pylint: disable=invalid-name
+    @classmethod
+    def setUpTestData(cls):  # pylint: disable=invalid-name
         """Initialize test case."""
-        # Setup Nautobot Objectsself.
-        self.testing_objects = utils.sync_network_data_ensure_required_nautobot_objects()
-        self.command_getter_result = sync_network_data_fixture.sync_network_mock_data_valid
-        self.processed_csv_data = {
+        # Setup Nautobot Objects.
+        cls.testing_objects = utils.sync_network_data_ensure_required_nautobot_objects()
+        cls.command_getter_result = sync_network_data_fixture.sync_network_mock_data_valid
+        cls.processed_csv_data = {
             "10.1.1.10": {
-                "location": self.testing_objects["location"],
-                "namespace": self.testing_objects["namespace"],
+                "location": cls.testing_objects["location"],
+                "namespace": cls.testing_objects["namespace"],
                 "port": 22,
                 "timeout": 30,
                 "set_mgmt_only": True,
                 "update_devices_without_primary_ip": True,
-                "device_role": self.testing_objects["device_role"],
-                "device_status": self.testing_objects["status"],
-                "interface_status": self.testing_objects["status"],
-                "ip_address_status": self.testing_objects["status"],
-                "secrets_group": self.testing_objects["secrets_group"],
-                "platform": self.testing_objects["platform_1"],
+                "device_role": cls.testing_objects["device_role"],
+                "device_status": cls.testing_objects["status"],
+                "interface_status": cls.testing_objects["status"],
+                "ip_address_status": cls.testing_objects["status"],
+                "secrets_group": cls.testing_objects["secrets_group"],
+                "platform": cls.testing_objects["platform_1"],
             },
             "10.1.1.11": {
-                "location": self.testing_objects["location"],
-                "namespace": self.testing_objects["namespace"],
+                "location": cls.testing_objects["location"],
+                "namespace": cls.testing_objects["namespace"],
                 "port": 22,
                 "timeout": 30,
                 "set_mgmt_only": True,
                 "update_devices_without_primary_ip": True,
-                "device_role": self.testing_objects["device_role"],
-                "device_status": self.testing_objects["status"],
-                "interface_status": self.testing_objects["status"],
-                "ip_address_status": self.testing_objects["status"],
-                "secrets_group": self.testing_objects["secrets_group"],
-                "platform": self.testing_objects["platform_2"],
+                "device_role": cls.testing_objects["device_role"],
+                "device_status": cls.testing_objects["status"],
+                "interface_status": cls.testing_objects["status"],
+                "ip_address_status": cls.testing_objects["status"],
+                "secrets_group": cls.testing_objects["secrets_group"],
+                "platform": cls.testing_objects["platform_2"],
             },
         }
-        self.mock_job = MagicMock()
-        self.mock_job.location = self.testing_objects["location"]
-        self.mock_job.processed_csv_data = self.processed_csv_data
-        self.mock_job.location.name = "Site B"
-        self.mock_job.logger.error.return_value = None
-        self.mock_job.logger.warning.return_value = None
+        cls.mock_job = MagicMock()
+        cls.mock_job.location = cls.testing_objects["location"]
+        cls.mock_job.processed_csv_data = cls.processed_csv_data
+        cls.mock_job.location.name = "Site B"
+        cls.mock_job.logger.error.return_value = None
+        cls.mock_job.logger.warning.return_value = None
 
     def test_generate_device_queryset_from_command_getter_result(self):
         """Test generating a queryset from data returned from command getter."""

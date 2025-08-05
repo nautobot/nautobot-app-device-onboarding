@@ -1,11 +1,9 @@
 """DiffSync adapters."""
 
-import socket
 from collections import defaultdict
 from typing import DefaultDict, Dict, FrozenSet, Hashable, Tuple, Type
 
 import diffsync
-import netaddr
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db.models import Model
@@ -166,25 +164,6 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
         self.device_data = None
         self.failed_ip_addresses = []
 
-    def _validate_ip_addresses(self, ip_addresses):
-        """Validate the format of each IP Address in a list of IP Addresses."""
-        # Validate IP Addresses
-        validation_successful = True
-        for i, ip_address in enumerate(ip_addresses):
-            try:
-                netaddr.IPAddress(ip_address)
-            except netaddr.AddrFormatError:
-                try:
-                    resolved_ip = socket.gethostbyname(ip_address)
-                    self.job.logger.info(f"[{ip_address}] resolved to [{resolved_ip}]")
-                    ip_addresses[i] = resolved_ip
-                except socket.gaierror:
-                    self.job.logger.error(f"[{ip_address}] is not a valid IP Address or name.")
-                    validation_successful = False
-        if validation_successful:
-            return True
-        raise netaddr.AddrConversionError
-
     def _handle_failed_devices(self, device_data):
         """
         Handle result data from failed devices.
@@ -215,9 +194,8 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                         "Platform.network_driver missing"
                     )
         result = sync_devices_command_getter(
-            self.job.job_result,
+            self.job,
             self.job.logger.getEffectiveLevel(),
-            self.job.job_result.task_kwargs,
         )
         if self.job.debug:
             self.job.logger.debug(f"Command Getter Result: {result}")
@@ -406,7 +384,6 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
 
     def load(self):
         """Load network data."""
-        self._validate_ip_addresses(self.job.ip_addresses)
         self.execute_command_getter()
         self.load_manufacturers()
         self.load_platforms()

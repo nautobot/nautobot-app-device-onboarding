@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 import yaml
-from nautobot.core.testing import TransactionTestCase
+from nautobot.apps.testing import TransactionTestCase
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Secret, SecretsGroup, SecretsGroupAssociation
 

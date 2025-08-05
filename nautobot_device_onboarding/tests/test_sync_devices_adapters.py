@@ -3,7 +3,7 @@
 from unittest.mock import patch
 
 from diffsync.exceptions import ObjectNotFound
-from nautobot.core.testing import TransactionTestCase
+from nautobot.apps.testing import TransactionTestCase
 from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
 from nautobot.extras.models import JobResult
 
