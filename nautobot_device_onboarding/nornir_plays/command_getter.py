@@ -20,6 +20,7 @@ from nornir_netmiko.tasks import netmiko_send_command
 from ntc_templates.parse import parse_output
 from ttp import ttp
 
+from nautobot_device_onboarding.nornir_plays.inventory_creator import guess_netmiko_device_type
 from nautobot_device_onboarding.constants import SUPPORTED_COMMAND_PARSERS
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
@@ -384,3 +385,12 @@ def scan_target_ssh(task):
         return tcp_ping(task.host.hostname, task.host.port)
     except ConnectionRefusedError as e:
         return False
+
+def get_network_driver(task):
+    """Get (discover/guess) network driver from host."""
+    return guess_netmiko_device_type(
+        hostname=task.host.hostname,
+        username=task.host.username,
+        password=task.host.password,
+        port=task.host.port,
+    )

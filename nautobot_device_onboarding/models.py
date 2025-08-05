@@ -62,20 +62,20 @@ class DiscoveredDevice(PrimaryModel):
 class DeviceService:
     ip: str
     port: int
-    service: Literal['ssh', 'snmp', 'api']
+    name: Literal['ssh', 'snmp', 'api']
 
     def __str__(self) -> str:
-        return f"{self.ip}:{self.port}:{self.service}"
+        return f"{self.ip}:{self.port}:{self.name}"
 
     @classmethod
-    def from_args(cls, ip, port, service):
-        return cls(ip, port, service)
+    def from_args(cls, ip, port, name):
+        return cls(ip, int(port), name)
 
     @classmethod
     def from_string(cls, value: str):
         try:
-            ip, port, service = value.strip().split(":")
-            return cls.from_args(ip, port, service)
+            ip, port, name = value.strip().split(":")
+            return cls.from_args(ip, port, name)
         except ValueError as e:
             raise ValueError(f"Invalid format for DeviceService string: {value!r}") from e
 
@@ -85,7 +85,7 @@ class DiscoveryResult:
     hostname: Optional[str] = None
     device_model: Optional[str] = None
     serial: Optional[str] = None
-    network_driver: Optional[str] = None
+    # network_driver: Optional[str] = None
 
 
 @dataclass
@@ -103,7 +103,12 @@ class ProbedDeviceServices:
         'invalid_credentials',
         'unexpected_output',
         'parsing_error',
+        'authenticated',
+        'discovery_issue',
     ]] = None
+
+    network_driver: Optional[str] = None
+
 
     banner: str = ""
     last_seen: str = ""
@@ -157,17 +162,40 @@ class ProbedDeviceStore:
     def filter(self, **kwargs) -> list['ProbedDeviceServices']:
         def match(entry) -> bool:
             for key, value in kwargs.items():
-                if key.endswith("__in"):
-                    attr = key[:-4]
-                    if getattr(entry, attr, None) not in value:
-                        return False
-                elif key.endswith("__not"):
-                    attr = key[:-5]
-                    if getattr(entry, attr, None) == value:
-                        return False
+                # Support nested fields, e.g., service__ip
+                parts = key.split("__")
+                negate = False
+
+                # Handle special suffixes like __in and __not
+                if parts[-1] == "in":
+                    attr_path = parts[:-1]
+                    op = "in"
+                elif parts[-1] == "not":
+                    attr_path = parts[:-1]
+                    op = "not"
                 else:
-                    if getattr(entry, key, None) != value:
+                    attr_path = parts
+                    op = "eq"
+
+                # Traverse nested attributes
+                current = entry
+                try:
+                    for attr in attr_path:
+                        current = getattr(current, attr)
+                except AttributeError:
+                    return False  # attribute doesn't exist
+
+                # Compare based on operation
+                if op == "in":
+                    if current not in value:
                         return False
+                elif op == "not":
+                    if current == value:
+                        return False
+                else:  # equality check
+                    if current != value:
+                        return False
+
             return True
 
         return [entry for entry in self._entries.values() if match(entry)]
@@ -214,7 +242,7 @@ class ProbedDeviceStore:
             service = DeviceService(
                 ip=entry["ip"],
                 port=entry["port"],
-                service=entry["service"]
+                type=entry["service"]
             )
             discovery_result = DiscoveryResult(
                 hostname=entry.get("hostname"),

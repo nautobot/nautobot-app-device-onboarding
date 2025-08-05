@@ -66,8 +66,9 @@ from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
 from nautobot_device_onboarding.nornir_plays.command_getter import (
     _parse_credentials,
     netmiko_send_commands,
-    sync_devices_command_getter,
+    # sync_devices_command_getter,
     scan_target_ssh,
+    get_network_driver,
 )
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
@@ -957,11 +958,6 @@ class DeviceOnboardingDiscoveryJob(Job):
         required=True,
         description="Discovery protocols.",
     )
-    # secrets_groups = MultiObjectVar(
-    #     model=SecretsGroup,
-    #     required=True,
-    #     description="SecretsGroup for device connection credentials.",
-    # )
     secrets_group = ObjectVar(
         model=SecretsGroup,
         required=True,
@@ -993,17 +989,24 @@ class DeviceOnboardingDiscoveryJob(Job):
 
     def ssh_ping(self):
         with InitNornir(inventory={"plugin": "empty-inventory"}) as nornir_obj:
-            for probed_service in self.probed_device_store.filter(service="ssh"):
-                host = Host(name=str(probed_service.service), hostname=probed_service.service.ip, port=probed_service.service.port)
+            # Build inventory
+            for probed_service in self.probed_device_store.filter(service__name="ssh"):
+                host = Host(
+                    name=str(probed_service.service),
+                    hostname=probed_service.service.ip,
+                    port=probed_service.service.port
+                )
                 nornir_obj.inventory.hosts.update({host.name: host})
 
+            # Run tcp ping
             ping_results = nornir_obj.run(task=scan_target_ssh)
 
+            # Update results
             for host, result in ping_results.items():
                 device_service = DeviceService.from_string(host)
                 probed_device_service = self.probed_device_store[device_service]
 
-                if result.result:
+                if result[0].result:
                     probed_device_service.port_status = "open"
                 else:
                     probed_device_service.port_status = "unreachable"
@@ -1015,48 +1018,56 @@ class DeviceOnboardingDiscoveryJob(Job):
             kwargs={"debug": self.debug}
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
 
-            for probed_service in self.probed_device_store.filter(service="ssh", port_status="open"):
-                host = Host(name=str(probed_service), hostname=probed_service.service.ip, port=probed_service.service.port)
+            # For open ports, get (discover) network_driver
+            for probed_service in self.probed_device_store.filter(service__name="ssh", port_status="open"):
+                host = Host(
+                    name=str(probed_service.service),
+                    hostname=probed_service.service.ip,
+                    port=probed_service.service.port,
+                    username=self.ssh_username,
+                    password=self.ssh_password,
+                )
                 nornir_obj.inventory.hosts.update({host.name: host})
 
-                single_host_inventory_constructed, exc_info = _set_inventory(
-                    host_ip=probed_service.service.ip,
-                    platform="",
-                    port=probed_service.service.port,
-                    username="",  # TODO(mzb)
-                    password="",  # TODO(mzb)
-                )
+            get_network_driver_results = nornir_obj.run(task=get_network_driver)
 
-                if exc_info:
-                    logger.error(f"Unable to onboard {probed_service.service.ip}, failed with exception {exc_info}")
+            # Update results
+            for host, result in get_network_driver_results.items():
+                device_service = DeviceService.from_string(host)
+                probed_device_service = self.probed_device_store[device_service]
+                network_driver, exc = result[0]
 
-                nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
-
-            connect_results = nr_with_processors.run(
-                task=netmiko_send_commands,
-                command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
-                command_getter_job="sync_devices",
-                logger=logger,
-                **kwargs,
-            )
-
-            for host, result in connect_results.items():
-                probed_service = DeviceService.from_string(host)
-                probed_device_service = self.probed_device_store[probed_service]
-
-                if result:
-                    discovery_result = DiscoveryResult()
-
-                    discovery_result.hostname = result["hostname"]
-                    discovery_result.serial_number = result["serial_number"]
-                    discovery_result.device_model = result["device_model"]
-
-                    probed_device_service.service_status = "ok"
-                    probed_device_service.discovery_result = discovery_result
+                if network_driver and not exc:
+                    probed_device_service.network_driver = network_driver
+                    probed_device_service.service_status = "authenticated"
                 else:
-                    # TODO(mzb): Finalize exceptions and other cases
-                    ...
-                ...
+                    probed_device_service.service_status = "discovery_issue"
+
+            # connect_results = nr_with_processors.run(
+            #     task=netmiko_send_commands,
+            #     command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
+            #     command_getter_job="sync_devices",
+            #     logger=logger,
+            #     **kwargs,
+            # )
+
+            # for host, result in connect_results.items():
+            #     probed_service = DeviceService.from_string(host)
+            #     probed_device_service = self.probed_device_store[probed_service]
+            #
+            #     if result:
+            #         discovery_result = DiscoveryResult()
+            #
+            #         discovery_result.hostname = result["hostname"]
+            #         discovery_result.serial_number = result["serial_number"]
+            #         discovery_result.device_model = result["device_model"]
+            #
+            #         probed_device_service.service_status = "ok"
+            #         probed_device_service.discovery_result = discovery_result
+            #     else:
+            #         # TODO(mzb): Finalize exceptions and other cases
+            #         ...
+            #     ...
 
     def update_discovery_inventory(self):
         # IPs with at least one SSH Service open:
@@ -1175,6 +1186,16 @@ class DeviceOnboardingDiscoveryJob(Job):
         self.prefixes = prefixes.split(",")
         self.protocols = protocols
         self.secrets_group = secrets_group
+
+        self.ssh_username = secrets_group.get_secret_value(
+            access_type=SecretsGroupAccessTypeChoices.TYPE_SSH,
+            secret_type=SecretsGroupSecretTypeChoices.TYPE_USERNAME,
+        )
+        self.ssh_password = secrets_group.get_secret_value(
+            access_type=SecretsGroupAccessTypeChoices.TYPE_SSH,
+            secret_type=SecretsGroupSecretTypeChoices.TYPE_PASSWORD,
+        )
+
         self.scanning_threads_count = scanning_threads_count
         self.login_threads_count = login_threads_count
         self.ssh_ports = [int(port) for port in ssh_ports.split(",")]
@@ -1190,14 +1211,15 @@ class DeviceOnboardingDiscoveryJob(Job):
                 for ssh_port in self.ssh_ports:
                     self.probed_device_store.add_or_update(
                         ProbedDeviceServices(
-                            service=DeviceService.from_args(ip=ip, port=ssh_port, service=AutodiscoveryProtocolTypeChoices.SSH))
+                            service=DeviceService.from_args(ip=ip, port=ssh_port, name=AutodiscoveryProtocolTypeChoices.SSH))
                     )
 
         scan_result = self.ssh_ping()
+        self.ssh_connect()
+        print(self.probed_device_store.to_json())
+        # connection_attempts = self._attempt_connection(scan_result)
 
-        connection_attempts = self._attempt_connection(scan_result)
-
-        self._update_discovered_devices(connection_attempts)
+        # self._update_discovered_devices(connection_attempts)
 
         # return discovered_result
 
