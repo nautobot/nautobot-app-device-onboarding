@@ -5,7 +5,6 @@ import os
 from typing import Dict, Tuple, Union
 
 from django.conf import settings
-from nautobot.dcim.models import Platform
 from nautobot.dcim.utils import get_all_network_driver_mappings
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import SecretsGroup, SecretsGroupAssociation
@@ -290,21 +289,17 @@ def sync_devices_command_getter(job, log_level):
             for entered_ip in ip_addresses:
                 if job.processed_csv_data:
                     # get platform if one was provided via csv
-                    platform = None
-                    platform_id = job.processed_csv_data[entered_ip]["platform"]
-                    if platform_id:
-                        platform = Platform.objects.get(id=platform_id)
+                    platform = job.processed_csv_data[entered_ip]["platform"]
 
                     # parse secrets from secrets groups provided via csv
-                    secrets_group_id = job.processed_csv_data[entered_ip]["secrets_group"]
-                    if secrets_group_id:
-                        new_secrets_group = SecretsGroup.objects.get(id=secrets_group_id)
+                    secrets_group = job.processed_csv_data[entered_ip]["secrets_group"]
+                    if secrets_group:
                         # only update the credentials if the secrets_group specified on a csv row
                         # is different than the secrets group on the previous csv row. This prevents
                         # unnecessary repeat calls to secrets providers.
-                        if new_secrets_group != loaded_secrets_group:
-                            logger.info(f"Parsing credentials from Secrets Group: {new_secrets_group.name}")
-                            loaded_secrets_group = new_secrets_group
+                        if secrets_group != loaded_secrets_group:
+                            logger.info(f"Parsing credentials from Secrets Group: {secrets_group.name}")
+                            loaded_secrets_group = secrets_group
                             username, password = _parse_credentials(loaded_secrets_group, logger=logger)
                             if not (username and password):
                                 logger.error(f"Unable to onboard {entered_ip}, failed to parse credentials")
