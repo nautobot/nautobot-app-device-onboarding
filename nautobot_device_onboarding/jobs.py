@@ -79,7 +79,7 @@ from nautobot_device_onboarding.models import ProbedDeviceStore, DeviceService, 
 
 from netmiko import SSHDetect
 from nautobot_device_onboarding.nornir_plays.processor import CommandGetterProcessor
-
+from nautobot_device_onboarding.models import SshStateChoices
 
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
 
@@ -319,7 +319,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
     update_devices_without_primary_ip = BooleanVar(
         default=False,
         description="If a device at the specified location already exists in Nautobot but the primary ip address "
-        "does not match an ip address entered, update this device with the sync.",
+                    "does not match an ip address entered, update this device with the sync.",
     )
     device_role = ObjectVar(
         model=Role,
@@ -529,27 +529,27 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         return processed_input_data
 
     def run(
-        self,
-        dryrun,
-        memory_profiling,
-        debug,
-        csv_file,
-        location,
-        namespace,
-        ip_addresses,
-        set_mgmt_only,
-        update_devices_without_primary_ip,
-        device_role,
-        device_status,
-        interface_status,
-        ip_address_status,
-        port,
-        timeout,
-        secrets_group,
-        platform,
-        discovered_devices,
-        *args,
-        **kwargs,
+            self,
+            dryrun,
+            memory_profiling,
+            debug,
+            csv_file,
+            location,
+            namespace,
+            ip_addresses,
+            set_mgmt_only,
+            update_devices_without_primary_ip,
+            device_role,
+            device_status,
+            interface_status,
+            ip_address_status,
+            port,
+            timeout,
+            secrets_group,
+            platform,
+            discovered_devices,
+            *args,
+            **kwargs,
     ):
         """Run sync."""
         self.dryrun = dryrun
@@ -760,23 +760,23 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         self.target_adapter.load()
 
     def run(
-        self,
-        dryrun,
-        memory_profiling,
-        debug,
-        namespace,
-        interface_status,
-        ip_address_status,
-        default_prefix_status,
-        location,
-        devices,
-        device_role,
-        platform,
-        sync_vlans,
-        sync_vrfs,
-        sync_cables,
-        *args,
-        **kwargs,
+            self,
+            dryrun,
+            memory_profiling,
+            debug,
+            namespace,
+            interface_status,
+            ip_address_status,
+            default_prefix_status,
+            location,
+            devices,
+            device_role,
+            platform,
+            sync_vlans,
+            sync_vrfs,
+            sync_cables,
+            *args,
+            **kwargs,
     ):
         """Run sync."""
         self.dryrun = dryrun
@@ -894,11 +894,11 @@ class DeviceOnboardingTroubleshootingJob(Job):
         try:
             logger = NornirLogger(self.job_result, self.logger.getEffectiveLevel())
             with InitNornir(
-                runner=NORNIR_SETTINGS.get("runner"),
-                logging={"enabled": False},
-                inventory={
-                    "plugin": "empty-inventory",
-                },
+                    runner=NORNIR_SETTINGS.get("runner"),
+                    logging={"enabled": False},
+                    inventory={
+                        "plugin": "empty-inventory",
+                    },
             ) as nornir_obj:
                 for entered_ip in ip_addresses:
                     single_host_inventory_constructed, _ = _set_inventory(
@@ -974,7 +974,7 @@ class DeviceOnboardingDiscoveryJob(Job):
         default=2,
     )
     ssh_ports = StringVar(
-        default="22", 
+        default="22",
         description="Comma separated list of ports to attempt SSH connection over.  Ports are tried in the order given.",
         label="SSH Ports"
     )
@@ -992,7 +992,8 @@ class DeviceOnboardingDiscoveryJob(Job):
         with InitNornir(inventory={"plugin": "empty-inventory"}) as nornir_obj:
             # Build inventory
             for probed_service in self.probed_device_store.filter(service__name="ssh"):
-                nornir_obj.inventory.hosts.update({str(probed_service): probed_service.to_nornir_host(name_eq_ip=False)})
+                nornir_obj.inventory.hosts.update(
+                    {str(probed_service): probed_service.to_nornir_host(name_eq_ip=False)})
 
             # Run tcp ping
             ping_results = nornir_obj.run(task=scan_target_ssh)
@@ -1003,9 +1004,9 @@ class DeviceOnboardingDiscoveryJob(Job):
                 probed_device_service = self.probed_device_store[device_service]
 
                 if result[0].result:
-                    probed_device_service.port_status = "open"
+                    probed_device_service.port_status = SshStateChoices.PORT_OPENED
                 else:
-                    probed_device_service.port_status = "unreachable"
+                    probed_device_service.port_status = SshStateChoices.PORT_CLOSED
 
     def ssh_connect(self):
         """Login via SSH and Guess platform."""
@@ -1016,8 +1017,10 @@ class DeviceOnboardingDiscoveryJob(Job):
             # nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
 
             # For open ports, get (discover) network_driver
-            for probed_service in self.probed_device_store.filter(service__name="ssh", port_status="open"):
-                nornir_obj.inventory.hosts.update({str(probed_service): probed_service.to_nornir_host(name_eq_ip=False)})
+            for probed_service in self.probed_device_store.filter(service__name="ssh",
+                                                                  port_status=SshStateChoices.PORT_OPENED):
+                nornir_obj.inventory.hosts.update(
+                    {str(probed_service): probed_service.to_nornir_host(name_eq_ip=False)})
 
             get_network_driver_results = nornir_obj.run(task=get_network_driver)
 
@@ -1029,26 +1032,26 @@ class DeviceOnboardingDiscoveryJob(Job):
 
                 if network_driver and not exc:
                     probed_device_service.network_driver = network_driver
-                    probed_device_service.service_status = "authenticated"
+                    probed_device_service.service_status = SshStateChoices.SERVICE_AUTHENTICATED
                 else:
-                    probed_device_service.service_status = "discovery_issue"
-
+                    probed_device_service.service_status = "discovery_issue"  # TODO(mzb): Account for other statuses
 
     def ssh_collect(self):
         """Collect device details through SSH."""
         with InitNornir(inventory={"plugin": "empty-inventory"}) as nornir_obj:
             logger = NornirLogger(job_result=self.job_result, log_level=self.logger.getEffectiveLevel())
             compiled_results = {}
-            kwargs={"debug": self.debug}
+            kwargs = {"debug": self.debug}
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
 
             # For open, authenticated ports, get (discover) device's network_driver
             for probed_service in self.probed_device_store.filter(
                     service__name="ssh",
-                    port_status="open",
-                    service_status="authenticated",
-                ):
-                nornir_obj.inventory.hosts.update({probed_service.service.ip: probed_service.to_nornir_host(name_eq_ip=True)})
+                    port_status=SshStateChoices.PORT_OPENED,
+                    service_status=SshStateChoices.SERVICE_AUTHENTICATED,
+            ):
+                nornir_obj.inventory.hosts.update(
+                    {probed_service.service.ip: probed_service.to_nornir_host(name_eq_ip=True)})
 
             nr_with_processors.run(
                 task=netmiko_send_commands,
@@ -1065,24 +1068,33 @@ class DeviceOnboardingDiscoveryJob(Job):
                 probed_device_service.hostname = compiled_result["hostname"]
                 probed_device_service.serial = compiled_result["serial"]
                 probed_device_service.device_model = compiled_result["device_type"]
-                probed_device_service.service_status = "ok"
-
+                probed_device_service.service_status = SshStateChoices.SERVICE_DATA_COLLECTED
 
     def update_discovery_inventory(self):
         # IPs with at least one SSH Service open:
-        connected_services = self.probed_device_store.filter(service__name="ssh", port_status="open", service_status="ok")
+        connected_services = self.probed_device_store.filter(
+            service__name="ssh",
+            port_status=SshStateChoices.PORT_OPENED,
+            service_status=SshStateChoices.SERVICE_DATA_COLLECTED
+        )
         connected_services_ips = {service.service.ip for service in connected_services}
 
         # IPs with SSH open but without successful collection (deduplicate):
         services_with_issues = [service for service in
-                                self.probed_device_store.filter(service="ssh", port_status="open",
-                                                                service_status__not="ok") if
+                                self.probed_device_store.filter(
+                                    service="ssh",
+                                    port_status=SshStateChoices.PORT_OPENED,
+                                    service_status__not=SshStateChoices.SERVICE_DATA_COLLECTED,
+                                ) if
                                 service.service.ip not in connected_services_ips]
         not_connected_services_ips = {service.service.ip for service in services_with_issues}
 
         # Unreachable IPs
         unreachable_services = [service for service in
-                                self.probed_device_store.filter(service="ssh", port_status__not="open")
+                                self.probed_device_store.filter(
+                                    service="ssh",
+                                    port_status=SshStateChoices.PORT_CLOSED,
+                                )
                                 if (service.service.ip not in not_connected_services_ips) and
                                 (service.service.ip not in connected_services_ips)]
         unreachable_services_ips = {service.service.ip for service in unreachable_services}
@@ -1104,35 +1116,33 @@ class DeviceOnboardingDiscoveryJob(Job):
             )
 
         for service_with_issue in services_with_issues:
-            _, _ = DiscoveredDevice.objects.update_or_create(
-                ip_address=service_with_issue.service.ip,
-                defaults={
-                    "ssh_response": True,  # Rename to ssh_login ? or ssh_status ?
-                    "ssh_response_datetime": datetime.now(),
-                    "ssh_credentials": None,
-                    "ssh_port": service_with_issue.service.port,
-                }
+            DiscoveredDevice.objects.filter(ip_address=service_with_issue.service.ip).update(
+                    ssh_response=True,  # Rename to ssh_login ? or ssh_status ?
+                    ssh_response_datetime=datetime.now(),
+                    ssh_credentials=None,
+                    ssh_port=service_with_issue.service.port,
+                    ssh_issue=service_with_issue.service_status,
             )
 
         DiscoveredDevice.objects.filter(ip_address__in=unreachable_services_ips).update(
             ssh_response=False,  # Rename to ssh_login ? or ssh_status ?
-            ssh_response_datetime=datetime.now(),
             ssh_credentials=None,
+            ssh_port=None,
+            ssh_issue=SshStateChoices.PORT_CLOSED,
         )
 
-
     def run(
-        self,
-        # memory_profiling,
-        debug,
-        scanning_threads_count,
-        login_threads_count,
-        prefixes,
-        secrets_group,
-        protocols,
-        ssh_ports,
-        *args,
-        **kwargs,
+            self,
+            # memory_profiling,
+            debug,
+            scanning_threads_count,
+            login_threads_count,
+            prefixes,
+            secrets_group,
+            protocols,
+            ssh_ports,
+            *args,
+            **kwargs,
     ):  # pragma: no cover
         """Process discovering devices."""
         # self.dryrun = dryrun

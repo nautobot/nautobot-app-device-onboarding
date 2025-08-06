@@ -23,19 +23,25 @@ from nornir.core.inventory import ConnectionOptions, Host
 from nautobot_device_onboarding.constants import NETMIKO_EXTRAS
 
 
-class SshIssuesChoices(ChoiceSet):
-    """Styling choices for custom banners."""
+class SshStateChoices(ChoiceSet):
+    """SSH State Choices."""
 
-    INVALID_CREDENTIALS = "invalid_credentials"
-    INVALID_COMMAND = "invalid_command"
     PORT_CLOSED = "port_closed"
+    PORT_OPENED = "port_opened"
+    SERVICE_UNAUTHENTICATED = "Service unauthenticated"
+    SERVICE_AUTHENTICATED = "service_authenticated"
+    SERVICE_DATA_COLLECTED = "service_data_collected"
+    INVALID_COMMAND = "invalid_command"
     PARSE_ERROR = "parse_error"
 
     CHOICES = (
-        (INVALID_CREDENTIALS, "Invalid credentials"),
         (PORT_CLOSED, "Port closed"),
-        (PARSE_ERROR, "Parse error"),
+        (PORT_OPENED, "Port opened"),
+        (SERVICE_UNAUTHENTICATED, "Service unauthenticated"),
+        (SERVICE_AUTHENTICATED, "Service authenticated"),
+        (SERVICE_DATA_COLLECTED, "Service data collected"),
         (INVALID_COMMAND, "Invalid command"),
+        (PARSE_ERROR, "Parse error"),
     )
 
 
@@ -44,7 +50,7 @@ class DiscoveredDevice(PrimaryModel):
 
     ssh_response = BooleanField(default=False, verbose_name="SSH login")
     ssh_response_datetime = DateTimeField(blank=True, null=True, verbose_name="SSH last response")
-    ssh_issue = CharField(choices=SshIssuesChoices.CHOICES, blank=True, null=True, max_length=CHARFIELD_MAX_LENGTH)
+    ssh_issue = CharField(choices=SshStateChoices.CHOICES, blank=True, null=True, max_length=CHARFIELD_MAX_LENGTH)  # TODO(mzb): Rename to ssh_status!
     ssh_port = PositiveIntegerField(blank=True, null=True)
     ssh_credentials = ForeignKey(to="extras.SecretsGroup", on_delete=SET_NULL, related_name="+", blank=True, null=True)
     ssh_timeout = PositiveIntegerField(default=30, blank=True, null=True)
@@ -148,8 +154,6 @@ class ProbedDeviceServices:
         }
         return {**base, **discovery_dict}
 
-from collections import defaultdict
-from typing import Iterator
 
 class ProbedDeviceStore:
     def __init__(self):
@@ -175,10 +179,6 @@ class ProbedDeviceStore:
 
     def add_or_update(self, probed_device_services: ProbedDeviceServices):
         self._entries[probed_device_services.service] = probed_device_services
-
-    # def get(self, ip: str, port: int, service: Literal['ssh', 'snmp', 'api']) -> Optional[ProbedDeviceServices]:
-    #     key = DeviceService(ip, port, service)
-    #     return self._entries.get(key)
 
     def filter(self, **kwargs) -> list['ProbedDeviceServices']:
         def match(entry) -> bool:
@@ -221,61 +221,8 @@ class ProbedDeviceStore:
 
         return [entry for entry in self._entries.values() if match(entry)]
 
-    # def group_by_ip_and_service(self) -> dict[tuple[str, str], list[ProbedDeviceServices]]:
-    #     grouped = defaultdict(list)
-    #
-    #     for entry in self._entries.values():
-    #         key = (entry.service.ip, entry.service.service)
-    #         grouped[key].append(entry)
-    #
-    #     return grouped
-
-    # from collections import defaultdict
-    #
-    # def reachable_and_unreachable_ips(self, service: Optional[str] = None) -> tuple[set[str], set[str]]:
-    #     status_by_ip = defaultdict(list)
-    #
-    #     for entry in self._entries.values():
-    #         if service is None or entry.service.service == service:
-    #             status_by_ip[entry.service.ip].append(entry.port_status)
-    #
-    #     reachable = {ip for ip, statuses in status_by_ip.items() if "open" in statuses}
-    #     unreachable = set(status_by_ip.keys()) - reachable
-    #     return reachable, unreachable
-    #
-    # def reachable_ips(self, service: Optional[str] = None) -> set[str]:
-    #     reachable, _ = self.reachable_and_unreachable_ips(service)
-    #     return reachable
-    #
-    # def unreachable_ips(self, service: Optional[str] = None) -> set[str]:
-    #     _, unreachable = self.reachable_and_unreachable_ips(service)
-    #     return unreachable
-
     def to_json(self) -> str:
         return json.dumps(
             [entry.to_dict() for entry in self._entries.values()],
             indent=2
         )
-
-    def from_json(self, json_str: str):
-        data = json.loads(json_str)
-        for entry in data:
-            service = DeviceService(
-                ip=entry["ip"],
-                port=entry["port"],
-                type=entry["service"]
-            )
-            discovery_result = DiscoveryResult(
-                hostname=entry.get("hostname"),
-                device_model=entry.get("device_model"),
-                serial_number=entry.get("serial_number")
-            )
-            probed = ProbedDeviceServices(
-                service=service,
-                port_status=entry.get("port_status"),
-                service_status=entry.get("service_status"),
-                banner=entry.get("banner", ""),
-                last_seen=entry.get("last_seen", ""),
-                discovery_result=discovery_result
-            )
-            self.add_or_update(probed)
