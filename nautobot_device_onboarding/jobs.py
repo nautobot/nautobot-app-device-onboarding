@@ -1099,8 +1099,29 @@ class DeviceOnboardingDiscoveryJob(Job):
                                 (service.service.ip not in connected_services_ips)]
         unreachable_services_ips = {service.service.ip for service in unreachable_services}
 
-        def get_inventory_health(discovered_device):
+        def update_inventory_health(discovered_device):
+            """Updates inventory health information based on discovered device."""
+            query = Q(primary_ip4__host=discovered_device.ip_address)
 
+            if discovered_device.hostname:
+                query |= Q(name=discovered_device.hostname)
+
+            if discovered_device.serial:
+                query |= Q(serial=discovered_device.serial)
+
+            try:
+                # 100% match: Primary IP4, Hostname and Serial
+                discovered_device.device = Device.objects.get(query)
+                discovered_device.inventory_status = "Inventoried"
+                discovered_device.validated_save()
+            except Device.DoesNotExist:
+                # 0% match - none of the details exist
+                discovered_device.inventory_status = "Pending Inventory"
+                discovered_device.validated_save()
+            except Device.MultipleObjectsReturned:
+                # 1-99% match, unknown inventory state / conflict
+                discovered_device.inventory_status = "Partially Inventoried"
+                discovered_device.validated_save()
 
         # Update Connected services
         for connected_service in connected_services:
@@ -1117,6 +1138,7 @@ class DeviceOnboardingDiscoveryJob(Job):
                     "network_driver": connected_service.network_driver,
                 }
             )
+            update_inventory_health(device)
 
         for service_with_issue in services_with_issues:
             DiscoveredDevice.objects.filter(ip_address=service_with_issue.service.ip).update(
