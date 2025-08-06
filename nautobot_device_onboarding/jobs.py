@@ -1099,9 +1099,12 @@ class DeviceOnboardingDiscoveryJob(Job):
                                 (service.service.ip not in connected_services_ips)]
         unreachable_services_ips = {service.service.ip for service in unreachable_services}
 
+        def get_inventory_health(discovered_device):
+
+
         # Update Connected services
         for connected_service in connected_services:
-            _, _ = DiscoveredDevice.objects.update_or_create(
+            device, _ = DiscoveredDevice.objects.update_or_create(
                 ip_address=connected_service.service.ip,
                 defaults={
                     "ssh_response": True,
