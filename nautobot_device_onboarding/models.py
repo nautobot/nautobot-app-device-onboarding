@@ -42,8 +42,8 @@ class SshIssuesChoices(ChoiceSet):
 class DiscoveredDevice(PrimaryModel):
     ip_address = GenericIPAddressField(unique=True)
 
-    ssh_response = BooleanField(default=False)
-    ssh_response_datetime = DateTimeField(blank=True, null=True)
+    ssh_response = BooleanField(default=False, verbose_name="SSH login")
+    ssh_response_datetime = DateTimeField(blank=True, null=True, verbose_name="SSH last response")
     ssh_issue = CharField(choices=SshIssuesChoices.CHOICES, blank=True, null=True, max_length=CHARFIELD_MAX_LENGTH)
     ssh_port = PositiveIntegerField(blank=True, null=True)
     ssh_credentials = ForeignKey(to="extras.SecretsGroup", on_delete=SET_NULL, related_name="+", blank=True, null=True)
@@ -86,14 +86,6 @@ class DeviceService:
 
 
 @dataclass
-class DiscoveryResult:
-    hostname: Optional[str] = None
-    device_model: Optional[str] = None
-    serial: Optional[str] = None
-    # network_driver: Optional[str] = None
-
-
-@dataclass
 class ProbedDeviceServices:
     service: DeviceService
 
@@ -119,10 +111,6 @@ class ProbedDeviceServices:
     hostname: Optional[str] = None
     device_model: Optional[str] = None
     serial: Optional[str] = None
-
-    banner: str = ""
-    last_seen: str = ""
-    # discovery_result: DiscoveryResult = field(default_factory=DiscoveryResult)
 
     def __str__(self) -> str:
         return f"{self.service.ip}:{self.service.port}:{self.service.name}"

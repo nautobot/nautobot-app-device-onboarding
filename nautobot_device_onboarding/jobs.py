@@ -75,7 +75,7 @@ from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inven
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import TroubleshootingProcessor
 from nautobot_device_onboarding.utils.helper import onboarding_task_fqdn_to_ip
-from nautobot_device_onboarding.models import ProbedDeviceStore, DeviceService, ProbedDeviceServices, DiscoveryResult
+from nautobot_device_onboarding.models import ProbedDeviceStore, DeviceService, ProbedDeviceServices
 
 from netmiko import SSHDetect
 from nautobot_device_onboarding.nornir_plays.processor import CommandGetterProcessor
@@ -499,7 +499,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         update_devices_without_primary_ip = False
         for device in discovered_devices:
             secrets_group = device.ssh_credentials
-            platform = platform = Platform.objects.get(
+            platform = Platform.objects.get(
                 name=device.network_driver,
             )
 
@@ -1042,7 +1042,7 @@ class DeviceOnboardingDiscoveryJob(Job):
             kwargs={"debug": self.debug}
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, kwargs)])
 
-            # For open ports, get (discover) network_driver
+            # For open, authenticated ports, get (discover) device's network_driver
             for probed_service in self.probed_device_store.filter(
                     service__name="ssh",
                     port_status="open",
@@ -1058,13 +1058,13 @@ class DeviceOnboardingDiscoveryJob(Job):
                 **kwargs,
             )
 
-            for k, v in compiled_results.items():
-                probed_service = DeviceService.from_args(ip=k, port=v["port"], name="ssh")
+            for ip, compiled_result in compiled_results.items():
+                probed_service = DeviceService.from_args(ip=ip, port=compiled_result["port"], name="ssh")
                 probed_device_service = self.probed_device_store[probed_service]
 
-                probed_device_service.hostname = v["hostname"]
-                probed_device_service.serial = v["serial"]
-                probed_device_service.device_model = v["device_type"]
+                probed_device_service.hostname = compiled_result["hostname"]
+                probed_device_service.serial = compiled_result["serial"]
+                probed_device_service.device_model = compiled_result["device_type"]
                 probed_device_service.service_status = "ok"
 
 
@@ -1177,10 +1177,10 @@ class DeviceOnboardingDiscoveryJob(Job):
                         )
                     )
 
-        self.ssh_ping()
-        self.ssh_connect()
-        self.ssh_collect()
-        self.update_discovery_inventory()
+            self.ssh_ping()
+            self.ssh_connect()
+            self.ssh_collect()
+            self.update_discovery_inventory()
         # print(self.probed_device_store.to_json())
         # connection_attempts = self._attempt_connection(scan_result)
 
