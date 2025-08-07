@@ -2,6 +2,8 @@
 
 import json
 import os
+import pprint
+import traceback
 from typing import Dict, Tuple, Union
 
 from django.conf import settings
@@ -29,7 +31,7 @@ from nautobot_device_onboarding.nornir_plays.transform import (
     get_git_repo_parser_path,
     load_files_with_precedence,
 )
-from nautobot_device_onboarding.utils.helper import check_for_required_file
+from nautobot_device_onboarding.utils.helper import check_for_required_file, format_log_message
 
 PARSER_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "parsers"))
 
@@ -154,6 +156,9 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                 read_timeout=60,
                 **send_command_kwargs,
             )
+            if nautobot_job.debug:
+                log_message = format_log_message(pprint.pformat(current_result.result))
+                logger.debug(f"Result of '{command['command']}' command:<br><br>{log_message}")
             if command.get("parser") in SUPPORTED_COMMAND_PARSERS:
                 if isinstance(current_result.result, str):
                     if "Invalid input detected at" in current_result.result:
@@ -179,9 +184,22 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                                     data=current_result.result,
                                     try_fallback=bool(git_template_dir),
                                 )
+                                if nautobot_job.debug:
+                                    log_message = format_log_message(pprint.pformat(parsed_output))
+                                    logger.debug(
+                                        f"Parsed output of '{command['command']}' command:<br><br>{log_message}"
+                                    )
                                 task.results[result_idx].result = parsed_output
                                 task.results[result_idx].failed = False
                             except Exception:  # https://github.com/networktocode/ntc-templates/issues/369
+                                try:
+                                    if nautobot_job.debug:
+                                        traceback_str = traceback.format_exc().replace("\n", "<br>")
+                                        logger.warning(
+                                            f"Parsing failed for '{command['command']}' command:<br><br>{traceback_str}"
+                                        )
+                                except:  # noqa: E722, S110
+                                    pass
                                 task.results[result_idx].result = []
                                 task.results[result_idx].failed = False
                         if command["parser"] == "ttp":
