@@ -58,7 +58,11 @@ class SSOTSyncDevicesTestCase(TransactionTestCase):
             module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
         )
 
-        self.assertEqual(job_result.status, JobResultStatusChoices.STATUS_SUCCESS)
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
         self.assertEqual(2, Device.objects.all().count())
         for returned_device_ip, data in device_data.return_value.items():
             device = Device.objects.get(serial=data["serial"])
@@ -165,11 +169,11 @@ class SSOTSyncDevicesTestCase(TransactionTestCase):
         self.assertIsInstance(job, JobClass)
         self.assertEqual(job.connectivity_test, "AnyWackyValueHere")
         self.assertEqual(job.debug, True)
-        self.assertSequenceEqual(list(job.processed_csv_data.keys()), ["172.23.0.8"])
-        self.assertEqual(job.processed_csv_data["172.23.0.8"]["port"], 22)
-        self.assertEqual(job.processed_csv_data["172.23.0.8"]["timeout"], 30)
-        self.assertEqual(job.processed_csv_data["172.23.0.8"]["secrets_group"], ANY)
-        self.assertEqual(job.processed_csv_data["172.23.0.8"]["platform"], None)
+        self.assertSequenceEqual(list(job.ip_address_inventory.keys()), ["172.23.0.8"])
+        self.assertEqual(job.ip_address_inventory["172.23.0.8"]["port"], 22)
+        self.assertEqual(job.ip_address_inventory["172.23.0.8"]["timeout"], 30)
+        self.assertEqual(job.ip_address_inventory["172.23.0.8"]["secrets_group"], ANY)
+        self.assertEqual(job.ip_address_inventory["172.23.0.8"]["platform"], None)
         self.assertEqual(log_level, 10)
 
 
@@ -216,7 +220,11 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
             module="nautobot_device_onboarding.jobs", name="SSOTSyncNetworkData", **job_form_inputs
         )
 
-        self.assertEqual(job_result.status, JobResultStatusChoices.STATUS_SUCCESS, job_result.traceback)
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
         for returned_device_hostname, data in device_data.return_value.items():
             device = Device.objects.get(serial=data["serial"])
             self.assertEqual(device.name, returned_device_hostname)
@@ -292,7 +300,11 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
                     module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
                 )
 
-        self.assertEqual(job_result.status, JobResultStatusChoices.STATUS_SUCCESS, msg=job_result.traceback)
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
         self.assertTrue(job_result.job_log_entries.filter(message=r"[{localhost}] resolved to [{127.0.0.1}]").exists())
         newly_imported_device = Device.objects.get(name="fake-ios-01")
         self.assertEqual(str(newly_imported_device.primary_ip4), "127.0.0.1/32")

@@ -105,7 +105,7 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
         if self.job.debug:
             self.job.logger.debug("Loading Device data from Nautobot...")
 
-        for device in Device.objects.filter(primary_ip4__host__in=self.job.ip_addresses):
+        for device in Device.objects.filter(primary_ip4__host__in=list(self.job.ip_address_inventory)):
             interface_list = []
             # Only interfaces with the device's primary ip should be considered for diff calculations
             # Ultimately, only the first matching interface is used but this list could support multiple
@@ -183,16 +183,6 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
 
     def execute_command_getter(self):
         """Start the CommandGetterDO job to query devices for data."""
-        if not self.job.processed_csv_data:
-            if self.job.platform:
-                if not self.job.platform.network_driver:
-                    self.job.logger.error(
-                        f"The selected platform, {self.job.platform} "
-                        "does not have a network driver, please update the Platform."
-                    )
-                    raise Exception(  # pylint: disable=broad-exception-raised
-                        "Platform.network_driver missing"
-                    )
         result = sync_devices_command_getter(
             self.job,
             self.job.logger.getEffectiveLevel(),
@@ -309,26 +299,13 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
             platform = None  # If an exception is caught below, the platform must still be set.
             onboarding_device = None
             try:
-                location = diffsync_utils.retrieve_submitted_value(
-                    job=self.job, ip_address=ip_address, query_string="location"
-                )
-                platform = diffsync_utils.retrieve_submitted_value(
-                    job=self.job, ip_address=ip_address, query_string="platform"
-                )
-                primary_ip4__status = diffsync_utils.retrieve_submitted_value(
-                    job=self.job,
-                    ip_address=ip_address,
-                    query_string="ip_address_status",
-                )
-                device_role = diffsync_utils.retrieve_submitted_value(
-                    job=self.job, ip_address=ip_address, query_string="device_role"
-                )
-                device_status = diffsync_utils.retrieve_submitted_value(
-                    job=self.job, ip_address=ip_address, query_string="device_status"
-                )
-                secrets_group = diffsync_utils.retrieve_submitted_value(
-                    job=self.job, ip_address=ip_address, query_string="secrets_group"
-                )
+                job_form_attrs = self.job.ip_address_inventory[ip_address]
+                location = job_form_attrs["location"]
+                platform = job_form_attrs["platform"]
+                primary_ip4__status = job_form_attrs["ip_address_status"]
+                device_role = job_form_attrs["device_role"]
+                device_status = job_form_attrs["device_status"]
+                secrets_group = job_form_attrs["secrets_group"]
 
                 onboarding_device = self.device(
                     adapter=self,

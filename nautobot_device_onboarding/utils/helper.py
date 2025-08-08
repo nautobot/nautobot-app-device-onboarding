@@ -23,7 +23,13 @@ MARKDOWN_ESCAPE_RE = re.compile(r"(?<!\\)([\*_\[\]\(\)`])")
 
 def format_log_message(message):
     """Format a message for inclusion in Nautobot job logs."""
-    return MARKDOWN_ESCAPE_RE.sub(r"\\\1", message).replace("\r\n", "<br>").replace("\n", "<br>")
+    return (
+        MARKDOWN_ESCAPE_RE.sub(r"\\\1", message)
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\r\n", "<br>")
+        .replace("\n", "<br>")
+    )
 
 
 def get_job_filter(data=None):

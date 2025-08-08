@@ -5,7 +5,6 @@ import csv
 import json
 import logging
 import socket
-from io import StringIO
 
 import netaddr
 from diffsync.enum import DiffSyncFlags
@@ -254,7 +253,8 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
     def __init__(self, *args, **kwargs):
         """Initialize SSoTSyncDevices."""
         super().__init__(*args, **kwargs)
-        self.processed_csv_data = {}
+        self.ip_address_inventory = {}
+        self.found_invalid_ip_address = False
 
         self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
 
@@ -362,15 +362,19 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         )
 
     def _process_csv_data(self, csv_file):
-        """Convert CSV data into a dictionary containing Nautobot objects."""
+        """Convert CSV data into a list of dictionaries containing Nautobot objects."""
         self.logger.info("Decoding CSV file...")
         decoded_csv_file = csv_file.read().decode("utf-8")
-        csv_reader = csv.DictReader(StringIO(decoded_csv_file))
+        csv_reader = csv.DictReader(decoded_csv_file.split("\n"))
+
+        if len(decoded_csv_file.split("\n")) <= 1:
+            self.logger.error("The CSV file contains no data!")
+            return None
+
         self.logger.info("Processing CSV data...")
         processing_failed = False
         processed_csv_data = {}
-        row_count = 1
-        for row in csv_reader:
+        for row_num, row in enumerate(csv_reader, start=2):
             query = None
             try:
                 query = f"location_name: {row.get('location_name')}, location_parent_name: {row.get('location_parent_name')}"
@@ -412,6 +416,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                     platform = Platform.objects.get(
                         name=row["platform_name"].strip(),
                     )
+                    self._validate_platform_network_driver(platform)
 
                 set_mgmt_only = self._convert_string_to_bool(
                     string=row["set_mgmt_only"].lower().strip(), header="set_mgmt_only"
@@ -421,66 +426,73 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                     header="update_devices_without_primary_ip",
                 )
 
-                processed_csv_data[row["ip_address_host"]] = {}
-                processed_csv_data[row["ip_address_host"]]["location"] = location
-                processed_csv_data[row["ip_address_host"]]["namespace"] = namespace
-                processed_csv_data[row["ip_address_host"]]["port"] = int(row["port"].strip())
-                processed_csv_data[row["ip_address_host"]]["timeout"] = int(row["timeout"].strip())
-                processed_csv_data[row["ip_address_host"]]["set_mgmt_only"] = set_mgmt_only
-                processed_csv_data[row["ip_address_host"]]["update_devices_without_primary_ip"] = (
-                    update_devices_without_primary_ip
-                )
-                processed_csv_data[row["ip_address_host"]]["device_role"] = device_role
-                processed_csv_data[row["ip_address_host"]]["device_status"] = device_status
-                processed_csv_data[row["ip_address_host"]]["interface_status"] = interface_status
-                processed_csv_data[row["ip_address_host"]]["ip_address_status"] = ip_address_status
-                processed_csv_data[row["ip_address_host"]]["secrets_group"] = secrets_group
-                processed_csv_data[row["ip_address_host"]]["platform"] = platform
+                resolved_ip = self._validate_ip_address(row["ip_address_host"])
+                processed_row = {
+                    "original_ip_address": row["ip_address_host"],
+                    "location": location,
+                    "namespace": namespace,
+                    "port": int(row["port"].strip()),
+                    "timeout": int(row["timeout"].strip()),
+                    "set_mgmt_only": set_mgmt_only,
+                    "update_devices_without_primary_ip": update_devices_without_primary_ip,
+                    "device_role": device_role,
+                    "device_status": device_status,
+                    "interface_status": interface_status,
+                    "ip_address_status": ip_address_status,
+                    "secrets_group": secrets_group,
+                    "platform": platform,
+                }
 
-                row_count += 1
+                processed_csv_data[resolved_ip] = processed_row
+
             except ObjectDoesNotExist as err:
-                self.logger.error(f"(row {sum([row_count, 1])}), {err} {query}")
+                self.logger.error(f"(row {row_num}), {err} {query}")
                 processing_failed = True
-                row_count += 1
             except ValidationError as err:
-                self.logger.error(f"(row {sum([row_count, 1])}), {err}")
-                row_count += 1
+                self.logger.error(f"(row {row_num}), {err}")
+                processing_failed = True
         if processing_failed:
-            processed_csv_data = None
-        if row_count <= 1:
-            self.logger.error("The CSV file is empty!")
             processed_csv_data = None
 
         return processed_csv_data
 
-    def _validate_ip_addresses(self):
-        """Validate the IP Addresses, resolving FQDNs and replacing them with IPs as necessary."""
-        # Validate IP Addresses
-        validation_successful = True
-        for i, ip_address in enumerate(self.ip_addresses):
+    def _validate_ip_address(self, ip_address):
+        """Validate the IP Address, resolving FQDNs and replacing with an IP as necessary."""
+        try:
+            netaddr.IPAddress(ip_address)
+            return ip_address
+        except netaddr.AddrFormatError:
             try:
-                netaddr.IPAddress(ip_address)
-            except netaddr.AddrFormatError:
-                try:
-                    resolved_ip = socket.gethostbyname(ip_address)
-                    self.logger.info("[{%s}] resolved to [{%s}]", ip_address, resolved_ip)
-                    self.ip_addresses[i] = resolved_ip
-                except socket.gaierror:
-                    self.logger.error("[{%s}] is not a valid IP Address or FQDN.", ip_address)
-                    validation_successful = False
-        if not validation_successful:
-            raise RuntimeError("An invalid IP Address or FQDN was provided")
+                resolved_ip = socket.gethostbyname(ip_address)
+                self.logger.info("[{%s}] resolved to [{%s}]", ip_address, resolved_ip)
+                return resolved_ip
+            except socket.gaierror:
+                self.logger.error("[{%s}] is not a valid IP Address or FQDN.", ip_address)
+                self.found_invalid_ip_address = True
+                return ip_address
+
+    def _validate_platform_network_driver(self, platform):
+        if not platform.network_driver:
+            self.logger.error(
+                "The selected platform, %s does not have a network driver, please update the Platform.", platform
+            )
+            return False
+            # TODO: where does this go?
+            # raise Exception(  # pylint: disable=broad-exception-raised
+            #     "Platform.network_driver missing"
+            # )
+        return True
 
     def run(
         self,
-        dryrun,
-        memory_profiling,
-        debug,
-        connectivity_test,
-        port,
-        timeout,
-        set_mgmt_only,
-        update_devices_without_primary_ip,
+        dryrun=True,
+        memory_profiling=False,
+        debug=False,
+        port=22,
+        timeout=30,
+        connectivity_test=False,
+        update_devices_without_primary_ip=False,
+        set_mgmt_only=True,
         csv_file=None,
         location=None,
         namespace=None,
@@ -498,11 +510,8 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         self.debug = debug
 
         if csv_file:
-            self.processed_csv_data = self._process_csv_data(csv_file=csv_file)
-            if self.processed_csv_data:
-                # create a list of ip addresses for processing in the adapter
-                self.ip_addresses = list(self.processed_csv_data.keys())
-            else:
+            self.ip_address_inventory = self._process_csv_data(csv_file=csv_file)
+            if not self.ip_address_inventory:
                 raise ValidationError(message="CSV check failed. No devices will be synced.")
 
         else:
@@ -523,30 +532,37 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             missing_required_inputs = [
                 form_field for form_field, input_value in required_inputs.items() if not input_value
             ]
-            if not missing_required_inputs:
-                pass
-            else:
+            if missing_required_inputs:
                 self.logger.error(f"Missing requried inputs from job form: {missing_required_inputs}")
                 raise ValidationError(message=f"Missing required inputs {missing_required_inputs}")
 
-            self.ip_addresses = ip_addresses.replace(" ", "").split(",")
+            default_values = {
+                "port": int(port),
+                "timeout": int(timeout),
+                "secrets_group": secrets_group,
+                "platform": platform,
+                "location": location,
+                "namespace": namespace,
+                "device_role": device_role,
+                "device_status": device_status,
+                "interface_status": interface_status,
+                "ip_address_status": ip_address_status,
+                "set_mgmt_only": set_mgmt_only,
+                "update_devices_without_primary_ip": update_devices_without_primary_ip,
+            }
+
+            if platform:
+                self._validate_platform_network_driver(platform)
+
+            for ip_address in ip_addresses.replace(" ", "").split(","):
+                resolved = self._validate_ip_address(ip_address)
+                self.ip_address_inventory[resolved] = {"original_ip_address": ip_address, **default_values}
 
         self.connectivity_test = connectivity_test
-        self.port = port
-        self.timeout = timeout
-        self.set_mgmt_only = set_mgmt_only
-        self.update_devices_without_primary_ip = update_devices_without_primary_ip
         self.csv_file = csv_file
-        self.location = location
-        self.namespace = namespace
-        self.device_role = device_role
-        self.device_status = device_status
-        self.interface_status = interface_status
-        self.ip_address_status = ip_address_status
-        self.secrets_group = secrets_group
-        self.platform = platform
 
-        self._validate_ip_addresses()
+        if self.found_invalid_ip_address:
+            raise RuntimeError("An invalid IP Address or FQDN was provided")
 
         super().run(dryrun, memory_profiling)
 

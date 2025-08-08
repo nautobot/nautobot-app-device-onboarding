@@ -12,7 +12,6 @@ from nautobot_device_onboarding.utils.diffsync_utils import (
     generate_device_queryset_from_command_getter_result,
     get_or_create_ip_address,
     get_or_create_prefix,
-    retrieve_submitted_value,
 )
 
 
@@ -25,7 +24,7 @@ class TestDiffSyncUtils(TestCase):
         # Setup Nautobot Objects.
         cls.testing_objects = utils.sync_network_data_ensure_required_nautobot_objects()
         cls.command_getter_result = sync_network_data_fixture.sync_network_mock_data_valid
-        cls.processed_csv_data = {
+        cls.ip_address_inventory = {
             "10.1.1.10": {
                 "location": cls.testing_objects["location"],
                 "namespace": cls.testing_objects["namespace"],
@@ -56,9 +55,8 @@ class TestDiffSyncUtils(TestCase):
             },
         }
         cls.mock_job = MagicMock()
-        cls.mock_job.location = cls.testing_objects["location"]
-        cls.mock_job.processed_csv_data = cls.processed_csv_data
-        cls.mock_job.location.name = "Site B"
+        cls.mock_job.ip_address_inventory = cls.ip_address_inventory
+        cls.testing_objects["location"].name = "Site B"
         cls.mock_job.logger.error.return_value = None
         cls.mock_job.logger.warning.return_value = None
 
@@ -129,13 +127,3 @@ class TestDiffSyncUtils(TestCase):
                 default_prefix_status=self.testing_objects["status"],
                 job=None,
             )
-
-    def test_retrieve_submitted_value(self):
-        """Test retrieving values from processed csv data."""
-
-        location = retrieve_submitted_value(job=self.mock_job, ip_address="10.1.1.10", query_string="location")
-        self.assertEqual(self.testing_objects["location"].name, location.name)
-
-        self.mock_job.processed_csv_data = None
-        location = retrieve_submitted_value(job=self.mock_job, ip_address="10.1.1.10", query_string="location")
-        self.assertEqual(self.mock_job.location.name, location.name)

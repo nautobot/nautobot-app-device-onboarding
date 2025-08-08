@@ -4,6 +4,7 @@ import json
 import os
 import pprint
 import traceback
+from functools import cache
 from typing import Dict, Tuple, Union
 
 from django.conf import settings
@@ -247,25 +248,25 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
             task.results[result_idx].failed = False
 
 
-def _parse_credentials(credentials: Union[SecretsGroup, None], logger: NornirLogger = None) -> Tuple[str, str]:
+@cache
+def _parse_credentials(secrets_group: Union[SecretsGroup, None], logger: NornirLogger = None) -> Tuple[str, str]:
     """Parse creds from either secretsgroup or settings, return tuple of username/password."""
     username, password = None, None
-
-    if credentials:
+    if secrets_group:
+        logger.info(f"Parsing credentials from Secrets Group: {secrets_group.name}")
         try:
-            username = credentials.get_secret_value(
+            username = secrets_group.get_secret_value(
                 access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
                 secret_type=SecretsGroupSecretTypeChoices.TYPE_USERNAME,
             )
-            password = credentials.get_secret_value(
+            password = secrets_group.get_secret_value(
                 access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
                 secret_type=SecretsGroupSecretTypeChoices.TYPE_PASSWORD,
             )
         except SecretsGroupAssociation.DoesNotExist:
             pass
         except Exception as e:  # pylint: disable=broad-exception-caught
-            logger.debug(f"Error processing credentials from secrets group {credentials.name}: {e}")
-            pass
+            logger.debug(f"Error processing credentials from secrets group {secrets_group.name}: {e}")
     else:
         username = settings.NAPALM_USERNAME
         password = settings.NAPALM_PASSWORD
@@ -283,15 +284,6 @@ def sync_devices_command_getter(job, log_level):
     """Nornir play to run show commands for sync_devices ssot job."""
     logger = NornirLogger(job.job_result, log_level)
 
-    if job.processed_csv_data:  # ip_addreses will be keys in a dict
-        ip_addresses = list(job.processed_csv_data.keys())
-    else:
-        ip_addresses = job.ip_addresses
-        port = job.port
-        # timeout = kwargs["timeout"]
-        platform = job.platform
-        username, password = _parse_credentials(job.secrets_group, logger=logger)
-
     # Initiate Nornir instance with empty inventory
     try:
         compiled_results = {}
@@ -303,40 +295,25 @@ def sync_devices_command_getter(job, log_level):
             },
         ) as nornir_obj:
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, job)])
-            loaded_secrets_group = None
-            for entered_ip in ip_addresses:
-                if job.processed_csv_data:
-                    # get platform if one was provided via csv
-                    platform = job.processed_csv_data[entered_ip]["platform"]
-
-                    # parse secrets from secrets groups provided via csv
-                    secrets_group = job.processed_csv_data[entered_ip]["secrets_group"]
-                    if secrets_group:
-                        # only update the credentials if the secrets_group specified on a csv row
-                        # is different than the secrets group on the previous csv row. This prevents
-                        # unnecessary repeat calls to secrets providers.
-                        if secrets_group != loaded_secrets_group:
-                            logger.info(f"Parsing credentials from Secrets Group: {secrets_group.name}")
-                            loaded_secrets_group = secrets_group
-                            username, password = _parse_credentials(loaded_secrets_group, logger=logger)
-                            if not (username and password):
-                                logger.error(f"Unable to onboard {entered_ip}, failed to parse credentials")
-                        single_host_inventory_constructed, exc_info = _set_inventory(
-                            host_ip=entered_ip,
-                            platform=platform,
-                            port=job.processed_csv_data[entered_ip]["port"],
-                            username=username,
-                            password=password,
-                        )
-                        if exc_info:
-                            logger.error(f"Unable to onboard {entered_ip}, failed with exception {exc_info}")
-                            continue
-                else:
+            for ip_address, values in job.ip_address_inventory.items():
+                # parse secrets from secrets groups provided via csv
+                secrets_group = values["secrets_group"]
+                if secrets_group:
+                    # The _parse_credentials function is cached. This prevents unnecessary repeat calls to secrets providers.
+                    username, password = _parse_credentials(secrets_group, logger=logger)
+                    if not username or not password:
+                        logger.error(f"Unable to onboard {values['original_ip_address']}, failed to parse credentials")
                     single_host_inventory_constructed, exc_info = _set_inventory(
-                        entered_ip, platform, port, username, password
+                        host_ip=ip_address,
+                        platform=values["platform"],
+                        port=values["port"],
+                        username=username,
+                        password=password,
                     )
                     if exc_info:
-                        logger.error(f"Unable to onboard {entered_ip}, failed with exception {exc_info}")
+                        logger.error(
+                            f"Unable to onboard {values['original_ip_address']}, failed with exception {exc_info}"
+                        )
                         continue
                 nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
             nr_with_processors.run(
@@ -347,7 +324,14 @@ def sync_devices_command_getter(job, log_level):
                 nautobot_job=job,
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
-        logger.info(f"Error During Sync Devices Command Getter: {err}")
+        try:
+            if job.debug:
+                traceback_str = format_log_message(traceback.format_exc())
+                logger.warning(f"Error During Sync Devices Command Getter:<br><br>{err}<br>{traceback_str}")
+            else:
+                logger.warning(f"Error During Sync Devices Command Getter: {err}")
+        except:  # noqa: E722, S110
+            logger.warning(f"Error During Sync Devices Command Getter: {err}")
     return compiled_results
 
 
