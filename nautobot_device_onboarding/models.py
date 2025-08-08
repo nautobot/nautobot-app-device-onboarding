@@ -33,6 +33,7 @@ class SshStateChoices(ChoiceSet):
     SERVICE_DATA_COLLECTED = "service_data_collected"
     INVALID_COMMAND = "invalid_command"
     PARSE_ERROR = "parse_error"
+    UNKNOWN = "unknown"
 
     CHOICES = (
         (PORT_CLOSED, "Port closed"),
@@ -42,11 +43,13 @@ class SshStateChoices(ChoiceSet):
         (SERVICE_DATA_COLLECTED, "Service data collected"),
         (INVALID_COMMAND, "Invalid command"),
         (PARSE_ERROR, "Parse error"),
+        (UNKNOWN, "Unknown"),
     )
 
 
 class DiscoveredDevice(PrimaryModel):
     ip_address = GenericIPAddressField(unique=True)
+    # ignore = BooleanField(default=False, verbose_name="Ignore")  # TODO(mzb): skip/ignore flag
 
     ssh_response = BooleanField(default=False, verbose_name="SSH login")
     ssh_response_datetime = DateTimeField(blank=True, null=True, verbose_name="SSH last response")
@@ -67,6 +70,7 @@ class DiscoveredDevice(PrimaryModel):
             return f"{self.hostname} / {self.ip_address}"
         else:
             return f"{self.ip_address}"
+
 
 
 @dataclass(eq=True, frozen=True)
@@ -113,7 +117,7 @@ class ProbedDeviceServices:
     ssh_username: Optional[str] = None
     ssh_password: Optional[str] = None
     ssh_timeout: Optional[int] = None
-    network_driver: Optional[str] = None
+    network_driver: Optional[str] = "cisco_ios"
     hostname: Optional[str] = None
     device_model: Optional[str] = None
     serial: Optional[str] = None
