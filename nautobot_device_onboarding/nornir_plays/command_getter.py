@@ -4,7 +4,7 @@ import json
 import os
 import pprint
 import traceback
-from functools import cache
+from functools import lru_cache
 from typing import Dict, Tuple, Union
 
 from django.conf import settings
@@ -248,7 +248,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
             task.results[result_idx].failed = False
 
 
-@cache
+@lru_cache(maxsize=None)
 def _parse_credentials(secrets_group: Union[SecretsGroup, None], logger: NornirLogger = None) -> Tuple[str, str]:
     """Parse creds from either secretsgroup or settings, return tuple of username/password."""
     username, password = None, None
