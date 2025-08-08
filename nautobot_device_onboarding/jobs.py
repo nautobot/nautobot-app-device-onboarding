@@ -474,13 +474,9 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
     def _validate_platform_network_driver(self, platform):
         if not platform.network_driver:
             self.logger.error(
-                "The selected platform, %s does not have a network driver, please update the Platform.", platform
+                "The selected platform, '%s' does not have a network driver, please update the Platform.", platform
             )
             return False
-            # TODO: where does this go?
-            # raise Exception(  # pylint: disable=broad-exception-raised
-            #     "Platform.network_driver missing"
-            # )
         return True
 
     def run(
@@ -553,6 +549,8 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
 
             if platform:
                 self._validate_platform_network_driver(platform)
+                # TODO: We're only raising an exception if a csv file is not provided. Is that correct?
+                raise ValueError("Platform.network_driver missing")
 
             for ip_address in ip_addresses.replace(" ", "").split(","):
                 resolved = self._validate_ip_address(ip_address)

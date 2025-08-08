@@ -53,6 +53,7 @@ class CommandGetterProcessor(BaseLoggingProcessor):
             )
             if "has no platform set" in result[0].result:
                 del self.data[host.name]
+                return
             else:
                 self.data[host.name].update({"failed": True})
         # [1:] because result 1 is the (network_send_commands ) task which runs all the subtask, it has no result.
