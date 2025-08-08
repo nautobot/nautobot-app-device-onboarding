@@ -548,9 +548,9 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             }
 
             if platform:
-                self._validate_platform_network_driver(platform)
-                # TODO: We're only raising an exception if a csv file is not provided. Is that correct?
-                raise ValueError("Platform.network_driver missing")
+                if not self._validate_platform_network_driver(platform):
+                    # TODO: We're only raising an exception if a csv file is not provided. Is that correct?
+                    raise ValueError("Platform.network_driver missing")
 
             for ip_address in ip_addresses.replace(" ", "").split(","):
                 resolved = self._validate_ip_address(ip_address)
