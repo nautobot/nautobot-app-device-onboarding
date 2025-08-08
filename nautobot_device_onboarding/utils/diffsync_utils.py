@@ -96,17 +96,3 @@ def get_or_create_ip_address(host, mask_length, namespace, default_ip_status, de
             if job:
                 job.logger.error(f"IP Address {host} failed to create, {err}")
     return ip_address
-
-
-def retrieve_submitted_value(job, ip_address, query_string):
-    """
-    Check for a submitted CSV file and retrieve a the appropriate user submitted value.
-
-    If a user has submitted a CSV file, return the relevant value based on the data
-    that was parsed when the file was loaded. If a CSV file has not been submitted,
-    return the value input into the job form.
-    """
-    if job.processed_csv_data:
-        return job.processed_csv_data[ip_address][query_string]
-    else:
-        return getattr(job, query_string)

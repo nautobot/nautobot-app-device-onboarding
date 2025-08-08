@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 import yaml
-from nautobot.core.testing import TransactionTestCase
+from nautobot.apps.testing import TransactionTestCase
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Secret, SecretsGroup, SecretsGroupAssociation
 
@@ -264,7 +264,9 @@ class TestSSHCredParsing(TransactionTestCase):
     @patch.dict(os.environ, {"DEVICE_USER": "admin", "DEVICE_PASS": "worstP$$w0rd"})
     def test_parse_user_and_pass(self):
         """Extract correct user and password from secretgroup env-vars"""
-        assert _parse_credentials(credentials=self.secrets_group, logger=NornirLogger(job_result={}, log_level=1)) == (
+        assert _parse_credentials(
+            secrets_group=self.secrets_group, logger=NornirLogger(job_result=MagicMock(), log_level=1)
+        ) == (
             "admin",
             "worstP$$w0rd",
         )
@@ -274,7 +276,7 @@ class TestSSHCredParsing(TransactionTestCase):
         """Extract just the username without bailing out if password is missing"""
         mock_job_result = MagicMock()
         assert _parse_credentials(
-            credentials=self.secrets_group, logger=NornirLogger(job_result=mock_job_result, log_level=1)
+            secrets_group=self.secrets_group, logger=NornirLogger(job_result=mock_job_result, log_level=1)
         ) == ("admin", None)
         mock_job_result.log.assert_called_with("Missing credentials for ['password']", level_choice="debug")
 
@@ -284,7 +286,7 @@ class TestSSHCredParsing(TransactionTestCase):
     )
     def test_parse_napalm_creds(self):
         """When no secrets group is provided, fallback to napalm creds"""
-        assert _parse_credentials(credentials=None, logger=NornirLogger(job_result=None, log_level=1)) == (
+        assert _parse_credentials(secrets_group=None, logger=NornirLogger(job_result=None, log_level=1)) == (
             "napalm_admin",
             "napalamP$$w0rd",
         )

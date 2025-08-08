@@ -2,8 +2,7 @@
 
 from unittest.mock import patch
 
-from nautobot.apps.testing import create_job_result_and_run_job
-from nautobot.core.testing import TransactionTestCase
+from nautobot.apps.testing import TransactionTestCase, create_job_result_and_run_job
 from nautobot.dcim.models import Device, Interface
 from nautobot.extras.choices import JobResultStatusChoices
 
@@ -52,7 +51,11 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
             module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
         )
         device = Device.objects.get(serial="9ABUXU5882222")
-        self.assertEqual(job_result.status, JobResultStatusChoices.STATUS_SUCCESS)
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
         self.assertEqual(device.primary_ip4.host, "10.1.1.10")
         self.assertEqual(device.name, device_data.return_value["10.1.1.10"]["hostname"])
         self.assertEqual(device.serial, device_data.return_value["10.1.1.10"]["serial"])
@@ -81,7 +84,7 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
             "csv_file": None,
             "location": self.testing_objects["location"].pk,
             "namespace": self.testing_objects["namespace"].pk,
-            "ip_addresses": "10.1.1.15",
+            "ip_addresses": "10.1.1.10",
             "port": 22,
             "timeout": 30,
             "set_mgmt_only": True,
@@ -98,7 +101,11 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
             module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
         )
         device = Device.objects.get(serial="test-serial-abc")
-        self.assertEqual(job_result.status, JobResultStatusChoices.STATUS_SUCCESS)
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
         self.assertEqual(device.name, device_data.return_value["10.1.1.10"]["hostname"])
         self.assertEqual(device.serial, device_data.return_value["10.1.1.10"]["serial"])
         self.assertEqual(device.device_type.model, device_data.return_value["10.1.1.10"]["device_type"])
@@ -140,7 +147,11 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
         job_result = create_job_result_and_run_job(
             module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
         )
-        self.assertEqual(job_result.status, JobResultStatusChoices.STATUS_SUCCESS)
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
         device = Device.objects.get(serial="test-serial-abc")
         mgmt_interface = Interface.objects.get(
             device=device, name=device_data.return_value["192.1.1.10"]["mgmt_interface"]
