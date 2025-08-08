@@ -53,6 +53,7 @@ class DiscoveredDeviceTable(BaseTable):
             "device",
             "serial",
             "device_type",
+            "ssh_issue",
         )
         default_columns = (
             "pk",
@@ -64,4 +65,5 @@ class DiscoveredDeviceTable(BaseTable):
             "device_type",
             "serial",
             "network_driver",
+            "ssh_issue",
         )

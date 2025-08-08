@@ -957,35 +957,35 @@ class DeviceOnboardingDiscoveryJob(Job):
 
     debug = BooleanVar(
         default=False,
-        description="Enable for more verbose logging.",
+        description="Enable to activate detailed logging output for troubleshooting purposes.",
     )
     prefixes = StringVar(
         required=True,
-        description="Comma separated list of prefixes to be searched",
+        description="Comma-separated list of network prefixes to be scanned during discovery.",
     )
     protocols = MultiChoiceVar(
         choices=AutodiscoveryProtocolTypeChoices,
         required=True,
-        description="Discovery protocols.",
+        description="Protocols to be utilized for network device discovery.",
     )
     secrets_group = ObjectVar(
         model=SecretsGroup,
         required=True,
-        description="SecretsGroup for device connection credentials.",
+        description="Reference to the SecretsGroup containing credentials for device authentication.",
     )
     scanning_threads_count = IntegerVar(
-        description="Number of IPs to scan at a time.",
+        description="Maximum number of IP addresses to scan concurrently.",
         label="Number of Threads",
         default=8,
     )
     login_threads_count = IntegerVar(
-        description="Number of simultaneous SSH logins.",
-        label="Number of sim. SSH logins..",
+        description="Maximum number of simultaneous SSH login attempts allowed.",
+        label="Number of Simultaneous SSH Logins",
         default=2,
     )
     ssh_ports = StringVar(
         default="22",
-        description="Comma separated list of ports to attempt SSH connection over.  Ports are tried in the order given.",
+        description="Comma-separated list of ports to use for SSH connection attempts, processed sequentially in the specified order.",
         label="SSH Ports"
     )
 
@@ -999,7 +999,7 @@ class DeviceOnboardingDiscoveryJob(Job):
 
     def ssh_ping(self):
         """Run TCP for all devices in the IP scope."""
-        with InitNornir(inventory={"plugin": "empty-inventory"}) as nornir:
+        with InitNornir(inventory={"plugin": "empty-inventory"}, runner={"plugin": "threaded", "options": {"num_workers": self.scanning_threads_count}}) as nornir:
             # Build ad-hoc inventory from SSH services
             for service in self.probed_device_store.filter(service__name="ssh"):
                 nornir.inventory.hosts[str(service)] = service.to_nornir_host(name_eq_ip=False)
@@ -1017,7 +1017,7 @@ class DeviceOnboardingDiscoveryJob(Job):
 
     def ssh_connect(self):
         """Login via SSH and guess platform."""
-        with InitNornir(inventory={"plugin": "empty-inventory"}) as nornir:
+        with InitNornir(inventory={"plugin": "empty-inventory"}, runner={"plugin": "threaded", "options": {"num_workers": self.login_threads_count}}) as nornir:
             # Build ad-hoc inventory
             for service in self.probed_device_store.filter(
                     service__name="ssh",
@@ -1045,11 +1045,11 @@ class DeviceOnboardingDiscoveryJob(Job):
                     probed_service.service_status = SshStateChoices.PORT_CLOSED
                     self.logger.error("[ssh-connect] Timeout for device {} ({})".format(service.name, str(exc)))
                 elif isinstance(exc, ConfigInvalidException):
-                    probed_service.service_status = SshStateChoices.INVALID_COMMAND
+                    probed_service.service_status = SshStateChoices.SERVICE_INVALID_COMMAND
                     self.logger.error("[ssh-connect] Invalid command for device {} ({})".format(service.name, str(exc)))
                 else:
-                    # Other
-                    probed_service.service_status = "discovery_issue"  # TODO(mzb): Account for other statuses
+                    # Other - TODO(mzb): Protocol error / banner etc
+                    probed_service.service_status = SshStateChoices.UNKNOWN
 
     def _handle_ssh_failure(self, host, results, probed_device_service):
         """Set appropriate SSH failure status based on exceptions."""
@@ -1068,7 +1068,7 @@ class DeviceOnboardingDiscoveryJob(Job):
 
     def ssh_collect(self):
         """Collect device details through SSH."""
-        with InitNornir(inventory={"plugin": "empty-inventory"}) as nornir:
+        with InitNornir(inventory={"plugin": "empty-inventory"}, runner={"plugin": "threaded", "options": {"num_workers": self.login_threads_count}}) as nornir:
             # Build ad-hoc inventory
             logger = NornirLogger(job_result=self.job_result, log_level=self.logger.getEffectiveLevel())
             hosts_data = {}  # Hosts extracted data appended by Nornir processor
@@ -1080,13 +1080,13 @@ class DeviceOnboardingDiscoveryJob(Job):
             ])
 
             # Add hosts from authenticated SSH services
-            for service in self.probed_device_store.filter(
+            for probed in self.probed_device_store.filter(
                 service__name="ssh",
                 port_status=SshStateChoices.PORT_OPENED,
                 service_status=SshStateChoices.SERVICE_AUTHENTICATED,
             ):
-                host_data = service.to_nornir_host(name_eq_ip=True)
-                nr.inventory.hosts[service.service.ip] = host_data
+                host_data = probed.to_nornir_host(name_eq_ip=True)
+                nr.inventory.hosts[probed.service.ip] = host_data
 
             # Run Nornir task
             command_results = nr.run(
@@ -1120,7 +1120,7 @@ class DeviceOnboardingDiscoveryJob(Job):
                 if all([probed.hostname, probed.serial, probed.device_model]):
                     probed.service_status = SshStateChoices.SERVICE_DATA_COLLECTED
                 else:
-                    probed.service_status = SshStateChoices.PARSE_ERROR
+                    probed.service_status = SshStateChoices.SERVICE_PARSING_ERROR
 
     def _update_inventory_health(self, discovered_device):
         """Update inventory health based on discovered device details."""
@@ -1155,7 +1155,7 @@ class DeviceOnboardingDiscoveryJob(Job):
         # Get SSH services with issues (port open but data not collected)
         issues = [
             s for s in self.probed_device_store.filter(
-                service="ssh",
+                service__name="ssh",
                 port_status=SshStateChoices.PORT_OPENED,
                 service_status__not=SshStateChoices.SERVICE_DATA_COLLECTED,
             ) if s.service.ip not in connected_ips
@@ -1165,7 +1165,7 @@ class DeviceOnboardingDiscoveryJob(Job):
         # Get unreachable SSH services (port closed and not already listed)
         unreachable = [
             s for s in self.probed_device_store.filter(
-                service="ssh",
+                service__name="ssh",
                 port_status=SshStateChoices.PORT_CLOSED,
             ) if s.service.ip not in connected_ips and s.service.ip not in issue_ips
         ]
