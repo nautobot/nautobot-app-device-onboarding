@@ -517,7 +517,6 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
         result = sync_network_data_command_getter(
             self.job.job_result,
             self.job.logger.getEffectiveLevel(),
-            self.job.job_result.task_kwargs,
         )
         # verify data returned is a dict
         data_type_check = diffsync_utils.check_data_type(result)
