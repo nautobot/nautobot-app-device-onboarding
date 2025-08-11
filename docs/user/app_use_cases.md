@@ -185,8 +185,8 @@ This SSoT job supports a bulk CSV execution option to speed up this process.
 
 ### Example CSV 
 ```
-ip_address_host,location_name,device_role_name,namespace,device_status_name,interface_status_name,ip_address_status_name,secrets_group_name,platform_name,set_mgmt_only,update_devices_without_primary_ip,
-192.168.1.1,"Test Site",Onboarding,Global,Active,Active,Active,"test secret group",,False,True
+ip_address_host,port,timeout,location_name,device_role_name,namespace,device_status_name,interface_status_name,ip_address_status_name,secrets_group_name,platform_name,set_mgmt_only,update_devices_without_primary_ip,
+192.168.1.1,22,30,"Test Site",Onboarding,Global,Active,Active,Active,"test secret group",,False,True
 ```
 
 ### Consult the Status of the Sync Network Devices SSoT Job
