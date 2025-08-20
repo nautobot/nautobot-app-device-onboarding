@@ -52,7 +52,7 @@ namespace = Collection("nautobot_device_onboarding")
 namespace.configure(
     {
         "nautobot_device_onboarding": {
-            "nautobot_ver": "2.3.1",
+            "nautobot_ver": "2.4.2",
             "project_name": "nautobot-device-onboarding",
             "python_ver": "3.11",
             "local": False,
