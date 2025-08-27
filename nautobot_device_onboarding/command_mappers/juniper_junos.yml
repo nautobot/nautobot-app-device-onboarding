@@ -82,7 +82,7 @@ sync_network_data:
       - command: "show interfaces | display json"
         parser: "none"
         jpath: '"interface-information"[]["physical-interface"[?name[?data==`{{ current_key.split(".")[0] }}`]]][][]."admin-status"[].data'  # yamllint disable-line rule:quoted-strings
-        post_processor: "{% if obj | length > 0 %}{{ obj[0] | interface_status_to_bool }}{% else %}{{ obj }}{% endif %}"
+        post_processor: "{% if obj | length > 0 %}{{ obj[0] | interface_status_to_bool }}{% else %}False{% endif %}"
   interfaces__802.1Q_mode:
     commands:
       - command: "show interfaces | display json"
