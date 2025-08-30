@@ -1,0 +1,1 @@
+Fixed dictionary being modified during execution by working off of a copy of the dictionary.
