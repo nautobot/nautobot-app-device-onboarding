@@ -134,6 +134,14 @@
                                 {
                                         "ip_address": "123.65.5.210",
                                         "prefix_length": "29"
+                                },
+                                {
+                                        "ip_address": "2620:16d:ff00:4106:0:6:5457:1",
+                                        "prefix_length": "64"
+                                },
+                                {
+                                        "ip_address": "fe80::3e61:408:3403:bacc",
+                                        "prefix_length": "64"
                                 }
                         ],
                         "lag": [],
@@ -163,6 +171,14 @@
                                 {
                                         "ip_address": "123.65.27.233",
                                         "prefix_length": "29"
+                                },
+                                {
+                                        "ip_address": "2620:16d:ff00:1010:0:6:5456:1",
+                                        "prefix_length": "64"
+                                },
+                                {
+                                        "ip_address": "fe80::3e61:40c:1c03:bacd",
+                                        "prefix_length": "64"
                                 }
                         ],
                         "lag": [],
@@ -181,6 +197,14 @@
                                 {
                                         "ip_address": "123.65.27.241",
                                         "prefix_length": "29"
+                                },
+                                {
+                                        "ip_address": "2620:16d:ff00:1011:0:6:5456:1",
+                                        "prefix_length": "64"
+                                },
+                                {
+                                        "ip_address": "fe80::3e61:40c:1d03:bacd",
+                                        "prefix_length": "64"
                                 }
                         ],
                         "lag": [],
@@ -199,6 +223,14 @@
                                 {
                                         "ip_address": "123.65.27.249",
                                         "prefix_length": "29"
+                                },
+                                {
+                                        "ip_address": "2620:16d:ff00:1012:0:6:5456:1",
+                                        "prefix_length": "64"
+                                },
+                                {
+                                        "ip_address": "fe80::3e61:40c:1e03:bacd",
+                                        "prefix_length": "64"
                                 }
                         ],
                         "lag": [],
@@ -217,6 +249,14 @@
                                 {
                                         "ip_address": "123.65.28.1",
                                         "prefix_length": "29"
+                                },
+                                {
+                                        "ip_address": "2620:16d:ff00:1013:0:6:5456:1",
+                                        "prefix_length": "64"
+                                },
+                                {
+                                        "ip_address": "fe80::3e61:40c:1f03:bacd",
+                                        "prefix_length": "64"
                                 }
                         ],
                         "lag": [],
@@ -235,6 +275,14 @@
                                 {
                                         "ip_address": "123.65.28.9",
                                         "prefix_length": "29"
+                                },
+                                {
+                                        "ip_address": "2620:16d:ff00:1014:0:6:5456:1",
+                                        "prefix_length": "64"
+                                },
+                                {
+                                        "ip_address": "fe80::3e61:40c:2003:bacd",
+                                        "prefix_length": "64"
                                 }
                         ],
                         "lag": [],
@@ -253,6 +301,14 @@
                                 {
                                         "ip_address": "123.65.28.17",
                                         "prefix_length": "29"
+                                },
+                                {
+                                        "ip_address": "2620:16d:ff00:1015:0:6:5456:1",
+                                        "prefix_length": "64"
+                                },
+                                {
+                                        "ip_address": "fe80::3e61:40c:2103:bacd",
+                                        "prefix_length": "64"
                                 }
                         ],
                         "lag": [],
@@ -300,6 +356,14 @@
                                 {
                                         "ip_address": "123.65.4.0",
                                         "prefix_length": "31"
+                                },
+                                {
+                                        "ip_address": "2620:16d:ff00:40b0:0:6:5457:1",
+                                        "prefix_length": "64"
+                                },
+                                {
+                                        "ip_address": "fe80::3e61:407:d003:bace",
+                                        "prefix_length": "64"
                                 }
                         ],
                         "lag": [],
@@ -318,6 +382,14 @@
                                 {
                                         "ip_address": "123.65.4.4",
                                         "prefix_length": "31"
+                                },
+                                {
+                                        "ip_address": "2620:16d:ff00:40b1:0:6:5457:1",
+                                        "prefix_length": "64"
+                                },
+                                {
+                                        "ip_address": "fe80::3e61:407:d103:bace",
+                                        "prefix_length": "64"
                                 }
                         ],
                         "lag": [],
@@ -336,6 +408,14 @@
                                 {
                                         "ip_address": "123.65.4.96",
                                         "prefix_length": "31"
+                                },
+                                {
+                                        "ip_address": "2620:16d:ff00:40b2:0:6:5457:1",
+                                        "prefix_length": "64"
+                                },
+                                {
+                                        "ip_address": "fe80::3e61:407:d303:bace",
+                                        "prefix_length": "64"
                                 }
                         ],
                         "lag": [],
@@ -483,6 +563,10 @@
                         "ip_addresses": [
                                 {
                                         "ip_address": "123.65.37.249",
+                                        "prefix_length": "29"
+                                },
+                                {
+                                        "ip_address": "123.65.37.250",
                                         "prefix_length": "29"
                                 }
                         ],
@@ -810,6 +894,10 @@
                                 {
                                         "ip_address": "123.65.212.1",
                                         "prefix_length": "26"
+                                },
+                                {
+                                        "ip_address": "123.65.212.2",
+                                        "prefix_length": "26"
                                 }
                         ],
                         "lag": [],
@@ -827,6 +915,10 @@
                         "ip_addresses": [
                                 {
                                         "ip_address": "134.248.215.65",
+                                        "prefix_length": "28"
+                                },
+                                {
+                                        "ip_address": "134.248.215.66",
                                         "prefix_length": "28"
                                 }
                         ],
@@ -846,6 +938,10 @@
                                 {
                                         "ip_address": "123.65.0.193",
                                         "prefix_length": "29"
+                                },
+                                {
+                                        "ip_address": "123.65.0.194",
+                                        "prefix_length": "29"
                                 }
                         ],
                         "lag": [],
@@ -864,6 +960,10 @@
                                 {
                                         "ip_address": "123.65.132.9",
                                         "prefix_length": "29"
+                                },
+                                {
+                                        "ip_address": "123.65.132.11",
+                                        "prefix_length": "29"
                                 }
                         ],
                         "lag": [],
@@ -881,6 +981,10 @@
                         "ip_addresses": [
                                 {
                                         "ip_address": "124.46.189.129",
+                                        "prefix_length": "26"
+                                },
+                                {
+                                        "ip_address": "124.46.189.130",
                                         "prefix_length": "26"
                                 }
                         ],
@@ -1048,6 +1152,10 @@
                         "ip_addresses": [
                                 {
                                         "ip_address": "124.22.0.1",
+                                        "prefix_length": "28"
+                                },
+                                {
+                                        "ip_address": "124.22.0.2",
                                         "prefix_length": "28"
                                 }
                         ],
@@ -1249,6 +1357,10 @@
                                 {
                                         "ip_address": "124.34.0.1",
                                         "prefix_length": "28"
+                                },
+                                {
+                                        "ip_address": "124.34.0.2",
+                                        "prefix_length": "28"
                                 }
                         ],
                         "lag": [],
@@ -1328,6 +1440,10 @@
                         "ip_addresses": [
                                 {
                                         "ip_address": "198.51.100.1",
+                                        "prefix_length": 32
+                                },
+                                {
+                                        "ip_address": "fe80::6af3:8e0f:fc30:d2ae",
                                         "prefix_length": 32
                                 }
                         ],
@@ -2290,6 +2406,10 @@
                         "ip_addresses": [
                                 {
                                         "ip_address": "123.65.41.241",
+                                        "prefix_length": "29"
+                                },
+                                {
+                                        "ip_address": "123.65.41.242",
                                         "prefix_length": "29"
                                 }
                         ],

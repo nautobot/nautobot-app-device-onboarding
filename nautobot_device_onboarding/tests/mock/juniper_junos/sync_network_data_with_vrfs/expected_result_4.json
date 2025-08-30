@@ -296,6 +296,10 @@
                 {
                     "ip_address": "198.51.100.1",
                     "prefix_length": 32
+                },
+                {
+                    "ip_address": "fe80::2a0:a50f:fc82:6e6e",
+                    "prefix_length": 32
                 }
             ],
             "lag": [],
