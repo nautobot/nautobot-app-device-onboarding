@@ -1,0 +1,241 @@
+{
+    "interfaces": {
+        "fxp0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "False",
+            "mac_address": [],
+            "mtu": "",
+            "tagged_vlans": [],
+            "type": "other",
+            "untagged_vlan": []
+        },
+        "fxp0.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "False",
+            "mac_address": [],
+            "mtu": "",
+            "tagged_vlans": [],
+            "type": "other",
+            "untagged_vlan": []
+        },
+        "ge-0/0/0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "f8:c1:16:a5:eb:80",
+            "mtu": "1514",
+            "tagged_vlans": [],
+            "type": "other",
+            "untagged_vlan": []
+        },
+        "ge-0/0/0.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "10.254.100.2",
+                    "prefix_length": "24"
+                }
+            ],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "tagged_vlans": [],
+            "type": "other",
+            "untagged_vlan": []
+        },
+        "ge-0/0/1": {
+            "802.1Q_mode": "",
+            "description": "LAN PORT",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "f8:c1:16:a5:eb:81",
+            "mtu": "1514",
+            "tagged_vlans": [],
+            "type": "other",
+            "untagged_vlan": []
+        },
+        "ge-0/0/1.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "tagged_vlans": [],
+            "type": "other",
+            "untagged_vlan": []
+        },
+        "ge-0/0/2": {
+            "802.1Q_mode": "",
+            "description": "LAN PORT",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "False",
+            "mac_address": "f8:c1:16:a5:eb:82",
+            "mtu": "1514",
+            "tagged_vlans": [],
+            "type": "other",
+            "untagged_vlan": []
+        },
+        "ge-0/0/2.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "False",
+            "mac_address": [],
+            "mtu": "1514",
+            "tagged_vlans": [],
+            "type": "other",
+            "untagged_vlan": []
+        },
+        "ge-0/0/3": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "False",
+            "mac_address": "f8:c1:16:a5:eb:83",
+            "mtu": "1514",
+            "tagged_vlans": [],
+            "type": "other",
+            "untagged_vlan": []
+        },
+        "ge-0/0/4": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "False",
+            "mac_address": "f8:c1:16:a5:eb:84",
+            "mtu": "1514",
+            "tagged_vlans": [],
+            "type": "other",
+            "untagged_vlan": []
+        },
+        "ge-0/0/5": {
+            "802.1Q_mode": "",
+            "description": "WAN - PORT",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "f8:c1:16:a5:eb:85",
+            "mtu": "1518",
+            "tagged_vlans": [],
+            "type": "other",
+            "untagged_vlan": []
+        },
+        "ge-0/0/5.2379": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "10.130.237.161",
+                    "prefix_length": "29"
+                }
+            ],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1518",
+            "tagged_vlans": [],
+            "type": "other",
+            "untagged_vlan": []
+        },
+        "ge-0/0/6": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "False",
+            "mac_address": "f8:c1:16:a5:eb:86",
+            "mtu": "1514",
+            "tagged_vlans": [],
+            "type": "other",
+            "untagged_vlan": []
+        },
+        "ge-0/0/7": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "False",
+            "mac_address": "f8:c1:16:a5:eb:87",
+            "mtu": "1514",
+            "tagged_vlans": [],
+            "type": "other",
+            "untagged_vlan": []
+        },
+        "irb": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "f8:c1:16:a5:ec:30",
+            "mtu": "1514",
+            "tagged_vlans": [],
+            "type": "other",
+            "untagged_vlan": []
+        },
+        "irb.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "172.16.5.100",
+                    "prefix_length": "29"
+                }
+            ],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "1514",
+            "tagged_vlans": [],
+            "type": "other",
+            "untagged_vlan": []
+        },
+        "lo0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "9192",
+            "tagged_vlans": [],
+            "type": "other",
+            "untagged_vlan": []
+        },
+        "lo0.0": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "198.51.100.1",
+                    "prefix_length": 32
+                }
+            ],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": [],
+            "mtu": "9192",
+            "tagged_vlans": [],
+            "type": "other",
+            "untagged_vlan": []
+        }
+    },
+    "serial": "CV54321AN0123"
+}

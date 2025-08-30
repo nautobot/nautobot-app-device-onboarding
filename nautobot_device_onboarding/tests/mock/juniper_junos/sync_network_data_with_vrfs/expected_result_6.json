@@ -111,6 +111,10 @@
                 {
                     "ip_address": "123.65.208.161",
                     "prefix_length": "28"
+                },
+                {
+                    "ip_address": "123.65.208.162",
+                    "prefix_length": "28"
                 }
             ],
             "lag": [],
@@ -128,6 +132,10 @@
             "ip_addresses": [
                 {
                     "ip_address": "123.65.133.57",
+                    "prefix_length": "29"
+                },
+                {
+                    "ip_address": "123.65.133.59",
                     "prefix_length": "29"
                 }
             ],
@@ -390,6 +398,10 @@
             "ip_addresses": [
                 {
                     "ip_address": "198.51.100.1",
+                    "prefix_length": 32
+                },
+                {
+                    "ip_address": "fe80::2a8a:1c0f:fc56:9bff",
                     "prefix_length": 32
                 }
             ],
