@@ -6,21 +6,21 @@ sync_devices:
         parser: "ttp"
         jpath: "[]|[?mgmt_ip==`{{ obj }}`].mgmt_hostname"
         post_processor: "{{ obj[0] }}"
-        interable_type: "str"
+        iterable_type: "str"
   serial:
     commands:
       - command: "show sys hardware"
         parser: "ttp"
         jpath: "[*].serial_number"
         post_processor: "{{ obj[0] }}"
-        interable_type: "str"
+        iterable_type: "str"
   device_type:
     commands:
       - command: "show sys hardware"
         parser: "ttp"
         jpath: "[*].model_type"
         post_processor: "{{ obj[0] }}"
-        interable_type: "str"
+        iterable_type: "str"
   mgmt_interface:
     commands:
       - command: "show net interface | grep mgmt | grep up"
