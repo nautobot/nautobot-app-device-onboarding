@@ -1,1 +1,0 @@
-fixes capitalization of the keys in the command_mapper for cisco_nxos for `show interface switchport`
