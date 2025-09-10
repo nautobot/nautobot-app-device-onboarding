@@ -48,7 +48,7 @@ def get_mgmt_info(
 class NetdevKeeper:  # pylint: disable=too-many-instance-attributes
     """Used to maintain information about the network device during the onboarding process."""
 
-    def __init__(  # pylint: disable=R0913
+    def __init__(  # pylint: disable=too-many-positional-arguments
         self,
         hostname,
         port=None,

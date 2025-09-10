@@ -479,7 +479,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             return False
         return True
 
-    def run(
+    def run(  # pylint: disable=too-many-positional-arguments
         self,
         dryrun=True,
         memory_profiling=False,
@@ -652,7 +652,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         self.target_adapter = SyncNetworkDataNautobotAdapter(job=self, sync=self.sync)
         self.target_adapter.load()
 
-    def run(
+    def run(  # pylint: disable=too-many-positional-arguments
         self,
         dryrun,
         memory_profiling,
