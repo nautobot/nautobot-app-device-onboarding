@@ -3,7 +3,7 @@
 from unittest.mock import patch
 
 from diffsync.exceptions import ObjectNotFound
-from nautobot.core.testing import TransactionTestCase
+from nautobot.apps.testing import TransactionTestCase
 from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
 from nautobot.extras.models import JobResult
 
@@ -16,7 +16,7 @@ from nautobot_device_onboarding.tests import utils
 from nautobot_device_onboarding.tests.fixtures import sync_devices_fixture
 
 
-class SyncDevicesNetworkAdapaterTestCase(TransactionTestCase):
+class SyncDevicesNetworkAdapterTestCase(TransactionTestCase):
     """Test SyncDevicesNetworkAdapter class."""
 
     databases = ("default", "job_logs")
@@ -41,18 +41,24 @@ class SyncDevicesNetworkAdapaterTestCase(TransactionTestCase):
         device_data.return_value = sync_devices_fixture.sync_devices_mock_data_valid
 
         self.job.debug = True
-        self.job.ip_addresses = ""
-        self.job.location = self.testing_objects["location"]
-        self.job.namespace = self.testing_objects["namespace"]
-        self.job.port = 22
-        self.job.timeout = 30
-        self.job.update_devices_without_primary_ip = True
-        self.job.device_role = self.testing_objects["device_role"]
-        self.job.device_status = self.testing_objects["status"]
-        self.job.interface_status = self.testing_objects["status"]
-        self.job.ip_address_status = self.testing_objects["status"]
-        self.job.secrets_group = self.testing_objects["secrets_group"]
-        self.job.platform = None
+
+        processed_ip_address_attrs = {
+            "location": self.testing_objects["location"],
+            "namespace": self.testing_objects["namespace"],
+            "port": 22,
+            "timeout": 30,
+            "update_devices_without_primary_ip": True,
+            "device_role": self.testing_objects["device_role"],
+            "device_status": self.testing_objects["status"],
+            "interface_status": self.testing_objects["status"],
+            "ip_address_status": self.testing_objects["status"],
+            "secrets_group": self.testing_objects["secrets_group"],
+            "platform": None,
+        }
+        self.job.ip_address_inventory = {
+            "10.1.1.10": processed_ip_address_attrs,
+            "10.1.1.11": processed_ip_address_attrs,
+        }
 
         self.sync_devices_adapter.load()
 
@@ -96,7 +102,7 @@ class SyncDevicesNautobotAdapterTestCase(TransactionTestCase):
         """Test loading Nautobot data into the diffsync store."""
 
         self.job.debug = True
-        self.job.ip_addresses = ["10.1.1.10", "10.1.1.11", "192.1.1.10"]
+        self.job.ip_address_inventory = {"10.1.1.10": {}, "10.1.1.11": {}, "192.1.1.10": {}}
         self.job.location = self.testing_objects["location"]
         self.job.namespace = self.testing_objects["namespace"]
         self.job.port = 22
@@ -130,7 +136,7 @@ class SyncDevicesNautobotAdapterTestCase(TransactionTestCase):
             self.assertEqual(device_type.manufacturer.name, diffsync_obj.manufacturer__name)
             self.assertEqual(device_type.part_number, diffsync_obj.part_number)
 
-        for device in Device.objects.filter(primary_ip4__host__in=self.job.ip_addresses):
+        for device in Device.objects.filter(primary_ip4__host__in=list(self.job.ip_address_inventory)):
             unique_id = f"{device.location.name}__{device.name}__{device.serial}"
             diffsync_obj = self.sync_devices_adapter.get("device", unique_id)
             self.assertEqual(device.location.name, diffsync_obj.location__name)

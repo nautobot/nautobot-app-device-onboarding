@@ -1,5 +1,6 @@
 """DiffSync adapters."""
 
+import copy
 import datetime
 
 import diffsync
@@ -480,7 +481,8 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
         """
         failed_devices = []
 
-        for hostname in device_data:
+        # Iterate over a copy of device_data to avoid modifying the dictionary while iterating
+        for hostname in list(device_data.keys()):
             if device_data[hostname].get("failed"):
                 self.job.logger.error(
                     f"{hostname}: Connection or data error, this device will not be synced. "
@@ -496,14 +498,16 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
         )
 
         # remove devices that have errors found while creating the queryset from the command getter results
-        for hostname in devices_with_errors:
-            del device_data[hostname]
+        # Iterate over a copy of devices_with_errors to avoid modifying the list while iterating
+        for hostname in list(devices_with_errors):
+            if hostname in device_data:
+                del device_data[hostname]
 
         failed_devices = failed_devices + devices_with_errors
         if failed_devices:
             self.job.logger.warning(f"Failed devices: {failed_devices}")
 
-        self.job.command_getter_result = device_data
+        self.job.command_getter_result = copy.deepcopy(device_data)
         self.job.devices_to_load = device_queryset
 
     def _handle_general_load_exception(self, error, hostname, data, model_type):
@@ -517,7 +521,6 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
         result = sync_network_data_command_getter(
             self.job.job_result,
             self.job.logger.getEffectiveLevel(),
-            self.job.job_result.task_kwargs,
         )
         # verify data returned is a dict
         data_type_check = diffsync_utils.check_data_type(result)
@@ -603,7 +606,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
             for interface_name, interface_data in device_data["interfaces"].items():
                 if interface_data["ip_addresses"]:
                     for ip_address in interface_data["ip_addresses"]:
-                        if ip_address["ip_address"]:  # the ip_address and mask_length may be empty, skip these
+                        if ip_address.get("ip_address"):  # the ip_address and mask_length may be empty, skip these
                             if self.job.debug:
                                 self.job.logger.debug(f"Loading {ip_address} from {interface_name} on {hostname}")
                             try:

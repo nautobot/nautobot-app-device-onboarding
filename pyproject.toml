@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-device-onboarding"
-version = "4.2.6"
+version = "4.3.0"
 description = "A app for Nautobot to easily onboard new devices."
 authors = ["Network to Code, LLC <info@networktocode.com>"]
 license = "Apache-2.0"
@@ -12,7 +12,6 @@ classifiers = [
     "Intended Audience :: Developers",
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -27,21 +26,21 @@ include = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.13"
-napalm = ">=2.5.0, <5"
+python = ">=3.9.2,<3.13"
+napalm = ">=4.1.0,<6.0.0"
 zipp = "^3.4.0"
 nautobot = "^2.3.1"
 nautobot-ssot = "^3.0.0"
 nautobot-plugin-nornir = "^2.0.0"
-jdiff = ">=0.0.6,<1.0.0"
-ntc-templates = "^7.0.0"
+jdiff = ">=1.0.1,<2.0.0"
+ntc-templates = ">=7.9.0,<9.0.0"
 # Netutils pin is needed for https://github.com/networktocode/netutils/pull/553
 netutils = "^1.9.1"
 ttp = "^0.9.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "*"
-django-debug-toolbar = "*"
+django-debug-toolbar = "<6.0.0"
 invoke = "*"
 ipython = "*"
 pylint = "*"
@@ -51,10 +50,7 @@ ruff = "0.5.5"
 yamllint = "*"
 toml = "*"
 # Python implementation of markdownlint
-pymarkdownlnt = [
-    {version = "0.9.26", python = "~3.8.0"},
-    {version = "~0.9.29", python = ">=3.9,<3.13"},
-]
+pymarkdownlnt = "~0.9.29"
 Markdown = "*"
 # Render custom markdown for version added/changed/remove notes
 markdown-version-annotations = "1.0.1"
@@ -118,7 +114,7 @@ supported_nautobot_versions = [
 
 [tool.ruff]
 line-length = 120
-target-version = "py38"
+target-version = "py39"
 
 [tool.ruff.lint]
 select = [

@@ -1,0 +1,7 @@
+{
+    "device_type": "IOS-XRv 9000",
+    "hostname": "XRv7.11.1",
+    "mask_length": 24,
+    "mgmt_interface": "MgmtEth0/RP0/CPU0/0",
+    "serial": "B5ABC78C64B"
+}
