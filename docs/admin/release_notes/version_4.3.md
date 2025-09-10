@@ -14,10 +14,6 @@ This document describes all new features and changes in the release. The format 
 
 - [#348](https://github.com/nautobot/nautobot-app-device-onboarding/issues/348) - Added Cisco IOS-XR experimental support to Nautobot Device Onboarding.
 
-### Changed
-
-- [#407](https://github.com/nautobot/nautobot-app-device-onboarding/issues/407) - Changed napalm dependency to match Nautobot Core.
-
 ### Deprecated
 
 - [#414](https://github.com/nautobot/nautobot-app-device-onboarding/issues/414) - Deprecated Python 3.8 support as its EOL.
@@ -27,15 +23,16 @@ This document describes all new features and changes in the release. The format 
 - [#342](https://github.com/nautobot/nautobot-app-device-onboarding/issues/342) - Fixed a bug that prevented onboarding devices using their FQDN.
 - [#376](https://github.com/nautobot/nautobot-app-device-onboarding/issues/376) - Fixed the default coming back for admin status to default to False instead of an empty list.
 - [#384](https://github.com/nautobot/nautobot-app-device-onboarding/issues/384) - Fixed a typo in the F5 command mapper yaml.
-- [#385](https://github.com/nautobot/nautobot-app-device-onboarding/issues/385) - Fixed bug causing exessive logging noise
-- [#386](https://github.com/nautobot/nautobot-app-device-onboarding/issues/386) - Add 10GEChannel to INTERFACE_TYPE_MAP_STATIC so that port-channel interfaces with this hardware type are recognized as type LAG.
-- [#387](https://github.com/nautobot/nautobot-app-device-onboarding/issues/387) - fixes capitalization of the keys in the command_mapper for cisco_nxos for `show interface switchport`
-- [#388](https://github.com/nautobot/nautobot-app-device-onboarding/issues/388) - Fixed dictionary being modified during execution by working off of a copy of the dictionary.
+- [#385](https://github.com/nautobot/nautobot-app-device-onboarding/issues/385) - Fixed bug causing excessive logging noise.
+- [#386](https://github.com/nautobot/nautobot-app-device-onboarding/issues/386) - Added 10GEChannel to INTERFACE_TYPE_MAP_STATIC so that port-channel interfaces with this hardware type are recognized as type LAG.
+- [#387](https://github.com/nautobot/nautobot-app-device-onboarding/issues/387) - Fixed capitalization of the keys in the command_mapper for cisco_nxos for `show interface switchport`.
+- [#388](https://github.com/nautobot/nautobot-app-device-onboarding/issues/388) - Fixed a `RuntimeError` when running the onboarding job against a large number of devices.
 
 ### Dependencies
 
-- [#348](https://github.com/nautobot/nautobot-app-device-onboarding/issues/348) - Update ntc-templates pinning to support Cisco XR parsing.
-- [#414](https://github.com/nautobot/nautobot-app-device-onboarding/issues/414) - Updating the jdiff dependency to major version.
+- [#348](https://github.com/nautobot/nautobot-app-device-onboarding/issues/348) - Updated ntc-templates pinning to support Cisco XR parsing.
+- [#407](https://github.com/nautobot/nautobot-app-device-onboarding/issues/407) - Changed napalm dependency to match Nautobot Core.
+- [#414](https://github.com/nautobot/nautobot-app-device-onboarding/issues/414) - Updated the jdiff dependency to major version.
 
 ### Documentation
 
