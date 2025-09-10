@@ -58,17 +58,11 @@ class SyncDevicesDevice(DiffSyncModel):
             # If a device is found in Nautobot with a matching name and location as the
             # device being created, but the primary ip address doesn't match an ip address entered,
             # (or doesn't exist) the matching device will be updated or skipped based on user preference.
-
-            location = diffsync_utils.retrieve_submitted_value(
-                job=adapter.job, ip_address=attrs["primary_ip4__host"], query_string="location"
-            )
+            job_form_attrs = adapter.job.ip_address_inventory[attrs["primary_ip4__host"]]
+            location = job_form_attrs["location"]
             platform = Platform.objects.get(name=attrs["platform__name"])
             device = Device.objects.get(name=ids["name"], location=location)
-            update_devices_without_primary_ip = diffsync_utils.retrieve_submitted_value(
-                job=adapter.job,
-                ip_address=attrs["primary_ip4__host"],
-                query_string="update_devices_without_primary_ip",
-            )
+            update_devices_without_primary_ip = job_form_attrs["update_devices_without_primary_ip"]
             if update_devices_without_primary_ip:
                 adapter.job.logger.warning(
                     f"Device {device.name} at location {location.name} already exists in Nautobot "
@@ -87,20 +81,15 @@ class SyncDevicesDevice(DiffSyncModel):
 
         except ObjectDoesNotExist:
             # Create Device
+            job_form_attrs = adapter.job.ip_address_inventory[attrs["primary_ip4__host"]]
             device = Device(
                 location=location,
-                status=diffsync_utils.retrieve_submitted_value(
-                    job=adapter.job, ip_address=attrs["primary_ip4__host"], query_string="device_status"
-                ),
-                role=diffsync_utils.retrieve_submitted_value(
-                    job=adapter.job, ip_address=attrs["primary_ip4__host"], query_string="device_role"
-                ),
+                status=job_form_attrs["device_status"],
+                role=job_form_attrs["device_role"],
                 device_type=DeviceType.objects.get(model=attrs["device_type__model"]),
                 name=ids["name"],
                 platform=platform,
-                secrets_group=diffsync_utils.retrieve_submitted_value(
-                    job=adapter.job, ip_address=attrs["primary_ip4__host"], query_string="secrets_group"
-                ),
+                secrets_group=job_form_attrs["secrets_group"],
                 serial=ids["serial"],
             )
             device.validated_save()
@@ -117,14 +106,11 @@ class SyncDevicesDevice(DiffSyncModel):
             )
         except ObjectDoesNotExist:
             try:
+                job_form_attrs = adapter.job.ip_address_inventory[ip_address]
                 device_interface = Interface(
                     name=interface_name,
-                    mgmt_only=diffsync_utils.retrieve_submitted_value(
-                        job=adapter.job, ip_address=ip_address, query_string="set_mgmt_only"
-                    ),
-                    status=diffsync_utils.retrieve_submitted_value(
-                        job=adapter.job, ip_address=ip_address, query_string="interface_status"
-                    ),
+                    mgmt_only=job_form_attrs["set_mgmt_only"],
+                    status=job_form_attrs["interface_status"],
                     type=InterfaceTypeChoices.TYPE_OTHER,
                     device=device,
                 )
@@ -156,28 +142,13 @@ class SyncDevicesDevice(DiffSyncModel):
     @classmethod
     def _update_device_with_attrs(cls, device, platform, ids, attrs, adapter):
         """Update a Nautobot device instance with attrs."""
-        device.location = diffsync_utils.retrieve_submitted_value(
-            job=adapter.job,
-            ip_address=attrs["primary_ip4__host"],
-            query_string="location",
-        )
-        device.status = diffsync_utils.retrieve_submitted_value(
-            job=adapter.job,
-            ip_address=attrs["primary_ip4__host"],
-            query_string="device_status",
-        )
-        device.role = diffsync_utils.retrieve_submitted_value(
-            job=adapter.job,
-            ip_address=attrs["primary_ip4__host"],
-            query_string="device_role",
-        )
+        job_form_attrs = adapter.job.ip_address_inventory[attrs["primary_ip4__host"]]
+        device.location = job_form_attrs["location"]
+        device.status = job_form_attrs["device_status"]
+        device.role = job_form_attrs["device_role"]
         device.device_type = DeviceType.objects.get(model=attrs["device_type__model"])
         device.platform = platform
-        device.secrets_group = diffsync_utils.retrieve_submitted_value(
-            job=adapter.job,
-            ip_address=attrs["primary_ip4__host"],
-            query_string="secrets_group",
-        )
+        device.secrets_group = job_form_attrs["secrets_group"]
         device.serial = ids["serial"]
 
         return device
@@ -213,18 +184,13 @@ class SyncDevicesDevice(DiffSyncModel):
         # Get or create Device, Interface and IP Address
         device = cls._get_or_create_device(adapter, ids, attrs)
         if device:
+            job_form_attrs = adapter.job.ip_address_inventory[attrs["primary_ip4__host"]]
             ip_address = diffsync_utils.get_or_create_ip_address(
                 host=attrs["primary_ip4__host"],
                 mask_length=attrs["mask_length"],
-                namespace=diffsync_utils.retrieve_submitted_value(
-                    job=adapter.job, ip_address=attrs["primary_ip4__host"], query_string="namespace"
-                ),
-                default_ip_status=diffsync_utils.retrieve_submitted_value(
-                    job=adapter.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
-                ),
-                default_prefix_status=diffsync_utils.retrieve_submitted_value(
-                    job=adapter.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
-                ),
+                namespace=job_form_attrs["namespace"],
+                default_ip_status=job_form_attrs["ip_address_status"],
+                default_prefix_status=job_form_attrs["ip_address_status"],
                 job=adapter.job,
             )
             interface = cls._get_or_create_interface(
@@ -249,7 +215,14 @@ class SyncDevicesDevice(DiffSyncModel):
 
     def update(self, attrs):
         """Update an existing nautobot device using data scraped from a device."""
-        device = Device.objects.get(name=self.name, location__name=self.location__name)
+        try:
+            device = Device.objects.get(name=self.name, location__name=self.location__name)
+        except MultipleObjectsReturned as exc:
+            raise MultipleObjectsReturned(
+                f"Multiple devices found with name {self.name} and location {self.location__name}"
+            ) from exc
+        except ObjectDoesNotExist as exc:
+            raise ObjectDoesNotExist(f"Device {self.name} does not exist at {self.location__name}") from exc
 
         if self.adapter.job.debug:
             self.adapter.job.logger.debug(f"Updating {device.name} with attrs: {attrs}")
@@ -271,18 +244,14 @@ class SyncDevicesDevice(DiffSyncModel):
                 if not attrs.get("mask_length"):
                     attrs["mask_length"] = device.primary_ip4.mask_length
 
+                job_form_attrs = self.adapter.job.ip_address_inventory[attrs["primary_ip4__host"]]
+
                 ip_address = diffsync_utils.get_or_create_ip_address(
                     host=attrs["primary_ip4__host"],
                     mask_length=attrs["mask_length"],
-                    namespace=diffsync_utils.retrieve_submitted_value(
-                        job=self.adapter.job, ip_address=attrs["primary_ip4__host"], query_string="namespace"
-                    ),
-                    default_ip_status=diffsync_utils.retrieve_submitted_value(
-                        job=self.adapter.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
-                    ),
-                    default_prefix_status=diffsync_utils.retrieve_submitted_value(
-                        job=self.adapter.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
-                    ),
+                    namespace=job_form_attrs["namespace"],
+                    default_ip_status=job_form_attrs["ip_address_status"],
+                    default_prefix_status=job_form_attrs["ip_address_status"],
                     job=self.adapter.job,
                 )
                 new_interface = self._get_or_create_interface(
@@ -317,18 +286,13 @@ class SyncDevicesDevice(DiffSyncModel):
                 if not attrs.get("mask_length"):
                     attrs["mask_length"] = device.primary_ip4.mask_length
 
+                job_form_attrs = self.adapter.job.ip_address_inventory[attrs["primary_ip4__host"]]
                 new_ip_address = diffsync_utils.get_or_create_ip_address(
                     host=attrs["primary_ip4__host"],
                     mask_length=attrs["mask_length"],
-                    namespace=diffsync_utils.retrieve_submitted_value(
-                        job=self.adapter.job, ip_address=attrs["primary_ip4__host"], query_string="namespace"
-                    ),
-                    default_ip_status=diffsync_utils.retrieve_submitted_value(
-                        job=self.adapter.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
-                    ),
-                    default_prefix_status=diffsync_utils.retrieve_submitted_value(
-                        job=self.adapter.job, ip_address=attrs["primary_ip4__host"], query_string="ip_address_status"
-                    ),
+                    namespace=job_form_attrs["namespace"],
+                    default_ip_status=job_form_attrs["ip_address_status"],
+                    default_prefix_status=job_form_attrs["ip_address_status"],
                     job=self.adapter.job,
                 )
                 self._remove_old_interface_assignment(device=device, ip_address=device.primary_ip4)

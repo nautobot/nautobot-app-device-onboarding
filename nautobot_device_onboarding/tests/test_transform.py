@@ -35,6 +35,8 @@ class TestTransformNoGitRepo(unittest.TestCase):
             "cisco_nxos",
             "hp_comware",
             "paloalto_panos",
+            "f5_tmsh",
+            "aruba_aoscx",
         ]
         self.assertEqual(sorted(default_mappers), list(sorted(command_mappers.keys())))
 

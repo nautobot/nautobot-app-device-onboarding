@@ -158,7 +158,8 @@ NETWORK_DATA_SCHEMA = {
                     "ip_addresses",
                     "mac_address",
                     "mtu",
-                    "description" "link_status",
+                    "description",
+                    "link_status",
                     "802.1Q_mode",
                 ],
                 "properties": {
@@ -215,6 +216,10 @@ NETWORK_DATA_SCHEMA = {
                     "remote_device": {"type": "string", "description": "Name of the remote device"},
                 },
             },
+        },
+        "software_version": {
+            "type": "string",
+            "description": "Software version of the device",
         },
     },
 }

@@ -10,6 +10,67 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - [#200](https://github.com/nautobot/nautobot-app-device-onboarding/issues/200) - Added basic connectivity checker using Netutils tcp_ping method.
 - [#274](https://github.com/nautobot/nautobot-app-device-onboarding/issues/274) - Added TTP Parser support.
 - [#274](https://github.com/nautobot/nautobot-app-device-onboarding/issues/274) - Added Sync Device from Network support for Palo Alto Panos.
+- [#340](https://github.com/nautobot/nautobot-app-device-onboarding/issues/340) - Add Aruba AOSCX support for Sync Devices from Network Job.
+- [#278](https://github.com/nautobot/nautobot-app-device-onboarding/issues/278) - Optimized VLAN loading into diffsync from Nautbot
+- [#278](https://github.com/nautobot/nautobot-app-device-onboarding/issues/278) - Improved error handling when creating VLANs
+- [#233](https://github.com/nautobot/nautobot-app-device-onboarding/issues/233) - Added support syncing in software versions from devices to nautobot core models.
+- [#334](https://github.com/nautobot/nautobot-app-device-onboarding/issues/334) - Add initial F5 Support for Network Device Sync
+- [#357](https://github.com/nautobot/nautobot-app-device-onboarding/issues/357) - Added improved error messaging for device object `get()` call in the `update()` method of `SyncDevicesDevice`
+- [#372](https://github.com/nautobot/nautobot-app-device-onboarding/issues/372) - Fixed bug when loading Nautobot Vlans with multiple locations assigned. Only Vlans with 1 location will be considered for the sync.
+
+## [v4.2.6 (2025-07-25)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.2.6a0)
+
+### Fixed
+
+- [#385](https://github.com/nautobot/nautobot-app-device-onboarding/issues/385) - Fixed bug causing exessive logging noise
+- [#386](https://github.com/nautobot/nautobot-app-device-onboarding/issues/386) - Add 10GEChannel to INTERFACE_TYPE_MAP_STATIC so that port-channel interfaces with this hardware type are recognized as type LAG.
+
+### Housekeeping
+
+- Rebaked from the cookie `nautobot-app-v2.5.0`.
+
+## [v4.2.5 (2025-05-13)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.2.5)
+
+### Added
+
+- [#233](https://github.com/nautobot/nautobot-app-device-onboarding/issues/233) - Added support syncing in software versions from devices to nautobot core models.
+- [#334](https://github.com/nautobot/nautobot-app-device-onboarding/issues/334) - Add initial F5 Support for Network Device Sync
+- [#357](https://github.com/nautobot/nautobot-app-device-onboarding/issues/357) - Added improved error messaging for device object `get()` call in the `update()` method of `SyncDevicesDevice`
+
+### Fixed
+
+- [#372](https://github.com/nautobot/nautobot-app-device-onboarding/issues/372) - Fixed bug when loading Nautobot Vlans with multiple locations assigned. Only Vlans with 1 location will be considered for the sync.
+
+### Dependencies
+
+- [#367](https://github.com/nautobot/nautobot-app-device-onboarding/issues/367) - Updated jdiff dependency pin.
+
+### Documentation
+
+- [#358](https://github.com/nautobot/nautobot-app-device-onboarding/issues/358) - Updated documentation on the README for VRF.
+
+
+## [v4.2.4 (2025-04-08)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.2.4)
+
+### Added
+
+- [#326](https://github.com/nautobot/nautobot-app-device-onboarding/issues/326) - Added testing for cable termination type when adding cables to diffsync store.
+- [#340](https://github.com/nautobot/nautobot-app-device-onboarding/issues/340) - Add Aruba AOSCX support for Sync Devices from Network Job.
+
+### Changed
+
+- [#278](https://github.com/nautobot/nautobot-app-device-onboarding/issues/278) - Optimized VLAN loading into diffsync from Nautbot
+- [#278](https://github.com/nautobot/nautobot-app-device-onboarding/issues/278) - Improved error handling when creating VLANs
+
+### Fixed
+
+- [#326](https://github.com/nautobot/nautobot-app-device-onboarding/issues/326) - Fixed incorrect call to cable termination type.
+- [#337](https://github.com/nautobot/nautobot-app-device-onboarding/issues/337) - Fixed logging call from an invalid path to the correct one.
+- [#346](https://github.com/nautobot/nautobot-app-device-onboarding/issues/346) - Fixed Juniper IP addresses not syncing secondary IP addresses.
+
+### Housekeeping
+
+- [#341](https://github.com/nautobot/nautobot-app-device-onboarding/issues/341) - Add MySQL testing back to the CI configuration.
 
 ## [v4.2.3 (2025-03-11)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.2.3)
 

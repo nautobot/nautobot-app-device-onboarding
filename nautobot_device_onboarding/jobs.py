@@ -4,8 +4,9 @@
 import csv
 import json
 import logging
-from io import StringIO
+import socket
 
+import netaddr
 from diffsync.enum import DiffSyncFlags
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -252,8 +253,8 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
     def __init__(self, *args, **kwargs):
         """Initialize SSoTSyncDevices."""
         super().__init__(*args, **kwargs)
-        self.processed_csv_data = {}
-        self.task_kwargs_csv_data = {}
+        self.ip_address_inventory = {}
+        self.found_invalid_ip_address = False
 
         self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
 
@@ -361,16 +362,19 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         )
 
     def _process_csv_data(self, csv_file):
-        """Convert CSV data into a dictionary containing Nautobot objects."""
+        """Convert CSV data into a list of dictionaries containing Nautobot objects."""
         self.logger.info("Decoding CSV file...")
         decoded_csv_file = csv_file.read().decode("utf-8")
-        csv_reader = csv.DictReader(StringIO(decoded_csv_file))
+        csv_reader = csv.DictReader(decoded_csv_file.split("\n"))
+
+        if len(decoded_csv_file.split("\n")) <= 1:
+            self.logger.error("The CSV file contains no data!")
+            return None
+
         self.logger.info("Processing CSV data...")
         processing_failed = False
         processed_csv_data = {}
-        self.task_kwargs_csv_data = {}
-        row_count = 1
-        for row in csv_reader:
+        for row_num, row in enumerate(csv_reader, start=2):
             query = None
             try:
                 query = f"location_name: {row.get('location_name')}, location_parent_name: {row.get('location_parent_name')}"
@@ -412,6 +416,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                     platform = Platform.objects.get(
                         name=row["platform_name"].strip(),
                     )
+                    self._validate_platform_network_driver(platform)
 
                 set_mgmt_only = self._convert_string_to_bool(
                     string=row["set_mgmt_only"].lower().strip(), header="set_mgmt_only"
@@ -421,92 +426,88 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                     header="update_devices_without_primary_ip",
                 )
 
-                processed_csv_data[row["ip_address_host"]] = {}
-                processed_csv_data[row["ip_address_host"]]["location"] = location
-                processed_csv_data[row["ip_address_host"]]["namespace"] = namespace
-                processed_csv_data[row["ip_address_host"]]["port"] = int(row["port"].strip())
-                processed_csv_data[row["ip_address_host"]]["timeout"] = int(row["timeout"].strip())
-                processed_csv_data[row["ip_address_host"]]["set_mgmt_only"] = set_mgmt_only
-                processed_csv_data[row["ip_address_host"]]["update_devices_without_primary_ip"] = (
-                    update_devices_without_primary_ip
-                )
-                processed_csv_data[row["ip_address_host"]]["device_role"] = device_role
-                processed_csv_data[row["ip_address_host"]]["device_status"] = device_status
-                processed_csv_data[row["ip_address_host"]]["interface_status"] = interface_status
-                processed_csv_data[row["ip_address_host"]]["ip_address_status"] = ip_address_status
-                processed_csv_data[row["ip_address_host"]]["secrets_group"] = secrets_group
-                processed_csv_data[row["ip_address_host"]]["platform"] = platform
+                resolved_ip = self._validate_ip_address(row["ip_address_host"])
+                processed_row = {
+                    "original_ip_address": row["ip_address_host"],
+                    "location": location,
+                    "namespace": namespace,
+                    "port": int(row["port"].strip()),
+                    "timeout": int(row["timeout"].strip()),
+                    "set_mgmt_only": set_mgmt_only,
+                    "update_devices_without_primary_ip": update_devices_without_primary_ip,
+                    "device_role": device_role,
+                    "device_status": device_status,
+                    "interface_status": interface_status,
+                    "ip_address_status": ip_address_status,
+                    "secrets_group": secrets_group,
+                    "platform": platform,
+                }
 
-                # Prepare ids to send to the job in celery
-                self.task_kwargs_csv_data[row["ip_address_host"]] = {}
-                self.task_kwargs_csv_data[row["ip_address_host"]]["port"] = int(row["port"].strip())
-                self.task_kwargs_csv_data[row["ip_address_host"]]["timeout"] = int(row["timeout"].strip())
-                self.task_kwargs_csv_data[row["ip_address_host"]]["secrets_group"] = (
-                    secrets_group.id if secrets_group else ""
-                )
-                self.task_kwargs_csv_data[row["ip_address_host"]]["platform"] = platform.id if platform else ""
-                row_count += 1
+                processed_csv_data[resolved_ip] = processed_row
+
             except ObjectDoesNotExist as err:
-                self.logger.error(f"(row {sum([row_count, 1])}), {err} {query}")
+                self.logger.error(f"(row {row_num}), {err} {query}")
                 processing_failed = True
-                row_count += 1
             except ValidationError as err:
-                self.logger.error(f"(row {sum([row_count, 1])}), {err}")
-                row_count += 1
+                self.logger.error(f"(row {row_num}), {err}")
+                processing_failed = True
         if processing_failed:
-            processed_csv_data = None
-        if row_count <= 1:
-            self.logger.error("The CSV file is empty!")
             processed_csv_data = None
 
         return processed_csv_data
 
-    def run(
+    def _validate_ip_address(self, ip_address):
+        """Validate the IP Address, resolving FQDNs and replacing with an IP as necessary."""
+        try:
+            netaddr.IPAddress(ip_address)
+            return ip_address
+        except netaddr.AddrFormatError:
+            try:
+                resolved_ip = socket.gethostbyname(ip_address)
+                self.logger.info("[{%s}] resolved to [{%s}]", ip_address, resolved_ip)
+                return resolved_ip
+            except socket.gaierror:
+                self.logger.error("[{%s}] is not a valid IP Address or FQDN.", ip_address)
+                self.found_invalid_ip_address = True
+                return ip_address
+
+    def _validate_platform_network_driver(self, platform):
+        if not platform.network_driver:
+            self.logger.error(
+                "The selected platform, '%s' does not have a network driver, please update the Platform.", platform
+            )
+            return False
+        return True
+
+    def run(  # pylint: disable=too-many-positional-arguments
         self,
-        dryrun,
-        memory_profiling,
-        debug,
-        csv_file,
-        location,
-        namespace,
-        ip_addresses,
-        set_mgmt_only,
-        update_devices_without_primary_ip,
-        device_role,
-        device_status,
-        interface_status,
-        ip_address_status,
-        port,
-        timeout,
-        secrets_group,
-        platform,
-        *args,
-        **kwargs,
+        dryrun=True,
+        memory_profiling=False,
+        debug=False,
+        port=22,
+        timeout=30,
+        connectivity_test=False,
+        update_devices_without_primary_ip=False,
+        set_mgmt_only=True,
+        csv_file=None,
+        location=None,
+        namespace=None,
+        ip_addresses=None,
+        device_role=None,
+        device_status=None,
+        interface_status=None,
+        ip_address_status=None,
+        secrets_group=None,
+        platform=None,
     ):
         """Run sync."""
         self.dryrun = dryrun
         self.memory_profiling = memory_profiling
         self.debug = debug
 
-        self.job_result.task_kwargs = {
-            "debug": debug,
-            "connectivity_test": kwargs["connectivity_test"],
-        }
-
         if csv_file:
-            self.processed_csv_data = self._process_csv_data(csv_file=csv_file)
-            if self.processed_csv_data:
-                # create a list of ip addresses for processing in the adapter
-                self.ip_addresses = []
-                for ip_address in self.processed_csv_data:
-                    self.ip_addresses.append(ip_address)
-                # prepare the task_kwargs needed by the CommandGetterDO job
-                self.job_result.task_kwargs.update(
-                    {
-                        "csv_file": self.task_kwargs_csv_data,
-                    }
-                )
-            else:
+            self.ip_address_inventory = self._process_csv_data(csv_file=csv_file)
+            if not self.ip_address_inventory:
                 raise ValidationError(message="CSV check failed. No devices will be synced.")
 
         else:
@@ -527,45 +528,41 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             missing_required_inputs = [
                 form_field for form_field, input_value in required_inputs.items() if not input_value
             ]
-            if not missing_required_inputs:
-                pass
-            else:
+            if missing_required_inputs:
                 self.logger.error(f"Missing requried inputs from job form: {missing_required_inputs}")
                 raise ValidationError(message=f"Missing required inputs {missing_required_inputs}")
 
-            self.location = location
-            self.namespace = namespace
-            self.ip_addresses = ip_addresses.replace(" ", "").split(",")
-            self.set_mgmt_only = set_mgmt_only
-            self.update_devices_without_primary_ip = update_devices_without_primary_ip
-            self.device_role = device_role
-            self.device_status = device_status
-            self.interface_status = interface_status
-            self.ip_address_status = ip_address_status
-            self.port = port
-            self.timeout = timeout
-            self.secrets_group = secrets_group
-            self.platform = platform
+            default_values = {
+                "port": int(port),
+                "timeout": int(timeout),
+                "secrets_group": secrets_group,
+                "platform": platform,
+                "location": location,
+                "namespace": namespace,
+                "device_role": device_role,
+                "device_status": device_status,
+                "interface_status": interface_status,
+                "ip_address_status": ip_address_status,
+                "set_mgmt_only": set_mgmt_only,
+                "update_devices_without_primary_ip": update_devices_without_primary_ip,
+            }
 
-            self.job_result.task_kwargs.update(
-                {
-                    "location": location,
-                    "namespace": namespace,
-                    "ip_addresses": ip_addresses,
-                    "set_mgmt_only": set_mgmt_only,
-                    "update_devices_without_primary_ip": update_devices_without_primary_ip,
-                    "device_role": device_role,
-                    "device_status": device_status,
-                    "interface_status": interface_status,
-                    "ip_address_status": ip_address_status,
-                    "port": port,
-                    "timeout": timeout,
-                    "secrets_group": secrets_group,
-                    "platform": platform,
-                    "csv_file": "",
-                }
-            )
-        super().run(dryrun, memory_profiling, *args, **kwargs)
+            if platform:
+                if not self._validate_platform_network_driver(platform):
+                    # TODO: We're only raising an exception if a csv file is not provided. Is that correct?
+                    raise ValueError("Platform.network_driver missing")
+
+            for ip_address in ip_addresses.replace(" ", "").split(","):
+                resolved = self._validate_ip_address(ip_address)
+                self.ip_address_inventory[resolved] = {"original_ip_address": ip_address, **default_values}
+
+        self.connectivity_test = connectivity_test
+        self.csv_file = csv_file
+
+        if self.found_invalid_ip_address:
+            raise RuntimeError("An invalid IP Address or FQDN was provided")
+
+        super().run(dryrun, memory_profiling)
 
 
 class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attributes
@@ -594,6 +591,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
     sync_vlans = BooleanVar(default=False, description="Sync VLANs and interface VLAN assignments.")
     sync_vrfs = BooleanVar(default=False, description="Sync VRFs and interface VRF assignments.")
     sync_cables = BooleanVar(default=False, description="Sync cables between interfaces via a LLDP or CDP.")
+    sync_software_version = BooleanVar(default=False, description="Sync software version from device.")
     namespace = ObjectVar(
         model=Namespace,
         required=True,
@@ -654,40 +652,42 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         self.target_adapter = SyncNetworkDataNautobotAdapter(job=self, sync=self.sync)
         self.target_adapter.load()
 
-    def run(
+    def run(  # pylint: disable=too-many-positional-arguments
         self,
         dryrun,
         memory_profiling,
         debug,
+        connectivity_test,
+        sync_vlans,
+        sync_vrfs,
+        sync_cables,
+        sync_software_version,
         namespace,
         interface_status,
         ip_address_status,
         default_prefix_status,
-        location,
-        devices,
-        device_role,
-        platform,
-        sync_vlans,
-        sync_vrfs,
-        sync_cables,
-        *args,
-        **kwargs,
+        devices=None,
+        location=None,
+        device_role=None,
+        platform=None,
     ):
         """Run sync."""
         self.dryrun = dryrun
         self.memory_profiling = memory_profiling
         self.debug = debug
-        self.namespace = namespace
-        self.ip_address_status = ip_address_status
-        self.interface_status = interface_status
-        self.default_prefix_status = default_prefix_status
-        self.location = location
-        self.devices = devices
-        self.device_role = device_role
-        self.platform = platform
+        self.connectivity_test = connectivity_test
         self.sync_vlans = sync_vlans
         self.sync_vrfs = sync_vrfs
         self.sync_cables = sync_cables
+        self.sync_software_version = sync_software_version
+        self.namespace = namespace
+        self.interface_status = interface_status
+        self.ip_address_status = ip_address_status
+        self.default_prefix_status = default_prefix_status
+        self.devices = devices
+        self.location = location
+        self.device_role = device_role
+        self.platform = platform
 
         # Check for last_network_data_sync CustomField
         if self.debug:
@@ -740,20 +740,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         else:
             self.logger.warning("Over 300 devices were selected to sync")
 
-        self.job_result.task_kwargs = {
-            "debug": debug,
-            "ip_address_status": ip_address_status,
-            "default_prefix_status": default_prefix_status,
-            "location": location,
-            "devices": self.filtered_devices,
-            "device_role": device_role,
-            "sync_vlans": sync_vlans,
-            "sync_vrfs": sync_vrfs,
-            "sync_cables": sync_cables,
-            "connectivity_test": kwargs["connectivity_test"],
-        }
-
-        super().run(dryrun, memory_profiling, *args, **kwargs)
+        super().run(dryrun, memory_profiling)
 
 
 class DeviceOnboardingTroubleshootingJob(Job):
@@ -805,6 +792,7 @@ class DeviceOnboardingTroubleshootingJob(Job):
                     kwargs.update({"sync_vrfs": True})
                     kwargs.update({"sync_vlans": True})
                     kwargs.update({"sync_cables": True})
+                    kwargs.update({"sync_software_version": True})
                     nr_with_processors.run(
                         task=netmiko_send_commands,
                         command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],
@@ -824,6 +812,7 @@ class DeviceOnboardingTroubleshootingJob(Job):
                         kwargs.update({"sync_vrfs": True})
                         kwargs.update({"sync_vlans": True})
                         kwargs.update({"sync_cables": True})
+                        kwargs.update({"sync_software_version": True})
                     nr_with_processors.run(
                         task=netmiko_send_commands,
                         command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],

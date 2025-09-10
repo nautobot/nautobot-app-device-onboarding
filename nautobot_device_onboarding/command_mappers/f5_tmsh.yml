@@ -1,0 +1,36 @@
+---
+sync_devices:
+  hostname:
+    commands:
+      - command: "show cm device"
+        parser: "ttp"
+        jpath: "[]|[?mgmt_ip==`{{ obj }}`].mgmt_hostname"
+        post_processor: "{{ obj[0] }}"
+        iterable_type: "str"
+  serial:
+    commands:
+      - command: "show sys hardware"
+        parser: "ttp"
+        jpath: "[*].serial_number"
+        post_processor: "{{ obj[0] }}"
+        iterable_type: "str"
+  device_type:
+    commands:
+      - command: "show sys hardware"
+        parser: "ttp"
+        jpath: "[*].model_type"
+        post_processor: "{{ obj[0] }}"
+        iterable_type: "str"
+  mgmt_interface:
+    commands:
+      - command: "show net interface | grep mgmt | grep up"
+        parser: "raw"
+        jpath: "raw"
+        post_processor: "{{ obj.split(' ')[0] }}"
+  mask_length:
+    commands:
+      - command: "show sys cluster"
+        parser: "ttp"
+        jpath: "[*].mgmt_mask"
+        post_processor: "{{ obj[0] }}"
+        iterable_type: "int"
