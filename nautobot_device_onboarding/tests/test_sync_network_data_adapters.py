@@ -3,7 +3,7 @@
 from unittest.mock import MagicMock, patch
 
 from django.contrib.contenttypes.models import ContentType
-from nautobot.core.testing import TransactionTestCase
+from nautobot.apps.testing import TransactionTestCase
 from nautobot.dcim.models import Cable, Device, Interface, SoftwareVersion
 from nautobot.extras.models import JobResult
 from nautobot.ipam.models import VLAN, VRF, IPAddress
@@ -51,11 +51,21 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
         """Devices that failed to returned pardsed data should be removed from results."""
         # Add a failed device to the mock returned data
         self.job.command_getter_result.update(sync_network_data_fixture.failed_device)
+        self.assertIn("demo-cisco-3", self.job.command_getter_result.keys())
 
         self.sync_network_data_adapter._handle_failed_devices(  # pylint: disable=protected-access
             device_data=self.job.command_getter_result
         )
-        self.assertNotIn("demo-cisco-xe3", self.job.command_getter_result.keys())
+        self.assertNotIn("demo-cisco-3", self.job.command_getter_result.keys())
+
+    def test_handle_failed_devices_no_serial(self):
+        """Test handling of failed devices when an error is raised due to missing serial."""
+        self.job.command_getter_result.update(sync_network_data_fixture.missing_serial)
+        self.assertIn("demo-cisco-4", self.job.command_getter_result.keys())
+        self.sync_network_data_adapter._handle_failed_devices(  # pylint: disable=protected-access
+            device_data=self.job.command_getter_result
+        )
+        self.assertNotIn("demo-cisco-4", self.job.command_getter_result.keys())
 
     @patch("nautobot_device_onboarding.diffsync.adapters.sync_network_data_adapters.sync_network_data_command_getter")
     def test_execute_command_getter(self, command_getter_result):

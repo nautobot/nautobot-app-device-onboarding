@@ -195,3 +195,32 @@ sync_network_mock_data_valid = {
     },
 }
 failed_device = {"demo-cisco-3": {"failed": True, "failed_reason": "Authentication failure"}}
+missing_serial = {
+    "demo-cisco-4": {
+        "interfaces": {
+            "GigabitEthernet1": {
+                "type": "100base-tx",
+                "ip_addresses": [
+                    {"ip_address": "10.1.1.15", "prefix_length": 24},
+                ],
+                "mac_address": "d8b1.905c.5174",
+                "mtu": "1500",
+                "description": "",
+                "link_status": True,
+                "802.1Q_mode": "tagged",
+                "lag": "",
+                "untagged_vlan": {"name": "vlan60", "id": "60"},
+                "tagged_vlans": [{"name": "vlan40", "id": "40"}],
+                "vrf": {"name": "mgmt"},
+            },
+        },
+        "cables": [
+            {
+                "remote_device": "demo-cisco-1",
+                "local_interface": "GigabitEthernet1",
+                "remote_interface": "GigabitEthernet1",
+            },
+        ],
+        "software_version": "16.12.4",
+    },
+}

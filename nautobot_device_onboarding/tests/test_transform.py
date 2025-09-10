@@ -30,6 +30,7 @@ class TestTransformNoGitRepo(unittest.TestCase):
             "arista_eos",
             "cisco_wlc",
             "cisco_xe",
+            "cisco_xr",
             "juniper_junos",
             "cisco_nxos",
             "hp_comware",

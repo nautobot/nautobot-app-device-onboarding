@@ -73,7 +73,7 @@ def object_match(obj, search_array):
 class NautobotKeeper:  # pylint: disable=too-many-instance-attributes
     """Used to manage the information relating to the network device within the Nautobot server."""
 
-    def __init__(  # pylint: disable=R0913,R0914
+    def __init__(  # pylint: disable=too-many-positional-arguments
         self,
         netdev_hostname,
         netdev_nb_role_name,
