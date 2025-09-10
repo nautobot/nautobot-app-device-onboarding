@@ -40,6 +40,6 @@
         {"interface": "GigabitEthernet0/0/0/3", "link_status": "administratively down", "admin_state": "administratively down", "hardware_type": "GigabitEthernet", "mac_address": "5000.0004.0006", "bia": "5000.0004.0006", "description": "3rd interface", "ip_address": "Unknown", "mtu": "1514", "duplex": "unknown", "hardware_media": "", "speed": "1000Mb/s", "bandwidth": "1000000 Kbit", "encapsulation": "ARPA", "vlan_id": "", "last_input": "never", "last_output": "never", "input_rate": "0", "output_rate": "0", "input_pps": "0", "output_pps": "0", "input_packets": "0", "output_packets": "0", "runts": "0", "giants": "0", "input_errors": "0", "crc": "0", "frame": "0", "overrun": "0", "abort": "0", "output_errors": "0"}
     ],
     "show ipv4 vrf all interface brief":[
-        {"interface": "MgmtEth0/RP0/CPU0/0", "ip_address": "192.168.254.130", "status": "Up", "proto": "Up", "vrf": "MGMT"}
+        {"interface": "MgmtEth0/RP0/CPU0/0", "ip_address": "198.51.100.1", "status": "Up", "proto": "Up", "vrf": "MGMT"}
     ]
 }
