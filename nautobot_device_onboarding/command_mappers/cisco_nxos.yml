@@ -107,13 +107,13 @@ sync_network_data:
     commands:
       - command: "show interface switchport"
         parser: "textfsm"
-        jpath: "[?INTERFACE=='{{ current_key }}'].{admin_mode: MODE, mode: MODE, access_vlan: ACCESS_VLAN, trunking_vlans: TRUNKING_VLANS, native_vlan: NATIVE_VLAN}"
+        jpath: "[?interface=='{{ current_key }}'].{admin_mode: mode, mode: mode, access_vlan: access_vlan, trunking_vlans: trunking_vlans, native_vlan: native_vlan}"
         post_processor: "{{ obj | get_vlan_data(vlan_map, 'tagged') | tojson }}"
   interfaces__untagged_vlan:
     commands:
       - command: "show interface switchport"
         parser: "textfsm"
-        jpath: "[?INTERFACE=='{{ current_key }}'].{admin_mode: MODE, mode: MODE, access_vlan: ACCESS_VLAN, trunking_vlans: TRUNKING_VLANS, native_vlan: NATIVE_VLAN}"
+        jpath: "[?interface=='{{ current_key }}'].{admin_mode: mode, mode: mode, access_vlan: access_vlan, trunking_vlans: trunking_vlans, native_vlan: native_vlan}"
         post_processor: "{{ obj | get_vlan_data(vlan_map, 'untagged') | tojson }}"
         iterable_type: "dict"
   cables:
