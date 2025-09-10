@@ -606,7 +606,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
             for interface_name, interface_data in device_data["interfaces"].items():
                 if interface_data["ip_addresses"]:
                     for ip_address in interface_data["ip_addresses"]:
-                        if ip_address["ip_address"]:  # the ip_address and mask_length may be empty, skip these
+                        if ip_address.get("ip_address"):  # the ip_address and mask_length may be empty, skip these
                             if self.job.debug:
                                 self.job.logger.debug(f"Loading {ip_address} from {interface_name} on {hostname}")
                             try:
