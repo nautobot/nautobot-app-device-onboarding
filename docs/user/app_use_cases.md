@@ -163,11 +163,11 @@ PLUGINS_CONFIG = {
 
 3. Run the jobs and the ssh config will be used and the connection will be proxied through the jumphost.
 
-# Use-cases and common workflows
+## Use-cases and common workflows
 
-## Onboarding a Device
+### Onboarding a Device
 
-### Onboard a New Device Using Sync Devices From Network Job
+#### Onboard a New Device Using Sync Devices From Network Job
 
 A new device can be onboarded via :
 
@@ -183,17 +183,17 @@ During a successful onboarding process, a new device will be created in Nautobot
 
 This SSoT job supports a bulk CSV execution option to speed up this process.
 
-### Example CSV 
+#### Example CSV 
 ```
 ip_address_host,port,timeout,location_name,device_role_name,namespace,device_status_name,interface_status_name,ip_address_status_name,secrets_group_name,platform_name,set_mgmt_only,update_devices_without_primary_ip,
 192.168.1.1,22,30,"Test Site",Onboarding,Global,Active,Active,Active,"test secret group",,False,True
 ```
 
-### Consult the Status of the Sync Network Devices SSoT Job
+#### Consult the Status of the Sync Network Devices SSoT Job
 
 The status of onboarding jobs can be viewed via the UI (Jobs > Job Results) or retrieved via API (`/api/extras/job-results/`) with each process corresponding to an individual Job-Result object.
 
-### API
+#### API
 
 To run the SSoT Sync Devices Job via the api:
 
@@ -216,9 +216,9 @@ Optional Fields:
     device_type: Device Type UUID
     continue_on_failure: Boolean
 
-## Onboarding Interface, Vlans, IPs Etc.
+### Onboarding Interface, Vlans, IPs Etc.
 
-### Enhance Existing Device
+#### Enhance Existing Device
 
 An existing device's data can be expanded to include additional objects by:
 
@@ -232,11 +232,11 @@ An existing device's data can be expanded to include additional objects by:
 
 During a successful network data sync process, a devices related objects will be created in Nautobot with all interfaces, their IP addresses, and optionally VLANs, and VRFs.
 
-### Consult the Status of the Sync Network Data SSoT Job
+#### Consult the Status of the Sync Network Data SSoT Job
 
 The status of onboarding jobs can be viewed via the UI (Jobs > Job Results) or retrieved via API (`/api/extras/job-results/`) with each process corresponding to an individual Job-Result object.
 
-### API
+#### API
 
 To run the SSoT Sync Network Data Job via the api:
 
@@ -250,20 +250,20 @@ Required Fields:
     devices: Location UUID
 
 
-## Using Git(Datasources) to Override the Apps Defaults
+### Using Git(Datasources) to Override the Apps Defaults
 
-### YAML Overrides
+#### YAML Overrides
 
 By utilizing the Nautobot core feature `Datasource` the command mappers, jpaths, post_processors for each platform can be overridden. This also gives an easy way for a user to add platform support without having to get those fixes directly upstreamed into this application.
 
 The format of these YAML files are and how to extend this application is covered in [App YAML Overrides](./app_yaml_overrides.md).
 
 
-### Parser Templates
+#### Parser Templates
 
 As this App continues to mature, support has been added to support `TTP`; with this addition the ability to add and/or override templates was required. This follows a similar pattern to the YAML overrides.
 
-### TTP Parser Extensions
+#### TTP Parser Extensions
 
 !!! info
     To avoid overly complicating the merge logic, the App will always prefer the template files loaded in from the git repository.
@@ -280,7 +280,7 @@ File structure:
 
 When loading from a Git Repository this App is expecting a root directory called `onboarding_command_mappers`. Parser files should be located in a `parsers` directory followed by one additional directory; e.g., `ttp`. The template file names must be named `<network_driver>_<command_seperated_by_underscores>.ttp`.
 
-### Textfsm Parser Extensions
+#### Textfsm Parser Extensions
 
 !!! info
     To avoid overly complicating the merge logic, the App will always prefer the template files loaded in from the git repository. If a template isn't found in the git repository it will fallback to using native ntc-templates directory.
