@@ -341,7 +341,7 @@ def sync_network_data_command_getter(job, log_level):
 
     try:
         compiled_results = {}
-        qs = job.devices
+        qs = job.filtered_devices
         if not qs:
             return None
         with InitNornir(
