@@ -1,0 +1,1 @@
+Fixed job failure due to invalid argument to sync_network_data_command_getter and empty device queryset
