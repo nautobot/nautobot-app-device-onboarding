@@ -1,6 +1,10 @@
 ---
 nautobot_device_onboarding:
+<<<<<<< HEAD
   nautobot_ver: "2.2.3"
+=======
+  nautobot_ver: "2.4.2"
+>>>>>>> 7e2e637 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
   python_ver: "3.11"
   # local: false
   # compose_dir: "/full/path/to/nautobot-app-device-onboarding/development"

@@ -10,8 +10,6 @@
         "project_slug": "nautobot-app-device-onboarding",
         "repo_url": "https://github.com/nautobot/nautobot-app-device-onboarding",
         "base_url": "nautobot-device-onboarding",
-        "min_nautobot_version": "2.0.3",
-        "max_nautobot_version": "2.9999",
         "camel_name": "NautobotDeviceOnboarding",
         "project_short_description": "Device Onboarding",
         "model_class_name": "None",
@@ -21,13 +19,17 @@
         "_drift_manager": {
             "template": "https://github.com/nautobot/cookiecutter-nautobot-app.git",
             "template_dir": "nautobot-app",
-            "template_ref": "nautobot-app-v2.5.1",
+            "template_ref": "nautobot-app-v2.6.0",
             "cookie_dir": "",
             "branch_prefix": "drift-manager",
-            "pull_request_strategy": "create",
+            "pull_request_strategy": "update-or-create",
             "post_actions": [],
             "draft": false,
+<<<<<<< HEAD
             "baked_commit_ref": "7cc1deb31268b277fc5c7bd6f5058b3ce702b998"
+=======
+            "baked_commit_ref": "5b2bce221e1ad4bfc3ed2be455b4f7cdc6eb7e70"
+>>>>>>> 7e2e637 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
         }
     }
 }

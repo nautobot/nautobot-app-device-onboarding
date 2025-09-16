@@ -19,6 +19,7 @@ class NautobotDeviceOnboardingConfig(NautobotAppConfig):
                    collecting and populating common device 'facts' into Nautobot."
     base_url = "nautobot-device-onboarding"
     required_settings = []
+<<<<<<< HEAD
     min_version = "2.1.1"
     max_version = "2.9999"
     default_settings = {
@@ -46,6 +47,12 @@ class NautobotDeviceOnboardingConfig(NautobotAppConfig):
     caching_config = {}
     docs_view_name = "plugins:nautobot_device_onboarding:docs"
     home_view_name = "extras:job_list"  # Jobs only for now. May change in the future.
+=======
+    default_settings = {}
+    caching_config = {}
+    docs_view_name = "plugins:nautobot_device_onboarding:docs"
+    searchable_models = []
+>>>>>>> 7e2e637 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
 
 
 config = NautobotDeviceOnboardingConfig  # pylint:disable=invalid-name
