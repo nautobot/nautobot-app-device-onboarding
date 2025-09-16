@@ -1,6 +1,6 @@
 {
     "cookiecutter": {
-        "codeowner_github_usernames": "@mzbroch @scetron @glennmatthews @chadell",
+        "codeowner_github_usernames": "@glennmatthews @dav-c @jeffkala @scetron",
         "full_name": "Network to Code, LLC",
         "email": "info@networktocode.com",
         "github_org": "nautobot",
@@ -10,8 +10,6 @@
         "project_slug": "nautobot-app-device-onboarding",
         "repo_url": "https://github.com/nautobot/nautobot-app-device-onboarding",
         "base_url": "nautobot-device-onboarding",
-        "min_nautobot_version": "2.0.3",
-        "max_nautobot_version": "2.9999",
         "camel_name": "NautobotDeviceOnboarding",
         "project_short_description": "Device Onboarding",
         "model_class_name": "None",
@@ -21,10 +19,10 @@
         "_drift_manager": {
             "template": "https://github.com/nautobot/cookiecutter-nautobot-app.git",
             "template_dir": "nautobot-app",
-            "template_ref": "nautobot-app-v2.5.1",
+            "template_ref": "nautobot-app-v2.6.0",
             "cookie_dir": "",
             "branch_prefix": "drift-manager",
-            "pull_request_strategy": "create",
+            "pull_request_strategy": "update-or-create",
             "post_actions": [],
             "draft": false,
             "baked_commit_ref": ""

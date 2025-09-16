@@ -18,11 +18,10 @@ class NautobotDeviceOnboardingConfig(NautobotAppConfig):
     description = "Device Onboarding."
     base_url = "nautobot-device-onboarding"
     required_settings = []
-    min_version = "2.0.3"
-    max_version = "2.9999"
     default_settings = {}
     caching_config = {}
     docs_view_name = "plugins:nautobot_device_onboarding:docs"
+    searchable_models = []
 
 
 config = NautobotDeviceOnboardingConfig  # pylint:disable=invalid-name
