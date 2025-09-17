@@ -172,7 +172,7 @@ sync_network_data:
       - command: "show net interface all-properties"
         parser: "ttp"
         jpath: '[]."{{ current_key }}".mac'
-        post_processor: "{{ 'no description' }}"
+        post_processor: "{{ '' }}"
   interfaces__link_status:
     commands:
       - command: "show net interface all-properties"
