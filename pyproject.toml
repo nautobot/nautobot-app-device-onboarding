@@ -54,6 +54,7 @@ toml = "*"
 pymarkdownlnt = "~0.9.30"
 Markdown = "*"
 towncrier = ">=23.6.0,<=24.8.0"
+fakenos = { git = "https://github.com/fakenos/fakenos", branch = "master" }
 to-json-schema = "*"
 jsonschema = "*"
 djlint = ">=1.36.4,<2.0.0"
