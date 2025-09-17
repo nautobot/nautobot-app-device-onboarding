@@ -4,15 +4,15 @@ sync_devices:
     commands:
       - command: "show cm device"
         parser: "ttp"
-        jpath: "[]|[?mgmt_ip==`{{ obj }}`].mgmt_hostname"
-        post_processor: "{{ obj[0] }}"
+        jpath: "[*].systems[?(@.mgmt_ip==`{{ obj }}`)].hostname[]"
+        post_processor: "{{ obj[0] | remove_fqdn }}"
         iterable_type: "str"
   serial:
     commands:
       - command: "show sys hardware"
         parser: "ttp"
-        jpath: "[*].serial_number"
-        post_processor: "{{ obj[0] }}"
+        jpath: "[*].{model: model_type, sn: serial_number, mac: base_mac}"
+        post_processor: "{% if ('vCMP' in obj[0].model) or ('Virtual' in obj[0].model) %}{{ obj[0].mac }}{% else %}{{ obj[0].sn }}{% endif %}"
         iterable_type: "str"
   device_type:
     commands:
@@ -23,14 +23,224 @@ sync_devices:
         iterable_type: "str"
   mgmt_interface:
     commands:
-      - command: "show net interface | grep mgmt | grep up"
-        parser: "raw"
-        jpath: "raw"
-        post_processor: "{{ obj.split(' ')[0] }}"
+      - command: "show sys hardware"
+        parser: "ttp"
+        jpath: "[*].model_type"
+        post_processor: "{{ 'mgmt' }}"
+        iterable_type: "str"
   mask_length:
     commands:
-      - command: "show sys cluster"
+      - command: "list sys management-ip"
         parser: "ttp"
-        jpath: "[*].mgmt_mask"
+        jpath: "[*].mgmt_netmask"
         post_processor: "{{ obj[0] }}"
         iterable_type: "int"
+
+sync_network_data:
+  pre_processor:
+      vlan_map:
+        commands:
+        - command: "list net vlan"
+          parser: "ttp"
+          jpath: "[0]"
+          post_processor: "{% set result={} %}{% if obj | length > 0 %}{% for name, attrs in obj.items() %}{{ result.update({attrs.vlan_id: {'vlan_name': name}}) or '' }}{% endfor %}{% endif %}{{ result | tojson }}"
+          iterable_type: "dict"
+      vlan_int_map:
+        commands:
+        - command: "list net vlan"
+          parser: "ttp"
+          jpath: "[0]"
+          post_processor: |
+            {% set result = {} %}
+            {% for name, attrs in obj.items() %}
+              {% if attrs.members is defined %}
+                {% for member in attrs.members %}
+                  {% if member.interface != 'none' %}
+                    {% if member.interface not in result %}
+                      {% set _ = result.update({member.interface: {'tagged': [], 'untagged': []}}) %}
+                    {% endif %}
+                    {% if member.dot1q is defined %}
+                      {% set _ = result[member.interface][member.dot1q].append({'id': attrs.vlan_id, 'name': name}) %}
+                    {% endif %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+            {% endfor %}
+            {{ result | tojson }}
+          iterable_type: "dict"
+      trunk_map:
+        commands:
+        - command: "list net trunk"
+          parser: "ttp"
+          jpath: "[0]"
+          iterable_type: "list"
+      ip_map:
+        commands:
+        - command: "list net self"
+          parser: "ttp"
+          jpath: "[0]"
+          post_processor: "{{ obj | tojson }}"
+          iterable_type: "list"
+
+  serial:
+    commands:
+      - command: "show sys hardware"
+        parser: "ttp"
+        jpath: "[*].{model: model_type, sn: serial_number, mac: base_mac}"
+        post_processor: "{% if ('vCMP' in obj[0].model) or ('Virtual' in obj[0].model) %}{{ obj[0].mac }}{% else %}{{ obj[0].sn }}{% endif %}"
+        iterable_type: "str"
+  interfaces:
+    root_key: true
+    commands:
+      - command: "show net interface all-properties"
+        parser: "ttp"
+        jpath: "[].keys(@)[]"
+        post_processor: |
+          {% set result={} %}
+          {% for interface in obj %}
+            {% set _=result.update({interface: {}}) or '' %}
+          {% endfor %}
+          {% if trunk_map is mapping %}
+            {% for trunk in trunk_map.keys() %}
+              {% set _=result.update({trunk: {}}) or '' %}
+            {% endfor %}
+          {% endif %}
+          {% if vlan_map is mapping %}
+            {% for vlan in vlan_map.values() %}
+              {% set _=result.update({vlan.vlan_name: {}}) or '' %}
+            {% endfor %}
+          {% endif %}
+          {{ result | tojson }}
+  interfaces__type:
+    commands:
+      - command: "show net interface all-properties"
+        parser: "ttp"
+        jpath: '[]."{{ current_key }}".{media:media}'
+        post_processor: |
+          {% if current_key in trunk_map %}
+          {{-'lag'-}}
+          {% elif obj and obj[0] and obj[0].media != 'none' %}
+          {{-{'1000T-FD': '1000base-t', '10000SR-FD':'10gbase-x-sfpp','10000LR-FD':'10gbase-x-sfpp','40000SRBD-FD':'40gbase-x-qsfpp'}.get(obj[0]['media'], 'other')-}}
+          {% else %}
+          {{-'other'-}}
+          {% endif %}
+        iterable_type: "str"
+  interfaces__ip_addresses:
+    commands:
+      - command: "list sys management-ip"
+        parser: "ttp"
+        jpath: "[*].{ip_address:mgmt_ip, prefix_length:mgmt_netmask}"
+        post_processor: |
+          {% if current_key == 'mgmt' %}
+          {{- obj | tojson -}}
+          {% elif current_key in ip_map %}
+          {{- ip_map[current_key] | tojson -}}
+          {% else %}
+          {{- [] | tojson -}}
+          {% endif %}
+        iterable_type: "list"
+  interfaces__mtu:
+    commands:
+      - command: "show net interface all-properties"
+        parser: "ttp"
+        jpath: '[]."{{ current_key }}".mtu'
+        post_processor: |
+          {% if current_key in trunk_map %}
+          {{-'9198'-}}         
+          {% elif obj and obj[0] and obj[0] != 'none' %}
+          {{-obj[0]-}}
+          {% else %}
+          {{-'1500'-}}
+          {% endif %}
+        iterable_type: "str"
+  interfaces__mac_address:
+    commands:
+      - command: "show net interface all-properties"
+        parser: "ttp"
+        jpath: '[]."{{ current_key }}".mac'
+        post_processor: |
+          {% if current_key in trunk_map %}
+          {{-trunk_map[current_key].mac_address-}}
+          {% elif obj and obj[0] and obj[0] != 'none' %}
+          {{-obj[0]-}}
+          {% else %}
+          {{-''-}}
+          {% endif %}
+        iterable_type: "str"
+  interfaces__description:
+    commands:
+      - command: "show net interface all-properties"
+        parser: "ttp"
+        jpath: '[]."{{ current_key }}".mac'
+        post_processor: "{{ 'no description' }}"
+  interfaces__link_status:
+    commands:
+      - command: "show net interface all-properties"
+        parser: "ttp"
+        jpath: '[]."{{ current_key }}".status'
+        post_processor: "{% if (current_key in trunk_map and trunk_map[current_key].if_list != 'none') or 'VLAN_' in current_key %}{{ 'True' }}{% elif obj %}{{ obj[0] | interface_status_to_bool }}{% else %}{{ 'False' }}{% endif %}"
+  interfaces__802.1Q_mode:
+    commands:
+      - command: "show net interface all-properties"
+        parser: "ttp"
+        jpath: '[]."{{ current_key }}".trunk'
+        post_processor: "{% if (current_key in trunk_map) or (obj | length > 0 and obj[0] != 'none') or (vlan_int_map[current_key] is defined and vlan_int_map[current_key]['tagged'] | length > 0) %}{{ 'tagged' }}{% else %}{{ 'access' }}{% endif %}"
+        iterable_type: "str"
+  interfaces__lag:
+    commands:
+      - command: "show net interface all-properties"
+        parser: "ttp"
+        jpath: '[]."{{ current_key }}".trunk'
+        post_processor: |         
+          {% if obj and obj[0] and obj[0] != 'none' %}
+          {{-obj[0]-}}
+          {% else %}
+          {{-''-}}
+          {% endif %}
+        iterable_type: "str"
+  interfaces__vrf: # F5 uses route domains. Not in use at this moment.
+      commands:
+        - command: "show net interface all-properties"
+          parser: "ttp"
+          jpath: '[]."{{ current_key }}".trunk'
+          post_processor: "{{ {} | tojson }}"
+          iterable_type: "dict"
+  interfaces__tagged_vlans:
+    commands:
+      - command: "show net interface all-properties"
+        parser: "ttp"
+        jpath: '[]."{{ current_key }}".trunk'
+        post_processor: |
+          {% if current_key in vlan_int_map %}
+          {{-vlan_int_map[current_key]['tagged'] | tojson-}}
+          {% else %}
+          {{-{} | tojson-}}
+          {% endif %}
+  interfaces__untagged_vlan:
+    commands:
+      - command: "show net interface all-properties"
+        parser: "ttp"
+        jpath: '[]."{{ current_key }}".trunk'
+        post_processor: |
+          {% if current_key in vlan_int_map %}
+          {{-vlan_int_map[current_key]['untagged'] | tojson-}}
+          {% else %}
+          {{-[] | tojson-}}
+          {% endif %}
+        iterable_type: "dict"
+  software_version:
+    commands:
+      - command: "show sys version"
+        parser: "ttp"
+        jpath: "[0].version"
+  cables:
+    commands:
+      - command: "show net lldp-neighbors all-properties"
+        parser: "ttp"
+        jpath: "[0].lldp_neighbors[].{lport: local_port, rport: port_id, sysname: system_name}"
+        post_processor: |
+          {% set result = [] %}
+          {% for cable in obj %}
+              {% set _=result.append({'local_interface': cable['lport'], 'remote_interface': cable['rport'], 'remote_device': cable['sysname'] | remove_fqdn }) %}
+          {% endfor %}
+          {{ result | tojson }}

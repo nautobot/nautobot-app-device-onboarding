@@ -1,0 +1,12 @@
+<group name="{{ vlan_name }}">
+net vlan {{ vlan_name }} {
+    <group name="members*">
+    interfaces {
+        {{ interface | default('none') | exclude("poll-interval") | exclude("sampling-rate") }} {{ _line_ }}
+            {{ dot1q | match("tagged|untagged") | default("tagged") }}
+        }
+    }
+    </group>
+    tag {{ vlan_id | default('none') }}
+}
+</group>
