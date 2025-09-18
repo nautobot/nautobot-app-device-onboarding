@@ -7,15 +7,15 @@
 
     {% with csv_tab_active=form.initial.csv_input %}
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation"{% if not csv_tab_active %} class="active"{% endif %}>
-                <a href="#job_manual_input" role="tab" data-toggle="tab">Manual Input</a>
+            <li {% if not csv_tab_active %} class="active"{% endif %} role="presentation">
+                <a data-toggle="tab" href="#job_manual_input" role="tab">Manual Input</a>
             </li>
-            <li role="presentation"{% if csv_tab_active %} class="active"{% endif %}>
-                <a href="#job_csv_input" role="tab" data-toggle="tab">CSV Input</a>
+            <li {% if csv_tab_active %} class="active"{% endif %} role="presentation">
+                <a data-toggle="tab" href="#job_csv_input" role="tab">CSV Input</a>
             </li>
         </ul>
         <div class="tab-content">
-            <div id="job_manual_input" class="tab-pane{% if not csv_tab_active %} active{% endif %}">
+            <div class="tab-pane{% if not csv_tab_active %} active{% endif %}" id="job_manual_input">
                 {% render_field job_form.location %}
                 {% render_field job_form.namespace %}
                 {% render_field job_form.ip_addresses %}
@@ -30,7 +30,7 @@
                 {% render_field job_form.secrets_group %}
                 {% render_field job_form.platform %}
             </div>
-            <div id="job_csv_input" class="tab-pane{% if csv_tab_active %} active{% endif %}">
+            <div class="tab-pane{% if csv_tab_active %} active{% endif %}" id="job_csv_input">
                 {% render_field job_form.csv_file %}
             </div>
         </div>
