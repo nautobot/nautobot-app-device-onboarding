@@ -1,0 +1,7 @@
+{
+    "device_type": "ICX7650-48F",
+    "hostname": "BROCSW01",
+    "mask_length": 23,
+    "mgmt_interface": "mgmt1",
+    "serial": "EZE3301E43T"
+}

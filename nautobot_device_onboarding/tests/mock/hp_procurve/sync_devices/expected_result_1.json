@@ -1,0 +1,7 @@
+{
+    "device_type": "J9776A",
+    "hostname": "PROCSW0101",
+    "mask_length": 23,
+    "mgmt_interface": "DEFAULT_VLAN",
+    "serial": "TW01TR4512"
+}

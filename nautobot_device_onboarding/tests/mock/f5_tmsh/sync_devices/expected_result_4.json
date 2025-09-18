@@ -1,0 +1,7 @@
+{
+    "device_type": "BIG-IP vCMP Guest",
+    "hostname": "VCMPSF501",
+    "mask_length": 24,
+    "mgmt_interface": "mgmt",
+    "serial": "00:0f:11:f8:8b:11"
+}

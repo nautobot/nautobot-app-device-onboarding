@@ -1,0 +1,7 @@
+{
+    "device_type": "JL322A",
+    "hostname": "AOSSW03",
+    "mask_length": 23,
+    "mgmt_interface": "DEFAULT_VLAN",
+    "serial": "SH45OTR3W"
+}

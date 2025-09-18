@@ -1,0 +1,7 @@
+{
+    "device_type": "BIG-IP i7800",
+    "hostname": "F5EXT01-A",
+    "mask_length": 23,
+    "mgmt_interface": "mgmt",
+    "serial": "f5-hgbb-aaaa"
+}
