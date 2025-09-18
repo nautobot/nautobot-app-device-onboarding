@@ -433,6 +433,7 @@ class TestFormatterSyncDevices(unittest.TestCase):
             "arista_eos",
             "cisco_wlc",
             "cisco_xe",
+            "cisco_xr",
             "juniper_junos",
             "cisco_nxos",
             "hp_comware",
@@ -549,7 +550,7 @@ class TestFormatterSyncNetworkDataNoOptions(unittest.TestCase):
                                 command_outputs,
                                 job_debug=False,
                             )
-                            self.assertCountEqual(expected_parsed_result, actual_result)
+                            self.assertEqual(expected_parsed_result, actual_result)
 
 
 class TestFormatterSyncNetworkDataWithVrfs(unittest.TestCase):
@@ -617,7 +618,7 @@ class TestFormatterSyncNetworkDataWithVrfs(unittest.TestCase):
                                 command_outputs,
                                 job_debug=False,
                             )
-                            self.assertCountEqual(expected_parsed_result, actual_result)
+                            self.assertEqual(expected_parsed_result, actual_result)
 
 
 class TestFormatterSyncNetworkDataWithVlans(unittest.TestCase):
@@ -685,7 +686,7 @@ class TestFormatterSyncNetworkDataWithVlans(unittest.TestCase):
                                 command_outputs,
                                 job_debug=False,
                             )
-                            self.assertCountEqual(expected_parsed_result, actual_result)
+                            self.assertEqual(expected_parsed_result, actual_result)
 
 
 @unittest.skip(reason="Todo test sync network data with all options.")

@@ -12,21 +12,21 @@ classifiers = [
     "Intended Audience :: Developers",
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 packages = [
     { include = "nautobot_device_onboarding" },
 ]
 include = [
     # Poetry by default will exclude files that are in .gitignore
-    "nautobot_device_onboarding/static/nautobot_device_onboarding/docs/**/*",
+    { path = "nautobot_device_onboarding/static/nautobot_device_onboarding/docs/**/*", format = ["sdist", "wheel"] }
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.9.2,<3.13"
+python = ">=3.10,<3.14"
 napalm = ">=2.5.0, <5"
 zipp = "^3.4.0"
 nautobot = {git = "https://github.com/nautobot/nautobot.git", rev = "next"}
@@ -35,7 +35,7 @@ nautobot-ssot = {git = "https://github.com/nautobot/nautobot-app-ssot.git", rev 
 # nautobot-ssot = "^4.0.0"  # TODO: Uncomment after v4.0.0 is released
 nautobot-plugin-nornir = {git = "https://github.com/nautobot/nautobot-app-nornir.git", rev = "next-3.0"}
 # nautobot-plugin-nornir = "^3.0.0"  # TODO: Uncomment after v3.0.0 is released
-jdiff = "^0.0.6"
+jdiff = ">=1.0.1,<2.0.0"
 ntc-templates = "^7.0.0"
 # Netutils pin is needed for https://github.com/networktocode/netutils/pull/553
 netutils = "^1.9.1"
@@ -43,7 +43,7 @@ ttp = "^0.9.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "*"
-django-debug-toolbar = "*"
+django-debug-toolbar = "<6.0.0"
 invoke = "*"
 ipython = "*"
 pylint = "*"
@@ -52,7 +52,17 @@ pylint-nautobot = "*"
 ruff = "0.5.5"
 yamllint = "*"
 toml = "*"
+# Python implementation of markdownlint
+pymarkdownlnt = "~0.9.30"
 Markdown = "*"
+towncrier = ">=23.6.0,<=24.8.0"
+fakenos = { git = "https://github.com/fakenos/fakenos", branch = "master" }
+to-json-schema = "*"
+jsonschema = "*"
+djlint = ">=1.36.4,<2.0.0"
+djhtml = ">=3.0.8,<4.0.0"
+
+[tool.poetry.group.docs.dependencies]
 # Render custom markdown for version added/changed/remove notes
 markdown-version-annotations = "1.0.1"
 # Rendering docs to HTML
@@ -64,9 +74,6 @@ mkdocstrings = "0.25.2"
 mkdocstrings-python = "1.10.8"
 mkdocs-autorefs = "1.2.0"
 griffe = "1.1.1"
-towncrier = "~23.6.0"
-# Used in integration tests
-fakenos = { git = "https://github.com/fakenos/fakenos", branch = "master" }
 
 [tool.poetry.extras]
 all = [
@@ -87,12 +94,16 @@ disable = """,
     line-too-long,
     duplicate-code,
     logging-fstring-interpolation,
+    nb-warn-dunder-filter-field,
+    nb-no-search-function,
+    nb-no-char-filter-q,
     too-few-public-methods,
     too-many-ancestors,
     too-many-arguments,
     too-many-branches,
     too-many-lines,
     too-many-locals,
+    too-many-positional-arguments,
     too-many-public-methods,
     too-many-statements,
     unused-argument,
@@ -108,12 +119,12 @@ notes = """,
 
 [tool.pylint-nautobot]
 supported_nautobot_versions = [
-    "3.0.0"
+    "3"
 ]
 
 [tool.ruff]
 line-length = 120
-target-version = "py38"
+target-version = "py39"
 
 [tool.ruff.lint]
 select = [
@@ -153,8 +164,25 @@ convention = "google"
     "S"
 ]
 
+[tool.coverage.run]
+disable_warnings = ["already-imported"]
+relative_files = true
+omit = [
+    # Skip Tests
+    "*/tests/*",
+]
+include = [
+    "nautobot_device_onboarding/*",
+]
+
+[tool.pymarkdown]
+plugins.selectively_enable_rules = true
+plugins.blanks-around-lists.enabled = true
+plugins.list-anchored-indent.enabled = true
+extensions.front-matter.enabled = true
+
 [build-system]
-requires = ["poetry_core>=1.0.0"]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.towncrier]
@@ -209,3 +237,8 @@ showcontent = true
 directory = "housekeeping"
 name = "Housekeeping"
 showcontent = true
+
+[tool.djlint]
+ignore = "H005,H006,H008,H011,H012,H013,H014,H015,H016,H019,H020,H021,H022,H023,H025,H026,H030,H031,H037"
+profile="django"
+extend_exclude = "docs/,nautobot_device_onboarding/static/"

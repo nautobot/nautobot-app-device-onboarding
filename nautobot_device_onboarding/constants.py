@@ -40,6 +40,7 @@ INTERFACE_TYPE_MAP_STATIC = {
     "port-channel": "lag",
     "Port-Channel": "lag",
     "GEChannel": "lag",
+    "10GEChannel": "lag",
     "EtherSVI": "virtual",
     "FastEthernet": "100base-fx",
     "ethernet": "1000base-t",
