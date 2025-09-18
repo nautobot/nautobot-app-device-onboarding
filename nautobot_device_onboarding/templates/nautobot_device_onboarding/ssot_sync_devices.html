@@ -7,11 +7,11 @@
 
     {% with csv_tab_active=form.initial.csv_input %}
         <ul class="nav nav-tabs" role="tablist">
-            <li {% if not csv_tab_active %} class="active"{% endif %} role="presentation">
-                <a data-toggle="tab" href="#job_manual_input" role="tab">Manual Input</a>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link{% if not csv_tab_active %} active{% endif %}" data-bs-toggle="tab" href="#job_manual_input" role="tab">Manual Input</a>
             </li>
-            <li {% if csv_tab_active %} class="active"{% endif %} role="presentation">
-                <a data-toggle="tab" href="#job_csv_input" role="tab">CSV Input</a>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link{% if csv_tab_active %} active{% endif %}" data-bs-toggle="tab" href="#job_csv_input" role="tab">CSV Input</a>
             </li>
         </ul>
         <div class="tab-content">
@@ -54,9 +54,9 @@
       element.required = isRequired;
       const label = document.querySelector(`label[for="${fieldId}"]`);
       if (isRequired) {
-        label.classList.add('required');
+        label.classList.add('nb-required');
       } else {
-        label.classList.remove('required');
+        label.classList.remove('nb-required');
       }
     }
 
@@ -69,7 +69,7 @@
 
         csvInput.value = '';
         csvInput.required = !isManualInputTab;
-        document.querySelector('label[for="id_csv_file"]').classList.toggle('required', !isManualInputTab);
+        document.querySelector('label[for="id_csv_file"]').classList.toggle('nb-required', !isManualInputTab);
 
         manualRequiredFields.forEach(field => setFieldRequired(field, isManualInputTab));
       });
