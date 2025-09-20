@@ -1,0 +1,7 @@
+{
+    "device_type": "JL724B 6200F 24G 4SFP+ Swch",
+    "hostname": "AOSCXSW01",
+    "mask_length": 25,
+    "mgmt_interface": "vlan100",
+    "serial": "TW41LZ788B"
+}

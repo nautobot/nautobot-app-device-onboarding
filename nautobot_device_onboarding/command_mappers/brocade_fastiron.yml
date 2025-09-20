@@ -1,0 +1,231 @@
+---
+sync_devices:
+  hostname:
+    commands:
+      - command: "show configuration | i hostname"
+        parser: "raw"
+        jpath: "raw"
+        post_processor: "{{ obj.split('hostname ')[1].strip() if 'hostname ' in obj else 'Unknown-Hostname' }}"
+  serial:
+    commands:
+      - command: "show version"
+        parser: "textfsm"
+        jpath: "[0].serial"
+        post_processor: "{% if obj and obj[0] %}{{ obj[0] }}{% else %}{{ 'unknown-serial' }}{% endif %}"
+  device_type:
+    commands:
+      - command: "show version"
+        parser: "textfsm"
+        jpath: "[0].model"
+        post_processor: "{% if obj and obj[0] %}{{ obj[0] }}{% else %}{{ 'unknown-model' }}{% endif %}"
+  mgmt_interface:
+    commands:
+      - command: "show interfaces brief"
+        parser: "textfsm"
+        jpath: "[*].interface"
+        post_processor: "{% if obj and (obj | length > 0) and 've300' in obj %}{{ 've300' }}{% else %}{{ 'mgmt1' }}{% endif %}"
+  mask_length:
+    commands:
+      - command: "show run | i ip address"
+        parser: "raw"
+        jpath: "raw"
+        post_processor: "{{ obj.strip().split('\\n')[-1].split()[3] | netmask_to_cidr }}"
+        iterable_type: "int"
+
+sync_network_data:
+  pre_processor:
+    vlan_map:
+      commands:
+        - command: "show vlan"
+          parser: "textfsm"
+          jpath: "[*].[$vlan_id$,vlan_name]"
+          post_processor: "{{ obj | flatten_list_of_dict_from_value('vlan_name') | tojson }}"
+    vlan_port_map:
+      commands:
+        - command: "show vlan"
+          parser: "textfsm"
+          jpath: "[*].{stack: stack_id, slot: slot, port: port, vid: vlan_id, name: vlan_name, mode: status, lag: lag}"
+          post_processor: |
+            {% set ns = namespace(result={}) %}
+            {% for port in obj %}
+              {% if 'LAG' in port.lag %}
+                {% set intf = ('lg' ~ port.port) %}
+              {% else %}
+                {% set intf = (port.stack ~ '/' ~ port.slot ~ '/' ~ port.port) %}
+              {% endif %}
+              {% if intf not in ns.result.keys() %}
+                {% set _= ns.result.update({intf: []}) %}
+              {% endif %}
+              {% if port.vid and port.mode != 'Untagged' %}
+                {% set _= ns.result[intf].append({'id': port.vid, 'name': port.name}) %}
+              {% endif %}
+            {% endfor %}
+            {{ ns.result | tojson }}
+          iterable_type: "dict"
+    ip_map:
+      commands:
+        - command: "show running-config interface"
+          parser: "textfsm"
+          jpath: "[*].{intf: interface, intf_type: interface_type, ip_addr: ip_address, mask: ip_addr_cidr}"
+          post_processor: |
+            {% set result = {} %}
+            {% for item in obj %}
+              {% set intf_name = (item.intf_type ~ item.intf) %}
+              {% if item.ip_addr and item.mask %}
+                {% set cidr = {'ip_address': item.ip_addr, 'prefix_length': (item.mask | netmask_to_cidr)} %}
+                {% set _ = result.update({intf_name: cidr}) %}
+              {% endif %}
+            {% endfor %}
+            {{ result | tojson }}
+          iterable_type: "dict"
+    ruckus_mgmt_map:
+      commands:
+        - command: "show run | i ip address"
+          parser: "raw"
+          jpath: "raw"
+          post_processor: |
+            {% set mask = (obj.strip().split('\\n')[-1].split()[3] | netmask_to_cidr) %}
+            {% set ip_addr = obj.strip().split('\\n')[-1].split()[2] %}
+            {{ {'ip_address': ip_addr, 'prefix_length': mask} | tojson }}
+          iterable_type: "dict"
+  software_version:
+    commands:
+      - command: "show version"
+        parser: "textfsm"
+        jpath: "[*].sw_version[0]"
+  serial:
+    commands:
+      - command: "show version"
+        parser: "textfsm"
+        jpath: "[0].serial"
+        post_processor: "{% if obj and obj[0] %}{{ obj[0] }}{% else %}{{ 'unknown-serial' }}{% endif %}"
+  interfaces:
+    root_key: true
+    commands:
+      - command: "show interfaces brief"
+        parser: "textfsm"
+        jpath: "[*].interface"
+        post_processor: "{% set result={} %}{% for interface in obj %}{% set intf_name = interface.split('-Trk')[0] %}{{ result.update({intf_name: {}}) or '' }}{% endfor %}{{ result | tojson }}"
+  interfaces__type:
+    commands:
+      - command: "show media"
+        parser: "textfsm"
+        jpath: "[?port=='{{ current_key }}'].{speed: speed, media: media, hw_type_gen: hw_type_generic}"
+        post_processor: |
+          {% if 'lg' in current_key %}
+          {{-'lag'-}}
+          {% elif obj and obj[0] and obj[0]['speed'] != 'EMPTY' %}
+          {{-{'M-C': '1000base-t','M-LX':'1000base-x-sfp','M-SX':'1000base-x-sfp','SR':'10gbase-x-sfpp','LR':'10gbase-x-sfpp','Active':'10gbase-t'}.get(obj[0]['media'], 'other')-}}
+          {% else %}
+          {{-'other'-}}
+          {% endif %}
+        iterable_type: "str"
+  interfaces__ip_addresses:
+    commands:
+      - command: "show interfaces brief"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].{name: interface}"
+        post_processor: |
+          {% set ns = namespace(has_ve=false) %}
+          {% for k in ip_map.keys() %}
+            {% if 've' in k %}
+              {% set ns.has_ve = true %}
+            {% endif %}
+          {% endfor %}
+          {% if 've' in current_key and ns.has_ve and (current_key in ip_map) %}
+          {{- [ip_map[current_key]] | tojson -}}
+          {% elif current_key == 'mgmt1' and not ns.has_ve %}
+          {{- [ruckus_mgmt_map] | tojson -}}
+          {% else %}
+          {{- [] | tojson -}}
+          {% endif %}
+        iterable_type: "list"
+  interfaces__mtu:
+    commands:
+      - command: "show interfaces brief"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].mtu"
+        post_processor: "{% if obj and obj[0] %}{{ obj[0] }}{% else %}{{ '1500' }}{% endif %}"
+        iterable_type: "str"
+  interfaces__mac_address:
+    commands:
+      - command: "show interfaces brief"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].mac"
+        post_processor: "{% if obj | length > 0 %}{{ obj[0] }}{% else %}{{ '' }}{% endif %}"
+  interfaces__description:
+    commands:
+      - command: "show interfaces brief"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].name"
+        iterable_type: "str"
+  interfaces__link_status:
+    commands:
+      - command: "show interfaces brief"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].linkstate"
+        post_processor: "{% if obj %}{{ obj[0] | interface_status_to_bool }}{% else %}{{ 'False' }}{% endif %}"
+        iterable_type: "bool"
+  interfaces__802.1Q_mode:
+    commands:
+      - command: "show interfaces brief"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].tagonly"
+        post_processor: "{% if obj and 'Yes' in obj[0] %}{{ 'tagged' }}{% else %}{{ 'access' }}{% endif %}"
+        iterable_type: "str"
+  interfaces__lag:
+    commands:
+      - command: "show interfaces brief"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].trunkid"
+        post_processor: "{% if obj and (obj[0] in ['None', 'N/A']) or 'lg' in current_key %}{{ '' }}{% else %}{{ 'lg' ~ obj[0] }}{% endif %}"
+        iterable_type: "str"
+  interfaces__vrf: # not supported by platform, implemented to avoid user errors when onboarding multiple platforms at once.
+    commands:
+      - command: "show interfaces brief"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].name"
+        post_processor: "{{ {} | tojson }}"
+        iterable_type: "dict"
+  interfaces__tagged_vlans:
+    commands:
+      - command: "show interfaces brief"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].{trunk: tagonly, untagged: pvid}"
+        post_processor: |
+          {% set ns = namespace(result=[]) %}
+          {% if obj and obj[0] and 'Yes' in obj[0]['trunk'] %}
+            {% if current_key in vlan_port_map %}
+              {% for vlan in vlan_port_map[current_key] %}
+                {% if vlan.id != obj[0]['untagged'] %}
+                  {% set _= ns.result.append(vlan) %}
+                {% endif %}
+              {% endfor %}
+            {% else %}
+              {% set ns.result = [] %}
+            {% endif %}
+          {% else %}
+            {% set ns.result = [] %}
+          {% endif %}
+          {{ ns.result | tojson }}
+        iterable_type: "list"
+  interfaces__untagged_vlan:
+    commands:
+      - command: "show interfaces brief"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].pvid"
+        post_processor: "{% if obj and obj[0] and obj[0] in ['None', 'N/A'] or obj[0] not in vlan_map %}{{ [] | tojson }}{% else %}{{ {'id': obj[0],'name': vlan_map[obj[0]]} | tojson }}{% endif %}"
+        iterable_type: "dict"
+  cables:
+      commands:
+        - command: "show lldp neighbors detail"
+          parser: "textfsm"
+          jpath: "[*].{local_interface:local_interface, remote_interface:neighbor_interface, remote_device:neighbor_name}"
+          post_processor: |
+            {% set result = [] %}
+            {% for cable in obj %}
+              {% if cable['local_interface'] and cable['remote_interface'] and (cable['remote_device'] | remove_fqdn) %}
+                {% set _=result.append({'local_interface': cable['local_interface'], 'remote_interface': cable['remote_interface'], 'remote_device': (cable['remote_device'] | remove_fqdn) }) %}
+              {% endif %}
+            {% endfor %}
+            {{ result | tojson }}

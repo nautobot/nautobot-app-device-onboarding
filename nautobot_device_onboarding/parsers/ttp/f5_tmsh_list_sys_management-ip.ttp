@@ -1,0 +1,1 @@
+sys management-ip {{ mgmt_ip }}/{{ mgmt_netmask }}{{ ignore(".*") }}

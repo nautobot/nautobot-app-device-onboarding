@@ -1,0 +1,639 @@
+{
+    "show cm device": [
+        {
+            "systems": [
+                {
+                    "hostname": "F5EXT01-A",
+                    "mgmt_ip": "10.12.241.47"
+                }
+            ]
+        }
+    ],
+    "show sys hardware": [
+        {
+            "base_mac": "00:94:a2:03:44:00",
+            "model_type": "BIG-IP i7800",
+            "serial_number": "f5-hgbb-aaaa"
+        }
+    ],
+    "list sys management-ip": [
+        {
+            "mgmt_ip": "10.12.241.47",
+            "mgmt_netmask": "23"
+        }
+    ],
+    "list net vlan": [
+        {
+            "VLAN_100": {
+                "members": [
+                    {
+                        "_line_": "{ }",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_EXTERNAL"
+                    }
+                ],
+                "vlan_id": "100"
+            },
+            "VLAN_300": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_PROD"
+                    }
+                ],
+                "vlan_id": "300"
+            },
+            "VLAN_309": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_PROD"
+                    }
+                ],
+                "vlan_id": "309"
+            },
+            "VLAN_350": {
+                "members": [
+                    {
+                        "_line_": "{ }",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_INTERNAL"
+                    }
+                ],
+                "vlan_id": "350"
+            },
+            "VLAN_4093": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_HA"
+                    }
+                ],
+                "vlan_id": "4093"
+            },
+            "VLAN_4094": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_HA"
+                    }
+                ],
+                "vlan_id": "4094"
+            },
+            "VLAN_515": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_PROD"
+                    }
+                ],
+                "vlan_id": "515"
+            },
+            "VLAN_516": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_PROD"
+                    }
+                ],
+                "vlan_id": "516"
+            },
+            "VLAN_517": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_PROD"
+                    }
+                ],
+                "vlan_id": "517"
+            },
+            "VLAN_524": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_INTERNAL"
+                    }
+                ],
+                "vlan_id": "524"
+            },
+            "VLAN_525": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_INTERNAL"
+                    }
+                ],
+                "vlan_id": "525"
+            },
+            "VLAN_526": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_PROD"
+                    }
+                ],
+                "vlan_id": "526"
+            },
+            "VLAN_653": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_INTERNAL"
+                    }
+                ],
+                "vlan_id": "653"
+            },
+            "VLAN_655": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_INTERNAL"
+                    }
+                ],
+                "vlan_id": "655"
+            },
+            "VLAN_656": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_INTERNAL"
+                    }
+                ],
+                "vlan_id": "656"
+            },
+            "VLAN_658": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_PROD"
+                    }
+                ],
+                "vlan_id": "658"
+            },
+            "VLAN_659": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_PROD"
+                    }
+                ],
+                "vlan_id": "659"
+            },
+            "VLAN_660": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_PROD"
+                    }
+                ],
+                "vlan_id": "660"
+            },
+            "VLAN_662": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_INTERNAL"
+                    }
+                ],
+                "vlan_id": "662"
+            },
+            "VLAN_663": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_PROD"
+                    }
+                ],
+                "vlan_id": "663"
+            },
+            "VLAN_664": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_INTERNAL"
+                    }
+                ],
+                "vlan_id": "664"
+            },
+            "VLAN_807": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_INTERNAL"
+                    }
+                ],
+                "vlan_id": "807"
+            },
+            "VLAN_816": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_PROD"
+                    }
+                ],
+                "vlan_id": "816"
+            },
+            "VLAN_817": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_INTERNAL"
+                    }
+                ],
+                "vlan_id": "817"
+            },
+            "VLAN_818": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_INTERNAL"
+                    }
+                ],
+                "vlan_id": "818"
+            },
+            "VLAN_821": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_PROD"
+                    }
+                ],
+                "vlan_id": "821"
+            },
+            "VLAN_850": {
+                "members": [
+                    {
+                        "_line_": "{",
+                        "dot1q": "tagged",
+                        "interface": "TRUNK_PROD"
+                    }
+                ],
+                "vlan_id": "850"
+            }
+        }
+    ],
+    "list net trunk": [
+        {
+            "TRUNK_EXTERNAL": {
+                "if_list": [
+                    "1.3",
+                    "2.1"
+                ],
+                "lacp_mode": "none",
+                "mac_address": "00:92:c1:08:71:22"
+            },
+            "TRUNK_HA": {
+                "if_list": [
+                    "2.3",
+                    "2.4"
+                ],
+                "lacp_mode": "none",
+                "mac_address": "00:92:c1:08:71:23"
+            },
+            "TRUNK_INTERNAL": {
+                "if_list": [
+                    "1.4",
+                    "2.2"
+                ],
+                "lacp_mode": "none",
+                "mac_address": "00:92:c1:08:71:24"
+            },
+            "TRUNK_PROD": {
+                "if_list": [
+                    "3.0",
+                    "4.0"
+                ],
+                "lacp_mode": "none",
+                "mac_address": "00:92:c1:08:71:25"
+            }
+        }
+    ],
+    "list net self": [],
+    "show net interface all-properties": [
+        {
+            "1.0": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:92:c1:08:71:04",
+                "media": "none",
+                "mtu": "9198",
+                "status": "uninit",
+                "trunk": "none"
+            },
+            "1.1": {
+                "aggr": "detached",
+                "flow": "tx-rx",
+                "mac": "00:92:c1:08:71:05",
+                "media": "none",
+                "mtu": "9198",
+                "status": "down",
+                "trunk": "none"
+            },
+            "1.2": {
+                "aggr": "detached",
+                "flow": "tx-rx",
+                "mac": "00:92:c1:08:71:06",
+                "media": "none",
+                "mtu": "9198",
+                "status": "down",
+                "trunk": "none"
+            },
+            "1.3": {
+                "aggr": "attached",
+                "flow": "tx-rx",
+                "mac": "00:92:c1:08:71:07",
+                "media": "10000SR-FD",
+                "mtu": "9198",
+                "status": "up",
+                "trunk": "TRUNK_EXTERNAL"
+            },
+            "1.4": {
+                "aggr": "attached",
+                "flow": "tx-rx",
+                "mac": "00:92:c1:08:71:08",
+                "media": "10000SR-FD",
+                "mtu": "9198",
+                "status": "up",
+                "trunk": "TRUNK_INTERNAL"
+            },
+            "2.0": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:92:c1:08:71:09",
+                "media": "none",
+                "mtu": "9198",
+                "status": "uninit",
+                "trunk": "none"
+            },
+            "2.1": {
+                "aggr": "attached",
+                "flow": "tx-rx",
+                "mac": "00:92:c1:08:71:0a",
+                "media": "10000SR-FD",
+                "mtu": "9198",
+                "status": "up",
+                "trunk": "TRUNK_EXTERNAL"
+            },
+            "2.2": {
+                "aggr": "attached",
+                "flow": "tx-rx",
+                "mac": "00:92:c1:08:71:0b",
+                "media": "10000SR-FD",
+                "mtu": "9198",
+                "status": "up",
+                "trunk": "TRUNK_INTERNAL"
+            },
+            "2.3": {
+                "aggr": "attached",
+                "flow": "tx-rx",
+                "mac": "00:92:c1:08:71:0c",
+                "media": "10000SR-FD",
+                "mtu": "9198",
+                "status": "up",
+                "trunk": "TRUNK_HA"
+            },
+            "2.4": {
+                "aggr": "attached",
+                "flow": "tx-rx",
+                "mac": "00:92:c1:08:71:0d",
+                "media": "10000SR-FD",
+                "mtu": "9198",
+                "status": "up",
+                "trunk": "TRUNK_HA"
+            },
+            "3.0": {
+                "aggr": "attached",
+                "flow": "tx-rx",
+                "mac": "00:92:c1:08:71:0e",
+                "media": "40000SRBD-FD",
+                "mtu": "9198",
+                "status": "up",
+                "trunk": "TRUNK_PROD"
+            },
+            "3.1": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:92:c1:08:71:0f",
+                "media": "none",
+                "mtu": "9198",
+                "status": "uninit",
+                "trunk": "none"
+            },
+            "3.2": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:92:c1:08:71:10",
+                "media": "none",
+                "mtu": "9198",
+                "status": "uninit",
+                "trunk": "none"
+            },
+            "3.3": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:92:c1:08:71:11",
+                "media": "none",
+                "mtu": "9198",
+                "status": "uninit",
+                "trunk": "none"
+            },
+            "3.4": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:92:c1:08:71:12",
+                "media": "none",
+                "mtu": "9198",
+                "status": "uninit",
+                "trunk": "none"
+            },
+            "4.0": {
+                "aggr": "attached",
+                "flow": "tx-rx",
+                "mac": "00:92:c1:08:71:13",
+                "media": "40000SRBD-FD",
+                "mtu": "9198",
+                "status": "up",
+                "trunk": "TRUNK_PROD"
+            },
+            "4.1": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:92:c1:08:71:14",
+                "media": "none",
+                "mtu": "9198",
+                "status": "uninit",
+                "trunk": "none"
+            },
+            "4.2": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:92:c1:08:71:15",
+                "media": "none",
+                "mtu": "9198",
+                "status": "uninit",
+                "trunk": "none"
+            },
+            "4.3": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:92:c1:08:71:16",
+                "media": "none",
+                "mtu": "9198",
+                "status": "uninit",
+                "trunk": "none"
+            },
+            "4.4": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:92:c1:08:71:17",
+                "media": "none",
+                "mtu": "9198",
+                "status": "uninit",
+                "trunk": "none"
+            },
+            "5.0": {
+                "aggr": "detached",
+                "flow": "tx-rx",
+                "mac": "00:92:c1:08:71:18",
+                "media": "none",
+                "mtu": "9198",
+                "status": "down",
+                "trunk": "none"
+            },
+            "5.1": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:92:c1:08:71:19",
+                "media": "none",
+                "mtu": "9198",
+                "status": "uninit",
+                "trunk": "none"
+            },
+            "5.2": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:92:c1:08:71:1a",
+                "media": "none",
+                "mtu": "9198",
+                "status": "uninit",
+                "trunk": "none"
+            },
+            "5.3": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:92:c1:08:71:1b",
+                "media": "none",
+                "mtu": "9198",
+                "status": "uninit",
+                "trunk": "none"
+            },
+            "5.4": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:92:c1:08:71:1c",
+                "media": "none",
+                "mtu": "9198",
+                "status": "uninit",
+                "trunk": "none"
+            },
+            "6.0": {
+                "aggr": "detached",
+                "flow": "tx-rx",
+                "mac": "00:92:c1:08:71:1d",
+                "media": "none",
+                "mtu": "9198",
+                "status": "down",
+                "trunk": "none"
+            },
+            "6.1": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:92:c1:08:71:1e",
+                "media": "none",
+                "mtu": "9198",
+                "status": "uninit",
+                "trunk": "none"
+            },
+            "6.2": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:92:c1:08:71:1f",
+                "media": "none",
+                "mtu": "9198",
+                "status": "uninit",
+                "trunk": "none"
+            },
+            "6.3": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:92:c1:08:71:20",
+                "media": "none",
+                "mtu": "9198",
+                "status": "uninit",
+                "trunk": "none"
+            },
+            "6.4": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:92:c1:08:71:21",
+                "media": "none",
+                "mtu": "9198",
+                "status": "uninit",
+                "trunk": "none"
+            },
+            "mgmt": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:92:c1:08:71:02",
+                "media": "1000T-FD",
+                "mtu": "1500",
+                "status": "up",
+                "trunk": "none"
+            }
+        }
+    ],
+    "show sys version": [
+        {
+            "hotfix": "0.411.5",
+            "os": "BIG-IP",
+            "version": "17.1.1.3"
+        }
+    ],
+    "show net lldp-neighbors all-properties": [
+        {
+            "lldp_neighbors": {
+                "chassis_id": "d1:8d:37:88:e1:d8",
+                "local_port": "1.4",
+                "management_address": "10.12.241.11",
+                "port_description": "NEXUS-EXT Eth1.4",
+                "port_id": "Ethernet1/25",
+                "system_description": "Cisco Nexus Operating System (N",
+                "system_name": "NEXUS-EXT.acme.com"
+            }
+        }
+    ]
+}

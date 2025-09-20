@@ -1,0 +1,7 @@
+{
+    "device_type": "BIG-IP Virtual Edition",
+    "hostname": "VIRTUALF5-B",
+    "mask_length": 24,
+    "mgmt_interface": "mgmt",
+    "serial": "00:50:56:82:fc:c4"
+}

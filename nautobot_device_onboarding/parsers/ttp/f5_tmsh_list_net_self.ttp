@@ -1,0 +1,6 @@
+<group name="{{ interface_id }}*">
+net self {{ ignore }} {
+    address {{ ip_address }}/{{ prefix_length }}
+    vlan {{ interface_id }}
+}
+</group>

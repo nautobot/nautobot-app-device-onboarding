@@ -1,0 +1,3924 @@
+{
+    "show configuration | i hostname": {
+        "raw": "\nhostname BROCSW01"
+    },
+    "show version": [
+        {
+            "switch_id": [
+                "1",
+                "2"
+            ],
+            "sw_bin": [
+                "TNR08092.bin",
+                "TNR08092.bin"
+            ],
+            "sw_version": [
+                "08.0.92T233",
+                "08.0.92T233"
+            ],
+            "boot_monitor_version": "",
+            "hw": "Stackable ICX7650-48F",
+            "slot": [
+                "1",
+                "3",
+                "1",
+                "3"
+            ],
+            "model": [
+                "ICX7650-48F-L3-BASE",
+                "ICX7650-2X100G",
+                "ICX7650-48F-L3-BASE",
+                "ICX7650-2X100G"
+            ],
+            "poe": [
+                "None",
+                "None",
+                "None",
+                "None"
+            ],
+            "ports": [
+                "48",
+                "2",
+                "48",
+                "2"
+            ],
+            "module_type": [
+                "Management",
+                "200G",
+                "Management",
+                "200G"
+            ],
+            "serial": [
+                "EZE3301E43T",
+                "EZE3301E43U"
+            ],
+            "license": [
+                "l3-prem",
+                "l3-prem"
+            ],
+            "license_comp": [],
+            "compliance_status": "",
+            "flash": "",
+            "flash_measurement": "",
+            "ram": "3910",
+            "ram_measurement": "MB",
+            "uptime_days": [
+                "603",
+                "603"
+            ],
+            "uptime_hours": [
+                "3",
+                "3"
+            ],
+            "uptime_minutes": [
+                "44",
+                "44"
+            ],
+            "uptime_seconds": [
+                "19",
+                "18"
+            ],
+            "start_time": "16:23:12",
+            "start_timezone": "Eastern",
+            "start_day": "Sat",
+            "start_month": "Jan",
+            "start_date": "27",
+            "start_year": "2024",
+            "reload_reason": "cold start"
+        }
+    ],
+    "show interfaces brief": [
+        {
+            "interface": "1/1/1",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "300",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/2",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/3",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/4",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/5",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/6",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/7",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/8",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/9",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/10",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/11",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/12",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/13",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/14",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/15",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/16",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/17",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/18",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/19",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/20",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/21",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/22",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/23",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/24",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/25",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "2",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/26",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "3",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/27",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "4",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/28",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "5",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/29",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "6",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/30",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "7",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/31",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "8",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/32",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "9",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/33",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "10",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/34",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "11",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/35",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "12",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/36",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "13",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/37",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "14",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/38",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "15",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/39",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/40",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/41",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/42",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/43",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/44",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/45",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/46",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/47",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "100",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/1/48",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "1/3/1",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "100G",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "N/A",
+            "priority": "0",
+            "mac": "f411.8b1a.ed9e",
+            "name": ""
+        },
+        {
+            "interface": "1/3/2",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "100G",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "N/A",
+            "priority": "0",
+            "mac": "f411.8b1a.ed9f",
+            "name": ""
+        },
+        {
+            "interface": "2/1/1",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/2",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/3",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/4",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/5",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/6",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/7",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/8",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/9",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/10",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/11",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/12",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/13",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/14",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/15",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/16",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/17",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/18",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/19",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/20",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/21",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/22",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/23",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/24",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/25",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "2",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/26",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "3",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/27",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "4",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/28",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "5",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/29",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "6",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/30",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "7",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/31",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "8",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/32",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "9",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/33",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "10",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/34",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "11",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/35",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "12",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/36",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "13",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/37",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "14",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/38",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "15",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/39",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/40",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/41",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/42",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/43",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/44",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/45",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/46",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/47",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/1/48",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "2/3/1",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "100G",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "N/A",
+            "priority": "0",
+            "mac": "94bf.c43f.11bf",
+            "name": ""
+        },
+        {
+            "interface": "2/3/2",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "100G",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "N/A",
+            "priority": "0",
+            "mac": "94bf.c43f.11c0",
+            "name": ""
+        },
+        {
+            "interface": "lg2",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "20G",
+            "trunkid": "2",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "lg3",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "20G",
+            "trunkid": "3",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "lg4",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "20G",
+            "trunkid": "4",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "lg5",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "20G",
+            "trunkid": "5",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "lg6",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "20G",
+            "trunkid": "6",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "lg7",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "20G",
+            "trunkid": "7",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "lg8",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "20G",
+            "trunkid": "8",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "lg9",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "20G",
+            "trunkid": "9",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "lg10",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "20G",
+            "trunkid": "10",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "lg11",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "10G",
+            "trunkid": "11",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "lg12",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "12",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "lg13",
+            "linkstate": "Up",
+            "portstate": "Forward",
+            "duplex": "Full",
+            "speed": "20G",
+            "trunkid": "13",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "lg14",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "14",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "lg15",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "15",
+            "tagonly": "Yes",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "lg100",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "100",
+            "tagonly": "No",
+            "pvid": "1",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "mgmt1",
+            "linkstate": "Down",
+            "portstate": "None",
+            "duplex": "None",
+            "speed": "None",
+            "trunkid": "None",
+            "tagonly": "No",
+            "pvid": "None",
+            "priority": "0",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "ve1",
+            "linkstate": "Up",
+            "portstate": "N/A",
+            "duplex": "N/A",
+            "speed": "N/A",
+            "trunkid": "None",
+            "tagonly": "N/A",
+            "pvid": "N/A",
+            "priority": "N/A",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        },
+        {
+            "interface": "ve300",
+            "linkstate": "Up",
+            "portstate": "N/A",
+            "duplex": "N/A",
+            "speed": "N/A",
+            "trunkid": "None",
+            "tagonly": "N/A",
+            "pvid": "N/A",
+            "priority": "N/A",
+            "mac": "f411.8b1a.ed69",
+            "name": ""
+        }
+    ],
+    "show run | i ip address": {
+        "raw": "\n ip address 192.168.1.45 255.255.255.0\n ip address 10.250.4.4 255.255.252.0"
+    },
+    "show vlan": [
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "2",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "3",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "4",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "5",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "6",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "7",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "8",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "9",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "10",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "11",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "12",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "13",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "14",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "15",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "16",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "17",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "18",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "19",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "20",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "21",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "22",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "23",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "24",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "25",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "26",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "27",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "28",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "29",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "30",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "31",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "32",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "33",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "34",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "35",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "36",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "37",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "38",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "39",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "40",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "41",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "42",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "43",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "44",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "45",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "46",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "47",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "48",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "1",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "2",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "3",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "4",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "5",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "6",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "7",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "8",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "9",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "10",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "11",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "12",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "13",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "14",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "15",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "16",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "17",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "18",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "19",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "20",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "21",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "22",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "23",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "24",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "25",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "26",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "27",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "28",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "29",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "30",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "31",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "32",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "33",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "34",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "35",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "36",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "37",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "38",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "39",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "40",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "41",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "42",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "43",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "44",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "45",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "46",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "47",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "48",
+            "lag": ""
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "2",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "3",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "4",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "5",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "6",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "7",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "8",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "9",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "10",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "11",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "12",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "13",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "14",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "15",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT-VLAN",
+            "status": "Untagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "100",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Untagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "1",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "25",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "26",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "27",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "28",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "29",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "30",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "31",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "32",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "33",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "34",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "35",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "36",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "37",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "1",
+            "slot": "1",
+            "port": "38",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "25",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "26",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "27",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "28",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "29",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "30",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "31",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "32",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "33",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "34",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "35",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "36",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "37",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "2",
+            "slot": "1",
+            "port": "38",
+            "lag": ""
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "2",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "3",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "4",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "5",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "6",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "7",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "8",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "9",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "10",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "11",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "12",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "13",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "14",
+            "lag": "LAG"
+        },
+        {
+            "vlan_id": "300",
+            "vlan_name": "[None]",
+            "status": "Tagged",
+            "stack_id": "",
+            "slot": "",
+            "port": "15",
+            "lag": "LAG"
+        }
+    ],
+    "show running-config interface": [
+        {
+            "interface_type": "ve",
+            "interface": "1",
+            "portname": "",
+            "qostostrust": "",
+            "qostosmark": "",
+            "ospfarea": "",
+            "ospfpassive": "",
+            "ospfcost": "",
+            "vrf": "",
+            "ippimsparse": "",
+            "iprouterisis": "",
+            "isismetric": "",
+            "ip_helper": [],
+            "ipredirect": "",
+            "ip_address": "192.168.1.45",
+            "ip_addr_cidr": "255.255.255.0",
+            "ipv6_addr": "",
+            "ipv6_addr_cidr": "",
+            "admin_state": "",
+            "acl_in": "",
+            "acl_out": "",
+            "vrid": [],
+            "ip_addr_vrrpe": []
+        },
+        {
+            "interface_type": "ve",
+            "interface": "300",
+            "portname": "",
+            "qostostrust": "",
+            "qostosmark": "",
+            "ospfarea": "",
+            "ospfpassive": "",
+            "ospfcost": "",
+            "vrf": "",
+            "ippimsparse": "",
+            "iprouterisis": "",
+            "isismetric": "",
+            "ip_helper": [],
+            "ipredirect": "",
+            "ip_address": "10.250.4.4",
+            "ip_addr_cidr": "255.255.252.0",
+            "ipv6_addr": "",
+            "ipv6_addr_cidr": "",
+            "admin_state": "",
+            "acl_in": "",
+            "acl_out": "",
+            "vrid": [],
+            "ip_addr_vrrpe": []
+        }
+    ],
+    "show media": [
+        {
+            "port": "1/1/1",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/2",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/3",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/4",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/5",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/6",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/7",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/8",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/9",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/10",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/11",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/12",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/13",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/14",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/15",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/16",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/17",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/18",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/19",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/20",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/21",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/22",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/23",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/24",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/25",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/26",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/27",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/28",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/29",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/30",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/31",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/32",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/33",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/34",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/35",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/36",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/37",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/38",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/39",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/40",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/41",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/42",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/43",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/44",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/45",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/46",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/47",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/1/48",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "1/3/1",
+            "speed": "100GBASE-Passive",
+            "media": "5m",
+            "hw_type_generic": "QSFP28"
+        },
+        {
+            "port": "1/3/2",
+            "speed": "100GBASE-Passive",
+            "media": "5m",
+            "hw_type_generic": "QSFP28"
+        },
+        {
+            "port": "2/1/1",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/2",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/3",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/4",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/5",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/6",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/7",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/8",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/9",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/10",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/11",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/12",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/13",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/14",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/15",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/16",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/17",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/18",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/19",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/20",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/21",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/22",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/23",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/24",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/25",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/26",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/27",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/28",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/29",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/30",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/31",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/32",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/33",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/34",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/35",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/36",
+            "speed": "10GE",
+            "media": "LR",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/37",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/38",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/39",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/40",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/41",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/42",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/43",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/44",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/45",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/46",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/47",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/1/48",
+            "speed": "EMPTY",
+            "media": "",
+            "hw_type_generic": ""
+        },
+        {
+            "port": "2/3/1",
+            "speed": "100GBASE-Passive",
+            "media": "5m",
+            "hw_type_generic": "QSFP28"
+        },
+        {
+            "port": "2/3/2",
+            "speed": "100GBASE-Passive",
+            "media": "5m",
+            "hw_type_generic": "QSFP28"
+        }
+    ],
+    "show lldp neighbors detail": [
+        {
+            "local_interface": "1/1/25",
+            "neighbor_port_id": "60fc.9f21.a5fd",
+            "holdtime": "100",
+            "neighbor_name": "BROCSW03",
+            "neighbor_interface": "10GigabitEthernet1/2/1",
+            "vlan_id": "1",
+            "mgmt_address": "10.250.4.47",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        },
+        {
+            "local_interface": "1/1/26",
+            "neighbor_port_id": "60fc.9f21.7bcd",
+            "holdtime": "94",
+            "neighbor_name": "BROCSW07",
+            "neighbor_interface": "10GigabitEthernet1/2/1",
+            "vlan_id": "1",
+            "mgmt_address": "10.250.4.51",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        },
+        {
+            "local_interface": "1/1/27",
+            "neighbor_port_id": "60fc.9f21.8515",
+            "holdtime": "108",
+            "neighbor_name": "BROCSW04",
+            "neighbor_interface": "10GigabitEthernet1/2/1",
+            "vlan_id": "1",
+            "mgmt_address": "10.250.4.48",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        },
+        {
+            "local_interface": "1/1/28",
+            "neighbor_port_id": "609c.9f72.a769",
+            "holdtime": "96",
+            "neighbor_name": "BROCSW05",
+            "neighbor_interface": "10GigabitEthernet1/2/1",
+            "vlan_id": "1",
+            "mgmt_address": "10.250.4.49",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        },
+        {
+            "local_interface": "1/1/29",
+            "neighbor_port_id": "78a6.e10d.3d7d",
+            "holdtime": "114",
+            "neighbor_name": "BROCSW06",
+            "neighbor_interface": "10GigabitEthernet1/2/1",
+            "vlan_id": "1",
+            "mgmt_address": "10.250.4.50",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        },
+        {
+            "local_interface": "1/1/30",
+            "neighbor_port_id": "60fc.9f21.7e9d",
+            "holdtime": "90",
+            "neighbor_name": "BROCSW11",
+            "neighbor_interface": "10GigabitEthernet1/2/1",
+            "vlan_id": "none",
+            "mgmt_address": "10.250.4.55",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        },
+        {
+            "local_interface": "1/1/31",
+            "neighbor_port_id": "60fc.9f21.d051",
+            "holdtime": "110",
+            "neighbor_name": "BROCSW08",
+            "neighbor_interface": "10GigabitEthernet1/2/1",
+            "vlan_id": "1",
+            "mgmt_address": "10.250.4.52",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        },
+        {
+            "local_interface": "1/1/32",
+            "neighbor_port_id": "60fc.9f21.5959",
+            "holdtime": "116",
+            "neighbor_name": "BROCSW09",
+            "neighbor_interface": "10GigabitEthernet1/2/1",
+            "vlan_id": "1",
+            "mgmt_address": "10.250.4.53",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        },
+        {
+            "local_interface": "1/1/33",
+            "neighbor_port_id": "60fc.9f21.cd5d",
+            "holdtime": "101",
+            "neighbor_name": "BROCSW14",
+            "neighbor_interface": "10GigabitEthernet1/2/1",
+            "vlan_id": "none",
+            "mgmt_address": "10.250.4.58",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        },
+        {
+            "local_interface": "1/1/36",
+            "neighbor_port_id": "60fc.9f21.caff",
+            "holdtime": "109",
+            "neighbor_name": "BROCSW12",
+            "neighbor_interface": "10GigabitEthernet1/2/7",
+            "vlan_id": "1",
+            "mgmt_address": "10.250.4.56",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        },
+        {
+            "local_interface": "2/1/25",
+            "neighbor_port_id": "60fc.9f21.a5ff",
+            "holdtime": "95",
+            "neighbor_name": "BROCSW03",
+            "neighbor_interface": "10GigabitEthernet1/2/3",
+            "vlan_id": "1",
+            "mgmt_address": "10.250.4.47",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        },
+        {
+            "local_interface": "2/1/26",
+            "neighbor_port_id": "60fc.9f21.7bcf",
+            "holdtime": "108",
+            "neighbor_name": "BROCSW07",
+            "neighbor_interface": "10GigabitEthernet1/2/3",
+            "vlan_id": "1",
+            "mgmt_address": "10.250.4.51",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        },
+        {
+            "local_interface": "2/1/27",
+            "neighbor_port_id": "60fc.9f21.8517",
+            "holdtime": "101",
+            "neighbor_name": "BROCSW04",
+            "neighbor_interface": "10GigabitEthernet1/2/3",
+            "vlan_id": "1",
+            "mgmt_address": "10.250.4.48",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        },
+        {
+            "local_interface": "2/1/28",
+            "neighbor_port_id": "609c.9f72.a76b",
+            "holdtime": "100",
+            "neighbor_name": "BROCSW05",
+            "neighbor_interface": "10GigabitEthernet1/2/3",
+            "vlan_id": "1",
+            "mgmt_address": "10.250.4.49",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        },
+        {
+            "local_interface": "2/1/29",
+            "neighbor_port_id": "78a6.e10d.3d7f",
+            "holdtime": "92",
+            "neighbor_name": "BROCSW06",
+            "neighbor_interface": "10GigabitEthernet1/2/3",
+            "vlan_id": "1",
+            "mgmt_address": "10.250.4.50",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        },
+        {
+            "local_interface": "2/1/30",
+            "neighbor_port_id": "60fc.9f21.7e9f",
+            "holdtime": "99",
+            "neighbor_name": "BROCSW11",
+            "neighbor_interface": "10GigabitEthernet1/2/3",
+            "vlan_id": "none",
+            "mgmt_address": "10.250.4.55",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        },
+        {
+            "local_interface": "2/1/31",
+            "neighbor_port_id": "60fc.9f21.d053",
+            "holdtime": "110",
+            "neighbor_name": "BROCSW08",
+            "neighbor_interface": "10GigabitEthernet1/2/3",
+            "vlan_id": "1",
+            "mgmt_address": "10.250.4.52",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        },
+        {
+            "local_interface": "2/1/32",
+            "neighbor_port_id": "60fc.9f21.595b",
+            "holdtime": "91",
+            "neighbor_name": "BROCSW09",
+            "neighbor_interface": "10GigabitEthernet1/2/3",
+            "vlan_id": "1",
+            "mgmt_address": "10.250.4.53",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        },
+        {
+            "local_interface": "2/1/33",
+            "neighbor_port_id": "60fc.9f21.cd5f",
+            "holdtime": "99",
+            "neighbor_name": "BROCSW14",
+            "neighbor_interface": "10GigabitEthernet1/2/3",
+            "vlan_id": "none",
+            "mgmt_address": "10.250.4.58",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        },
+        {
+            "local_interface": "2/1/36",
+            "neighbor_port_id": "60fc.9f21.cafd",
+            "holdtime": "107",
+            "neighbor_name": "BROCSW12",
+            "neighbor_interface": "10GigabitEthernet1/2/5",
+            "vlan_id": "1",
+            "mgmt_address": "10.250.4.56",
+            "neighbor_lacp_index": "3073",
+            "neighbor_max_frame_size": "1522",
+            "neighbor_mau": "10GigBaseLR",
+            "capabilities": "bridge"
+        }
+    ]
+}
