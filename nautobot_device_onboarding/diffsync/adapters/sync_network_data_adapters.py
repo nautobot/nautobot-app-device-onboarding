@@ -398,6 +398,9 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         for device in self.job.devices_to_load.all():  # refresh queryset after sync is complete
             if not device.primary_ip:
                 ip_address = ""
+                if not self.primary_ips[device.id]:
+                    self.job.logger.info(f"No primary IP Address was assigned for Device: {device.name}.")
+                    continue
                 try:
                     ip_address = IPAddress.objects.get(id=self.primary_ips[device.id])
                     device.primary_ip4 = ip_address
