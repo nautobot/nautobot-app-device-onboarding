@@ -164,7 +164,7 @@ def sync_network_data_ensure_required_nautobot_objects():
         device=device_1, name="GigabitEthernet2", status=status, type=InterfaceTypeChoices.TYPE_VIRTUAL
     )
     interface_5, _ = Interface.objects.get_or_create(
-    device=device_4, name="GigabitEthernet2", status=status, type=InterfaceTypeChoices.TYPE_VIRTUAL
+        device=device_4, name="GigabitEthernet2", status=status, type=InterfaceTypeChoices.TYPE_VIRTUAL
     )
     IPAddressToInterface.objects.get_or_create(interface=interface_1, ip_address=ip_address_1)
     device_1.primary_ip4 = ip_address_1
