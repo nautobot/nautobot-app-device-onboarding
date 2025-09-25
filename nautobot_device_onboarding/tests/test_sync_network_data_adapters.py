@@ -283,7 +283,7 @@ class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
         self.job.sync_vlans = True
         self.job.sync_vrfs = True
         self.job.debug = True
-        self.job.devices_to_load = Device.objects.filter(name__in=["demo-cisco-1", "demo-cisco-2"])
+        self.job.devices_to_load = Device.objects.filter(name__in=["demo-cisco-1", "demo-cisco-2", "demo-cisco-4"])
 
         self.sync_network_data_adapter = SyncNetworkDataNautobotAdapter(job=self.job, sync=None)
 
