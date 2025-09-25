@@ -293,7 +293,7 @@ class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
             device_queryset=self.job.devices_to_load
         )
         for device in self.job.devices_to_load:
-            self.assertEqual(self.sync_network_data_adapter.primary_ips[device.id], device.primary_ip.id)
+            self.assertEqual(self.sync_network_data_adapter.primary_ips[device.id], device.primary_ip.id if device.primary_ip else None)
 
     def test_load_param_mac_address(self):
         """Test MAC address string converstion."""
@@ -444,4 +444,4 @@ class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
             device.validated_save()
         self.sync_network_data_adapter.sync_complete(source=None, diff=None)
         for device in self.job.devices_to_load.all():
-            self.assertEqual(self.sync_network_data_adapter.primary_ips[device.id], device.primary_ip.id)
+            self.assertEqual(self.sync_network_data_adapter.primary_ips[device.id], device.primary_ip.id if device.primary_ip else None)

@@ -82,7 +82,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         """
         self.primary_ips = {}
         for device in device_queryset:
-            self.primary_ips[device.id] = device.primary_ip.id
+            self.primary_ips[device.id] = device.primary_ip.id if device.primary_ip else None
 
     def load_param_mac_address(self, parameter_name, database_object):
         """Convert interface mac_address to string."""
