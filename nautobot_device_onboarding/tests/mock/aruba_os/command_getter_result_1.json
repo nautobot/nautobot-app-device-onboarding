@@ -36,7 +36,7 @@
         {
             "intf_name": "DEFAULT_VLAN",
             "intf_config": "Manual",
-            "ip_address": "10.248.111.46",
+            "ip_address": "198.51.100.1",
             "ip_mask": "255.255.255.128"
         }
     ],

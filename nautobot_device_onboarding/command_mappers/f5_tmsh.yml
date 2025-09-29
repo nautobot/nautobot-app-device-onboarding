@@ -38,15 +38,15 @@ sync_devices:
 
 sync_network_data:
   pre_processor:
-      vlan_map:
-        commands:
+    vlan_map:
+      commands:
         - command: "list net vlan"
           parser: "ttp"
           jpath: "[0]"
           post_processor: "{% set result={} %}{% if obj | length > 0 %}{% for name, attrs in obj.items() %}{{ result.update({attrs.vlan_id: {'vlan_name': name}}) or '' }}{% endfor %}{% endif %}{{ result | tojson }}"
           iterable_type: "dict"
-      vlan_int_map:
-        commands:
+    vlan_int_map:
+      commands:
         - command: "list net vlan"
           parser: "ttp"
           jpath: "[0]"
@@ -70,17 +70,17 @@ sync_network_data:
           iterable_type: "dict"
       trunk_map:
         commands:
-        - command: "list net trunk"
-          parser: "ttp"
-          jpath: "[0]"
-          iterable_type: "list"
+          - command: "list net trunk"
+            parser: "ttp"
+            jpath: "[0]"
+            iterable_type: "list"
       ip_map:
         commands:
-        - command: "list net self"
-          parser: "ttp"
-          jpath: "[0]"
-          post_processor: "{{ obj | tojson }}"
-          iterable_type: "list"
+          - command: "list net self"
+            parser: "ttp"
+            jpath: "[0]"
+            post_processor: "{{ obj | tojson }}"
+            iterable_type: "list"
 
   serial:
     commands:
@@ -115,7 +115,7 @@ sync_network_data:
     commands:
       - command: "show net interface all-properties"
         parser: "ttp"
-        jpath: '[]."{{ current_key }}".{media:media}'
+        jpath: '[]."{{ current_key }}".{media:media}'  # yamllint disable-line rule:quoted-strings
         post_processor: |
           {% if current_key in trunk_map %}
           {{-'lag'-}}
@@ -143,10 +143,10 @@ sync_network_data:
     commands:
       - command: "show net interface all-properties"
         parser: "ttp"
-        jpath: '[]."{{ current_key }}".mtu'
+        jpath: '[]."{{ current_key }}".mtu'  # yamllint disable-line rule:quoted-strings
         post_processor: |
           {% if current_key in trunk_map %}
-          {{-'9198'-}}         
+          {{-'9198'-}}
           {% elif obj and obj[0] and obj[0] != 'none' %}
           {{-obj[0]-}}
           {% else %}
@@ -157,7 +157,7 @@ sync_network_data:
     commands:
       - command: "show net interface all-properties"
         parser: "ttp"
-        jpath: '[]."{{ current_key }}".mac'
+        jpath: '[]."{{ current_key }}".mac'  # yamllint disable-line rule:quoted-strings
         post_processor: |
           {% if current_key in trunk_map %}
           {{-trunk_map[current_key].mac_address-}}
@@ -171,45 +171,45 @@ sync_network_data:
     commands:
       - command: "show net interface all-properties"
         parser: "ttp"
-        jpath: '[]."{{ current_key }}".mac'
+        jpath: '[]."{{ current_key }}".mac'  # yamllint disable-line rule:quoted-strings
         post_processor: "{{ '' }}"
   interfaces__link_status:
     commands:
       - command: "show net interface all-properties"
         parser: "ttp"
-        jpath: '[]."{{ current_key }}".status'
+        jpath: '[]."{{ current_key }}".status'  # yamllint disable-line rule:quoted-strings
         post_processor: "{% if (current_key in trunk_map and trunk_map[current_key].if_list != 'none') or 'VLAN_' in current_key %}{{ 'True' }}{% elif obj %}{{ obj[0] | interface_status_to_bool }}{% else %}{{ 'False' }}{% endif %}"
   interfaces__802.1Q_mode:
     commands:
       - command: "show net interface all-properties"
         parser: "ttp"
-        jpath: '[]."{{ current_key }}".trunk'
+        jpath: '[]."{{ current_key }}".trunk'  # yamllint disable-line rule:quoted-strings
         post_processor: "{% if (current_key in trunk_map) or (obj | length > 0 and obj[0] != 'none') or (vlan_int_map[current_key] is defined and vlan_int_map[current_key]['tagged'] | length > 0) %}{{ 'tagged' }}{% else %}{{ 'access' }}{% endif %}"
         iterable_type: "str"
   interfaces__lag:
     commands:
       - command: "show net interface all-properties"
         parser: "ttp"
-        jpath: '[]."{{ current_key }}".trunk'
-        post_processor: |         
+        jpath: '[]."{{ current_key }}".trunk'  # yamllint disable-line rule:quoted-strings
+        post_processor: |
           {% if obj and obj[0] and obj[0] != 'none' %}
           {{-obj[0]-}}
           {% else %}
           {{-''-}}
           {% endif %}
         iterable_type: "str"
-  interfaces__vrf: # F5 uses route domains. Not in use at this moment.
-      commands:
-        - command: "show net interface all-properties"
-          parser: "ttp"
-          jpath: '[]."{{ current_key }}".trunk'
-          post_processor: "{{ {} | tojson }}"
-          iterable_type: "dict"
+  interfaces__vrf:  # F5 uses route domains. Not in use at this moment.
+    commands:
+      - command: "show net interface all-properties"
+        parser: "ttp"
+        jpath: '[]."{{ current_key }}".trunk'  # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ {} | tojson }}"
+        iterable_type: "dict"
   interfaces__tagged_vlans:
     commands:
       - command: "show net interface all-properties"
         parser: "ttp"
-        jpath: '[]."{{ current_key }}".trunk'
+        jpath: '[]."{{ current_key }}".trunk'  # yamllint disable-line rule:quoted-strings
         post_processor: |
           {% if current_key in vlan_int_map %}
           {{-vlan_int_map[current_key]['tagged'] | tojson-}}
@@ -220,7 +220,7 @@ sync_network_data:
     commands:
       - command: "show net interface all-properties"
         parser: "ttp"
-        jpath: '[]."{{ current_key }}".trunk'
+        jpath: '[]."{{ current_key }}".trunk'  # yamllint disable-line rule:quoted-strings
         post_processor: |
           {% if current_key in vlan_int_map %}
           {{-vlan_int_map[current_key]['untagged'] | tojson-}}

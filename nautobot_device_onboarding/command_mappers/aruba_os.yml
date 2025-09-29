@@ -121,7 +121,7 @@ sync_network_data:
         jpath: "[*].{port: local_port, lag: trunk}"
         post_processor: "{% if obj | length > 0 %}{% for intf in obj %}{% if intf['port'] | string == current_key %}{{ intf['lag'] }}{% else %}{{ '' }}{% endif %}{% endfor %}{% endif %}"
         iterable_type: "str"
-  interfaces__vrf: # not supported by platform, implemented to avoid user errors when onboarding multiple platforms at once.
+  interfaces__vrf:  # not supported by platform, implemented to avoid user errors when onboarding multiple platforms at once.
     commands:
       - command: "show interfaces status"
         parser: "textfsm"

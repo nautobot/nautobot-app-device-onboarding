@@ -440,6 +440,9 @@ class TestFormatterSyncDevices(unittest.TestCase):
             "paloalto_panos",
             "f5_tmsh",
             "aruba_aoscx",
+            "aruba_os",
+            "brocade_fastiron",
+            "hp_procurve",
         ]
         self.assertEqual(sorted(default_mappers), list(sorted(self.platform_parsing_info.keys())))
 

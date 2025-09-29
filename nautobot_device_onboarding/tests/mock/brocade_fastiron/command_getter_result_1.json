@@ -1624,7 +1624,7 @@
         }
     ],
     "show run | i ip address": {
-        "raw": "\n ip address 192.168.1.45 255.255.255.0\n ip address 10.250.4.4 255.255.252.0"
+        "raw": "\n ip address 192.168.1.45 255.255.255.0\n ip address 198.51.100.1 255.255.252.0"
     },
     "show vlan": [
         {
@@ -3046,7 +3046,7 @@
             "isismetric": "",
             "ip_helper": [],
             "ipredirect": "",
-            "ip_address": "10.250.4.4",
+            "ip_address": "198.51.100.1",
             "ip_addr_cidr": "255.255.252.0",
             "ipv6_addr": "",
             "ipv6_addr_cidr": "",

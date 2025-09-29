@@ -10,7 +10,7 @@
                 {
                     "ha_state": "standby",
                     "hostname": "VCMPSF501",
-                    "mgmt_ip": "10.130.119.92"
+                    "mgmt_ip": "198.51.100.1"
                 }
             ]
         }
@@ -23,7 +23,7 @@
     ],
     "list sys management-ip": [
         {
-            "mgmt_ip": "10.130.119.92",
+            "mgmt_ip": "198.51.100.1",
             "mgmt_netmask": "24"
         }
     ],

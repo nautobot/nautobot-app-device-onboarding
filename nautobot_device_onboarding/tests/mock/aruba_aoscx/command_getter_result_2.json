@@ -1239,7 +1239,7 @@
             "mac_address": "4c:d5:87:ab:cc:40",
             "mtu": "",
             "if_type": "",
-            "ip_address": "10.27.203.130/25",
+            "ip_address": "198.51.100.1/25",
             "duplex": "",
             "qos_trust": "",
             "speed": "",

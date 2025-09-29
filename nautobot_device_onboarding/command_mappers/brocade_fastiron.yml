@@ -180,7 +180,7 @@ sync_network_data:
         jpath: "[?interface=='{{ current_key }}'].trunkid"
         post_processor: "{% if obj and (obj[0] in ['None', 'N/A']) or 'lg' in current_key %}{{ '' }}{% else %}{{ 'lg' ~ obj[0] }}{% endif %}"
         iterable_type: "str"
-  interfaces__vrf: # not supported by platform, implemented to avoid user errors when onboarding multiple platforms at once.
+  interfaces__vrf:  # not supported by platform, implemented to avoid user errors when onboarding multiple platforms at once.
     commands:
       - command: "show interfaces brief"
         parser: "textfsm"
@@ -217,15 +217,15 @@ sync_network_data:
         post_processor: "{% if obj and obj[0] and obj[0] in ['None', 'N/A'] or obj[0] not in vlan_map %}{{ [] | tojson }}{% else %}{{ {'id': obj[0],'name': vlan_map[obj[0]]} | tojson }}{% endif %}"
         iterable_type: "dict"
   cables:
-      commands:
-        - command: "show lldp neighbors detail"
-          parser: "textfsm"
-          jpath: "[*].{local_interface:local_interface, remote_interface:neighbor_interface, remote_device:neighbor_name}"
-          post_processor: |
-            {% set result = [] %}
-            {% for cable in obj %}
-              {% if cable['local_interface'] and cable['remote_interface'] and (cable['remote_device'] | remove_fqdn) %}
-                {% set _=result.append({'local_interface': cable['local_interface'], 'remote_interface': cable['remote_interface'], 'remote_device': (cable['remote_device'] | remove_fqdn) }) %}
-              {% endif %}
-            {% endfor %}
-            {{ result | tojson }}
+    commands:
+      - command: "show lldp neighbors detail"
+        parser: "textfsm"
+        jpath: "[*].{local_interface:local_interface, remote_interface:neighbor_interface, remote_device:neighbor_name}"
+        post_processor: |
+          {% set result = [] %}
+          {% for cable in obj %}
+            {% if cable['local_interface'] and cable['remote_interface'] and (cable['remote_device'] | remove_fqdn) %}
+              {% set _=result.append({'local_interface': cable['local_interface'], 'remote_interface': cable['remote_interface'], 'remote_device': (cable['remote_device'] | remove_fqdn) }) %}
+            {% endif %}
+          {% endfor %}
+          {{ result | tojson }}

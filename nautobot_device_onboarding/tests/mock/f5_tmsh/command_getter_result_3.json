@@ -4,7 +4,7 @@
             "systems": [
                 {
                     "hostname": "F5EXT01-A",
-                    "mgmt_ip": "10.12.241.47"
+                    "mgmt_ip": "198.51.100.1"
                 }
             ]
         }
@@ -18,7 +18,7 @@
     ],
     "list sys management-ip": [
         {
-            "mgmt_ip": "10.12.241.47",
+            "mgmt_ip": "198.51.100.1",
             "mgmt_netmask": "23"
         }
     ],
