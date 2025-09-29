@@ -95,7 +95,7 @@ sync_network_data:
       - command: "show port-channel summary"
         parser: "textfsm"
         jpath: "[?contains(@.member_interface, '{{ current_key | abbreviated_interface_name(addl_reverse_map={'Ethernet': 'Eth'}) }}')].bundle_name"
-        post_processor: "{% if obj | length > 0 %}{{ obj[0] | canonical_interface_name }}{% else %}[]{% endif %}"
+        post_processor: "{% if obj | length > 0 %}{{ obj[0] | canonical_interface_name(addl_name_map={'Po': 'port-channel'}) | lower }}{% else %}[]{% endif %}"
         iterable_type: "str"
   interfaces__vrf:
     commands:
