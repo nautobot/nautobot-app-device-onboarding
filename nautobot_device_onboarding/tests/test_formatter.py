@@ -524,7 +524,7 @@ class TestFormatterSyncNetworkDataNoOptions(unittest.TestCase):
         supported_platforms = list(self.platform_parsing_info.keys())
         for sync_only in SYNC_DEVICES_ONLY:
             supported_platforms.remove(sync_only)
-        for platform in ["cisco_nxos"]:
+        for platform in supported_platforms:
             self.host.platform = platform
             current_test_dir = f"{MOCK_DIR}/{platform}/"
             getters = find_files_by_prefix(current_test_dir, "command_getter")
