@@ -1,1 +1,654 @@
-{}
+{
+    "interfaces": {
+        "0.10": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "02:f1:23:33:00:09",
+            "mtu": "9198",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "0.5": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "02:f1:23:33:00:04",
+            "mtu": "9198",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "0.6": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "02:f1:23:33:00:05",
+            "mtu": "9198",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "0.7": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "02:f1:23:33:00:06",
+            "mtu": "9198",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "0.8": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "02:f1:23:33:00:07",
+            "mtu": "9198",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "0.9": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "02:f1:23:33:00:08",
+            "mtu": "9198",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "TRUNK-PO49-FRONTSIDE": {
+            "802.1Q_mode": "tagged",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "00:0c:f4:f8:8b:ac",
+            "mtu": "9198",
+            "tagged_vlans": {},
+            "type": "lag",
+            "untagged_vlan": {}
+        },
+        "TRUNK-PO51-SERVERSIDE": {
+            "802.1Q_mode": "tagged",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "00:0c:f4:f8:8b:ad",
+            "mtu": "9198",
+            "tagged_vlans": {},
+            "type": "lag",
+            "untagged_vlan": {}
+        },
+        "TRUNK_EXTERNAL": {
+            "802.1Q_mode": "tagged",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "00:00:00:00:00:00",
+            "mtu": "9198",
+            "tagged_vlans": {},
+            "type": "lag",
+            "untagged_vlan": {}
+        },
+        "TRUNK_HA": {
+            "802.1Q_mode": "tagged",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "00:0c:f4:f8:8b:af",
+            "mtu": "9198",
+            "tagged_vlans": {},
+            "type": "lag",
+            "untagged_vlan": {}
+        },
+        "TRUNK_INTERNAL": {
+            "802.1Q_mode": "tagged",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "00:0c:f4:f8:8b:b0",
+            "mtu": "9198",
+            "tagged_vlans": {},
+            "type": "lag",
+            "untagged_vlan": {}
+        },
+        "VLAN_10": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.148.113",
+                    "prefix_length": "28"
+                },
+                {
+                    "ip_address": "10.128.148.114",
+                    "prefix_length": "28"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_1048": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.148.129",
+                    "prefix_length": "27"
+                },
+                {
+                    "ip_address": "10.128.148.131",
+                    "prefix_length": "27"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_1049": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "172.23.236.3",
+                    "prefix_length": "25"
+                },
+                {
+                    "ip_address": "172.23.236.1",
+                    "prefix_length": "25"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_11": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.112.1",
+                    "prefix_length": "28"
+                },
+                {
+                    "ip_address": "10.128.112.2",
+                    "prefix_length": "28"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_1148": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.148.162",
+                    "prefix_length": "28"
+                },
+                {
+                    "ip_address": "10.128.148.161",
+                    "prefix_length": "28"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_12": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.112.17",
+                    "prefix_length": "28"
+                },
+                {
+                    "ip_address": "10.128.112.18",
+                    "prefix_length": "28"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_13": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.111.1",
+                    "prefix_length": "24"
+                },
+                {
+                    "ip_address": "10.128.111.2",
+                    "prefix_length": "24"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_14": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.112.33",
+                    "prefix_length": "27"
+                },
+                {
+                    "ip_address": "10.128.112.34",
+                    "prefix_length": "27"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_146": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.146.8",
+                    "prefix_length": "24"
+                },
+                {
+                    "ip_address": "10.128.146.10",
+                    "prefix_length": "24"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_147": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.147.1",
+                    "prefix_length": "24"
+                },
+                {
+                    "ip_address": "10.128.147.2",
+                    "prefix_length": "24"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_21": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.24.1",
+                    "prefix_length": "28"
+                },
+                {
+                    "ip_address": "10.128.24.2",
+                    "prefix_length": "28"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_22": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.24.17",
+                    "prefix_length": "28"
+                },
+                {
+                    "ip_address": "10.128.24.18",
+                    "prefix_length": "28"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_24": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.26.1",
+                    "prefix_length": "24"
+                },
+                {
+                    "ip_address": "10.128.26.2",
+                    "prefix_length": "24"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_248": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.148.225",
+                    "prefix_length": "27"
+                },
+                {
+                    "ip_address": "10.128.148.226",
+                    "prefix_length": "27"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_3303": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "172.232.3.136",
+                    "prefix_length": "25"
+                },
+                {
+                    "ip_address": "172.232.3.135",
+                    "prefix_length": "25"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_348": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.148.1",
+                    "prefix_length": "28"
+                },
+                {
+                    "ip_address": "10.128.148.2",
+                    "prefix_length": "28"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_448": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.148.17",
+                    "prefix_length": "28"
+                },
+                {
+                    "ip_address": "10.128.148.18",
+                    "prefix_length": "28"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_548": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.148.33",
+                    "prefix_length": "28"
+                },
+                {
+                    "ip_address": "10.128.148.34",
+                    "prefix_length": "28"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_648": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.148.49",
+                    "prefix_length": "28"
+                },
+                {
+                    "ip_address": "10.128.148.50",
+                    "prefix_length": "28"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_748": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.148.65",
+                    "prefix_length": "28"
+                },
+                {
+                    "ip_address": "10.128.148.66",
+                    "prefix_length": "28"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_78": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.78.2",
+                    "prefix_length": "29"
+                },
+                {
+                    "ip_address": "10.128.78.1",
+                    "prefix_length": "29"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_848": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.148.81",
+                    "prefix_length": "28"
+                },
+                {
+                    "ip_address": "10.128.148.82",
+                    "prefix_length": "28"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_948": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "10.128.148.97",
+                    "prefix_length": "28"
+                },
+                {
+                    "ip_address": "10.128.148.98",
+                    "prefix_length": "28"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "VLAN_998": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "172.31.255.2",
+                    "prefix_length": "30"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        },
+        "mgmt": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "198.51.100.1",
+                    "prefix_length": "24"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "00:0b:f4:c8:81:85",
+            "mtu": "1500",
+            "tagged_vlans": {},
+            "type": "other",
+            "untagged_vlan": {}
+        }
+    },
+    "serial": "00:0f:11:f8:8b:11"
+}
