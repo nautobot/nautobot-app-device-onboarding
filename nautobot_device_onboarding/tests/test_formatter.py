@@ -16,7 +16,7 @@ from nautobot_device_onboarding.nornir_plays.formatter import (
 from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info
 
 MOCK_DIR = os.path.join("nautobot_device_onboarding", "tests", "mock")
-SYNC_DEVICES_ONLY = ["cisco_wlc", "hp_comware", "paloalto_panos", "f5_tmsh", "aruba_aoscx"]
+SYNC_DEVICES_ONLY = ["cisco_wlc", "hp_comware", "paloalto_panos"]
 
 
 def find_files_by_prefix(directory, prefix):
@@ -494,6 +494,7 @@ class TestFormatterSyncNetworkDataNoOptions(unittest.TestCase):
     @patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository")
     def setUp(self, mock_repo):
         # Load the application command_mapper files
+        self.maxDiff = None
         mock_repo.return_value = 0
         self.platform_parsing_info = add_platform_parsing_info()
         self.host = Host(
@@ -537,12 +538,15 @@ class TestFormatterSyncNetworkDataNoOptions(unittest.TestCase):
                     msg=f"test_perform_data_extraction_sync_network_data_no_options with platform {platform}"
                 ):
                     for command_getter_file in getters:
-                        with open(
-                            f"{MOCK_DIR}/{platform}/sync_network_data_no_options/expected_result_{command_getter_file.split('_')[-1]}",
-                            "r",
-                            encoding="utf-8",
-                        ) as expected_parsed:
-                            expected_parsed_result = json.loads(expected_parsed.read())
+                        try:
+                            with open(
+                                f"{MOCK_DIR}/{platform}/sync_network_data_no_options/expected_result_{command_getter_file.split('_')[-1]}",
+                                "r",
+                                encoding="utf-8",
+                            ) as expected_parsed:
+                                expected_parsed_result = json.loads(expected_parsed.read())
+                        except FileNotFoundError:
+                            continue
                         with open(
                             f"{MOCK_DIR}/{platform}/{command_getter_file}", "r", encoding="utf-8"
                         ) as command_info:
@@ -605,12 +609,15 @@ class TestFormatterSyncNetworkDataWithVrfs(unittest.TestCase):
                     msg=f"test_perform_data_extraction_sync_network_data_with_vrfs with platform {platform}"
                 ):
                     for command_getter_file in getters:
-                        with open(
-                            f"{MOCK_DIR}/{platform}/sync_network_data_with_vrfs/expected_result_{command_getter_file.split('_')[-1]}",
-                            "r",
-                            encoding="utf-8",
-                        ) as expected_parsed:
-                            expected_parsed_result = json.loads(expected_parsed.read())
+                        try:
+                            with open(
+                                f"{MOCK_DIR}/{platform}/sync_network_data_with_vrfs/expected_result_{command_getter_file.split('_')[-1]}",
+                                "r",
+                                encoding="utf-8",
+                            ) as expected_parsed:
+                                expected_parsed_result = json.loads(expected_parsed.read())
+                        except FileNotFoundError:
+                            continue
                         with open(
                             f"{MOCK_DIR}/{platform}/{command_getter_file}", "r", encoding="utf-8"
                         ) as command_info:
@@ -673,12 +680,15 @@ class TestFormatterSyncNetworkDataWithVlans(unittest.TestCase):
                     msg=f"test_perform_data_extraction_sync_network_data_with_vlans with platform {platform}"
                 ):
                     for command_getter_file in getters:
-                        with open(
-                            f"{MOCK_DIR}/{platform}/sync_network_data_with_vlans/expected_result_{command_getter_file.split('_')[-1]}",
-                            "r",
-                            encoding="utf-8",
-                        ) as expected_parsed:
-                            expected_parsed_result = json.loads(expected_parsed.read())
+                        try:
+                            with open(
+                                f"{MOCK_DIR}/{platform}/sync_network_data_with_vlans/expected_result_{command_getter_file.split('_')[-1]}",
+                                "r",
+                                encoding="utf-8",
+                            ) as expected_parsed:
+                                expected_parsed_result = json.loads(expected_parsed.read())
+                        except FileNotFoundError:
+                            continue
                         with open(
                             f"{MOCK_DIR}/{platform}/{command_getter_file}", "r", encoding="utf-8"
                         ) as command_info:

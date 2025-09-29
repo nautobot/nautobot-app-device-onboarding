@@ -68,19 +68,19 @@ sync_network_data:
             {% endfor %}
             {{ result | tojson }}
           iterable_type: "dict"
-      trunk_map:
-        commands:
-          - command: "list net trunk"
-            parser: "ttp"
-            jpath: "[0]"
-            iterable_type: "list"
-      ip_map:
-        commands:
-          - command: "list net self"
-            parser: "ttp"
-            jpath: "[0]"
-            post_processor: "{{ obj | tojson }}"
-            iterable_type: "list"
+    trunk_map:
+      commands:
+        - command: "list net trunk"
+          parser: "ttp"
+          jpath: "[0]"
+          iterable_type: "list"
+    ip_map:
+      commands:
+        - command: "list net self"
+          parser: "ttp"
+          jpath: "[0]"
+          post_processor: "{{ obj | tojson }}"
+          iterable_type: "list"
 
   serial:
     commands:
