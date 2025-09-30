@@ -7,6 +7,14 @@ This document describes all new features and changes in the release. The format 
 
 - Deprecated Python 3.8
 - Added Cisco IOS-XR experimental support to Nautobot Device Onboarding.
+- Fixed job failures caused by logging implementation changes.
+
+## [v4.3.2 (2025-09-29)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.3.2)
+
+### Housekeeping
+
+- Fixed logging error preventing the execution of the hidden troubleshooting job.
+- Rebaked from the cookie `nautobot-app-v2.6.0`.
 
 ## [v4.3.1 (2025-09-12)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.3.1)
 
