@@ -774,6 +774,7 @@ class TestFormatterSyncNetworkDataWithSoftware(unittest.TestCase):
     @patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository")
     def setUp(self, mock_repo):
         # Load the application command_mapper files
+        self.maxDiff = None
         mock_repo.return_value = 0
         self.platform_parsing_info = add_platform_parsing_info()
         self.host = Host(
