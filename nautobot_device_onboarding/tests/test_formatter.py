@@ -814,7 +814,9 @@ class TestFormatterSyncNetworkDataWithSoftware(unittest.TestCase):
             getters = find_files_by_prefix(current_test_dir, "command_getter")
             # NOTE: Cleanup later, should always require tests to be present
             if len(getters) > 0:
-                with self.subTest(msg=f"test_perform_data_extraction_sync_network_data_with_software with platform {platform}"):
+                with self.subTest(
+                    msg=f"test_perform_data_extraction_sync_network_data_with_software with platform {platform}"
+                ):
                     for command_getter_file in getters:
                         try:
                             with open(
