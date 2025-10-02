@@ -13,7 +13,7 @@ This is a quick reference guide if you're already familiar with the development 
 
 The [Invoke](http://www.pyinvoke.org/) library is used to provide some helper commands based on the environment. There are a few configuration parameters which can be passed to Invoke to override the default configuration:
 
-- `nautobot_ver`: the version of Nautobot to use as a base for any built docker containers (default: 2.4.2)
+- `nautobot_ver`: the version of Nautobot to use as a base for any built docker containers (default: 3.0.0)
 - `project_name`: the default docker compose project name (default: `nautobot-device-onboarding`)
 - `python_ver`: the version of Python to use as a base for any built docker containers (default: 3.11)
 - `local`: a boolean flag indicating if invoke tasks should be run on the host or inside the docker containers (default: False, commands will be run in docker containers)
@@ -227,7 +227,7 @@ Once the containers are fully up, you should be able to open up a web browser, a
 - A live version of the documentation at [http://localhost:8001](http://localhost:8001)
 
 !!! note
-	Sometimes the containers take a minute to fully spin up. If the page doesn't load right away, wait a minute and try again.
+    Sometimes the containers take a minute to fully spin up. If the page doesn't load right away, wait a minute and try again.
 
 ### Invoke - Creating a Superuser
 
@@ -238,7 +238,7 @@ The Nautobot development image will automatically provision a super user when sp
 - `NAUTOBOT_SUPERUSER_PASSWORD=admin`
 
 !!! note
-	The default username is **admin**, but can be overridden by specifying **NAUTOBOT_SUPERUSER_USERNAME**.
+    The default username is **admin**, but can be overridden by specifying **NAUTOBOT_SUPERUSER_USERNAME**.
 
 If you need to create additional superusers, run the follow commands.
 
@@ -288,7 +288,7 @@ Removing network nautobot_device_onboarding_default
 This will safely shut down all of your running Docker containers for this project. When you are ready to spin containers back up, it is as simple as running `invoke start` again [as seen previously](#invoke-starting-the-development-environment).
 
 !!! warning
-	If you're wanting to reset the database and configuration settings, you can use the `invoke destroy` command, but **you will lose any data stored in those containers**, so make sure that is what you want to do.
+    If you're wanting to reset the database and configuration settings, you can use the `invoke destroy` command, but **you will lose any data stored in those containers**, so make sure that is what you want to do.
 
 ### Real-Time Updates? How Cool!
 
@@ -299,15 +299,15 @@ Now you can start developing your app in the project folder!
 The magic here is the root directory is mounted inside your Docker containers when built and ran, so **any** changes made to the files in here are directly updated to the Nautobot app code running in Docker. This means that as you modify the code in your app folder, the changes will be instantly updated in Nautobot.
 
 !!! warning
-	There are a few exceptions to this, as outlined in the section [To Rebuild or Not To Rebuild](#to-rebuild-or-not-to-rebuild).
+    There are a few exceptions to this, as outlined in the section [To Rebuild or Not To Rebuild](#to-rebuild-or-not-to-rebuild).
 
 The back-end Django process is setup to automatically reload itself (it only takes a couple of seconds) every time a file is updated (saved). So for example, if you were to update one of the files like `tables.py`, then save it, the changes will be visible right away in the web browser!
 
 !!! note
-	You may get connection refused while Django reloads, but it should be refreshed fairly quickly.
+    You may get connection refused while Django reloads, but it should be refreshed fairly quickly.
 
 !!! note
-	Workers do not get automatically restarted and must be restarted manually, if running with docker-compose you can run `docker restart nautobot_device_onboarding_worker_1`.
+    Workers do not get automatically restarted and must be restarted manually, if running with docker-compose you can run `docker restart nautobot_device_onboarding_worker_1`.
 
 ### Docker Logs
 
@@ -318,7 +318,7 @@ When trying to debug an issue, one helpful thing you can look at are the logs wi
 ```
 
 !!! note
-	The `-f` tag will keep the logs open, and output them in realtime as they are generated.
+    The `-f` tag will keep the logs open, and output them in realtime as they are generated.
 
 !!! info
     Want to limit the log output even further? Use the `--tail <#>` command line argument in conjunction with `-f`.
@@ -397,7 +397,7 @@ namespace.configure(
         "nautobot_device_onboarding": {
             ...
             "python_ver": "3.11",
-	    ...
+        ...
         }
     }
 )
@@ -415,8 +415,8 @@ namespace.configure(
     {
         "nautobot_device_onboarding": {
             ...
-            "nautobot_ver": "2.4.2",
-	    ...
+            "nautobot_ver": "3.0.0",
+        ...
         }
     }
 )
