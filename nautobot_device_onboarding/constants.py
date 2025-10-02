@@ -44,6 +44,9 @@ INTERFACE_TYPE_MAP_STATIC = {
     "EtherSVI": "virtual",
     "FastEthernet": "100base-fx",
     "ethernet": "1000base-t",
+    "1000/10000/25000 Ethernet": "25gbase-x-sfp28",
+    "100/1000/10000/25000 Ethernet": "25gbase-x-sfp28",
+    "1000/10000/25000/40000/50000/100000 Ethernet": "100gbase-x-qsfp28",
 }
 
 # The git repository data source content identifier for custom command mappers.

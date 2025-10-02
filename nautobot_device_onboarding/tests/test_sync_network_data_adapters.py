@@ -283,7 +283,7 @@ class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
         self.job.sync_vlans = True
         self.job.sync_vrfs = True
         self.job.debug = True
-        self.job.devices_to_load = Device.objects.filter(name__in=["demo-cisco-1", "demo-cisco-2"])
+        self.job.devices_to_load = Device.objects.filter(name__in=["demo-cisco-1", "demo-cisco-2", "demo-cisco-4"])
 
         self.sync_network_data_adapter = SyncNetworkDataNautobotAdapter(job=self.job, sync=None)
 
@@ -293,7 +293,10 @@ class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
             device_queryset=self.job.devices_to_load
         )
         for device in self.job.devices_to_load:
-            self.assertEqual(self.sync_network_data_adapter.primary_ips[device.id], device.primary_ip.id)
+            self.assertEqual(
+                self.sync_network_data_adapter.primary_ips[device.id],
+                device.primary_ip.id if device.primary_ip else None,
+            )
 
     def test_load_param_mac_address(self):
         """Test MAC address string converstion."""
@@ -444,4 +447,7 @@ class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
             device.validated_save()
         self.sync_network_data_adapter.sync_complete(source=None, diff=None)
         for device in self.job.devices_to_load.all():
-            self.assertEqual(self.sync_network_data_adapter.primary_ips[device.id], device.primary_ip.id)
+            self.assertEqual(
+                self.sync_network_data_adapter.primary_ips[device.id],
+                device.primary_ip.id if device.primary_ip else None,
+            )
