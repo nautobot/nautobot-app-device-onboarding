@@ -106,7 +106,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.13"]
         nautobot-version: ["next"]  # TODO: Change to 3.0.0 after v3.0.0 is released
     env:
       INVOKE_NAUTOBOT_DEVICE_ONBOARDING_PYTHON_VER: "${{ matrix.python-version }}"
@@ -152,14 +152,14 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.10", "3.12"]
+        python-version: ["3.10"]
         db-backend: ["postgresql"]
         nautobot-version: ["next"]  # TODO: Change to stable after v3.0.0 is released
         include:
           # - python-version: "3.11"
           #   db-backend: "postgresql"
           #   nautobot-version: "3.0.0"  # TODO: Uncomment after v3.0.0 is released
-          - python-version: "3.12"
+          - python-version: "3.13"
             db-backend: "mysql"
             nautobot-version: "next"  # TODO: Change to stable after v3.0.0 is released
     runs-on: "ubuntu-22.04"
@@ -207,7 +207,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.12"]
+        python-version: ["3.13"]
         db-backend: ["postgresql"]
         nautobot-version: ["next"]
     runs-on: "ubuntu-latest"
