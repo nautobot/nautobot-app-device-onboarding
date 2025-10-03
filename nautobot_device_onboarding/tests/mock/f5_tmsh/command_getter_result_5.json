@@ -1,0 +1,317 @@
+{
+    "show cm device": [
+        {
+            "systems": [
+                {
+                    "ha_state": "standby",
+                    "hostname": "VIRTUALF5-B",
+                    "mgmt_ip": "198.51.100.1"
+                },
+                {
+                    "ha_state": "active",
+                    "hostname": "VIRTUALF5-A",
+                    "mgmt_ip": "10.11.45.16"
+                }
+            ]
+        }
+    ],
+    "show sys hardware": [
+        {
+            "base_mac": "00:50:56:82:fc:c4",
+            "model_type": "BIG-IP Virtual Edition"
+        }
+    ],
+    "list sys management-ip": [
+        {
+            "mgmt_ip": "198.51.100.1",
+            "mgmt_netmask": "24"
+        }
+    ],
+    "list net vlan": [
+        {
+            "vlan-1300": {
+                "members": [
+                    {
+                        "_line_": "{ }",
+                        "dot1q": "tagged",
+                        "interface": "1.1"
+                    }
+                ],
+                "vlan_id": "1300"
+            },
+            "vlan-1301": {
+                "members": [
+                    {
+                        "_line_": "{ }",
+                        "dot1q": "tagged",
+                        "interface": "1.2"
+                    }
+                ],
+                "vlan_id": "1301"
+            },
+            "vlan-1302": {
+                "members": [
+                    {
+                        "_line_": "{ }",
+                        "dot1q": "tagged",
+                        "interface": "1.8"
+                    }
+                ],
+                "vlan_id": "1302"
+            },
+            "vlan-1303": {
+                "members": [
+                    {
+                        "_line_": "{ }",
+                        "dot1q": "tagged",
+                        "interface": "1.9"
+                    }
+                ],
+                "vlan_id": "1303"
+            },
+            "vlan-1304": {
+                "members": [
+                    {
+                        "_line_": "{ }",
+                        "dot1q": "tagged",
+                        "interface": "1.5"
+                    }
+                ],
+                "vlan_id": "1304"
+            },
+            "vlan-1306": {
+                "members": [
+                    {
+                        "_line_": "{ }",
+                        "dot1q": "tagged",
+                        "interface": "1.7"
+                    }
+                ],
+                "vlan_id": "1306"
+            },
+            "vlan-1350": {
+                "members": [
+                    {
+                        "_line_": "{ }",
+                        "dot1q": "tagged",
+                        "interface": "1.4"
+                    }
+                ],
+                "vlan_id": "1350"
+            },
+            "vlan-1351": {
+                "members": [
+                    {
+                        "_line_": "{ }",
+                        "dot1q": "tagged",
+                        "interface": "1.6"
+                    }
+                ],
+                "vlan_id": "1351"
+            },
+            "vlan-505": {
+                "members": [
+                    {
+                        "_line_": "{ }",
+                        "dot1q": "tagged",
+                        "interface": "1.3"
+                    }
+                ],
+                "vlan_id": "505"
+            }
+        }
+    ],
+    "list net trunk": [],
+    "list net self": [
+        {
+            "vlan-1300": [
+                {
+                    "ip_address": "10.12.36.8",
+                    "prefix_length": "24"
+                },
+                {
+                    "ip_address": "10.12.36.7",
+                    "prefix_length": "24"
+                }
+            ],
+            "vlan-1301": [
+                {
+                    "ip_address": "10.12.47.8",
+                    "prefix_length": "24"
+                },
+                {
+                    "ip_address": "10.12.47.7",
+                    "prefix_length": "24"
+                }
+            ],
+            "vlan-1302": [
+                {
+                    "ip_address": "10.12.58.7",
+                    "prefix_length": "23"
+                },
+                {
+                    "ip_address": "10.12.58.8",
+                    "prefix_length": "23"
+                }
+            ],
+            "vlan-1303": [
+                {
+                    "ip_address": "10.12.56.7",
+                    "prefix_length": "23"
+                },
+                {
+                    "ip_address": "10.12.56.8",
+                    "prefix_length": "23"
+                }
+            ],
+            "vlan-1304": [
+                {
+                    "ip_address": "10.12.52.8",
+                    "prefix_length": "24"
+                },
+                {
+                    "ip_address": "10.12.52.7",
+                    "prefix_length": "24"
+                }
+            ],
+            "vlan-1306": [
+                {
+                    "ip_address": "10.12.53.8",
+                    "prefix_length": "24"
+                },
+                {
+                    "ip_address": "10.12.53.7",
+                    "prefix_length": "24"
+                }
+            ],
+            "vlan-1350": [
+                {
+                    "ip_address": "10.12.50.8",
+                    "prefix_length": "26"
+                },
+                {
+                    "ip_address": "10.12.50.7",
+                    "prefix_length": "26"
+                }
+            ],
+            "vlan-1351": [
+                {
+                    "ip_address": "10.12.54.7",
+                    "prefix_length": "24"
+                },
+                {
+                    "ip_address": "10.12.54.8",
+                    "prefix_length": "24"
+                }
+            ],
+            "vlan-505": [
+                {
+                    "ip_address": "10.12.44.13",
+                    "prefix_length": "30"
+                }
+            ]
+        }
+    ],
+    "show net interface all-properties": [
+        {
+            "1.1": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:50:77:f5:7d:b8",
+                "media": "10000T-FD",
+                "mtu": "1500",
+                "status": "up",
+                "trunk": "none"
+            },
+            "1.2": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:50:77:f5:18:79",
+                "media": "10000T-FD",
+                "mtu": "1500",
+                "status": "up",
+                "trunk": "none"
+            },
+            "1.3": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:50:77:f5:2b:26",
+                "media": "10000T-FD",
+                "mtu": "1500",
+                "status": "up",
+                "trunk": "none"
+            },
+            "1.4": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:50:77:f5:7a:22",
+                "media": "10000T-FD",
+                "mtu": "1500",
+                "status": "up",
+                "trunk": "none"
+            },
+            "1.5": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:50:77:f5:20:6c",
+                "media": "10000T-FD",
+                "mtu": "1500",
+                "status": "up",
+                "trunk": "none"
+            },
+            "1.6": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:50:77:f5:90:a6",
+                "media": "10000T-FD",
+                "mtu": "1500",
+                "status": "up",
+                "trunk": "none"
+            },
+            "1.7": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:50:77:f5:bb:94",
+                "media": "10000T-FD",
+                "mtu": "1500",
+                "status": "up",
+                "trunk": "none"
+            },
+            "1.8": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:50:77:f5:81:aa",
+                "media": "10000T-FD",
+                "mtu": "1500",
+                "status": "up",
+                "trunk": "none"
+            },
+            "1.9": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:50:77:f5:04:bf",
+                "media": "10000T-FD",
+                "mtu": "1500",
+                "status": "up",
+                "trunk": "none"
+            },
+            "mgmt": {
+                "aggr": "detached",
+                "flow": "none",
+                "mac": "00:50:77:f5:dc:cf",
+                "media": "100TX-FD",
+                "mtu": "1500",
+                "status": "up",
+                "trunk": "none"
+            }
+        }
+    ],
+    "show sys version": [
+        {
+            "hotfix": "0.44.2",
+            "os": "BIG-IP",
+            "version": "15.1.10.2"
+        }
+    ],
+    "show net lldp-neighbors all-properties": []
+}

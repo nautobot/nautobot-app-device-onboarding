@@ -1,0 +1,11 @@
+{{ ignore | re(".*-----.*") }}
+{{ ignore | re(".*LLDP Neighbours.*") }}
+{{ ignore | re(".*Chassis-ID.*") }}
+{{ ignore | re(".*-----.*") }}
+<group name="lldp_neighbors">
+{{ local_port | re("\d+\.\d+") }} {{ chassis_id }} {{ port_id }}
+Port Description:  {{ port_description | ORPHRASE }}
+System Name:  {{ system_name | ORPHRASE }}
+System Description:  {{ system_description | ORPHRASE }}
+Management Address:  {{ management_address | IP }}
+</group>

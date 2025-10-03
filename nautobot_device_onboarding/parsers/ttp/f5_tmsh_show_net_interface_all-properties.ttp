@@ -1,0 +1,3 @@
+<group name="{{ name }}" method="table">
+{{ name }} {{ status }} {{ mac | MAC }} {{ mtu }} {{ ignore(".*") }} {{ media }} {{ flow }} {{ trunk }} {{ aggr }}
+</group>
