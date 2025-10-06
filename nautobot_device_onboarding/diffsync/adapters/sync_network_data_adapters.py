@@ -82,7 +82,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         """
         self.primary_ips = {}
         for device in device_queryset:
-            self.primary_ips[device.id] = device.primary_ip.id
+            self.primary_ips[device.id] = device.primary_ip.id if device.primary_ip else None
 
     def load_param_mac_address(self, parameter_name, database_object):
         """Convert interface mac_address to string."""
@@ -398,6 +398,9 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         for device in self.job.devices_to_load.all():  # refresh queryset after sync is complete
             if not device.primary_ip:
                 ip_address = ""
+                if not self.primary_ips[device.id]:
+                    self.job.logger.info(f"No primary IP Address was previously assigned for Device: {device.name}.")
+                    continue
                 try:
                     ip_address = IPAddress.objects.get(id=self.primary_ips[device.id])
                     device.primary_ip4 = ip_address
