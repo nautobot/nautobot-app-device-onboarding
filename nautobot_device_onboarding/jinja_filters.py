@@ -4,6 +4,7 @@ import logging
 from itertools import chain
 
 from django_jinja import library
+from nautobot.apps.choices import InterfaceModeChoices
 from netutils.ip import is_ip
 from netutils.vlan import vlanconfig_to_list
 
@@ -33,15 +34,26 @@ def interface_status_to_bool(status):
 
 
 @library.filter
-def port_mode_to_nautobot(current_mode):
-    """Take links or admin status and change to boolean."""
-    mode_mapping = {
-        "access": "access",
-        "trunk": "tagged",
-        "bridged": "tagged",
-        "routed": "",
-    }
-    return mode_mapping.get(current_mode, "")
+def nxos_switchport_mode_to_nautobot_interface_mode(interface_object):
+    """Convert the switchport mode from the "show interface switchport" command output to a Nautobot interface mode."""
+    if isinstance(interface_object, (list, set)):
+        if len(interface_object) == 0:
+            # Interface not present in "show interface switchport". Return blank
+            return ""
+        interface_object = interface_object[0]
+
+    mode = interface_object.get("mode", "")
+    trunking_vlans = interface_object.get("trunking_vlans", "")
+
+    if mode in ("trunk", "bridged"):
+        if trunking_vlans == "1-4094":
+            return InterfaceModeChoices.MODE_TAGGED_ALL
+        return InterfaceModeChoices.MODE_TAGGED
+
+    if mode == "access":
+        return InterfaceModeChoices.MODE_ACCESS
+
+    return ""
 
 
 @library.filter
@@ -155,6 +167,8 @@ def get_vlan_data(item, vlan_mapping, tag_type):  # pylint: disable=too-many-ret
                 trunk_vlans = [current_item["trunking_vlans"]]
             else:
                 trunk_vlans = current_item["trunking_vlans"]
+            if "none" in trunk_vlans:
+                return []
             return [
                 {"id": str(vid), "name": vlan_mapping.get(str(vid), f"VLAN{str(vid).zfill(4)}")}
                 for vid in list(chain.from_iterable([vlanconfig_to_list(vlan_stanza) for vlan_stanza in trunk_vlans]))
