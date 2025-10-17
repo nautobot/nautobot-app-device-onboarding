@@ -48,7 +48,7 @@ invoke = "*"
 ipython = "*"
 pylint = "*"
 pylint-django = "*"
-pylint-nautobot = "*"
+pylint-nautobot = ">=0.3.1"
 ruff = "0.5.5"
 yamllint = "*"
 toml = "*"
@@ -116,11 +116,6 @@ notes = """,
     FIXME,
     XXX,
     """
-
-[tool.pylint-nautobot]
-supported_nautobot_versions = [
-    "3"
-]
 
 [tool.ruff]
 line-length = 120
