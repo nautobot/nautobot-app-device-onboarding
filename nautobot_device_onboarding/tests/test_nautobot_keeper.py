@@ -1,14 +1,16 @@
 """Unit tests for nautobot_device_onboarding.onboard module and its classes."""
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from nautobot.apps.testing import TestCase
 from nautobot.dcim.choices import InterfaceTypeChoices
 from nautobot.dcim.models import Device, DeviceType, Interface, Location, LocationType, Manufacturer, Platform
+from nautobot.extras import management
 from nautobot.extras.choices import CustomFieldTypeChoices
 from nautobot.extras.models import CustomField, Role, Status
 from nautobot.extras.models.secrets import SecretsGroup
-from nautobot.ipam.models import IPAddress
+from nautobot.ipam.models import IPAddress, Namespace
 
 from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.nautobot_keeper import NautobotKeeper
@@ -23,6 +25,11 @@ class NautobotKeeperTestCase(TestCase):
     def setUpTestData(cls):
         """Create test data for this test case."""
         role_content_type = ContentType.objects.get_for_model(Device)
+
+        # Populate default statuses
+        management.populate_status_choices(apps, None)
+
+        Namespace.objects.get_or_create(name="Global")
 
         device_role = Role.objects.create(name="Switch")
         device_role.content_types.set([role_content_type])

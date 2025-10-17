@@ -1,4 +1,4 @@
-{   
+{
     "serial": "FDO20432435",
     "interfaces": {
         "Ethernet1/1": {
@@ -202,7 +202,7 @@
             "type": "1000base-t"
         },
         "Ethernet1/25": {
-            "802.1Q_mode": "tagged",
+            "802.1Q_mode": "tagged-all",
             "description": "a description",
             "ip_addresses": [],
             "lag": "",
@@ -212,7 +212,7 @@
             "type": "1000base-t"
         },
         "Ethernet1/26": {
-            "802.1Q_mode": "tagged",
+            "802.1Q_mode": "tagged-all",
             "description": "a description",
             "ip_addresses": [],
             "lag": "",
@@ -222,7 +222,7 @@
             "type": "1000base-t"
         },
         "Ethernet1/27": {
-            "802.1Q_mode": "tagged",
+            "802.1Q_mode": "tagged-all",
             "description": "a description",
             "ip_addresses": [],
             "lag": "",

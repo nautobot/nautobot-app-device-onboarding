@@ -488,6 +488,8 @@ class TestFormatterSyncDevices(unittest.TestCase):
 class TestFormatterSyncNetworkDataNoOptions(unittest.TestCase):
     """Tests to ensure formatter is working for sync devices 'ssot job'."""
 
+    maxDiff = None
+
     @patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository")
     def setUp(self, mock_repo):
         # Load the application command_mapper files
@@ -556,6 +558,8 @@ class TestFormatterSyncNetworkDataNoOptions(unittest.TestCase):
 class TestFormatterSyncNetworkDataWithVrfs(unittest.TestCase):
     """Tests to ensure formatter is working for sync devices 'ssot job'."""
 
+    maxDiff = None
+
     @patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository")
     def setUp(self, mock_repo):
         # Load the application command_mapper files
@@ -623,6 +627,8 @@ class TestFormatterSyncNetworkDataWithVrfs(unittest.TestCase):
 
 class TestFormatterSyncNetworkDataWithVlans(unittest.TestCase):
     """Tests to ensure formatter is working for sync devices 'ssot job'."""
+
+    maxDiff = None
 
     @patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository")
     def setUp(self, mock_repo):
