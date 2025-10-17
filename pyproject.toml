@@ -27,7 +27,7 @@ include = [
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.14"
-napalm = ">=2.5.0, <5"
+napalm = ">=4.1.0, <6.0.0"
 zipp = "^3.4.0"
 nautobot = {git = "https://github.com/nautobot/nautobot.git", rev = "next"}
 # nautobot = "^3.0.0"  # TODO: Uncomment after v3.0.0 is released
