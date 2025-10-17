@@ -764,17 +764,17 @@ class DeviceOnboardingTroubleshootingJob(Job):
 
     def run(self, *args, **kwargs):  # pragma: no cover
         """Process onboarding task from ssot-ni job."""
+        logger = NornirLogger(self.job_result, self.logger.getEffectiveLevel())
         ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
         port = kwargs["port"]
         platform = kwargs["platform"]
         username, password = (  # pylint:disable=unused-variable
-            _parse_credentials(kwargs["secrets_group"])
+            _parse_credentials(kwargs["secrets_group"], logger=logger)
         )
         kwargs["connectivity_test"] = False
         # Initiate Nornir instance with empty inventory
         compiled_results = {}
         try:
-            logger = NornirLogger(self.job_result, self.logger.getEffectiveLevel())
             with InitNornir(
                 runner=NORNIR_SETTINGS.get("runner"),
                 logging={"enabled": False},

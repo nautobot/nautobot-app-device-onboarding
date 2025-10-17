@@ -92,6 +92,9 @@ def sync_network_data_ensure_required_nautobot_objects():
     platform_2, _ = Platform.objects.get_or_create(
         name="cisco_xe", network_driver="cisco_xe", manufacturer=manufacturer
     )
+    platform_3, _ = Platform.objects.get_or_create(
+        name="cisco_nxos", network_driver="cisco_nxos", manufacturer=manufacturer
+    )
 
     vlan_1, _ = VLAN.objects.get_or_create(vid=40, name="vlan40", location=location, status=status)
     vlan_2, _ = VLAN.objects.get_or_create(vid=50, name="vlan50", location=location, status=status)
@@ -193,6 +196,7 @@ def sync_network_data_ensure_required_nautobot_objects():
     testing_objects["device_type"] = device_type
     testing_objects["platform_1"] = platform_1
     testing_objects["platform_2"] = platform_2
+    testing_objects["platform_3"] = platform_3
     testing_objects["prefix"] = prefix
     testing_objects["ip_address_1"] = ip_address_1
     testing_objects["ip_address_2"] = ip_address_2
