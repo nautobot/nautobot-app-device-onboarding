@@ -371,6 +371,6 @@ def sync_network_data_command_getter(job, log_level):
                 logger=logger,
                 nautobot_job=job,
             )
-    except Exception as err:  # pylint: disable=broad-exception-caught
-        logger.info(f"Error During Sync Network Data Command Getter: {err}")
+    except Exception:  # pylint: disable=broad-exception-caught
+        logger.info(f"Error During Sync Network Data Command Getter: {traceback.format_exc()}")
     return compiled_results
