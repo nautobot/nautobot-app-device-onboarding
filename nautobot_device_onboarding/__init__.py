@@ -19,7 +19,6 @@ class NautobotDeviceOnboardingConfig(NautobotAppConfig):
     base_url = "nautobot-device-onboarding"
     required_settings = []
     default_settings = {}
-    caching_config = {}
     docs_view_name = "plugins:nautobot_device_onboarding:docs"
     searchable_models = []
 
