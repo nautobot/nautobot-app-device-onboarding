@@ -19,6 +19,7 @@ class NautobotDeviceOnboardingConfig(NautobotAppConfig):
                    collecting and populating common device 'facts' into Nautobot."
     base_url = "nautobot-device-onboarding"
     required_settings = []
+<<<<<<< HEAD
     default_settings = {
         "create_platform_if_missing": True,
         "create_manufacturer_if_missing": True,
@@ -42,6 +43,9 @@ class NautobotDeviceOnboardingConfig(NautobotAppConfig):
         "object_match_strategy": "loose",
     }
     caching_config = {}
+=======
+    default_settings = {}
+>>>>>>> b6ac0b1 (Cookie updated by NetworkToCode Cookie Drift Manager Tool)
     docs_view_name = "plugins:nautobot_device_onboarding:docs"
     home_view_name = "extras:job_list"  # Jobs only for now. May change in the future.
     searchable_models = []
