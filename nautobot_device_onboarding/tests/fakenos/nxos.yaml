@@ -1,0 +1,788 @@
+---
+name: "nexustest"
+initial_prompt: "{base_prompt}#"
+enable_prompt: "{base_prompt}#"
+config_prompt: "{base_prompt}(config)#"
+commands:
+  enable:
+    output: "null"
+    new_prompt: "{base_prompt}#"
+    help: "enter enable mode"
+    prompt: "{base_prompt}#"
+  show interface:
+    output: |
+      mgmt0 is up
+      admin state is up,
+        Hardware: GigabitEthernet, address: 0c00.543c.7500 (bia 0c00.543c.7500)
+        Description: MANAGEMENT_DO_NOT_CHANGE
+        Internet Address is 127.0.0.1/24
+        MTU 1500 bytes, BW 1000000 Kbit , DLY 10 usec
+        reliability 255/255, txload 1/255, rxload 1/255
+        Encapsulation ARPA, medium is broadcast
+        full-duplex, 1000 Mb/s
+        Auto-Negotiation is turned on
+        Auto-mdix is turned off
+        EtherType is 0x0000
+        1 minute input rate 360 bits/sec, 0 packets/sec
+        1 minute output rate 432 bits/sec, 0 packets/sec
+        Rx
+          3095 input packets 3015 unicast packets 78 multicast packets
+          2 broadcast packets 241302 bytes
+        Tx
+          2754 output packets 2219 unicast packets 531 multicast packets
+          4 broadcast packets 526884 bytes
+        Management transceiver: Absent
+        Active connector: RJ45
+      Ethernet1/1 is up
+      admin state is up, Dedicated Interface
+        Hardware: 100/1000/10000 Ethernet, address: 0c3c.7500.1b08 (bia 0c3c.7500.0101)
+        MTU 1500 bytes, BW 1000000 Kbit , DLY 10 usec
+        reliability 255/255, txload 1/255, rxload 1/255
+        Encapsulation ARPA, medium is broadcast
+        full-duplex, 1000 Mb/s
+        Beacon is turned off
+        Auto-Negotiation is turned on  FEC mode is Auto
+        Input flow-control is off, output flow-control is off
+        Auto-mdix is turned off
+        Switchport monitor is off
+        EtherType is 0x8100
+        EEE (efficient-ethernet) : n/a
+          admin fec state is auto, oper fec state is off
+        Last link flapped 08:43:10
+        Last clearing of "show interface" counters never
+        2 interface resets
+        Load-Interval #1: 30 seconds
+          30 seconds input rate 48 bits/sec, 0 packets/sec
+          30 seconds output rate 48 bits/sec, 0 packets/sec
+          input rate 48 bps, 0 pps; output rate 48 bps, 0 pps
+        Load-Interval #2: 5 minute (300 seconds)
+          300 seconds input rate 104 bits/sec, 0 packets/sec
+          300 seconds output rate 96 bits/sec, 0 packets/sec
+          input rate 104 bps, 0 pps; output rate 96 bps, 0 pps
+        RX
+          28 unicast packets  1592 multicast packets  0 broadcast packets
+          1620 input packets  433082 bytes
+          0 jumbo packets  0 storm suppression packets
+          0 runts  0 giants  0 CRC  0 no buffer
+          0 input error  0 short frame  0 overrun   0 underrun  0 ignored
+          0 watchdog  0 bad etype drop  0 bad proto drop  0 if down drop
+          0 input with dribble  0 input discard
+          0 Rx pause
+          0 Stomped CRC
+        TX
+          0 unicast packets  1593 multicast packets  0 broadcast packets
+          1593 output packets  431403 bytes
+          0 jumbo packets
+          0 output error  0 collision  0 deferred  0 late collision
+          0 lost carrier  0 no carrier  0 babble  0 output discard
+          0 Tx pause
+      Ethernet1/60 is down (Link not connected)
+      admin state is up, Dedicated Interface
+        Hardware: 100/1000/10000 Ethernet, address: 0c3c.7500.013c (bia 0c3c.7500.013c)
+        MTU 1500 bytes, BW 10000000 Kbit , DLY 10 usec
+        reliability 255/255, txload 1/255, rxload 1/255
+        Encapsulation ARPA, medium is broadcast
+        Port mode is trunk
+        auto-duplex, auto-speed
+        Beacon is turned off
+        Auto-Negotiation is turned on  FEC mode is Auto
+        Input flow-control is off, output flow-control is off
+        Auto-mdix is turned off
+        Switchport monitor is off
+        EtherType is 0x8100
+        EEE (efficient-ethernet) : n/a
+          admin fec state is auto, oper fec state is off
+        Last link flapped never
+        Last clearing of "show interface" counters never
+        0 interface resets
+        Load-Interval #1: 0 seconds
+          0 seconds input rate 0 bits/sec, 0 packets/sec
+          0 seconds output rate 0 bits/sec, 0 packets/sec
+          input rate 0 bps, 0 pps; output rate 0 bps, 0 pps
+        Load-Interval #2: 0 seconds
+          0 seconds input rate 0 bits/sec, 0 packets/sec
+          0 seconds output rate 0 bits/sec, 0 packets/sec
+          input rate 0 bps, 0 pps; output rate 0 bps, 0 pps
+        RX
+          0 unicast packets  0 multicast packets  0 broadcast packets
+          0 input packets  0 bytes
+          0 jumbo packets  0 storm suppression packets
+          0 runts  0 giants  0 CRC  0 no buffer
+          0 input error  0 short frame  0 overrun   0 underrun  0 ignored
+          0 watchdog  0 bad etype drop  0 bad proto drop  0 if down drop
+          0 input with dribble  0 input discard
+          0 Rx pause
+          0 Stomped CRC
+        TX
+          0 unicast packets  0 multicast packets  0 broadcast packets
+          0 output packets  0 bytes
+          0 jumbo packets
+          0 output error  0 collision  0 deferred  0 late collision
+          0 lost carrier  0 no carrier  0 babble  0 output discard
+          0 Tx pause
+
+      Ethernet1/61 is down (Link not connected)
+      admin state is up, Dedicated Interface
+        Hardware: 100/1000/10000 Ethernet, address: 0c3c.7500.013d (bia 0c3c.7500.013d)
+        MTU 1500 bytes, BW 10000000 Kbit , DLY 10 usec
+        reliability 255/255, txload 1/255, rxload 1/255
+        Encapsulation ARPA, medium is broadcast
+        Port mode is trunk
+        auto-duplex, auto-speed
+        Beacon is turned off
+        Auto-Negotiation is turned on  FEC mode is Auto
+        Input flow-control is off, output flow-control is off
+        Auto-mdix is turned off
+        Switchport monitor is off
+        EtherType is 0x8100
+        EEE (efficient-ethernet) : n/a
+          admin fec state is auto, oper fec state is off
+        Last link flapped never
+        Last clearing of "show interface" counters never
+        0 interface resets
+        Load-Interval #1: 0 seconds
+          0 seconds input rate 0 bits/sec, 0 packets/sec
+          0 seconds output rate 0 bits/sec, 0 packets/sec
+          input rate 0 bps, 0 pps; output rate 0 bps, 0 pps
+        Load-Interval #2: 0 seconds
+          0 seconds input rate 0 bits/sec, 0 packets/sec
+          0 seconds output rate 0 bits/sec, 0 packets/sec
+          input rate 0 bps, 0 pps; output rate 0 bps, 0 pps
+        RX
+          0 unicast packets  0 multicast packets  0 broadcast packets
+          0 input packets  0 bytes
+          0 jumbo packets  0 storm suppression packets
+          0 runts  0 giants  0 CRC  0 no buffer
+          0 input error  0 short frame  0 overrun   0 underrun  0 ignored
+          0 watchdog  0 bad etype drop  0 bad proto drop  0 if down drop
+          0 input with dribble  0 input discard
+          0 Rx pause
+          0 Stomped CRC
+        TX
+          0 unicast packets  0 multicast packets  0 broadcast packets
+          0 output packets  0 bytes
+          0 jumbo packets
+          0 output error  0 collision  0 deferred  0 late collision
+          0 lost carrier  0 no carrier  0 babble  0 output discard
+          0 Tx pause
+
+      Ethernet1/62 is down (Administratively down)
+      admin state is down, Dedicated Interface
+        Hardware: 100/1000/10000 Ethernet, address: 0c3c.7500.013e (bia 0c3c.7500.013e)
+        MTU 1500 bytes, BW 10000000 Kbit , DLY 10 usec
+        reliability 255/255, txload 1/255, rxload 1/255
+        Encapsulation ARPA, medium is broadcast
+        Port mode is trunk
+        auto-duplex, auto-speed
+        Beacon is turned off
+        Auto-Negotiation is turned on  FEC mode is Auto
+        Input flow-control is off, output flow-control is off
+        Auto-mdix is turned off
+        Switchport monitor is off
+        EtherType is 0x8100
+        EEE (efficient-ethernet) : n/a
+          admin fec state is auto, oper fec state is off
+        Last link flapped never
+        Last clearing of "show interface" counters never
+        0 interface resets
+        Load-Interval #1: 0 seconds
+          0 seconds input rate 0 bits/sec, 0 packets/sec
+          0 seconds output rate 0 bits/sec, 0 packets/sec
+          input rate 0 bps, 0 pps; output rate 0 bps, 0 pps
+        Load-Interval #2: 0 seconds
+          0 seconds input rate 0 bits/sec, 0 packets/sec
+          0 seconds output rate 0 bits/sec, 0 packets/sec
+          input rate 0 bps, 0 pps; output rate 0 bps, 0 pps
+        RX
+          0 unicast packets  0 multicast packets  0 broadcast packets
+          0 input packets  0 bytes
+          0 jumbo packets  0 storm suppression packets
+          0 runts  0 giants  0 CRC  0 no buffer
+          0 input error  0 short frame  0 overrun   0 underrun  0 ignored
+          0 watchdog  0 bad etype drop  0 bad proto drop  0 if down drop
+          0 input with dribble  0 input discard
+          0 Rx pause
+          0 Stomped CRC
+        TX
+          0 unicast packets  0 multicast packets  0 broadcast packets
+          0 output packets  0 bytes
+          0 jumbo packets
+          0 output error  0 collision  0 deferred  0 late collision
+          0 lost carrier  0 no carrier  0 babble  0 output discard
+          0 Tx pause
+
+      Ethernet1/63 is down (Link not connected)
+      admin state is up, Dedicated Interface
+        Hardware: 100/1000/10000 Ethernet, address: 0c3c.7500.013f (bia 0c3c.7500.013f)
+        MTU 1500 bytes, BW 10000000 Kbit , DLY 10 usec
+        reliability 255/255, txload 1/255, rxload 1/255
+        Encapsulation ARPA, medium is broadcast
+        Port mode is trunk
+        auto-duplex, auto-speed
+        Beacon is turned off
+        Auto-Negotiation is turned on  FEC mode is Auto
+        Input flow-control is off, output flow-control is off
+        Auto-mdix is turned off
+        Switchport monitor is off
+        EtherType is 0x8100
+        EEE (efficient-ethernet) : n/a
+          admin fec state is auto, oper fec state is off
+        Last link flapped never
+        Last clearing of "show interface" counters never
+        0 interface resets
+        Load-Interval #1: 0 seconds
+          0 seconds input rate 0 bits/sec, 0 packets/sec
+          0 seconds output rate 0 bits/sec, 0 packets/sec
+          input rate 0 bps, 0 pps; output rate 0 bps, 0 pps
+        Load-Interval #2: 0 seconds
+          0 seconds input rate 0 bits/sec, 0 packets/sec
+          0 seconds output rate 0 bits/sec, 0 packets/sec
+          input rate 0 bps, 0 pps; output rate 0 bps, 0 pps
+        RX
+          0 unicast packets  0 multicast packets  0 broadcast packets
+          0 input packets  0 bytes
+          0 jumbo packets  0 storm suppression packets
+          0 runts  0 giants  0 CRC  0 no buffer
+          0 input error  0 short frame  0 overrun   0 underrun  0 ignored
+          0 watchdog  0 bad etype drop  0 bad proto drop  0 if down drop
+          0 input with dribble  0 input discard
+          0 Rx pause
+          0 Stomped CRC
+        TX
+          0 unicast packets  0 multicast packets  0 broadcast packets
+          0 output packets  0 bytes
+          0 jumbo packets
+          0 output error  0 collision  0 deferred  0 late collision
+          0 lost carrier  0 no carrier  0 babble  0 output discard
+          0 Tx pause
+      Ethernet1/64 is down (Administratively down)
+      admin state is down, Dedicated Interface
+        Hardware: 100/1000/10000 Ethernet, address: 0c3c.7500.1b08 (bia 0c3c.7500.0140)
+        MTU 1500 bytes, BW 10000000 Kbit , DLY 10 usec
+        reliability 255/255, txload 1/255, rxload 1/255
+        Encapsulation ARPA, medium is broadcast
+        auto-duplex, auto-speed
+        Beacon is turned off
+        Auto-Negotiation is turned on  FEC mode is Auto
+        Input flow-control is off, output flow-control is off
+        Auto-mdix is turned off
+        Switchport monitor is off
+        EtherType is 0x8100
+        EEE (efficient-ethernet) : n/a
+          admin fec state is auto, oper fec state is off
+        Last link flapped never
+        Last clearing of "show interface" counters never
+        0 interface resets
+        Load-Interval #1: 0 seconds
+          0 seconds input rate 0 bits/sec, 0 packets/sec
+          0 seconds output rate 0 bits/sec, 0 packets/sec
+          input rate 0 bps, 0 pps; output rate 0 bps, 0 pps
+        Load-Interval #2: 0 seconds
+          0 seconds input rate 0 bits/sec, 0 packets/sec
+          0 seconds output rate 0 bits/sec, 0 packets/sec
+          input rate 0 bps, 0 pps; output rate 0 bps, 0 pps
+        RX
+          0 unicast packets  0 multicast packets  0 broadcast packets
+          0 input packets  0 bytes
+          0 jumbo packets  0 storm suppression packets
+          0 runts  0 giants  0 CRC  0 no buffer
+          0 input error  0 short frame  0 overrun   0 underrun  0 ignored
+          0 watchdog  0 bad etype drop  0 bad proto drop  0 if down drop
+          0 input with dribble  0 input discard
+          0 Rx pause
+          0 Stomped CRC
+        TX
+          0 unicast packets  0 multicast packets  0 broadcast packets
+          0 output packets  0 bytes
+          0 jumbo packets
+          0 output error  0 collision  0 deferred  0 late collision
+          0 lost carrier  0 no carrier  0 babble  0 output discard
+          0 Tx pause
+
+      Vlan1 is down (Administratively down), line protocol is down, autostate enabled
+        Hardware is EtherSVI, address is  0c3c.7500.1b08
+        MTU 1500 bytes, BW 1000000 Kbit, DLY 10 usec,
+        reliability 255/255, txload 1/255, rxload 1/255
+        Encapsulation ARPA, loopback not set
+        Keepalive not supported
+        ARP type: ARPA
+        Last clearing of "show interface" counters never
+        L3 in Switched:
+          ucast: 0 pkts, 0 bytes
+        L3 out Switched:
+          ucast: 0 pkts, 0 bytes
+
+      Vlan10 is down (VLAN/BD is down), line protocol is down, autostate enabled
+        Hardware is EtherSVI, address is  0c3c.7500.1b08
+        Internet Address is 10.10.0.1/24
+        MTU 1500 bytes, BW 1000000 Kbit, DLY 10 usec,
+        reliability 255/255, txload 1/255, rxload 1/255
+        Encapsulation ARPA, loopback not set
+        Keepalive not supported
+        ARP type: ARPA
+        Last clearing of "show interface" counters never
+        L3 in Switched:
+          ucast: 0 pkts, 0 bytes
+        L3 out Switched:
+          ucast: 0 pkts, 0 bytes
+
+      Vlan20 is down (VLAN/BD is down), line protocol is down, autostate enabled
+        Hardware is EtherSVI, address is  0c3c.7500.1b08
+        Internet Address is 10.20.0.1/24
+        MTU 1500 bytes, BW 1000000 Kbit, DLY 10 usec,
+        reliability 255/255, txload 1/255, rxload 1/255
+        Encapsulation ARPA, loopback not set
+        Keepalive not supported
+        ARP type: ARPA
+        Last clearing of "show interface" counters never
+        L3 in Switched:
+          ucast: 0 pkts, 0 bytes
+        L3 out Switched:
+          ucast: 0 pkts, 0 bytes
+    help: "execute the command 'show interface'"
+    prompt:
+      - "{base_prompt}#"
+  show version:
+    output: |
+      Cisco Nexus Operating System (NX-OS) Software
+      TAC support: http://www.cisco.com/tac
+      Documents: http://www.cisco.com/en/US/products/ps9372/tsd_products_support_series_home.html
+      Copyright (c) 2002-2022, Cisco Systems, Inc. All rights reserved.
+      The copyrights to certain works contained herein are owned by
+      other third parties and are used and distributed under license.
+      Some parts of this software are covered under the GNU Public
+      License. A copy of the license is available at
+      http://www.gnu.org/licenses/gpl.html.
+
+      Nexus 9000v is a demo version of the Nexus Operating System
+
+      Software
+        BIOS: version
+        NXOS: version 10.2(3) [Feature Release]
+        BIOS compile time:
+        NXOS image file is: bootflash:///nxos64-cs.10.2.3.F.bin
+        NXOS compile time:  4/24/2022 3:00:00 [04/24/2022 14:54:51]
+
+      Hardware
+        cisco Nexus9000 C9500v Chassis ("Supervisor Module")
+        Intel(R) Xeon(R) Platinum 8358 CPU @ 2.60GHz with 8146668 kB of memory.
+        Processor Board ID 937TZ07F29P
+        Device name: fake-nxos-01
+        bootflash:    4287040 kB
+
+      Kernel uptime is 0 day(s), 8 hour(s), 52 minute(s), 52 second(s)
+
+      Last reset
+        Reason: Unknown
+        System version:
+        Service:
+
+      plugin
+        Core Plugin, Ethernet Plugin
+
+      Active Package(s):
+    help: "execute the command 'show version'"
+    prompt:
+      - "{base_prompt}#"
+  show vlan:
+    output: |
+      VLAN Name                             Status    Ports
+      ---- -------------------------------- --------- -------------------------------
+      1    default                          active    Eth1/61, Eth1/63
+      10   DATA                             active    Eth1/61, Eth1/62, Eth1/63
+      20   VOICE                            active    Eth1/61, Eth1/62, Eth1/63
+      30   WLAN                             active    Eth1/61, Eth1/63
+      40   PRINTERS                         active    Eth1/61, Eth1/63
+
+      VLAN Type         Vlan-mode
+      ---- -----        ----------
+      1    enet         CE
+      10   enet         CE
+      20   enet         CE
+      30   enet         CE
+      40   enet         CE
+
+      Remote SPAN VLANs
+      -------------------------------------------------------------------------------
+
+      Primary  Secondary  Type             Ports
+      -------  ---------  ---------------  -------------------------------------------
+    help: "execute the command 'show vlan'"
+    prompt:
+      - "{base_prompt}#"
+  show port-channel summary:
+    output: ""
+    help: "execute the command 'show port-channel summary'"
+    prompt:
+      - "{base_prompt}#"
+  show cdp neighbors detail:
+    output: |
+      ----------------------------------------
+      Device ID:nxos-spine2.ntc.com(9HVASUDPU3X)
+      System Name: nxos-spine2
+
+      Interface address(es): 1
+          IPv4 Address: 10.0.0.15
+      Platform: N9K-C9500v, Capabilities: Router Switch Supports-STP-Dispute
+      Interface: Ethernet1/1, Port ID (outgoing port): Ethernet1/1
+      Holdtime: 135 sec
+
+      Version:
+      Cisco Nexus Operating System (NX-OS) Software, Version 10.2(3)
+
+      Advertisement Version: 2
+      Duplex: full
+
+      MTU: 1500
+      Mgmt address(es):
+          IPv4 Address: 10.0.0.15
+      Local Interface MAC: 0c:3c:75:00:01:01
+      Remote Interface MAC: 0c:e1:65:00:1b:08
+      ----------------------------------------
+      Device ID:nxos-spine2.ntc.com(9HVASUDPU3X)
+      System Name: nxos-spine2
+
+      Interface address(es): 1
+          IPv4 Address: 10.0.0.15
+      Platform: N9K-C9500v, Capabilities: Router Switch Supports-STP-Dispute
+      Interface: Ethernet1/2, Port ID (outgoing port): Ethernet1/2
+      Holdtime: 136 sec
+
+      Version:
+      Cisco Nexus Operating System (NX-OS) Software, Version 10.2(3)
+
+      Advertisement Version: 2
+      Duplex: full
+
+      MTU: 1500
+      Mgmt address(es):
+          IPv4 Address: 10.0.0.15
+      Local Interface MAC: 0c:3c:75:00:01:02
+      Remote Interface MAC: 0c:e1:65:00:1b:08
+      ----------------------------------------
+      Device ID:nxos-spine2.ntc.com(9HVASUDPU3X)
+      System Name: nxos-spine2
+
+      Interface address(es): 1
+          IPv4 Address: 10.0.0.15
+      Platform: N9K-C9500v, Capabilities: Router Switch Supports-STP-Dispute
+      Interface: Ethernet1/3, Port ID (outgoing port): Ethernet1/3
+      Holdtime: 137 sec
+
+      Version:
+      Cisco Nexus Operating System (NX-OS) Software, Version 10.2(3)
+
+      Advertisement Version: 2
+      Duplex: full
+
+      MTU: 1500
+      Mgmt address(es):
+          IPv4 Address: 10.0.0.15
+      Local Interface MAC: 0c:3c:75:00:01:03
+      Remote Interface MAC: 0c:e1:65:00:1b:08
+      ----------------------------------------
+      Device ID:nxos-spine2.ntc.com(9HVASUDPU3X)
+      System Name: nxos-spine2
+
+      Interface address(es): 1
+          IPv4 Address: 10.0.0.15
+      Platform: N9K-C9500v, Capabilities: Router Switch Supports-STP-Dispute
+      Interface: Ethernet1/4, Port ID (outgoing port): Ethernet1/4
+      Holdtime: 138 sec
+
+      Version:
+      Cisco Nexus Operating System (NX-OS) Software, Version 10.2(3)
+
+      Advertisement Version: 2
+      Duplex: full
+
+      MTU: 1500
+      Mgmt address(es):
+          IPv4 Address: 10.0.0.15
+      Local Interface MAC: 0c:3c:75:00:01:04
+      Remote Interface MAC: 0c:e1:65:00:1b:08
+    help: "execute the command 'show cdp neighbors detail'"
+    prompt:
+      - "{base_prompt}#"
+  show interface switchport:
+    output: |
+      Name: Ethernet1/60
+        Switchport: Enabled
+        Switchport Monitor: Not enabled
+        Switchport Isolated : Not enabled
+        Switchport Block Multicast: Not enabled
+        Switchport Block Unicast: Not enabled
+        Switchport mac-address static-only: Disabled
+        Mac learning: Enabled
+        Operational Mode: trunk
+        Access Mode VLAN: 1 (default)
+        Trunking Native Mode VLAN: 1 (default)
+        Trunking VLANs Allowed: none
+        Voice VLAN: none
+        Extended Trust State : not trusted [COS = 0]
+        Administrative private-vlan primary host-association: none
+        Administrative private-vlan secondary host-association: none
+        Administrative private-vlan primary mapping: none
+        Administrative private-vlan secondary mapping: none
+        Administrative private-vlan trunk native VLAN: none
+        Administrative private-vlan trunk encapsulation: dot1q
+        Administrative private-vlan trunk normal VLANs: none
+        Administrative private-vlan trunk private VLANs: none
+        Operational private-vlan: none
+      Name: Ethernet1/61
+        Switchport: Enabled
+        Switchport Monitor: Not enabled
+        Switchport Isolated : Not enabled
+        Switchport Block Multicast: Not enabled
+        Switchport Block Unicast: Not enabled
+        Switchport mac-address static-only: Disabled
+        Mac learning: Enabled
+        Operational Mode: trunk
+        Access Mode VLAN: 1 (default)
+        Trunking Native Mode VLAN: 1 (default)
+        Trunking VLANs Allowed: 1-4094
+        Voice VLAN: none
+        Extended Trust State : not trusted [COS = 0]
+        Administrative private-vlan primary host-association: none
+        Administrative private-vlan secondary host-association: none
+        Administrative private-vlan primary mapping: none
+        Administrative private-vlan secondary mapping: none
+        Administrative private-vlan trunk native VLAN: none
+        Administrative private-vlan trunk encapsulation: dot1q
+        Administrative private-vlan trunk normal VLANs: none
+        Administrative private-vlan trunk private VLANs: none
+        Operational private-vlan: none
+      Name: Ethernet1/62
+        Switchport: Enabled
+        Switchport Monitor: Not enabled
+        Switchport Isolated : Not enabled
+        Switchport Block Multicast: Not enabled
+        Switchport Block Unicast: Not enabled
+        Switchport mac-address static-only: Disabled
+        Mac learning: Enabled
+        Operational Mode: trunk
+        Access Mode VLAN: 1 (default)
+        Trunking Native Mode VLAN: 1 (default)
+        Trunking VLANs Allowed: 10,20
+        Voice VLAN: none
+        Extended Trust State : not trusted [COS = 0]
+        Administrative private-vlan primary host-association: none
+        Administrative private-vlan secondary host-association: none
+        Administrative private-vlan primary mapping: none
+        Administrative private-vlan secondary mapping: none
+        Administrative private-vlan trunk native VLAN: none
+        Administrative private-vlan trunk encapsulation: dot1q
+        Administrative private-vlan trunk normal VLANs: none
+        Administrative private-vlan trunk private VLANs: none
+        Operational private-vlan: none
+      Name: Ethernet1/63
+        Switchport: Enabled
+        Switchport Monitor: Not enabled
+        Switchport Isolated : Not enabled
+        Switchport Block Multicast: Not enabled
+        Switchport Block Unicast: Not enabled
+        Switchport mac-address static-only: Disabled
+        Mac learning: Enabled
+        Operational Mode: trunk
+        Access Mode VLAN: 1 (default)
+        Trunking Native Mode VLAN: 1 (default)
+        Trunking VLANs Allowed: 100-120
+        Voice VLAN: none
+        Extended Trust State : not trusted [COS = 0]
+        Administrative private-vlan primary host-association: none
+        Administrative private-vlan secondary host-association: none
+        Administrative private-vlan primary mapping: none
+        Administrative private-vlan secondary mapping: none
+        Administrative private-vlan trunk native VLAN: none
+        Administrative private-vlan trunk encapsulation: dot1q
+        Administrative private-vlan trunk normal VLANs: none
+        Administrative private-vlan trunk private VLANs: none
+        Operational private-vlan: none
+    help: "execute the command 'show interface switchport'"
+    prompt:
+      - "{base_prompt}#"
+  show vrf interface:
+    output: |
+      Interface                 VRF-Name                        VRF-ID  Site-of-Origin
+      Vlan1                     default                              1  --
+      Vlan10                    default                              1  --
+      Vlan20                    default                              1  --
+      Ethernet1/1               default                              1  --
+      Ethernet1/2               default                              1  --
+      Ethernet1/3               default                              1  --
+      Ethernet1/4               default                              1  --
+      Ethernet1/5               default                              1  --
+      Ethernet1/6               default                              1  --
+      Ethernet1/7               default                              1  --
+      Ethernet1/8               default                              1  --
+      Ethernet1/9               default                              1  --
+      Ethernet1/10              default                              1  --
+      Ethernet1/11              default                              1  --
+      Ethernet1/12              default                              1  --
+      Ethernet1/13              default                              1  --
+      Ethernet1/14              default                              1  --
+      Ethernet1/15              default                              1  --
+      Ethernet1/16              default                              1  --
+      Ethernet1/17              default                              1  --
+      Ethernet1/18              default                              1  --
+      Ethernet1/19              default                              1  --
+      Ethernet1/20              default                              1  --
+      Ethernet1/21              default                              1  --
+      Ethernet1/22              default                              1  --
+      Ethernet1/23              default                              1  --
+      Ethernet1/24              default                              1  --
+      Ethernet1/25              default                              1  --
+      Ethernet1/26              default                              1  --
+      Ethernet1/27              default                              1  --
+      Ethernet1/28              default                              1  --
+      Ethernet1/29              default                              1  --
+      Ethernet1/30              default                              1  --
+      Ethernet1/31              default                              1  --
+      Ethernet1/32              default                              1  --
+      Ethernet1/33              default                              1  --
+      Ethernet1/34              default                              1  --
+      Ethernet1/35              default                              1  --
+      Ethernet1/36              default                              1  --
+      Ethernet1/37              default                              1  --
+      Ethernet1/38              default                              1  --
+      Ethernet1/39              default                              1  --
+      Ethernet1/40              default                              1  --
+      Ethernet1/41              default                              1  --
+      Ethernet1/42              default                              1  --
+      Ethernet1/43              default                              1  --
+      Ethernet1/44              default                              1  --
+      Ethernet1/45              default                              1  --
+      Ethernet1/46              default                              1  --
+      Ethernet1/47              default                              1  --
+      Ethernet1/48              default                              1  --
+      Ethernet1/49              default                              1  --
+      Ethernet1/50              default                              1  --
+      Ethernet1/51              default                              1  --
+      Ethernet1/52              default                              1  --
+      Ethernet1/53              default                              1  --
+      Ethernet1/54              default                              1  --
+      Ethernet1/55              default                              1  --
+      Ethernet1/56              default                              1  --
+      Ethernet1/57              default                              1  --
+      Ethernet1/58              default                              1  --
+      Ethernet1/59              default                              1  --
+      Ethernet1/64              default                              1  --
+      mgmt0                     management                           2  --
+    help: "execute the command 'show vrf interface'"
+    prompt:
+      - "{base_prompt}#"
+  show inventory:
+    output: |
+      NAME: "Chassis",  DESCR: "Nexus9000 C9500v Chassis"
+      PID: N9K-C9500v          ,  VID:     ,  SN: 92LT8SWGKKD
+
+      NAME: "Slot 1",  DESCR: "Nexus 9000v 64 port Ethernet Module"
+      PID: N9K-X9564v          ,  VID:     ,  SN: 9I67T5729WL
+
+      NAME: "Slot 27",  DESCR: "Supervisor Module"
+      PID: N9K-vSUP            ,  VID:     ,  SN: 937TZ07F29P
+    help: "execute the command 'show inventory'"
+    prompt:
+      - "{base_prompt}#"
+  show ip interface brief vrf all:
+    output: |
+      IP Interface Status for VRF "default"(1)
+      Interface            IP Address      Interface Status
+      Vlan10               10.10.0.1       protocol-down/link-down/admin-up
+      Vlan20               10.20.0.1       protocol-down/link-down/admin-up
+
+      IP Interface Status for VRF "management"(2)
+      Interface            IP Address      Interface Status
+      mgmt0                127.0.0.1       protocol-up/link-up/admin-up
+    help: "execute the command 'show ip interface brief vrf all'"
+    prompt:
+      - "{base_prompt}#"
+  show ip interface vrf all:
+    output: |
+      IP Interface Status for VRF "default"
+      Vlan10, Interface status: protocol-down/link-down/admin-up, iod: 71,
+        IP address: 10.10.0.1, IP subnet: 10.10.0.0/24 route-preference: 0, tag: 0
+        IP broadcast address: 255.255.255.255
+        IP multicast groups locally joined: none
+        IP MTU: 1500 bytes (using link MTU)
+        IP primary address route-preference: 0, tag: 0
+        IP proxy ARP : disabled
+        IP Local Proxy ARP : disabled
+        IP multicast routing: disabled
+        IP icmp redirects: enabled
+        IP directed-broadcast: disabled
+        IP Forwarding: disabled
+        IP icmp unreachables (except port): disabled
+        IP icmp port-unreachable: enabled
+        IP unicast reverse path forwarding: none
+        IP load sharing: none
+        IP interface statistics last reset: never
+        IP interface software stats: (sent/received/forwarded/originated/consumed)
+          Unicast packets    : 0/0/0/0/0
+          Unicast bytes      : 0/0/0/0/0
+          Multicast packets  : 0/0/0/0/0
+          Multicast bytes    : 0/0/0/0/0
+          Broadcast packets  : 0/0/0/0/0
+          Broadcast bytes    : 0/0/0/0/0
+          Labeled packets    : 0/0/0/0/0
+          Labeled bytes      : 0/0/0/0/0
+      Vlan20, Interface status: protocol-down/link-down/admin-up, iod: 72,
+        IP address: 10.20.0.1, IP subnet: 10.20.0.0/24 route-preference: 0, tag: 0
+        IP broadcast address: 255.255.255.255
+        IP multicast groups locally joined: none
+        IP MTU: 1500 bytes (using link MTU)
+        IP primary address route-preference: 0, tag: 0
+        IP proxy ARP : disabled
+        IP Local Proxy ARP : disabled
+        IP multicast routing: disabled
+        IP icmp redirects: enabled
+        IP directed-broadcast: disabled
+        IP Forwarding: disabled
+        IP icmp unreachables (except port): disabled
+        IP icmp port-unreachable: enabled
+        IP unicast reverse path forwarding: none
+        IP load sharing: none
+        IP interface statistics last reset: never
+        IP interface software stats: (sent/received/forwarded/originated/consumed)
+          Unicast packets    : 0/0/0/0/0
+          Unicast bytes      : 0/0/0/0/0
+          Multicast packets  : 0/0/0/0/0
+          Multicast bytes    : 0/0/0/0/0
+          Broadcast packets  : 0/0/0/0/0
+          Broadcast bytes    : 0/0/0/0/0
+          Labeled packets    : 0/0/0/0/0
+          Labeled bytes      : 0/0/0/0/0
+
+      IP Interface Status for VRF "management"
+      mgmt0, Interface status: protocol-up/link-up/admin-up, iod: 2,
+        IP address: 127.0.0.1, IP subnet: 127.0.0.0/24 route-preference: 0, tag: 0
+        IP broadcast address: 255.255.255.255
+        IP multicast groups locally joined: none
+        IP MTU: 1500 bytes (using link MTU)
+        IP primary address route-preference: 0, tag: 0
+        IP proxy ARP : disabled
+        IP Local Proxy ARP : disabled
+        IP multicast routing: disabled
+        IP icmp redirects: enabled
+        IP directed-broadcast: disabled
+        IP Forwarding: disabled
+        IP icmp unreachables (except port): disabled
+        IP icmp port-unreachable: enabled
+        IP unicast reverse path forwarding: none
+        IP load sharing: none
+        IP interface statistics last reset: never
+        IP interface software stats: (sent/received/forwarded/originated/consumed)
+          Unicast packets    : 2108/2836/0/2108/5672
+          Unicast bytes      : 376832/167140/0/376832/322148
+          Multicast packets  : 0/0/0/0/0
+          Multicast bytes    : 0/0/0/0/0
+          Broadcast packets  : 0/0/0/0/0
+          Broadcast bytes    : 0/0/0/0/0
+          Labeled packets    : 0/0/0/0/0
+          Labeled bytes      : 0/0/0/0/0
+    help: "execute the command 'show ip interface vrf all'"
+    prompt:
+      - "{base_prompt}#"
+  _default_:
+    output: "% Invalid input detected at '^' marker."
+    help: "Output to print for unknown commands"
