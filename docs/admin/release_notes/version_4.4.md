@@ -8,7 +8,7 @@ This document describes all new features and changes in the release. The format 
 - Fixed VLANs creation on cisco_nxos devices.
 - Fixed nxos lag member assigment.
 
-## [v4.4.0 (2025-10-24)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.4.0)
+## [v4.4.0 (2025-10-27)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.4.0)
 
 ### Fixed
 
