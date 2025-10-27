@@ -1,0 +1,1706 @@
+{
+    "show system": [
+        {
+            "name": "AOSSW03",
+            "contact": "bob@networktocode.com",
+            "location": "NYC",
+            "mac_age": "300",
+            "timezone": "-300",
+            "daylight_rule": "Continental-US-and-Canada",
+            "software_version": "WC.16.10.0016",
+            "rom_version": "WC.17.02.0007",
+            "allow_mods": "",
+            "mac_address": "b8d4e7-0a7654",
+            "serial": "SH45OTR3W",
+            "uptime": "367 days",
+            "cpu_util": "4",
+            "mem_tot": "338,244,096",
+            "mem_free": "174,686,932",
+            "packets_rx": "64,330,777",
+            "packets_tx": "63,312,151",
+            "packets_tot": "6600",
+            "buffers_free": "4282",
+            "buffers_lowest": "4035",
+            "buffers_missed": "0"
+        }
+    ],
+    "show lldp info local-device": [
+        {
+            "chassis_id": "b8d4e7-0a7654           ",
+            "sys_name": "AOSSW03",
+            "model": "JL322A",
+            "mgmt_ip": "fe80::bad4:e7ff:fe0a:8181"
+        }
+    ],
+    "show ip": [
+        {
+            "intf_name": "DEFAULT_VLAN",
+            "intf_config": "Manual",
+            "ip_address": "198.51.100.1",
+            "ip_mask": "255.255.255.128"
+        }
+    ],
+    "show vlans": [
+        {
+            "vlan_id": "1",
+            "vlan_name": "DEFAULT_VLAN",
+            "status": "Port-based",
+            "voice": "No",
+            "jumbo": "No"
+        }
+    ],
+    "show trunks": [
+        {
+            "local_port": "A1",
+            "int_name": "Connected_to_AOSSW01#1-B3",
+            "int_type": "SFP+LR",
+            "trunk": "Trk10",
+            "trunk_type": "LACP"
+        },
+        {
+            "local_port": "A2",
+            "int_name": "Connected_to_AOSSW01#2-B3",
+            "int_type": "SFP+LR",
+            "trunk": "Trk10",
+            "trunk_type": "LACP"
+        }
+    ],
+    "show interfaces brief": [
+        {
+            "port": "1",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "2",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "3",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "4",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "5",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "6",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "NA",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "7",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "8",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "9",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "10",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "11",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Up",
+            "mode": "1000FDx",
+            "mdi_mode": "MDIX",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "12",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "13",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "14",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "15",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "16",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "17",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "18",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "19",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "20",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "21",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Up",
+            "mode": "1000FDx",
+            "mdi_mode": "MDI",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "22",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "23",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Up",
+            "mode": "1000FDx",
+            "mdi_mode": "MDIX",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "24",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "25",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "NA",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "26",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "27",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "28",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "29",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "30",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "31",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "32",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "33",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "34",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "35",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "36",
+            "type": "100/1000T",
+            "intrusion_alert": "Yes",
+            "enabled": "Yes",
+            "status": "Up",
+            "mode": "1000FDx",
+            "mdi_mode": "MDIX",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "37",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "38",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "39",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "40",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "41",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "42",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "43",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "44",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "45",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "46",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "47",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "48",
+            "type": "100/1000T",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": "1000FDx",
+            "mdi_mode": "Auto",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "A1-Trk10",
+            "type": "SFP+LR",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Up",
+            "mode": "10GigFD",
+            "mdi_mode": "NA",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "A2-Trk10",
+            "type": "SFP+LR",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Up",
+            "mode": "10GigFD",
+            "mdi_mode": "NA",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "A3",
+            "type": "",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": ".",
+            "mdi_mode": "",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "A4",
+            "type": "",
+            "intrusion_alert": "No",
+            "enabled": "Yes",
+            "status": "Down",
+            "mode": ".",
+            "mdi_mode": "",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        }
+    ],
+    "show interface": [
+        {
+            "port": "1",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "2",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "3",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "4",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "5",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "6",
+            "total_bytes": "2,233,223,503",
+            "total_frames": "226,495,212",
+            "errors_rx": "0",
+            "drops_tx": "6528",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "7",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "8",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "9",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "10",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "11",
+            "total_bytes": "1,790,359,030",
+            "total_frames": "538,889,714",
+            "errors_rx": "0",
+            "drops_tx": "220",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "12",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "13",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "14",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "15",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "16",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "17",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "18",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "19",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "20",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "21",
+            "total_bytes": "2,610,324,338",
+            "total_frames": "1,515,032,533",
+            "errors_rx": "1",
+            "drops_tx": "76,232",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "22",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "23",
+            "total_bytes": "845,309,820",
+            "total_frames": "2,050,198,947",
+            "errors_rx": "1",
+            "drops_tx": "18,678",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "24",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "25",
+            "total_bytes": "4,275,666,849",
+            "total_frames": "630,833,453",
+            "errors_rx": "0",
+            "drops_tx": "90,912",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "26",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "27",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "28",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "29",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "30",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "31",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "32",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "33",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "34",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "35",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "36",
+            "total_bytes": "503,125,645",
+            "total_frames": "1,318,865,973",
+            "errors_rx": "0",
+            "drops_tx": "48,891",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "37",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "38",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "39",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "40",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "41",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "42",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "43",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "44",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "45",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "46",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "47",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "48",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "A1-Trk10",
+            "total_bytes": "2,210,497,369",
+            "total_frames": "3,699,070,528",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "A2-Trk10",
+            "total_bytes": "384,214,365",
+            "total_frames": "1,493,555,206",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "A3",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        },
+        {
+            "port": "A4",
+            "total_bytes": "0",
+            "total_frames": "0",
+            "errors_rx": "0",
+            "drops_tx": "0",
+            "flow_ctrl": "off",
+            "bcast_limit": "0"
+        }
+    ],
+    "show interfaces status": [
+        {
+            "port": "1",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "2",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "3",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "4",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "5",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "6",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "7",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "8",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "9",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "10",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "11",
+            "name": "",
+            "status": "Up",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "12",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "13",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "14",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "15",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "16",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "17",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "18",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "19",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "20",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "21",
+            "name": "",
+            "status": "Up",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "22",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "23",
+            "name": "",
+            "status": "Up",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "24",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "25",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "26",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "27",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "28",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "29",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "30",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "31",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "32",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "33",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "34",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "35",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "36",
+            "name": "",
+            "status": "Up",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "37",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "38",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "39",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "40",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "41",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "42",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "43",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "44",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "45",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "46",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "47",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "48",
+            "name": "",
+            "status": "Down",
+            "config_mode": "Auto",
+            "speed": "1000FDx",
+            "type": "100/1000T",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "A1-Trk10",
+            "name": "Connect...",
+            "status": "Up",
+            "config_mode": "Auto",
+            "speed": "10GigFD",
+            "type": "10GbE-GEN",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "A2-Trk10",
+            "name": "Connect...",
+            "status": "Up",
+            "config_mode": "Auto",
+            "speed": "10GigFD",
+            "type": "10GbE-GEN",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "A3",
+            "name": "",
+            "status": "Down",
+            "config_mode": "",
+            "speed": "",
+            "type": "",
+            "tagged": "No",
+            "untagged": "1"
+        },
+        {
+            "port": "A4",
+            "name": "",
+            "status": "Down",
+            "config_mode": "",
+            "speed": "",
+            "type": "",
+            "tagged": "No",
+            "untagged": "1"
+        }
+    ],
+    "show lldp info remote-device detail": [
+        {
+            "local_interface": "11",
+            "neighbor_chassis_type": "mac-address",
+            "chassis_id": "ACMESW10",
+            "port_type": "mac-address",
+            "neighbor_interface": "00 a0 a4 4d ff 83",
+            "neighbor_name": "",
+            "neighbor_description": "",
+            "neighbor_interface_description": "",
+            "vlan_id": "",
+            "capabilities_supported": "",
+            "capabilities": "",
+            "mgmt_address": ""
+        },
+        {
+            "local_interface": "21",
+            "neighbor_chassis_type": "local",
+            "chassis_id": "ACMESW03",
+            "port_type": "mac-address",
+            "neighbor_interface": "84 a9 38 1f 54 34",
+            "neighbor_name": "",
+            "neighbor_description": "",
+            "neighbor_interface_description": "",
+            "vlan_id": "",
+            "capabilities_supported": "",
+            "capabilities": "",
+            "mgmt_address": ""
+        },
+        {
+            "local_interface": "23",
+            "neighbor_chassis_type": "local",
+            "chassis_id": "ACMESW01",
+            "port_type": "mac-address",
+            "neighbor_interface": "90 8d 6e 1f 54 f2",
+            "neighbor_name": "",
+            "neighbor_description": "",
+            "neighbor_interface_description": "",
+            "vlan_id": "",
+            "capabilities_supported": "",
+            "capabilities": "",
+            "mgmt_address": ""
+        },
+        {
+            "local_interface": "A1",
+            "neighbor_chassis_type": "mac-address",
+            "chassis_id": "f860f0-50111f",
+            "port_type": "local",
+            "neighbor_interface": "35",
+            "neighbor_name": "AOSSW01",
+            "neighbor_description": "HP J9851A Switch, revision KB.16.10.0016, ROM KB...",
+            "neighbor_interface_description": "1/B3",
+            "vlan_id": "1",
+            "capabilities_supported": "bridge, router",
+            "capabilities": "bridge",
+            "mgmt_address": "10.248.111.45"
+        },
+        {
+            "local_interface": "A2",
+            "neighbor_chassis_type": "mac-address",
+            "chassis_id": "f860f0-50111f",
+            "port_type": "local",
+            "neighbor_interface": "419",
+            "neighbor_name": "AOSSW01",
+            "neighbor_description": "HP J9851A Switch, revision KB.16.10.0016, ROM KB...",
+            "neighbor_interface_description": "2/B3",
+            "vlan_id": "1",
+            "capabilities_supported": "bridge, router",
+            "capabilities": "bridge",
+            "mgmt_address": "10.248.111.45"
+        }
+    ]
+}

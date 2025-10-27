@@ -1,2 +1,5 @@
-Hostname {{ mgmt_hostname }}
+<group name="systems*">
+Hostname {{ hostname }}
 Mgmt IP {{ mgmt_ip }}
+Device HA State {{ ha_state }}
+</group>
