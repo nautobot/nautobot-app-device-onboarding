@@ -1,18 +1,21 @@
 """Test Jobs."""
 
 import os
+from pathlib import Path
 from unittest.mock import ANY, patch
 
 from django.core.files.base import ContentFile
 from django.test import override_settings
 from fakenos import FakeNOS
 from fakenos.core.host import Host
+from nautobot.apps.choices import InterfaceModeChoices
 from nautobot.apps.jobs import Job as JobClass
 from nautobot.apps.testing import create_job_result_and_run_job
 from nautobot.core.testing import TransactionTestCase
 from nautobot.dcim.models import Device, Interface, Manufacturer, Platform
 from nautobot.extras.choices import JobResultStatusChoices
 from nautobot.extras.models import FileProxy
+from nautobot.ipam.models import VLAN
 
 from nautobot_device_onboarding import jobs
 from nautobot_device_onboarding.tests import utils
@@ -182,10 +185,6 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
 
     databases = ("default", "job_logs")
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
     def setUp(self):  # pylint: disable=invalid-name
         """Initialize test case."""
         # Setup Nautobot Objects
@@ -309,3 +308,117 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
         newly_imported_device = Device.objects.get(name="fake-ios-01")
         self.assertEqual(str(newly_imported_device.primary_ip4), "127.0.0.1/32")
         self.assertEqual(newly_imported_device.serial, "991UCMIHG4UAJ1J010CQG")
+
+    # TODO: This should be using override_settings but nautobot-app-nornir isn't accessing the django settings directly
+    @patch.dict(
+        "nautobot_plugin_nornir.plugins.inventory.nautobot_orm.PLUGIN_CFG",
+        connection_options={"netmiko": {"extras": {"fast_cli": False, "read_timeout_override": 30}, "port": 6222}},
+    )
+    @patch.dict("os.environ", {"DEVICE_USER": "admin", "DEVICE_PASS": "admin"})
+    def test_sync_network_data_with_full_ssh_nxos_trunked_vlans(self):
+        """Test full nxos device sync and network data sync with VLANs."""
+        sync_devices_job_form_inputs = {
+            "debug": False,
+            "connectivity_test": False,
+            "dryrun": False,
+            "csv_file": None,
+            "location": self.testing_objects["location"].pk,
+            "namespace": self.testing_objects["namespace"].pk,
+            "ip_addresses": "localhost",
+            "port": 6222,
+            "timeout": 30,
+            "set_mgmt_only": True,
+            "update_devices_without_primary_ip": True,
+            "device_role": self.testing_objects["device_role"].pk,
+            "device_status": self.testing_objects["status"].pk,
+            "interface_status": self.testing_objects["status"].pk,
+            "ip_address_status": self.testing_objects["status"].pk,
+            "default_prefix_status": self.testing_objects["status"].pk,
+            "secrets_group": self.testing_objects["secrets_group"].pk,
+            "platform": self.testing_objects["platform_3"].pk,
+            "memory_profiling": False,
+        }
+        sync_network_data_job_form_inputs = {
+            "debug": False,
+            "connectivity_test": False,
+            "dryrun": False,
+            "sync_vlans": True,
+            "sync_vrfs": True,
+            "sync_cables": True,
+            "sync_software_version": True,
+            "namespace": self.testing_objects["namespace"].pk,
+            "interface_status": self.testing_objects["status"].pk,
+            "ip_address_status": self.testing_objects["status"].pk,
+            "default_prefix_status": self.testing_objects["status"].pk,
+            "location": None,
+            "device_role": None,
+            "platform": None,
+            "memory_profiling": False,
+        }
+
+        initial_vlans = set(VLAN.objects.values_list("vid", flat=True))
+
+        fakenos_inventory = {
+            "hosts": {
+                "fake-nxos-01": {
+                    "username": "admin",
+                    "password": "admin",
+                    "platform": "nexustest",
+                    "port": 6222,
+                }
+            }
+        }
+
+        # This is hacky, theres clearly a bug in the fakenos library
+        # https://github.com/fakenos/fakenos/issues/19
+        with patch.object(Host, "_check_if_platform_is_supported"):
+            with FakeNOS(
+                inventory=fakenos_inventory,
+                plugins=[str(Path(__file__).parent.joinpath("fakenos/nxos.yaml").resolve())],
+            ):
+                create_job_result_and_run_job(
+                    module="nautobot_device_onboarding.jobs",
+                    name="SSOTSyncDevices",
+                    **sync_devices_job_form_inputs,
+                )
+                sync_network_data_job_form_inputs["devices"] = Device.objects.filter(name="fake-nxos-01")
+                create_job_result_and_run_job(
+                    module="nautobot_device_onboarding.jobs",
+                    name="SSOTSyncNetworkData",
+                    **sync_network_data_job_form_inputs,
+                )
+
+        device_obj = Device.objects.filter(name="fake-nxos-01").first()
+
+        # Ethernet1/60 mode should be tagged with no tagged_vlans -- switchport trunk allowed vlan none
+        eth1_60 = device_obj.interfaces.filter(name="Ethernet1/60").first()
+        self.assertIsNotNone(eth1_60)
+        self.assertEqual(eth1_60.mode, InterfaceModeChoices.MODE_TAGGED)
+        self.assertFalse(eth1_60.tagged_vlans.exists())
+        self.assertEqual(eth1_60.untagged_vlan.vid, 1)
+
+        # Ethernet1/61 mode should be tagged-all  -- switchport trunk allowed vlan all
+        eth1_61 = device_obj.interfaces.filter(name="Ethernet1/61").first()
+        self.assertIsNotNone(eth1_61)
+        self.assertEqual(eth1_61.mode, InterfaceModeChoices.MODE_TAGGED_ALL)
+        self.assertFalse(eth1_61.tagged_vlans.exists())
+        self.assertEqual(eth1_61.untagged_vlan.vid, 1)
+
+        # VLANS 10 and 20 should be created for Ethernet1/62 -- switchport trunk allowed vlan 10,20
+        eth1_62 = device_obj.interfaces.filter(name="Ethernet1/62").first()
+        self.assertIsNotNone(eth1_62)
+        self.assertEqual(eth1_62.mode, InterfaceModeChoices.MODE_TAGGED)
+        self.assertSequenceEqual(eth1_62.tagged_vlans.values_list("vid", flat=True), [10, 20])
+        self.assertEqual(eth1_62.untagged_vlan.vid, 1)
+
+        # VLANS 100-120 should be created for Ethernet1/63 -- switchport trunk allowed vlan 100-120
+        eth1_63 = device_obj.interfaces.filter(name="Ethernet1/63").first()
+        self.assertIsNotNone(eth1_63)
+        self.assertEqual(eth1_63.mode, InterfaceModeChoices.MODE_TAGGED)
+        self.assertSequenceEqual(eth1_63.tagged_vlans.values_list("vid", flat=True), range(100, 121))
+        self.assertEqual(eth1_63.untagged_vlan.vid, 1)
+
+        self.assertEqual(
+            initial_vlans.union({1, 10, 20, *range(100, 121)}),
+            set(VLAN.objects.values_list("vid", flat=True)),
+        )
