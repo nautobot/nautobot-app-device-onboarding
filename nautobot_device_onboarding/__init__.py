@@ -41,7 +41,6 @@ class NautobotDeviceOnboardingConfig(NautobotAppConfig):
         },
         "object_match_strategy": "loose",
     }
-    caching_config = {}
     docs_view_name = "plugins:nautobot_device_onboarding:docs"
     home_view_name = "extras:job_list"  # Jobs only for now. May change in the future.
     searchable_models = []
