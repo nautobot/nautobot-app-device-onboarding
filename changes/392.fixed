@@ -1,1 +1,0 @@
-Fixed a bug when creating VLANs for trunks on cisco_nxos devices.
