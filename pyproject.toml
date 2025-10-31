@@ -47,7 +47,7 @@ django-debug-toolbar = "<6.0.0"
 invoke = "*"
 ipython = "*"
 pylint = "*"
-pylint-django = "*"
+pylint-django = ">=2.5.4"
 pylint-nautobot = ">=0.3.1"
 ruff = "0.5.5"
 yamllint = "*"
@@ -61,6 +61,7 @@ to-json-schema = "*"
 jsonschema = "*"
 djlint = ">=1.36.4,<2.0.0"
 djhtml = ">=3.0.8,<4.0.0"
+tomli = { version = "*", markers = "python_version < '3.11'" }  # tomli is included in the stdlib as of Python 3.11
 
 [tool.poetry.group.docs.dependencies]
 # Render custom markdown for version added/changed/remove notes
@@ -187,6 +188,11 @@ filename = "docs/admin/release_notes/version_X.Y.md"
 template = "development/towncrier_template.j2"
 start_string = "<!-- towncrier release notes start -->"
 issue_format = "[#{issue}](https://github.com/nautobot/nautobot-app-device-onboarding/issues/{issue})"
+
+[[tool.towncrier.type]]
+directory = "breaking"
+name = "Breaking Changes"
+showcontent = true
 
 [[tool.towncrier.type]]
 directory = "security"
