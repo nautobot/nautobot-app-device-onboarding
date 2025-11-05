@@ -7,7 +7,7 @@ This document describes all new features and changes in the release. The format 
 - Added support for Nautobot 3.0.
 - Added support for Python 3.13.
 
-## [v5.0.0a1 (2025-11-04)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v5.0.0a1)
+## [v5.0.0a1 (2025-11-05)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v5.0.0a1)
 
 ### Added
 
