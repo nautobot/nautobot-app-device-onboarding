@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-device-onboarding"
-version = "5.0.0a0"
+version = "5.0.0a1"
 description = "A app for Nautobot to easily onboard new devices."
 authors = ["Network to Code, LLC <info@networktocode.com>"]
 license = "Apache-2.0"
@@ -29,11 +29,11 @@ include = [
 python = ">=3.10,<3.14"
 napalm = ">=4.1.0, <6.0.0"
 zipp = "^3.4.0"
-nautobot = {git = "https://github.com/nautobot/nautobot.git", rev = "next"}
+nautobot = ">=3.0.0a2,<3.0.0rc99"
 # nautobot = "^3.0.0"  # TODO: Uncomment after v3.0.0 is released
-nautobot-ssot = {git = "https://github.com/nautobot/nautobot-app-ssot.git", rev = "next-3.0"}
+nautobot-ssot = ">=4.0.0a1,<4.0.0rc99"
 # nautobot-ssot = "^4.0.0"  # TODO: Uncomment after v4.0.0 is released
-nautobot-plugin-nornir = {git = "https://github.com/nautobot/nautobot-app-nornir.git", rev = "next-3.0"}
+nautobot-plugin-nornir = ">=3.0.0a1,<3.0.0rc99"
 # nautobot-plugin-nornir = "^3.0.0"  # TODO: Uncomment after v3.0.0 is released
 jdiff = ">=1.0.1,<2.0.0"
 ntc-templates = "^7.0.0"
