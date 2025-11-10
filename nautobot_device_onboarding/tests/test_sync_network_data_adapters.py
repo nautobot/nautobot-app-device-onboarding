@@ -3,6 +3,7 @@
 from unittest.mock import MagicMock, patch
 
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 from nautobot.apps.testing import TransactionTestCase
 from nautobot.dcim.models import Cable, Device, Interface, SoftwareVersion
 from nautobot.extras.models import JobResult
@@ -292,10 +293,10 @@ class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
         self.sync_network_data_adapter._cache_primary_ips(  # pylint: disable=protected-access
             device_queryset=self.job.devices_to_load
         )
-        for device in self.job.devices_to_load:
+        for device in self.job.devices_to_load.filter(Q(primary_ip4__isnull=False) | Q(primary_ip6__isnull=False)):
             self.assertEqual(
                 self.sync_network_data_adapter.primary_ips[device.id],
-                device.primary_ip.id if device.primary_ip else None,
+                device.primary_ip.id,
             )
 
     def test_load_param_mac_address(self):
@@ -446,7 +447,8 @@ class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
             device.primary_ip4 = None
             device.validated_save()
         self.sync_network_data_adapter.sync_complete(source=None, diff=None)
-        for device in self.job.devices_to_load.all():
+        # Only test for Devices that initially had Primary IP set
+        for device in self.job.devices_to_load.filter(Q(primary_ip4__isnull=False) | Q(primary_ip6__isnull=False)):
             self.assertEqual(
                 self.sync_network_data_adapter.primary_ips[device.id],
                 device.primary_ip.id if device.primary_ip else None,

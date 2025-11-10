@@ -7,6 +7,7 @@ import diffsync
 from diffsync.enum import DiffSyncModelFlags
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 from django.core.exceptions import ValidationError
 from nautobot.dcim.models import Device, Interface, SoftwareVersion
 from nautobot.ipam.models import VLAN, VRF, IPAddress
@@ -81,8 +82,8 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         of an interface, this cache is used to reset it in sync_complete().
         """
         self.primary_ips = {}
-        for device in device_queryset:
-            self.primary_ips[device.id] = device.primary_ip.id if device.primary_ip else None
+        for device in device_queryset.filter(Q(primary_ip4__isnull=False) | Q(primary_ip6__isnull=False)):
+            self.primary_ips[device.id] = device.primary_ip.id
 
     def load_param_mac_address(self, parameter_name, database_object):
         """Convert interface mac_address to string."""
@@ -398,7 +399,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         for device in self.job.devices_to_load.all():  # refresh queryset after sync is complete
             if not device.primary_ip:
                 ip_address = ""
-                if not self.primary_ips[device.id]:
+                if not self.primary_ips.get(device.id):
                     self.job.logger.info(f"No primary IP Address was previously assigned for Device: {device.name}.")
                     continue
                 try:
