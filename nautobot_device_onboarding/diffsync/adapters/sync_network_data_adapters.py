@@ -7,8 +7,8 @@ import diffsync
 from diffsync.enum import DiffSyncModelFlags
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from nautobot.dcim.models import Device, Interface, SoftwareVersion
 from nautobot.ipam.models import VLAN, VRF, IPAddress
 from nautobot_ssot.contrib import NautobotAdapter
