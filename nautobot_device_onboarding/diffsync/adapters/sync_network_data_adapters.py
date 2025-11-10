@@ -954,6 +954,10 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
             if self.job.debug:
                 self.job.logger.debug(f"Loading Software Versions from {hostname}")
             if device_data["software_version"]:
+                # TODO: This fails if no device exists that matches the serial retrieved from "show version"
+                #       This should:
+                #         - Track the device object from Nautobot since the user already provided it
+                #         - Fail gracefully if the above is not possible
                 device = Device.objects.get(serial=device_data["serial"])
                 try:
                     network_software_version = self.software_version(
