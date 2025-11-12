@@ -61,56 +61,41 @@ def deduplicate_command_list(data):
 
 
 def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables, sync_software_version):
-    """Using merged command mapper info and look up all commands that need to be run."""
+    """Return a deduplicated list of commands to run based on YAML info and sync flags."""
     all_commands = []
+
+    # Define which keys to skip based on sync flags
+    skip_conditions = {
+        "interfaces__tagged_vlans": not sync_vlans,
+        "interfaces__untagged_vlan": not sync_vlans,
+        "interfaces__vrf": not sync_vrfs,
+        "cables": not sync_cables,
+        "software_version": not sync_software_version,
+    }
+
     for key, value in yaml_parsed_info.items():
+        # Handle pre_processor section separately
         if key == "pre_processor":
             for pre_processor, v in value.items():
                 if not sync_vlans and pre_processor == "vlan_map":
                     continue
-                current_root_key = v.get("commands")
-                if isinstance(current_root_key, list):
-                    # Means their is any "nested" structures. e.g multiple commands
-                    for command in v["commands"]:
-                        all_commands.append(command)
-                else:
-                    if isinstance(current_root_key, dict):
-                        all_commands.append(current_root_key)
-        else:
-            # Deduplicate commands + parser key
-            current_root_key = value.get("commands")
-            if isinstance(current_root_key, list):
-                # Means there is a "nested" structures. e.g. multiple commands
-                for command in value["commands"]:
-                    # If syncing vlans isn't in scope don't run the unneeded commands.
-                    if not sync_vlans and key in ["interfaces__tagged_vlans", "interfaces__untagged_vlan"]:
-                        continue
-                    # If syncing vrfs isn't in scope remove the unneeded commands.
-                    if not sync_vrfs and key == "interfaces__vrf":
-                        continue
-                    # If syncing cables isn't in scope remove the unneeded commands.
-                    if not sync_cables and key == "cables":
-                        continue
-                    # If syncing software_versions isn't in scope remove the unneeded commands.
-                    if not sync_software_version and key == "software_version":
-                        continue
-                    all_commands.append(command)
-            else:
-                if isinstance(current_root_key, dict):
-                    # Means there isn't a "nested" structures. e.g. 1 command
-                    # If syncing vlans isn't in scope don't run the unneeded commands.
-                    if not sync_vlans and key in ["interfaces__tagged_vlans", "interfaces__untagged_vlan"]:
-                        continue
-                    # If syncing vrfs isn't in scope remove the unneeded commands.
-                    if not sync_vrfs and key == "interfaces__vrf":
-                        continue
-                    # If syncing cables isn't in scope remove the unneeded commands.
-                    if not sync_cables and key == "cables":
-                        continue
-                    # If syncing software_versions isn't in scope remove the unneeded commands.
-                    if not sync_software_version and key == "software_version":
-                        continue
-                    all_commands.append(current_root_key)
+                commands = v.get("commands", [])
+                if isinstance(commands, dict):
+                    all_commands.append(commands)
+                elif isinstance(commands, list):
+                    all_commands.extend(commands)
+            continue  # move to next key
+
+        # Skip if this key shouldn't be synced
+        if skip_conditions.get(key, False):
+            continue
+
+        commands = value.get("commands", [])
+        if isinstance(commands, dict):
+            all_commands.append(commands)
+        elif isinstance(commands, list):
+            all_commands.extend(commands)
+
     return deduplicate_command_list(all_commands)
 
 
