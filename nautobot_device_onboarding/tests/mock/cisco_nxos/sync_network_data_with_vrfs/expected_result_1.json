@@ -228,7 +228,7 @@
             "vrf": {}
         },
         "Ethernet1/25": {
-            "802.1Q_mode": "tagged",
+            "802.1Q_mode": "tagged-all",
             "description": "a description",
             "ip_addresses": [],
             "lag": "",
@@ -239,7 +239,7 @@
             "vrf": {}
         },
         "Ethernet1/26": {
-            "802.1Q_mode": "tagged",
+            "802.1Q_mode": "tagged-all",
             "description": "a description",
             "ip_addresses": [],
             "lag": "",
@@ -250,7 +250,7 @@
             "vrf": {}
         },
         "Ethernet1/27": {
-            "802.1Q_mode": "tagged",
+            "802.1Q_mode": "tagged-all",
             "description": "a description",
             "ip_addresses": [],
             "lag": "",

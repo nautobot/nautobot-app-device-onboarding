@@ -85,10 +85,10 @@ sync_network_data:
         post_processor: "{{ obj[0] | interface_status_to_bool }}"
   interfaces__802.1Q_mode:
     commands:
-      - command: "show interface"
+      - command: "show interface switchport"
         parser: "textfsm"
-        jpath: "[?interface=='{{ current_key }}'].mode"
-        post_processor: "{% if obj | length > 0 %}{{ obj[0] | port_mode_to_nautobot }}{% else %}{{ obj }}{% endif %}"
+        jpath: "[?interface=='{{ current_key }}'].{mode: mode, trunking_vlans: trunking_vlans}"
+        post_processor: "{{ obj | nxos_switchport_mode_to_nautobot_interface_mode }}"
         iterable_type: "str"
   interfaces__lag:
     commands:
