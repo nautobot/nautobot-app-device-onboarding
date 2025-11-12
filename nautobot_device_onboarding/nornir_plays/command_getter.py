@@ -60,26 +60,18 @@ def deduplicate_command_list(data):
     return unique_list
 
 
-def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables, sync_software_version):
+def _get_commands_to_run(yaml_parsed_info, skip_list=None):
     """Return a deduplicated list of commands to run based on YAML info and sync flags."""
     all_commands = []
-
-    # Define which keys to skip based on sync flags
-    skip_conditions = {
-        "interfaces__tagged_vlans": not sync_vlans,
-        "interfaces__untagged_vlan": not sync_vlans,
-        "interfaces__vrf": not sync_vrfs,
-        "cables": not sync_cables,
-        "software_version": not sync_software_version,
-    }
 
     for key, value in yaml_parsed_info.items():
         # Handle pre_processor section separately
         if key == "pre_processor":
-            for pre_processor, v in value.items():
-                if not sync_vlans and pre_processor == "vlan_map":
+            for pre_processor_name, pre_processor_value in value.items():
+                # Skip if this key shouldn't be synced
+                if skip_list and (pre_processor_name in skip_list):
                     continue
-                commands = v.get("commands", [])
+                commands = pre_processor_value.get("commands", [])
                 if isinstance(commands, dict):
                     all_commands.append(commands)
                 elif isinstance(commands, list):
@@ -87,7 +79,7 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables, s
             continue  # move to next key
 
         # Skip if this key shouldn't be synced
-        if skip_conditions.get(key, False):
+        if skip_list and (key in skip_list):
             continue
 
         commands = value.get("commands", [])
@@ -99,7 +91,12 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables, s
     return deduplicate_command_list(all_commands)
 
 
-def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_getter_job: str, logger, nautobot_job):
+def netmiko_send_commands(task: Task,
+                          command_getter_yaml_data: Dict,
+                          command_getter_job: str,
+                          logger,
+                          nautobot_job
+                          ):
     """Run commands specified in PLATFORM_COMMAND_MAP."""
     if not task.host.platform:
         return Result(host=task.host, result=f"{task.host.name} has no platform set.", failed=True)
@@ -115,13 +112,24 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                 host=task.host, result=f"{task.host.name} failed connectivity check via tcp_ping.", failed=True
             )
     task.host.data["platform_parsing_info"] = command_getter_yaml_data[task.host.platform]
+
+    skip_conditions = {
+        "interfaces__tagged_vlans": not sync_vlans,
+        "vlan_map": not sync_vlans,
+        "interfaces__untagged_vlan": not sync_vlans,
+        "interfaces__vrf": not sync_vrfs,
+        "cables": not sync_cables,
+        "software_version": not sync_software_version,
+    }
+
     commands = _get_commands_to_run(
         command_getter_yaml_data[task.host.platform][command_getter_job],
-        getattr(nautobot_job, "sync_vlans", False),
-        getattr(nautobot_job, "sync_vrfs", False),
-        getattr(nautobot_job, "sync_cables", False),
-        getattr(nautobot_job, "sync_software_version", False),
+        # getattr(nautobot_job, "sync_vlans", False),
+        # getattr(nautobot_job, "sync_vrfs", False),
+        # getattr(nautobot_job, "sync_cables", False),
+        # getattr(nautobot_job, "sync_software_version", False),
     )
+
     if (
         getattr(nautobot_job, "sync_cables", False)
         and "cables" not in command_getter_yaml_data[task.host.platform][command_getter_job].keys()
