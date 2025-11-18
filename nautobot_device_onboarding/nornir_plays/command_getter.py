@@ -33,6 +33,8 @@ from nautobot_device_onboarding.nornir_plays.transform import (
     load_files_with_precedence,
 )
 from nautobot_device_onboarding.utils.helper import check_for_required_file, format_log_message
+from nautobot_device_onboarding.nornir_plays.formatter import perform_data_extraction
+from jsonschema import ValidationError, validate
 
 PARSER_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "parsers"))
 
@@ -91,9 +93,10 @@ def _get_commands_to_run(yaml_parsed_info, skip_list=None):
     return deduplicate_command_list(all_commands)
 
 
-def netmiko_send_commands(
+def get_device_facts(  # legacy `netmiko_send_commands`
     task: Task,
     command_getter_yaml_data: Dict,
+    command_getter_schema,
     command_getter_job: str,
     logger,
     nautobot_job,
@@ -127,14 +130,52 @@ def netmiko_send_commands(
     logger.debug(f"Commands to run: {[cmd['command'] for cmd in commands]}")
 
     # ---- 3. Command Execution & Parsing -------------------------------------
+    host_facts = {}
+
     for idx, command in enumerate(commands):
+        command_name = command["command"]
         try:
-            current_result = _run_command(task, command)
-            _handle_command_result(task, idx, command, current_result, nautobot_job, logger)
-        except NornirSubTaskError as e:
+            command_result = task.run(
+                task=netmiko_send_command,
+                name=command_name,
+                command_string=command_name,
+                read_timeout=60,
+            )
+
+        except NornirSubTaskError as e:  # proceed if `netmiko_send_command` exception
+            # TODO(mzb): mark host as failed and skip
             return _handle_subtask_error(task, idx, e)
 
-    return Result(host=task.host, result="Commands executed successfully.", failed=False)
+        else:  # proceed if no exception
+            parsed_result = parse_command_result(
+                network_driver=task.host.platform,
+                command=command_name,
+                raw_output=command_result.result,
+                parser_type=command.get("parser"),
+                logger=logger,
+            )
+
+            formatted_result = perform_data_extraction(
+                task.host,
+                command_getter_yaml_data[task.host.platform][command_getter_job],
+                parsed_result,
+                logger,
+                skip_list=command_exclusions,
+            )
+
+            host_facts[command_name] = formatted_result
+
+    # ---- 4. Command Validation  ----------------------------------------------
+    try:
+        validate(host_facts, command_getter_schema)
+    except ValidationError as err:
+        logger.debug(f"Schema validation failed for {task.host.name}. Error: {err}.")
+        return Result(host=task.host, result="Schema validation failed.", failed=True)
+
+    else:
+        logger.debug(f"Facts getter collected, parsed and formatted successfully: {task.host.name} {host_facts}")
+
+    return Result(host=task.host, result=host_facts, failed=False)
 
 
 # -----------------------------------------------------------------------------
@@ -166,77 +207,69 @@ def _check_connectivity(task):
     return tcp_ping(task.host.hostname, task.host.port)
 
 
-def _run_command(task, command):
-    """Execute a single Netmiko command."""
-    return task.run(
-        task=netmiko_send_command,
-        name=command["command"],
-        command_string=command["command"],
-        read_timeout=60,
-    )
-
-
-def _handle_command_result(task, idx, command, current_result, nautobot_job, logger):
+def parse_command_result(network_driver, command, raw_output, parser_type, logger):
     """Parse and store results based on parser type."""
-    raw_output = current_result.result
-    parser_type = command.get("parser")
 
-    # Debug output
-    if nautobot_job.debug:
-        log_message = format_log_message(pprint.pformat(raw_output))
-        logger.debug(f"Result of '{command['command']}' command:<br><br>{log_message}")
+    # # Debug output
+    # if nautobot_job.debug:
+    #     log_message = format_log_message(pprint.pformat(raw_output))
+    #     logger.debug(f"Result of '{command['command']}' command:<br><br>{log_message}")
+
+    # TODO(mzb): Implement conditional formatter
+    logger.debug(f"Result of '{command}' command:<br><br>{raw_output}")
 
     # Handle invalid input gracefully
+    # TODO(mzb): This probably should fail tasks execution or not ? Or just fail via schema check?
     if isinstance(raw_output, str) and "Invalid input detected" in raw_output:
-        task.results[idx].result = []
-        task.results[idx].failed = False
-        return
+        return []
 
     if parser_type in SUPPORTED_COMMAND_PARSERS:
-        parsed = _parse_command_output(task, command, raw_output, parser_type, nautobot_job, logger)
-        task.results[idx].result = parsed
-        task.results[idx].failed = False
+        parsed = _parse_command_output(network_driver, command, raw_output, parser_type, logger)
     else:
-        task.results[idx].result = _handle_raw_or_none(raw_output, parser_type)
-        task.results[idx].failed = False
+        parsed = _handle_raw_or_none(raw_output, parser_type)
+
+    return parsed
 
 
-def _parse_command_output(task, command, raw_output, parser_type, nautobot_job, logger):
+def _parse_command_output(network_driver, command, raw_output, parser_type, logger):
     """Dispatch to the appropriate parser."""
     try:
         if parser_type == "textfsm":
-            return _parse_textfsm(task, command, raw_output, nautobot_job, logger)
+            return _parse_textfsm(network_driver, command, raw_output, logger)
         elif parser_type == "ttp":
-            return _parse_ttp(task, command, raw_output)
+            return _parse_ttp(network_driver, command, raw_output)
     except Exception as e:
-        logger.warning(f"Parsing failed for {command['command']}: {e}")
+        logger.warning(f"Parsing failed for {command}: {e}")
         return []
     return []
 
 
-def _parse_textfsm(task, command, data, nautobot_job, logger):
+def _parse_textfsm(network_driver, command, data, logger):
     git_template_dir = get_git_repo_parser_path("textfsm")
     if git_template_dir and not check_for_required_file(git_template_dir, "index"):
         logger.debug(f"Missing index file in {git_template_dir}, falling back to defaults.")
         git_template_dir = None
 
     parsed_output = parse_output(
-        platform=get_all_network_driver_mappings()[task.host.platform]["ntc_templates"],
+        platform=get_all_network_driver_mappings()[network_driver]["ntc_templates"],
         template_dir=git_template_dir,
-        command=command["command"],
+        command=command,
         data=data,
         try_fallback=bool(git_template_dir),
     )
 
-    if nautobot_job.debug:
-        logger.debug(format_log_message(pprint.pformat(parsed_output)))
+    # if nautobot_job.debug:
+    #     logger.debug(format_log_message(pprint.pformat(parsed_output)))
+
+    # TODO(mzb): Implement conditional log formatter
+    logger.debug(parsed_output)
 
     return parsed_output
 
 
-def _parse_ttp(task, command, data):
+def _parse_ttp(network_driver, command, data):
     ttp_template_files = load_files_with_precedence(f"{PARSER_DIR}/ttp", "ttp")
-    template_name = f"{task.host.platform}_{command['command'].replace(' ', '_')}.ttp"
+    template_name = f"{network_driver}_{command.replace(' ', '_')}.ttp"
     parser = ttp(data=data, template=ttp_template_files[template_name])
     parser.parse()
     return json.loads(parser.result(format="json")[0])
@@ -338,13 +371,15 @@ def sync_devices_command_getter(job, log_level):
                 nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
 
             nr_with_processors.run(
-                task=netmiko_send_commands,
+                task=get_device_facts,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
                 command_getter_job="sync_devices",
                 logger=logger,
                 nautobot_job=job,
                 # command_getter_yaml_exclusions=command_exclusions,
             )
+
+
     except Exception as err:  # pylint: disable=broad-exception-caught
         try:
             if job.debug:
@@ -407,7 +442,7 @@ def sync_network_data_command_getter(job, log_level):
 
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, job)])
             nr_with_processors.run(
-                task=netmiko_send_commands,
+                task=get_device_facts,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
                 command_getter_job="sync_network_data",
                 logger=logger,

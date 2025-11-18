@@ -54,7 +54,7 @@ from nautobot_device_onboarding.exceptions import OnboardException
 from nautobot_device_onboarding.netdev_keeper import NetdevKeeper
 from nautobot_device_onboarding.nornir_plays.command_getter import (
     _parse_credentials,
-    netmiko_send_commands,
+    get_device_facts,
 )
 from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInventory
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
@@ -794,15 +794,17 @@ class DeviceOnboardingTroubleshootingJob(Job):
                     kwargs.update({"sync_cables": True})
                     kwargs.update({"sync_software_version": True})
                     nr_with_processors.run(
-                        task=netmiko_send_commands,
+                        task=get_device_facts,
                         command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],
+                        command_getter_schema=None,  # TODO(mzb): put schema here
                         command_getter_job="sync_devices",
                         logger=logger,
                         **kwargs,
                     )
                     nr_with_processors.run(
-                        task=netmiko_send_commands,
+                        task=get_device_facts,
                         command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],
+                        command_getter_schema=None,  # TODO(mzb): put schema here
                         command_getter_job="sync_network_data",
                         logger=logger,
                         **kwargs,
@@ -814,7 +816,7 @@ class DeviceOnboardingTroubleshootingJob(Job):
                         kwargs.update({"sync_cables": True})
                         kwargs.update({"sync_software_version": True})
                     nr_with_processors.run(
-                        task=netmiko_send_commands,
+                        task=get_device_facts,
                         command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],
                         command_getter_job=kwargs["ssot_job_type"],
                         logger=logger,

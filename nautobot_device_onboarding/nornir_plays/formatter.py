@@ -11,14 +11,14 @@ from jdiff import extract_data_from_json
 from jinja2.sandbox import SandboxedEnvironment
 
 
-def setup_logger(logger_name, debug_on):
-    """Creates a logger for the ETL process."""
-    logger = logging.getLogger(logger_name)
-    if debug_on:
-        logger.setLevel(logging.DEBUG)
-    else:
-        logger.setLevel(logging.INFO)
-    return logger
+# def setup_logger(logger_name, debug_on):
+#     """Creates a logger for the ETL process."""
+#     logger = logging.getLogger(logger_name)
+#     if debug_on:
+#         logger.setLevel(logging.DEBUG)
+#     else:
+#         logger.setLevel(logging.INFO)
+#     return logger
 
 
 def get_django_env():
@@ -81,9 +81,9 @@ def normalize_processed_data(processed_data, iterable_type):
     return post_processed_data
 
 
-def extract_and_post_process(parsed_command_output, yaml_command_element, j2_data_context, iter_type, job_debug):
+def extract_and_post_process(parsed_command_output, yaml_command_element, j2_data_context, iter_type, logger):
     """Helper to extract and apply post_processing on a single element."""
-    logger = logger = setup_logger("DEVICE_ONBOARDING_ETL_LOGGER", job_debug)
+    # logger = logger = setup_logger("DEVICE_ONBOARDING_ETL_LOGGER", job_debug)
     # if parsed_command_output is an empty data structure, no need to go through all the processing.
     if not parsed_command_output:
         return parsed_command_output, normalize_processed_data(parsed_command_output, iter_type)
@@ -121,45 +121,40 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
     return pre_processed_extracted, post_processed_data
 
 
-def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_debug):
+def perform_data_extraction(host, command_info_dict, command_outputs_dict, logger, skip_list=None):
     """Extract, process data."""
     result_dict = {}
-    sync_vlans = host.defaults.data.get("sync_vlans", False)
-    sync_vrfs = host.defaults.data.get("sync_vrfs", False)
-    sync_cables = host.defaults.data.get("sync_cables", False)
-    sync_software_version = host.defaults.data.get("sync_software_version", False)
+
     get_context_from_pre_processor = {}
-    if command_info_dict.get("pre_processor"):
-        for pre_processor_name, field_data in command_info_dict["pre_processor"].items():
-            if pre_processor_name == "vlan_map" and not sync_vlans:
-                continue
-            if isinstance(field_data["commands"], dict):
-                # only one command is specified as a dict force it to a list.
-                loop_commands = [field_data["commands"]]
-            else:
-                loop_commands = field_data["commands"]
-            for show_command_dict in loop_commands:
-                final_iterable_type = show_command_dict.get("iterable_type")
-                _, current_field_post = extract_and_post_process(
-                    command_outputs_dict[show_command_dict["command"]],
-                    show_command_dict,
-                    {"obj": host.name, "original_host": host.name},
-                    final_iterable_type,
-                    job_debug,
-                )
-                get_context_from_pre_processor[pre_processor_name] = current_field_post
+
+    for pre_processor_name, field_data in command_info_dict.get("pre_processor", {}).items():
+        if skip_list and (pre_processor_name in skip_list):
+            continue
+
+        if isinstance(field_data["commands"], dict):
+            # only one command is specified as a dict force it to a list.
+            loop_commands = [field_data["commands"]]
+        else:
+            loop_commands = field_data["commands"]
+        for show_command_dict in loop_commands:
+            final_iterable_type = show_command_dict.get("iterable_type")
+            _, current_field_post = extract_and_post_process(
+                command_outputs_dict[show_command_dict["command"]],
+                show_command_dict,
+                {"obj": host.name, "original_host": host.name},
+                final_iterable_type,
+                logger,
+            )
+            get_context_from_pre_processor[pre_processor_name] = current_field_post
+
     for ssot_field, field_data in command_info_dict.items():
-        if not sync_vlans and ssot_field in ["interfaces__tagged_vlans", "interfaces__untagged_vlan"]:
+        # Do not process a pre_processor
+        if ssot_field == "pre_processor":  # Skip fast
             continue
-        # If syncing vrfs isn't inscope remove the unneeded commands.
-        if not sync_vrfs and ssot_field == "interfaces__vrf":
+        # Skip if this key shouldn't be synced
+        if skip_list and (ssot_field in skip_list):
             continue
-        if not sync_cables and ssot_field == "cables":
-            continue
-        if not sync_software_version and ssot_field == "software_version":
-            continue
-        if ssot_field == "pre_processor":
-            continue
+
         if isinstance(field_data["commands"], dict):
             # only one command is specified as a dict force it to a list.
             loop_commands = [field_data["commands"]]
@@ -175,7 +170,7 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
                     show_command_dict,
                     merged_context,
                     final_iterable_type,
-                    job_debug,
+                    logger,
                 )
                 result_dict[ssot_field] = root_key_post
             else:
@@ -196,7 +191,7 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
                             show_command_dict,
                             merged_context,
                             final_iterable_type,
-                            job_debug,
+                            logger,
                         )
                         result_dict[field_nesting[0]][current_key][field_nesting[1]] = current_key_post
                 else:
@@ -207,7 +202,7 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
                         show_command_dict,
                         merged_context,
                         final_iterable_type,
-                        job_debug,
+                        logger,
                     )
                     result_dict[ssot_field] = current_field_post
         # if command_info_dict.get("validator_pattern"):
@@ -221,17 +216,3 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
         #             result_dict[dict_field] = extracted_processed
         #             break
     return result_dict
-
-
-def extract_show_data(host, command_outputs, command_getter_type, job_debug):
-    """Take a result of show command and extra specific needed data.
-
-    Args:
-        host (host): host from task
-        command_outputs (dict): dictionary of results from command getter.
-        command_getter_type (str): to know what dict to pull, sync_devices or sync_network_data.
-        job_debug (logging.INFO or logging.DEBUG): to know if debug button was checked.
-    """
-    command_getter_iterable = host.data["platform_parsing_info"][command_getter_type]
-    all_results_extracted = perform_data_extraction(host, command_getter_iterable, command_outputs, job_debug)
-    return all_results_extracted
