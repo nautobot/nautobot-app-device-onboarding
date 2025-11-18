@@ -35,6 +35,7 @@ from nautobot_device_onboarding.nornir_plays.transform import (
 from nautobot_device_onboarding.utils.helper import check_for_required_file, format_log_message
 from nautobot_device_onboarding.nornir_plays.formatter import perform_data_extraction
 from jsonschema import ValidationError, validate
+from nautobot_device_onboarding.nornir_plays.schemas import NETWORK_DEVICES_SCHEMA, NETWORK_DATA_SCHEMA
 
 PARSER_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "parsers"))
 
@@ -97,19 +98,17 @@ def get_device_facts(  # legacy `netmiko_send_commands`
     task: Task,
     command_getter_yaml_data: Dict,
     command_getter_schema,
-    command_getter_job: str,
+    command_getter_section_name: str,  # legacy `job name`: sync_device, sync_network etc.
     logger,
-    nautobot_job,
     **kwargs,
 ):
     """Run platform-specific commands with optional parsing and logging."""
 
-    command_exclusions = kwargs.get("command_exclusions", [])
+    command_exclusions = kwargs.get("command_exclusions")
     connectivity_test = kwargs.get("connectivity_test", False)
-    # sync_cables = kwargs.get("sync_cables", False)
 
     # ---- 1. Validation -------------------------------------------------------
-    validation_result = _validate_task(task, command_getter_yaml_data, command_getter_job)
+    validation_result = _validate_task(task, command_getter_yaml_data, command_getter_section_name)
     if validation_result:
         return validation_result
 
@@ -124,7 +123,7 @@ def get_device_facts(  # legacy `netmiko_send_commands`
 
     # ---- 2. Command Preparation ---------------------------------------------
     commands = _get_commands_to_run(
-        yaml_parsed_info=command_getter_yaml_data[task.host.platform][command_getter_job],
+        yaml_parsed_info=command_getter_yaml_data[task.host.platform][command_getter_section_name],
         skip_list=command_exclusions,
     )
     logger.debug(f"Commands to run: {[cmd['command'] for cmd in commands]}")
@@ -141,39 +140,35 @@ def get_device_facts(  # legacy `netmiko_send_commands`
                 command_string=command_name,
                 read_timeout=60,
             )
+        except NornirSubTaskError as exc:  # proceed if `netmiko_send_command` exception
+            return _handle_netmiko_error(task=task, exception=exc)
 
-        except NornirSubTaskError as e:  # proceed if `netmiko_send_command` exception
-            # TODO(mzb): mark host as failed and skip
-            return _handle_subtask_error(task, idx, e)
+        parsed_result = parse_command_result(
+            network_driver=task.host.platform,
+            command=command_name,
+            raw_output=command_result.result,
+            parser_type=command.get("parser"),
+            logger=logger,
+        )
 
-        else:  # proceed if no exception
-            parsed_result = parse_command_result(
-                network_driver=task.host.platform,
-                command=command_name,
-                raw_output=command_result.result,
-                parser_type=command.get("parser"),
-                logger=logger,
-            )
+        formatted_result = perform_data_extraction(
+            task.host,
+            command_getter_yaml_data[task.host.platform][command_getter_section_name],
+            parsed_result,
+            logger,
+            skip_list=command_exclusions,
+        )
 
-            formatted_result = perform_data_extraction(
-                task.host,
-                command_getter_yaml_data[task.host.platform][command_getter_job],
-                parsed_result,
-                logger,
-                skip_list=command_exclusions,
-            )
+        host_facts[command_name] = formatted_result
 
-            host_facts[command_name] = formatted_result
-
-    # ---- 4. Command Validation  ----------------------------------------------
+    # ---- 4. Schema Validation  -----------------------------------------------
     try:
         validate(host_facts, command_getter_schema)
     except ValidationError as err:
         logger.debug(f"Schema validation failed for {task.host.name}. Error: {err}.")
         return Result(host=task.host, result="Schema validation failed.", failed=True)
 
-    else:
-        logger.debug(f"Facts getter collected, parsed and formatted successfully: {task.host.name} {host_facts}")
+    logger.debug(f"Facts getter collected, parsed and formatted successfully: {task.host.name} {host_facts}")
 
     return Result(host=task.host, result=host_facts, failed=False)
 
@@ -286,19 +281,18 @@ def _handle_raw_or_none(raw_output, parser_type):
     return []
 
 
-def _handle_subtask_error(task, idx, exception):
+def _handle_netmiko_error(task, exception):
     """Handle connection/authentication errors gracefully."""
-    exc_type = type(task.results[idx].exception).__name__
+    from netmiko.exceptions import NetmikoTimeoutException, NetmikoAuthenticationException
 
-    if exc_type == "NetmikoAuthenticationException":
-        return Result(host=task.host, result=f"{task.host.name} failed authentication.", failed=True)
-    if exc_type == "NetmikoTimeoutException":
-        return Result(host=task.host, result=f"{task.host.name} SSH timeout occurred.", failed=True)
+    if isinstance(exception, NetmikoAuthenticationException):
+        fail_message = f"Authentication failed for {task.host.name}"
+    elif isinstance(exception, NetmikoTimeoutException):
+        fail_message = f"Timeout failure for {task.host.name}"
+    else:
+        fail_message = f"Task failed due to {exception}"
 
-    task.results[idx].result = []
-    task.results[idx].failed = False
-
-    return None
+    return Result(host=task.host, result=fail_message, failed=True)
 
 
 @lru_cache(maxsize=None)
@@ -347,7 +341,7 @@ def sync_devices_command_getter(job, log_level):
                 "plugin": "empty-inventory",
             },
         ) as nornir_obj:
-            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, job)])
+            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger)])
             for ip_address, values in job.ip_address_inventory.items():
                 # parse secrets from secrets groups provided via csv
                 secrets_group = values["secrets_group"]
@@ -373,10 +367,10 @@ def sync_devices_command_getter(job, log_level):
             nr_with_processors.run(
                 task=get_device_facts,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
-                command_getter_job="sync_devices",
+                command_getter_section_name="sync_devices",
+                command_getter_schema=NETWORK_DEVICES_SCHEMA,
                 logger=logger,
-                nautobot_job=job,
-                # command_getter_yaml_exclusions=command_exclusions,
+                command_exclusions=None,
             )
 
 
@@ -412,44 +406,30 @@ def sync_network_data_command_getter(job, log_level):
                     "defaults": {
                         "platform_parsing_info": add_platform_parsing_info(),
                         "network_driver_mappings": list(get_all_network_driver_mappings().keys()),
-                        # "sync_vlans": job.sync_vlans,
-                        # "sync_vrfs": job.sync_vrfs,
-                        # "sync_cables": job.sync_cables,
-                        # "sync_software_version": job.sync_software_version,
                     },
                 },
             },
         ) as nornir_obj:
 
             command_exclusions = {
+                "cables": not job.sync_cables,
                 "interfaces__tagged_vlans": not job.sync_vlans,
-                "vlan_map": not job.sync_vlans,
                 "interfaces__untagged_vlan": not job.sync_vlans,
                 "interfaces__vrf": not job.sync_vrfs,
-                "cables": not job.sync_cables,
                 "software_version": not job.sync_software_version,
+                "vlan_map": not job.sync_vlans,
             }
             exclusions = [k for k, v in command_exclusions.items() if v]
 
-            # commands = _get_commands_to_run(
-            #     command_getter_yaml_data[task.host.platform][command_getter_job],
-            #     # getattr(nautobot_job, "sync_vlans", False),
-            #     # getattr(nautobot_job, "sync_vrfs", False),
-            #     # getattr(nautobot_job, "sync_cables", False),
-            #     # getattr(nautobot_job, "sync_software_version", False),
-            # )
-
-
-            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, job)])
+            nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger)])
             nr_with_processors.run(
                 task=get_device_facts,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
-                command_getter_job="sync_network_data",
+                command_getter_section_name="sync_network_data",
+                command_getter_schema=NETWORK_DATA_SCHEMA,
                 logger=logger,
                 command_exclusions=exclusions,
                 connectivity_test=job.connectivity_test,
-                sync_cables=job.sync_cables,
-                # nautobot_job=job,
             )
     except Exception:  # pylint: disable=broad-exception-caught
         logger.info(f"Error During Sync Network Data Command Getter: {traceback.format_exc()}")

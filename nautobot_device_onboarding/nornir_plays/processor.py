@@ -11,20 +11,9 @@ from nornir_nautobot.plugins.processors import BaseLoggingProcessor
 class CommandGetterProcessor(BaseLoggingProcessor):
     """Processor class for Command Getter Nornir Tasks."""
 
-    def __init__(self, logger, command_outputs, job):
+    def __init__(self, logger):
         """Set logging facility."""
         self.logger = logger
-        self.data: Dict = command_outputs
-        self.job = job
-
-    def task_instance_started(self, task: Task, host: Host) -> None:
-        """Processor for logging and data processing on task start."""
-        if not self.data.get(host.name):
-            self.data[host.name] = {
-                "platform": host.platform,
-                "manufacturer": host.platform.split("_")[0].title() if host.platform else "PLACEHOLDER",
-                "network_driver": host.platform,
-            }
 
     def task_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Processor for logging and data processing on task completed.
@@ -48,11 +37,6 @@ class CommandGetterProcessor(BaseLoggingProcessor):
                 f"Netmiko Send Commands failed on {host.name} with result: {result[0].result}",
                 extra={"object": host.name},
             )
-            if "has no platform set" in result[0].result:
-                del self.data[host.name]
-                return
-            else:
-                self.data[host.name].update({"failed": True})
 
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Processor for logging and data processing on subtask completed."""

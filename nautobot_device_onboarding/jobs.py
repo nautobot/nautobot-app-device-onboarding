@@ -793,11 +793,12 @@ class DeviceOnboardingTroubleshootingJob(Job):
                     kwargs.update({"sync_vlans": True})
                     kwargs.update({"sync_cables": True})
                     kwargs.update({"sync_software_version": True})
+
                     nr_with_processors.run(
                         task=get_device_facts,
                         command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],
                         command_getter_schema=None,  # TODO(mzb): put schema here
-                        command_getter_job="sync_devices",
+                        command_getter_section_name="sync_devices",
                         logger=logger,
                         **kwargs,
                     )
@@ -805,7 +806,7 @@ class DeviceOnboardingTroubleshootingJob(Job):
                         task=get_device_facts,
                         command_getter_yaml_data=nornir_obj.inventory.defaults.data["platform_parsing_info"],
                         command_getter_schema=None,  # TODO(mzb): put schema here
-                        command_getter_job="sync_network_data",
+                        command_getter_section_name="sync_network_data",
                         logger=logger,
                         **kwargs,
                     )
