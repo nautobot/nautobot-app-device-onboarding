@@ -155,7 +155,7 @@ def get_device_facts(  # legacy `netmiko_send_commands`
             task.host,
             command_getter_yaml_data[task.host.platform][command_getter_section_name],
             parsed_result,
-            logger,
+            logger=logger,
             skip_list=command_exclusions,
         )
 
@@ -168,7 +168,7 @@ def get_device_facts(  # legacy `netmiko_send_commands`
         logger.debug(f"Schema validation failed for {task.host.name}. Error: {err}.")
         return Result(host=task.host, result="Schema validation failed.", failed=True)
 
-    logger.debug(f"Facts getter collected, parsed and formatted successfully: {task.host.name} {host_facts}")
+    logger.debug(f"Facts getter completed - commands collected, parsed and formatted successfully: {task.host.name} {host_facts}")
 
     return Result(host=task.host, result=host_facts, failed=False)
 
@@ -364,7 +364,7 @@ def sync_devices_command_getter(job, log_level):
                         continue
                 nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
 
-            nr_with_processors.run(
+            result = nr_with_processors.run(
                 task=get_device_facts,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
                 command_getter_section_name="sync_devices",
@@ -372,7 +372,9 @@ def sync_devices_command_getter(job, log_level):
                 logger=logger,
                 command_exclusions=None,
             )
-
+            print(result)
+            for host_str, results in result.items():
+                compiled_results[host_str] = results.result[0]
 
     except Exception as err:  # pylint: disable=broad-exception-caught
         try:
@@ -422,7 +424,7 @@ def sync_network_data_command_getter(job, log_level):
             exclusions = [k for k, v in command_exclusions.items() if v]
 
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger)])
-            nr_with_processors.run(
+            result = nr_with_processors.run(
                 task=get_device_facts,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
                 command_getter_section_name="sync_network_data",
@@ -431,6 +433,9 @@ def sync_network_data_command_getter(job, log_level):
                 command_exclusions=exclusions,
                 connectivity_test=job.connectivity_test,
             )
+            for host_str, results in result.items():
+                compiled_results[host_str] = results.result[0]
+
     except Exception:  # pylint: disable=broad-exception-caught
         logger.info(f"Error During Sync Network Data Command Getter: {traceback.format_exc()}")
     return compiled_results
