@@ -11,16 +11,6 @@ from jdiff import extract_data_from_json
 from jinja2.sandbox import SandboxedEnvironment
 
 
-# def setup_logger(logger_name, debug_on):
-#     """Creates a logger for the ETL process."""
-#     logger = logging.getLogger(logger_name)
-#     if debug_on:
-#         logger.setLevel(logging.DEBUG)
-#     else:
-#         logger.setLevel(logging.INFO)
-#     return logger
-
-
 def get_django_env():
     """Load Django Jinja filters from the Django jinja template engine, and add them to the jinja_env.
 
@@ -83,7 +73,6 @@ def normalize_processed_data(processed_data, iterable_type):
 
 def extract_and_post_process(parsed_command_output, yaml_command_element, j2_data_context, iter_type, logger):
     """Helper to extract and apply post_processing on a single element."""
-    # logger = logger = setup_logger("DEVICE_ONBOARDING_ETL_LOGGER", job_debug)
     # if parsed_command_output is an empty data structure, no need to go through all the processing.
     if not parsed_command_output:
         return parsed_command_output, normalize_processed_data(parsed_command_output, iter_type)

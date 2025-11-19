@@ -129,7 +129,7 @@ def get_device_facts(  # legacy `netmiko_send_commands`
     logger.debug(f"Commands to run: {[cmd['command'] for cmd in commands]}")
 
     # ---- 3. Command Execution & Parsing -------------------------------------
-    host_facts = {}
+    preformatted_facts = {}
 
     for idx, command in enumerate(commands):
         command_name = command["command"]
@@ -143,7 +143,7 @@ def get_device_facts(  # legacy `netmiko_send_commands`
         except NornirSubTaskError as exc:  # proceed if `netmiko_send_command` exception
             return _handle_netmiko_error(task=task, exception=exc)
 
-        parsed_result = parse_command_result(
+        preformatted_facts[command_name] = parse_command_result(
             network_driver=task.host.platform,
             command=command_name,
             raw_output=command_result.result,
@@ -151,15 +151,13 @@ def get_device_facts(  # legacy `netmiko_send_commands`
             logger=logger,
         )
 
-        formatted_result = perform_data_extraction(
-            task.host,
-            command_getter_yaml_data[task.host.platform][command_getter_section_name],
-            parsed_result,
-            logger=logger,
-            skip_list=command_exclusions,
-        )
-
-        host_facts[command_name] = formatted_result
+    host_facts = perform_data_extraction(
+        task.host,
+        command_getter_yaml_data[task.host.platform][command_getter_section_name],
+        preformatted_facts,
+        logger=logger,
+        skip_list=command_exclusions,
+    )
 
     # ---- 4. Schema Validation  -----------------------------------------------
     try:
@@ -372,7 +370,6 @@ def sync_devices_command_getter(job, log_level):
                 logger=logger,
                 command_exclusions=None,
             )
-            print(result)
             for host_str, results in result.items():
                 compiled_results[host_str] = results.result[0]
 
@@ -391,9 +388,9 @@ def sync_devices_command_getter(job, log_level):
 def sync_network_data_command_getter(job, log_level):
     """Nornir play to run show commands for sync_network_data ssot job."""
     logger = NornirLogger(job.job_result, log_level)
+    compiled_results = {}
 
     try:
-        compiled_results = {}
         qs = job.filtered_devices
         if not qs:
             return None
@@ -438,4 +435,5 @@ def sync_network_data_command_getter(job, log_level):
 
     except Exception:  # pylint: disable=broad-exception-caught
         logger.info(f"Error During Sync Network Data Command Getter: {traceback.format_exc()}")
+
     return compiled_results
