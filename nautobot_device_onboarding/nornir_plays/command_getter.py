@@ -371,7 +371,8 @@ def sync_devices_command_getter(job, log_level):
                 command_exclusions=None,
             )
             for host_str, results in result.items():
-                compiled_results[host_str] = results.result[0]
+                # TODO(mzb): should it be `hostname` or host_str ?
+                compiled_results[results.result['hostname']] = results.result
 
     except Exception as err:  # pylint: disable=broad-exception-caught
         try:
@@ -431,7 +432,8 @@ def sync_network_data_command_getter(job, log_level):
                 connectivity_test=job.connectivity_test,
             )
             for host_str, results in result.items():
-                compiled_results[host_str] = results.result[0]
+                # TODO(mzb): should it be `hostname` or host_str ?
+                compiled_results[host_str] = results.result
 
     except Exception:  # pylint: disable=broad-exception-caught
         logger.info(f"Error During Sync Network Data Command Getter: {traceback.format_exc()}")
