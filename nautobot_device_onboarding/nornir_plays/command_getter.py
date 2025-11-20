@@ -158,6 +158,10 @@ def get_device_facts(  # legacy `netmiko_send_commands`
         logger=logger,
         skip_list=command_exclusions,
     )
+    # TODO(mzb): FIXME
+    host_facts["platform"] = task.host.platform
+    host_facts["manufacturer"] = task.host.platform.split("_")[0].title() if host.platform else "PLACEHOLDER"
+    host_facts["network_driver"] = task.host.platform
 
     # ---- 4. Schema Validation  -----------------------------------------------
     try:
