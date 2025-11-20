@@ -26,10 +26,6 @@ class TestGetCommandsToRun(unittest.TestCase):
         """Test dedup on sync_devices ssot job."""
         get_commands_to_run = _get_commands_to_run(
             self.expected_data["sync_devices"],
-            sync_vlans=False,
-            sync_vrfs=False,
-            sync_cables=False,
-            sync_software_version=False,
         )
         expected_commands_to_run = [
             {"command": "show version", "jpath": "[*].hostname", "parser": "textfsm"},
@@ -46,10 +42,14 @@ class TestGetCommandsToRun(unittest.TestCase):
         """Test dedup on sync_network_data ssot job."""
         get_commands_to_run = _get_commands_to_run(
             self.expected_data["sync_network_data"],
-            sync_vlans=False,
-            sync_vrfs=False,
-            sync_cables=False,
-            sync_software_version=False,
+            skip_list = [
+                "cables",
+                "interfaces__tagged_vlans",
+                "interfaces__untagged_vlan",
+                "interfaces__vrf",
+                "software_version",
+                "vlan_map",
+            ],
         )
         expected_commands_to_run = [
             {"command": "show version", "parser": "textfsm", "jpath": "[*].serial[]"},
@@ -80,10 +80,13 @@ class TestGetCommandsToRun(unittest.TestCase):
         """Test dedup on sync_network_data ssot job."""
         get_commands_to_run = _get_commands_to_run(
             self.expected_data["sync_network_data"],
-            sync_vlans=False,
-            sync_vrfs=True,
-            sync_cables=False,
-            sync_software_version=False,
+            skip_list = [
+                "cables",
+                "interfaces__tagged_vlans",
+                "interfaces__untagged_vlan",
+                "software_version",
+                "vlan_map",
+            ]
         )
         expected_commands_to_run = [
             {"command": "show version", "parser": "textfsm", "jpath": "[*].serial[]"},
@@ -121,10 +124,14 @@ class TestGetCommandsToRun(unittest.TestCase):
         """Test dedup on sync_network_data ssot job."""
         get_commands_to_run = _get_commands_to_run(
             self.expected_data["sync_network_data"],
-            sync_vlans=True,
-            sync_vrfs=False,
-            sync_cables=False,
-            sync_software_version=False,
+            skip_list = [
+                "cables",
+                # "interfaces__tagged_vlans",
+                # "interfaces__untagged_vlan",
+                "interfaces__vrf",
+                "software_version",
+                # "vlan_map",
+            ],
         )
         expected_commands_to_run = [
             {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vlan_id, name: vlan_name}"},
@@ -156,10 +163,14 @@ class TestGetCommandsToRun(unittest.TestCase):
         """Test dedup on sync_network_data ssot job."""
         get_commands_to_run = _get_commands_to_run(
             self.expected_data["sync_network_data"],
-            sync_vlans=True,
-            sync_vrfs=True,
-            sync_cables=False,
-            sync_software_version=False,
+            skip_list = [
+                "cables",
+                # "interfaces__tagged_vlans",
+                # "interfaces__untagged_vlan",
+                # "interfaces__vrf",
+                "software_version",
+                # "vlan_map",
+            ],
         )
         expected_commands_to_run = [
             {"command": "show vlan", "parser": "textfsm", "jpath": "[*].{id: vlan_id, name: vlan_name}"},
@@ -197,10 +208,14 @@ class TestGetCommandsToRun(unittest.TestCase):
     def test_deduplicate_command_list_sync_data_cables(self):
         get_commands_to_run = _get_commands_to_run(
             self.expected_data["sync_network_data"],
-            sync_vlans=False,
-            sync_vrfs=False,
-            sync_cables=True,
-            sync_software_version=False,
+            skip_list = [
+                # "cables",
+                "interfaces__tagged_vlans",
+                "interfaces__untagged_vlan",
+                "interfaces__vrf",
+                "software_version",
+                "vlan_map",
+            ],
         )
         expected_commands_to_run = [
             {"command": "show version", "parser": "textfsm", "jpath": "[*].serial[]"},
