@@ -157,9 +157,9 @@ jobs:
           - python-version: "3.11"
             db-backend: "postgresql"
             nautobot-version: "2.4.20"
-          # - python-version: "3.12"
-          #   db-backend: "mysql"
-          #   nautobot-version: "stable"
+          - python-version: "3.12"
+            db-backend: "mysql"
+            nautobot-version: "2.4"
     runs-on: "ubuntu-latest"
     env:
       INVOKE_NAUTOBOT_DEVICE_ONBOARDING_PYTHON_VER: "${{ matrix.python-version }}"
