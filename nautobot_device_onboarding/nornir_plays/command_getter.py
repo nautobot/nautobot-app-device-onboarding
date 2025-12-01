@@ -160,7 +160,7 @@ def get_device_facts(  # legacy `netmiko_send_commands`
     )
     # TODO(mzb): FIXME
     host_facts["platform"] = task.host.platform
-    host_facts["manufacturer"] = task.host.platform.split("_")[0].title() if host.platform else "PLACEHOLDER"
+    host_facts["manufacturer"] = task.host.platform.split("_")[0].title() if task.host.platform else "PLACEHOLDER"
     host_facts["network_driver"] = task.host.platform
 
     # ---- 4. Schema Validation  -----------------------------------------------
@@ -376,7 +376,7 @@ def sync_devices_command_getter(job, log_level):
             )
             for host_str, results in result.items():
                 # TODO(mzb): should it be `hostname` or host_str ?
-                compiled_results[results.result['hostname']] = results.result
+                compiled_results[host_str] = results.result
 
     except Exception as err:  # pylint: disable=broad-exception-caught
         try:

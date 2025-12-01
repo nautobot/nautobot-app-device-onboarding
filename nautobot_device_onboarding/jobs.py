@@ -505,6 +505,9 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         self.memory_profiling = memory_profiling
         self.debug = debug
 
+        if self.debug:
+            self.logger.setLevel(logging.DEBUG)
+
         if csv_file:
             self.ip_address_inventory = self._process_csv_data(csv_file=csv_file)
             if not self.ip_address_inventory:
