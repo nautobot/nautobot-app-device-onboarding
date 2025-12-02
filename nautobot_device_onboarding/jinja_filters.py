@@ -32,6 +32,16 @@ def interface_status_to_bool(status):
     """Take links or admin status and change to boolean."""
     return "up" in status.lower()
 
+@library.filter
+def cisco_interface_status_to_bool(status):
+    """
+    Take links or admin status and change to boolean.
+    
+    administratively down -> False
+    down -> True
+    up -> True
+    """
+    return "admin" not in status.lower()
 
 @library.filter
 def nxos_switchport_mode_to_nautobot_interface_mode(interface_object):

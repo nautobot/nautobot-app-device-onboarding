@@ -13,6 +13,7 @@ from nautobot_device_onboarding.jinja_filters import (
     get_vlan_data,
     interface_mode_logic,
     interface_status_to_bool,
+    cisco_interface_status_to_bool,
     key_exist_or_default,
     map_interface_type,
     nxos_switchport_mode_to_nautobot_interface_mode,
@@ -59,6 +60,18 @@ class TestJinjaFilters(unittest.TestCase):
     def test_interface_status_to_bool_up_upper(self):
         """Take links or admin status and change to boolean."""
         self.assertTrue(interface_status_to_bool("UP"))
+
+    def test_cisco_interface_status_to_bool_linkdown(self):
+        """Take links or admin status and change to boolean."""
+        self.assertTrue(cisco_interface_status_to_bool("down"))
+
+    def test_cisco_interface_status_to_bool_admindown(self):
+        """Take links or admin status and change to boolean."""
+        self.assertFalse(cisco_interface_status_to_bool("administratively down"))
+
+    def test_cisco_interface_status_to_bool_linkup(self):
+        """Take links or admin status and change to boolean."""
+        self.assertFalse(cisco_interface_status_to_bool("up"))
 
     def test_nxos_switchport_mode_to_nautobot_interface_mode(self):
         """Convert the switchport mode from the "show interface switchport" command output to a Nautobot interface mode."""
