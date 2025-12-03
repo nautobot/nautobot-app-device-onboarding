@@ -6,6 +6,7 @@ import unittest.mock
 from nautobot.apps.choices import InterfaceModeChoices
 
 from nautobot_device_onboarding.jinja_filters import (
+    cisco_interface_status_to_bool,
     extract_prefix,
     flatten_dict_from_value,
     flatten_list_of_dict_from_value,
@@ -13,7 +14,6 @@ from nautobot_device_onboarding.jinja_filters import (
     get_vlan_data,
     interface_mode_logic,
     interface_status_to_bool,
-    cisco_interface_status_to_bool,
     key_exist_or_default,
     map_interface_type,
     nxos_switchport_mode_to_nautobot_interface_mode,
