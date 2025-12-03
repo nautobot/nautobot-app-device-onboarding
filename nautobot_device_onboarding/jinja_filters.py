@@ -36,7 +36,7 @@ def interface_status_to_bool(status):
 def cisco_interface_status_to_bool(status):
     """
     Take links or admin status and change to boolean.
-    
+
     administratively down -> False
     down -> True
     up -> True
