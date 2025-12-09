@@ -806,7 +806,7 @@ def ruff(context, action=None, target=None, fix=False, output_format="concise"):
     if "format" in action:
         command = "ruff format "
         if not fix:
-            command += "--check "
+            command += "--check --diff "
         command += " ".join(target)
         if not run_command(context, command, warn=True):
             exit_code = 1
