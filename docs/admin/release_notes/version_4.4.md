@@ -8,7 +8,7 @@ This document describes all new features and changes in the release. The format 
 - Fixed nxos lag member assigment.
 
 <!-- towncrier release notes start -->
-## [v4.4.1 (2025-12-05)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.4.1)
+## [v4.4.1 (2025-12-09)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.4.1)
 
 ### Fixed
 
