@@ -1,4 +1,3 @@
-
 # v4.4 Release Notes
 
 This document describes all new features and changes in the release. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -7,6 +6,18 @@ This document describes all new features and changes in the release. The format 
 
 - Fixed VLANs creation on cisco_nxos devices.
 - Fixed nxos lag member assigment.
+
+<!-- towncrier release notes start -->
+## [v4.4.1 (2025-12-09)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.4.1)
+
+### Fixed
+
+- [#458](https://github.com/nautobot/nautobot-app-device-onboarding/issues/458) - Fixed migration bug where OnboardingTask was not filtered correctly.
+
+### Housekeeping
+
+- Rebaked from the cookie `nautobot-app-v2.7.0`.
+- Rebaked from the cookie `nautobot-app-v2.7.1`.
 
 ## [v4.4.0 (2025-10-27)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.4.0)
 
