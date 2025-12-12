@@ -1,0 +1,130 @@
+{
+    "interfaces": {
+        "0.10": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "02:f1:23:33:00:09",
+            "mtu": "9198",
+            "type": "other"
+        },
+        "0.5": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "02:f1:23:33:00:04",
+            "mtu": "9198",
+            "type": "other"
+        },
+        "0.6": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "02:f1:23:33:00:05",
+            "mtu": "9198",
+            "type": "other"
+        },
+        "0.7": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "02:f1:23:33:00:06",
+            "mtu": "9198",
+            "type": "other"
+        },
+        "0.8": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "02:f1:23:33:00:07",
+            "mtu": "9198",
+            "type": "other"
+        },
+        "0.9": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "02:f1:23:33:00:08",
+            "mtu": "9198",
+            "type": "other"
+        },
+        "TRUNK-PO49-FRONTSIDE": {
+            "802.1Q_mode": "tagged",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "00:0c:f4:f8:8b:ac",
+            "mtu": "9198",
+            "type": "lag"
+        },
+        "TRUNK-PO51-SERVERSIDE": {
+            "802.1Q_mode": "tagged",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "00:0c:f4:f8:8b:ad",
+            "mtu": "9198",
+            "type": "lag"
+        },
+        "TRUNK_EXTERNAL": {
+            "802.1Q_mode": "tagged",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "00:00:00:00:00:00",
+            "mtu": "9198",
+            "type": "lag"
+        },
+        "TRUNK_HA": {
+            "802.1Q_mode": "tagged",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "00:0c:f4:f8:8b:af",
+            "mtu": "9198",
+            "type": "lag"
+        },
+        "TRUNK_INTERNAL": {
+            "802.1Q_mode": "tagged",
+            "description": [],
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "00:0c:f4:f8:8b:b0",
+            "mtu": "9198",
+            "type": "lag"
+        },
+        "mgmt": {
+            "802.1Q_mode": "access",
+            "description": [],
+            "ip_addresses": [
+                {
+                    "ip_address": "198.51.100.1",
+                    "prefix_length": "24"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "00:0b:f4:c8:81:85",
+            "mtu": "1500",
+            "type": "other"
+        }
+    },
+    "serial": "00:0f:11:f8:8b:11"
+}

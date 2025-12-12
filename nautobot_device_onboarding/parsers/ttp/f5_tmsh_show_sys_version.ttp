@@ -1,0 +1,5 @@
+Sys::Version
+Main Package
+  Product {{ os }}
+  Version {{ version }}
+  Build {{ hotfix }}
