@@ -523,8 +523,9 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
     def execute_command_getter(self):
         """Query devices for data."""
         result = sync_network_data_command_getter(
-            self.job,
-            self.job.logger.getEffectiveLevel(),
+            job=self.job,
+            logger=self.job.logger,
+            # self.job.logger.getEffectiveLevel(),
         )
         # verify data returned is a dict
         data_type_check = diffsync_utils.check_data_type(result)

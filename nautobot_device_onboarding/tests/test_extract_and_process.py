@@ -4,6 +4,8 @@ import json
 import os
 import unittest
 
+from unittest.mock import MagicMock
+
 import yaml
 from nornir.core.inventory import ConnectionOptions, Defaults, Host
 
@@ -32,8 +34,9 @@ class TestSingleCommandFormatterExtractAndProcess(unittest.TestCase):
                     platform="platform",
                 )
             },
-            defaults=Defaults(data={"sync_vlans": False, "sync_vrfs": False, "sync_cables": False}),
+            # defaults=Defaults(data={"sync_vlans": False, "sync_vrfs": False, "sync_cables": False}),
         )
+        self.logger = MagicMock()
 
     def test_extract_and_process_from_directory(self):
         test_dir = f"{MOCK_DIR}/extract_and_process/"
@@ -55,6 +58,6 @@ class TestSingleCommandFormatterExtractAndProcess(unittest.TestCase):
                         platform_parsing_info,
                         {"obj": self.host.name, "original_host": self.host.name},
                         None,
-                        False,
+                        logger=self.logger,
                     )
                     self.assertEqual(expected_result, postpro_result)

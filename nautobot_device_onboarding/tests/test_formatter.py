@@ -3,7 +3,7 @@
 import json
 import os
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import yaml
 from nornir.core.inventory import ConnectionOptions, Defaults, Host
@@ -109,14 +109,20 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
                     platform="platform",
                 )
             },
-            defaults=Defaults(data={"sync_vlans": False, "sync_vrfs": False, "sync_cables": False}),
         )
+        self.logger = MagicMock()
+        self.skip_list = [
+            "cables",
+            "interfaces__tagged_vlans",
+            "interfaces__untagged_vlan",
+            "interfaces__vrf",
+            "software_version",
+            "vlan_map",
+        ]
+
 
     def test_perform_data_extraction_simple_host_values(self):
         self.assertEqual("198.51.100.1", self.host.name)
-        self.assertFalse(self.host.defaults.data.get("sync_vlans"))
-        self.assertFalse(self.host.defaults.data.get("sync_vrfs"))
-        self.assertFalse(self.host.defaults.data.get("sync_cables"))
 
     def test_extract_and_post_process_empty_command_result_str(self):
         parsed_command_output = ""
@@ -125,7 +131,7 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
             self.platform_parsing_info["sync_devices"]["serial"],
             {"obj": "1.1.1.1", "original_host": "1.1.1.1"},
             None,
-            False,
+            self.logger,
         )
         expected_parsed_result = ("", [])
         self.assertEqual(expected_parsed_result, actual_result)
@@ -137,7 +143,7 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
             self.platform_parsing_info["sync_devices"]["serial"],
             {"obj": "1.1.1.1", "original_host": "1.1.1.1"},
             None,
-            False,
+            self.logger,
         )
         expected_parsed_result = ([], [])
         self.assertEqual(expected_parsed_result, actual_result)
@@ -149,7 +155,7 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
             self.platform_parsing_info["sync_devices"]["serial"],
             {"obj": "1.1.1.1", "original_host": "1.1.1.1"},
             None,
-            False,
+            self.logger,
         )
         expected_parsed_result = ({}, [])
         self.assertEqual(expected_parsed_result, actual_result)
@@ -161,7 +167,7 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
             self.platform_parsing_info["sync_devices"]["serial"],
             {"obj": "1.1.1.1", "original_host": "1.1.1.1"},
             "str",
-            False,
+            self.logger,
         )
         expected_parsed_result = ("", "")
         self.assertEqual(expected_parsed_result, actual_result)
@@ -173,7 +179,7 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
             self.platform_parsing_info["sync_devices"]["serial"],
             {"obj": "1.1.1.1", "original_host": "1.1.1.1"},
             "dict",
-            False,
+            self.logger,
         )
         expected_parsed_result = ([], {})
         self.assertEqual(expected_parsed_result, actual_result)
@@ -185,7 +191,7 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
             self.platform_parsing_info["sync_devices"]["serial"],
             {"obj": "1.1.1.1", "original_host": "1.1.1.1"},
             "dict",
-            False,
+            self.logger,
         )
         expected_parsed_result = ({}, {})
         self.assertEqual(expected_parsed_result, actual_result)
@@ -197,7 +203,7 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
             self.platform_parsing_info["sync_devices"]["serial"]["commands"][0],
             {"obj": "1.1.1.1", "original_host": "1.1.1.1"},
             None,
-            False,
+            self.logger,
         )
         expected_parsed_result = (["FOC2341Y2CQ"], "FOC2341Y2CQ")
         self.assertEqual(expected_parsed_result, actual_result)
@@ -213,7 +219,7 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
             },
             {"obj": "1.1.1.1", "original_host": "1.1.1.1"},
             None,
-            False,
+            self.logger,
         )
         expected_parsed_result = ("bar", "bar")
         self.assertEqual(expected_parsed_result, actual_result)
@@ -229,7 +235,7 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
             },
             {"obj": "1.1.1.1", "original_host": "1.1.1.1"},
             None,
-            False,
+            self.logger,
         )
         expected_parsed_result = ("bar", "bar")
         self.assertEqual(expected_parsed_result, actual_result)
@@ -245,7 +251,7 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
             },
             {"obj": "1.1.1.1", "original_host": "1.1.1.1"},
             None,
-            False,
+            self.logger,
         )
         expected_parsed_result = ([], [])
         self.assertEqual(expected_parsed_result, actual_result)
@@ -261,7 +267,7 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
             },
             {"obj": "1.1.1.1", "original_host": "1.1.1.1"},
             "dict",
-            False,
+            self.logger,
         )
         expected_parsed_result = ([], {})
         self.assertEqual(expected_parsed_result, actual_result)
@@ -277,7 +283,7 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
             },
             {"obj": "1.1.1.1", "original_host": "1.1.1.1"},
             "dict",
-            False,
+            self.logger,
         )
         expected_parsed_result = ([{"bar": "moo"}], {"bar": "moo"})
         self.assertEqual(expected_parsed_result, actual_result)
@@ -293,7 +299,7 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
             },
             {"obj": "1.1.1.1", "original_host": "1.1.1.1"},
             "str",
-            False,
+            self.logger,
         )
         expected_parsed_result = (["foo"], "foo")
         self.assertEqual(expected_parsed_result, actual_result)
@@ -309,7 +315,7 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
             },
             {"obj": "1.1.1.1", "original_host": "1.1.1.1"},
             None,
-            False,
+            self.logger,
         )
         expected_parsed_result = ([{"bar": "moo"}], [{"bar": "moo"}])
         self.assertEqual(expected_parsed_result, actual_result)
@@ -345,7 +351,7 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
                 "current_key": "GigabitEthernet1/8",
             },
             None,
-            False,
+            self.logger,
         )
         expected_parsed_result = (
             [
@@ -393,7 +399,7 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
             },
             {"obj": "1.1.1.1", "original_host": "1.1.1.1"},
             "str",
-            False,
+            self.logger,
         )
         expected_parsed_result = (["991UCMIHG4UAJ1J010CQG"], "991UCMIHG4UAJ1J010CQG")
         self.assertEqual(expected_parsed_result, actual_result)
@@ -423,8 +429,16 @@ class TestFormatterSyncDevices(unittest.TestCase):
                     platform="platform",
                 )
             },
-            defaults=Defaults(data={"sync_vlans": False, "sync_vrfs": False}),
         )
+        self.logger = MagicMock()
+        self.skip_list = [
+            "cables",
+            "interfaces__tagged_vlans",
+            "interfaces__untagged_vlan",
+            "interfaces__vrf",
+            "software_version",
+            "vlan_map",
+        ]
 
     def test_add_platform_parsing_info_sane_defaults(self):
         # Note: This is also officially tested in test_transform, but secondary check here as well.
@@ -457,8 +471,6 @@ class TestFormatterSyncDevices(unittest.TestCase):
             self.host.platform = platform
             with self.subTest(msg=f"Testing host with platform {platform}"):
                 self.assertEqual("198.51.100.1", self.host.name)
-                self.assertFalse(self.host.defaults.data.get("sync_vlans"))
-                self.assertFalse(self.host.defaults.data.get("sync_vrfs"))
 
     def test_perform_data_extraction_sync_devices(self):
         for platform in list(self.platform_parsing_info.keys()):
@@ -483,7 +495,8 @@ class TestFormatterSyncDevices(unittest.TestCase):
                                 self.host,
                                 self.platform_parsing_info[platform]["sync_devices"],
                                 command_outputs,
-                                job_debug=False,
+                                logger=self.logger,
+                                skip_list=self.skip_list,
                             )
                             self.assertEqual(expected_parsed_result, actual_result)
 
@@ -514,16 +527,22 @@ class TestFormatterSyncNetworkDataNoOptions(unittest.TestCase):
                     platform="platform",
                 )
             },
-            defaults=Defaults(data={"sync_vlans": False, "sync_vrfs": False}),
         )
+        self.logger = MagicMock()
+        self.skip_list = [
+            "cables",
+            "interfaces__tagged_vlans",
+            "interfaces__untagged_vlan",
+            "interfaces__vrf",
+            "software_version",
+            "vlan_map",
+        ]
 
     def test_perform_data_extraction_simple_host_values(self):
         for platform in list(self.platform_parsing_info.keys()):
             self.host.platform = platform
             with self.subTest(msg=f"Testing host with platform {platform}"):
                 self.assertEqual("198.51.100.1", self.host.name)
-                self.assertFalse(self.host.defaults.data.get("sync_vlans"))
-                self.assertFalse(self.host.defaults.data.get("sync_vrfs"))
 
     def test_perform_data_extraction_sync_network_data_no_options(self):
         supported_platforms = list(self.platform_parsing_info.keys())
@@ -556,7 +575,8 @@ class TestFormatterSyncNetworkDataNoOptions(unittest.TestCase):
                                 self.host,
                                 self.platform_parsing_info[platform]["sync_network_data"],
                                 command_outputs,
-                                job_debug=False,
+                                logger=self.logger,
+                                skip_list=self.skip_list,
                             )
                             self.assertEqual(expected_parsed_result, actual_result)
 
@@ -587,16 +607,21 @@ class TestFormatterSyncNetworkDataWithVrfs(unittest.TestCase):
                     platform="platform",
                 )
             },
-            defaults=Defaults(data={"sync_vlans": False, "sync_vrfs": True}),
         )
+        self.logger = MagicMock()
+        self.skip_list = [
+            "cables",
+            "interfaces__tagged_vlans",
+            "interfaces__untagged_vlan",
+            "software_version",
+            "vlan_map",
+        ]
 
     def test_perform_data_extraction_simple_host_values(self):
         for platform in list(self.platform_parsing_info.keys()):
             self.host.platform = platform
             with self.subTest(msg=f"Testing host with platform {platform}"):
                 self.assertEqual("198.51.100.1", self.host.name)
-                self.assertFalse(self.host.defaults.data.get("sync_vlans"))
-                self.assertTrue(self.host.defaults.data.get("sync_vrfs"))
 
     def test_perform_data_extraction_sync_network_data_with_vrfs(self):
         supported_platforms = list(self.platform_parsing_info.keys())
@@ -629,7 +654,8 @@ class TestFormatterSyncNetworkDataWithVrfs(unittest.TestCase):
                                 self.host,
                                 self.platform_parsing_info[platform]["sync_network_data"],
                                 command_outputs,
-                                job_debug=False,
+                                logger=self.logger,
+                                skip_list=self.skip_list,
                             )
                             self.assertEqual(expected_parsed_result, actual_result)
 
@@ -660,16 +686,19 @@ class TestFormatterSyncNetworkDataWithVlans(unittest.TestCase):
                     platform="platform",
                 )
             },
-            defaults=Defaults(data={"sync_vlans": True, "sync_vrfs": False}),
         )
+        self.logger = MagicMock()
+        self.skip_list = [
+            "cables",
+            "interfaces__vrf",
+            "software_version",
+        ]
 
     def test_perform_data_extraction_simple_host_values(self):
         for platform in list(self.platform_parsing_info.keys()):
             self.host.platform = platform
             with self.subTest(msg=f"Testing host with platform {platform}"):
                 self.assertEqual("198.51.100.1", self.host.name)
-                self.assertTrue(self.host.defaults.data.get("sync_vlans"))
-                self.assertFalse(self.host.defaults.data.get("sync_vrfs"))
 
     def test_perform_data_extraction_sync_network_data_with_vlans(self):
         supported_platforms = list(self.platform_parsing_info.keys())
@@ -702,7 +731,8 @@ class TestFormatterSyncNetworkDataWithVlans(unittest.TestCase):
                                 self.host,
                                 self.platform_parsing_info[platform]["sync_network_data"],
                                 command_outputs,
-                                job_debug=False,
+                                logger=self.logger,
+                                skip_list=self.skip_list,
                             )
                             self.assertEqual(expected_parsed_result, actual_result)
 
@@ -732,16 +762,18 @@ class TestFormatterSyncNetworkDataAll(unittest.TestCase):
                     platform="platform",
                 )
             },
-            defaults=Defaults(data={"sync_vlans": True, "sync_vrfs": True}),
         )
+        self.logger = MagicMock()
+        self.skip_list = [
+            "cables",
+            "software_version",
+        ]
 
     def test_perform_data_extraction_simple_host_values(self):
         for platform in list(self.platform_parsing_info.keys()):
             self.host.platform = platform
             with self.subTest(msg=f"Testing host with platform {platform}"):
                 self.assertEqual("198.51.100.1", self.host.name)
-                self.assertTrue(self.host.defaults.data.get("sync_vlans"))
-                self.assertTrue(self.host.defaults.data.get("sync_vrfs"))
 
     def test_perform_data_extraction_sync_network_data_all(self):
         supported_platforms = list(self.platform_parsing_info.keys())
@@ -769,7 +801,8 @@ class TestFormatterSyncNetworkDataAll(unittest.TestCase):
                                 self.host,
                                 self.platform_parsing_info[platform]["sync_network_data"],
                                 command_outputs,
-                                job_debug=False,
+                                logger=self.logger,
+                                skip_list=self.skip_list,
                             )
                             self.assertEqual(expected_parsed_result, actual_result)
 

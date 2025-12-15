@@ -339,7 +339,7 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
             "memory_profiling": False,
         }
         sync_network_data_job_form_inputs = {
-            "debug": False,
+            "debug": True,
             "connectivity_test": False,
             "dryrun": False,
             "sync_vlans": True,
