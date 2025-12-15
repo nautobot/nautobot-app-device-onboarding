@@ -1,0 +1,9 @@
+<group name="{{ trunk_name }}">
+net trunk {{ trunk_name }} {
+    interfaces {
+        {{ if_list | default('none') | joinmatches(',') | to_list }}
+    }
+    mac-address {{ mac_address | default('00:00:00:00:00:00')| MAC }}
+    lacp-mode {{ lacp_mode | default('none') }}
+}
+</group>
