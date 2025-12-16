@@ -331,7 +331,7 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                 device_status = job_form_attrs["device_status"]
                 secrets_group = job_form_attrs["secrets_group"]
 
-                if isinstance(self.device_data[ip_address]["virtual_chassis"], list) and len(self.device_data[ip_address]["virtual_chassis"] > 1):
+                if isinstance(self.device_data[ip_address]["virtual_chassis"], list) and len(self.device_data[ip_address]["virtual_chassis"]) > 1:
                     # Virtual Chassis detected
                     onboarding_vc = self.virtual_chassis(
                         name=self.device_data[ip_address]["hostname"],
