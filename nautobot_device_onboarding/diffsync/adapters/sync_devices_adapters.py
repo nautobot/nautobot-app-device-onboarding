@@ -337,8 +337,8 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                         name=self.device_data[ip_address]["hostname"],
                     )
                     # Create Virtual Chassis members
-                    for index, vc_member in enumerate(self.device_data[ip_address]["virtual_chassis"], start=1):
-                        if index == 1:
+                    for index, vc_member in enumerate(self.device_data[ip_address]["virtual_chassis"]):
+                        if index == 0:
                             onboarding_device = self.device(
                                 adapter=self,
                                 device_type__model=self.device_data[ip_address]["modules"][index]["model"],
@@ -363,7 +363,7 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                                     adapter=self,
                                     device_type__model=self.device_data[ip_address]["modules"][index]["model"],
                                     location__name=location.name,
-                                    name=f"{self.device_data[ip_address]['hostname']}:{index}",
+                                    name=f"{self.device_data[ip_address]['hostname']}:{index+1}",
                                     platform__name=(platform.name if platform else self.device_data[ip_address]["platform"]),
                                     primary_ip4__host=ip_address, # Needed for form input lookup only
                                     role__name=device_role.name,
