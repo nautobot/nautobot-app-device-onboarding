@@ -1,0 +1,28 @@
+---
+services:
+  fakerouter1:
+    build:
+      args:
+        PYTHON_VER: "${PYTHON_VER}"
+      context: "../"
+      dockerfile: "development/Dockerfile-fakenos"
+    image: "nautobot-device-onboarding/fakenos:py${PYTHON_VER}"
+    pull_policy: never
+    expose:
+      - "22"
+  fakerouter2: &fakerouter
+    image: "nautobot-device-onboarding/fakenos:py${PYTHON_VER}"
+    pull_policy: never
+    expose:
+      - "22"
+  fakerouter3: *fakerouter
+  fakerouter4: *fakerouter
+  fakerouter5: *fakerouter
+  fakerouter6: *fakerouter
+  fakerouter7: *fakerouter
+  fakerouter8: *fakerouter
+  fakerouter9: *fakerouter
+  fakerouter10: *fakerouter
+  fakerouter11: *fakerouter
+  fakerouter12: *fakerouter
+  fakerouter13: *fakerouter
