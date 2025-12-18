@@ -12,7 +12,6 @@ from nautobot.dcim.models import (
     DeviceType,
     Manufacturer,
     Platform,
-    VirtualChassis,
 )
 
 from nautobot_device_onboarding.diffsync.models import sync_devices_models
@@ -107,15 +106,33 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
             if self.job.debug:
                 self.job.logger.debug(f"DeviceType: {device_type.model} loaded.")
 
-    def load_virtual_chassis(self):
+    def load_virtual_chassis(self, device):
         """Add Nautobot Virtual Chassis objects as DiffSync."""
-        # We import the master node as a VC
-        for _vc in VirtualChassis.objects.all():
-            # TODO: Should we list members here as well?
-            new_vc = self.virtual_chassis(
-                name=_vc.name,
+        onboarding_vc = device.virtual_chassis
+        for vc_member in onboarding_vc.members.all().exclude(id=device.id): # The originating device is loaded in load_devices
+            onboarding_device = self.device(
+                adapter=self,
+                pk=vc_member.pk,
+                device_type__model=vc_member.device_type.model,
+                location__name=vc_member.location.name,
+                name=vc_member.name,
+                platform__name=vc_member.platform.name if vc_member.platform_id else "",
+                primary_ip4__host=device.primary_ip4.host if device.primary_ip4_id else "",
+                primary_ip4__status__name=(device.primary_ip4.status.name if device.primary_ip4_id else ""),
+                role__name=vc_member.role.name,
+                status__name=vc_member.status.name,
+                mask_length=(device.primary_ip4.mask_length if device.primary_ip4_id else None),
+                serial=vc_member.serial,
+                virtual_chassis__name=vc_member.virtual_chassis.name,
+                vc_position=vc_member.vc_position,
+                vc_priority=vc_member.vc_priority,
             )
-            self.add(new_vc)
+            self.add(onboarding_device)
+            if self.job.debug:
+                self.job.logger.debug(f"Device: {vc_member.name} loaded.")
+        self.add(onboarding_vc)
+        if self.job.debug:
+            self.job.logger.debug(f"Virtual Chassis: {onboarding_vc.name} loaded.")
 
     def load_devices(self):
         """Load device data from Nautobot."""
@@ -135,22 +152,24 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
                 interfaces = [interface_list[0]]
             else:
                 interfaces = []
+            if device.virtual_chassis_id:
+                self.load_virtual_chassis(device)
             onboarding_device = self.device(
                 adapter=self,
                 pk=device.pk,
                 device_type__model=device.device_type.model,
                 location__name=device.location.name,
                 name=device.name,
-                platform__name=device.platform.name if device.platform else "",
-                primary_ip4__host=device.primary_ip4.host if device.primary_ip4 else "",
-                primary_ip4__status__name=(device.primary_ip4.status.name if device.primary_ip4 else ""),
+                platform__name=device.platform.name if device.platform_id else "",
+                primary_ip4__host=device.primary_ip4.host if device.primary_ip4_id else "",
+                primary_ip4__status__name=(device.primary_ip4.status.name if device.primary_ip4_id else ""),
                 role__name=device.role.name,
                 status__name=device.status.name,
-                secrets_group__name=(device.secrets_group.name if device.secrets_group else ""),
+                secrets_group__name=(device.secrets_group.name if device.secrets_group_id else ""),
                 interfaces=interfaces,
-                mask_length=(device.primary_ip4.mask_length if device.primary_ip4 else None),
+                mask_length=(device.primary_ip4.mask_length if device.primary_ip4_id else None),
                 serial=device.serial,
-                virtual_chassis__name=(device.virtual_chassis.name if device.virtual_chassis else None),
+                virtual_chassis__name=(device.virtual_chassis.name if device.virtual_chassis_id else None),
                 vc_position=device.vc_position,
                 vc_priority=device.vc_priority,
             )
@@ -163,7 +182,6 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
         self.load_manufacturers()
         self.load_platforms()
         self.load_device_types()
-        self.load_virtual_chassis()
         self.load_devices()
 
 
@@ -365,9 +383,10 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                                     location__name=location.name,
                                     name=f"{self.device_data[ip_address]['hostname']}:{index+1}",
                                     platform__name=(platform.name if platform else self.device_data[ip_address]["platform"]),
-                                    primary_ip4__host=ip_address, # Needed for form input lookup only
+                                    primary_ip4__host=ip_address,
                                     role__name=device_role.name,
                                     status__name=device_status.name,
+                                    mask_length=int(self.device_data[ip_address]["mask_length"]),
                                     serial=self.device_data[ip_address]["modules"][index]["serial"],
                                     virtual_chassis__name=(self.device_data[ip_address]["hostname"]),
                                     vc_position=int(vc_member["switch"]),

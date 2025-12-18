@@ -210,7 +210,7 @@ class SyncDevicesDevice(DiffSyncModel):
 
         # Get or create Device, Interface and IP Address
         device = cls._get_or_create_device(adapter, ids, attrs)
-        if device and attrs.get("vc_position", 0) > 1:
+        if device and attrs.get("vc_position",1) == 1:  # vc master or non-vc device
             job_form_attrs = adapter.job.ip_address_inventory[attrs["primary_ip4__host"]]
             ip_address = diffsync_utils.get_or_create_ip_address(
                 host=attrs["primary_ip4__host"],
