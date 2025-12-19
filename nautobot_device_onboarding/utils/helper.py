@@ -5,6 +5,7 @@ import re
 import socket
 
 import netaddr
+from django.contrib.contenttypes.models import ContentType
 from nautobot.dcim.filters import DeviceFilterSet
 from nautobot.dcim.models import Device
 from netaddr.core import AddrFormatError
@@ -119,3 +120,28 @@ def check_for_required_file(directory, filename):
         return False
     except FileNotFoundError:
         return False
+
+
+def add_content_type(job, model_to_add, target_object):
+    """Add a content type to the valid content types of a target object.
+
+    Args:
+        job: The job object used for logging.
+        model_to_add: The model class to get the content type for.
+        target_object: The object to which the content type will be added.
+
+    Raises:
+        OnboardException: If adding the content type fails.
+    """
+    try:
+        job.logger.info(
+            "Adding %s content type to valid content types for location type %s",
+            model_to_add.__name__,
+            target_object,
+        )
+        content_type = ContentType.objects.get_for_model(model_to_add)
+        target_object.content_types.add(content_type)
+    except Exception as e:
+        err_msg = f"Failed to add {model_to_add.__name__} to valid content types for {target_object}: {e}"
+        job.logger.error(err_msg)
+        raise OnboardException("fail-general - " + err_msg) from e

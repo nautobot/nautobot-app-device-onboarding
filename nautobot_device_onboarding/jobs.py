@@ -60,7 +60,7 @@ from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInvento
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import TroubleshootingProcessor
-from nautobot_device_onboarding.utils.helper import onboarding_task_fqdn_to_ip
+from nautobot_device_onboarding.utils.helper import add_content_type, onboarding_task_fqdn_to_ip
 
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
 
@@ -371,6 +371,8 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             self.logger.error("The CSV file contains no data!")
             return None
 
+        location_type_ids = set()
+
         self.logger.info("Processing CSV data...")
         processing_failed = False
         processed_csv_data = {}
@@ -386,6 +388,14 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 else:
                     query = query = f"location_name: {row.get('location_name')}"
                     location = Location.objects.get(name=row["location_name"].strip(), parent=None)
+
+                # Check and add content type if needed (only once per location type)
+                location_type = location.location_type
+                if location_type.id not in location_type_ids:
+                    if not location_type.content_types.filter(app_label="dcim", model="device").exists():
+                        add_content_type(self, model_to_add=Device, target_object=location_type)
+                    location_type_ids.add(location_type.id)
+
                 query = f"device_role: {row.get('device_role_name')}"
                 device_role = Role.objects.get(
                     name=row["device_role_name"].strip(),
@@ -551,6 +561,11 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 if not self._validate_platform_network_driver(platform):
                     # TODO: We're only raising an exception if a csv file is not provided. Is that correct?
                     raise ValueError("Platform.network_driver missing")
+
+            if location:
+                location_type = location.location_type
+                if not location_type.content_types.filter(app_label="dcim", model="device").exists():
+                    add_content_type(self, model_to_add=Device, target_object=location_type)
 
             for ip_address in ip_addresses.replace(" ", "").split(","):
                 resolved = self._validate_ip_address(ip_address)

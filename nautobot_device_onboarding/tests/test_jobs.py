@@ -179,6 +179,68 @@ class SSOTSyncDevicesTestCase(TransactionTestCase):
         self.assertEqual(job.ip_address_inventory["172.23.0.8"]["platform"], None)
         self.assertEqual(log_level, 10)
 
+    def test_add_content_type_during_csv_sync(self):
+        """Test successful addition of content type to location type during CSV sync."""
+        # Create a location type without Device content type
+        location_type_without_device = self.testing_objects["location_2"].location_type
+        location_type_without_device.content_types.clear()
+        location_type_without_device.validated_save()
+
+        self.assertFalse(location_type_without_device.content_types.filter(app_label="dcim", model="device").exists())
+
+        # Run CSV processing which should add the content type
+        onboarding_job = jobs.SSOTSyncDevices()
+        with open("nautobot_device_onboarding/tests/fixtures/onboarding_csv_fixture.csv", "rb") as csv_file:
+            onboarding_job._process_csv_data(csv_file=csv_file)  # pylint: disable=protected-access
+
+        # Verify content type was added
+        location_type_without_device.refresh_from_db()
+        self.assertTrue(location_type_without_device.content_types.filter(app_label="dcim", model="device").exists())
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
+    def test_add_content_type_during_manual_sync(self, device_data):
+        """Test that content type is added when running manual sync with location."""
+        device_data.return_value = sync_devices_fixture.sync_devices_mock_data_valid
+
+        # Create a location type without Device content type
+        location_type_without_device = self.testing_objects["location_2"].location_type
+        location_type_without_device.content_types.clear()
+        location_type_without_device.validated_save()
+
+        self.assertFalse(location_type_without_device.content_types.filter(app_label="dcim", model="device").exists())
+
+        job_form_inputs = {
+            "debug": True,
+            "connectivity_test": False,
+            "dryrun": False,
+            "csv_file": None,
+            "location": self.testing_objects["location_2"].pk,
+            "namespace": self.testing_objects["namespace"].pk,
+            "ip_addresses": "10.1.1.10,10.1.1.11",
+            "port": 22,
+            "timeout": 30,
+            "set_mgmt_only": True,
+            "update_devices_without_primary_ip": True,
+            "device_role": self.testing_objects["device_role"].pk,
+            "device_status": self.testing_objects["status"].pk,
+            "interface_status": self.testing_objects["status"].pk,
+            "ip_address_status": self.testing_objects["status"].pk,
+            "secrets_group": self.testing_objects["secrets_group"].pk,
+            "platform": None,
+            "memory_profiling": False,
+        }
+        job_result = create_job_result_and_run_job(
+            module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
+        )
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
+        # Verify content type was added
+        location_type_without_device.refresh_from_db()
+        self.assertTrue(location_type_without_device.content_types.filter(app_label="dcim", model="device").exists())
+
 
 class SSOTSyncNetworkDataTestCase(TransactionTestCase):
     """Test SSOTSyncNetworkData class."""
