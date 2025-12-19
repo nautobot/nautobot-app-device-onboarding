@@ -111,7 +111,7 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
         onboarding_vc = self.virtual_chassis(
             name=device.virtual_chassis.name,
         )
-        for vc_member in onboarding_vc.members.all().exclude(id=device.id): # The originating device is loaded in load_devices
+        for vc_member in device.virtual_chassis.members.all().exclude(id=device.id): # The originating device is loaded in load_devices
             onboarding_device = self.device(
                 adapter=self,
                 pk=vc_member.pk,
