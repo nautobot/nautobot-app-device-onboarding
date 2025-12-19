@@ -108,7 +108,9 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
 
     def load_virtual_chassis(self, device):
         """Add Nautobot Virtual Chassis objects as DiffSync."""
-        onboarding_vc = device.virtual_chassis
+        onboarding_vc = self.virtual_chassis(
+            name=device.virtual_chassis.name,
+        )
         for vc_member in onboarding_vc.members.all().exclude(id=device.id): # The originating device is loaded in load_devices
             onboarding_device = self.device(
                 adapter=self,
