@@ -120,7 +120,6 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
                 name=vc_member.name,
                 platform__name=vc_member.platform.name if vc_member.platform_id else "",
                 primary_ip4__host=device.primary_ip4.host if device.primary_ip4_id else "",
-                primary_ip4__status__name=(device.primary_ip4.status.name if device.primary_ip4_id else ""),
                 role__name=vc_member.role.name,
                 status__name=vc_member.status.name,
                 mask_length=(device.primary_ip4.mask_length if device.primary_ip4_id else None),
