@@ -110,6 +110,7 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
         """Add Nautobot Virtual Chassis objects as DiffSync."""
         onboarding_vc = self.virtual_chassis(
             name=device.virtual_chassis.name,
+            master__name=device.virtual_chassis.master.name if device.virtual_chassis.master_id else "",
         )
         for vc_member in device.virtual_chassis.members.all().exclude(id=device.id): # The originating device is loaded in load_devices
             onboarding_device = self.device(
@@ -354,6 +355,7 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                     # Virtual Chassis detected
                     onboarding_vc = self.virtual_chassis(
                         name=self.device_data[ip_address]["hostname"],
+                        master__name=self.device_data[ip_address]["hostname"],
                     )
                     # Create Virtual Chassis members
                     for index, vc_member in enumerate(self.device_data[ip_address]["virtual_chassis"]):
