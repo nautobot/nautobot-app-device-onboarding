@@ -403,5 +403,8 @@ class SyncDevicesVirtualChassis(NautobotModel):
     _modelname = "virtual_chassis"
     _model = VirtualChassis
     _identifiers = ("name",)
+    _attributes = ("master__name")
 
     name: str
+
+    master__name: str
