@@ -9,6 +9,7 @@ from nornir_nautobot.plugins.processors import BaseLoggingProcessor
 
 from nautobot_device_onboarding.nornir_plays.formatter import extract_show_data
 from nautobot_device_onboarding.nornir_plays.schemas import NETWORK_DATA_SCHEMA, NETWORK_DEVICES_SCHEMA
+from nautobot_device_onboarding.utils.helper import close_threaded_db_connections
 
 
 class CommandGetterProcessor(BaseLoggingProcessor):
@@ -29,6 +30,7 @@ class CommandGetterProcessor(BaseLoggingProcessor):
                 "network_driver": host.platform,
             }
 
+    @close_threaded_db_connections
     def task_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Processor for logging and data processing on task completed.
 
