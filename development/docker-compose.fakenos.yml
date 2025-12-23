@@ -7,12 +7,12 @@ services:
       context: "../"
       dockerfile: "development/Dockerfile-fakenos"
     image: "nautobot-device-onboarding/fakenos:py${PYTHON_VER}"
-    pull_policy: never
+    pull_policy: "never"
     expose:
       - "22"
   fakerouter2: &fakerouter
     image: "nautobot-device-onboarding/fakenos:py${PYTHON_VER}"
-    pull_policy: never
+    pull_policy: "never"
     expose:
       - "22"
   fakerouter3: *fakerouter
