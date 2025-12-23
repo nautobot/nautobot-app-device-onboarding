@@ -9,8 +9,7 @@ WORKDIR /usr/src/fakenos
 
 RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
 
-# NOTE: fakenos has a bug that causes the cli to use 100% cpu. Use fork until pr is merged
-RUN pip install git+https://github.com/gsnider2195/fakenos.git
+RUN pip install git+https://github.com/fakenos/fakenos.git
 
 # NOTE: fakenos does not recognize .yml files, must use .yaml
 RUN cat <<EOF > /usr/src/fakenos/fakenos_inventory.yaml
