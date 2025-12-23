@@ -124,10 +124,11 @@ def check_for_required_file(directory, filename):
 
 def close_threaded_db_connections(func):
     """Decorator to close database connections in threaded tasks."""
-    def inner(*args, **kwargs):
 
+    def inner(*args, **kwargs):
         try:
             func(*args, **kwargs)
         finally:
             connections.close_all()
+
     return inner
