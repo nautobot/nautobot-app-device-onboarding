@@ -5,6 +5,7 @@ import re
 import socket
 
 import netaddr
+from django.db import connections
 from nautobot.dcim.filters import DeviceFilterSet
 from nautobot.dcim.models import Device
 from netaddr.core import AddrFormatError
@@ -119,3 +120,14 @@ def check_for_required_file(directory, filename):
         return False
     except FileNotFoundError:
         return False
+
+
+def close_threaded_db_connections(func):
+    """Decorator to close database connections in threaded tasks."""
+    def inner(*args, **kwargs):
+
+        try:
+            func(*args, **kwargs)
+        finally:
+            connections.close_all()
+    return inner
