@@ -75,6 +75,16 @@ Navigate to the Device Onboarding Job: Jobs > Perform Device Onboarding (origina
 
 You can check out the [Use Cases](app_use_cases.md) section for more examples or try out the job inputs with at least the required fields.
 
-![job input](../images/sync_devices_inputs.png)
-
+<!-- ![job input](../images/sync_devices_inputs.png) -->
+<!-- updated_images -->
+<!-- light mode -->
+![job input](../images/s-sync_devices_inputs_1_light.png#only-light){ .on-glb }
+![job input](../images/s-sync_devices_inputs_2_light.png#only-light){ .on-glb }
+![job input](../images/s-sync_devices_inputs_3_light.png#only-light){ .on-glb }
+![job input](../images/s-sync_devices_inputs_4_light.png#only-light){ .on-glb }
+<!-- dark mode -->
+![job input](../images/s-sync_devices_inputs_1_dark.png#only-dark){ .on-glb }
+![job input](../images/s-sync_devices_inputs_2_dark.png#only-dark){ .on-glb }
+![job input](../images/s-sync_devices_inputs_3_dark.png#only-dark){ .on-glb }
+![job input](../images/s-sync_devices_inputs_4_dark.png#only-dark){ .on-glb }
 The Nautobot job will pass the job execution to the worker which will initiate an onboarding and will reach out to the device and attempt to onboard it.

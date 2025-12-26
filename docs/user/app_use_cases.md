@@ -40,8 +40,13 @@ For the platforms where SSH auto-detection does not work, the user will need to:
 
 The Onboarding App will automatically create Platforms for vendor operating systems where platform auto-detection works. The picture below shows the details of auto-created Platforms for `cisco_ios` and `juniper_junos`.
 
-![cisco_ios_platform](../images/platform_cisco_ios.png)
-![juniper_junos_platform](../images/platform_juniper_junos.png)
+<!-- ![cisco_ios_platform](../images/platform_cisco_ios.png) -->
+![cisco_ios_platform](../images/s-platform_cisco_ios_light.png#only-light){ .on-glb }
+![cisco_ios_platform](../images/s-platform_cisco_ios_dark.png#only-dark){ .on-glb }
+
+<!-- ![juniper_junos_platform](../images/platform_juniper_junos.png) -->
+![juniper_junos_platform](../images/s-platform_juniper_junos_light.png#only-light){ .on-glb }
+![juniper_junos_platform](../images/s-platform_juniper_junos_dark.png#only-dark){ .on-glb }
 
 ### Passing Custom Nornir Connection Options
 
