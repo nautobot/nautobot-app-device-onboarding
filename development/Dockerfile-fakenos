@@ -29,7 +29,6 @@ EOF
 ARG PYTHON_VER="3.12"
 
 # NOTE: fakenos does not correctly handle absolute paths
-# NOTE: stop using fakenos
 WORKDIR /usr/local/lib/python${PYTHON_VER}/site-packages
 
 CMD [ "fakenos", "--inventory", "/usr/src/fakenos/fakenos_inventory.yaml" ]
