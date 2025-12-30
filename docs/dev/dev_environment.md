@@ -414,11 +414,7 @@ namespace.configure(
         "nautobot_device_onboarding": {
             ...
             "nautobot_ver": "3.0.0",
-<<<<<<< HEAD
-        ...
-=======
 	    ...
->>>>>>> e3b162a (Cookie updated targeting develop by NetworkToCode Cookie Drift Manager Tool)
         }
     }
 )
