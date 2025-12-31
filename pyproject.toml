@@ -29,7 +29,6 @@ include = [
 python = ">=3.10,<3.14"
 napalm = ">=4.1.0, <6.0.0"
 zipp = "^3.4.0"
-nautobot = ">=3.0.0,<4.0.0"
 nautobot-ssot = ">=4.0.0,<5.0.0"
 nautobot-plugin-nornir = ">=3.0.0,<4.0.0"
 jdiff = ">=1.0.1,<2.0.0"
@@ -37,6 +36,8 @@ ntc-templates = "^7.0.0"
 # Netutils pin is needed for https://github.com/networktocode/netutils/pull/553
 netutils = "^1.9.1"
 ttp = "^0.9.0"
+# Used for local development
+nautobot = ">=3.0.0,<4.0.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "*"
