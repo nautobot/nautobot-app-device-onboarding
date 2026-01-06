@@ -336,44 +336,47 @@ class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
     def test_load_tagged_vlans_to_interface(self):
         """Test loading Nautobot tagged vlan interface assignments into the Diffsync store."""
         self.sync_network_data_adapter.load_tagged_vlans_to_interface()
-        for interface in Interface.objects.filter(device__in=self.job.devices_to_load):
-            tagged_vlans = []
-            for vlan in interface.tagged_vlans.all():
-                vlan_dict = {}
-                vlan_dict["name"] = vlan.name
-                vlan_dict["id"] = str(vlan.vid)
-                tagged_vlans.append(vlan_dict)
+        for device in self.job.devices_to_load:
+            for interface in device.all_interfaces:
+                tagged_vlans = []
+                for vlan in interface.tagged_vlans.all():
+                    vlan_dict = {}
+                    vlan_dict["name"] = vlan.name
+                    vlan_dict["id"] = str(vlan.vid)
+                    tagged_vlans.append(vlan_dict)
 
-                unique_id = f"{interface.device.name}__{interface.name}"
-                diffsync_obj = self.sync_network_data_adapter.get("tagged_vlans_to_interface", unique_id)
-                self.assertEqual(interface.device.name, diffsync_obj.device__name)
-                self.assertEqual(interface.name, diffsync_obj.name)
-                self.assertEqual(tagged_vlans, diffsync_obj.tagged_vlans)
+                    unique_id = f"{interface.parent.name}__{interface.name}"
+                    diffsync_obj = self.sync_network_data_adapter.get("tagged_vlans_to_interface", unique_id)
+                    self.assertEqual(interface.parent.name, diffsync_obj.device__name)
+                    self.assertEqual(interface.name, diffsync_obj.name)
+                    self.assertEqual(tagged_vlans, diffsync_obj.tagged_vlans)
 
     def load_untagged_vlan_to_interface(self):
         """Test loading Nautobot untagged vlan interface assignments into the Diffsync store."""
         self.sync_network_data_adapter.load_untagged_vlan_to_interface()
-        for interface in Interface.objects.filter(device__in=self.job.devices_to_load):
-            untagged_vlan = {}
-            if interface.untagged_vlan:
-                untagged_vlan["name"] = interface.untagged_vlan.name
-                untagged_vlan["id"] = str(interface.untagged_vlan.vid)
+        for device in self.job.devices_to_load:
+            for interface in device.all_interfaces:
+                untagged_vlan = {}
+                if interface.untagged_vlan:
+                    untagged_vlan["name"] = interface.untagged_vlan.name
+                    untagged_vlan["id"] = str(interface.untagged_vlan.vid)
 
-                unique_id = f"{interface.device.name}__{interface.name}"
-                diffsync_obj = self.sync_network_data_adapter.get("untagged_vlans_to_interface", unique_id)
-                self.assertEqual(interface.device.name, diffsync_obj.device__name)
-                self.assertEqual(interface.name, diffsync_obj.name)
-                self.assertEqual(untagged_vlan, diffsync_obj.tagged_vlan)
+                    unique_id = f"{interface.parent.name}__{interface.name}"
+                    diffsync_obj = self.sync_network_data_adapter.get("untagged_vlans_to_interface", unique_id)
+                    self.assertEqual(interface.parent.name, diffsync_obj.device__name)
+                    self.assertEqual(interface.name, diffsync_obj.name)
+                    self.assertEqual(untagged_vlan, diffsync_obj.tagged_vlan)
 
     def test_load_lag_to_interface(self):
         """Test loading Nautobot lag interface assignments into the Diffsync store."""
         self.sync_network_data_adapter.load_lag_to_interface()
-        for interface in Interface.objects.filter(device__in=self.job.devices_to_load):
-            unique_id = f"{interface.device.name}__{interface.name}"
-            diffsync_obj = self.sync_network_data_adapter.get("lag_to_interface", unique_id)
-            self.assertEqual(interface.device.name, diffsync_obj.device__name)
-            self.assertEqual(interface.name, diffsync_obj.name)
-            self.assertEqual(interface.lag.name if interface.lag else "", diffsync_obj.lag__interface__name)
+        for device in self.job.devices_to_load:
+            for interface in device.all_interfaces:
+                unique_id = f"{interface.parent.name}__{interface.name}"
+                diffsync_obj = self.sync_network_data_adapter.get("lag_to_interface", unique_id)
+                self.assertEqual(interface.parent.name, diffsync_obj.device__name)
+                self.assertEqual(interface.name, diffsync_obj.name)
+                self.assertEqual(interface.lag.name if interface.lag else "", diffsync_obj.lag__interface__name)
 
     def test_load_vrfs(self):
         """Test loading Nautobot vrf data into the diffsync store."""
@@ -411,15 +414,16 @@ class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
     def test_load_vrf_to_interface(self):
         """Test loading Nautobot vrf interface assignments into the Diffsync store."""
         self.sync_network_data_adapter.load_vrf_to_interface()
-        for interface in Interface.objects.filter(device__in=self.job.devices_to_load):
-            vrf = {}
-            if interface.vrf:
-                vrf["name"] = interface.vrf.name
-            unique_id = f"{interface.device.name}__{interface.name}"
-            diffsync_obj = self.sync_network_data_adapter.get("vrf_to_interface", unique_id)
-            self.assertEqual(interface.device.name, diffsync_obj.device__name)
-            self.assertEqual(interface.name, diffsync_obj.name)
-            self.assertEqual(vrf, diffsync_obj.vrf)
+        for device in self.job.devices_to_load:
+            for interface in device.all_interfaces:
+                vrf = {}
+                if interface.vrf:
+                    vrf["name"] = interface.vrf.name
+                unique_id = f"{interface.parent.name}__{interface.name}"
+                diffsync_obj = self.sync_network_data_adapter.get("vrf_to_interface", unique_id)
+                self.assertEqual(interface.parent.name, diffsync_obj.device__name)
+                self.assertEqual(interface.name, diffsync_obj.name)
+                self.assertEqual(vrf, diffsync_obj.vrf)
 
     def test_load_software_versions(self):
         """Test loading Nautobot software version data into the diffsync store."""
