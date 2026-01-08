@@ -22,6 +22,20 @@ The [Invoke](http://www.pyinvoke.org/) library is used to provide some helper co
 
 Using **Invoke** these configuration options can be overridden using [several methods](https://docs.pyinvoke.org/en/stable/concepts/configuration.html). Perhaps the simplest is setting an environment variable `INVOKE_NAUTOBOT_DEVICE_ONBOARDING_VARIABLE_NAME` where `VARIABLE_NAME` is the variable you are trying to override. The only exception is `compose_files`, because it is a list it must be overridden in a YAML file. There is an example `invoke.yml` (`invoke.example.yml`) in this directory which can be used as a starting point.
 
+#### FakeNOS Support
+
+To enable FakeNOS support in the development environment, you can add the `docker-compose.fakenos.yml` file to the list of compose files used by Invoke. This can be done by creating an `invoke.yml` file with the following contents at the root of the repo:
+
+```yaml
+---
+nautobot_device_onboarding:
+    compose_files:
+      - docker-compose.redis.yml
+      - docker-compose.postgres.yml
+      - docker-compose.fakenos.yml
+      - docker-compose.dev.yml
+```
+
 ### Docker Development Environment
 
 !!! tip
