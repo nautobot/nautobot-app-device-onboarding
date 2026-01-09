@@ -160,6 +160,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                 name=command["command"],
                 command_string=command["command"],
                 read_timeout=60,
+                enable=True,
                 **send_command_kwargs,
             )
             if nautobot_job.debug:
@@ -254,9 +255,9 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
 
 
 @lru_cache(maxsize=None)
-def _parse_credentials(secrets_group: Union[SecretsGroup, None], logger: NornirLogger = None) -> Tuple[str, str]:
-    """Parse creds from either secretsgroup or settings, return tuple of username/password."""
-    username, password = None, None
+def _parse_credentials(secrets_group: Union[SecretsGroup, None], logger: NornirLogger = None) -> Tuple[str, str, str]:
+    """Parse creds from either secretsgroup or settings, return tuple of username/password/secret."""
+    username, password, secret = None, None, None
     if secrets_group:
         logger.info(f"Parsing credentials from Secrets Group: {secrets_group.name}")
         try:
@@ -272,9 +273,23 @@ def _parse_credentials(secrets_group: Union[SecretsGroup, None], logger: NornirL
             pass
         except Exception as e:  # pylint: disable=broad-exception-caught
             logger.debug(f"Error processing credentials from secrets group {secrets_group.name}: {e}")
+        # Try to get the enable secret (TYPE_SECRET)
+        try:
+            secret = secrets_group.get_secret_value(
+                access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
+                secret_type=SecretsGroupSecretTypeChoices.TYPE_SECRET,
+            )
+        except SecretsGroupAssociation.DoesNotExist:
+            pass
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logger.debug(f"Error processing enable secret from secrets group {secrets_group.name}: {e}")
     else:
         username = settings.NAPALM_USERNAME
         password = settings.NAPALM_PASSWORD
+
+    # Fallback: use password as secret if not defined
+    if not secret:
+        secret = password
 
     missing_creds = []
     for cred_var in ["username", "password"]:
@@ -282,7 +297,7 @@ def _parse_credentials(secrets_group: Union[SecretsGroup, None], logger: NornirL
             missing_creds.append(cred_var)
     if missing_creds:
         logger.debug(f"Missing credentials for {missing_creds}")
-    return (username, password)
+    return (username, password, secret)
 
 
 def sync_devices_command_getter(job, log_level):
@@ -305,7 +320,7 @@ def sync_devices_command_getter(job, log_level):
                 secrets_group = values["secrets_group"]
                 if secrets_group:
                     # The _parse_credentials function is cached. This prevents unnecessary repeat calls to secrets providers.
-                    username, password = _parse_credentials(secrets_group, logger=logger)
+                    username, password, secret = _parse_credentials(secrets_group, logger=logger)
                     if not username or not password:
                         logger.error(f"Unable to onboard {values['original_ip_address']}, failed to parse credentials")
                     single_host_inventory_constructed, exc_info = _set_inventory(
@@ -314,6 +329,7 @@ def sync_devices_command_getter(job, log_level):
                         port=values["port"],
                         username=username,
                         password=password,
+                        secret=secret,
                     )
                     if exc_info:
                         logger.error(
