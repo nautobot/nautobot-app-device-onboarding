@@ -100,10 +100,7 @@ class SyncDevicesDevice(DiffSyncModel):
         """Attempt to get a Device Interface, create a new one if necessary."""
         device_interface = None
         try:
-            device_interface = Interface.objects.get(
-                name=interface_name,
-                device=device,
-            )
+            device_interface = device.all_interfaces.get(name=interface_name)
         except ObjectDoesNotExist:
             try:
                 job_form_attrs = adapter.job.ip_address_inventory[ip_address]
@@ -156,10 +153,7 @@ class SyncDevicesDevice(DiffSyncModel):
     def _remove_old_interface_assignment(self, device, ip_address):
         """Remove a device's primary IP address from an interface."""
         try:
-            old_interface = Interface.objects.get(
-                device=device,
-                ip_addresses__in=[ip_address],
-            )
+            old_interface = device.all_interfaces.get(ip_addresses__in=[ip_address])
             old_interface_assignment = IPAddressToInterface.objects.get(
                 interface=old_interface,
                 ip_address=ip_address,
