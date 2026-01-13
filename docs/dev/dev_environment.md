@@ -22,6 +22,20 @@ The [Invoke](http://www.pyinvoke.org/) library is used to provide some helper co
 
 Using **Invoke** these configuration options can be overridden using [several methods](https://docs.pyinvoke.org/en/stable/concepts/configuration.html). Perhaps the simplest is setting an environment variable `INVOKE_NAUTOBOT_DEVICE_ONBOARDING_VARIABLE_NAME` where `VARIABLE_NAME` is the variable you are trying to override. The only exception is `compose_files`, because it is a list it must be overridden in a YAML file. There is an example `invoke.yml` (`invoke.example.yml`) in this directory which can be used as a starting point.
 
+#### FakeNOS Support
+
+To enable FakeNOS support in the development environment, you can add the `docker-compose.fakenos.yml` file to the list of compose files used by Invoke. This can be done by creating an `invoke.yml` file with the following contents at the root of the repo:
+
+```yaml
+---
+nautobot_device_onboarding:
+    compose_files:
+      - docker-compose.redis.yml
+      - docker-compose.postgres.yml
+      - docker-compose.fakenos.yml
+      - docker-compose.dev.yml
+```
+
 ### Docker Development Environment
 
 !!! tip
@@ -181,7 +195,7 @@ The first thing you need to do is build the necessary Docker image for Nautobot 
 #14 exporting layers
 #14 exporting layers 1.2s done
 #14 writing image sha256:2d524bc1665327faa0d34001b0a9d2ccf450612bf8feeb969312e96a2d3e3503 done
-#14 naming to docker.io/nautobot-device-onboarding/nautobot:2.4.20-py3.12 done
+#14 naming to docker.io/nautobot-device-onboarding/nautobot:3.0.0-py3.12 done
 ```
 
 ### Invoke - Starting the Development Environment
@@ -212,9 +226,9 @@ This will start all of the Docker containers used for hosting Nautobot. You shou
 ```bash
 ➜ docker ps
 ****CONTAINER ID   IMAGE                            COMMAND                  CREATED          STATUS          PORTS                                       NAMES
-ee90fbfabd77   nautobot-device-onboarding/nautobot:2.4.20-py3.12  "nautobot-server rqw…"   16 seconds ago   Up 13 seconds                                               nautobot_device_onboarding_worker_1
-b8adb781d013   nautobot-device-onboarding/nautobot:2.4.20-py3.12  "/docker-entrypoint.…"   20 seconds ago   Up 15 seconds   0.0.0.0:8080->8080/tcp, :::8080->8080/tcp   nautobot_device_onboarding_nautobot_1
-d64ebd60675d   nautobot-device-onboarding/nautobot:2.4.20-py3.12  "mkdocs serve -v -a …"   25 seconds ago   Up 18 seconds   0.0.0.0:8001->8080/tcp, :::8001->8080/tcp   nautobot_device_onboarding_docs_1
+ee90fbfabd77   nautobot-device-onboarding/nautobot:3.0.0-py3.12  "nautobot-server rqw…"   16 seconds ago   Up 13 seconds                                               nautobot_device_onboarding_worker_1
+b8adb781d013   nautobot-device-onboarding/nautobot:3.0.0-py3.12  "/docker-entrypoint.…"   20 seconds ago   Up 15 seconds   0.0.0.0:8080->8080/tcp, :::8080->8080/tcp   nautobot_device_onboarding_nautobot_1
+d64ebd60675d   nautobot-device-onboarding/nautobot:3.0.0-py3.12  "mkdocs serve -v -a …"   25 seconds ago   Up 18 seconds   0.0.0.0:8001->8080/tcp, :::8001->8080/tcp   nautobot_device_onboarding_docs_1
 e72d63129b36   postgres:13-alpine               "docker-entrypoint.s…"   25 seconds ago   Up 19 seconds   0.0.0.0:5432->5432/tcp, :::5432->5432/tcp   nautobot_device_onboarding_postgres_1
 96c6ff66997c   redis:6-alpine                   "docker-entrypoint.s…"   25 seconds ago   Up 21 seconds   0.0.0.0:6379->6379/tcp, :::6379->6379/tcp   nautobot_device_onboarding_redis_1
 ```
@@ -414,7 +428,7 @@ namespace.configure(
         "nautobot_device_onboarding": {
             ...
             "nautobot_ver": "3.0.0",
-        ...
+	    ...
         }
     }
 )

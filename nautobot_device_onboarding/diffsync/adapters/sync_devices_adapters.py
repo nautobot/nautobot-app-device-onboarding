@@ -107,18 +107,14 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
             self.job.logger.debug("Loading Device data from Nautobot...")
 
         for device in Device.objects.filter(primary_ip4__host__in=list(self.job.ip_address_inventory)):
-            interface_list = []
+            interfaces = []
             # Only interfaces with the device's primary ip should be considered for diff calculations
             # Ultimately, only the first matching interface is used but this list could support multiple
             # interface syncs in the future.
-            for interface in device.interfaces.all():
+            for interface in device.all_interfaces.order_by("name"):
                 if device.primary_ip4 in interface.ip_addresses.all():
-                    interface_list.append(interface.name)
-            if interface_list:
-                interface_list.sort()
-                interfaces = [interface_list[0]]
-            else:
-                interfaces = []
+                    interfaces = [interface.name]
+                    break
             onboarding_device = self.device(
                 adapter=self,
                 pk=device.pk,
