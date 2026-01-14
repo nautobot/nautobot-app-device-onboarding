@@ -68,9 +68,13 @@ Regardless, the Onboarding App greatly simplifies the onboarding process by allo
 Device Onboarding is a Job that allows you to provide a few required pieces of information and onboard the device.
 
 As Job data and Job execution will be same for both Manual Input and CSV Input.
+
 Manual Input:
+
 ![job input](https://raw.githubusercontent.com/nautobot/nautobot-app-device-onboarding/develop/docs/images/manual_input_dark.png)
+
 CSV Input:
+
 ![job input](https://raw.githubusercontent.com/nautobot/nautobot-app-device-onboarding/develop/docs/images/csv_input_dark.png)
 
 
