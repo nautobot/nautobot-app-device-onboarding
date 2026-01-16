@@ -78,9 +78,12 @@ You can check out the [Use Cases](app_use_cases.md) section for more examples or
 As Job data and Job execution will be same for both Manual Input and CSV Input.
 
 Manual Input:
+
 ![job input](../images/manual_input_light.png#only-light){ .on-glb }
 ![job input](../images/manual_input_dark.png#only-dark){ .on-glb }
+
 CSV Input:
+
 ![job input](../images/csv_input_light.png#only-light){ .on-glb }
 ![job input](../images/csv_input_dark.png#only-dark){ .on-glb }
 
