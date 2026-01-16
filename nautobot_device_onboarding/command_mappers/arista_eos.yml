@@ -116,6 +116,26 @@ sync_network_data:
         jpath: '{admin_mode: switchports."{{ current_key }}".switchportInfo.mode, mode: switchports."{{ current_key }}".switchportInfo.mode, access_vlan: switchports."{{ current_key }}".switchportInfo.accessVlanId, trunking_vlans: switchports."{{ current_key }}".switchportInfo.trunkAllowedVlans, native_vlan: switchports."{{ current_key }}".switchportInfo.trunkingNativeVlanId}'  # yamllint disable-line rule:quoted-strings
         post_processor: "{{ obj | get_vlan_data(vlan_map, 'untagged') | tojson }}"
         iterable_type: "dict"
+  cables:
+    commands:
+      - command: "sh lldp nei detail | json"
+        parser: "none"
+        jpath: "@"
+        post_processor: |
+          {% set results = [] %}
+          {% for key, value in obj.get('lldpNeighbors', {}).items() %}
+            {% if value.get('lldpNeighborInfo', []) | length > 0 %}
+              {% if value['lldpNeighborInfo'][0]['neighborInterfaceInfo']['interfaceIdType'] == 'interfaceName'
+                and ' ' not in value['lldpNeighborInfo'][0]['systemName'] %}
+                {% set _ = results.append({
+                  'local_interface': key,
+                  'remote_interface': value['lldpNeighborInfo'][0]['neighborInterfaceInfo']['interfaceId'] | replace('"', ''),
+                  'remote_device': value['lldpNeighborInfo'][0]['systemName'] | remove_fqdn,
+                }) %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {{ results | tojson }}
   software_version:
     commands:
       - command: "show version"
