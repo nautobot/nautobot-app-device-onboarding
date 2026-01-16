@@ -5,6 +5,7 @@ import ipaddress
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from nautobot.apps.choices import PrefixTypeChoices
 from nautobot.dcim.models import Device
+from nautobot.extras.models import Role
 from nautobot.ipam.models import IPAddress, Prefix
 
 
@@ -61,10 +62,9 @@ def get_or_create_prefix(host, mask_length, default_status, namespace, job=None)
     return prefix
 
 
-def get_or_create_ip_address(host, mask_length, namespace, default_ip_status, default_prefix_status, job=None):
+def get_or_create_ip_address(host, mask_length, namespace, default_ip_status, default_prefix_status, default_ip_role=None, job=None):
     """Attempt to get a Nautobot IPAddress, and create a new one if necessary."""
     ip_address = None
-
     try:
         ip_address = IPAddress.objects.get(
             host=host,
@@ -77,6 +77,8 @@ def get_or_create_ip_address(host, mask_length, namespace, default_ip_status, de
                 namespace=namespace,
                 status=default_ip_status,
             )
+            if default_ip_role:
+                ip_address.role = Role.objects.get(name=default_ip_role)
             ip_address.validated_save()
         except ValidationError:
             if job:
@@ -90,6 +92,8 @@ def get_or_create_ip_address(host, mask_length, namespace, default_ip_status, de
                 status=default_ip_status,
                 parent=prefix,
             )
+            if default_ip_role:
+                ip_address.role = Role.objects.get(name=default_ip_role)
         try:
             ip_address.validated_save()
         except ValidationError as err:
