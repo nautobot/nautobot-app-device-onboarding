@@ -51,6 +51,7 @@ class SSOTSyncDevicesTestCase(TransactionTestCase):
             "update_devices_without_primary_ip": True,
             "device_role": self.testing_objects["device_role"].pk,
             "device_status": self.testing_objects["status"].pk,
+            "device_tenant": self.testing_objects["device_tenant_1"].pk,
             "interface_status": self.testing_objects["status"].pk,
             "ip_address_status": self.testing_objects["status"].pk,
             "secrets_group": self.testing_objects["secrets_group"].pk,

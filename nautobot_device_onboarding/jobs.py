@@ -36,6 +36,7 @@ from nautobot.extras.models import (
     Status,
 )
 from nautobot.ipam.models import Namespace
+from nautobot.tenancy.models import Tenant
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
@@ -314,6 +315,11 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         required=False,
         description="Status to be applied to all synced devices.",
     )
+    device_tenant = ObjectVar(
+        model=Tenant,
+        required=False,
+        description="Tenant to be applied to all synced devices.",
+    )
     interface_status = ObjectVar(
         model=Status,
         query_params={"content_types": "dcim.interface"},
@@ -398,6 +404,13 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 device_status = Status.objects.get(
                     name=row["device_status_name"].strip(),
                 )
+                if row.get("device_tenant_name"):
+                    query = f"device_tenant: {row.get('device_tenant_name')}"
+                    device_tenant = Tenant.objects.get(
+                        name=row["device_tenant_name"].strip(),
+                    )
+                else:
+                    device_tenant = None
                 query = f"interface_status: {row.get('interface_status_name')}"
                 interface_status = Status.objects.get(
                     name=row["interface_status_name"].strip(),
@@ -437,6 +450,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                     "update_devices_without_primary_ip": update_devices_without_primary_ip,
                     "device_role": device_role,
                     "device_status": device_status,
+                    "device_tenant": device_tenant,
                     "interface_status": interface_status,
                     "ip_address_status": ip_address_status,
                     "secrets_group": secrets_group,
@@ -495,6 +509,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         ip_addresses=None,
         device_role=None,
         device_status=None,
+        device_tenant=None,
         interface_status=None,
         ip_address_status=None,
         secrets_group=None,
@@ -541,6 +556,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 "namespace": namespace,
                 "device_role": device_role,
                 "device_status": device_status,
+                "device_tenant": device_tenant,
                 "interface_status": interface_status,
                 "ip_address_status": ip_address_status,
                 "set_mgmt_only": set_mgmt_only,
