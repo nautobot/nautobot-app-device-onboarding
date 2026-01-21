@@ -11,6 +11,9 @@ from nautobot.dcim.models import (
     Location,
     LocationType,
     Manufacturer,
+    Module,
+    ModuleBay,
+    ModuleType,
     Platform,
     SoftwareVersion,
 )
@@ -26,6 +29,7 @@ def sync_network_data_ensure_required_nautobot_objects():
 
     status, _ = Status.objects.get_or_create(name="Active")
     status.content_types.add(ContentType.objects.get_for_model(Device))
+    status.content_types.add(ContentType.objects.get_for_model(Module))
     status.content_types.add(ContentType.objects.get_for_model(Prefix))
     status.content_types.add(ContentType.objects.get_for_model(IPAddress))
     status.content_types.add(ContentType.objects.get_for_model(Location))
@@ -74,6 +78,9 @@ def sync_network_data_ensure_required_nautobot_objects():
     ip_address_3, _ = IPAddress.objects.get_or_create(
         host="10.1.1.15", mask_length=24, type=IPAddressTypeChoices.TYPE_HOST, status=status
     )
+    ip_address_4, _ = IPAddress.objects.get_or_create(
+        host="10.1.1.16", mask_length=24, type=IPAddressTypeChoices.TYPE_HOST, status=status
+    )
     location_type, _ = LocationType.objects.get_or_create(name="Site")
     location_type.content_types.add(ContentType.objects.get_for_model(Device))
     location_type.content_types.add(ContentType.objects.get_for_model(VLAN))
@@ -104,6 +111,7 @@ def sync_network_data_ensure_required_nautobot_objects():
     software_version_2, _ = SoftwareVersion.objects.get_or_create(version="3.12R.4", platform=platform_2, status=status)
 
     device_type, _ = DeviceType.objects.get_or_create(model="CSR1000V17", manufacturer=manufacturer)
+    module_type, _ = ModuleType.objects.get_or_create(model="Test Module Foo", manufacturer=manufacturer)
     device_1, _ = Device.objects.get_or_create(
         name="demo-cisco-1",
         serial="9ABUXU581111",
@@ -114,6 +122,15 @@ def sync_network_data_ensure_required_nautobot_objects():
         platform=platform_1,
         secrets_group=secrets_group,
         software_version=software_version_1,
+    )
+    device_1_module_bay, _ = ModuleBay.objects.get_or_create(
+        parent_device=device_1,
+        name="demo-cisco-1-module-1",
+    )
+    device_1_module, _ = Module.objects.get_or_create(
+        module_type=module_type,
+        parent_module_bay=device_1_module_bay,
+        status=status,
     )
     device_2, _ = Device.objects.get_or_create(
         name="demo-cisco-2",
@@ -137,8 +154,19 @@ def sync_network_data_ensure_required_nautobot_objects():
         secrets_group=secrets_group,
         software_version=software_version_2,
     )
+    device_4, _ = Device.objects.get_or_create(
+        name="demo-cisco-4",
+        serial="9ABUXU5884444",
+        device_type=device_type,
+        status=status,
+        location=location,
+        role=device_role,
+        platform=platform_2,
+        secrets_group=secrets_group,
+        software_version=software_version_2,
+    )
     interface_1, _ = Interface.objects.get_or_create(
-        device=device_1, name="GigabitEthernet1", status=status, type=InterfaceTypeChoices.TYPE_VIRTUAL
+        module=device_1_module, name="GigabitEthernet1", status=status, type=InterfaceTypeChoices.TYPE_VIRTUAL
     )
     interface_1.mode = InterfaceModeChoices.MODE_TAGGED
     interface_1.tagged_vlans.add(vlan_1)
@@ -152,6 +180,9 @@ def sync_network_data_ensure_required_nautobot_objects():
     interface_4, _ = Interface.objects.get_or_create(
         device=device_1, name="GigabitEthernet2", status=status, type=InterfaceTypeChoices.TYPE_VIRTUAL
     )
+    interface_5, _ = Interface.objects.get_or_create(
+        device=device_4, name="GigabitEthernet2", status=status, type=InterfaceTypeChoices.TYPE_VIRTUAL
+    )
     IPAddressToInterface.objects.get_or_create(interface=interface_1, ip_address=ip_address_1)
     device_1.primary_ip4 = ip_address_1
     device_1.validated_save()
@@ -163,6 +194,9 @@ def sync_network_data_ensure_required_nautobot_objects():
     IPAddressToInterface.objects.get_or_create(interface=interface_3, ip_address=ip_address_3)
     device_3.primary_ip4 = ip_address_3
     device_3.validated_save()
+
+    # Don't set primary IP for Device 4
+    IPAddressToInterface.objects.get_or_create(interface=interface_5, ip_address=ip_address_4)
 
     provider_1, _ = Provider.objects.get_or_create(name="Provider 1")
     circuit_type_1, _ = CircuitType.objects.get_or_create(name="Circuit Type 1")
@@ -201,9 +235,11 @@ def sync_network_data_ensure_required_nautobot_objects():
     testing_objects["ip_address_1"] = ip_address_1
     testing_objects["ip_address_2"] = ip_address_2
     testing_objects["ip_address_3"] = ip_address_3
+    testing_objects["ip_address_4"] = ip_address_4
     testing_objects["device_1"] = device_1
     testing_objects["device_2"] = device_2
     testing_objects["device_3"] = device_3
+    testing_objects["device_4"] = device_4
     testing_objects["vlan_1"] = vlan_1
     testing_objects["vlan_2"] = vlan_2
     testing_objects["vrf_1"] = vrf_1

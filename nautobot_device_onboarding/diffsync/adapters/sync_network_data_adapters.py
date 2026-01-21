@@ -8,6 +8,7 @@ from diffsync.enum import DiffSyncModelFlags
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from nautobot.dcim.models import Device, Interface, SoftwareVersion
 from nautobot.ipam.models import VLAN, VRF, IPAddress
 from nautobot_ssot.contrib import NautobotAdapter
@@ -81,8 +82,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         of an interface, this cache is used to reset it in sync_complete().
         """
         self.primary_ips = {}
-        for device in device_queryset:
-            # TODO: This fails if the device has no primary ip -- AttributeError: 'NoneType' object has no attribute 'id'
+        for device in device_queryset.filter(Q(primary_ip4__isnull=False) | Q(primary_ip6__isnull=False)):
             self.primary_ips[device.id] = device.primary_ip.id
 
     def load_param_mac_address(self, parameter_name, database_object):
@@ -167,23 +167,24 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
 
         Only Vlan assignments that were returned by the CommandGetter job should be loaded.
         """
-        for interface in Interface.objects.filter(device__in=self.job.devices_to_load):
-            tagged_vlans = []
-            for vlan in interface.tagged_vlans.all():
-                vlan_dict = {}
-                vlan_dict["name"] = vlan.name
-                vlan_dict["id"] = str(vlan.vid)
-                tagged_vlans.append(vlan_dict)
-            sorted_tagged_vlans = sorted(tagged_vlans, key=lambda x: x["id"])
+        for device in self.job.devices_to_load:
+            for interface in device.all_interfaces:
+                tagged_vlans = []
+                for vlan in interface.tagged_vlans.all():
+                    vlan_dict = {}
+                    vlan_dict["name"] = vlan.name
+                    vlan_dict["id"] = str(vlan.vid)
+                    tagged_vlans.append(vlan_dict)
+                sorted_tagged_vlans = sorted(tagged_vlans, key=lambda x: x["id"])
 
-            network_tagged_vlans_to_interface = self.tagged_vlans_to_interface(
-                adapter=self,
-                device__name=interface.device.name,
-                name=interface.name,
-                tagged_vlans=sorted_tagged_vlans,
-            )
-            network_tagged_vlans_to_interface.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
-            self.add(network_tagged_vlans_to_interface)
+                network_tagged_vlans_to_interface = self.tagged_vlans_to_interface(
+                    adapter=self,
+                    device__name=device.name,
+                    name=interface.name,
+                    tagged_vlans=sorted_tagged_vlans,
+                )
+                network_tagged_vlans_to_interface.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
+                self.add(network_tagged_vlans_to_interface)
 
     def load_untagged_vlan_to_interface(self):
         """
@@ -191,20 +192,21 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
 
         Only UnTagged Vlan assignments that were returned by the CommandGetter job should be synced.
         """
-        for interface in Interface.objects.filter(device__in=self.job.devices_to_load):
-            untagged_vlan = {}
-            if interface.untagged_vlan:
-                untagged_vlan["name"] = interface.untagged_vlan.name
-                untagged_vlan["id"] = str(interface.untagged_vlan.vid)
+        for device in self.job.devices_to_load:
+            for interface in device.all_interfaces:
+                untagged_vlan = {}
+                if interface.untagged_vlan:
+                    untagged_vlan["name"] = interface.untagged_vlan.name
+                    untagged_vlan["id"] = str(interface.untagged_vlan.vid)
 
-            network_untagged_vlan_to_interface = self.untagged_vlan_to_interface(
-                adapter=self,
-                device__name=interface.device.name,
-                name=interface.name,
-                untagged_vlan=untagged_vlan,
-            )
-            network_untagged_vlan_to_interface.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
-            self.add(network_untagged_vlan_to_interface)
+                network_untagged_vlan_to_interface = self.untagged_vlan_to_interface(
+                    adapter=self,
+                    device__name=device.name,
+                    name=interface.name,
+                    untagged_vlan=untagged_vlan,
+                )
+                network_untagged_vlan_to_interface.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
+                self.add(network_untagged_vlan_to_interface)
 
     def load_lag_to_interface(self):
         """
@@ -212,15 +214,16 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
 
         Only Lag assignments that were returned by the CommandGetter job should be synced.
         """
-        for interface in Interface.objects.filter(device__in=self.job.devices_to_load):
-            network_lag_to_interface = self.lag_to_interface(
-                adapter=self,
-                device__name=interface.device.name,
-                name=interface.name,
-                lag__interface__name=interface.lag.name if interface.lag else "",
-            )
-            network_lag_to_interface.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
-            self.add(network_lag_to_interface)
+        for device in self.job.devices_to_load:
+            for interface in device.all_interfaces:
+                network_lag_to_interface = self.lag_to_interface(
+                    adapter=self,
+                    device__name=device.name,
+                    name=interface.name,
+                    lag__interface__name=interface.lag.name if interface.lag else "",
+                )
+                network_lag_to_interface.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
+                self.add(network_lag_to_interface)
 
     def load_vrfs(self):
         """
@@ -246,19 +249,20 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
 
         Only Vrf assignments that were returned by the CommandGetter job should be synced.
         """
-        for interface in Interface.objects.filter(device__in=self.job.devices_to_load):
-            vrf = {}
-            if interface.vrf:
-                vrf["name"] = interface.vrf.name
+        for device in self.job.devices_to_load:
+            for interface in device.all_interfaces:
+                vrf = {}
+                if interface.vrf:
+                    vrf["name"] = interface.vrf.name
 
-            network_vrf_to_interface = self.vrf_to_interface(
-                adapter=self,
-                device__name=interface.device.name,
-                name=interface.name,
-                vrf=vrf,
-            )
-            network_vrf_to_interface.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
-            self.add(network_vrf_to_interface)
+                network_vrf_to_interface = self.vrf_to_interface(
+                    adapter=self,
+                    device__name=device.name,
+                    name=interface.name,
+                    vrf=vrf,
+                )
+                network_vrf_to_interface.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
+                self.add(network_vrf_to_interface)
 
     def load_cables(self):
         """
@@ -345,6 +349,21 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
             network_software_version_to_device.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
             self.add(network_software_version_to_device)
 
+    def _handle_single_parameter(self, parameters, parameter_name, database_object, diffsync_model):
+        """Overload parameter handling to add special handling for modular interfaces."""
+        if parameter_name == "device__name":
+            if database_object.parent:
+                parameters["device__name"] = database_object.parent.name
+            else:
+                parameters["device__name"] = ""
+        elif parameter_name == "interface__device__name":
+            if database_object.interface.parent:
+                parameters["interface__device__name"] = database_object.interface.parent.name
+            else:
+                parameters["interface__device__name"] = ""
+        else:
+            super()._handle_single_parameter(parameters, parameter_name, database_object, diffsync_model)
+
     def load(self):
         """Generic implementation of the load function."""
         if not hasattr(self, "top_level") or not self.top_level:
@@ -399,6 +418,9 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         for device in self.job.devices_to_load.all():  # refresh queryset after sync is complete
             if not device.primary_ip:
                 ip_address = ""
+                if not self.primary_ips.get(device.id):
+                    self.job.logger.info(f"No primary IP Address was previously assigned for Device: {device.name}.")
+                    continue
                 try:
                     ip_address = IPAddress.objects.get(id=self.primary_ips[device.id])
                     device.primary_ip4 = ip_address
@@ -411,7 +433,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
                     )
                 if ip_address:
                     try:
-                        interface = Interface.objects.get(device=device, ip_addresses__in=[ip_address])
+                        interface = device.all_interfaces.get(ip_addresses__in=[ip_address])
                         interface.mgmt_only = True
                         interface.validated_save()
                         self.job.logger.info(
