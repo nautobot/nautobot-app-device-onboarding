@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-device-onboarding"
-version = "4.4.1"
+version = "4.4.2"
 description = "A app for Nautobot to easily onboard new devices."
 authors = ["Network to Code, LLC <info@networktocode.com>"]
 license = "Apache-2.0"
@@ -53,7 +53,7 @@ toml = "*"
 pymarkdownlnt = "~0.9.30"
 Markdown = "*"
 towncrier = ">=23.6.0,<=24.8.0"
-fakenos = { git = "https://github.com/fakenos/fakenos", branch = "master" }
+fakenos = { git = "https://github.com/fakenos/fakenos", branch = "master", python = ">=3.11,<3.13" }
 to-json-schema = "*"
 jsonschema = "*"
 djlint = ">=1.36.4,<2.0.0"
