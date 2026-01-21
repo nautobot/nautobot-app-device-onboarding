@@ -101,6 +101,7 @@ class SSOTSyncDevicesTestCase(TransactionTestCase):
         self.assertEqual(processed_csv_data["10.1.1.10"]["update_devices_without_primary_ip"], True)
         self.assertEqual(processed_csv_data["10.1.1.10"]["device_role"], self.testing_objects["device_role"])
         self.assertEqual(processed_csv_data["10.1.1.10"]["device_status"], self.testing_objects["status"])
+        self.assertEqual(processed_csv_data["10.1.1.10"]["device_tenant"], self.testing_objects["device_tenant_1"])
         self.assertEqual(processed_csv_data["10.1.1.10"]["interface_status"], self.testing_objects["status"])
         self.assertEqual(processed_csv_data["10.1.1.10"]["ip_address_status"], self.testing_objects["status"])
         self.assertEqual(processed_csv_data["10.1.1.10"]["secrets_group"], self.testing_objects["secrets_group"])
