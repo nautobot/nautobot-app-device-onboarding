@@ -315,11 +315,6 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         required=False,
         description="Status to be applied to all synced devices.",
     )
-    device_tenant = ObjectVar(
-        model=Tenant,
-        required=False,
-        description="Tenant to be applied to all synced devices.",
-    )
     interface_status = ObjectVar(
         model=Status,
         query_params={"content_types": "dcim.interface"},
@@ -342,6 +337,11 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         model=Platform,
         required=False,
         description="Device platform. Define ONLY to override auto-recognition of platform.",
+    )
+    device_tenant = ObjectVar(
+        model=Tenant,
+        required=False,
+        description="Tenant to be applied to all synced devices.",
     )
 
     template_name = "nautobot_device_onboarding/ssot_sync_devices.html"
