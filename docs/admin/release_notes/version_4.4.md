@@ -8,6 +8,18 @@ This document describes all new features and changes in the release. The format 
 - Fixed nxos lag member assigment.
 
 <!-- towncrier release notes start -->
+
+## [v4.4.2 (2026-01-21)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.4.2)
+
+### Fixed
+
+- [#366](https://github.com/nautobot/nautobot-app-device-onboarding/issues/366) - Fixed Sync Devices and Sync Network Data jobs not releasing DB connections.
+- [#483](https://github.com/nautobot/nautobot-app-device-onboarding/issues/483) - Fixed interfaces attached to modules being recreated when running the Sync Network Data job.
+
+### Housekeeping
+
+- Rebaked from the cookie `nautobot-app-v2.7.2`.
+
 ## [v4.4.1 (2025-12-09)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.4.1)
 
 ### Fixed

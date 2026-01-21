@@ -1,1 +1,0 @@
-Fixed Sync Devices and Sync Network Data jobs not releasing DB connections.
