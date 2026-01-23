@@ -9,6 +9,13 @@ This document describes all new features and changes in the release. The format 
 
 <!-- towncrier release notes start -->
 
+
+## [v4.4.3 (2026-01-23)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.4.3)
+
+### Added
+
+- [#484](https://github.com/nautobot/nautobot-app-device-onboarding/issues/484) - Added support for assigning a tenant to devices created by the SSOTSyncDevices job.
+
 ## [v4.4.2 (2026-01-21)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.4.2)
 
 ### Fixed
