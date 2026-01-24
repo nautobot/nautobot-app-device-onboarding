@@ -15,7 +15,7 @@ from nautobot.core.testing import TransactionTestCase
 from nautobot.dcim.models import Device, Interface, Manufacturer, Platform
 from nautobot.extras.choices import JobResultStatusChoices
 from nautobot.extras.models import FileProxy
-from nautobot.ipam.models import VLAN
+from nautobot.ipam.models import VLAN, VRF
 
 from nautobot_device_onboarding import jobs
 from nautobot_device_onboarding.tests import utils
@@ -422,3 +422,110 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
             initial_vlans.union({1, 10, 20, *range(100, 121)}),
             set(VLAN.objects.values_list("vid", flat=True)),
         )
+
+    # TODO: This should be using override_settings but nautobot-app-nornir isn't accessing the django settings directly
+    @patch.dict(
+        "nautobot_plugin_nornir.plugins.inventory.nautobot_orm.PLUGIN_CFG",
+        connection_options={"netmiko": {"extras": {"fast_cli": False, "read_timeout_override": 30}, "port": 6222}},
+    )
+    @patch.dict("os.environ", {"DEVICE_USER": "admin", "DEVICE_PASS": "admin"})
+    def test_sync_network_data_with_full_ssh_cisco_xe_vrfs(self):
+        """Test full cisco xe device sync and network data sync with VRFs."""
+        sync_devices_job_form_inputs = {
+            "debug": False,
+            "connectivity_test": False,
+            "dryrun": False,
+            "csv_file": None,
+            "location": self.testing_objects["location"].pk,
+            "namespace": self.testing_objects["namespace"].pk,
+            "ip_addresses": "localhost",
+            "port": 6222,
+            "timeout": 30,
+            "set_mgmt_only": True,
+            "update_devices_without_primary_ip": True,
+            "device_role": self.testing_objects["device_role"].pk,
+            "device_status": self.testing_objects["status"].pk,
+            "interface_status": self.testing_objects["status"].pk,
+            "ip_address_status": self.testing_objects["status"].pk,
+            "default_prefix_status": self.testing_objects["status"].pk,
+            "secrets_group": self.testing_objects["secrets_group"].pk,
+            "platform": self.testing_objects["platform_2"].pk,
+            "memory_profiling": False,
+        }
+        sync_network_data_job_form_inputs = {
+            "debug": False,
+            "connectivity_test": False,
+            "dryrun": False,
+            "sync_vlans": True,
+            "sync_vrfs": True,
+            "sync_cables": False,
+            "sync_software_version": True,
+            "namespace": self.testing_objects["namespace"].pk,
+            "interface_status": self.testing_objects["status"].pk,
+            "ip_address_status": self.testing_objects["status"].pk,
+            "default_prefix_status": self.testing_objects["status"].pk,
+            "location": None,
+            "device_role": None,
+            "platform": None,
+            "memory_profiling": False,
+        }
+
+        initial_vrfs = set(VRF.objects.values_list("name", flat=True))
+
+        fakenos_inventory = {
+            "hosts": {
+                "fake-xe-01": {
+                    "username": "admin",
+                    "password": "admin",
+                    "platform": "xetest",
+                    "port": 6222,
+                }
+            }
+        }
+
+        # This is hacky, theres clearly a bug in the fakenos library
+        # https://github.com/fakenos/fakenos/issues/19
+        with patch.object(Host, "_check_if_platform_is_supported"):
+            with FakeNOS(
+                inventory=fakenos_inventory,
+                plugins=[str(Path(__file__).parent.joinpath("fakenos/xe_vrfs.yaml").resolve())],
+            ):
+                create_job_result_and_run_job(
+                    module="nautobot_device_onboarding.jobs",
+                    name="SSOTSyncDevices",
+                    **sync_devices_job_form_inputs,
+                )
+                sync_network_data_job_form_inputs["devices"] = Device.objects.filter(name="fake-xe-01")
+                create_job_result_and_run_job(
+                    module="nautobot_device_onboarding.jobs",
+                    name="SSOTSyncNetworkData",
+                    **sync_network_data_job_form_inputs,
+                )
+        device_obj = Device.objects.filter(name="fake-xe-01").first()
+
+        # GigabitEthernet0/0/0 should have no VRF
+        gi0_0_0 = device_obj.interfaces.filter(name="GigabitEthernet0/0/0").first()
+        self.assertIsNotNone(gi0_0_0)
+        self.assertIsNone(gi0_0_0.vrf)
+
+        # GigabitEthernet0/0/1 should be in VRF "Mgmt-vrf"
+        gi0_0_1 = device_obj.interfaces.filter(name="GigabitEthernet0/0/1").first()
+        self.assertIsNotNone(gi0_0_1)
+        self.assertIsNotNone(gi0_0_1.vrf)
+        self.assertEqual(gi0_0_1.vrf.name, "Mgmt-vrf")
+
+        # VirtualPortGroup4 should be in VRF "10" This also validates that the addl_reverse_map for VirtualPortGroup to Vi is working.
+        vi4 = device_obj.interfaces.filter(name="VirtualPortGroup4").first()
+        self.assertIsNotNone(vi4)
+        self.assertIsNotNone(vi4.vrf)
+        self.assertEqual(vi4.vrf.name, "10")
+
+        po1 = device_obj.interfaces.filter(name="Port-channel1").first()
+        self.assertIsNotNone(po1)
+
+        po1_91 = device_obj.interfaces.filter(name="Port-channel1.91").first()
+        self.assertIsNotNone(po1_91)
+        self.assertIsNotNone(po1_91.vrf)
+        self.assertEqual(po1_91.vrf.name, "91")
+
+        self.assertEqual(initial_vrfs.union({"Mgmt-vrf", "10", "91"}), set(VRF.objects.values_list("name", flat=True)))
