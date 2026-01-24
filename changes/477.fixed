@@ -1,0 +1,1 @@
+Fixed VRFs not syncing on Cisco XE interfaces that are down.

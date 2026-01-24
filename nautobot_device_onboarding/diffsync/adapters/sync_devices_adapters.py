@@ -1,7 +1,8 @@
 """DiffSync adapters."""
 
 from collections import defaultdict
-from typing import DefaultDict, Dict, FrozenSet, Hashable, Tuple, Type
+from collections.abc import Hashable
+from typing import DefaultDict, Dict, FrozenSet, Tuple, Type
 
 import diffsync
 from django.contrib.contenttypes.models import ContentType
