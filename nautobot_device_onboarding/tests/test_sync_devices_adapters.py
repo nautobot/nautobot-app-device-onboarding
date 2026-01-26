@@ -50,6 +50,7 @@ class SyncDevicesNetworkAdapterTestCase(TransactionTestCase):
             "update_devices_without_primary_ip": True,
             "device_role": self.testing_objects["device_role"],
             "device_status": self.testing_objects["status"],
+            "device_tenant": self.testing_objects["device_tenant_1"],
             "interface_status": self.testing_objects["status"],
             "ip_address_status": self.testing_objects["status"],
             "secrets_group": self.testing_objects["secrets_group"],
@@ -110,6 +111,7 @@ class SyncDevicesNautobotAdapterTestCase(TransactionTestCase):
         self.job.update_devices_without_primary_ip = True
         self.job.device_role = self.testing_objects["device_role"]
         self.job.device_status = self.testing_objects["status"]
+        self.job.device_tenant = self.testing_objects["device_tenant_1"]
         self.job.interface_status = self.testing_objects["status"]
         self.job.ip_address_status = self.testing_objects["status"]
         self.job.secrets_group = self.testing_objects["secrets_group"]
