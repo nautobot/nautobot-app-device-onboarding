@@ -54,8 +54,8 @@ Regardless, the Onboarding App greatly simplifies the onboarding process by allo
 
 |     Cabling          | Cisco IOS          | Cisco XE           | Cisco XR           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  | Aruba AOSCX | Aruba OS | Brocade/Ruckus Fastiron | HP Procurve |
 | ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: | :--------------: | :--------------: | :--------------: | :--------------: |
-|  Terminations A      | 🧪 | 🧪 | ❌ | 🧪 | ❌ | 🧪 | ❌ | 🧪 | 🧪 | 🧪 | 🧪 | 🧪 |
-|  Terminations B      | 🧪 | 🧪 | ❌ | 🧪 | ❌ | 🧪 | ❌ | 🧪 | 🧪 | 🧪 | 🧪 | 🧪 |
+|  Terminations A      | 🧪 | 🧪 | ❌ | 🧪 | ❌ | 🧪 | 🧪 | 🧪 | 🧪 | 🧪 | 🧪 | 🧪 |
+|  Terminations B      | 🧪 | 🧪 | ❌ | 🧪 | ❌ | 🧪 | 🧪 | 🧪 | 🧪 | 🧪 | 🧪 | 🧪 |
 
 | Legend |
 | :---- |
