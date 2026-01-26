@@ -483,6 +483,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         self,
         dryrun=True,
         memory_profiling=False,
+        parallel_loading=False,
         debug=False,
         port=22,
         timeout=30,
@@ -503,6 +504,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         """Run sync."""
         self.dryrun = dryrun
         self.memory_profiling = memory_profiling
+        self.parallel_loading = parallel_loading
         self.debug = debug
 
         if csv_file:
@@ -666,6 +668,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         interface_status,
         ip_address_status,
         default_prefix_status,
+        parallel_loading=False,
         devices=None,
         location=None,
         device_role=None,
@@ -684,6 +687,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         self.interface_status = interface_status
         self.ip_address_status = ip_address_status
         self.default_prefix_status = default_prefix_status
+        self.parallel_loading = parallel_loading
         self.devices = devices
         self.location = location
         self.device_role = device_role
