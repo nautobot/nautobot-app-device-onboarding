@@ -126,6 +126,7 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
                 primary_ip4__status__name=(device.primary_ip4.status.name if device.primary_ip4 else ""),
                 role__name=device.role.name,
                 status__name=device.status.name,
+                tenant__name=device.tenant.name if device.tenant else None,
                 secrets_group__name=(device.secrets_group.name if device.secrets_group else ""),
                 interfaces=interfaces,
                 mask_length=(device.primary_ip4.mask_length if device.primary_ip4 else None),
@@ -302,6 +303,7 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                 primary_ip4__status = job_form_attrs["ip_address_status"]
                 device_role = job_form_attrs["device_role"]
                 device_status = job_form_attrs["device_status"]
+                device_tenant = job_form_attrs["device_tenant"]
                 secrets_group = job_form_attrs["secrets_group"]
 
                 onboarding_device = self.device(
@@ -314,6 +316,7 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                     primary_ip4__status__name=primary_ip4__status.name,
                     role__name=device_role.name,
                     status__name=device_status.name,
+                    tenant__name=device_tenant.name if device_tenant else None,
                     secrets_group__name=secrets_group.name,
                     interfaces=[self.device_data[ip_address]["mgmt_interface"]],
                     mask_length=int(self.device_data[ip_address]["mask_length"]),
