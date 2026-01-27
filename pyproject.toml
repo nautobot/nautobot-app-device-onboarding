@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-device-onboarding"
-version = "5.1.0"
+version = "5.2.0"
 description = "A app for Nautobot to easily onboard new devices."
 authors = ["Network to Code, LLC <info@networktocode.com>"]
 license = "Apache-2.0"
@@ -182,7 +182,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.towncrier]
 package = "nautobot"
 directory = "changes"
-filename = "docs/admin/release_notes/version_5.1.md"
+filename = "docs/admin/release_notes/version_5.2.md"
 template = "development/towncrier_template.j2"
 start_string = "<!-- towncrier release notes start -->"
 issue_format = "[#{issue}](https://github.com/nautobot/nautobot-app-device-onboarding/issues/{issue})"

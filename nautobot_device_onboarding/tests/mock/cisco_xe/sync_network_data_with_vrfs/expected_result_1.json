@@ -30,7 +30,9 @@
             "mac_address": "ac3a.6789.5d40",
             "mtu": "1500",
             "type": "other",
-            "vrf": {}
+            "vrf": {
+                "name": "10"
+            }
         },
         "GigabitEthernet0/0/1": {
             "802.1Q_mode": "",
@@ -46,7 +48,9 @@
             "mac_address": "ac3a.6789.5d41",
             "mtu": "1500",
             "type": "other",
-            "vrf": {}
+            "vrf": {
+                "name": "MgmtVRF"
+            }
         },
         "GigabitEthernet0/0/1.100": {
             "802.1Q_mode": "",
@@ -126,7 +130,9 @@
             "mac_address": "ac3a.6789.5d50",
             "mtu": "1500",
             "type": "other",
-            "vrf": {}
+            "vrf": {
+                "name": "TestDownInterfaceVRF"
+            }
         },
         "GigabitEthernet0/2/1": {
             "802.1Q_mode": "tagged-all",

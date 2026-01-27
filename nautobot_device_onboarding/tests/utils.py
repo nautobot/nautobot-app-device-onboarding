@@ -21,6 +21,7 @@ from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupS
 from nautobot.extras.models import Role, Secret, SecretsGroup, SecretsGroupAssociation, Status
 from nautobot.ipam.choices import IPAddressTypeChoices, PrefixTypeChoices
 from nautobot.ipam.models import VLAN, VRF, IPAddress, IPAddressToInterface, Namespace, Prefix
+from nautobot.tenancy.models import Tenant
 
 
 def sync_network_data_ensure_required_nautobot_objects():
@@ -360,6 +361,7 @@ def sync_devices_ensure_required_nautobot_objects():
     IPAddressToInterface.objects.get_or_create(interface=interface_2, ip_address=ip_address_2)
     device_2.primary_ip4 = ip_address_2
     device_2.validated_save()
+    device_tenant_1, _ = Tenant.objects.get_or_create(name="Device Tenant 1")
 
     testing_objects["status"] = status
     testing_objects["status_planned"] = status_planned
@@ -377,6 +379,7 @@ def sync_devices_ensure_required_nautobot_objects():
     testing_objects["ip_address_2"] = ip_address_2
     testing_objects["device_1"] = device_1
     testing_objects["device_2"] = device_2
+    testing_objects["device_tenant_1"] = device_tenant_1
 
     return testing_objects
 
@@ -438,11 +441,14 @@ def sync_devices_ensure_required_nautobot_objects__jobs_testing():
     device_role.content_types.add(ContentType.objects.get_for_model(Device))
     device_role.validated_save()
 
+    device_tenant_1, _ = Tenant.objects.get_or_create(name="Device Tenant 1")
+
     testing_objects["status"] = status
     testing_objects["secrets_group"] = secrets_group
     testing_objects["namespace"] = namespace
     testing_objects["location_1"] = location_1
     testing_objects["location_2"] = location_2
     testing_objects["device_role"] = device_role
+    testing_objects["device_tenant_1"] = device_tenant_1
 
     return testing_objects
