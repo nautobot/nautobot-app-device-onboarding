@@ -115,6 +115,7 @@ nav:
       - Compatibility Matrix: "admin/compatibility_matrix.md"
       - Release Notes:
           - "admin/release_notes/index.md"
+          - v5.2: "admin/release_notes/version_5.2.md"
           - v5.1: "admin/release_notes/version_5.1.md"
           - v5.0: "admin/release_notes/version_5.0.md"
           - v4.4: "admin/release_notes/version_4.4.md"
