@@ -383,14 +383,23 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         for row_num, row in enumerate(csv_reader, start=2):
             query = None
             try:
-                query = f"location_name: {row.get('location_name')}, location_parent_name: {row.get('location_parent_name')}"
                 if row.get("location_parent_name"):
-                    location = Location.objects.get(
-                        name=row["location_name"].strip(),
-                        parent__name=row["location_parent_name"].strip(),
-                    )
+                    if row.get("location_parent_parent_name"):
+                        query = f"location_name: {row.get('location_name')}, location_parent_name: {row.get('location_parent_name')}, location_parent_parent_name: {row.get('location_parent_parent_name')}"
+                        location = Location.objects.get(
+                            name=row["location_name"].strip(),
+                            parent__name=row["location_parent_name"].strip(),
+                            parent__parent__name=row["location_parent_parent_name"].strip(),
+                        )
+                    else:
+                        query = f"location_name: {row.get('location_name')}, location_parent_name: {row.get('location_parent_name')}"
+                        location = Location.objects.get(
+                            name=row["location_name"].strip(),
+                            parent__name=row["location_parent_name"].strip(),
+                            parent__parent=None,
+                        )
                 else:
-                    query = query = f"location_name: {row.get('location_name')}"
+                    query = f"location_name: {row.get('location_name')}"
                     location = Location.objects.get(name=row["location_name"].strip(), parent=None)
                 query = f"device_role: {row.get('device_role_name')}"
                 device_role = Role.objects.get(
