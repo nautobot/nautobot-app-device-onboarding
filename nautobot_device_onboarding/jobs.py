@@ -580,7 +580,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         if self.found_invalid_ip_address:
             raise RuntimeError("An invalid IP Address or FQDN was provided")
 
-        super().run(dryrun, memory_profiling)
+        super().run(dryrun=dryrun, memory_profiling=memory_profiling)
 
 
 class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attributes
@@ -760,7 +760,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         else:
             self.logger.warning("Over 300 devices were selected to sync")
 
-        super().run(dryrun, memory_profiling)
+        super().run(dryrun=dryrun, memory_profiling=memory_profiling)
 
 
 class DeviceOnboardingTroubleshootingJob(Job):
