@@ -88,7 +88,7 @@ sync_network_data:
       - command: "show interfaces"
         parser: "textfsm"
         jpath: "[?interface=='{{ current_key }}'].link_status"
-        post_processor: "{{ obj[0] | interface_status_to_bool }}"
+        post_processor: "{{ obj[0] | cisco_interface_status_to_bool }}"
   interfaces__802.1Q_mode:
     commands:
       - command: "show interfaces switchport"
