@@ -3,6 +3,7 @@
 import os
 
 import yaml
+from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
 from nautobot.extras.models import GitRepository
 
 from nautobot_device_onboarding.constants import (
@@ -14,18 +15,17 @@ DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__
 
 
 def get_git_repo():
-    """Get the git repo object."""
-    if (
-        GitRepository.objects.filter(
-            provided_contents__contains="nautobot_device_onboarding.onboarding_command_mappers"
-        ).count()
-        == 1
-    ):
-        repository_record = GitRepository.objects.filter(
-            provided_contents=[ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER]
-        ).first()
-        return repository_record
-    return None
+    """
+    Retrieve the Git repository object that contains onboarding command mappers.
+
+    Returns:
+        GitRepository or None: The GitRepository object if found, None if no repository
+                              is found or if multiple repositories match the criteria.
+    """
+    try:
+        return GitRepository.objects.get(provided_contents__contains=ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER)
+    except (ObjectDoesNotExist, MultipleObjectsReturned):
+        return None
 
 
 def get_git_repo_parser_path(parser_type):
