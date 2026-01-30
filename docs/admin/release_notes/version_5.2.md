@@ -7,6 +7,14 @@ This document describes all new features and changes in the release. The format 
 - Added support for assigning tenants to devices.
 
 <!-- towncrier release notes start -->
+
+
+## [v5.2.1 (2026-01-29)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v5.2.1)
+
+### Fixed
+
+- [#500](https://github.com/nautobot/nautobot-app-device-onboarding/issues/500) - Fixed dryrun variable being set to True incorrectly.
+
 ## [v5.2.0 (2026-01-27)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v5.2.0)
 
 ### Added
