@@ -15,14 +15,16 @@ DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__
 
 
 def get_git_repo():
-    """Get the git repo object providing the onboarding command mappers."""
+    """
+    Retrieve the Git repository object that contains onboarding command mappers.
+
+    Returns:
+        GitRepository or None: The GitRepository object if found, None if no repository
+                              is found or if multiple repositories match the criteria.
+    """
     try:
-        # Use .get() to enforce that exactly one record must exist
-        return GitRepository.objects.get(
-            provided_contents__contains=ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER
-        )
+        return GitRepository.objects.get(provided_contents__contains=ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER)
     except (ObjectDoesNotExist, MultipleObjectsReturned):
-        # If 0 records exist, or >1 records exist, return None
         return None
 
 

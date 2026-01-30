@@ -12,7 +12,11 @@ from nautobot.extras.choices import JobResultStatusChoices
 from nautobot.extras.models import GitRepository, JobResult
 
 from nautobot_device_onboarding.constants import ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER
-from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info, load_command_mappers_from_dir
+from nautobot_device_onboarding.nornir_plays.transform import (
+    add_platform_parsing_info,
+    get_git_repo,
+    load_command_mappers_from_dir,
+)
 
 MOCK_DIR = os.path.join("nautobot_device_onboarding", "tests", "mock")
 
@@ -121,3 +125,82 @@ class TestTransformWithGitRepo(TransactionTestCase):
                 }
                 merged_mappers = add_platform_parsing_info()
                 self.assertEqual(expected_dict, merged_mappers)
+
+
+@mock.patch("nautobot.extras.datasources.git.GitRepo")
+class GetGitRepoTestCase(unittest.TestCase):
+    def setUp(self):
+        # Create a clean state before each test
+        super().setUp()
+        # Clean up any existing repos to ensure a fresh state (safe option)
+        GitRepository.objects.filter(provided_contents__contains=ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER).delete()
+        self.repo = GitRepository(
+            name="Test Git Repo",
+            remote_url="http://localhost/git.git",
+            provided_contents=[ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER],
+        )
+        self.repo.save()
+        # self.job_result = JobResult.objects.create(name=self.repo.name)
+        return mock.DEFAULT
+
+    def test_get_git_repo_success(self, *args, **kwargs):
+        """
+        Scenario: A single repository exists with the correct content identifier.
+        Expected: The function returns that specific repository object.
+        """
+
+        result = get_git_repo()
+
+        self.assertIsNotNone(result)
+        self.assertEqual(result, self.repo)
+        self.assertEqual(result.name, self.repo.name)
+
+    def test_get_git_repo_success_with_multiple_contents(self, *args, **kwargs):
+        """
+        Scenario: A repository provides the mappers AND other content (e.g., jobs).
+        Expected: The function still finds it because we use `__contains`.
+        """
+        result = get_git_repo()
+        result.provided_contents.append("some_other_content")
+        result.save()
+        self.assertIsNotNone(result)
+        self.assertEqual(result, self.repo)
+
+    def test_get_git_repo_multiple_exist(self, *args, **kwargs):
+        """
+        Scenario: Two repositories claim to provide the command mappers.
+        Expected: Returns None (catches MultipleObjectsReturned) to avoid ambiguity.
+        """
+        # Create Repo 1
+        new_repo = GitRepository(
+            name="repo-1",
+            slug="repo-1",
+            remote_url="http://github.com/test/repo1.git",
+            provided_contents=[ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER],
+        )
+        new_repo.save()
+
+        result = get_git_repo()
+
+        self.assertIsNone(result)
+        # clean up
+        new_repo.delete()
+
+    def test_get_git_repo_none_exists(self, *args, **kwargs):
+        """
+        Scenario: No repository exists with that specific content identifier.
+        Expected: Returns None (catches ObjectDoesNotExist).
+        """
+        # delete existing test repo
+        self.repo.delete()
+        # Create a repo that does NOT have the right content
+        irr_repo = GitRepository(
+            name="irrelevant-repo",
+            remote_url="http://github.com/test/irr_repo.git",
+            provided_contents=["some_other_content"],
+        )
+        irr_repo.save()
+        result = get_git_repo()
+        self.assertIsNone(result)
+        # clean up
+        irr_repo.delete()
