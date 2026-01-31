@@ -61,3 +61,29 @@ class TestInventoryCreator(unittest.TestCase):
             port=22,
             custom_setting="enabled",
         )
+
+    @patch("nautobot_device_onboarding.nornir_plays.inventory_creator.NETMIKO_EXTRAS", {"fast_cli": False})
+    def test_set_inventory_with_secret(self):
+        """Ensure that secret is properly merged with NETMIKO_EXTRAS in connection options."""
+        secret = "enable_password"  # nosec
+        inv, exception = _set_inventory(
+            self.host_ip, self.platform, self.port, self.username, self.password, secret=secret
+        )
+        # Verify secret is in the netmiko connection options extras
+        netmiko_extras = inv["198.51.100.1"].connection_options["netmiko"].extras
+        self.assertEqual(netmiko_extras["secret"], secret)
+        self.assertEqual(netmiko_extras["fast_cli"], False)
+        self.assertIsNone(exception)
+
+    @patch("nautobot_device_onboarding.nornir_plays.inventory_creator.NETMIKO_EXTRAS", {"fast_cli": False})
+    def test_set_inventory_without_secret(self):
+        """Ensure that when secret is not provided, NETMIKO_EXTRAS is used as-is."""
+        inv, exception = _set_inventory(
+            self.host_ip, self.platform, self.port, self.username, self.password
+        )
+        # Verify secret is NOT in the netmiko connection options extras
+        netmiko_extras = inv["198.51.100.1"].connection_options["netmiko"].extras
+        self.assertNotIn("secret", netmiko_extras)
+        self.assertEqual(netmiko_extras["fast_cli"], False)
+        self.assertIsNone(exception)
+

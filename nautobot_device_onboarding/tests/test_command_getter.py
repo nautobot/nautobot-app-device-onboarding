@@ -247,6 +247,9 @@ class TestSSHCredParsing(TransactionTestCase):
         password_secret, _ = Secret.objects.get_or_create(
             name="password", provider="environment-variable", parameters={"variable": "DEVICE_PASS"}
         )
+        enable_secret, _ = Secret.objects.get_or_create(
+            name="enable_secret", provider="environment-variable", parameters={"variable": "DEVICE_SECRET"}
+        )
         self.secrets_group, _ = SecretsGroup.objects.get_or_create(name="test secrets group")
         SecretsGroupAssociation.objects.get_or_create(
             secrets_group=self.secrets_group,
@@ -260,15 +263,47 @@ class TestSSHCredParsing(TransactionTestCase):
             access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
             secret_type=SecretsGroupSecretTypeChoices.TYPE_PASSWORD,
         )
+        # Create a separate secrets group with enable secret for testing
+        self.secrets_group_with_secret, _ = SecretsGroup.objects.get_or_create(name="test secrets group with enable")
+        SecretsGroupAssociation.objects.get_or_create(
+            secrets_group=self.secrets_group_with_secret,
+            secret=username_secret,
+            access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
+            secret_type=SecretsGroupSecretTypeChoices.TYPE_USERNAME,
+        )
+        SecretsGroupAssociation.objects.get_or_create(
+            secrets_group=self.secrets_group_with_secret,
+            secret=password_secret,
+            access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
+            secret_type=SecretsGroupSecretTypeChoices.TYPE_PASSWORD,
+        )
+        SecretsGroupAssociation.objects.get_or_create(
+            secrets_group=self.secrets_group_with_secret,
+            secret=enable_secret,
+            access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
+            secret_type=SecretsGroupSecretTypeChoices.TYPE_SECRET,
+        )
 
     @patch.dict(os.environ, {"DEVICE_USER": "admin", "DEVICE_PASS": "worstP$$w0rd"})
     def test_parse_user_and_pass(self):
-        """Extract correct user and password from secretgroup env-vars"""
+        """Extract correct user and password from secretgroup env-vars, secret falls back to password"""
         assert _parse_credentials(
             secrets_group=self.secrets_group, logger=NornirLogger(job_result=MagicMock(), log_level=1)
         ) == (
             "admin",
             "worstP$$w0rd",
+            "worstP$$w0rd",  # secret falls back to password when not defined
+        )
+
+    @patch.dict(os.environ, {"DEVICE_USER": "admin", "DEVICE_PASS": "worstP$$w0rd", "DEVICE_SECRET": "enableP$$w0rd"})
+    def test_parse_user_pass_and_secret(self):
+        """Extract correct user, password, and enable secret from secretgroup env-vars"""
+        assert _parse_credentials(
+            secrets_group=self.secrets_group_with_secret, logger=NornirLogger(job_result=MagicMock(), log_level=1)
+        ) == (
+            "admin",
+            "worstP$$w0rd",
+            "enableP$$w0rd",
         )
 
     @patch.dict(os.environ, {"DEVICE_USER": "admin"})
@@ -277,7 +312,7 @@ class TestSSHCredParsing(TransactionTestCase):
         mock_job_result = MagicMock()
         assert _parse_credentials(
             secrets_group=self.secrets_group, logger=NornirLogger(job_result=mock_job_result, log_level=1)
-        ) == ("admin", None)
+        ) == ("admin", None, None)  # secret is also None when password is None
         mock_job_result.log.assert_called_with("Missing credentials for ['password']", level_choice="debug")
 
     @patch(
@@ -285,8 +320,9 @@ class TestSSHCredParsing(TransactionTestCase):
         MagicMock(NAPALM_USERNAME="napalm_admin", NAPALM_PASSWORD="napalamP$$w0rd"),
     )
     def test_parse_napalm_creds(self):
-        """When no secrets group is provided, fallback to napalm creds"""
+        """When no secrets group is provided, fallback to napalm creds, secret falls back to password"""
         assert _parse_credentials(secrets_group=None, logger=NornirLogger(job_result=None, log_level=1)) == (
             "napalm_admin",
             "napalamP$$w0rd",
+            "napalamP$$w0rd",  # secret falls back to password
         )
