@@ -1,0 +1,2 @@
+---
+summary: "Add support for enable secret (privileged mode password) in sync_devices job for devices requiring privileged mode for show commands."
