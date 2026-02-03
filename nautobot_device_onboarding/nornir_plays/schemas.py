@@ -135,6 +135,28 @@ NETWORK_DEVICES_SCHEMA = {
         "device_type": {"type": ["string", "integer"]},
         "mgmt_interface": {"type": "string"},
         "mask_length": {"type": "integer"},
+        "virtual_chassis": {
+            "type": "array",
+            "description": "Virtual chassis / switch stack member information (optional)",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "switch": {"type": "string", "description": "Switch number in the stack"},
+                    "priority": {"type": "string", "description": "Stack priority"},
+                },
+            },
+        },
+        "modules": {
+            "type": "array",
+            "description": "Module information for each stack member (optional)",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "model": {"type": "string", "description": "Model of the module/switch"},
+                    "serial": {"type": "string", "description": "Serial number of the module/switch"},
+                },
+            },
+        },
     },
 }
 

@@ -113,7 +113,9 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
             name=device.virtual_chassis.name,
             master__name=device.virtual_chassis.master.name if device.virtual_chassis.master_id else "",
         )
-        for vc_member in device.virtual_chassis.members.all().exclude(id=device.id): # The originating device is loaded in load_devices
+        for vc_member in device.virtual_chassis.members.all().exclude(
+            id=device.id
+        ):  # The originating device is loaded in load_devices
             onboarding_device = self.device(
                 adapter=self,
                 pk=vc_member.pk,
@@ -350,21 +352,24 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                 device_tenant = job_form_attrs["device_tenant"]
                 secrets_group = job_form_attrs["secrets_group"]
 
-                if isinstance(self.device_data[ip_address]["virtual_chassis"], list) and len(self.device_data[ip_address]["virtual_chassis"]) > 1:
+                virtual_chassis_data = self.device_data[ip_address].get("virtual_chassis", [])
+                if isinstance(virtual_chassis_data, list) and len(virtual_chassis_data) > 1:
                     # Virtual Chassis detected
                     onboarding_vc = self.virtual_chassis(
                         name=self.device_data[ip_address]["hostname"],
                         master__name=self.device_data[ip_address]["hostname"],
                     )
                     # Create Virtual Chassis members
-                    for index, vc_member in enumerate(self.device_data[ip_address]["virtual_chassis"]):
+                    for index, vc_member in enumerate(virtual_chassis_data):
                         if index == 0:
                             onboarding_device = self.device(
                                 adapter=self,
                                 device_type__model=self.device_data[ip_address]["modules"][index]["model"],
                                 location__name=location.name,
                                 name=self.device_data[ip_address]["hostname"],
-                                platform__name=(platform.name if platform else self.device_data[ip_address]["platform"]),
+                                platform__name=(
+                                    platform.name if platform else self.device_data[ip_address]["platform"]
+                                ),
                                 primary_ip4__host=ip_address,
                                 primary_ip4__status__name=primary_ip4__status.name,
                                 role__name=device_role.name,
@@ -385,7 +390,9 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                                     device_type__model=self.device_data[ip_address]["modules"][index]["model"],
                                     location__name=location.name,
                                     name=f"{self.device_data[ip_address]['hostname']}:{index+1}",
-                                    platform__name=(platform.name if platform else self.device_data[ip_address]["platform"]),
+                                    platform__name=(
+                                        platform.name if platform else self.device_data[ip_address]["platform"]
+                                    ),
                                     primary_ip4__host=ip_address,
                                     role__name=device_role.name,
                                     status__name=device_status.name,

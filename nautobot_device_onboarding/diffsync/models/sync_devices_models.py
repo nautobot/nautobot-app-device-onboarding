@@ -199,7 +199,6 @@ class SyncDevicesDevice(DiffSyncModel):
 
         return device
 
-
     @classmethod
     def create(cls, adapter, ids, attrs):
         """Create a new nautobot device using data scraped from a device."""
@@ -208,7 +207,8 @@ class SyncDevicesDevice(DiffSyncModel):
 
         # Get or create Device, Interface and IP Address
         device = cls._get_or_create_device(adapter, ids, attrs)
-        if device and attrs.get("vc_position",1) == 1:  # vc master or non-vc device
+        vc_position = attrs.get("vc_position")
+        if device and (vc_position is None or vc_position == 1):  # vc master or non-vc device
             job_form_attrs = adapter.job.ip_address_inventory[attrs["primary_ip4__host"]]
             ip_address = diffsync_utils.get_or_create_ip_address(
                 host=attrs["primary_ip4__host"],
@@ -232,10 +232,15 @@ class SyncDevicesDevice(DiffSyncModel):
                 device = cls._update_device_with_vc_attrs(device, attrs)
             try:
                 device.validated_save()
+                # Set this device as the VC master if it's the master (vc_position == 1)
+                if attrs.get("virtual_chassis__name") and attrs.get("vc_position") == 1:
+                    vc = VirtualChassis.objects.get(name=attrs["virtual_chassis__name"])
+                    vc.master = device
+                    vc.validated_save()
             except ValidationError as err:
                 adapter.job.logger.error(f"Failed to create or update Device: {ids['name']}, {err}")
                 raise ValidationError(err)
-        elif device and attrs.get("vc_position") is not None: # vc members not the master
+        elif device and vc_position is not None and vc_position > 1:  # vc members not the master
             device = cls._update_device_with_vc_attrs(device, attrs)
             device.secrets_group = None  # VC members should not have secrets group assigned
             try:
@@ -397,14 +402,21 @@ class SyncDevicesPlatform(NautobotModel):
     manufacturer__name: Optional[str] = None
 
 
-class SyncDevicesVirtualChassis(NautobotModel):
+class SyncDevicesVirtualChassis(DiffSyncModel):
     """Diffsync model for virtual chassis data."""
 
     _modelname = "virtual_chassis"
     _model = VirtualChassis
     _identifiers = ("name",)
-    _attributes = ("master__name")
+    _attributes = ("master__name",)
 
     name: str
 
-    master__name: str
+    master__name: Optional[str] = None
+
+    @classmethod
+    def create(cls, adapter, ids, attrs):
+        """Create a VirtualChassis without a master - master is set by device creation."""
+        VirtualChassis.objects.get_or_create(name=ids["name"])
+        # Master will be set by SyncDevicesDevice.create() when the master device is created
+        return super().create(adapter, ids, attrs)
