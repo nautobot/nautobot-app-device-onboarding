@@ -153,7 +153,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
                 adapter=self,
                 name=vlan.name,
                 vid=vlan.vid,
-                location__name=vlan.location.name if vlan.location else "",
+                location_natural_key=vlan.location.natural_key(),
             )
             try:
                 network_vlan.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
@@ -661,9 +661,9 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
 
     def load_vlans(self):
         """Load vlans into the Diffsync store."""
-        location_names = {}
+        location_natural_keys = {}
         for device in self.job.devices_to_load:
-            location_names[device.name] = device.location.name
+            location_natural_keys[device.name] = device.location.natural_key()
 
         for (
             hostname,
@@ -679,7 +679,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                             adapter=self,
                             name=tagged_vlan["name"],
                             vid=tagged_vlan["id"],
-                            location__name=location_names.get(hostname, ""),
+                            location_natural_key=location_natural_keys[hostname],
                         )
                         self.add(network_vlan)
                     except diffsync.exceptions.ObjectAlreadyExists:
@@ -703,7 +703,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                             adapter=self,
                             name=interface_data["untagged_vlan"]["name"],
                             vid=interface_data["untagged_vlan"]["id"],
-                            location__name=location_names.get(hostname, ""),
+                            location_natural_key=location_natural_keys[hostname],
                         )
                         self.add(network_vlan)
                     except diffsync.exceptions.ObjectAlreadyExists:

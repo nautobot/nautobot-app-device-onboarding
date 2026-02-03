@@ -1,0 +1,1 @@
+Fixed VLAN sync failing with duplicate child location name.
