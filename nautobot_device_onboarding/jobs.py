@@ -367,6 +367,27 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             "Please use either 'True' or 'False'."
         )
 
+def get_location_by_dynamic_ancestry(location_name, row):
+    """
+    Given a location name and a CSV row, find the Location by traversing arbitrary ancestry columns:
+    - location_parent_name
+    - location_parent_parent_name
+    - location_parent_parent_parent_name
+    - etc.
+    Expects parent columns to go from immediate parent up to root (children first).
+    """
+    # Find all keys that match 'location_parent' (handles any depth)
+    parent_keys = [k for k in row if k.startswith('location_parent')]
+    # Sort keys by depth (shorter is closer; i.e., parent before parent_parent, etc.)
+    parent_keys.sort(key=lambda x: x.count('parent'))
+    # Build parent name list from root down to immediate parent
+    parent_names = [row[k].strip() for k in parent_keys if row.get(k) and row[k].strip()]
+
+    parent_obj = None
+    for parent_name in parent_names:
+        parent_obj = Location.objects.get(name=parent_name, parent=parent_obj)
+    return Location.objects.get(name=location_name, parent=parent_obj)
+
     def _process_csv_data(self, csv_file):
         """Convert CSV data into a list of dictionaries containing Nautobot objects."""
         self.logger.info("Decoding CSV file...")
