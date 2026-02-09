@@ -367,26 +367,46 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             "Please use either 'True' or 'False'."
         )
 
-def get_location_by_dynamic_ancestry(location_name, row):
-    """
-    Given a location name and a CSV row, find the Location by traversing arbitrary ancestry columns:
-    - location_parent_name
-    - location_parent_parent_name
-    - location_parent_parent_parent_name
-    - etc.
-    Expects parent columns to go from immediate parent up to root (children first).
-    """
-    # Find all keys that match 'location_parent' (handles any depth)
-    parent_keys = [k for k in row if k.startswith('location_parent')]
-    # Sort keys by depth (shorter is closer; i.e., parent before parent_parent, etc.)
-    parent_keys.sort(key=lambda x: x.count('parent'))
-    # Build parent name list from root down to immediate parent
-    parent_names = [row[k].strip() for k in parent_keys if row.get(k) and row[k].strip()]
+    def _get_location_by_dynamic_ancestry(self, row):
+        """
+        Find a Location object by traversing its ancestry hierarchy from a CSV row.
 
-    parent_obj = None
-    for parent_name in parent_names:
-        parent_obj = Location.objects.get(name=parent_name, parent=parent_obj)
-    return Location.objects.get(name=location_name, parent=parent_obj)
+        Expects row to contain:
+        - 'location_name': The target location's name
+        - 'location_parent_name': Immediate parent's name
+        - 'location_parent_parent_name': Grandparent's name (optional)
+        - 'location_parent_parent_parent_name': Great-grandparent's name (optional)
+        - etc. (arbitrary depth supported)
+
+        Args:
+            row (dict): CSV row data with location and ancestry information
+
+        Returns:
+            Location: The Location object matching the name and full ancestry chain
+
+        Raises:
+            Location.DoesNotExist: If any location in the hierarchy is not found
+            KeyError: If 'location_name' is missing from row
+        """
+        location_name = row['location_name'].strip()
+
+        # Find all parent ancestry columns (location_parent*)
+        parent_keys = [k for k in row if k.startswith('location_parent')]
+
+        # Sort by depth (fewer 'parent' substrings = closer to child)
+        parent_keys.sort(key=lambda x: x.count('parent'))
+
+        # Extract non-empty parent names and reverse for root-to-leaf traversal
+        parent_names = [row[k].strip() for k in parent_keys if row.get(k) and row[k].strip()]
+        parent_names.reverse()
+
+        # Traverse from root to immediate parent
+        parent_obj = None
+        for parent_name in parent_names:
+            parent_obj = Location.objects.get(name=parent_name, parent=parent_obj)
+
+        # Return the target location with full ancestry
+        return Location.objects.get(name=location_name, parent=parent_obj)
 
     def _process_csv_data(self, csv_file):
         """Convert CSV data into a list of dictionaries containing Nautobot objects."""
@@ -404,24 +424,8 @@ def get_location_by_dynamic_ancestry(location_name, row):
         for row_num, row in enumerate(csv_reader, start=2):
             query = None
             try:
-                if row.get("location_parent_name"):
-                    if row.get("location_parent_parent_name"):
-                        query = f"location_name: {row.get('location_name')}, location_parent_name: {row.get('location_parent_name')}, location_parent_parent_name: {row.get('location_parent_parent_name')}"
-                        location = Location.objects.get(
-                            name=row["location_name"].strip(),
-                            parent__name=row["location_parent_name"].strip(),
-                            parent__parent__name=row["location_parent_parent_name"].strip(),
-                        )
-                    else:
-                        query = f"location_name: {row.get('location_name')}, location_parent_name: {row.get('location_parent_name')}"
-                        location = Location.objects.get(
-                            name=row["location_name"].strip(),
-                            parent__name=row["location_parent_name"].strip(),
-                            parent__parent=None,
-                        )
-                else:
-                    query = f"location_name: {row.get('location_name')}"
-                    location = Location.objects.get(name=row["location_name"].strip(), parent=None)
+                location = self._get_location_by_dynamic_ancestry(row)
+                query = f"location_name: {row.get('location_name')}"
                 query = f"device_role: {row.get('device_role_name')}"
                 device_role = Role.objects.get(
                     name=row["device_role_name"].strip(),
