@@ -221,5 +221,31 @@ NETWORK_DATA_SCHEMA = {
             "type": "string",
             "description": "Software version of the device",
         },
+        "modules": {
+            "type": "object",
+            "description": "Modules/line cards installed in the device",
+            "items": {
+                "type": "object",
+                "required": ["module_type", "manufacturer"],
+                "properties": {
+                    "module_type": {
+                        "type": "string",
+                        "description": "Model/type of the module",
+                    },
+                    "manufacturer": {
+                        "type": "string",
+                        "description": "Manufacturer of the module",
+                    },
+                    "serial": {
+                        "type": "string",
+                        "description": "Serial number of the module",
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the module",
+                    },
+                },
+            },
+        },
     },
 }

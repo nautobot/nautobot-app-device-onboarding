@@ -166,6 +166,9 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
         else:
             loop_commands = field_data["commands"]
         for show_command_dict in loop_commands:
+            # Skip commands that weren't executed (e.g., when sync flags are False)
+            if show_command_dict["command"] not in command_outputs_dict:
+                continue
             final_iterable_type = show_command_dict.get("iterable_type")
             if field_data.get("root_key"):
                 original_context = {"obj": host.name, "original_host": host.name}

@@ -13,7 +13,18 @@ from diffsync import exceptions as diffsync_exceptions
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
 from django.db.models import Q
 from nautobot.dcim.choices import InterfaceTypeChoices
-from nautobot.dcim.models import Cable, Device, Interface, Location, Platform, SoftwareVersion
+from nautobot.dcim.models import (
+    Cable,
+    Device,
+    Interface,
+    Location,
+    Manufacturer,
+    Module,
+    ModuleBay,
+    ModuleType,
+    Platform,
+    SoftwareVersion,
+)
 from nautobot.extras.models import Status
 from nautobot.ipam.models import VLAN, VRF, IPAddress, IPAddressToInterface
 from nautobot_ssot.contrib import CustomFieldAnnotation, NautobotModel
@@ -795,4 +806,186 @@ class SyncNetworkSoftwareVersionToDevice(DiffSyncModel):
 
     def delete(self):
         """Prevent device deletion."""
+        return None
+
+
+class SyncNetworkModuleBay(DiffSyncModel):
+    """Shared data model representing a module bay."""
+
+    _modelname = "module_bay"
+    _model = ModuleBay
+    _identifiers = (
+        "name",
+        "parent_device__name",
+    )
+    _attributes = ()
+    _children = {}
+
+    name: str
+    parent_device__name: str
+
+    pk: Optional[UUID] = None
+
+    @classmethod
+    def create(cls, adapter, ids, attrs):
+        """Create a new module bay."""
+        try:
+            device = Device.objects.get(name=ids["parent_device__name"])
+        except ObjectDoesNotExist:
+            adapter.job.logger.error(
+                f"Failed to get device {ids['parent_device__name']}. A device with name: "
+                f"{ids['parent_device__name']} was not found."
+            )
+            raise diffsync_exceptions.ObjectNotCreated
+        try:
+            module_bay, created = ModuleBay.objects.get_or_create(
+                name=ids["name"],
+                parent_device=device,
+            )
+            if created:
+                module_bay.validated_save()
+        except ValidationError as err:
+            adapter.job.logger.error(f"Module bay {ids['name']} failed to create, {err}")
+            raise diffsync_exceptions.ObjectNotCreated
+
+        return super().create(adapter, ids, attrs)
+
+    def delete(self):
+        """Prevent module bay deletion."""
+        self.adapter.job.logger.error(f"{self} will not be deleted.")
+        return None
+
+
+class SyncNetworkModuleType(DiffSyncModel):
+    """Shared data model representing a module type."""
+
+    _modelname = "module_type"
+    _model = ModuleType
+    _identifiers = (
+        "model",
+        "manufacturer__name",
+    )
+    _attributes = ()
+    _children = {}
+
+    model: str
+    manufacturer__name: str
+
+    pk: Optional[UUID] = None
+
+    @classmethod
+    def create(cls, adapter, ids, attrs):
+        """Create a new module type."""
+        try:
+            manufacturer = Manufacturer.objects.get(name=ids["manufacturer__name"])
+        except ObjectDoesNotExist:
+            adapter.job.logger.error(
+                f"Failed to get manufacturer {ids['manufacturer__name']}. A manufacturer with name: "
+                f"{ids['manufacturer__name']} was not found."
+            )
+            raise diffsync_exceptions.ObjectNotCreated
+        try:
+            module_type, created = ModuleType.objects.get_or_create(
+                model=ids["model"],
+                manufacturer=manufacturer,
+            )
+            if created:
+                module_type.validated_save()
+        except ValidationError as err:
+            adapter.job.logger.error(f"Module type {ids['model']} failed to create, {err}")
+            raise diffsync_exceptions.ObjectNotCreated
+
+        return super().create(adapter, ids, attrs)
+
+    def delete(self):
+        """Prevent module type deletion."""
+        self.adapter.job.logger.error(f"{self} will not be deleted.")
+        return None
+
+
+class SyncNetworkModule(DiffSyncModel):
+    """Shared data model representing a module."""
+
+    _modelname = "module"
+    _model = Module
+    _identifiers = (
+        "module_type__model",
+        "module_type__manufacturer__name",
+        "parent_module_bay__name",
+        "parent_module_bay__parent_device__name",
+    )
+    _attributes = ()
+    _children = {}
+
+    module_type__model: str
+    module_type__manufacturer__name: str
+    parent_module_bay__name: str
+    parent_module_bay__parent_device__name: str
+
+    pk: Optional[UUID] = None
+
+    @classmethod
+    def create(cls, adapter, ids, attrs):
+        """Create a new module."""
+        try:
+            manufacturer = Manufacturer.objects.get(
+                name=ids["module_type__manufacturer__name"],
+            )
+        except ObjectDoesNotExist:
+            adapter.job.logger.error(
+                f"Failed to get manufacturer {ids['module_type__manufacturer__name']}. A manufacturer with name: "
+                f"{ids['module_type__manufacturer__name']} was not found."
+            )
+            raise diffsync_exceptions.ObjectNotCreated
+        try:
+            module_type = ModuleType.objects.get(
+                model=ids["module_type__model"],
+                manufacturer=manufacturer,
+            )
+        except ObjectDoesNotExist:
+            adapter.job.logger.error(
+                f"Failed to get module type {ids['module_type__model']}. A module type with model: "
+                f"{ids['module_type__model']} was not found."
+            )
+            raise diffsync_exceptions.ObjectNotCreated
+        try:
+            device = Device.objects.get(
+                name=ids["parent_module_bay__parent_device__name"],
+            )
+        except ObjectDoesNotExist:
+            adapter.job.logger.error(
+                f"Failed to get device {ids['parent_module_bay__parent_device__name']}. A device with name: "
+                f"{ids['parent_module_bay__parent_device__name']} was not found."
+            )
+            raise diffsync_exceptions.ObjectNotCreated
+        try:
+            module_bay = ModuleBay.objects.get(
+                name=ids["parent_module_bay__name"],
+                parent_device=device,
+            )
+        except ObjectDoesNotExist:
+            adapter.job.logger.error(
+                f"Failed to create module bay {ids['parent_module_bay__name']}. A module bay with name: "
+                f"{ids['parent_module_bay__name']} was not found."
+            )
+            raise diffsync_exceptions.ObjectNotCreated
+        try:
+            module, created = Module.objects.get_or_create(
+                module_type=module_type,
+                parent_module_bay=module_bay,
+                status=Status.objects.get(name="Active"),
+            )
+            if created:
+                module.validated_save()
+        except ValidationError as err:
+            adapter.job.logger.error(
+                f"Module of type {ids['module_type__model']} on device {ids['parent_module_bay__parent_device__name']} failed to create, {err}"
+            )
+            raise diffsync_exceptions.ObjectNotCreated
+
+        return super().create(adapter, ids, attrs)
+
+    def delete(self):
+        """Prevent module deletion."""
+        self.adapter.job.logger.error(f"{self} will not be deleted.")
         return None

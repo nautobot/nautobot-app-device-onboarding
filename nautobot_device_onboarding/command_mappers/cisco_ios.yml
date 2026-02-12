@@ -134,3 +134,35 @@ sync_network_data:
       - command: "show version"
         parser: "textfsm"
         jpath: "[*].version"
+  modules:
+    root_key: true
+    commands:
+      - command: "show inventory"
+        parser: "textfsm"
+        jpath: "[?contains(name, 'Module') && !contains(name, 'Power Supply') && !contains(name, 'StackPort') && !starts_with(name, 'Gi') && !starts_with(name, 'Te') && !starts_with(name, 'Fo')].name"
+        post_processor: "{% set result={} %}{% for module in obj %}{{ result.update({module: {}}) or '' }}{% endfor %}{{ result | tojson }}"
+  modules__module_type:
+    commands:
+      - command: "show inventory"
+        parser: "textfsm"
+        jpath: "[?name=='{{ current_key }}'].pid"
+        iterable_type: "str"
+  modules__manufacturer:
+    commands:
+      - command: "show inventory"
+        parser: "textfsm"
+        jpath: "[?name=='{{ current_key }}'].pid"
+        post_processor: "{{ 'Cisco' }}"
+        iterable_type: "str"
+  modules__serial:
+    commands:
+      - command: "show inventory"
+        parser: "textfsm"
+        jpath: "[?name=='{{ current_key }}'].sn"
+        iterable_type: "str"
+  modules__description:
+    commands:
+      - command: "show inventory"
+        parser: "textfsm"
+        jpath: "[?name=='{{ current_key }}'].descr"
+        iterable_type: "str"

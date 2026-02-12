@@ -110,6 +110,14 @@ sync_network_mock_data_valid = {
             },
         ],
         "software_version": "16.12.4",
+        "modules": {
+            "Switch 1 FRU Uplink Module 1": {
+                "module_type": "C9300-NM-4G",
+                "manufacturer": "Cisco",
+                "serial": "FJZ23271PFU",
+                "description": "4x1G Uplink Module",
+            },
+        },
     },
     "demo-cisco-2": {
         "serial": "9ABUXU5882222",
@@ -192,6 +200,7 @@ sync_network_mock_data_valid = {
             },
         ],
         "software_version": "3.12R.4",
+        "modules": {},
     },
 }
 failed_device = {"demo-cisco-3": {"failed": True, "failed_reason": "Authentication failure"}}

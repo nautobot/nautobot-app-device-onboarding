@@ -64,7 +64,7 @@ def deduplicate_command_list(data):
     return unique_list
 
 
-def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables, sync_software_version):
+def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables, sync_software_version, sync_modules):
     """Using merged command mapper info and look up all commands that need to be run."""
     all_commands = []
     for key, value in yaml_parsed_info.items():
@@ -98,6 +98,9 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables, s
                     # If syncing software_versions isn't in scope remove the unneeded commands.
                     if not sync_software_version and key == "software_version":
                         continue
+                    # If syncing modules isn't in scope remove the unneeded commands.
+                    if not sync_modules and key.startswith("modules"):
+                        continue
                     all_commands.append(command)
             else:
                 if isinstance(current_root_key, dict):
@@ -113,6 +116,9 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables, s
                         continue
                     # If syncing software_versions isn't in scope remove the unneeded commands.
                     if not sync_software_version and key == "software_version":
+                        continue
+                    # If syncing modules isn't in scope remove the unneeded commands.
+                    if not sync_modules and key.startswith("modules"):
                         continue
                     all_commands.append(current_root_key)
     return deduplicate_command_list(all_commands)
@@ -141,6 +147,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
         getattr(nautobot_job, "sync_vrfs", False),
         getattr(nautobot_job, "sync_cables", False),
         getattr(nautobot_job, "sync_software_version", False),
+        getattr(nautobot_job, "sync_modules", False),
     )
     if (
         getattr(nautobot_job, "sync_cables", False)
@@ -364,6 +371,7 @@ def sync_network_data_command_getter(job, log_level):
                         "sync_vrfs": job.sync_vrfs,
                         "sync_cables": job.sync_cables,
                         "sync_software_version": job.sync_software_version,
+                        "sync_modules": job.sync_modules,
                     },
                 },
             },
