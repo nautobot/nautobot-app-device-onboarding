@@ -27,13 +27,14 @@ sync_devices:
       - command: "show ip"
         parser: "textfsm"
         jpath: "[?contains(ip_address, `{{ obj }}`)].intf_name"
-        post_processor: "{{ obj[0] if obj else 'oobm' }}"
+        post_processor: "{% if obj %}{{ obj[0] }}{% else %}{{ 'oobm' }}{% endif %}"
+        iterable_type: "str"
   mask_length:
     commands:
       - command: "show ip"
         parser: "textfsm"
         jpath: "[?contains(ip_address, `{{ obj }}`)].ip_mask"
-        post_processor: "{{ (obj[0] | netmask_to_cidr) if obj else oobm_data['prefix_length'] }}"
+        post_processor: "{% if obj %}{{ obj[0] | netmask_to_cidr }}{% else %}{{ oobm_data['prefix_length'] }}{% endif %}"
         iterable_type: "int"
 sync_network_data:
   pre_processor:
