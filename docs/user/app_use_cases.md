@@ -21,7 +21,7 @@ To properly onboard a device, a user needs to provide, at a minimum:
 !!! note
     For DNS Name Resolution to work, the Celery instance of Nautobot must be able to resolve the name of the device to IP address.
 
-If `Platform`, `Device Type` and/or `Role` are not provided, the plugin will try to identify this information automatically and, based on the settings, it can create them in Nautobot as needed.
+If `Platform`, `Device Type` and/or `Role` are not provided, the plugin will try to identify this information automatically and, based on the settings, it can create them in Nautobot as needed. Optionally, a Tenant can be selected as part of the job inputs. When provided, the tenant will be assigned to newly onboarded devices during the sync process.
 
 !!! note
     The SSoT jobs use nornir-netmiko to run the show commands defined in the command mappers.

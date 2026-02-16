@@ -14,7 +14,7 @@ To properly onboard a device, a user needs to provide, at a minimum:
 !!! note
     For DNS Name Resolution to work, the instance of Nautobot must be able to resolve the name of the device to IP address.
 
-If other attributes (`Platform`, `Device Type`, `Role`) are provided in the onboarding job, the app will use provided value for the onboarded device.
+If other attributes (`Platform`, `Device Type`, `Role`) are provided in the onboarding job, the app will use provided value for the onboarded device. Optionally, a Tenant can be selected as part of the job inputs. When provided, the tenant will be assigned to newly onboarded devices during the sync process.
 
 If `Platform`, `Device Type` and/or `Role` are not provided, the plugin will try to identify this information automatically and, based on the settings, it can create them in Nautobot as needed.
 

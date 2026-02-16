@@ -131,20 +131,24 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
         self.job.devices_to_load = Device.objects.filter(name__in=["demo-cisco-1", "demo-cisco-2"])
         self.sync_network_data_adapter.load_vlans()
 
-        for _, device_data in self.job.command_getter_result.items():
+        location_natural_keys = {}
+        for device in self.job.devices_to_load:
+            location_natural_keys[device.name] = device.location.natural_key()
+
+        for hostname, device_data in self.job.command_getter_result.items():
             for _, interface_data in device_data["interfaces"].items():
                 for tagged_vlan in interface_data["tagged_vlans"]:
-                    unique_id = f"{tagged_vlan['id']}__{tagged_vlan['name']}__{self.job.location.name}"
+                    unique_id = f"{tagged_vlan['id']}__{tagged_vlan['name']}__{tuple(location_natural_keys[hostname])}"
                     diffsync_obj = self.sync_network_data_adapter.get("vlan", unique_id)
                     self.assertEqual(int(tagged_vlan["id"]), diffsync_obj.vid)
                     self.assertEqual(tagged_vlan["name"], diffsync_obj.name)
-                    self.assertEqual(self.job.location.name, diffsync_obj.location__name)
+                    self.assertEqual(tuple(location_natural_keys[hostname]), diffsync_obj.location_natural_key)
                 if interface_data["untagged_vlan"]:
-                    unique_id = f"{interface_data['untagged_vlan']['id']}__{interface_data['untagged_vlan']['name']}__{self.job.location.name}"
+                    unique_id = f"{interface_data['untagged_vlan']['id']}__{interface_data['untagged_vlan']['name']}__{tuple(location_natural_keys[hostname])}"
                     diffsync_obj = self.sync_network_data_adapter.get("vlan", unique_id)
                     self.assertEqual(int(interface_data["untagged_vlan"]["id"]), diffsync_obj.vid)
                     self.assertEqual(interface_data["untagged_vlan"]["name"], diffsync_obj.name)
-                    self.assertEqual(self.job.location.name, diffsync_obj.location__name)
+                    self.assertEqual(tuple(location_natural_keys[hostname]), diffsync_obj.location_natural_key)
 
     def test_load_vrfs(self):
         """Test loading vrf data returned from command getter into the diffsync store."""
@@ -327,11 +331,11 @@ class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
         self.sync_network_data_adapter.load_vlans()
 
         for vlan in VLAN.objects.all():
-            unique_id = f"{vlan.vid}__{vlan.name}__{self.job.location.name}"
+            unique_id = f"{vlan.vid}__{vlan.name}__{tuple(vlan.location.natural_key())}"
             diffsync_obj = self.sync_network_data_adapter.get("vlan", unique_id)
             self.assertEqual(int(vlan.vid), diffsync_obj.vid)
             self.assertEqual(vlan.name, diffsync_obj.name)
-            self.assertEqual(self.job.location.name, diffsync_obj.location__name)
+            self.assertEqual(tuple(vlan.location.natural_key()), diffsync_obj.location_natural_key)
 
     def test_load_tagged_vlans_to_interface(self):
         """Test loading Nautobot tagged vlan interface assignments into the Diffsync store."""
