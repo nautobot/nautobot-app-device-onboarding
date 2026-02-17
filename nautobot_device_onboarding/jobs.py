@@ -343,6 +343,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         required=False,
         description="Tenant to be applied to all synced devices.",
     )
+    fail_job_on_task_failure = BooleanVar(description="If any tasks for any device fails, fail the entire job result.")
 
     template_name = "nautobot_device_onboarding/ssot_sync_devices.html"
 

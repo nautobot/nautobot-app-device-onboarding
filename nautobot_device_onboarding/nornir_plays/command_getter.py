@@ -240,7 +240,9 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                         task.results[result_idx].failed = False
                     except Exception:
                         task.result.failed = False
-        except NornirSubTaskError:
+        except NornirSubTaskError as error:
+            if nautobot_job.fail_job_on_task_failure:
+                raise error
             # These exceptions indicate that the device is unreachable or the credentials are incorrect.
             # We should fail the task early to avoid trying all commands on a device that is unreachable.
             if type(task.results[result_idx].exception).__name__ == "NetmikoAuthenticationException":
@@ -329,6 +331,8 @@ def sync_devices_command_getter(job, log_level):
                 nautobot_job=job,
             )
     except Exception as err:  # pylint: disable=broad-exception-caught
+        if job.fail_job_on_task_failure:
+            raise err
         try:
             if job.debug:
                 traceback_str = format_log_message(traceback.format_exc())
