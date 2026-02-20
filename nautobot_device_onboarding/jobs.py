@@ -392,13 +392,13 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             Location.MultipleObjectsReturned: If name is ambiguous and no parent columns provided
             KeyError: If 'location_name' is missing from row
         """
-        location_name = row['location_name'].strip()
+        location_name = row["location_name"].strip()
 
         # Find all parent ancestry columns (location_parent*)
-        parent_keys = [k for k in row if k.startswith('location_parent')]
+        parent_keys = [k for k in row if k.startswith("location_parent")]
 
         # Sort by depth (fewer 'parent' substrings = closer to child)
-        parent_keys.sort(key=lambda x: x.count('parent'))
+        parent_keys.sort(key=lambda x: x.count("parent"))
 
         # Extract non-empty parent names and reverse for root-to-leaf traversal
         parent_names = [row[k].strip() for k in parent_keys if row.get(k) and row[k].strip()]
@@ -442,7 +442,9 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         for row_num, row in enumerate(csv_reader, start=2):
             query = None
             try:
-                ancestry_parts = {k: v for k, v in row.items() if k == "location_name" or k.startswith("location_parent")}
+                ancestry_parts = {
+                    k: v for k, v in row.items() if k == "location_name" or k.startswith("location_parent")
+                }
                 query = f"location: {ancestry_parts}"
                 location = self._get_location_by_dynamic_ancestry(row)
                 query = f"device_role: {row.get('device_role_name')}"
