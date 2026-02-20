@@ -401,7 +401,7 @@ def sync_network_data_command_getter(job, log_level):
             )
             if job.fail_job_on_task_failure and result.failed:
                 raise RuntimeError(f"netmiko_send_commads task failed with {result.failed_hosts.items()}.")
-    except Exception  as err:  # pylint: disable=broad-exception-caught
+    except Exception as err:  # pylint: disable=broad-exception-caught
         if job.fail_job_on_task_failure:
             raise RuntimeError("Error During Sync Network Data Command Getter.") from err
         logger.info(f"Error During Sync Network Data Command Getter: {traceback.format_exc()}")
