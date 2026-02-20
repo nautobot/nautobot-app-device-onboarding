@@ -37,7 +37,7 @@ sync_devices:
       - command: "show interface"
         parser: "textfsm"
         jpath: "[?contains(ip_address, `{{ obj }}/`)].ip_address"
-        post_processor: "{% if obj %}{{ obj[0].split('/')[1] }}{% else %}{{ oobm_mask[0]['ipv4_mask'] }}{% endif %}"
+        post_processor: "{% if obj %}{{ obj[0].split('/')[1] }}{% else %}{{ oobm_mask }}{% endif %}"
         iterable_type: "int"
 sync_network_data:
   pre_processor:
