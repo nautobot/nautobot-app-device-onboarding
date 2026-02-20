@@ -406,8 +406,22 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
 
         # Traverse from root to immediate parent
         parent_obj = None
-        for parent_name in parent_names:
-            parent_obj = Location.objects.get(name=parent_name, parent=parent_obj)
+        for i, parent_name in enumerate(parent_names):
+            if i == 0:
+                # Deepest ancestor provided — don't assume it's a root, just match by name.
+                # If ambiguous, the caller should provide more ancestry columns.
+                matches = Location.objects.filter(name=parent_name)
+                if matches.count() == 1:
+                    parent_obj = matches.first()
+                elif matches.count() == 0:
+                    raise Location.DoesNotExist(f"No Location found with name '{parent_name}'.")
+                else:
+                    raise Location.MultipleObjectsReturned(
+                        f"Multiple Locations found with name '{parent_name}'. "
+                        "Add more ancestor column(s) to the CSV to disambiguate."
+                    )
+            else:
+                parent_obj = Location.objects.get(name=parent_name, parent=parent_obj)
 
         # If no parent columns were provided, attempt a name-only lookup.
         # This handles the case where the location name is globally unique
@@ -478,9 +492,9 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 secrets_group = SecretsGroup.objects.get(
                     name=row["secrets_group_name"].strip(),
                 )
-                query = f"platform: {row.get('platform_name')}"
                 platform = None
                 if row.get("platform_name"):
+                    query = f"platform: {row.get('platform_name')}"
                     platform = Platform.objects.get(
                         name=row["platform_name"].strip(),
                     )
