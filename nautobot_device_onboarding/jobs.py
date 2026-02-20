@@ -404,7 +404,6 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         parent_names = [row[k].strip() for k in parent_keys if row.get(k) and row[k].strip()]
         parent_names.reverse()
 
-        # Traverse from root to immediate parent
         parent_obj = None
         for i, parent_name in enumerate(parent_names):
             if i == 0:
@@ -418,7 +417,8 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 else:
                     raise Location.MultipleObjectsReturned(
                         f"Multiple Locations found with name '{parent_name}'. "
-                        "Add more ancestor column(s) to the CSV to disambiguate."
+                        "Add more ancestor column(s) (location_parent_parent_name etc.) "
+                        "to the CSV to disambiguate."
                     )
             else:
                 parent_obj = Location.objects.get(name=parent_name, parent=parent_obj)
@@ -434,7 +434,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 raise Location.DoesNotExist(f"No Location found with name '{location_name}'.")
             raise Location.MultipleObjectsReturned(
                 f"Multiple Locations found with name '{location_name}'. "
-                "Add parent column(s) to the CSV to disambiguate."
+                "Add parent column(s) (location_parent_name etc.) to the CSV to disambiguate."
             )
 
         # Return the target location with full ancestry
