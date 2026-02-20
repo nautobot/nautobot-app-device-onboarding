@@ -378,6 +378,9 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         - 'location_parent_parent_parent_name': Great-grandparent's name (optional)
         - etc. (arbitrary depth supported)
 
+        If no parent columns are supplied and the location name is globally unique,
+        the location is returned without filtering by parent.
+
         Args:
             row (dict): CSV row data with location and ancestry information
 
@@ -386,6 +389,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
 
         Raises:
             Location.DoesNotExist: If any location in the hierarchy is not found
+            Location.MultipleObjectsReturned: If name is ambiguous and no parent columns provided
             KeyError: If 'location_name' is missing from row
         """
         location_name = row['location_name'].strip()
@@ -404,6 +408,20 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         parent_obj = None
         for parent_name in parent_names:
             parent_obj = Location.objects.get(name=parent_name, parent=parent_obj)
+
+        # If no parent columns were provided, attempt a name-only lookup.
+        # This handles the case where the location name is globally unique
+        # but the location is not a root (i.e. it does have a parent in the DB).
+        if parent_obj is None and not parent_names:
+            matches = Location.objects.filter(name=location_name)
+            if matches.count() == 1:
+                return matches.first()
+            if matches.count() == 0:
+                raise Location.DoesNotExist(f"No Location found with name '{location_name}'.")
+            raise Location.MultipleObjectsReturned(
+                f"Multiple Locations found with name '{location_name}'. "
+                "Add parent column(s) to the CSV to disambiguate."
+            )
 
         # Return the target location with full ancestry
         return Location.objects.get(name=location_name, parent=parent_obj)
@@ -424,8 +442,9 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         for row_num, row in enumerate(csv_reader, start=2):
             query = None
             try:
+                ancestry_parts = {k: v for k, v in row.items() if k == "location_name" or k.startswith("location_parent")}
+                query = f"location: {ancestry_parts}"
                 location = self._get_location_by_dynamic_ancestry(row)
-                query = f"location_name: {row.get('location_name')}"
                 query = f"device_role: {row.get('device_role_name')}"
                 device_role = Role.objects.get(
                     name=row["device_role_name"].strip(),
