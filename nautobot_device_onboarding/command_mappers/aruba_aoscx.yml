@@ -37,8 +37,7 @@ sync_devices:
       - command: "show interface"
         parser: "textfsm"
         jpath: "[?contains(ip_address, `{{ obj }}/`)].ip_address"
-        # TODO: The below should not be 24 but instead val ipv4_mask pre_processor but for some reason that parser's not working yet. Revisit.
-        post_processor: "{% if obj %}{{ obj[0].split('/')[1] }}{% else %}{{ 24 }}{% endif %}"
+        post_processor: "{% if obj %}{{ obj[0].split('/')[1] }}{% else %}{{ oobm_mask[0]['ipv4_mask'] }}{% endif %}"
         iterable_type: "int"
 sync_network_data:
   pre_processor:
