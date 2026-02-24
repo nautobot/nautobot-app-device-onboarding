@@ -57,6 +57,7 @@ class SSOTSyncDevicesTestCase(TransactionTestCase):
             "secrets_group": self.testing_objects["secrets_group"].pk,
             "platform": None,
             "memory_profiling": False,
+            "fail_job_on_task_failure": False,
         }
         job_result = create_job_result_and_run_job(
             module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
@@ -159,11 +160,13 @@ class SSOTSyncDevicesTestCase(TransactionTestCase):
             "update_devices_without_primary_ip": None,
             "device_role": None,
             "device_status": None,
+            "device_tenant": None,
             "interface_status": None,
             "ip_address_status": None,
             "secrets_group": None,
             "platform": None,
             "memory_profiling": False,
+            "fail_job_on_task_failure": False,
         }
 
         create_job_result_and_run_job(
@@ -216,6 +219,7 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
             "device_role": None,
             "platform": None,
             "memory_profiling": False,
+            "fail_job_on_task_failure": False,
         }
         job_result = create_job_result_and_run_job(
             module="nautobot_device_onboarding.jobs", name="SSOTSyncNetworkData", **job_form_inputs
@@ -273,12 +277,14 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
             "update_devices_without_primary_ip": True,
             "device_role": self.testing_objects["device_role"].pk,
             "device_status": self.testing_objects["status"].pk,
+            "device_tenant": None,
             "interface_status": self.testing_objects["status"].pk,
             "ip_address_status": self.testing_objects["status"].pk,
             "default_prefix_status": self.testing_objects["status"].pk,
             "secrets_group": self.testing_objects["secrets_group"].pk,
             "platform": self.testing_objects["platform_1"].pk,
             "memory_profiling": False,
+            "fail_job_on_task_failure": False,
         }
         current_file_path = os.path.dirname(os.path.abspath(__file__))
         fake_ios_inventory = {
@@ -334,11 +340,13 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
             "device_role": self.testing_objects["device_role"].pk,
             "device_status": self.testing_objects["status"].pk,
             "interface_status": self.testing_objects["status"].pk,
+            "device_tenant": None,
             "ip_address_status": self.testing_objects["status"].pk,
             "default_prefix_status": self.testing_objects["status"].pk,
             "secrets_group": self.testing_objects["secrets_group"].pk,
             "platform": self.testing_objects["platform_3"].pk,
             "memory_profiling": False,
+            "fail_job_on_task_failure": False,
         }
         sync_network_data_job_form_inputs = {
             "debug": False,
@@ -356,6 +364,7 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
             "device_role": None,
             "platform": None,
             "memory_profiling": False,
+            "fail_job_on_task_failure": False,
         }
 
         initial_vlans = set(VLAN.objects.values_list("vid", flat=True))
@@ -447,12 +456,14 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
             "update_devices_without_primary_ip": True,
             "device_role": self.testing_objects["device_role"].pk,
             "device_status": self.testing_objects["status"].pk,
+            "device_tenant": None,
             "interface_status": self.testing_objects["status"].pk,
             "ip_address_status": self.testing_objects["status"].pk,
             "default_prefix_status": self.testing_objects["status"].pk,
             "secrets_group": self.testing_objects["secrets_group"].pk,
             "platform": self.testing_objects["platform_2"].pk,
             "memory_profiling": False,
+            "fail_job_on_task_failure": False,
         }
         sync_network_data_job_form_inputs = {
             "debug": False,
@@ -470,6 +481,7 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
             "device_role": None,
             "platform": None,
             "memory_profiling": False,
+            "fail_job_on_task_failure": False,
         }
 
         initial_vrfs = set(VRF.objects.values_list("name", flat=True))
