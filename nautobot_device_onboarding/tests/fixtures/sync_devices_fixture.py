@@ -83,3 +83,47 @@ sync_devices_data_update = {
         "mask_length": 24,
     },
 }
+
+# Virtual Chassis / Switch Stack test data
+sync_devices_mock_data_virtual_chassis = {
+    "10.1.1.20": {
+        "hostname": "stack-switch-1",
+        "serial": "STACK001",
+        "device_type": "C9300-48P",
+        "mgmt_interface": "Vlan1",
+        "manufacturer": "Cisco",
+        "platform": "cisco_xe",
+        "network_driver": "cisco_xe",
+        "mask_length": 24,
+        "virtual_chassis": [
+            {"switch": "1", "priority": "15"},
+            {"switch": "2", "priority": "14"},
+            {"switch": "3", "priority": "1"},
+        ],
+        "modules": [
+            {"model": "C9300-48P", "serial": "STACK001"},
+            {"model": "C9300-24P", "serial": "STACK002"},
+            {"model": "C9300-48P", "serial": "STACK003"},
+        ],
+    },
+}
+
+# Standalone device (not part of a switch stack) - explicit empty/single virtual_chassis
+sync_devices_mock_data_standalone = {
+    "10.1.1.21": {
+        "hostname": "standalone-switch-1",
+        "serial": "STANDALONE001",
+        "device_type": "C9300-48P",
+        "mgmt_interface": "Vlan1",
+        "manufacturer": "Cisco",
+        "platform": "cisco_xe",
+        "network_driver": "cisco_xe",
+        "mask_length": 24,
+        "virtual_chassis": [
+            {"switch": "1", "priority": "15"},
+        ],
+        "modules": [
+            {"model": "C9300-48P", "serial": "STANDALONE001"},
+        ],
+    },
+}

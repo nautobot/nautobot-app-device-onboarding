@@ -196,3 +196,119 @@ class SyncDevicesNautobotAdapterTestCase(TransactionTestCase):
             device = self.testing_objects["device_2"]
             unique_id = f"{device.location.name}__{device.name}__{device.serial}"
             diffsync_obj = self.sync_devices_adapter.get("device", unique_id)
+
+class SyncDevicesNetworkAdapterVirtualChassisTestCase(TransactionTestCase):
+    """Test SyncDevicesNetworkAdapter class with Virtual Chassis / Switch Stack data."""
+
+    databases = ("default", "job_logs")
+
+    def setUp(self):  # pylint: disable=invalid-name
+        """Initialize test case."""
+        # Setup Job
+        self.job = SSOTSyncDevices()
+        self.job.job_result = JobResult.objects.create(
+            name=self.job.class_path, user=None, task_name="fake task", worker="default"
+        )
+        self.sync_devices_adapter = SyncDevicesNetworkAdapter(job=self.job, sync=None)
+
+        # Setup Nautobot Objects
+        self.testing_objects = utils.sync_devices_ensure_required_nautobot_objects()
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
+    def test_load_virtual_chassis(self, device_data):
+        """Test loading virtual chassis / switch stack data into the diffsync store."""
+        device_data.return_value = sync_devices_fixture.sync_devices_mock_data_virtual_chassis
+
+        self.job.debug = True
+
+        processed_ip_address_attrs = {
+            "location": self.testing_objects["location"],
+            "namespace": self.testing_objects["namespace"],
+            "port": 22,
+            "timeout": 30,
+            "update_devices_without_primary_ip": True,
+            "device_role": self.testing_objects["device_role"],
+            "device_status": self.testing_objects["status"],
+            "interface_status": self.testing_objects["status"],
+            "ip_address_status": self.testing_objects["status"],
+            "secrets_group": self.testing_objects["secrets_group"],
+            "platform": None,
+        }
+        self.job.ip_address_inventory = {
+            "10.1.1.20": processed_ip_address_attrs,
+        }
+
+        self.sync_devices_adapter.load()
+
+        # Verify the master device was loaded
+        master_unique_id = f"{self.testing_objects['location'].name}__stack-switch-1__STACK001"
+        diffsync_master = self.sync_devices_adapter.get("device", master_unique_id)
+        self.assertEqual("stack-switch-1", diffsync_master.name)
+        self.assertEqual("C9300-48P", diffsync_master.device_type__model)
+        self.assertEqual("STACK001", diffsync_master.serial)
+        self.assertEqual("10.1.1.20", diffsync_master.primary_ip4__host)
+        self.assertEqual("stack-switch-1", diffsync_master.virtual_chassis__name)
+        self.assertEqual(1, diffsync_master.vc_position)
+        self.assertEqual(15, diffsync_master.vc_priority)
+
+        # Verify member 2 was loaded
+        member2_unique_id = f"{self.testing_objects['location'].name}__stack-switch-1:2__STACK002"
+        diffsync_member2 = self.sync_devices_adapter.get("device", member2_unique_id)
+        self.assertEqual("stack-switch-1:2", diffsync_member2.name)
+        self.assertEqual("C9300-24P", diffsync_member2.device_type__model)
+        self.assertEqual("STACK002", diffsync_member2.serial)
+        self.assertEqual("stack-switch-1", diffsync_member2.virtual_chassis__name)
+        self.assertEqual(2, diffsync_member2.vc_position)
+        self.assertEqual(14, diffsync_member2.vc_priority)
+
+        # Verify member 3 was loaded
+        member3_unique_id = f"{self.testing_objects['location'].name}__stack-switch-1:3__STACK003"
+        diffsync_member3 = self.sync_devices_adapter.get("device", member3_unique_id)
+        self.assertEqual("stack-switch-1:3", diffsync_member3.name)
+        self.assertEqual("C9300-48P", diffsync_member3.device_type__model)
+        self.assertEqual("STACK003", diffsync_member3.serial)
+        self.assertEqual("stack-switch-1", diffsync_member3.virtual_chassis__name)
+        self.assertEqual(3, diffsync_member3.vc_position)
+        self.assertEqual(1, diffsync_member3.vc_priority)
+
+        # Verify the virtual chassis object was loaded
+        vc_unique_id = "stack-switch-1"
+        diffsync_vc = self.sync_devices_adapter.get("virtual_chassis", vc_unique_id)
+        self.assertEqual("stack-switch-1", diffsync_vc.name)
+        self.assertEqual("stack-switch-1", diffsync_vc.master__name)
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
+    def test_load_standalone_device(self, device_data):
+        """Test loading a standalone device (single member stack) into the diffsync store."""
+        device_data.return_value = sync_devices_fixture.sync_devices_mock_data_standalone
+
+        self.job.debug = True
+
+        processed_ip_address_attrs = {
+            "location": self.testing_objects["location"],
+            "namespace": self.testing_objects["namespace"],
+            "port": 22,
+            "timeout": 30,
+            "update_devices_without_primary_ip": True,
+            "device_role": self.testing_objects["device_role"],
+            "device_status": self.testing_objects["status"],
+            "interface_status": self.testing_objects["status"],
+            "ip_address_status": self.testing_objects["status"],
+            "secrets_group": self.testing_objects["secrets_group"],
+            "platform": None,
+        }
+        self.job.ip_address_inventory = {
+            "10.1.1.21": processed_ip_address_attrs,
+        }
+
+        self.sync_devices_adapter.load()
+
+        # Verify the standalone device was loaded as a regular device (not as virtual chassis)
+        device_unique_id = f"{self.testing_objects['location'].name}__standalone-switch-1__STANDALONE001"
+        diffsync_device = self.sync_devices_adapter.get("device", device_unique_id)
+        self.assertEqual("standalone-switch-1", diffsync_device.name)
+        self.assertEqual("C9300-48P", diffsync_device.device_type__model)
+        self.assertEqual("STANDALONE001", diffsync_device.serial)
+        self.assertEqual("10.1.1.21", diffsync_device.primary_ip4__host)
+        # Standalone device should not have virtual_chassis set
+        self.assertIsNone(diffsync_device.virtual_chassis__name)

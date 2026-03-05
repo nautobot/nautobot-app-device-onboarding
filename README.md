@@ -29,6 +29,7 @@ Regardless, the Onboarding App greatly simplifies the onboarding process by allo
 | Device Type             | ✅ | ✅ | ✅ | 🧪 | ✅ | ✅ | ✅ | 🧪 | 🧪 | 🧪 | 🧪 | 🧪 | 🧪 | 🧪 |
 | Mgmt Interface          | ✅ | ✅ | ✅ | 🧪 | ✅ | ✅ | ✅ | 🧪 | 🧪 | 🧪 | 🧪 | 🧪 | 🧪 | 🧪 |
 | Mgmt IP Address         | ✅ | ✅ | ✅ | 🧪 | ✅ | ✅ | ✅ | 🧪 | 🧪 | 🧪 | 🧪 | 🧪 | 🧪 | 🧪 |
+| Virtual Chassis (Stacks)| ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 
 
 ### Support Matrix (Sync Data From Network)
