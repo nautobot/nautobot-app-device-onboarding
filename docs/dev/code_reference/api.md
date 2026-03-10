@@ -1,5 +1,3 @@
 # Device Onboarding API Package
-
-::: nautobot_device_onboarding.api
-    options:
-        show_submodules: True
+!!! warning "Developer Note - Remove Me!"
+    This app does not expose a REST API (no model was defined).
