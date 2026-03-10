@@ -359,6 +359,10 @@ class SyncDevicesDevice(DiffSyncModel):
                 device.primary_ip4 = new_ip_address
         try:
             device.validated_save()
+            if device.virtual_chassis and device.vc_position == 1:
+                vc = device.virtual_chassis
+                vc.master = device
+                vc.validated_save()
         except ValidationError as err:
             self.adapter.job.logger.error(f"Device {device.name} failed to update, {err}")
         return super().update(attrs)
