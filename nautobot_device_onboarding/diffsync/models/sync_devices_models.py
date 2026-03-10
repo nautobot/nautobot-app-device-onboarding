@@ -266,6 +266,8 @@ class SyncDevicesDevice(DiffSyncModel):
 
         if self.adapter.job.debug:
             self.adapter.job.logger.debug(f"Updating {device.name} with attrs: {attrs}")
+        if attrs.get("serial"):
+           device.serial = attrs["serial"]
         if attrs.get("device_type__model"):
             device.device_type = DeviceType.objects.get(model=attrs.get("device_type__model"))
         if attrs.get("platform__name"):
