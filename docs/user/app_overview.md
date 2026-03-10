@@ -9,6 +9,7 @@ This [Nautobot](https://github.com/nautobot/nautobot) App allows to easily onboa
 
 ## Description/Overview
 
+<<<<<<< HEAD
 This section describes the new implementation (SSoT Implementation) and the original implementation.
 
 ### New SSoT Implementation
@@ -93,6 +94,10 @@ The goal of this app is not to import everything about a device into Nautobot. R
 For example, getting the Management IP and Platform data into Nautobot allows a follow-on tool that uses the basic info to access each device, retrieve data, and then populate Nautobot with that data.
 
 One example of a solution that can retrieve that additional device data and import it into Nautobot is the [Network Importer](https://github.com/networktocode/network-importer). Other options would include an Ansible playbook or a Python script.
+=======
+![Main Page](../media/ss_main_page_light.png#only-light)
+![Main Page](../media/ss_main_page_dark.png#only-dark)
+>>>>>>> 0e4e4d7 (Cookie updated targeting develop by NetworkToCode Cookie Drift Manager Tool)
 
 ## Audience (User Personas) - Who should use this App?
 
