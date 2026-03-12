@@ -14,7 +14,7 @@ This document describes all new features and changes in the release. The format 
 
 ### Fixed
 
-- [#517](https://github.com/nautobot/nautobot-app-device-onboarding/issues/517) - Added “fail job on task failure” so the job fails when one or more tasks fail.
+- [#517](https://github.com/nautobot/nautobot-app-device-onboarding/issues/517) - Added "fail job on task failure" so the job fails when one or more tasks fail.
 
 ## [v4.4.3 (2026-01-27)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.4.3)
 
