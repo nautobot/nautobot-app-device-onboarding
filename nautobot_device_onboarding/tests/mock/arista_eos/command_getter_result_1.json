@@ -95,6 +95,59 @@
                 "maxMssIngress": 0,
                 "maxMssEgress": 0
             },
+            "Ethernet5": {
+                "name": "Ethernet5",
+                "lineProtocolStatus": "up",
+                "interfaceStatus": "disabled",
+                "mtu": "1500",
+                "interfaceAddressBrief": {
+                    "ipAddr": {
+                        "address": "5.5.5.5",
+                        "maskLen": 24
+                    }
+                },
+                "ipv4Routable240": false,
+                "ipv4Routable0": false,
+                "enabled": true,
+                "description": "",
+                "interfaceAddress": {
+                    "primaryIp": {
+                        "address": "5.5.5.5",
+                        "maskLen": 24
+                    },
+                    "secondaryIps": {},
+                    "secondaryIpsOrderedList": [
+                        {
+                            "address": "2.2.2.3",
+                            "maskLen": 24
+                        },
+                        {
+                            "address": "2.3.3.4",
+                            "maskLen": 24
+                        }
+                    ],
+                    "virtualIp": {
+                        "address": "5.5.6.6",
+                        "maskLen": 24
+                    },
+                    "virtualSecondaryIps": {},
+                    "virtualSecondaryIpsOrderedList": [],
+                    "broadcastAddress": "255.255.255.255",
+                    "dhcp": false
+                },
+                "proxyArp": false,
+                "proxyArpAllowDefault": false,
+                "localProxyArp": false,
+                "gratuitousArp": false,
+                "routedAddr": "52:54:00:91:1e:bf",
+                "isVrrpBackup": false,
+                "vrf": "default",
+                "urpf": "disable",
+                "addresslessForwarding": "isInvalid",
+                "directedBroadcastEnabled": false,
+                "maxMssIngress": 0,
+                "maxMssEgress": 0
+            },
             "Management1": {
                 "name": "Management1",
                 "lineProtocolStatus": "up",
@@ -410,6 +463,99 @@
                 "mtu": "1500",
                 "name": "Ethernet4",
                 "physicalAddress": "52:54:00:91:1e:bf"
+            },
+            "Ethernet5": {
+                "autoNegotiate": "unknown",
+                "bandwidth": 1000000000,
+                "description": "",
+                "duplex": "duplexFull",
+                "forwardingModel": "routed",
+                "hardware": "ethernet",
+                "interfaceAddress": [
+                    {
+                        "broadcastAddress": "255.255.255.255",
+                        "dhcp": false,
+                        "primaryIp": {
+                            "address": "5.5.5.5",
+                            "maskLen": 24
+                        },
+                        "secondaryIps": {
+                            "2.2.2.3": {
+                                "address": "2.2.2.3",
+                                "maskLen": 24
+                            },
+                            "2.3.3.4": {
+                                "address": "2.3.3.4",
+                                "maskLen": 24
+                            }
+                        },
+                        "secondaryIpsOrderedList": [
+                            {
+                                "address": "2.2.2.3",
+                                "maskLen": 24
+                            },
+                            {
+                                "address": "2.3.3.4",
+                                "maskLen": 24
+                            }
+                        ],
+                        "virtualIp": {
+                            "address": "5.5.6.6",
+                            "maskLen": 24
+                        },
+                        "virtualSecondaryIps": {},
+                        "virtualSecondaryIpsOrderedList": []
+                    }
+                ],
+                "interfaceCounters": {
+                    "counterRefreshTime": 1716995214.376519,
+                    "inBroadcastPkts": 0,
+                    "inDiscards": 0,
+                    "inMulticastPkts": 0,
+                    "inOctets": 0,
+                    "inTotalPkts": 0,
+                    "inUcastPkts": 0,
+                    "inputErrorsDetail": {
+                        "alignmentErrors": 0,
+                        "fcsErrors": 0,
+                        "giantFrames": 0,
+                        "runtFrames": 0,
+                        "rxPause": 0,
+                        "symbolErrors": 0
+                    },
+                    "linkStatusChanges": 2,
+                    "outBroadcastPkts": 0,
+                    "outDiscards": 0,
+                    "outMulticastPkts": 20,
+                    "outOctets": 3119,
+                    "outTotalPkts": 20,
+                    "outUcastPkts": 0,
+                    "outputErrorsDetail": {
+                        "collisions": 0,
+                        "deferredTransmissions": 0,
+                        "lateCollisions": 0,
+                        "txPause": 0
+                    },
+                    "totalInErrors": 0,
+                    "totalOutErrors": 0
+                },
+                "interfaceStatistics": {
+                    "inBitsRate": 0.0,
+                    "inPktsRate": 0.0,
+                    "outBitsRate": 37.37829217160852,
+                    "outPktsRate": 0.0288879875526965,
+                    "updateInterval": 300.0
+                },
+                "interfaceStatus": "connected",
+                "l2Mru": 0,
+                "l3MtuConfigured": false,
+                "lanes": 0,
+                "lastStatusChangeTimestamp": 1716994739.7757108,
+                "lineProtocolStatus": "up",
+                "loopbackMode": "loopbackNone",
+                "mtu": "1500",
+                "name": "Ethernet5",
+                "physicalAddress": "52:54:00:91:1e:bb"
             },
             "Management1": {
                 "autoNegotiate": "success",
