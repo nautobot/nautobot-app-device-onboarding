@@ -121,6 +121,43 @@ class SSOTSyncDevicesTestCase(TransactionTestCase):
         self.assertEqual(processed_csv_data["10.1.1.11"]["secrets_group"], self.testing_objects["secrets_group"])
         self.assertEqual(processed_csv_data["10.1.1.11"]["platform"], platform)
 
+    def test_additional_parent_fields(self):
+        """Test processing of CSV file used for onboarding jobs with additional parent columns."""
+
+        manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
+        platform, _ = Platform.objects.get_or_create(
+            name="cisco_ios", network_driver="cisco_ios", manufacturer=manufacturer
+        )
+        onboarding_job = jobs.SSOTSyncDevices()
+        with open("nautobot_device_onboarding/tests/fixtures/additional_parent_fields.csv", "rb") as csv_file:
+            processed_csv_data = onboarding_job._process_csv_data(csv_file=csv_file)  # pylint: disable=protected-access
+        self.assertEqual(processed_csv_data["10.1.1.10"]["location"], self.testing_objects["location_3"])
+        self.assertEqual(processed_csv_data["10.1.1.10"]["namespace"], self.testing_objects["namespace"])
+        self.assertEqual(processed_csv_data["10.1.1.10"]["port"], 22)
+        self.assertEqual(processed_csv_data["10.1.1.10"]["timeout"], 30)
+        self.assertEqual(processed_csv_data["10.1.1.10"]["set_mgmt_only"], True)
+        self.assertEqual(processed_csv_data["10.1.1.10"]["update_devices_without_primary_ip"], True)
+        self.assertEqual(processed_csv_data["10.1.1.10"]["device_role"], self.testing_objects["device_role"])
+        self.assertEqual(processed_csv_data["10.1.1.10"]["device_status"], self.testing_objects["status"])
+        self.assertEqual(processed_csv_data["10.1.1.10"]["device_tenant"], self.testing_objects["device_tenant_1"])
+        self.assertEqual(processed_csv_data["10.1.1.10"]["interface_status"], self.testing_objects["status"])
+        self.assertEqual(processed_csv_data["10.1.1.10"]["ip_address_status"], self.testing_objects["status"])
+        self.assertEqual(processed_csv_data["10.1.1.10"]["secrets_group"], self.testing_objects["secrets_group"])
+        self.assertEqual(processed_csv_data["10.1.1.10"]["platform"], platform)
+
+        self.assertEqual(processed_csv_data["10.1.1.11"]["location"], self.testing_objects["location_4"])
+        self.assertEqual(processed_csv_data["10.1.1.11"]["namespace"], self.testing_objects["namespace"])
+        self.assertEqual(processed_csv_data["10.1.1.11"]["port"], 22)
+        self.assertEqual(processed_csv_data["10.1.1.11"]["timeout"], 30)
+        self.assertEqual(processed_csv_data["10.1.1.11"]["set_mgmt_only"], False)
+        self.assertEqual(processed_csv_data["10.1.1.11"]["update_devices_without_primary_ip"], False)
+        self.assertEqual(processed_csv_data["10.1.1.11"]["device_role"], self.testing_objects["device_role"])
+        self.assertEqual(processed_csv_data["10.1.1.11"]["device_status"], self.testing_objects["status"])
+        self.assertEqual(processed_csv_data["10.1.1.11"]["interface_status"], self.testing_objects["status"])
+        self.assertEqual(processed_csv_data["10.1.1.11"]["ip_address_status"], self.testing_objects["status"])
+        self.assertEqual(processed_csv_data["10.1.1.11"]["secrets_group"], self.testing_objects["secrets_group"])
+        self.assertEqual(processed_csv_data["10.1.1.11"]["platform"], platform)
+
     def test_process_csv_data__bad_file(self):
         """Test error checking of a bad CSV file used for onboarding jobs."""
         manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")

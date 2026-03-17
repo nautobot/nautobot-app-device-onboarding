@@ -419,6 +419,8 @@ def sync_devices_ensure_required_nautobot_objects__jobs_testing():
 
     namespace, _ = Namespace.objects.get_or_create(name="Global")
 
+    location_type__parent__parent__parent, _ = LocationType.objects.get_or_create(name="Continent")
+    location_type__parent__parent, _ = LocationType.objects.get_or_create(name="Country")
     location_type__parent, _ = LocationType.objects.get_or_create(name="Region")
     location_type, _ = LocationType.objects.get_or_create(name="Site")
     location_type.content_types.add(ContentType.objects.get_for_model(Device))
@@ -437,6 +439,44 @@ def sync_devices_ensure_required_nautobot_objects__jobs_testing():
         name="Site B", parent=location_2_parent, location_type=location_type, status=status
     )
 
+    # Locations with intentionally overlapping naming in ancestry
+    location_3_parent_parent_parent, _ = Location.objects.get_or_create(
+        name="Site C Great-Grandparent (1)", location_type=location_type__parent__parent__parent, status=status
+    )
+    location_3_parent_parent, _ = Location.objects.get_or_create(
+        name="Site C Grandparent (intentional duplicate)",
+        parent=location_3_parent_parent_parent,
+        location_type=location_type__parent__parent,
+        status=status,
+    )
+    location_3_parent, _ = Location.objects.get_or_create(
+        name="Site C Parent (intentional duplicate)",
+        parent=location_3_parent_parent,
+        location_type=location_type__parent,
+        status=status,
+    )
+    location_3, _ = Location.objects.get_or_create(
+        name="Site C (intentional duplicate)", parent=location_3_parent, location_type=location_type, status=status
+    )
+    location_4_parent_parent_parent, _ = Location.objects.get_or_create(
+        name="Site C Great-Grandparent (2)", location_type=location_type__parent__parent__parent, status=status
+    )
+    location_4_parent_parent, _ = Location.objects.get_or_create(
+        name="Site C Grandparent (intentional duplicate)",
+        parent=location_4_parent_parent_parent,
+        location_type=location_type__parent__parent,
+        status=status,
+    )
+    location_4_parent, _ = Location.objects.get_or_create(
+        name="Site C Parent (intentional duplicate)",
+        parent=location_4_parent_parent,
+        location_type=location_type__parent,
+        status=status,
+    )
+    location_4, _ = Location.objects.get_or_create(
+        name="Site C (intentional duplicate)", parent=location_4_parent, location_type=location_type, status=status
+    )
+
     device_role, _ = Role.objects.get_or_create(name="Network")
     device_role.content_types.add(ContentType.objects.get_for_model(Device))
     device_role.validated_save()
@@ -448,6 +488,8 @@ def sync_devices_ensure_required_nautobot_objects__jobs_testing():
     testing_objects["namespace"] = namespace
     testing_objects["location_1"] = location_1
     testing_objects["location_2"] = location_2
+    testing_objects["location_3"] = location_3
+    testing_objects["location_4"] = location_4
     testing_objects["device_role"] = device_role
     testing_objects["device_tenant_1"] = device_tenant_1
 
