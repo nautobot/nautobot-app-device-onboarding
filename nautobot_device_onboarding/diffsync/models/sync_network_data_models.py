@@ -1,6 +1,6 @@
 """Diffsync models."""
 
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from uuid import UUID
 
 try:
@@ -208,28 +208,28 @@ class SyncNetworkDataVLAN(DiffSyncModel):
 
     _model = VLAN
     _modelname = "vlan"
-    _identifiers = ("vid", "name", "location__name")
+    _identifiers = ("vid", "name", "location_natural_key")
 
     vid: int
     name: str
-    location__name: str
+    location_natural_key: Optional[Tuple[str, ...]] = None
 
     @classmethod
     def create(cls, adapter, ids, attrs):
         """Create a new VLAN."""
         location = None
         try:
-            location = Location.objects.get(name=ids["location__name"])
+            location = Location.objects.get_by_natural_key(*ids["location_natural_key"])
         except ObjectDoesNotExist as err:
             adapter.job.logger.error(
                 f"While creating VLAN {ids['vid']} - {ids['name']}, "
-                f"unable to find a Location with name: {ids['location__name']}."
+                f"unable to find Location: {ids['location_natural_key']}."
             )
             raise diffsync_exceptions.ObjectNotCreated(err)
         except MultipleObjectsReturned as err:
             adapter.job.logger.error(
                 f"While creating VLAN {ids['vid']} - {ids['name']}, "
-                f"Multiple Locations were found with name: {ids['location__name']}."
+                f"Multiple Locations found: {ids['location_natural_key']}."
             )
             raise diffsync_exceptions.ObjectNotCreated(err)
         try:

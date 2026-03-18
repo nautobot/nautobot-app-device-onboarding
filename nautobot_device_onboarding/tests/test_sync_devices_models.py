@@ -45,6 +45,7 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
             "secrets_group": self.testing_objects["secrets_group_alternate"].pk,
             "platform": None,
             "memory_profiling": False,
+            "fail_job_on_task_failure": False,
         }
         self.testing_objects["device_1"].primary_ip4 = None  # test existing device with missing primary ip
         self.testing_objects["device_1"].validated_save()
@@ -98,6 +99,7 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
             "secrets_group": self.testing_objects["secrets_group"].pk,
             "platform": None,
             "memory_profiling": False,
+            "fail_job_on_task_failure": False,
         }
         job_result = create_job_result_and_run_job(
             module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
@@ -146,6 +148,7 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
             "secrets_group": self.testing_objects["secrets_group_alternate"].pk,
             "platform": None,
             "memory_profiling": False,
+            "fail_job_on_task_failure": False,
         }
         job_result = create_job_result_and_run_job(
             module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
