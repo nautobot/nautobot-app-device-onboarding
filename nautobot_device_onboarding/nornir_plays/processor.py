@@ -43,10 +43,11 @@ class CommandGetterProcessor(BaseLoggingProcessor):
             None
         """
         parsed_command_outputs = {}
-        self.logger.info(
-            f"Task instance completed. Task Name: {task.name}",
-            extra={"object": task.host},
-        )
+        if self.job.debug:
+            self.logger.debug(
+                f"Task instance completed. Task Name: {task.name}",
+                extra={"object": task.host},
+            )
         # If any main task resulted in a failed:True then add that key so ssot side can ignore that entry.
         if result[0].failed:
             self.logger.info(
@@ -91,10 +92,11 @@ class CommandGetterProcessor(BaseLoggingProcessor):
 
     def subtask_instance_completed(self, task: Task, host: Host, result: MultiResult) -> None:
         """Processor for logging and data processing on subtask completed."""
-        self.logger.info(
-            f"Subtask {'failed' if result.failed else 'succeeded'}: {task.name}, {task.host}.",
-            extra={"object": task.host},
-        )
+        if self.job.debug:
+            self.logger.info(
+                f"Subtask {'failed' if result.failed else 'succeeded'}: {task.name}, {task.host}.",
+                extra={"object": task.host},
+            )
         if result.failed:
             for res in result:
                 if res.exception:
@@ -105,7 +107,8 @@ class CommandGetterProcessor(BaseLoggingProcessor):
 
     def subtask_instance_started(self, task: Task, host: Host) -> None:  # show command start
         """Processor for logging and data processing on subtask start."""
-        self.logger.info(f"Subtask starting: {task.name}, {task.host}.", extra={"object": task.host})
+        if self.job.debug:
+            self.logger.info(f"Subtask starting: {task.name}, {task.host}.", extra={"object": task.host})
 
 
 class TroubleshootingProcessor(BaseLoggingProcessor):
