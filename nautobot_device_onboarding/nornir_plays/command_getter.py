@@ -149,8 +149,8 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
         logger.error(
             f"{task.host.platform} has missing definitions for cables in command_mapper YAML file. Cables will not be loaded."
         )
-
-    logger.debug(f"Commands to run: {[cmd['command'] for cmd in commands]}")
+    if nautobot_job.debug:
+        logger.debug(f"Commands to run: {[cmd['command'] for cmd in commands]}")
     # All commands in this for loop are running within 1 device connection.
     for result_idx, command in enumerate(commands):
         send_command_kwargs = {}
@@ -179,9 +179,10 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                                 git_template_dir = get_git_repo_parser_path(parser_type="textfsm")
                                 if git_template_dir:
                                     if not check_for_required_file(git_template_dir, "index"):
-                                        logger.debug(
-                                            f"Unable to find required index file in {git_template_dir} for textfsm parsing. Falling back to default templates."
-                                        )
+                                        if nautobot_job.debug:
+                                            logger.debug(
+                                                f"Unable to find required index file in {git_template_dir} for textfsm parsing. Falling back to default templates."
+                                            )
                                         git_template_dir = None
                                 # Parsing textfsm ourselves instead of using netmikos use_<parser> function to be able to handle exceptions
                                 # ourselves. Default for netmiko is if it can't parse to return raw text which is tougher to handle.

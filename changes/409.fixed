@@ -1,0 +1,1 @@
+Fixed debug logging not adhering to the debug job input boolean.

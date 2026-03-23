@@ -91,16 +91,19 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
     # This just renders the jpath itself if any interpolation is needed.
     jpath_template = j2_env.from_string(yaml_command_element["jpath"])
     j2_rendered_jpath = jpath_template.render(**j2_data_context)
-    logger.debug("Post Rendered Jpath: %s", j2_rendered_jpath)
+    if job_debug:
+        logger.debug("Post Rendered Jpath: %s", j2_rendered_jpath)
     try:
         if isinstance(parsed_command_output, str):
             try:
                 parsed_command_output = json.loads(parsed_command_output)
             except (JSONDecodeError, TypeError):
-                logger.debug("Parsed Command Output is a string but not jsonable: %s", parsed_command_output)
+                if job_debug:
+                    logger.debug("Parsed Command Output is a string but not jsonable: %s", parsed_command_output)
         extracted_value = extract_data_from_json(parsed_command_output, j2_rendered_jpath)
     except TypeError as err:
-        logger.debug("Error occurred during extraction: %s setting default extracted value to []", err)
+        if job_debug:
+            logger.debug("Error occurred during extraction: %s setting default extracted value to []", err)
         extracted_value = []
     pre_processed_extracted = extracted_value
     if yaml_command_element.get("post_processor"):
@@ -116,8 +119,9 @@ def extract_and_post_process(parsed_command_output, yaml_command_element, j2_dat
     else:
         extracted_processed = extracted_value
     post_processed_data = normalize_processed_data(extracted_processed, iter_type)
-    logger.debug("Pre Processed Extracted: %s", pre_processed_extracted)
-    logger.debug("Post Processed Data: %s", post_processed_data)
+    if job_debug:
+        logger.debug("Pre Processed Extracted: %s", pre_processed_extracted)
+        logger.debug("Post Processed Data: %s", post_processed_data)
     return pre_processed_extracted, post_processed_data
 
 
