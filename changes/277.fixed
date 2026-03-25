@@ -1,0 +1,1 @@
+Refactors get_git_repo to use .get() for better error handling.
