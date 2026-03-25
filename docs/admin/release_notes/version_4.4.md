@@ -9,6 +9,14 @@ This document describes all new features and changes in the release. The format 
 
 <!-- towncrier release notes start -->
 
+
+## [v4.4.4 (2026-03-23)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.4.4)
+
+### Fixed
+
+- [#409](https://github.com/nautobot/nautobot-app-device-onboarding/issues/409) - Fixed debug logging not adhering to the debug job input boolean.
+- [#517](https://github.com/nautobot/nautobot-app-device-onboarding/issues/517) - Added "fail job on task failure" so the job fails when one or more tasks fail.
+
 ## [v4.4.3 (2026-01-27)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.4.3)
 
 ### Fixed
