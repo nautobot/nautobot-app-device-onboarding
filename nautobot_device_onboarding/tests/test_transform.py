@@ -10,8 +10,9 @@ from nautobot.core.jobs import GitRepositorySync
 from nautobot.core.testing import TransactionTestCase, run_job_for_testing
 from nautobot.extras.choices import JobResultStatusChoices
 from nautobot.extras.models import GitRepository, JobResult
-
-from nautobot_device_onboarding.constants import ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER
+from nautobot_device_onboarding.constants import (
+    ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER,
+)
 from nautobot_device_onboarding.nornir_plays.transform import (
     add_platform_parsing_info,
     get_git_repo,
@@ -77,12 +78,22 @@ class TestTransformWithGitRepo(TransactionTestCase):
         """Simple helper to populate a mock repo with some data."""
         os.makedirs(path, exist_ok=True)
         os.makedirs(os.path.join(path, "onboarding_command_mappers"), exist_ok=True)
-        with open(os.path.join(path, "onboarding_command_mappers", "foo_bar.yml"), "w", encoding="utf-8") as fd:  # pylint:disable=invalid-name
+        with open(
+            os.path.join(path, "onboarding_command_mappers", "foo_bar.yml"),
+            "w",
+            encoding="utf-8",
+        ) as fd:  # pylint:disable=invalid-name
             yaml.dump(
                 {
                     "sync_devices": {
                         "serial": {
-                            "commands": [{"command": "show version", "parser": "textfsm", "jpath": "[*].serial"}]
+                            "commands": [
+                                {
+                                    "command": "show version",
+                                    "parser": "textfsm",
+                                    "jpath": "[*].serial",
+                                }
+                            ]
                         }
                     }
                 },
@@ -96,15 +107,22 @@ class TestTransformWithGitRepo(TransactionTestCase):
         ).count()
         self.assertEqual(1, repo_count)
 
-    @mock.patch("nautobot_device_onboarding.nornir_plays.transform.load_command_mappers_from_dir")
-    def test_pull_git_repository_and_refresh_data_with_valid_data(self, mock_load_command_mappers, MockGitRepo):  # pylint:disable=invalid-name
+    @mock.patch(
+        "nautobot_device_onboarding.nornir_plays.transform.load_command_mappers_from_dir"
+    )
+    def test_pull_git_repository_and_refresh_data_with_valid_data(
+        self, mock_load_command_mappers, MockGitRepo
+    ):  # pylint:disable=invalid-name
         """
         The test_pull_git_repository_and_refresh_data job should succeed if valid data is present in the repo.
         """
         with tempfile.TemporaryDirectory() as tempdir:
             with self.settings(GIT_ROOT=tempdir):
                 MockGitRepo.side_effect = self.populate_repo
-                MockGitRepo.return_value.checkout.return_value = (self.COMMIT_HEXSHA, True)
+                MockGitRepo.return_value.checkout.return_value = (
+                    self.COMMIT_HEXSHA,
+                    True,
+                )
 
                 # Run the Git operation and refresh the object from the DB
                 job_model = GitRepositorySync().job_model
@@ -113,7 +131,12 @@ class TestTransformWithGitRepo(TransactionTestCase):
                 self.assertEqual(
                     job_result.status,
                     JobResultStatusChoices.STATUS_SUCCESS,
-                    (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+                    (
+                        job_result.traceback,
+                        list(
+                            job_result.job_log_entries.values_list("message", flat=True)
+                        ),
+                    ),
                 )
                 mock_load_command_mappers.side_effect = [
                     {"foo_bar": {"sync_devices": "serial"}},
@@ -133,7 +156,9 @@ class GetGitRepoTestCase(unittest.TestCase):
         # Create a clean state before each test
         super().setUp()
         # Clean up any existing repos to ensure a fresh state (safe option)
-        GitRepository.objects.filter(provided_contents__contains=ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER).delete()
+        GitRepository.objects.filter(
+            provided_contents__contains=ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER
+        ).delete()
         self.repo = GitRepository(
             name="Test Git Repo",
             remote_url="http://localhost/git.git",
