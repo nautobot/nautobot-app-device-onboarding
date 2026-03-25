@@ -148,6 +148,7 @@ class TestTransformWithGitRepo(TransactionTestCase):
 @mock.patch("nautobot.extras.datasources.git.GitRepo")
 class GetGitRepoTestCase(unittest.TestCase):
     """Testing the get_git_repo helper function."""
+
     def setUp(self):
         # Create a clean state before each test
         super().setUp()
