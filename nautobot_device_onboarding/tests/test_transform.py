@@ -2,12 +2,13 @@
 
 import os
 import tempfile
-import unittest
 from unittest import mock
 
 import yaml
+from django.core.exceptions import ObjectDoesNotExist
+from nautobot.apps.testing import TestCase, TransactionTestCase
 from nautobot.core.jobs import GitRepositorySync
-from nautobot.core.testing import TransactionTestCase, run_job_for_testing
+from nautobot.core.testing import run_job_for_testing
 from nautobot.extras.choices import JobResultStatusChoices
 from nautobot.extras.models import GitRepository, JobResult
 
@@ -23,13 +24,15 @@ from nautobot_device_onboarding.nornir_plays.transform import (
 MOCK_DIR = os.path.join("nautobot_device_onboarding", "tests", "mock")
 
 
-class TestTransformNoGitRepo(unittest.TestCase):
+class TestTransformNoGitRepo(TestCase):
     """Testing the transform helpers with no git repo overloads."""
 
     def setUp(self):
         self.yaml_file_dir = f"{MOCK_DIR}/command_mappers/"
 
-    def test_add_platform_parsing_info_sane_defaults(self):
+    @mock.patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository.objects.get")
+    def test_add_platform_parsing_info_sane_defaults(self, mock_repo_get):
+        mock_repo_get.side_effect = ObjectDoesNotExist
         command_mappers = add_platform_parsing_info()
         default_mappers = [
             "cisco_ios",
@@ -146,7 +149,7 @@ class TestTransformWithGitRepo(TransactionTestCase):
 
 
 @mock.patch("nautobot.extras.datasources.git.GitRepo")
-class GetGitRepoTestCase(unittest.TestCase):
+class GetGitRepoTestCase(TestCase):
     """Testing the get_git_repo helper function."""
 
     def setUp(self):
@@ -160,7 +163,6 @@ class GetGitRepoTestCase(unittest.TestCase):
             provided_contents=[ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER],
         )
         self.repo.save()
-        # self.job_result = JobResult.objects.create(name=self.repo.name)
         return mock.DEFAULT
 
     def test_get_git_repo_success(self, *args, **kwargs):
