@@ -119,9 +119,10 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
                 if interface_data["ip_addresses"]:
                     for ip_address in interface_data["ip_addresses"]:
                         if ip_address["ip_address"]:
-                            unique_id = ip_address["ip_address"]
+                            unique_id = f"{ip_address['ip_address']}__{self.job.namespace.name}"
                             diffsync_obj = self.sync_network_data_adapter.get("ip_address", unique_id)
                             self.assertEqual(ip_address["ip_address"], diffsync_obj.host)
+                            self.assertEqual(self.job.namespace.name, diffsync_obj.namespace)
                             self.assertEqual(4, diffsync_obj.ip_version)
                             self.assertEqual(int(ip_address["prefix_length"]), diffsync_obj.mask_length)
                             self.assertEqual(self.job.ip_address_status.name, diffsync_obj.status__name)
@@ -168,11 +169,13 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
             for interface_name, interface_data in device_data["interfaces"].items():
                 for ip_address in interface_data["ip_addresses"]:
                     if ip_address["ip_address"]:
-                        unique_id = f"{hostname}__{interface_name}__{ip_address['ip_address']}"
+                        #unique_id = f"{hostname}__{interface_name}__{ip_address['ip_address']}"
+                        unique_id = f"{hostname}__{interface_name}__{ip_address['ip_address']}__{self.job.namespace.name}"
                         diffsync_obj = self.sync_network_data_adapter.get("ipaddress_to_interface", unique_id)
                         self.assertEqual(hostname, diffsync_obj.interface__device__name)
                         self.assertEqual(interface_name, diffsync_obj.interface__name)
                         self.assertEqual(ip_address["ip_address"], diffsync_obj.ip_address__host)
+                        self.assertEqual(self.job.namespace.name, diffsync_obj.ip_address__parent__namespace__name)
 
     def test_load_tagged_vlans_to_interface(self):
         """Test loading tagged vlan interface assignments into the Diffsync store."""
@@ -319,12 +322,14 @@ class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
             host__in=ip_address_hosts,
             parent__namespace__name=self.job.namespace.name,
         ):
-            unique_id = f"{ip_address.host}"
+            #unique_id = f"{ip_address.host}"
+            unique_id = f"{ip_address.host}__{ip_address.parent.namespace.name}"
             diffsync_obj = self.sync_network_data_adapter.get("ip_address", unique_id)
             self.assertEqual(ip_address.host, diffsync_obj.host)
             self.assertEqual(ip_address.ip_version, diffsync_obj.ip_version)
             self.assertEqual(ip_address.mask_length, diffsync_obj.mask_length)
             self.assertEqual(self.job.ip_address_status.name, diffsync_obj.status__name)
+            self.assertEqual(ip_address.parent.namespace.name, diffsync_obj.namespace)
 
     def test_load_vlans(self):
         """Test loading Nautobot vlan data into the diffsync store."""

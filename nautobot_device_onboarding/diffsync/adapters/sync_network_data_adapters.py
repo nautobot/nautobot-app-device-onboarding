@@ -118,6 +118,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
             network_ip_address = self.ip_address(
                 adapter=self,
                 host=ip_address.host,
+                namespace=ip_address.parent.namespace.name,
                 mask_length=ip_address.mask_length,
                 type=ip_address.type,
                 ip_version=ip_address.ip_version,
@@ -636,6 +637,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                                 network_ip_address = self.ip_address(
                                     adapter=self,
                                     host=ip_address["ip_address"],
+                                    namespace=self.job.namespace.name,
                                     mask_length=int(ip_address["prefix_length"]),
                                     type="host",
                                     ip_version=4,
@@ -761,6 +763,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                                 interface__device__name=hostname,
                                 interface__name=interface_name,
                                 ip_address__host=ip_address["ip_address"],
+                                ip_address__parent__namespace__name=self.job.namespace.name,
                                 ip_address__mask_length=(
                                     int(ip_address["prefix_length"]) if ip_address["prefix_length"] else None
                                 ),
