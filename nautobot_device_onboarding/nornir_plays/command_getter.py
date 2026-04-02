@@ -130,7 +130,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
             host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True
         )
     if nautobot_job.connectivity_test:
-        if not tcp_ping(task.host.hostname, task.host.port):
+        if not tcp_ping(task.host.hostname, task.host.port if task.host.port else 22):
             return Result(
                 host=task.host, result=f"{task.host.name} failed connectivity check via tcp_ping.", failed=True
             )
