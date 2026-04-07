@@ -256,8 +256,8 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         super().__init__(*args, **kwargs)
         self.ip_address_inventory = {}
         self.found_invalid_ip_address = False
-
         self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
+        self._db_cache = {}  # per-job cache for _cached_get / _cached_filter_count_and_first
 
     class Meta:
         """Metadata about this Job."""
@@ -361,6 +361,36 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         self.target_adapter = SyncDevicesNautobotAdapter(job=self, sync=self.sync)
         self.target_adapter.load()
 
+    def _cached_get(self, model, **kwargs):
+        """Wrap model.objects.get() with a per-job in-memory cache.
+
+        Failed lookups are never cached so that each row still gets its own
+        ObjectDoesNotExist / MultipleObjectsReturned exception.
+        """
+        key = (model, "get", tuple(sorted(kwargs.items())))
+        if key not in self._db_cache:
+            self._db_cache[key] = model.objects.get(**kwargs)  # propagates on miss
+        else:
+            if self.debug:
+                self.logger.debug(f"Object successfully retrieved from cache: { self._db_cache[key] }")
+        return self._db_cache[key]
+
+    def _cached_filter_count_and_first(self, model, **kwargs):
+        """Wrap model.objects.filter() returning (count, first_or_none).
+
+        Used by _get_location_by_dynamic_ancestry for ambiguity checks.
+        The full queryset is evaluated once and stored as a list so subsequent
+        accesses don't re-hit the DB.
+        """
+        key = (model, "filter", tuple(sorted(kwargs.items())))
+        if key not in self._db_cache:
+            self._db_cache[key] = list(model.objects.filter(**kwargs))
+        else:
+            if self.debug:
+                self.logger.debug(f"Object successfully retrieved from cache: { self._db_cache[key] }")
+        cached = self._db_cache[key]
+        return len(cached), (cached[0] if cached else None)
+
     def _convert_string_to_bool(self, string, header):
         """Given a string of 'true' or 'false' convert to bool."""
         if string.lower() == "true":
@@ -414,10 +444,10 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             if i == 0:
                 # Deepest ancestor provided — don't assume it's a root, just match by name.
                 # If ambiguous, the caller should provide more ancestry columns.
-                matches = Location.objects.filter(name=parent_name)
-                if matches.count() == 1:
-                    parent_obj = matches.first()
-                elif matches.count() == 0:
+                count, first = self._cached_filter_count_and_first(Location, name=parent_name)
+                if count == 1:
+                    parent_obj = first
+                elif count == 0:
                     raise Location.DoesNotExist(f"No Location found with name '{parent_name}'.")
                 else:
                     raise Location.MultipleObjectsReturned(
@@ -426,16 +456,16 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                         "to the CSV to disambiguate."
                     )
             else:
-                parent_obj = Location.objects.get(name=parent_name, parent=parent_obj)
+                parent_obj = self._cached_get(Location, name=parent_name, parent=parent_obj)
 
         # If no parent columns were provided, attempt a name-only lookup.
         # This handles the case where the location name is globally unique
         # but the location is not a root (i.e. it does have a parent in the DB).
         if parent_obj is None and not parent_names:
-            matches = Location.objects.filter(name=location_name)
-            if matches.count() == 1:
-                return matches.first()
-            if matches.count() == 0:
+            count, first = self._cached_filter_count_and_first(Location, name=location_name)
+            if count == 1:
+                return first
+            if count == 0:
                 raise Location.DoesNotExist(f"No Location found with name '{location_name}'.")
             raise Location.MultipleObjectsReturned(
                 f"Multiple Locations found with name '{location_name}'. "
@@ -443,7 +473,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             )
 
         # Return the target location with full ancestry
-        return Location.objects.get(name=location_name, parent=parent_obj)
+        return self._cached_get(Location, name=location_name, parent=parent_obj)
 
     def _process_csv_data(self, csv_file):
         """Convert CSV data into a list of dictionaries containing Nautobot objects."""
@@ -467,42 +497,26 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 query = f"location: {ancestry_parts}"
                 location = self._get_location_by_dynamic_ancestry(row)
                 query = f"device_role: {row.get('device_role_name')}"
-                device_role = Role.objects.get(
-                    name=row["device_role_name"].strip(),
-                )
+                device_role = self._cached_get(Role, name=row["device_role_name"].strip())
                 query = f"namespace: {row.get('namespace')}"
-                namespace = Namespace.objects.get(
-                    name=row["namespace"].strip(),
-                )
+                namespace = self._cached_get(Namespace, name=row["namespace"].strip())
                 query = f"device_status: {row.get('device_status_name')}"
-                device_status = Status.objects.get(
-                    name=row["device_status_name"].strip(),
-                )
+                device_status = self._cached_get(Status, name=row["device_status_name"].strip())
                 if row.get("device_tenant_name"):
                     query = f"device_tenant: {row.get('device_tenant_name')}"
-                    device_tenant = Tenant.objects.get(
-                        name=row["device_tenant_name"].strip(),
-                    )
+                    device_tenant = self._cached_get(Tenant, name=row["device_tenant_name"].strip())
                 else:
                     device_tenant = None
                 query = f"interface_status: {row.get('interface_status_name')}"
-                interface_status = Status.objects.get(
-                    name=row["interface_status_name"].strip(),
-                )
+                interface_status = self._cached_get(Status, name=row["interface_status_name"].strip())
                 query = f"ip_address_status: {row.get('ip_address_status_name')}"
-                ip_address_status = Status.objects.get(
-                    name=row["ip_address_status_name"].strip(),
-                )
+                ip_address_status = self._cached_get(Status, name=row["ip_address_status_name"].strip())
                 query = f"secrets_group: {row.get('secrets_group_name')}"
-                secrets_group = SecretsGroup.objects.get(
-                    name=row["secrets_group_name"].strip(),
-                )
+                secrets_group = self._cached_get(SecretsGroup, name=row["secrets_group_name"].strip())
                 platform = None
                 if row.get("platform_name"):
                     query = f"platform: {row.get('platform_name')}"
-                    platform = Platform.objects.get(
-                        name=row["platform_name"].strip(),
-                    )
+                    platform = self._cached_get(Platform, name=row["platform_name"].strip())
                     self._validate_platform_network_driver(platform)
 
                 set_mgmt_only = self._convert_string_to_bool(
