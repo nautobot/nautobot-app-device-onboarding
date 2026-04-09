@@ -286,13 +286,13 @@ class TestSSHCredParsing(TransactionTestCase):
 
     @patch.dict(os.environ, {"DEVICE_USER": "admin", "DEVICE_PASS": "worstP$$w0rd"})
     def test_parse_user_and_pass(self):
-        """Extract correct user and password from secretgroup env-vars, secret falls back to password"""
+        """Extract correct user and password from secretgroup env-vars, enable secret falls back to password"""
         assert _parse_credentials(
             secrets_group=self.secrets_group, logger=NornirLogger(job_result=MagicMock(), log_level=1)
         ) == (
             "admin",
             "worstP$$w0rd",
-            "worstP$$w0rd",  # secret falls back to password when not defined
+            "worstP$$w0rd",  # enable secret falls back to password when not defined
         )
 
     @patch.dict(os.environ, {"DEVICE_USER": "admin", "DEVICE_PASS": "worstP$$w0rd", "DEVICE_SECRET": "enableP$$w0rd"})
@@ -317,12 +317,12 @@ class TestSSHCredParsing(TransactionTestCase):
 
     @patch(
         "nautobot_device_onboarding.nornir_plays.command_getter.settings",
-        MagicMock(NAPALM_USERNAME="napalm_admin", NAPALM_PASSWORD="napalamP$$w0rd"),
+        MagicMock(NAPALM_USERNAME="napalm_admin", NAPALM_PASSWORD="napalmP$$w0rd"),
     )
     def test_parse_napalm_creds(self):
-        """When no secrets group is provided, fallback to napalm creds, secret falls back to password"""
+        """When no secrets group is provided, fallback to napalm creds, enable secret falls back to password"""
         assert _parse_credentials(secrets_group=None, logger=NornirLogger(job_result=None, log_level=1)) == (
             "napalm_admin",
-            "napalamP$$w0rd",
-            "napalamP$$w0rd",  # secret falls back to password
+            "napalmP$$w0rd",
+            "napalmP$$w0rd",  # enable secret falls back to password
         )

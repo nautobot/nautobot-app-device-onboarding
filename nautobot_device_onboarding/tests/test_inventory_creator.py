@@ -78,12 +78,9 @@ class TestInventoryCreator(unittest.TestCase):
     @patch("nautobot_device_onboarding.nornir_plays.inventory_creator.NETMIKO_EXTRAS", {"fast_cli": False})
     def test_set_inventory_without_secret(self):
         """Ensure that when secret is not provided, NETMIKO_EXTRAS is used as-is."""
-        inv, exception = _set_inventory(
-            self.host_ip, self.platform, self.port, self.username, self.password
-        )
+        inv, exception = _set_inventory(self.host_ip, self.platform, self.port, self.username, self.password)
         # Verify secret is NOT in the netmiko connection options extras
         netmiko_extras = inv["198.51.100.1"].connection_options["netmiko"].extras
         self.assertNotIn("secret", netmiko_extras)
         self.assertEqual(netmiko_extras["fast_cli"], False)
         self.assertIsNone(exception)
-

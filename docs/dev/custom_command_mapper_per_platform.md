@@ -76,6 +76,7 @@ NETWORK_DRIVERS = {
 ```
 
 **Why this works:**
+
 - `CLASS_MAPPER` makes Netmiko accept `juniper_junos_mx204` as a valid device type (aliased to the `juniper_junos` SSH class).
 - `NETWORK_DRIVERS` makes `platform.network_driver_mappings.get("netmiko")` return `"juniper_junos_mx204"` instead of `None`.
 

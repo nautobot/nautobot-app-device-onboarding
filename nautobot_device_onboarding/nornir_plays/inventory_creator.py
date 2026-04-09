@@ -72,4 +72,3 @@ def _set_inventory(
         inv.update({host_ip: host})
 
     return inv, platform_guess_exc
-
