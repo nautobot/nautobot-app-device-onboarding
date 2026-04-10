@@ -80,8 +80,10 @@ markdown_extensions:
   - "pymdownx.snippets"
   - "pymdownx.superfences"
   - "footnotes"
+  - "meta"
 plugins:
   - "search"
+  - "glightbox"
   - "mkdocstrings":
       default_handler: "python"
       handlers:
