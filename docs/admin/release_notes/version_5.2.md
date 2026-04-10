@@ -8,6 +8,17 @@ This document describes all new features and changes in the release. The format 
 
 <!-- towncrier release notes start -->
 
+## [v5.2.3 (2026-04-10)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v5.2.3)
+
+### Fixed
+
+- [#425](https://github.com/nautobot/nautobot-app-device-onboarding/issues/425) - Fixed check connectivity failing on Sync Network Data job.
+- [#523](https://github.com/nautobot/nautobot-app-device-onboarding/issues/523) - Fixed invalid IP Address returned for Arista EOS virtual interface addresses.
+
+### Housekeeping
+
+- [#527](https://github.com/nautobot/nautobot-app-device-onboarding/issues/527) - Added @cdtomkins to CODEOWNERS.
+- Rebaked from the cookie `nautobot-app-v3.1.3`.
 
 ## [v5.2.2 (2026-03-18)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v5.2.2)
 
