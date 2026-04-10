@@ -11,6 +11,9 @@ from nautobot.dcim.models import (
     Location,
     LocationType,
     Manufacturer,
+    Module,
+    ModuleBay,
+    ModuleType,
     Platform,
     SoftwareVersion,
 )
@@ -18,6 +21,7 @@ from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupS
 from nautobot.extras.models import Role, Secret, SecretsGroup, SecretsGroupAssociation, Status
 from nautobot.ipam.choices import IPAddressTypeChoices, PrefixTypeChoices
 from nautobot.ipam.models import VLAN, VRF, IPAddress, IPAddressToInterface, Namespace, Prefix
+from nautobot.tenancy.models import Tenant
 
 
 def sync_network_data_ensure_required_nautobot_objects():
@@ -26,6 +30,7 @@ def sync_network_data_ensure_required_nautobot_objects():
 
     status, _ = Status.objects.get_or_create(name="Active")
     status.content_types.add(ContentType.objects.get_for_model(Device))
+    status.content_types.add(ContentType.objects.get_for_model(Module))
     status.content_types.add(ContentType.objects.get_for_model(Prefix))
     status.content_types.add(ContentType.objects.get_for_model(IPAddress))
     status.content_types.add(ContentType.objects.get_for_model(Location))
@@ -107,6 +112,7 @@ def sync_network_data_ensure_required_nautobot_objects():
     software_version_2, _ = SoftwareVersion.objects.get_or_create(version="3.12R.4", platform=platform_2, status=status)
 
     device_type, _ = DeviceType.objects.get_or_create(model="CSR1000V17", manufacturer=manufacturer)
+    module_type, _ = ModuleType.objects.get_or_create(model="Test Module Foo", manufacturer=manufacturer)
     device_1, _ = Device.objects.get_or_create(
         name="demo-cisco-1",
         serial="9ABUXU581111",
@@ -117,6 +123,15 @@ def sync_network_data_ensure_required_nautobot_objects():
         platform=platform_1,
         secrets_group=secrets_group,
         software_version=software_version_1,
+    )
+    device_1_module_bay, _ = ModuleBay.objects.get_or_create(
+        parent_device=device_1,
+        name="demo-cisco-1-module-1",
+    )
+    device_1_module, _ = Module.objects.get_or_create(
+        module_type=module_type,
+        parent_module_bay=device_1_module_bay,
+        status=status,
     )
     device_2, _ = Device.objects.get_or_create(
         name="demo-cisco-2",
@@ -152,7 +167,7 @@ def sync_network_data_ensure_required_nautobot_objects():
         software_version=software_version_2,
     )
     interface_1, _ = Interface.objects.get_or_create(
-        device=device_1, name="GigabitEthernet1", status=status, type=InterfaceTypeChoices.TYPE_VIRTUAL
+        module=device_1_module, name="GigabitEthernet1", status=status, type=InterfaceTypeChoices.TYPE_VIRTUAL
     )
     interface_1.mode = InterfaceModeChoices.MODE_TAGGED
     interface_1.tagged_vlans.add(vlan_1)
@@ -346,6 +361,7 @@ def sync_devices_ensure_required_nautobot_objects():
     IPAddressToInterface.objects.get_or_create(interface=interface_2, ip_address=ip_address_2)
     device_2.primary_ip4 = ip_address_2
     device_2.validated_save()
+    device_tenant_1, _ = Tenant.objects.get_or_create(name="Device Tenant 1")
 
     testing_objects["status"] = status
     testing_objects["status_planned"] = status_planned
@@ -363,6 +379,7 @@ def sync_devices_ensure_required_nautobot_objects():
     testing_objects["ip_address_2"] = ip_address_2
     testing_objects["device_1"] = device_1
     testing_objects["device_2"] = device_2
+    testing_objects["device_tenant_1"] = device_tenant_1
 
     return testing_objects
 
@@ -424,11 +441,14 @@ def sync_devices_ensure_required_nautobot_objects__jobs_testing():
     device_role.content_types.add(ContentType.objects.get_for_model(Device))
     device_role.validated_save()
 
+    device_tenant_1, _ = Tenant.objects.get_or_create(name="Device Tenant 1")
+
     testing_objects["status"] = status
     testing_objects["secrets_group"] = secrets_group
     testing_objects["namespace"] = namespace
     testing_objects["location_1"] = location_1
     testing_objects["location_2"] = location_2
     testing_objects["device_role"] = device_role
+    testing_objects["device_tenant_1"] = device_tenant_1
 
     return testing_objects

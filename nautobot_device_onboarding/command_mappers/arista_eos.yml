@@ -57,7 +57,13 @@ sync_network_data:
     commands:
       - command: "show interfaces | json"
         parser: "none"
-        jpath: 'interfaces."{{ current_key }}".interfaceAddress[].[{ip_address: primaryIp.address, prefix_length: primaryIp.maskLen }][]'  # yamllint disable-line rule:quoted-strings
+        jpath: >-
+          interfaces."{{ current_key }}".interfaceAddress[]
+          .[primaryIp, virtualIp, secondaryIps.*][] []
+          | [?address != '0.0.0.0'].{
+              ip_address: address,
+              prefix_length: maskLen
+          }
         post_processor: "{{ obj | tojson }}"
   interfaces__mtu:
     commands:

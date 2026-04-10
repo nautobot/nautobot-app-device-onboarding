@@ -99,5 +99,6 @@
             "vlan_native": "",
             "aggregated_interfaces": []
         }
-    ]
+    ],
+    "show interface mgmt": []
 }

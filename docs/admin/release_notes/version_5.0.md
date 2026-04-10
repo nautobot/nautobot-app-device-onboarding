@@ -12,6 +12,8 @@ This major release marks the compatibility of the Device Onboarding App with Nau
 
 We will continue to support the previous major release for users of Nautobot LTM 2.4 only with critical bug and security fixes as per the [Software Lifecycle Policy](https://networktocode.com/company/legal/software-lifecycle-policy/).
 
+<!-- towncrier release notes start -->
+
 ## [v5.0.0 (2025-11-17)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v5.0.0)
 
 ### Added

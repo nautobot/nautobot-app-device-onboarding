@@ -1,0 +1,34 @@
+# Fakenos dockerfile for local development
+
+# Accepts a desired Python version as build argument, default to 3.12
+ARG PYTHON_VER="3.12"
+
+FROM docker.io/python:${PYTHON_VER}-slim
+
+WORKDIR /usr/src/fakenos
+
+RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+
+RUN pip install git+https://github.com/fakenos/fakenos.git
+
+# NOTE: fakenos does not recognize .yml files, must use .yaml
+RUN cat <<EOF > /usr/src/fakenos/fakenos_inventory.yaml
+hosts:
+  fakerouter:
+    username: admin
+    password: admin
+    platform: cisco_ios
+    server:
+      plugin: "ParamikoSshServer"
+      configuration:
+        address: "0.0.0.0"
+        timeout: 1
+    port: 22
+EOF
+
+ARG PYTHON_VER="3.12"
+
+# NOTE: fakenos does not correctly handle absolute paths
+WORKDIR /usr/local/lib/python${PYTHON_VER}/site-packages
+
+CMD [ "fakenos", "--inventory", "/usr/src/fakenos/fakenos_inventory.yaml" ]

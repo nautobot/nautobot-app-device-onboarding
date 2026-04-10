@@ -39,11 +39,13 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
             "update_devices_without_primary_ip": True,
             "device_role": self.testing_objects["device_role_backup"].pk,
             "device_status": self.testing_objects["status_planned"].pk,
+            "device_tenant": self.testing_objects["device_tenant_1"].pk,
             "interface_status": self.testing_objects["status"].pk,
             "ip_address_status": self.testing_objects["status"].pk,
             "secrets_group": self.testing_objects["secrets_group_alternate"].pk,
             "platform": None,
             "memory_profiling": False,
+            "fail_job_on_task_failure": False,
         }
         self.testing_objects["device_1"].primary_ip4 = None  # test existing device with missing primary ip
         self.testing_objects["device_1"].validated_save()
@@ -91,11 +93,13 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
             "update_devices_without_primary_ip": True,
             "device_role": self.testing_objects["device_role"].pk,
             "device_status": self.testing_objects["status"].pk,
+            "device_tenant": self.testing_objects["device_tenant_1"].pk,
             "interface_status": self.testing_objects["status"].pk,
             "ip_address_status": self.testing_objects["status"].pk,
             "secrets_group": self.testing_objects["secrets_group"].pk,
             "platform": None,
             "memory_profiling": False,
+            "fail_job_on_task_failure": False,
         }
         job_result = create_job_result_and_run_job(
             module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
@@ -138,11 +142,13 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
             "update_devices_without_primary_ip": True,
             "device_role": self.testing_objects["device_role_backup"].pk,
             "device_status": self.testing_objects["status_planned"].pk,
+            "device_tenant": self.testing_objects["device_tenant_1"].pk,
             "interface_status": self.testing_objects["status"].pk,
             "ip_address_status": self.testing_objects["status"].pk,
             "secrets_group": self.testing_objects["secrets_group_alternate"].pk,
             "platform": None,
             "memory_profiling": False,
+            "fail_job_on_task_failure": False,
         }
         job_result = create_job_result_and_run_job(
             module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs

@@ -1329,5 +1329,6 @@
             "neighbor_port_id": "c4:11:e6:99:a6:b5",
             "neighbor_interface": ""
         }
-    ]
+    ],
+    "show interface mgmt": []
 }

@@ -8,6 +8,7 @@ from nautobot.apps.choices import InterfaceTypeChoices
 from nautobot.dcim.models import Device, DeviceType, Interface, Manufacturer, Platform
 from nautobot.extras.models import Role, SecretsGroup, Status
 from nautobot.ipam.models import IPAddressToInterface
+from nautobot.tenancy.models import Tenant
 from nautobot_ssot.contrib import NautobotModel
 
 from nautobot_device_onboarding.utils import diffsync_utils
@@ -31,6 +32,7 @@ class SyncDevicesDevice(DiffSyncModel):
         "role__name",
         "secrets_group__name",
         "status__name",
+        "tenant__name",
         "interfaces",
     )
 
@@ -46,6 +48,7 @@ class SyncDevicesDevice(DiffSyncModel):
     role__name: Optional[str] = None
     secrets_group__name: Optional[str] = None
     status__name: Optional[str] = None
+    tenant__name: Optional[str] = None
 
     interfaces: Optional[list] = None
 
@@ -85,6 +88,7 @@ class SyncDevicesDevice(DiffSyncModel):
             device = Device(
                 location=location,
                 status=job_form_attrs["device_status"],
+                tenant=job_form_attrs["device_tenant"],
                 role=job_form_attrs["device_role"],
                 device_type=DeviceType.objects.get(model=attrs["device_type__model"]),
                 name=ids["name"],
@@ -100,10 +104,7 @@ class SyncDevicesDevice(DiffSyncModel):
         """Attempt to get a Device Interface, create a new one if necessary."""
         device_interface = None
         try:
-            device_interface = Interface.objects.get(
-                name=interface_name,
-                device=device,
-            )
+            device_interface = device.all_interfaces.get(name=interface_name)
         except ObjectDoesNotExist:
             try:
                 job_form_attrs = adapter.job.ip_address_inventory[ip_address]
@@ -156,10 +157,7 @@ class SyncDevicesDevice(DiffSyncModel):
     def _remove_old_interface_assignment(self, device, ip_address):
         """Remove a device's primary IP address from an interface."""
         try:
-            old_interface = Interface.objects.get(
-                device=device,
-                ip_addresses__in=[ip_address],
-            )
+            old_interface = device.all_interfaces.get(ip_addresses__in=[ip_address])
             old_interface_assignment = IPAddressToInterface.objects.get(
                 interface=old_interface,
                 ip_address=ip_address,
@@ -234,6 +232,8 @@ class SyncDevicesDevice(DiffSyncModel):
             device.role = Role.objects.get(name=attrs.get("role__name"))
         if attrs.get("status__name"):
             device.status = Status.objects.get(name=attrs.get("status__name"))
+        if attrs.get("tenant__name"):
+            device.tenant = Tenant.objects.get(name=attrs.get("tenant__name"))
         if attrs.get("secrets_group__name"):
             device.secrets_group = SecretsGroup.objects.get(name=attrs.get("secrets_group__name"))
 

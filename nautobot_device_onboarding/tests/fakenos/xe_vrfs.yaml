@@ -1,0 +1,849 @@
+---
+name: "xetest"
+initial_prompt: "{base_prompt}#"
+enable_prompt: "{base_prompt}#"
+config_prompt: "{base_prompt}(config)#"
+commands:
+  enable:
+    output: "null"
+    new_prompt: "{base_prompt}#"
+    help: "enter enable mode"
+    prompt: "{base_prompt}#"
+  show vlan:
+    output: |
+      VLAN Name                             Status    Ports
+      ---- -------------------------------- --------- -------------------------------
+      1    default                          active    Gi0/0/1
+      90   VLAN0090                         active    Gi0/0/0
+      92   VLAN0092                         active    Gi0/0/0
+      96   VLAN0096                         active    Po1
+      1002 fddi-default                     act/unsup
+      1003 token-ring-default               act/unsup
+      1004 fddinet-default                  act/unsup
+      1005 trnet-default                    act/unsup
+    help: "execute the command 'show vlan'"
+    prompt:
+      - "{base_prompt}#"
+  show ip vrf interfaces:
+    output: |
+      Interface              IP-Address      VRF                              Protocol
+      Gi0/0/1                unassigned      Mgmt-vrf                         down
+      Lo50                   10.10.10.1      10                               up
+      Vi4                    10.10.38.33     10                               up
+      Po1.91                 10.11.38.130    91                               up
+    help: "execute the command 'show ip vrf interfaces'"
+    prompt:
+      - "{base_prompt}#"
+  show ip interface:
+    output: |
+      GigabitEthernet0/0/0 is up, line protocol is up
+        Internet protocol processing disabled
+      GigabitEthernet0/0/0.90 is up, line protocol is up
+        Internet address will be negotiated using DHCP
+        Broadcast address is 255.255.255.255
+        MTU is 1500 bytes
+        Helper address is not set
+        Directed broadcast forwarding is disabled
+        Outgoing Common access list is not set
+        Outgoing access list is not set
+        Inbound Common access list is not set
+        Inbound  access list is not set
+        Proxy ARP is disabled (Globally)
+        Local Proxy ARP is disabled
+        Security level is default
+        Split horizon is enabled
+        ICMP redirects are never sent
+        ICMP unreachables are always sent
+        ICMP mask replies are never sent
+        IP fast switching is enabled
+        IP Flow switching is disabled
+        IP CEF switching is enabled
+        IP CEF switching turbo vector
+        IP Null turbo vector
+        Associated unicast routing topologies:
+              Topology "base", operation state is UP
+        IP multicast fast switching is enabled
+        IP multicast distributed fast switching is disabled
+        IP route-cache flags are Fast, CEF
+        Router Discovery is disabled
+        IP output packet accounting is disabled
+        IP access violation accounting is disabled
+        TCP/IP header compression is disabled
+        RTP/IP header compression is disabled
+        Probe proxy name replies are disabled
+        Policy routing is disabled
+        Network address translation is enabled, interface in domain outside
+        BGP Policy Mapping is disabled
+        Input features: Virtual Fragment Reassembly, NAT Outside, MCI Check
+        Output features: Post-routing NAT Outside, QoS Classification
+        IPv4 WCCP Redirect outbound is disabled
+        IPv4 WCCP Redirect inbound is disabled
+        IPv4 WCCP Redirect exclude is disabled
+        IP Clear Dont Fragment is disabled
+      GigabitEthernet0/0/0.92 is up, line protocol is up
+        Internet address is 10.25.107.25/29
+        Broadcast address is 255.255.255.255
+        Address determined by unknown means
+        MTU is 1500 bytes
+        Helper address is not set
+        Directed broadcast forwarding is disabled
+        Outgoing Common access list is not set
+        Outgoing access list is not set
+        Inbound Common access list is not set
+        Inbound  access list is not set
+        Proxy ARP is disabled (Globally)
+        Local Proxy ARP is disabled
+        Security level is default
+        Split horizon is enabled
+        ICMP redirects are never sent
+        ICMP unreachables are always sent
+        ICMP mask replies are never sent
+        IP fast switching is enabled
+        IP Flow switching is disabled
+        IP CEF switching is enabled
+        IP CEF switching turbo vector
+        IP Null turbo vector
+        Associated unicast routing topologies:
+              Topology "base", operation state is UP
+        IP multicast fast switching is enabled
+        IP multicast distributed fast switching is disabled
+        IP route-cache flags are Fast, CEF
+        Router Discovery is disabled
+        IP output packet accounting is disabled
+        IP access violation accounting is disabled
+        TCP/IP header compression is disabled
+        RTP/IP header compression is disabled
+        Probe proxy name replies are disabled
+        Policy routing is disabled
+        Network address translation is disabled
+        BGP Policy Mapping is disabled
+        Input features: MCI Check
+        Output features: QoS Classification
+        IPv4 WCCP Redirect outbound is disabled
+        IPv4 WCCP Redirect inbound is disabled
+        IPv4 WCCP Redirect exclude is disabled
+        IP Clear Dont Fragment is disabled
+      GigabitEthernet0/0/1 is down, line protocol is down
+        Internet protocol processing disabled
+      GigabitEthernet0/0/2 is up, line protocol is up
+        Internet address is 172.16.0.29/29
+        Broadcast address is 255.255.255.255
+        Address determined by unknown means
+        MTU is 1500 bytes
+        Helper address is not set
+        Directed broadcast forwarding is disabled
+        Outgoing Common access list is not set
+        Outgoing access list is not set
+        Inbound Common access list is not set
+        Inbound  access list is not set
+        Proxy ARP is disabled (Globally)
+        Local Proxy ARP is disabled
+        Security level is default
+        Split horizon is enabled
+        ICMP redirects are never sent
+        ICMP unreachables are always sent
+        ICMP mask replies are never sent
+        IP fast switching is enabled
+        IP Flow switching is disabled
+        IP CEF switching is enabled
+        IP CEF switching turbo vector
+        IP Null turbo vector
+        Associated unicast routing topologies:
+              Topology "base", operation state is UP
+        IP multicast fast switching is enabled
+        IP multicast distributed fast switching is disabled
+        IP route-cache flags are Fast, CEF
+        Router Discovery is disabled
+        IP output packet accounting is disabled
+        IP access violation accounting is disabled
+        TCP/IP header compression is disabled
+        RTP/IP header compression is disabled
+        Probe proxy name replies are disabled
+        Policy routing is disabled
+        Network address translation is enabled, interface in domain outside
+        BGP Policy Mapping is disabled
+        Input features: Virtual Fragment Reassembly, NAT Outside, MCI Check
+        Output features: Post-routing NAT Outside, QoS Classification
+        IPv4 WCCP Redirect outbound is disabled
+        IPv4 WCCP Redirect inbound is disabled
+        IPv4 WCCP Redirect exclude is disabled
+        IP Clear Dont Fragment is disabled
+      TenGigabitEthernet0/0/4 is up, line protocol is up
+        Internet protocol processing disabled
+      TenGigabitEthernet0/0/5 is up, line protocol is up
+        Internet protocol processing disabled
+      Loopback50 is up, line protocol is up
+        Internet address is 10.10.10.1/32
+        Broadcast address is 255.255.255.255
+        Address determined by unknown means
+        MTU is 1500 bytes
+        Helper address is not set
+        Directed broadcast forwarding is disabled
+        Outgoing Common access list is not set
+        Outgoing access list is not set
+        Inbound Common access list is not set
+        Inbound  access list is not set
+        Proxy ARP is disabled (Globally)
+        Local Proxy ARP is disabled
+        Security level is default
+        Split horizon is enabled
+        ICMP redirects are never sent
+        ICMP unreachables are always sent
+        ICMP mask replies are never sent
+        IP fast switching is enabled
+        IP Flow switching is disabled
+        IP CEF switching is enabled
+        IP CEF switching turbo vector
+        IP Null turbo vector
+        VPN Routing/Forwarding "10"
+        Associated unicast routing topologies:
+              Topology "base", operation state is UP
+        IP multicast fast switching is enabled
+        IP multicast distributed fast switching is disabled
+        IP route-cache flags are Fast, CEF
+        Router Discovery is disabled
+        IP output packet accounting is disabled
+        IP access violation accounting is disabled
+        TCP/IP header compression is disabled
+        RTP/IP header compression is disabled
+        Probe proxy name replies are disabled
+        Policy routing is disabled
+        Network address translation is disabled
+        BGP Policy Mapping is disabled
+        Input features: MCI Check
+        IPv4 WCCP Redirect outbound is disabled
+        IPv4 WCCP Redirect inbound is disabled
+        IPv4 WCCP Redirect exclude is disabled
+        IP Clear Dont Fragment is disabled
+      Port-channel1 is up, line protocol is up
+        Internet protocol processing disabled
+      Port-channel1.91 is up, line protocol is up
+        Internet address is 10.13.0.130/28
+        Broadcast address is 255.255.255.255
+        Address determined by unknown means
+        MTU is 1500 bytes
+        Helper address is not set
+        Directed broadcast forwarding is disabled
+        Multicast reserved groups joined: 224.0.0.2
+        Outgoing Common access list is not set
+        Outgoing access list is not set
+        Inbound Common access list is not set
+        Inbound  access list is not set
+        Proxy ARP is disabled (Globally)
+        Local Proxy ARP is disabled
+        Security level is default
+        Split horizon is enabled
+        ICMP redirects are always sent
+        ICMP unreachables are always sent
+        ICMP mask replies are never sent
+        IP fast switching is enabled
+        IP Flow switching is disabled
+        IP CEF switching is enabled
+        IP CEF switching turbo vector
+        IP Null turbo vector
+        VPN Routing/Forwarding "91"
+        Associated unicast routing topologies:
+              Topology "base", operation state is UP
+        IP multicast fast switching is enabled
+        IP multicast distributed fast switching is disabled
+        IP route-cache flags are Fast, CEF
+        Router Discovery is disabled
+        IP output packet accounting is disabled
+        IP access violation accounting is disabled
+        TCP/IP header compression is disabled
+        RTP/IP header compression is disabled
+        Probe proxy name replies are disabled
+        Policy routing is disabled
+        Network address translation is disabled
+        BGP Policy Mapping is disabled
+        Input features: MCI Check
+        IPv4 WCCP Redirect outbound is disabled
+        IPv4 WCCP Redirect inbound is disabled
+        IPv4 WCCP Redirect exclude is disabled
+        IP Clear Dont Fragment is disabled
+      Port-channel1.94 is up, line protocol is up
+        Internet address is 10.13.0.145/28
+        Broadcast address is 255.255.255.255
+        Address determined by unknown means
+        MTU is 1500 bytes
+        Helper address is not set
+        Directed broadcast forwarding is disabled
+        Outgoing Common access list is not set
+        Outgoing access list is not set
+        Inbound Common access list is not set
+        Inbound  access list is not set
+        Proxy ARP is disabled (Globally)
+        Local Proxy ARP is disabled
+        Security level is default
+        Split horizon is enabled
+        ICMP redirects are always sent
+        ICMP unreachables are always sent
+        ICMP mask replies are never sent
+        IP fast switching is enabled
+        IP Flow switching is disabled
+        IP CEF switching is enabled
+        IP CEF switching turbo vector
+        IP Null turbo vector
+        VPN Routing/Forwarding "10"
+        Associated unicast routing topologies:
+              Topology "base", operation state is UP
+        IP multicast fast switching is enabled
+        IP multicast distributed fast switching is disabled
+        IP route-cache flags are Fast, CEF
+        Router Discovery is disabled
+        IP output packet accounting is disabled
+        IP access violation accounting is disabled
+        TCP/IP header compression is disabled
+        RTP/IP header compression is disabled
+        Probe proxy name replies are disabled
+        Policy routing is disabled
+        Network address translation is disabled
+        BGP Policy Mapping is disabled
+        Input features: MCI Check
+        IPv4 WCCP Redirect outbound is disabled
+        IPv4 WCCP Redirect inbound is disabled
+        IPv4 WCCP Redirect exclude is disabled
+        IP Clear Dont Fragment is disabled
+      Port-channel1.95 is up, line protocol is up
+        Internet address is 10.13.0.162/28
+        Broadcast address is 255.255.255.255
+        Address determined by unknown means
+        MTU is 1500 bytes
+        Helper address is not set
+        Directed broadcast forwarding is disabled
+        Multicast reserved groups joined: 224.0.0.2
+        Outgoing Common access list is not set
+        Outgoing access list is not set
+        Inbound Common access list is not set
+        Inbound  access list is not set
+        Proxy ARP is disabled (Globally)
+        Local Proxy ARP is disabled
+        Security level is default
+        Split horizon is enabled
+        ICMP redirects are always sent
+        ICMP unreachables are always sent
+        ICMP mask replies are never sent
+        IP fast switching is enabled
+        IP Flow switching is disabled
+        IP CEF switching is enabled
+        IP CEF switching turbo vector
+        IP Null turbo vector
+        VPN Routing/Forwarding "10"
+        Associated unicast routing topologies:
+              Topology "base", operation state is UP
+        IP multicast fast switching is enabled
+        IP multicast distributed fast switching is disabled
+        IP route-cache flags are Fast, CEF
+        Router Discovery is disabled
+        IP output packet accounting is disabled
+        IP access violation accounting is disabled
+        TCP/IP header compression is disabled
+        RTP/IP header compression is disabled
+        Probe proxy name replies are disabled
+        Policy routing is disabled
+        Network address translation is disabled
+        BGP Policy Mapping is disabled
+        Input features: MCI Check
+        IPv4 WCCP Redirect outbound is disabled
+        IPv4 WCCP Redirect inbound is disabled
+        IPv4 WCCP Redirect exclude is disabled
+        IP Clear Dont Fragment is disabled
+      Port-channel1.96 is up, line protocol is up
+        Internet address is 10.13.0.178/28
+        Broadcast address is 255.255.255.255
+        Address determined by unknown means
+        MTU is 1500 bytes
+        Helper address is not set
+        Directed broadcast forwarding is disabled
+        Multicast reserved groups joined: 224.0.0.2
+        Outgoing Common access list is not set
+        Outgoing access list is not set
+        Inbound Common access list is not set
+        Inbound  access list is not set
+        Proxy ARP is disabled (Globally)
+        Local Proxy ARP is disabled
+        Security level is default
+        Split horizon is enabled
+        ICMP redirects are always sent
+        ICMP unreachables are always sent
+        ICMP mask replies are never sent
+        IP fast switching is enabled
+        IP Flow switching is disabled
+        IP CEF switching is enabled
+        IP CEF switching turbo vector
+        IP Null turbo vector
+        VPN Routing/Forwarding "10"
+        Associated unicast routing topologies:
+              Topology "base", operation state is UP
+        IP multicast fast switching is enabled
+        IP multicast distributed fast switching is disabled
+        IP route-cache flags are Fast, CEF
+        Router Discovery is disabled
+        IP output packet accounting is disabled
+        IP access violation accounting is disabled
+        TCP/IP header compression is disabled
+        RTP/IP header compression is disabled
+        Probe proxy name replies are disabled
+        Policy routing is disabled
+        Network address translation is disabled
+        BGP Policy Mapping is disabled
+        Input features: MCI Check
+        IPv4 WCCP Redirect outbound is disabled
+        IPv4 WCCP Redirect inbound is disabled
+        IPv4 WCCP Redirect exclude is disabled
+        IP Clear Dont Fragment is disabled
+      VirtualPortGroup4 is up, line protocol is up
+        Internet address is 10.11.38.33/29
+        Broadcast address is 255.255.255.255
+        Address determined by unknown means
+        MTU is 1500 bytes
+        Helper address is not set
+        Directed broadcast forwarding is disabled
+        Outgoing Common access list is not set
+        Outgoing access list is not set
+        Inbound Common access list is not set
+        Inbound  access list is not set
+        Proxy ARP is disabled (Globally)
+        Local Proxy ARP is disabled
+        Security level is default
+        Split horizon is enabled
+        ICMP redirects are always sent
+        ICMP unreachables are always sent
+        ICMP mask replies are never sent
+        IP fast switching is disabled
+        IP Flow switching is disabled
+        IP CEF switching is disabled
+        IP Null turbo vector
+        IP Null turbo vector
+        VPN Routing/Forwarding "10"
+        Associated unicast routing topologies:
+              Topology "base", operation state is UP
+        IP multicast fast switching is enabled
+        IP multicast distributed fast switching is disabled
+        IP route-cache flags are Fast, CEF
+        Router Discovery is disabled
+        IP output packet accounting is disabled
+        IP access violation accounting is disabled
+        TCP/IP header compression is disabled
+        RTP/IP header compression is disabled
+        Probe proxy name replies are disabled
+        Policy routing is disabled
+        Network address translation is disabled
+        BGP Policy Mapping is disabled
+        Input features: MCI Check
+        IPv4 WCCP Redirect outbound is disabled
+        IPv4 WCCP Redirect inbound is disabled
+        IPv4 WCCP Redirect exclude is disabled
+        IP Clear Dont Fragment is disabled
+    help: "execute the command 'show ip interface'"
+    prompt:
+      - "{base_prompt}#"
+  show interfaces switchport:
+    output: |
+      Name: Gi0/0/0
+      Switchport: Enabled
+      Administrative Mode: trunk
+      Operational Mode: trunk
+      Administrative Trunking Encapsulation: dot1q
+      Operational Trunking Encapsulation: dot1q
+      Negotiation of Trunking: On
+      Access Mode VLAN: 1 (default)
+      Trunking Native Mode VLAN: 1 (default)
+      Administrative Native VLAN tagging: enabled
+      Voice VLAN: none
+      Operational Dot1q tagging: disabled
+      Trunking VLANs Enabled: 1,90,92
+      Pruning VLANs Enabled: 2-1001
+
+      Name: Gi0/0/1
+      Switchport: Enabled
+      Administrative Mode: dynamic auto
+      Operational Mode: down
+      Administrative Trunking Encapsulation: dot1q
+      Operational Trunking Encapsulation: native
+      Negotiation of Trunking: On
+      Access Mode VLAN: 1 (default)
+      Trunking Native Mode VLAN: 1 (default)
+      Administrative Native VLAN tagging: enabled
+      Voice VLAN: none
+
+      Name: Te0/0/4
+      Switchport: Enabled
+      Administrative Mode: trunk
+      Operational Mode: trunk
+      Administrative Trunking Encapsulation: dot1q
+      Operational Trunking Encapsulation: dot1q
+      Negotiation of Trunking: Off
+      Access Mode VLAN: 1 (default)
+      Trunking Native Mode VLAN: 1 (default)
+      Administrative Native VLAN tagging: enabled
+      Voice VLAN: none
+      Operational Dot1q tagging: disabled
+      Trunking VLANs Enabled: ALL
+      Pruning VLANs Enabled: 2-1001
+      Port-channel: Po1
+
+      Name: Te0/0/5
+      Switchport: Enabled
+      Administrative Mode: trunk
+      Operational Mode: trunk
+      Administrative Trunking Encapsulation: dot1q
+      Operational Trunking Encapsulation: dot1q
+      Negotiation of Trunking: Off
+      Access Mode VLAN: 1 (default)
+      Trunking Native Mode VLAN: 1 (default)
+      Administrative Native VLAN tagging: enabled
+      Voice VLAN: none
+      Operational Dot1q tagging: disabled
+      Trunking VLANs Enabled: ALL
+      Pruning VLANs Enabled: 2-1001
+      Port-channel: Po1
+
+      Name: Po1
+      Switchport: Enabled
+      Administrative Mode: trunk
+      Operational Mode: trunk
+      Administrative Trunking Encapsulation: dot1q
+      Operational Trunking Encapsulation: dot1q
+      Negotiation of Trunking: Off
+      Access Mode VLAN: 1 (default)
+      Trunking Native Mode VLAN: 1 (default)
+      Administrative Native VLAN tagging: enabled
+      Voice VLAN: none
+      Operational Dot1q tagging: disabled
+      Trunking VLANs Enabled: 1,96
+      Pruning VLANs Enabled: 2-1001
+    help: "execute the command 'show interfaces switchport'"
+    prompt:
+      - "{base_prompt}#"
+  show etherchannel summary:
+    output: |
+      Flags:  D - down        P/bndl - bundled in port-channel
+              I - stand-alone s/susp - suspended
+              H - Hot-standby (LACP only)
+              R - Layer3      S - Layer2
+              U - in use      f - failed to allocate aggregator
+
+              M - not in use, minimum links not met
+              u - unsuitable for bundling
+              w - waiting to be aggregated
+              d - default port
+
+
+      Number of channel-groups in use: 1
+      Number of aggregators:           1
+
+      Group  Port-channel  Protocol    Ports
+      ------+-------------+-----------+-----------------------------------------------
+      1       Po1(RU)         LACP     Te0/0/4(bndl) Te0/0/5(bndl)
+
+      RU - L3 port-channel UP State
+      SU - L2 port-channel UP state
+      P/bndl -  Bundled
+      S/susp  - Suspended
+    help: "execute the command 'show etherchannel summary'"
+    prompt:
+      - "{base_prompt}#"
+  show interfaces:
+    output: |
+      GigabitEthernet0/0/0 is up, line protocol is up
+        Hardware is 4x1G-2xSFP+, address is 48a1.707c.b390 (bia 48a1.707c.b390)
+        Description: MPLS and Bronze Trunk
+        Internet address is 127.0.0.1/32
+        MTU 1500 bytes, BW 1000000 Kbit/sec, DLY 10 usec,
+          reliability 255/255, txload 1/255, rxload 1/255
+        Encapsulation 802.1Q Virtual LAN, Vlan ID  1., loopback not set
+        Keepalive not supported
+        Full Duplex, 1000Mbps, link type is auto, media type is RJ45
+        output flow-control is on, input flow-control is on
+        ARP type: ARPA, ARP Timeout 00:20:00
+        Last input 00:00:01, output 00:00:01, output hang never
+        Last clearing of "show interface" counters never
+        Input queue: 0/375/0/0 (size/max/drops/flushes); Total output drops: 252439
+        Queueing strategy: Class-based queueing
+        Output queue: 0/40 (size/max)
+        30 second input rate 389000 bits/sec, 245 packets/sec
+        30 second output rate 451000 bits/sec, 366 packets/sec
+          5266269133 packets input, 1332513255777 bytes, 0 no buffer
+          Received 25798 broadcasts (0 IP multicasts)
+          0 runts, 0 giants, 0 throttles
+          4 input errors, 0 CRC, 0 frame, 4 overrun, 0 ignored
+          0 watchdog, 28854815 multicast, 0 pause input
+          10970825503 packets output, 5118182507992 bytes, 0 underruns
+          Output 1021120 broadcasts (0 IP multicasts)
+          0 output errors, 0 collisions, 1 interface resets
+          8 unknown protocol drops
+          0 babbles, 0 late collision, 0 deferred
+          1 lost carrier, 0 no carrier, 0 pause output
+          0 output buffer failures, 0 output buffers swapped out
+      GigabitEthernet0/0/0.90 is up, line protocol is up
+        Hardware is 4x1G-2xSFP+, address is 48a1.707c.b390 (bia 48a1.707c.b390)
+        Description: Last Resort
+        Internet address will be negotiated using DHCP
+        MTU 1500 bytes, BW 100000 Kbit/sec, DLY 10 usec,
+          reliability 255/255, txload 1/255, rxload 1/255
+        Encapsulation 802.1Q Virtual LAN, Vlan ID  90.
+        ARP type: ARPA, ARP Timeout 00:20:00
+        Keepalive not supported
+        Last clearing of "show interface" counters never
+      GigabitEthernet0/0/0.92 is up, line protocol is up
+        Hardware is 4x1G-2xSFP+, address is 48a1.707c.b390 (bia 48a1.707c.b390)
+        Description: ATT MPLS
+        Internet address is 10.12.5.25/29
+        MTU 1500 bytes, BW 500000 Kbit/sec, DLY 10 usec,
+          reliability 255/255, txload 1/255, rxload 1/255
+        Encapsulation 802.1Q Virtual LAN, Vlan ID  92.
+        ARP type: ARPA, ARP Timeout 00:20:00
+        Keepalive not supported
+        Last clearing of "show interface" counters never
+      GigabitEthernet0/0/1 is down, line protocol is down
+        Hardware is 4x1G-2xSFP+, address is 48a1.707c.b391 (bia 48a1.707c.b391)
+        MTU 1500 bytes, BW 1000000 Kbit/sec, DLY 10 usec,
+          reliability 255/255, txload 1/255, rxload 1/255
+        Encapsulation ARPA, loopback not set
+        Keepalive not supported
+        Full Duplex, 1000Mbps, link type is force-up, media type is RJ45
+        output flow-control is on, input flow-control is on
+        ARP type: ARPA, ARP Timeout 04:00:00
+        Last input never, output never, output hang never
+        Last clearing of "show interface" counters never
+        Input queue: 0/375/0/0 (size/max/drops/flushes); Total output drops: 0
+        Queueing strategy: fifo
+        Output queue: 0/40 (size/max)
+        5 minute input rate 0 bits/sec, 0 packets/sec
+        5 minute output rate 0 bits/sec, 0 packets/sec
+          0 packets input, 0 bytes, 0 no buffer
+          Received 0 broadcasts (0 IP multicasts)
+          0 runts, 0 giants, 0 throttles
+          0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+          0 watchdog, 0 multicast, 0 pause input
+          0 packets output, 0 bytes, 0 underruns
+          Output 0 broadcasts (0 IP multicasts)
+          0 output errors, 0 collisions, 2 interface resets
+          0 unknown protocol drops
+          0 babbles, 0 late collision, 0 deferred
+          0 lost carrier, 0 no carrier, 0 pause output
+          0 output buffer failures, 0 output buffers swapped out
+      TenGigabitEthernet0/0/4 is up, line protocol is up
+        Hardware is 4x1G-2xSFP+, address is 48a1.707c.b3d0 (bia 48a1.707c.b394)
+        MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec,
+          reliability 255/255, txload 1/255, rxload 4/255
+        Encapsulation ARPA, loopback not set
+        Keepalive not supported
+        Full Duplex, 10000Mbps, link type is auto, media type is 10GBase-SR
+        output flow-control is on, input flow-control is on
+        ARP type: ARPA, ARP Timeout 04:00:00
+        Last input 00:00:06, output 00:00:12, output hang never
+        Last clearing of "show interface" counters 43w6d
+        Input queue: 0/375/0/0 (size/max/drops/flushes); Total output drops: 0
+        Queueing strategy: fifo
+        Output queue: 0/40 (size/max)
+        5 minute input rate 167538000 bits/sec, 18142 packets/sec
+        5 minute output rate 73975000 bits/sec, 12225 packets/sec
+          87432105752 packets input, 66285290488597 bytes, 0 no buffer
+          Received 1439550 broadcasts (0 IP multicasts)
+          0 runts, 0 giants, 0 throttles
+          0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+          0 watchdog, 67196613 multicast, 0 pause input
+          61786569081 packets output, 51708082262660 bytes, 0 underruns
+          Output 4606 broadcasts (0 IP multicasts)
+          0 output errors, 0 collisions, 1 interface resets
+          0 unknown protocol drops
+          0 babbles, 0 late collision, 0 deferred
+          0 lost carrier, 0 no carrier, 0 pause output
+          0 output buffer failures, 0 output buffers swapped out
+      TenGigabitEthernet0/0/5 is up, line protocol is up
+        Hardware is 4x1G-2xSFP+, address is 48a1.707c.b3d0 (bia 48a1.707c.b395)
+        MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec,
+          reliability 255/255, txload 1/255, rxload 1/255
+        Encapsulation ARPA, loopback not set
+        Keepalive not supported
+        Full Duplex, 10000Mbps, link type is auto, media type is 10GBase-SR
+        output flow-control is on, input flow-control is on
+        ARP type: ARPA, ARP Timeout 04:00:00
+        Last input 00:00:07, output 00:00:11, output hang never
+        Last clearing of "show interface" counters 43w6d
+        Input queue: 0/375/0/0 (size/max/drops/flushes); Total output drops: 0
+        Queueing strategy: fifo
+        Output queue: 0/40 (size/max)
+        5 minute input rate 16399000 bits/sec, 4660 packets/sec
+        5 minute output rate 58157000 bits/sec, 7866 packets/sec
+          60149409305 packets input, 45967618372459 bytes, 0 no buffer
+          Received 683 broadcasts (0 IP multicasts)
+          0 runts, 0 giants, 0 throttles
+          0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+          0 watchdog, 24824696 multicast, 0 pause input
+          77916072684 packets output, 57035482889759 bytes, 0 underruns
+          Output 4399 broadcasts (0 IP multicasts)
+          0 output errors, 0 collisions, 1 interface resets
+          0 unknown protocol drops
+          0 babbles, 0 late collision, 0 deferred
+          0 lost carrier, 0 no carrier, 0 pause output
+          0 output buffer failures, 0 output buffers swapped out
+      Loopback50 is up, line protocol is up
+        Hardware is Loopback
+        Description: Loopback_50
+        Internet address is 10.10.10.1/32
+        MTU 1514 bytes, BW 8000000 Kbit/sec, DLY 5000 usec,
+          reliability 255/255, txload 1/255, rxload 1/255
+        Encapsulation LOOPBACK, loopback not set
+        Keepalive set (10 sec)
+        Last input never, output never, output hang never
+        Last clearing of "show interface" counters never
+        Input queue: 0/75/0/0 (size/max/drops/flushes); Total output drops: 0
+        Queueing strategy: fifo
+        Output queue: 0/0 (size/max)
+        5 minute input rate 0 bits/sec, 0 packets/sec
+        5 minute output rate 0 bits/sec, 0 packets/sec
+          0 packets input, 0 bytes, 0 no buffer
+          Received 0 broadcasts (0 IP multicasts)
+          0 runts, 0 giants, 0 throttles
+          0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored, 0 abort
+          0 packets output, 0 bytes, 0 underruns
+          Output 0 broadcasts (0 IP multicasts)
+          0 output errors, 0 collisions, 0 interface resets
+          0 unknown protocol drops
+          0 output buffer failures, 0 output buffers swapped out
+      Port-channel1 is up, line protocol is up
+        Hardware is 10GEChannel, address is 48a1.707c.b3d0 (bia 48a1.707c.b3d0)
+        MTU 1500 bytes, BW 20000000 Kbit/sec, DLY 10 usec,
+          reliability 255/255, txload 1/255, rxload 3/255
+        Encapsulation 802.1Q Virtual LAN, Vlan ID  1., loopback not set
+        Keepalive set (10 sec)
+        ARP type: ARPA, ARP Timeout 04:00:00
+          No. of active members in this channel: 2
+              Member 0 : TenGigabitEthernet0/0/4 , Full-duplex, 10000Mb/s
+              Member 1 : TenGigabitEthernet0/0/5 , Full-duplex, 10000Mb/s
+          No. of PF_JUMBO supported members in this channel : 2
+        Last input 00:00:00, output 00:00:00, output hang never
+        Last clearing of "show interface" counters never
+        Input queue: 0/750/0/0 (size/max/drops/flushes); Total output drops: 0
+        Queueing strategy: fifo
+        Output queue: 0/80 (size/max)
+        30 second input rate 185084000 bits/sec, 22887 packets/sec
+        30 second output rate 131193000 bits/sec, 20041 packets/sec
+          147581654651 packets input, 112253066928720 bytes, 0 no buffer
+          Received 1440233 broadcasts (0 IP multicasts)
+          0 runts, 0 giants, 0 throttles
+          0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+          0 watchdog, 92021328 multicast, 0 pause input
+          139702727469 packets output, 108743612402227 bytes, 0 underruns
+          Output 9005 broadcasts (0 IP multicasts)
+          0 output errors, 0 collisions, 0 interface resets
+          0 unknown protocol drops
+          0 babbles, 0 late collision, 0 deferred
+          0 lost carrier, 0 no carrier, 0 pause output
+          0 output buffer failures, 0 output buffers swapped out
+      Port-channel1.91 is up, line protocol is up
+        Hardware is 10GEChannel, address is 48a1.707c.b3d0 (bia 48a1.707c.b3d0)
+        Description: SOMETHING
+        Internet address is 172.19.0.1/32
+        MTU 1500 bytes, BW 20000000 Kbit/sec, DLY 10 usec,
+          reliability 255/255, txload 1/255, rxload 3/255
+        Encapsulation 802.1Q Virtual LAN, Vlan ID  96.
+        ARP type: ARPA, ARP Timeout 04:00:00
+        Keepalive set (10 sec)
+        Last clearing of "show interface" counters never
+      VirtualPortGroup4 is up, line protocol is up
+        Hardware is Virtual Port Group, address is 48a1.707c.b410 (bia 48a1.707c.b410)
+        Internet address is 127.0.0.2/32
+        MTU 1500 bytes, BW 6000000 Kbit/sec, DLY 1000 usec,
+          reliability 255/255, txload 1/255, rxload 1/255
+        Encapsulation ARPA, loopback not set
+        Keepalive not supported
+        ARP type: ARPA, ARP Timeout 04:00:00
+        Last input 00:05:01, output 00:00:07, output hang never
+        Last clearing of "show interface" counters never
+        Input queue: 0/375/0/0 (size/max/drops/flushes); Total output drops: 0
+        Queueing strategy: fifo
+        Output queue: 0/40 (size/max)
+        5 minute input rate 0 bits/sec, 0 packets/sec
+        5 minute output rate 0 bits/sec, 0 packets/sec
+          72352008 packets input, 13585650912 bytes, 0 no buffer
+          Received 0 broadcasts (0 IP multicasts)
+          0 runts, 0 giants, 0 throttles
+          2 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
+          0 input packets with dribble condition detected
+          60963277 packets output, 12988164239 bytes, 0 underruns
+          Output 0 broadcasts (0 IP multicasts)
+          0 output errors, 0 collisions, 0 interface resets
+          0 unknown protocol drops
+          0 babbles, 0 late collision, 0 deferred
+          0 lost carrier, 0 no carrier
+          0 output buffer failures, 0 output buffers swapped out
+    help: "execute the command 'show interfaces'"
+    prompt:
+      - "{base_prompt}#"
+  show version:
+    output: |
+      Cisco IOS XE Software, Version 17.12.04b
+      Cisco IOS Software [Dublin], c8000be Software (X86_64_LINUX_IOSD-UNIVERSALK9-M), Version 17.12.4b, RELEASE SOFTWARE (fc1)
+      Technical Support: http://www.cisco.com/techsupport
+      Copyright (c) 1986-2025 by Cisco Systems, Inc.
+      Compiled Mon 24-Feb-25 14:42 by mcpre
+
+
+      Cisco IOS-XE software, Copyright (c) 2005-2025 by cisco Systems, Inc.
+      All rights reserved.  Certain components of Cisco IOS-XE software are
+      licensed under the GNU General Public License ("GPL") Version 2.0.  The
+      software code licensed under GPL Version 2.0 is f+ee software that comes
+      with ABSOLUTELY NO WARRANTY.  You can redistribute and/or modify such
+      GPL code under the terms of GPL Version 2.0.  For more details, see the
+      documentation or "License Notice" file accompanying the IOS-XE software,
+      or the applicable URL provided on the flyer accompanying the IOS-XE
+      software.
+
+
+      ROM: 17.6(6r)
+
+      fake-xe-01 uptime is 43 weeks, 6 days, 19 hours, 4 minutes
+      Uptime for this control processor is 43 weeks, 6 days, 19 hours, 5 minutes
+      System returned to ROM by PowerOn
+      System restarted at 19:00:16 EDT Thu Mar 20 2025
+      System image file is "bootflash:packages.conf"
+      Last reload reason: PowerOn
+
+
+      This product contains cryptographic features and is subject to United
+      States and local country laws governing import, export, transfer and
+      use. Delivery of Cisco cryptographic products does not imply
+      third-party authority to import, export, distribute or use encryption.
+      Importers, exporters, distributors and users are responsible for
+      compliance with U.S. and local country laws. By using this product you
+      agree to comply with applicable laws and regulations. If you are unable
+      to comply with U.S. and local laws, return this product immediately.
+
+      A summary of U.S. laws governing Cisco cryptographic products may be found at:
+      http://www.cisco.com/wwl/export/crypto/tool/stqrg.html
+
+      If you require further assistance please contact us by sending email to
+      export@cisco.com.
+
+
+      Technology Package License Information:
+      Controller-managed
+
+      The current throughput level is unthrottled
+
+
+      Smart Licensing Status: Smart Licensing Using Policy
+
+      cisco C8300-1N1S-4T2X (1RU) processor with 7782523K/6147K bytes of memory.
+      Processor board ID FML2222222T
+      Router operating mode: Controller-Managed
+      4 Gigabit Ethernet interfaces
+      2 Ten Gigabit Ethernet interfaces
+      32768K bytes of non-volatile configuration memory.
+      16777216K bytes of physical memory.
+      7245823K bytes of flash memory at bootflash:.
+      14663680K bytes of M.2 USB at harddisk:.
+
+      Configuration register is 0x2102
+    help: "execute the command 'show version'"
+    prompt:
+      - "{base_prompt}#"
+  _default_:
+    output: "% Invalid input detected at '^' marker."
+    help: "Output to print for unknown commands"
+  terminal width 511: {"output":"", "help":"Set terminal width to 511"}
+  terminal length 0: {"output":"", "help":"Set terminal length to 0"}

@@ -5,6 +5,7 @@ import re
 import socket
 
 import netaddr
+from django.db import connections
 from django.contrib.contenttypes.models import ContentType
 from nautobot.dcim.filters import DeviceFilterSet
 from nautobot.dcim.models import Device
@@ -120,6 +121,18 @@ def check_for_required_file(directory, filename):
         return False
     except FileNotFoundError:
         return False
+
+
+def close_threaded_db_connections(func):
+    """Decorator to close database connections in threaded tasks."""
+
+    def inner(*args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        finally:
+            connections.close_all()
+
+    return inner
 
 
 def add_content_type(job, model_to_add, target_object):

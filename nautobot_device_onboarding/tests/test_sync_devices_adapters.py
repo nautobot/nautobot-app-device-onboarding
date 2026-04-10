@@ -1,6 +1,7 @@
 """Test Cisco Support adapter."""
 
-from unittest.mock import patch
+from types import SimpleNamespace
+from unittest.mock import MagicMock, patch
 
 from diffsync.exceptions import ObjectNotFound
 from nautobot.apps.testing import TransactionTestCase
@@ -12,6 +13,7 @@ from nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters import (
     SyncDevicesNetworkAdapter,
 )
 from nautobot_device_onboarding.jobs import SSOTSyncDevices
+from nautobot_device_onboarding.nornir_plays.command_getter import sync_devices_command_getter
 from nautobot_device_onboarding.tests import utils
 from nautobot_device_onboarding.tests.fixtures import sync_devices_fixture
 
@@ -50,6 +52,7 @@ class SyncDevicesNetworkAdapterTestCase(TransactionTestCase):
             "update_devices_without_primary_ip": True,
             "device_role": self.testing_objects["device_role"],
             "device_status": self.testing_objects["status"],
+            "device_tenant": self.testing_objects["device_tenant_1"],
             "interface_status": self.testing_objects["status"],
             "ip_address_status": self.testing_objects["status"],
             "secrets_group": self.testing_objects["secrets_group"],
@@ -79,6 +82,42 @@ class SyncDevicesNetworkAdapterTestCase(TransactionTestCase):
             self.assertEqual([data["mgmt_interface"]], diffsync_device.interfaces)
             self.assertEqual(data["mask_length"], diffsync_device.mask_length)
             self.assertEqual(data["serial"], diffsync_device.serial)
+
+    @patch("nautobot_device_onboarding.nornir_plays.command_getter.InitNornir")
+    def test_command_getter_raises_when_fail_job_on_task_failure_true(self, init_nornir):
+        self.job.fail_job_on_task_failure = True
+
+        nornir_obj = MagicMock()
+        nr_with_processors = MagicMock()
+        nornir_obj.with_processors.return_value = nr_with_processors
+
+        nr_with_processors.run.return_value = SimpleNamespace(
+            failed=True,
+            failed_hosts={"1.1.1.1": "DEVICE01"},
+        )
+
+        init_nornir.return_value.__enter__.return_value = nornir_obj
+
+        with self.assertRaises(RuntimeError):
+            sync_devices_command_getter(job=self.job, log_level="INFO")
+
+    @patch("nautobot_device_onboarding.nornir_plays.command_getter.InitNornir")
+    def test_command_getter_does_not_raise_when_fail_job_on_task_failure_false(self, init_nornir):
+        self.job.fail_job_on_task_failure = False
+
+        nornir_obj = MagicMock()
+        nr_with_processors = MagicMock()
+        nornir_obj.with_processors.return_value = nr_with_processors
+
+        nr_with_processors.run.return_value = SimpleNamespace(
+            failed=True,
+            failed_hosts={"1.1.1.1": "DEVICE01"},
+        )
+
+        init_nornir.return_value.__enter__.return_value = nornir_obj
+
+        result = sync_devices_command_getter(job=self.job, log_level="INFO")
+        self.assertEqual(result, {})
 
 
 class SyncDevicesNautobotAdapterTestCase(TransactionTestCase):
@@ -110,6 +149,7 @@ class SyncDevicesNautobotAdapterTestCase(TransactionTestCase):
         self.job.update_devices_without_primary_ip = True
         self.job.device_role = self.testing_objects["device_role"]
         self.job.device_status = self.testing_objects["status"]
+        self.job.device_tenant = self.testing_objects["device_tenant_1"]
         self.job.interface_status = self.testing_objects["status"]
         self.job.ip_address_status = self.testing_objects["status"]
         self.job.secrets_group = self.testing_objects["secrets_group"]

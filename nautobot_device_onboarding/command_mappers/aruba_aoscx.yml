@@ -1,5 +1,11 @@
 ---
 sync_devices:
+  pre_processor:
+    oobm_mask:
+      commands:
+        - command: "show interface mgmt"
+          parser: "textfsm"
+          jpath: "[*].ipv4_mask"
   hostname:
     commands:
       - command: "show system"
@@ -24,13 +30,14 @@ sync_devices:
       - command: "show interface"
         parser: "textfsm"
         jpath: "[?contains(ip_address, `{{ obj }}/`)].{name: interface, enabled: link_status}"
-        post_processor: "{{ (obj | selectattr('enabled', 'eq', 'up') | list | first ).name }}"
+        post_processor: "{% if obj %}{{ (obj | selectattr('enabled', 'eq', 'up') | list | first ).name }}{% else %}{{ 'mgmt' }}{% endif %}"
+        iterable_type: "str"
   mask_length:
     commands:
       - command: "show interface"
         parser: "textfsm"
         jpath: "[?contains(ip_address, `{{ obj }}/`)].ip_address"
-        post_processor: "{{ obj[0].split('/')[1] }}"
+        post_processor: "{% if obj %}{{ obj[0].split('/')[1] }}{% else %}{{ oobm_mask }}{% endif %}"
         iterable_type: "int"
 sync_network_data:
   pre_processor:

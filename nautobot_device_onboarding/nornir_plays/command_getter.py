@@ -32,7 +32,11 @@ from nautobot_device_onboarding.nornir_plays.transform import (
     get_git_repo_parser_path,
     load_files_with_precedence,
 )
-from nautobot_device_onboarding.utils.helper import check_for_required_file, format_log_message
+from nautobot_device_onboarding.utils.helper import (
+    check_for_required_file,
+    close_threaded_db_connections,
+    format_log_message,
+)
 
 PARSER_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "parsers"))
 
@@ -114,6 +118,7 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables, s
     return deduplicate_command_list(all_commands)
 
 
+@close_threaded_db_connections
 def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_getter_job: str, logger, nautobot_job):
     """Run commands specified in PLATFORM_COMMAND_MAP."""
     if not task.host.platform:
@@ -125,7 +130,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
             host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True
         )
     if nautobot_job.connectivity_test:
-        if not tcp_ping(task.host.hostname, task.host.port):
+        if not tcp_ping(task.host.hostname, task.host.port if task.host.port else 22):
             return Result(
                 host=task.host, result=f"{task.host.name} failed connectivity check via tcp_ping.", failed=True
             )
@@ -163,6 +168,9 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
             if command.get("parser") in SUPPORTED_COMMAND_PARSERS:
                 if isinstance(current_result.result, str):
                     if "Invalid input detected at" in current_result.result:
+                        if nautobot_job.fail_job_on_task_failure:
+                            task.results[result_idx].result = []
+                            task.results[result_idx].failed = True
                         task.results[result_idx].result = []
                         task.results[result_idx].failed = False
                     else:
@@ -193,6 +201,10 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                                 task.results[result_idx].result = parsed_output
                                 task.results[result_idx].failed = False
                             except Exception:  # https://github.com/networktocode/ntc-templates/issues/369
+                                if nautobot_job.fail_job_on_task_failure:
+                                    task.results[result_idx].result = []
+                                    task.results[result_idx].failed = True
+                                    raise
                                 try:
                                     if nautobot_job.debug:
                                         traceback_str = traceback.format_exc().replace("\n", "<br>")
@@ -221,6 +233,10 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                                 task.results[result_idx].result = json.loads(parsed_result)
                                 task.results[result_idx].failed = False
                             except Exception:
+                                if nautobot_job.fail_job_on_task_failure:
+                                    task.results[result_idx].result = []
+                                    task.results[result_idx].failed = True
+                                    raise
                                 task.results[result_idx].result = []
                                 task.results[result_idx].failed = False
             else:
@@ -234,8 +250,16 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                         task.results[result_idx].result = jsonified
                         task.results[result_idx].failed = False
                     except Exception:
+                        if nautobot_job.fail_job_on_task_failure:
+                            task.results[result_idx].result = []
+                            task.results[result_idx].failed = True
+                            raise
                         task.result.failed = False
         except NornirSubTaskError:
+            if nautobot_job.fail_job_on_task_failure:
+                task.results[result_idx].result = []
+                task.results[result_idx].failed = True
+                raise
             # These exceptions indicate that the device is unreachable or the credentials are incorrect.
             # We should fail the task early to avoid trying all commands on a device that is unreachable.
             if type(task.results[result_idx].exception).__name__ == "NetmikoAuthenticationException":
@@ -316,14 +340,18 @@ def sync_devices_command_getter(job, log_level):
                         )
                         continue
                 nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
-            nr_with_processors.run(
+            result = nr_with_processors.run(
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
                 command_getter_job="sync_devices",
                 logger=logger,
                 nautobot_job=job,
             )
+            if job.fail_job_on_task_failure and result.failed:
+                raise RuntimeError(f"netmiko_send_commads task failed with {result.failed_hosts.items()}.")
     except Exception as err:  # pylint: disable=broad-exception-caught
+        if job.fail_job_on_task_failure:
+            raise RuntimeError("Error During Sync Devices Command Getter.") from err
         try:
             if job.debug:
                 traceback_str = format_log_message(traceback.format_exc())
@@ -364,13 +392,17 @@ def sync_network_data_command_getter(job, log_level):
             },
         ) as nornir_obj:
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, job)])
-            nr_with_processors.run(
+            result = nr_with_processors.run(
                 task=netmiko_send_commands,
                 command_getter_yaml_data=nr_with_processors.inventory.defaults.data["platform_parsing_info"],
                 command_getter_job="sync_network_data",
                 logger=logger,
                 nautobot_job=job,
             )
-    except Exception:  # pylint: disable=broad-exception-caught
+            if job.fail_job_on_task_failure and result.failed:
+                raise RuntimeError(f"netmiko_send_commads task failed with {result.failed_hosts.items()}.")
+    except Exception as err:  # pylint: disable=broad-exception-caught
+        if job.fail_job_on_task_failure:
+            raise RuntimeError("Error During Sync Network Data Command Getter.") from err
         logger.info(f"Error During Sync Network Data Command Getter: {traceback.format_exc()}")
     return compiled_results

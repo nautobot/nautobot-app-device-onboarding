@@ -54,3 +54,6 @@ ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER = "nautobot_device_onboarding.onbo
 
 # The git repository data source folder name for custom command mappers.
 ONBOARDING_COMMAND_MAPPERS_REPOSITORY_FOLDER = "onboarding_command_mappers"
+
+# Support 4 modules deep (device -> modulebay -> module -> modulebay -> module -> modulebay -> module -> modulebay -> module -> interface)
+ONBOARDING_DEVICE_MODULE_RECURSION_LIMIT = 4

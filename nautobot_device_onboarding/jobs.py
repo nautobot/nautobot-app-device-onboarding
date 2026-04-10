@@ -36,6 +36,7 @@ from nautobot.extras.models import (
     Status,
 )
 from nautobot.ipam.models import Namespace
+from nautobot.tenancy.models import Tenant
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_ssot.jobs.base import DataSource
 from nornir import InitNornir
@@ -337,6 +338,16 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         required=False,
         description="Device platform. Define ONLY to override auto-recognition of platform.",
     )
+    device_tenant = ObjectVar(
+        model=Tenant,
+        required=False,
+        description="Tenant to be applied to all synced devices.",
+    )
+    fail_job_on_task_failure = BooleanVar(
+        description="If any tasks for any device fails, fail the entire job result.",
+        required=False,
+        default=False,
+    )
 
     template_name = "nautobot_device_onboarding/ssot_sync_devices.html"
 
@@ -408,6 +419,13 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 device_status = Status.objects.get(
                     name=row["device_status_name"].strip(),
                 )
+                if row.get("device_tenant_name"):
+                    query = f"device_tenant: {row.get('device_tenant_name')}"
+                    device_tenant = Tenant.objects.get(
+                        name=row["device_tenant_name"].strip(),
+                    )
+                else:
+                    device_tenant = None
                 query = f"interface_status: {row.get('interface_status_name')}"
                 interface_status = Status.objects.get(
                     name=row["interface_status_name"].strip(),
@@ -447,6 +465,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                     "update_devices_without_primary_ip": update_devices_without_primary_ip,
                     "device_role": device_role,
                     "device_status": device_status,
+                    "device_tenant": device_tenant,
                     "interface_status": interface_status,
                     "ip_address_status": ip_address_status,
                     "secrets_group": secrets_group,
@@ -493,6 +512,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         self,
         dryrun=True,
         memory_profiling=False,
+        parallel_loading=False,
         debug=False,
         port=22,
         timeout=30,
@@ -505,15 +525,19 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         ip_addresses=None,
         device_role=None,
         device_status=None,
+        device_tenant=None,
         interface_status=None,
         ip_address_status=None,
         secrets_group=None,
         platform=None,
+        fail_job_on_task_failure=None,
     ):
         """Run sync."""
         self.dryrun = dryrun
         self.memory_profiling = memory_profiling
+        self.parallel_loading = parallel_loading
         self.debug = debug
+        self.fail_job_on_task_failure = fail_job_on_task_failure
 
         if csv_file:
             self.ip_address_inventory = self._process_csv_data(csv_file=csv_file)
@@ -551,6 +575,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 "namespace": namespace,
                 "device_role": device_role,
                 "device_status": device_status,
+                "device_tenant": device_tenant,
                 "interface_status": interface_status,
                 "ip_address_status": ip_address_status,
                 "set_mgmt_only": set_mgmt_only,
@@ -577,7 +602,7 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         if self.found_invalid_ip_address:
             raise RuntimeError("An invalid IP Address or FQDN was provided")
 
-        super().run(dryrun, memory_profiling)
+        super().run(dryrun=dryrun, memory_profiling=memory_profiling)
 
 
 class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attributes
@@ -654,6 +679,11 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         required=False,
         description="Only update devices with the selected platform.",
     )
+    fail_job_on_task_failure = BooleanVar(
+        description="If any tasks for any device fails, fail the entire job result.",
+        required=False,
+        default=False,
+    )
 
     def load_source_adapter(self):
         """Load network data adapter."""
@@ -681,10 +711,12 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         interface_status,
         ip_address_status,
         default_prefix_status,
+        parallel_loading=False,
         devices=None,
         location=None,
         device_role=None,
         platform=None,
+        fail_job_on_task_failure=None,
     ):
         """Run sync."""
         self.dryrun = dryrun
@@ -699,10 +731,12 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         self.interface_status = interface_status
         self.ip_address_status = ip_address_status
         self.default_prefix_status = default_prefix_status
+        self.parallel_loading = parallel_loading
         self.devices = devices
         self.location = location
         self.device_role = device_role
         self.platform = platform
+        self.fail_job_on_task_failure = fail_job_on_task_failure
 
         # Check for last_network_data_sync CustomField
         if self.debug:
@@ -755,7 +789,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         else:
             self.logger.warning("Over 300 devices were selected to sync")
 
-        super().run(dryrun, memory_profiling)
+        super().run(dryrun=dryrun, memory_profiling=memory_profiling)
 
 
 class DeviceOnboardingTroubleshootingJob(Job):
