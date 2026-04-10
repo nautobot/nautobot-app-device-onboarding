@@ -5,8 +5,8 @@ import re
 import socket
 
 import netaddr
-from django.db import connections
 from django.contrib.contenttypes.models import ContentType
+from django.db import connections
 from nautobot.dcim.filters import DeviceFilterSet
 from nautobot.dcim.models import Device
 from netaddr.core import AddrFormatError
