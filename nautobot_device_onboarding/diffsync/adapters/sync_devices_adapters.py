@@ -380,6 +380,7 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                     )
 
                     vc_build_failed = False
+                    master_serial = self.device_data[ip_address]["serial"]
 
                     # Create Virtual Chassis members
                     for index, vc_member in enumerate(virtual_chassis_data):
@@ -407,7 +408,9 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                             vc_build_failed = True
                             break
 
-                        if index == 0:
+                        is_master = member_serial == master_serial
+
+                        if is_master:
                             onboarding_device = self.device(
                                 adapter=self,
                                 device_type__model=member_model,
@@ -433,7 +436,7 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                                     adapter=self,
                                     device_type__model=member_model,
                                     location__name=location.name,
-                                    name=f"{hostname}:{index+1}",
+                                    name=f"{hostname}:{member_position}",
                                     platform__name=platform_name,
                                     primary_ip4__host=ip_address,
                                     role__name=device_role.name,

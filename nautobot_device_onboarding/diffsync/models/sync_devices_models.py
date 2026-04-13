@@ -207,8 +207,9 @@ class SyncDevicesDevice(DiffSyncModel):
 
         # Get or create Device, Interface and IP Address
         device = cls._get_or_create_device(adapter, ids, attrs)
-        vc_position = attrs.get("vc_position")
-        if device and (vc_position is None or vc_position == 1):  # vc master or non-vc device
+        is_vc_master = attrs.get("virtual_chassis__name") and ids["name"] == attrs["virtual_chassis__name"]
+        is_vc_member = attrs.get("virtual_chassis__name") and ids["name"] != attrs["virtual_chassis__name"]
+        if device and not is_vc_member:  # vc master or non-vc device
             job_form_attrs = adapter.job.ip_address_inventory[attrs["primary_ip4__host"]]
             ip_address = diffsync_utils.get_or_create_ip_address(
                 host=attrs["primary_ip4__host"],
@@ -232,15 +233,14 @@ class SyncDevicesDevice(DiffSyncModel):
                 device = cls._update_device_with_vc_attrs(device, attrs)
             try:
                 device.validated_save()
-                # Set this device as the VC master if it's the master (vc_position == 1)
-                if attrs.get("virtual_chassis__name") and attrs.get("vc_position") == 1:
+                if is_vc_master:
                     vc = VirtualChassis.objects.get(name=attrs["virtual_chassis__name"])
                     vc.master = device
                     vc.validated_save()
             except ValidationError as err:
                 adapter.job.logger.error(f"Failed to create or update Device: {ids['name']}, {err}")
                 raise ValidationError(err)
-        elif device and vc_position is not None and vc_position > 1:  # vc members not the master
+        elif device and is_vc_member:
             device = cls._update_device_with_vc_attrs(device, attrs)
             device.secrets_group = None  # VC members should not have secrets group assigned
             try:
@@ -267,7 +267,7 @@ class SyncDevicesDevice(DiffSyncModel):
         if self.adapter.job.debug:
             self.adapter.job.logger.debug(f"Updating {device.name} with attrs: {attrs}")
         if attrs.get("serial"):
-           device.serial = attrs["serial"]
+            device.serial = attrs["serial"]
         if attrs.get("device_type__model"):
             device.device_type = DeviceType.objects.get(model=attrs.get("device_type__model"))
         if attrs.get("platform__name"):
@@ -329,8 +329,8 @@ class SyncDevicesDevice(DiffSyncModel):
                 self._get_or_create_ip_address_to_interface(
                     adapter=self.adapter, ip_address=device.primary_ip4, interface=new_interface
                 )
-        elif attrs.get("vc_position", 0) > 1:
-            pass
+        elif self.virtual_chassis__name and self.name != self.virtual_chassis__name:
+            pass  # VC member — skip IP/interface updates
         else:
             # Update the primary ip address only
             # This edge case is unlikely to occur. A device with primary_ip that doesn't mach what was entered
@@ -361,7 +361,7 @@ class SyncDevicesDevice(DiffSyncModel):
                 device.primary_ip4 = new_ip_address
         try:
             device.validated_save()
-            if device.virtual_chassis and device.vc_position == 1:
+            if device.virtual_chassis and self.name == self.virtual_chassis__name:
                 vc = device.virtual_chassis
                 vc.master = device
                 vc.validated_save()
@@ -406,8 +406,6 @@ class SyncDevicesPlatform(NautobotModel):
 
     network_driver: Optional[str] = None
     manufacturer__name: Optional[str] = None
-
-
 
 
 class SyncDevicesVirtualChassis(DiffSyncModel):
