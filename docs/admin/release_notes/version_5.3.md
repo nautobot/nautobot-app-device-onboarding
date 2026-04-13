@@ -23,6 +23,7 @@ This document describes all new features and changes in the release. The format 
 ### Dependencies
 
 - [#546](https://github.com/nautobot/nautobot-app-device-onboarding/issues/546) - Bumped minimum version of ntc-templates to 9.0.0.
+- [#549](https://github.com/nautobot/nautobot-app-device-onboarding/issues/549) - Bumped minimum version of nautobot-plugin-nornir to 3.2.0.
 
 ### Housekeeping
 
