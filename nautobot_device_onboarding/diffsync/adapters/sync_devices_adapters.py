@@ -365,92 +365,123 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                         self._add_ip_address_to_failed_list(ip_address=ip_address)
                         continue
 
+                    # Use modules count as the true member count (physically present hardware).
+                    # VC data may include provisioned-but-absent slots (e.g. Cisco 2960X stacks).
                     if len(modules_data) < len(virtual_chassis_data):
-                        self.job.logger.error(
+                        self.job.logger.info(
                             f"{ip_address}: Virtual chassis data contains {len(virtual_chassis_data)} members but "
                             f"only {len(modules_data)} module entries were returned. "
-                            "This device will not be synced."
+                            "Only physically present members will be onboarded."
                         )
-                        self._add_ip_address_to_failed_list(ip_address=ip_address)
-                        continue
 
-                    onboarding_vc = self.virtual_chassis(
-                        name=hostname,
-                        master__name=hostname,
-                    )
+                    # If only 1 module is present, treat as standalone despite multiple VC entries.
+                    if len(modules_data) <= 1:
+                        onboarding_device = self.device(
+                            adapter=self,
+                            device_type__model=self.device_data[ip_address]["device_type"],
+                            location__name=location.name,
+                            name=hostname,
+                            platform__name=platform_name,
+                            primary_ip4__host=ip_address,
+                            primary_ip4__status__name=primary_ip4__status.name,
+                            role__name=device_role.name,
+                            status__name=device_status.name,
+                            tenant__name=device_tenant.name if device_tenant else None,
+                            secrets_group__name=secrets_group.name if secrets_group else None,
+                            interfaces=[self.device_data[ip_address]["mgmt_interface"]],
+                            mask_length=int(self.device_data[ip_address]["mask_length"]),
+                            serial=self.device_data[ip_address]["serial"],
+                        )
+                    else:
+                        onboarding_vc = self.virtual_chassis(
+                            name=hostname,
+                            master__name=hostname,
+                        )
 
-                    vc_build_failed = False
-                    master_serial = self.device_data[ip_address]["serial"]
+                        vc_build_failed = False
+                        master_serial = self.device_data[ip_address]["serial"]
 
-                    # Create Virtual Chassis members
-                    for index, vc_member in enumerate(virtual_chassis_data):
-                        module_data = modules_data[index] if index < len(modules_data) else None
+                        # Only iterate over modules (physically present members).
+                        for index, module_data in enumerate(modules_data):
+                            if not isinstance(module_data, dict):
+                                self.job.logger.error(
+                                    f"{ip_address}: Missing or invalid module data for member index {index}. "
+                                    "This device will not be synced."
+                                )
+                                self._add_ip_address_to_failed_list(ip_address=ip_address)
+                                vc_build_failed = True
+                                break
 
-                        if not isinstance(module_data, dict):
-                            self.job.logger.error(
-                                f"{ip_address}: Missing or invalid module data for virtual chassis member index {index}. "
-                                "This device will not be synced."
-                            )
-                            self._add_ip_address_to_failed_list(ip_address=ip_address)
-                            vc_build_failed = True
-                            break
+                            # Match module to its VC entry by index position.
+                            if index >= len(virtual_chassis_data):
+                                vc_member = None
+                            else:
+                                vc_member = virtual_chassis_data[index]
+                            if vc_member is None:
+                                self.job.logger.error(
+                                    f"{ip_address}: No virtual chassis entry for module index {index}. "
+                                    "This device will not be synced."
+                                )
+                                self._add_ip_address_to_failed_list(ip_address=ip_address)
+                                vc_build_failed = True
+                                break
 
-                        try:
-                            member_model = module_data["model"]
-                            member_serial = module_data["serial"]
-                            member_position = int(vc_member["switch"])
-                            member_priority = int(vc_member["priority"])
-                        except (KeyError, TypeError, ValueError) as err:
-                            self.job.logger.error(
-                                f"{ip_address}: Invalid virtual chassis member data at index {index}, {err}"
-                            )
-                            self._add_ip_address_to_failed_list(ip_address=ip_address)
-                            vc_build_failed = True
-                            break
+                            try:
+                                member_model = module_data["model"]
+                                member_serial = module_data["serial"]
+                                member_position = int(vc_member["switch"])
+                                member_priority = int(vc_member["priority"])
+                            except (KeyError, TypeError, ValueError) as err:
+                                self.job.logger.error(
+                                    f"{ip_address}: Invalid virtual chassis member data at index {index}, {err}"
+                                )
+                                self._add_ip_address_to_failed_list(ip_address=ip_address)
+                                vc_build_failed = True
+                                break
 
-                        is_master = member_serial == master_serial
+                            is_master = member_serial == master_serial
 
-                        if is_master:
-                            onboarding_device = self.device(
-                                adapter=self,
-                                device_type__model=member_model,
-                                location__name=location.name,
-                                name=hostname,
-                                platform__name=platform_name,
-                                primary_ip4__host=ip_address,
-                                primary_ip4__status__name=primary_ip4__status.name,
-                                role__name=device_role.name,
-                                status__name=device_status.name,
-                                tenant__name=device_tenant.name if device_tenant else None,
-                                secrets_group__name=secrets_group.name if secrets_group else None,
-                                interfaces=[self.device_data[ip_address]["mgmt_interface"]],
-                                mask_length=int(self.device_data[ip_address]["mask_length"]),
-                                serial=member_serial,
-                                virtual_chassis__name=hostname,
-                                vc_position=member_position,
-                                vc_priority=member_priority,
-                            )
-                        else:
-                            onboarding_members.append(
-                                self.device(
+                            if is_master:
+                                onboarding_device = self.device(
                                     adapter=self,
                                     device_type__model=member_model,
                                     location__name=location.name,
-                                    name=f"{hostname}:{member_position}",
+                                    name=hostname,
                                     platform__name=platform_name,
                                     primary_ip4__host=ip_address,
+                                    primary_ip4__status__name=primary_ip4__status.name,
                                     role__name=device_role.name,
                                     status__name=device_status.name,
                                     tenant__name=device_tenant.name if device_tenant else None,
+                                    secrets_group__name=secrets_group.name if secrets_group else None,
+                                    interfaces=[self.device_data[ip_address]["mgmt_interface"]],
+                                    mask_length=int(self.device_data[ip_address]["mask_length"]),
                                     serial=member_serial,
                                     virtual_chassis__name=hostname,
                                     vc_position=member_position,
                                     vc_priority=member_priority,
                                 )
-                            )
+                            else:
+                                onboarding_members.append(
+                                    self.device(
+                                        adapter=self,
+                                        device_type__model=member_model,
+                                        location__name=location.name,
+                                        name=f"{hostname}:{member_position}",
+                                        platform__name=platform_name,
+                                        primary_ip4__host=ip_address,
+                                        role__name=device_role.name,
+                                        status__name=device_status.name,
+                                        tenant__name=device_tenant.name if device_tenant else None,
+                                        serial=member_serial,
+                                        virtual_chassis__name=hostname,
+                                        vc_position=member_position,
+                                        vc_priority=member_priority,
+                                    )
+                                )
 
-                    if vc_build_failed:
-                        continue
+                        if vc_build_failed:
+                            continue
 
                 else:
                     # Standalone device

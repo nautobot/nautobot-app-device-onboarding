@@ -408,8 +408,8 @@ class SyncDevicesNetworkAdapterVirtualChassisTestCase(TransactionTestCase):
             self.sync_devices_adapter.get("device", f"{self.testing_objects['location'].name}__bad-stack-1")
 
     @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
-    def test_load_vc_mismatched_modules_count(self, device_data):
-        """Test that a VC with fewer modules than members is added to the failed list."""
+    def test_load_vc_single_module_treated_as_standalone(self, device_data):
+        """Test that a VC with many provisioned slots but only 1 physical module is treated as standalone."""
         device_data.return_value = sync_devices_fixture.sync_devices_mock_data_vc_mismatched_modules
 
         self.job.debug = True
@@ -434,9 +434,13 @@ class SyncDevicesNetworkAdapterVirtualChassisTestCase(TransactionTestCase):
 
         self.sync_devices_adapter.load()
 
-        self.assertIn("10.1.1.31", self.sync_devices_adapter.failed_ip_addresses)
-        with self.assertRaises(ObjectNotFound):
-            self.sync_devices_adapter.get("device", f"{self.testing_objects['location'].name}__bad-stack-2")
+        # Should be loaded as a standalone device, not failed
+        self.assertNotIn("10.1.1.31", self.sync_devices_adapter.failed_ip_addresses)
+        device_uid = f"{self.testing_objects['location'].name}__bad-stack-2"
+        diffsync_device = self.sync_devices_adapter.get("device", device_uid)
+        self.assertEqual("bad-stack-2", diffsync_device.name)
+        self.assertEqual("BADSTACK002", diffsync_device.serial)
+        self.assertIsNone(diffsync_device.virtual_chassis__name)
 
     @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
     def test_load_vc_invalid_member_keys(self, device_data):
