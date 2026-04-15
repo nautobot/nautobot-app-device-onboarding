@@ -152,7 +152,6 @@ class SyncNetworkDataIPAddress(DiffSyncModel):
         diffsync_utils.get_or_create_ip_address(
             host=ids["host"],
             mask_length=attrs["mask_length"],
-            #namespace=adapter.job.namespace,
             namespace=Namespace.objects.get(name=ids["namespace"]),
             default_ip_status=adapter.job.ip_address_status,
             default_prefix_status=adapter.job.default_prefix_status,
@@ -186,13 +185,17 @@ class SyncNetworkDataIPAddress(DiffSyncModel):
         return super().update(attrs)
 
 
-
 class SyncNetworkDataIPAddressToInterface(FilteredNautobotModel):
     """Shared data model representing an IPAddressToInterface."""
 
     _modelname = "ipaddress_to_interface"
     _model = IPAddressToInterface
-    _identifiers = ("interface__device__name", "interface__name", "ip_address__host", "ip_address__parent__namespace__name",)
+    _identifiers = (
+        "interface__device__name",
+        "interface__name",
+        "ip_address__host",
+        "ip_address__parent__namespace__name",
+    )
 
     interface__device__name: str
     interface__name: str

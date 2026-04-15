@@ -169,8 +169,9 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
             for interface_name, interface_data in device_data["interfaces"].items():
                 for ip_address in interface_data["ip_addresses"]:
                     if ip_address["ip_address"]:
-                        #unique_id = f"{hostname}__{interface_name}__{ip_address['ip_address']}"
-                        unique_id = f"{hostname}__{interface_name}__{ip_address['ip_address']}__{self.job.namespace.name}"
+                        unique_id = (
+                            f"{hostname}__{interface_name}__{ip_address['ip_address']}__{self.job.namespace.name}"
+                        )
                         diffsync_obj = self.sync_network_data_adapter.get("ipaddress_to_interface", unique_id)
                         self.assertEqual(hostname, diffsync_obj.interface__device__name)
                         self.assertEqual(interface_name, diffsync_obj.interface__name)
@@ -322,7 +323,6 @@ class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
             host__in=ip_address_hosts,
             parent__namespace__name=self.job.namespace.name,
         ):
-            #unique_id = f"{ip_address.host}"
             unique_id = f"{ip_address.host}__{ip_address.parent.namespace.name}"
             diffsync_obj = self.sync_network_data_adapter.get("ip_address", unique_id)
             self.assertEqual(ip_address.host, diffsync_obj.host)
