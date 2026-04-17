@@ -184,6 +184,95 @@ class SSOTSyncDevicesTestCase(TransactionTestCase):
         self.assertEqual(processed_csv_data["10.1.1.13"]["secrets_group"], self.testing_objects["secrets_group"])
         self.assertEqual(processed_csv_data["10.1.1.13"]["platform"], platform)
 
+    def _make_job_with_mock_logger(self, debug):
+        """Build an SSOTSyncDevices instance with a patched logger for cache-helper tests."""
+        from unittest.mock import MagicMock  # pylint: disable=import-outside-toplevel
+
+        onboarding_job = jobs.SSOTSyncDevices()
+        onboarding_job.debug = debug
+        onboarding_job.logger = MagicMock()
+        return onboarding_job
+
+    def test_cached_get__logs_miss_then_hit_with_safe_kwargs(self):
+        """_cached_get emits a miss log, then a hit log with the cached object's pk and str-formatted kwargs."""
+        location = self.testing_objects["location_1"]
+        parent = location.parent
+        onboarding_job = self._make_job_with_mock_logger(debug=True)
+
+        first = onboarding_job._cached_get(jobs.Location, name=location.name, parent=parent)  # pylint: disable=protected-access
+        self.assertEqual(first, location)
+        self.assertEqual(onboarding_job.logger.debug.call_count, 1)
+        miss_msg = onboarding_job.logger.debug.call_args_list[0].args[0]
+        self.assertIn("Cache miss for Location.objects.get(", miss_msg)
+        self.assertIn(f"name={location.name}", miss_msg)
+        self.assertIn(f"parent={parent}", miss_msg)
+        self.assertNotIn("<Location:", miss_msg)
+
+        onboarding_job.logger.debug.reset_mock()
+        second = onboarding_job._cached_get(jobs.Location, name=location.name, parent=parent)  # pylint: disable=protected-access
+        self.assertIs(second, first)
+        hit_msg = onboarding_job.logger.debug.call_args_list[0].args[0]
+        self.assertIn("Cache hit for Location.objects.get(", hit_msg)
+        self.assertIn(f"parent={parent}", hit_msg)
+        self.assertIn(str(location.pk), hit_msg)
+        self.assertNotIn("<Location:", hit_msg)
+
+    def test_cached_filter_count_and_first__logs_miss_then_hit_with_uuids(self):
+        """_cached_filter_count_and_first hit log shows match count and all matched UUIDs."""
+        duplicate_name = "Site C (intentional duplicate)"
+        onboarding_job = self._make_job_with_mock_logger(debug=True)
+
+        count, first = onboarding_job._cached_filter_count_and_first(jobs.Location, name=duplicate_name)  # pylint: disable=protected-access
+        self.assertEqual(count, 2)
+        self.assertIsNotNone(first)
+        miss_msg = onboarding_job.logger.debug.call_args_list[0].args[0]
+        self.assertIn("Cache miss for Location.objects.filter(", miss_msg)
+        self.assertIn(f"name={duplicate_name}", miss_msg)
+
+        onboarding_job.logger.debug.reset_mock()
+        count, _ = onboarding_job._cached_filter_count_and_first(jobs.Location, name=duplicate_name)  # pylint: disable=protected-access
+        self.assertEqual(count, 2)
+        hit_msg = onboarding_job.logger.debug.call_args_list[0].args[0]
+        self.assertIn("2 match(es)", hit_msg)
+        self.assertIn(str(self.testing_objects["location_3"].pk), hit_msg)
+        self.assertIn(str(self.testing_objects["location_4"].pk), hit_msg)
+
+    def test_cached_filter_count_and_first__zero_matches_render_as_none_not_empty_list(self):
+        """Zero-match filter results render as `[none]`, not `[]`, so the hit log reads clearly."""
+        onboarding_job = self._make_job_with_mock_logger(debug=True)
+
+        onboarding_job._cached_filter_count_and_first(jobs.Location, name="does-not-exist")  # pylint: disable=protected-access
+        onboarding_job.logger.debug.reset_mock()
+
+        count, first = onboarding_job._cached_filter_count_and_first(jobs.Location, name="does-not-exist")  # pylint: disable=protected-access
+        self.assertEqual(count, 0)
+        self.assertIsNone(first)
+        hit_msg = onboarding_job.logger.debug.call_args_list[0].args[0]
+        self.assertIn("0 match(es)", hit_msg)
+        self.assertIn("[none]", hit_msg)
+
+    def test_cached_helpers__debug_false_emits_no_log_output(self):
+        """When debug=False, neither helper should emit cache-miss or cache-hit debug output."""
+        location = self.testing_objects["location_1"]
+        onboarding_job = self._make_job_with_mock_logger(debug=False)
+
+        onboarding_job._cached_get(jobs.Location, name=location.name, parent=location.parent)  # pylint: disable=protected-access
+        onboarding_job._cached_get(jobs.Location, name=location.name, parent=location.parent)  # pylint: disable=protected-access
+        onboarding_job._cached_filter_count_and_first(jobs.Location, name=location.name)  # pylint: disable=protected-access
+        onboarding_job._cached_filter_count_and_first(jobs.Location, name=location.name)  # pylint: disable=protected-access
+        onboarding_job.logger.debug.assert_not_called()
+
+    def test_cached_helpers__non_location_models_bypass_cache_and_log(self):
+        """Non-Location lookups never populate the cache and never emit cache-related debug logs."""
+        role = self.testing_objects["device_role"]
+        onboarding_job = self._make_job_with_mock_logger(debug=True)
+
+        for _ in range(2):
+            onboarding_job._cached_get(jobs.Role, name=role.name)  # pylint: disable=protected-access
+
+        self.assertEqual(onboarding_job._db_cache, {})
+        onboarding_job.logger.debug.assert_not_called()
+
     def test_process_csv_data__bad_file(self):
         """Test error checking of a bad CSV file used for onboarding jobs."""
         manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
