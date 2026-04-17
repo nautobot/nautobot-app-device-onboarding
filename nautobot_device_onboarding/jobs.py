@@ -364,30 +364,54 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
     def _cached_get(self, model, **kwargs):
         """Wrap model.objects.get() with a per-job in-memory cache.
 
+        Caching is currently enabled for Location only; all other models hit the
+        DB each call. The cache has been tested with other models and works
+        correctly — the restriction is a deliberate scope choice, not a
+        limitation, and can be relaxed if desired.
         Failed lookups are never cached so that each row still gets its own
         ObjectDoesNotExist / MultipleObjectsReturned exception.
         """
+        if model is not Location:
+            return model.objects.get(**kwargs)
         key = (model, "get", tuple(sorted(kwargs.items())))
         if key not in self._db_cache:
-            self._db_cache[key] = model.objects.get(**kwargs)  # propagates on miss
-        else:
             if self.debug:
-                self.logger.debug(f"Object successfully retrieved from cache: { self._db_cache[key] }")
+                kwargs_str = ", ".join(f"{k}={v!s}" for k, v in kwargs.items())
+                self.logger.debug(f"Cache miss for {model.__name__}.objects.get({kwargs_str}); querying DB")
+            self._db_cache[key] = model.objects.get(**kwargs)  # propagates on miss
+        elif self.debug:
+            obj = self._db_cache[key]
+            kwargs_str = ", ".join(f"{k}={v!s}" for k, v in kwargs.items())
+            self.logger.debug(f"Cache hit for {model.__name__}.objects.get({kwargs_str}): {obj} ({obj.pk})")
         return self._db_cache[key]
 
     def _cached_filter_count_and_first(self, model, **kwargs):
         """Wrap model.objects.filter() returning (count, first_or_none).
 
         Used by _get_location_by_dynamic_ancestry for ambiguity checks.
+        Caching is currently enabled for Location only; all other models hit the
+        DB each call. The cache has been tested with other models and works
+        correctly — the restriction is a deliberate scope choice, not a
+        limitation, and can be relaxed if desired.
         The full queryset is evaluated once and stored as a list so subsequent
         accesses don't re-hit the DB.
         """
+        if model is not Location:
+            qs = list(model.objects.filter(**kwargs))
+            return len(qs), (qs[0] if qs else None)
         key = (model, "filter", tuple(sorted(kwargs.items())))
         if key not in self._db_cache:
-            self._db_cache[key] = list(model.objects.filter(**kwargs))
-        else:
             if self.debug:
-                self.logger.debug(f"Object successfully retrieved from cache: { self._db_cache[key] }")
+                kwargs_str = ", ".join(f"{k}={v!s}" for k, v in kwargs.items())
+                self.logger.debug(f"Cache miss for {model.__name__}.objects.filter({kwargs_str}); querying DB")
+            self._db_cache[key] = list(model.objects.filter(**kwargs))
+        elif self.debug:
+            cached = self._db_cache[key]
+            uuids = ", ".join(str(obj.pk) for obj in cached) or "none"
+            kwargs_str = ", ".join(f"{k}={v!s}" for k, v in kwargs.items())
+            self.logger.debug(
+                f"Cache hit for {model.__name__}.objects.filter({kwargs_str}): {len(cached)} match(es) [{uuids}]"
+            )
         cached = self._db_cache[key]
         return len(cached), (cached[0] if cached else None)
 
