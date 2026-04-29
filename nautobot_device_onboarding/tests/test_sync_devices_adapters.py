@@ -119,6 +119,57 @@ class SyncDevicesNetworkAdapterTestCase(TransactionTestCase):
         result = sync_devices_command_getter(job=self.job, log_level="INFO")
         self.assertEqual(result, {})
 
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
+    def test_load_respects_form_supplied_platform_manufacturer(self, device_data):
+        """When the job form supplies a Platform, its Manufacturer.name wins over the processor-derived value."""
+        palo_mfr, _ = Manufacturer.objects.get_or_create(name="Palo Alto")
+        palo_platform, _ = Platform.objects.get_or_create(
+            name="Palo Alto PanOS",
+            defaults={"manufacturer": palo_mfr, "network_driver": "paloalto_panos"},
+        )
+        device_data.return_value = {
+            "10.1.1.50": {
+                "hostname": "palo-fw-1",
+                "serial": "SN-PALO-001",
+                "device_type": "PA-220",
+                "mgmt_interface": "management",
+                "manufacturer": "Paloalto",
+                "platform": "paloalto_panos",
+                "network_driver": "paloalto_panos",
+                "mask_length": 24,
+            },
+        }
+
+        self.job.debug = True
+        processed_ip_address_attrs = {
+            "location": self.testing_objects["location"],
+            "namespace": self.testing_objects["namespace"],
+            "port": 22,
+            "timeout": 30,
+            "update_devices_without_primary_ip": True,
+            "device_role": self.testing_objects["device_role"],
+            "device_status": self.testing_objects["status"],
+            "device_tenant": self.testing_objects["device_tenant_1"],
+            "interface_status": self.testing_objects["status"],
+            "ip_address_status": self.testing_objects["status"],
+            "secrets_group": self.testing_objects["secrets_group"],
+            "set_mgmt_only": False,
+            "platform": palo_platform,
+        }
+        self.job.ip_address_inventory = {"10.1.1.50": processed_ip_address_attrs}
+
+        self.sync_devices_adapter.load()
+
+        self.assertTrue(self.sync_devices_adapter.get("manufacturer", "Palo Alto"))
+        with self.assertRaises(ObjectNotFound):
+            self.sync_devices_adapter.get("manufacturer", "Paloalto")
+
+        diff_platform = self.sync_devices_adapter.get("platform", "Palo Alto PanOS")
+        self.assertEqual(diff_platform.manufacturer__name, "Palo Alto")
+
+        diff_device_type = self.sync_devices_adapter.get("device_type", "PA-220__Palo Alto")
+        self.assertEqual(diff_device_type.manufacturer__name, "Palo Alto")
+
 
 class SyncDevicesNautobotAdapterTestCase(TransactionTestCase):
     """Test SyncDevicesNautobotAdapter class."""

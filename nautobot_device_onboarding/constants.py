@@ -57,3 +57,9 @@ ONBOARDING_COMMAND_MAPPERS_REPOSITORY_FOLDER = "onboarding_command_mappers"
 
 # Support 4 modules deep (device -> modulebay -> module -> modulebay -> module -> modulebay -> module -> modulebay -> module -> interface)
 ONBOARDING_DEVICE_MODULE_RECURSION_LIMIT = 4
+
+# Network driver -> Nautobot Manufacturer display name. Override only where
+# `token.split("_")[0].title()` would produce the wrong canonical name.
+NETWORK_DRIVER_TO_MANUFACTURER = {
+    "paloalto_panos": "Palo Alto",
+}
