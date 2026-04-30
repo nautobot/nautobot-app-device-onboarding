@@ -35,7 +35,7 @@ from nautobot.extras.models import (
     SecretsGroupAssociation,
     Status,
 )
-from nautobot.ipam.models import VRF, Namespace
+from nautobot.ipam.models import Namespace
 from nautobot.tenancy.models import Tenant
 from nautobot_plugin_nornir.constants import NORNIR_SETTINGS
 from nautobot_ssot.jobs.base import DataSource
@@ -784,87 +784,6 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
             self.logger.warning("Over 300 devices were selected to sync")
 
         super().run(dryrun=dryrun, memory_profiling=memory_profiling)
-
-        if self.sync_vrfs and self.sync_vrf_to_prefix and not self.dryrun:
-            self._associate_vrfs_to_prefixes_post_sync()
-
-    def _associate_vrfs_to_prefixes_post_sync(self):
-        """Additively tag parent prefixes of each interface's IPs with that interface's VRF.
-
-        Runs after the SSoT sync regardless of whether the diffsync VRF-to-Interface mapping
-        produced any create/update operations, so a manual removal of a Prefix-to-VRF link is
-        re-established on the next sync. Additive-only; never removes existing associations.
-        """
-        if not self.command_getter_result:
-            return
-
-        stats = {"linked": 0, "already_linked": 0, "skipped_no_parent": 0, "skipped_namespace_mismatch": 0}
-
-        for hostname, device_data in self.command_getter_result.items():
-            for interface_name, interface_data in device_data.get("interfaces", {}).items():
-                vrf_data = interface_data.get("vrf") or {}
-                vrf_name = vrf_data.get("name")
-                if not vrf_name:
-                    continue
-
-                try:
-                    vrf = VRF.objects.get(name=vrf_name, namespace=self.namespace)
-                except ObjectDoesNotExist:
-                    if self.debug:
-                        self.logger.debug(
-                            "VRF [%s] not found in namespace [%s] for [%s/%s], skipping prefix association",
-                            vrf_name,
-                            self.namespace,
-                            hostname,
-                            interface_name,
-                        )
-                    continue
-
-                try:
-                    interface = Device.objects.get(name=hostname).all_interfaces.get(name=interface_name)
-                except ObjectDoesNotExist:
-                    continue
-
-                for ip_address in interface.ip_addresses.all():
-                    parent = ip_address.parent
-                    if parent is None:
-                        stats["skipped_no_parent"] += 1
-                        continue
-                    if parent.namespace_id != vrf.namespace_id:
-                        stats["skipped_namespace_mismatch"] += 1
-                        continue
-                    if parent.vrfs.filter(pk=vrf.pk).exists():
-                        stats["already_linked"] += 1
-                        continue
-                    try:
-                        parent.vrfs.add(vrf)
-                    except Exception as err:  # pylint: disable=broad-exception-caught
-                        self.logger.warning(
-                            "Failed to associate vrf [%s] with prefix [%s] for interface [%s] on [%s], %s",
-                            vrf,
-                            parent,
-                            interface,
-                            hostname,
-                            err,
-                        )
-                        continue
-                    stats["linked"] += 1
-                    self.logger.info(
-                        "Linked vrf [%s] to prefix [%s] via interface [%s] on [%s].",
-                        vrf,
-                        parent,
-                        interface,
-                        hostname,
-                    )
-
-        self.logger.info(
-            "VRF-to-Prefix association: linked=%d, already_linked=%d, "
-            "skipped_no_parent=%d, skipped_namespace_mismatch=%d",
-            stats["linked"],
-            stats["already_linked"],
-            stats["skipped_no_parent"],
-            stats["skipped_namespace_mismatch"],
-        )
 
 
 class DeviceOnboardingTroubleshootingJob(Job):
