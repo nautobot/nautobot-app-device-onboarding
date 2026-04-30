@@ -2,6 +2,7 @@
 
 import copy
 import datetime
+import ipaddress
 
 import diffsync
 from diffsync.enum import DiffSyncModelFlags
@@ -53,6 +54,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
     untagged_vlan_to_interface = sync_network_data_models.SyncNetworkDataUnTaggedVlanToInterface
     lag_to_interface = sync_network_data_models.SyncNetworkDataLagToInterface
     vrf_to_interface = sync_network_data_models.SyncNetworkDataVrfToInterface
+    prefix_to_vrf = sync_network_data_models.SyncNetworkDataPrefixToVrf
     cable = sync_network_data_models.SyncNetworkDataCable
     software_version = sync_network_data_models.SyncNetworkSoftwareVersion
     software_version_to_device = sync_network_data_models.SyncNetworkSoftwareVersionToDevice
@@ -69,6 +71,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         "tagged_vlans_to_interface",
         "lag_to_interface",
         "vrf_to_interface",
+        "prefix_to_vrf",
         "cable",
         "software_version",
         "software_version_to_device",
@@ -265,6 +268,38 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
                 network_vrf_to_interface.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
                 self.add(network_vrf_to_interface)
 
+    def load_prefix_to_vrf(self):
+        """Load existing Prefix-to-VRF associations reachable via synced devices' IPs.
+
+        Scope: prefixes that are parents of IP addresses on synced devices' interfaces,
+        within the job namespace. SKIP_UNMATCHED_DST keeps the diff additive — pre-existing
+        associations not seen by this sync are not deleted.
+        """
+        namespace = self.job.namespace
+        seen = set()
+        for device in self.job.devices_to_load:
+            for interface in device.all_interfaces:
+                for ip_address in interface.ip_addresses.all():
+                    parent = ip_address.parent
+                    if parent is None or parent.namespace_id != namespace.id:
+                        continue
+                    for vrf in parent.vrfs.filter(namespace=namespace):
+                        key = (parent.pk, vrf.pk)
+                        if key in seen:
+                            continue
+                        seen.add(key)
+                        record = self.prefix_to_vrf(
+                            adapter=self,
+                            namespace__name=namespace.name,
+                            prefix=str(parent.prefix),
+                            vrf__name=vrf.name,
+                        )
+                        record.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
+                        try:
+                            self.add(record)
+                        except diffsync.exceptions.ObjectAlreadyExists:
+                            continue
+
     def load_cables(self):
         """
         Load Cables into diffsync store.
@@ -391,6 +426,9 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
             elif model_name == "vrf_to_interface":
                 if self.job.sync_vrfs:
                     self.load_vrf_to_interface()
+            elif model_name == "prefix_to_vrf":
+                if self.job.sync_vrfs and self.job.sync_vrf_to_prefix:
+                    self.load_prefix_to_vrf()
             elif model_name == "cable":
                 if self.job.sync_cables:
                     self.load_cables()
@@ -477,6 +515,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
     untagged_vlan_to_interface = sync_network_data_models.SyncNetworkDataUnTaggedVlanToInterface
     lag_to_interface = sync_network_data_models.SyncNetworkDataLagToInterface
     vrf_to_interface = sync_network_data_models.SyncNetworkDataVrfToInterface
+    prefix_to_vrf = sync_network_data_models.SyncNetworkDataPrefixToVrf
     cable = sync_network_data_models.SyncNetworkDataCable
     software_version = sync_network_data_models.SyncNetworkSoftwareVersion
     software_version_to_device = sync_network_data_models.SyncNetworkSoftwareVersionToDevice
@@ -491,6 +530,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
         "tagged_vlans_to_interface",
         "lag_to_interface",
         "vrf_to_interface",
+        "prefix_to_vrf",
         "cable",
         "software_version",
         "software_version_to_device",
@@ -871,6 +911,60 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                     )
                     continue
 
+    def load_prefix_to_vrf(self):
+        """Load Prefix-to-VRF associations from CommandGetter results.
+
+        Walks each interface's reported VRF and IP addresses, computes the parent
+        prefix from the IP+mask, and emits one record per (prefix, vrf) tuple. The
+        Nautobot adapter loads existing associations with SKIP_UNMATCHED_DST so the
+        diff is additive: any (prefix, vrf) seen here that isn't yet in Nautobot
+        becomes a create; existing associations not seen here are preserved.
+        """
+        seen = set()
+        for hostname, device_data in self.job.command_getter_result.items():
+            for interface_name, interface_data in device_data.get("interfaces", {}).items():
+                vrf_data = interface_data.get("vrf") or {}
+                vrf_name = vrf_data.get("name")
+                if not vrf_name:
+                    continue
+                for ip_address_data in interface_data.get("ip_addresses", []) or []:
+                    host = ip_address_data.get("ip_address")
+                    prefix_length = ip_address_data.get("prefix_length")
+                    if not host or not prefix_length:
+                        continue
+                    try:
+                        network = ipaddress.ip_interface(f"{host}/{prefix_length}").network
+                    except (ValueError, TypeError):
+                        if self.job.debug:
+                            self.job.logger.debug(
+                                f"Could not compute parent prefix from {host}/{prefix_length} "
+                                f"on {interface_name}@{hostname}; skipping prefix-to-vrf load."
+                            )
+                        continue
+                    prefix_str = str(network)
+                    key = (prefix_str, vrf_name)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    try:
+                        record = self.prefix_to_vrf(
+                            adapter=self,
+                            namespace__name=self.job.namespace.name,
+                            prefix=prefix_str,
+                            vrf__name=vrf_name,
+                        )
+                        self.add(record)
+                    except diffsync.exceptions.ObjectAlreadyExists:
+                        continue
+                    except Exception as err:  # pylint: disable=broad-exception-caught
+                        self._handle_general_load_exception(
+                            error=err,
+                            hostname=hostname,
+                            data=device_data,
+                            model_type="prefix to vrf",
+                        )
+                        continue
+
     def load_cables(self):  # pylint: disable=inconsistent-return-statements
         """Load cables into the Diffsync store."""
         for hostname, device_data in self.job.command_getter_result.items():
@@ -1027,6 +1121,8 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
         self.load_lag_to_interface()
         if self.job.sync_vrfs:
             self.load_vrf_to_interface()
+        if self.job.sync_vrfs and self.job.sync_vrf_to_prefix:
+            self.load_prefix_to_vrf()
         if self.job.sync_cables:
             self.load_cables()
         if self.job.sync_software_version:
