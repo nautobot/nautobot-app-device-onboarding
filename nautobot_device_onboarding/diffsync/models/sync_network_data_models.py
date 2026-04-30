@@ -607,31 +607,6 @@ class SyncNetworkDataVrfToInterface(DiffSyncModel):
                 raise diffsync_exceptions.ObjectNotCreated(err)
             if diff_method_type == "update":
                 raise diffsync_exceptions.ObjectNotUpdated(err)
-        if getattr(adapter.job, "sync_vrf_to_prefix", False):
-            cls._associate_vrf_with_interface_prefixes(adapter, vrf, interface)
-
-    @classmethod
-    def _associate_vrf_with_interface_prefixes(cls, adapter, vrf, interface):
-        """Additively tag parent prefixes of an interface's IPs with the given VRF.
-
-        Associations are add-only: a single sync sees only a subset of devices, so we cannot
-        safely decide that a prefix no longer belongs to a VRF on this sync alone.
-        """
-        for ip_address in interface.ip_addresses.all():
-            parent_prefix = ip_address.parent
-            if parent_prefix is None:
-                continue
-            try:
-                parent_prefix.vrfs.add(vrf)
-            except Exception as err:  # pylint: disable=broad-exception-caught
-                adapter.job.logger.warning(
-                    "Failed to associate vrf: [%s] with prefix: [%s] for interface: [%s] on device: [%s], %s",
-                    vrf,
-                    parent_prefix,
-                    interface,
-                    interface.parent,
-                    err,
-                )
 
     @classmethod
     def create(cls, adapter, ids, attrs):
