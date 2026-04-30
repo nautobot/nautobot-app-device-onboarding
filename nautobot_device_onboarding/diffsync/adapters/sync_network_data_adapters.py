@@ -914,12 +914,13 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
     def load_prefix_to_vrf(self):
         """Load Prefix-to-VRF associations from CommandGetter results.
 
-        Walks each interface's reported VRF and IP addresses, computes the parent
-        prefix from the IP+mask, and emits one record per (prefix, vrf) tuple. The
-        Nautobot adapter loads existing associations with SKIP_UNMATCHED_DST so the
-        diff is additive: any (prefix, vrf) seen here that isn't yet in Nautobot
-        becomes a create; existing associations not seen here are preserved.
+        For each interface's reported VRF + IP, resolves the parent prefix the same
+        way the destination does: by reading the IP's actual `parent` in Nautobot.
+        Falls back to computing the network arithmetically when the IP isn't in
+        Nautobot yet (a new IP will be created by `SyncNetworkDataIPAddress`, which
+        also creates the parent prefix at the IP's mask length, so arithmetic agrees).
         """
+        namespace = self.job.namespace
         seen = set()
         for hostname, device_data in self.job.command_getter_result.items():
             for interface_name, interface_data in device_data.get("interfaces", {}).items():
@@ -932,16 +933,26 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                     prefix_length = ip_address_data.get("prefix_length")
                     if not host or not prefix_length:
                         continue
-                    try:
-                        network = ipaddress.ip_interface(f"{host}/{prefix_length}").network
-                    except (ValueError, TypeError):
-                        if self.job.debug:
-                            self.job.logger.debug(
-                                f"Could not compute parent prefix from {host}/{prefix_length} "
-                                f"on {interface_name}@{hostname}; skipping prefix-to-vrf load."
-                            )
-                        continue
-                    prefix_str = str(network)
+
+                    prefix_str = None
+                    existing_ip = (
+                        IPAddress.objects.filter(host=host, parent__namespace=namespace)
+                        .select_related("parent")
+                        .first()
+                    )
+                    if existing_ip is not None and existing_ip.parent is not None:
+                        prefix_str = str(existing_ip.parent.prefix)
+                    else:
+                        try:
+                            prefix_str = str(ipaddress.ip_interface(f"{host}/{prefix_length}").network)
+                        except (ValueError, TypeError):
+                            if self.job.debug:
+                                self.job.logger.debug(
+                                    f"Could not compute parent prefix from {host}/{prefix_length} "
+                                    f"on {interface_name}@{hostname}; skipping prefix-to-vrf load."
+                                )
+                            continue
+
                     key = (prefix_str, vrf_name)
                     if key in seen:
                         continue
@@ -949,7 +960,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                     try:
                         record = self.prefix_to_vrf(
                             adapter=self,
-                            namespace__name=self.job.namespace.name,
+                            namespace__name=namespace.name,
                             prefix=prefix_str,
                             vrf__name=vrf_name,
                         )
