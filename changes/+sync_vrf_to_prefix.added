@@ -1,0 +1,1 @@
+Added optional `Sync VRF to Prefix` toggle on the Sync Network Data From Network job that additively associates each interface's VRF with the parent prefix of the interface's IP addresses.

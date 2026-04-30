@@ -1,0 +1,1 @@
+Added a standalone `Associate VRFs with Prefixes` maintenance job that backfills Prefix-to-VRF associations from existing Interface VRF assignments. Additive-only; supports namespace and VRF scoping and dry-run mode.
