@@ -128,7 +128,7 @@ def close_threaded_db_connections(func):
 
     def inner(*args, **kwargs):
         try:
-            func(*args, **kwargs)
+            return func(*args, **kwargs)
         finally:
             connections.close_all()
 
