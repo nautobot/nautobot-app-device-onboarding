@@ -10,6 +10,13 @@ This document describes all new features and changes in the release. The format 
 <!-- towncrier release notes start -->
 
 
+## [v4.4.5 (2026-05-06)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.4.5)
+
+### Fixed
+
+- [#425](https://github.com/nautobot/nautobot-app-device-onboarding/issues/425) - Fixed check connectivity failing on Sync Network Data job.
+- [#557](https://github.com/nautobot/nautobot-app-device-onboarding/issues/557) - Fixed `get_vlan_data` Jinja filter raising an error when trunking VLANs were reported as `NONE` by the device, so trunk interfaces with no tagged VLANs are now handled correctly.
+
 ## [v4.4.4 (2026-03-23)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.4.4)
 
 ### Fixed
