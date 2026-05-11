@@ -1,0 +1,2 @@
+Fixed Virtual Chassis master identification to use serial number matching instead of list position, correctly handling stacks where the conductor is not switch 1.
+Fixed handling of provisioned-but-absent stack slots so single-member stacks with provisioned empty slots are onboarded as standalone devices.

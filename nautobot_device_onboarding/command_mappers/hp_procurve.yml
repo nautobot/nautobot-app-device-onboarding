@@ -26,16 +26,26 @@ sync_devices:
     commands:
       - command: "show ip"
         parser: "textfsm"
-        jpath: "[?contains(ip_address, `{{ obj }}`)].intf_name"
+        jpath: "[?contains(ip_address, `{{ obj }}`)].vlan_name"
         post_processor: "{% if obj %}{{ obj[0] }}{% else %}{{ 'oobm' }}{% endif %}"
         iterable_type: "str"
   mask_length:
     commands:
       - command: "show ip"
         parser: "textfsm"
-        jpath: "[?contains(ip_address, `{{ obj }}`)].ip_mask"
+        jpath: "[?contains(ip_address, `{{ obj }}`)].subnet_mask"
         post_processor: "{% if obj %}{{ obj[0] | netmask_to_cidr }}{% else %}{{ oobm_data['prefix_length'] }}{% endif %}"
         iterable_type: "int"
+  virtual_chassis:
+    commands:
+      - command: "show vsf detail"
+        parser: "textfsm"
+        jpath: "[?member_id != ''].{switch: member_id, priority: priority }"
+  modules:
+    commands:
+      - command: "show vsf detail"
+        parser: "textfsm"
+        jpath: "[?member_id != ''].{model: model, serial: serial_number}"
 sync_network_data:
   pre_processor:
     vlan_map:
@@ -56,7 +66,7 @@ sync_network_data:
       commands:
         - command: "show ip"
           parser: "textfsm"
-          jpath: "[*].[$intf_name$,ip_address,ip_mask]"
+          jpath: "[*].[$vlan_name$,ip_address,subnet_mask]"
           post_processor: "{{ obj | flatten_list_of_dict_from_value('ip_address') | tojson }}"
   software_version:
     commands:
@@ -85,7 +95,7 @@ sync_network_data:
     commands:
       - command: "show ip"
         parser: "textfsm"
-        jpath: "[?contains(@.intf_name, `{{ current_key }}`)].{ip_address: ip_address, prefix_length: ip_mask}"
+        jpath: "[?contains(@.vlan_name, `{{ current_key }}`)].{ip_address: ip_address, prefix_length: subnet_mask}"
         post_processor: "{% if obj and obj[0]['ip_address'] and obj[0]['prefix_length'] %}{% set mask = obj[0]['prefix_length'] | netmask_to_cidr %}{{ [{'ip_address': obj[0]['ip_address'], 'prefix_length': mask}] | tojson }}{% else %}{{ obj | tojson }}{% endif %}"
         iterable_type: "list"
   interfaces__mtu:
@@ -120,7 +130,7 @@ sync_network_data:
     commands:
       - command: "show interfaces status"
         parser: "textfsm"
-        jpath: "[?port=='{{ current_key }}'].{access_vlan: untagged, trunking_vlans: tagged}"
+        jpath: "[?port=='{{ current_key }}'].{access_vlan: vlan_untagged, trunking_vlans: vlan_tagged}"
         post_processor: "{% if (obj and 'multi' in obj[0]['trunking_vlans']) or ('Trk' in current_key) %}{{ 'tagged' }}{% else %}{{ 'access' }}{% endif %}"
         iterable_type: "str"
   interfaces__lag:
@@ -141,13 +151,13 @@ sync_network_data:
     commands:
       - command: "show interfaces status"
         parser: "textfsm"
-        jpath: "[?port=='{{ current_key }}'].{access_vlan: untagged, trunking_vlans: tagged}"
+        jpath: "[?port=='{{ current_key }}'].{access_vlan: vlan_untagged, trunking_vlans: vlan_tagged}"
         post_processor: "{% if obj and 'multi' in obj[0]['trunking_vlans'] or ('Trk' in current_key) %}{% set result = [] %}{% for vid,name in vlan_map.items() %}{% if 'Trk' in current_key %}{% set _=result.append({'id': vid, 'name': name}) %}{% elif vid != obj[0]['access_vlan'] %}{% set _=result.append({'id': vid, 'name': name}) %}{% endif %}{% endfor %}{{ result | tojson }}{% endif %}"
   interfaces__untagged_vlan:
     commands:
       - command: "show interfaces status"
         parser: "textfsm"
-        jpath: "[?port=='{{ current_key }}'].{access_vlan: untagged, trunking_vlans: tagged}"
+        jpath: "[?port=='{{ current_key }}'].{access_vlan: vlan_untagged, trunking_vlans: vlan_tagged}"
         iterable_type: "dict"
         post_processor: "{% if obj and obj[0]['access_vlan'] in vlan_map %}{{ {'id': obj[0]['access_vlan'], 'name': vlan_map[obj[0]['access_vlan']]} | tojson }}{% else %}{{ [] | tojson }}{% endif %}"
   cables:

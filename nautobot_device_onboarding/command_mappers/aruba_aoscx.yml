@@ -39,6 +39,18 @@ sync_devices:
         jpath: "[?contains(ip_address, `{{ obj }}/`)].ip_address"
         post_processor: "{% if obj %}{{ obj[0].split('/')[1] }}{% else %}{{ oobm_mask }}{% endif %}"
         iterable_type: "int"
+  virtual_chassis:
+    commands:
+      - command: "show vsf detail"
+        parser: "textfsm"
+        jpath: "[?member_id != 'Stack'].{switch: member_id, priority: status }"
+        post_processor: '{% set result=[] %}{% for item in obj %}{{ result.append({"switch": item.switch, "priority": "10" if item.priority|lower == "conductor" else "0"}) or "" }}{% endfor %}{{ result | tojson }}'
+  modules:
+    commands:
+      - command: "show module"
+        parser: "textfsm"
+        jpath: "[?module_type=='Management'].{model: model, description: description, serial: serial_number}"
+        post_processor: '{% set result=[] %}{% for item in obj %}{{ result.append({"model": (item.model ~ " " ~ item.description), "serial": item.serial}) or "" }}{% endfor %}{{ result | tojson }}'
 sync_network_data:
   pre_processor:
     vlan_map:
@@ -117,8 +129,13 @@ sync_network_data:
     commands:
       - command: "show vrf"
         parser: "textfsm"
-        jpath: "[?contains(@.vrf_interfaces, `{{ current_key }}`)].{name:vrf_name}"
-        post_processor: "{% if obj | length > 0 %}{{ obj[0] | key_exist_or_default('name') | tojson }}{% else %}{{ {} | tojson }}{% endif %}"
+        jpath: "[?interface == `{{ current_key }}`].{name: vrf}"
+        post_processor: >-
+          {% if obj | length > 0 %}
+          {{ obj[0] | key_exist_or_default('name') | tojson }}
+          {% else %}
+          {{ {} | tojson }}
+          {% endif %}
         iterable_type: "dict"
   interfaces__tagged_vlans:
     commands:

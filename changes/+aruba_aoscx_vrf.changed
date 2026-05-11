@@ -1,0 +1,1 @@
+Changed Aruba AOS-CX VRF lookup in the Sync Network Data From Network job to use the per-interface row schema produced by the updated `aruba_aoscx_show_vrf` ntc-templates parser.

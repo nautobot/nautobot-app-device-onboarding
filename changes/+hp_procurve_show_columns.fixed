@@ -1,0 +1,1 @@
+Fixed HP ProCurve command mapper to align with the current `hp_procurve_show_ip` and `hp_procurve_show_interfaces_status` ntc-templates column names.
