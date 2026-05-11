@@ -104,7 +104,7 @@ sync_network_data:
     commands:
       - command: "show ip vrf interfaces"
         parser: "textfsm"
-        jpath: "[?interface=='{{ current_key | abbreviated_interface_name(addl_reverse_map={'VirtualPortGroup': 'Vi'}) }}'].{name:vrf}"
+        jpath: "[?interface=='{{ current_key | abbreviated_interface_name(addl_name_map={'Vlan': 'VLAN'}, addl_reverse_map={'VirtualPortGroup': 'Vi'}) }}'].{name:vrf}"
         post_processor: "{% if obj | length > 0 %}{{ obj[0] | key_exist_or_default('name') | tojson }}{% else %}{{ obj }}{% endif %}"
         iterable_type: "dict"
   interfaces__tagged_vlans:
