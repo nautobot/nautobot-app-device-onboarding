@@ -5,7 +5,7 @@ sync_devices:
       commands:
         - command: "show interface mgmt"
           parser: "textfsm"
-          jpath: "[*].ipv4_mask"
+          jpath: "[*].ipv4_prefix_length"
   hostname:
     commands:
       - command: "show system"
