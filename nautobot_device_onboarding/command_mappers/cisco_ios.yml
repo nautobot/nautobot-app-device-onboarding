@@ -32,6 +32,16 @@ sync_devices:
         jpath: "[?ip_address=='{{ obj }}'].prefix_length"
         post_processor: "{{ obj | unique | first }}"
         iterable_type: "int"
+  virtual_chassis:
+    commands:
+      - command: "show switch detail"
+        parser: "textfsm"
+        jpath: "[*].{switch: switch, priority: priority}"
+  modules:
+    commands:
+      - command: "show inventory"
+        parser: "textfsm"
+        jpath: "[?length(name) == `1` && contains('0123456789', name)].{model: pid, serial: sn}"
 sync_network_data:
   pre_processor:
     vlan_map:

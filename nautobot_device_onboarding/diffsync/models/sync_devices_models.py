@@ -3,9 +3,20 @@
 from typing import Optional
 
 from diffsync import DiffSyncModel
-from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
+from django.core.exceptions import (
+    MultipleObjectsReturned,
+    ObjectDoesNotExist,
+    ValidationError,
+)
 from nautobot.apps.choices import InterfaceTypeChoices
-from nautobot.dcim.models import Device, DeviceType, Interface, Manufacturer, Platform
+from nautobot.dcim.models import (
+    Device,
+    DeviceType,
+    Interface,
+    Manufacturer,
+    Platform,
+    VirtualChassis,
+)
 from nautobot.extras.models import Role, SecretsGroup, Status
 from nautobot.ipam.models import IPAddressToInterface
 from nautobot.tenancy.models import Tenant
@@ -21,9 +32,9 @@ class SyncDevicesDevice(DiffSyncModel):
     _identifiers = (
         "location__name",
         "name",
-        "serial",
     )
     _attributes = (
+        "serial",
         "device_type__model",
         "device_type__manufacturer__name",
         "mask_length",
@@ -35,6 +46,9 @@ class SyncDevicesDevice(DiffSyncModel):
         "status__name",
         "tenant__name",
         "interfaces",
+        "virtual_chassis__name",
+        "vc_position",
+        "vc_priority",
     )
 
     name: str
@@ -51,6 +65,9 @@ class SyncDevicesDevice(DiffSyncModel):
     secrets_group__name: Optional[str] = None
     status__name: Optional[str] = None
     tenant__name: Optional[str] = None
+    virtual_chassis__name: Optional[str] = None
+    vc_position: Optional[int] = None
+    vc_priority: Optional[int] = None
 
     interfaces: Optional[list] = None
 
@@ -99,7 +116,7 @@ class SyncDevicesDevice(DiffSyncModel):
                 name=ids["name"],
                 platform=platform,
                 secrets_group=job_form_attrs["secrets_group"],
-                serial=ids["serial"],
+                serial=attrs["serial"],
             )
             device.validated_save()
         return device
@@ -158,7 +175,7 @@ class SyncDevicesDevice(DiffSyncModel):
         )
         device.platform = platform
         device.secrets_group = job_form_attrs["secrets_group"]
-        device.serial = ids["serial"]
+        device.serial = attrs["serial"]
 
         return device
 
@@ -182,6 +199,15 @@ class SyncDevicesDevice(DiffSyncModel):
             pass
 
     @classmethod
+    def _update_device_with_vc_attrs(cls, device, attrs):
+        """Update a Nautobot device instance with Virtual Chassis attrs."""
+        device.virtual_chassis = VirtualChassis.objects.get(name=attrs["virtual_chassis__name"])
+        device.vc_position = attrs["vc_position"]
+        device.vc_priority = attrs["vc_priority"]
+
+        return device
+
+    @classmethod
     def create(cls, adapter, ids, attrs):
         """Create a new nautobot device using data scraped from a device."""
         if adapter.job.debug:
@@ -189,7 +215,9 @@ class SyncDevicesDevice(DiffSyncModel):
 
         # Get or create Device, Interface and IP Address
         device = cls._get_or_create_device(adapter, ids, attrs)
-        if device:
+        is_vc_master = attrs.get("virtual_chassis__name") and ids["name"] == attrs["virtual_chassis__name"]
+        is_vc_member = attrs.get("virtual_chassis__name") and ids["name"] != attrs["virtual_chassis__name"]
+        if device and not is_vc_member:  # vc master or non-vc device
             job_form_attrs = adapter.job.ip_address_inventory[attrs["primary_ip4__host"]]
             ip_address = diffsync_utils.get_or_create_ip_address(
                 host=attrs["primary_ip4__host"],
@@ -209,10 +237,24 @@ class SyncDevicesDevice(DiffSyncModel):
             # Assign primary IP Address to Device
             device.primary_ip4 = ip_address
 
+            if attrs.get("virtual_chassis__name"):
+                device = cls._update_device_with_vc_attrs(device, attrs)
+            try:
+                device.validated_save()
+                if is_vc_master:
+                    vc = VirtualChassis.objects.get(name=attrs["virtual_chassis__name"])
+                    vc.master = device
+                    vc.validated_save()
+            except ValidationError as err:
+                adapter.job.logger.error(f"Failed to create or update Device: {ids['name']}, {err}")
+                raise ValidationError(err)
+        elif device and is_vc_member:
+            device = cls._update_device_with_vc_attrs(device, attrs)
+            device.secrets_group = None  # VC members should not have secrets group assigned
             try:
                 device.validated_save()
             except ValidationError as err:
-                adapter.job.logger.error(f"Failed to create or update Device: {ids['name']}, {err}")
+                adapter.job.logger.error(f"Failed to create or update Virtual Chassis Member: {ids['name']}, {err}")
                 raise ValidationError(err)
         else:
             adapter.job.logger.error(f"Failed create or update Device: {ids['name']}")
@@ -232,6 +274,8 @@ class SyncDevicesDevice(DiffSyncModel):
 
         if self.adapter.job.debug:
             self.adapter.job.logger.debug(f"Updating {device.name} with attrs: {attrs}")
+        if attrs.get("serial"):
+            device.serial = attrs["serial"]
 
         new_platform = Platform.objects.get(name=attrs["platform__name"]) if attrs.get("platform__name") else None
 
@@ -251,6 +295,13 @@ class SyncDevicesDevice(DiffSyncModel):
             device.tenant = Tenant.objects.get(name=attrs.get("tenant__name"))
         if attrs.get("secrets_group__name"):
             device.secrets_group = SecretsGroup.objects.get(name=attrs.get("secrets_group__name"))
+
+        if attrs.get("virtual_chassis__name"):
+            device.virtual_chassis = VirtualChassis.objects.get(name=attrs["virtual_chassis__name"])
+        if attrs.get("vc_position"):
+            device.vc_position = attrs["vc_position"]
+        if attrs.get("vc_priority"):
+            device.vc_priority = attrs["vc_priority"]
 
         if attrs.get("interfaces"):
             # Update both the interface and primary ip address
@@ -293,6 +344,8 @@ class SyncDevicesDevice(DiffSyncModel):
                 self._get_or_create_ip_address_to_interface(
                     adapter=self.adapter, ip_address=device.primary_ip4, interface=new_interface
                 )
+        elif self.virtual_chassis__name and self.name != self.virtual_chassis__name:
+            pass  # VC member — skip IP/interface updates
         else:
             # Update the primary ip address only
             # This edge case is unlikely to occur. A device with primary_ip that doesn't mach what was entered
@@ -323,6 +376,10 @@ class SyncDevicesDevice(DiffSyncModel):
                 device.primary_ip4 = new_ip_address
         try:
             device.validated_save()
+            if device.virtual_chassis and self.name == self.virtual_chassis__name:
+                vc = device.virtual_chassis
+                vc.master = device
+                vc.validated_save()
         except ValidationError as err:
             self.adapter.job.logger.error(f"Device {device.name} failed to update, {err}")
         return super().update(attrs)
@@ -364,3 +421,23 @@ class SyncDevicesPlatform(NautobotModel):
 
     network_driver: Optional[str] = None
     manufacturer__name: Optional[str] = None
+
+
+class SyncDevicesVirtualChassis(DiffSyncModel):
+    """Diffsync model for virtual chassis data."""
+
+    _modelname = "virtual_chassis"
+    _model = VirtualChassis
+    _identifiers = ("name",)
+    _attributes = ("master__name",)
+
+    name: str
+
+    master__name: Optional[str] = None
+
+    @classmethod
+    def create(cls, adapter, ids, attrs):
+        """Create a VirtualChassis without a master - master is set by device creation."""
+        VirtualChassis.objects.get_or_create(name=ids["name"])
+        # Master will be set by SyncDevicesDevice.create() when the master device is created
+        return super().create(adapter, ids, attrs)

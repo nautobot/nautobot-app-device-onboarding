@@ -1,0 +1,1 @@
+Changed the Sync Devices From Network job to apply serial number changes as attribute updates rather than treating the device as new. This is required for Virtual Chassis support, where the chassis-level serial reported for the master device changes when the master role moves between stack members.
