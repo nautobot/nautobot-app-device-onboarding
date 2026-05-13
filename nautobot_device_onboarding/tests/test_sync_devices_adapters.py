@@ -8,7 +8,8 @@ from nautobot.apps.choices import InterfaceTypeChoices
 from nautobot.apps.testing import TransactionTestCase
 from nautobot.dcim.models import Device, DeviceType, Interface, Manufacturer, Platform, VirtualChassis
 from nautobot.extras.models import JobResult
-from nautobot.ipam.models import IPAddress, IPAddressToInterface
+from nautobot.ipam.choices import PrefixTypeChoices
+from nautobot.ipam.models import IPAddress, IPAddressToInterface, Prefix
 
 from nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters import (
     SyncDevicesNautobotAdapter,
@@ -606,8 +607,6 @@ class SyncDevicesNautobotAdapterVirtualChassisTestCase(TransactionTestCase):
         )
 
         # Assign a primary IP to the master so it's picked up by load_devices
-        from nautobot.ipam.choices import PrefixTypeChoices
-        from nautobot.ipam.models import Prefix
 
         Prefix.objects.get_or_create(
             prefix="10.99.99.0/24",

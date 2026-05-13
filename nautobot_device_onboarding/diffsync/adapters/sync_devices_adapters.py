@@ -356,7 +356,7 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                 fields_missing_data.append(field)
         return fields_missing_data
 
-    def load_devices(self):
+    def load_devices(self):  # pylint: disable=too-many-nested-blocks
         """Load devices into the DiffSync store."""
         for ip_address in self.device_data:
             if self.job.debug:
