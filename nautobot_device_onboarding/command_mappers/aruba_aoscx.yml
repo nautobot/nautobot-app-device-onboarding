@@ -49,8 +49,8 @@ sync_devices:
     commands:
       - command: "show module"
         parser: "textfsm"
-        jpath: "[?module_type=='Management'].{model: model, description: description, serial: serial_number}"
-        post_processor: '{% set result=[] %}{% for item in obj %}{{ result.append({"model": (item.model ~ " " ~ item.description), "serial": item.serial}) or "" }}{% endfor %}{{ result | tojson }}'
+        jpath: "[?module_type=='Management'].{model: model, cardtype: cardtype, serial: serial}"
+        post_processor: '{% set result=[] %}{% for item in obj %}{{ result.append({"model": (item.model ~ " " ~ item.cardtype), "serial": item.serial}) or "" }}{% endfor %}{{ result | tojson }}'
 sync_network_data:
   pre_processor:
     vlan_map:
