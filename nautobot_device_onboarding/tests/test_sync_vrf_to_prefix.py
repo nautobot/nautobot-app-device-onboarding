@@ -2,7 +2,8 @@
 
 from unittest import mock
 
-from diffsync import Adapter
+from diffsync import Adapter, DiffSyncModelFlags
+from diffsync.exceptions import ObjectNotCreated
 from nautobot.apps.testing import TransactionTestCase
 from nautobot.dcim.models import Interface
 from nautobot.extras.models import JobResult
@@ -73,6 +74,13 @@ class PrefixToVrfModelCreateTestCase(TransactionTestCase):
         self.assertTrue(self.prefix.vrfs.filter(pk=self.other_vrf.pk).exists())
         self.assertTrue(self.prefix.vrfs.filter(pk=self.vrf.pk).exists())
 
+    def test_create_raises_object_not_created_when_vrf_missing(self):
+        initial_count = self.prefix.vrfs.count()
+        with self.assertRaises(ObjectNotCreated):
+            SyncNetworkDataPrefixToVrf.create(self.adapter, self._ids(vrf_name="does-not-exist"), {})
+        self.prefix.refresh_from_db()
+        self.assertEqual(self.prefix.vrfs.count(), initial_count)
+
 
 class PrefixToVrfNetworkAdapterTestCase(TransactionTestCase):
     """Verify the network adapter loads (prefix, vrf) records from CommandGetter results."""
@@ -121,6 +129,43 @@ class PrefixToVrfNetworkAdapterTestCase(TransactionTestCase):
         # Only GigabitEthernet1 has a VRF; GigabitEthernet2's vrf is empty.
         self.assertEqual(len(records), 1)
 
+    def test_load_skips_interfaces_with_vrf_but_no_ips(self):
+        # D1 — interface with a VRF but an empty ip_addresses list emits nothing.
+        self.job.command_getter_result["demo-cisco-2"]["interfaces"]["GigabitEthernet3"] = {
+            "vrf": {"name": "mgmt"},
+            "ip_addresses": [],
+        }
+        self.adapter.load_prefix_to_vrf()
+        records = list(self.adapter.get_all(SyncNetworkDataPrefixToVrf))
+        # Only GigabitEthernet1 (VRF + IP) emits a record; GE2 (no VRF) and GE3 (no IPs) skip.
+        self.assertEqual(len(records), 1)
+
+    def test_load_skips_ip_entries_missing_host_or_prefix_length(self):
+        # D3 — IP entries missing host or prefix_length are silently skipped.
+        self.job.command_getter_result["demo-cisco-2"]["interfaces"]["GigabitEthernet3"] = {
+            "vrf": {"name": "mgmt"},
+            "ip_addresses": [
+                {"ip_address": "10.1.1.13"},  # missing prefix_length
+                {"prefix_length": 24},  # missing ip_address
+            ],
+        }
+        self.adapter.load_prefix_to_vrf()
+        records = list(self.adapter.get_all(SyncNetworkDataPrefixToVrf))
+        # Only the original GE1 record is emitted.
+        self.assertEqual(len(records), 1)
+
+    def test_load_skips_when_arithmetic_fallback_fails(self):
+        # D4 — for an IP not in Nautobot, arithmetic fallback fires; malformed prefix_length raises
+        # ValueError, which the loader catches and skips.
+        self.job.command_getter_result["demo-cisco-2"]["interfaces"]["GigabitEthernet3"] = {
+            "vrf": {"name": "mgmt"},
+            "ip_addresses": [{"ip_address": "172.16.99.99", "prefix_length": "abc"}],
+        }
+        self.adapter.load_prefix_to_vrf()
+        records = list(self.adapter.get_all(SyncNetworkDataPrefixToVrf))
+        # Only GE1's valid entry produces a record.
+        self.assertEqual(len(records), 1)
+
 
 class PrefixToVrfNautobotAdapterTestCase(TransactionTestCase):
     """Verify the Nautobot adapter loads existing (prefix, vrf) associations in scope."""
@@ -160,3 +205,18 @@ class PrefixToVrfNautobotAdapterTestCase(TransactionTestCase):
         # No prefix.vrfs.add() done — destination should be empty so source-side creates re-establish.
         self.adapter.load_prefix_to_vrf()
         self.assertEqual(list(self.adapter.get_all(SyncNetworkDataPrefixToVrf)), [])
+
+    def test_load_marks_records_skip_unmatched_dst_for_each_association(self):
+        # L2 — additive-only enforcement: destination loads every existing (prefix, vrf) association
+        # in scope and marks each with SKIP_UNMATCHED_DST so diffsync preserves them across syncs.
+        # This is the mechanism that keeps a stale (P, V1) link alive after the interface moves to V2.
+        other_vrf = VRF.objects.get(name="vrf2", namespace=self.namespace)
+        self.prefix.vrfs.add(self.vrf)
+        self.prefix.vrfs.add(other_vrf)
+
+        self.adapter.load_prefix_to_vrf()
+
+        records = list(self.adapter.get_all(SyncNetworkDataPrefixToVrf))
+        self.assertEqual(len(records), 2)
+        for record in records:
+            self.assertEqual(record.model_flags, DiffSyncModelFlags.SKIP_UNMATCHED_DST)
