@@ -630,6 +630,13 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
     )
     sync_vlans = BooleanVar(default=False, description="Sync VLANs and interface VLAN assignments.")
     sync_vrfs = BooleanVar(default=False, description="Sync VRFs and interface VRF assignments.")
+    sync_vrf_to_prefix = BooleanVar(
+        default=False,
+        description=(
+            "Associate each interface's VRF with the parent prefix of the interface's IP addresses. "
+            "Requires 'Sync VRFs'. Associations are add-only; stale prefix/VRF links are not removed."
+        ),
+    )
     sync_cables = BooleanVar(default=False, description="Sync cables between interfaces via a LLDP or CDP.")
     sync_software_version = BooleanVar(default=False, description="Sync software version from device.")
     namespace = ObjectVar(
@@ -705,6 +712,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         connectivity_test,
         sync_vlans,
         sync_vrfs,
+        sync_vrf_to_prefix,
         sync_cables,
         sync_software_version,
         namespace,
@@ -725,6 +733,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         self.connectivity_test = connectivity_test
         self.sync_vlans = sync_vlans
         self.sync_vrfs = sync_vrfs
+        self.sync_vrf_to_prefix = sync_vrf_to_prefix
         self.sync_cables = sync_cables
         self.sync_software_version = sync_software_version
         self.namespace = namespace
