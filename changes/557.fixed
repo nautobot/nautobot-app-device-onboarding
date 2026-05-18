@@ -1,0 +1,1 @@
+Fixed `get_vlan_data` Jinja filter raising an error when trunking VLANs were reported as `NONE` by the device, so trunk interfaces with no tagged VLANs are now handled correctly.
