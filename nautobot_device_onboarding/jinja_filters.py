@@ -167,7 +167,7 @@ def get_vlan_data(item, vlan_mapping, tag_type):  # pylint: disable=too-many-ret
                 trunk_vlans = [current_item["trunking_vlans"]]
             else:
                 trunk_vlans = current_item["trunking_vlans"]
-            if "none" in trunk_vlans:
+            if any(isinstance(v, str) and v.lower() == "none" for v in trunk_vlans):
                 return []
             return [
                 {"id": str(vid), "name": vlan_mapping.get(str(vid), f"VLAN{str(vid).zfill(4)}")}
