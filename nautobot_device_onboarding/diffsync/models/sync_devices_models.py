@@ -361,7 +361,10 @@ class SyncDevicesDevice(DiffSyncModel):
                 device.primary_ip4 = new_ip_address
         try:
             device.validated_save()
-            if device.virtual_chassis and self.name == self.virtual_chassis__name:
+            # Use device.virtual_chassis.name (post-save) rather than self.virtual_chassis__name,
+            # which still reflects the pre-update Nautobot state — None when a standalone device
+            # is becoming a VC master through this update path.
+            if device.virtual_chassis and self.name == device.virtual_chassis.name:
                 vc = device.virtual_chassis
                 vc.master = device
                 vc.validated_save()
