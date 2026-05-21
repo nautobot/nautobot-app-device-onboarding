@@ -470,3 +470,233 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
 
         # All 3 should be in the VC
         self.assertEqual(3, vc.members.count())
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
+    def test_device_update__standalone_becomes_vc_master__success(self, device_data):
+        """A device first onboarded as standalone, then re-onboarded as the master of a stack.
+
+        Proves the change in PR #567: with `serial` as an attribute ( not an identifier ), the
+        next sync matches on ( location, name ) and updates the existing Device row — even when
+        the network adapter reports a different serial for the same chassis on the second sync
+        ( e.g. modules[0].serial vs the chassis-level serial, which the parser pulls from
+        different fields and can differ ).
+
+        Under the previous design ( serial in `_identifiers` ), the second sync would have seen
+        a new device and called create() — ending up with a duplicate, with the VC-attachment
+        logic in update() never reached.
+        """
+        # First sync: device appears as a single-module ( standalone ) device.
+        initial_data = {
+            "10.1.1.50": {
+                "hostname": "transition-switch",
+                "serial": "CHASSIS-SERIAL-A",
+                "device_type": "C9300-48P",
+                "mgmt_interface": "Vlan1",
+                "manufacturer": "Cisco",
+                "platform": "cisco_xe",
+                "network_driver": "cisco_xe",
+                "mask_length": 24,
+                "virtual_chassis": [
+                    {"switch": "1", "priority": "15"},
+                ],
+                "modules": [
+                    {"model": "C9300-48P", "serial": "CHASSIS-SERIAL-A"},
+                ],
+            },
+        }
+        device_data.return_value = initial_data
+
+        job_form_inputs = {
+            "debug": True,
+            "connectivity_test": False,
+            "dryrun": False,
+            "csv_file": None,
+            "location": self.testing_objects["location"].pk,
+            "namespace": self.testing_objects["namespace"].pk,
+            "ip_addresses": "10.1.1.50",
+            "port": 22,
+            "timeout": 30,
+            "set_mgmt_only": True,
+            "update_devices_without_primary_ip": False,
+            "device_role": self.testing_objects["device_role"].pk,
+            "device_status": self.testing_objects["status"].pk,
+            "interface_status": self.testing_objects["status"].pk,
+            "ip_address_status": self.testing_objects["status"].pk,
+            "secrets_group": self.testing_objects["secrets_group"].pk,
+            "platform": None,
+            "memory_profiling": False,
+        }
+        job_result = create_job_result_and_run_job(
+            module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
+        )
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
+
+        # Capture the pk of the standalone device. This is the row that must persist across the
+        # transition — if diffsync calls create() instead of update() on the second sync, the
+        # refresh_from_db() below will raise DoesNotExist.
+        standalone_device = Device.objects.get(name="transition-switch")
+        original_pk = standalone_device.pk
+        self.assertIsNone(standalone_device.virtual_chassis)
+        self.assertEqual("CHASSIS-SERIAL-A", standalone_device.serial)
+        self.assertEqual(1, Device.objects.filter(name="transition-switch").count())
+
+        # Second sync: same IP, same hostname — but now reports as a 3-member stack, and
+        # modules[0].serial differs from the chassis-level serial on the first run. This is the
+        # parser-field-divergence scenario that motivated moving serial out of the identifiers.
+        stack_data = {
+            "10.1.1.50": {
+                "hostname": "transition-switch",
+                "serial": "MODULE-SERIAL-B",
+                "device_type": "C9300-48P",
+                "mgmt_interface": "Vlan1",
+                "manufacturer": "Cisco",
+                "platform": "cisco_xe",
+                "network_driver": "cisco_xe",
+                "mask_length": 24,
+                "virtual_chassis": [
+                    {"switch": "1", "priority": "15"},
+                    {"switch": "2", "priority": "14"},
+                    {"switch": "3", "priority": "1"},
+                ],
+                "modules": [
+                    {"model": "C9300-48P", "serial": "MODULE-SERIAL-B"},
+                    {"model": "C9300-24P", "serial": "MODULE-SERIAL-C"},
+                    {"model": "C9300-48P", "serial": "MODULE-SERIAL-D"},
+                ],
+            },
+        }
+        device_data.return_value = stack_data
+
+        job_result = create_job_result_and_run_job(
+            module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
+        )
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
+
+        # Master Device row from the first sync must still exist with the same pk — proving
+        # diffsync called update() ( not delete+create ).
+        standalone_device.refresh_from_db()
+        self.assertEqual(original_pk, standalone_device.pk)
+
+        # The same row is now the master of a 3-member VirtualChassis.
+        vc = VirtualChassis.objects.get(name="transition-switch")
+        self.assertEqual(standalone_device, vc.master)
+        self.assertEqual(vc, standalone_device.virtual_chassis)
+        self.assertEqual(1, standalone_device.vc_position)
+
+        # No duplicate of the original device — only 1 device with the master's name, and
+        # 3 devices total in the stack.
+        self.assertEqual(1, Device.objects.filter(name="transition-switch").count())
+        self.assertEqual(3, Device.objects.filter(virtual_chassis=vc).count())
+
+        # The master Device's serial attribute was updated to reflect modules[0].serial from
+        # the second sync.
+        self.assertEqual("MODULE-SERIAL-B", standalone_device.serial)
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
+    def test_device_update__serial_changes_on_same_name_location__success(self, device_data):
+        """Re-onboarding the same ( location, name ) with a different serial updates the row.
+
+        Covers the device-refresh / RMA scenario: a standalone chassis is swapped out for a
+        replacement unit. The new unit reports a different serial but is brought up under the
+        same hostname and management IP. With `serial` as an attribute, the second sync matches
+        the existing Device row on ( location, name ) and updates the serial — no duplicate,
+        no delete+create.
+        """
+        # First sync: standalone device with original serial.
+        initial_data = {
+            "10.1.1.60": {
+                "hostname": "rma-switch",
+                "serial": "OLD-SERIAL-001",
+                "device_type": "C9300-48P",
+                "mgmt_interface": "Vlan1",
+                "manufacturer": "Cisco",
+                "platform": "cisco_xe",
+                "network_driver": "cisco_xe",
+                "mask_length": 24,
+                "virtual_chassis": [
+                    {"switch": "1", "priority": "15"},
+                ],
+                "modules": [
+                    {"model": "C9300-48P", "serial": "OLD-SERIAL-001"},
+                ],
+            },
+        }
+        device_data.return_value = initial_data
+
+        job_form_inputs = {
+            "debug": True,
+            "connectivity_test": False,
+            "dryrun": False,
+            "csv_file": None,
+            "location": self.testing_objects["location"].pk,
+            "namespace": self.testing_objects["namespace"].pk,
+            "ip_addresses": "10.1.1.60",
+            "port": 22,
+            "timeout": 30,
+            "set_mgmt_only": True,
+            "update_devices_without_primary_ip": False,
+            "device_role": self.testing_objects["device_role"].pk,
+            "device_status": self.testing_objects["status"].pk,
+            "interface_status": self.testing_objects["status"].pk,
+            "ip_address_status": self.testing_objects["status"].pk,
+            "secrets_group": self.testing_objects["secrets_group"].pk,
+            "platform": None,
+            "memory_profiling": False,
+        }
+        job_result = create_job_result_and_run_job(
+            module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
+        )
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
+
+        device = Device.objects.get(name="rma-switch")
+        original_pk = device.pk
+        self.assertEqual("OLD-SERIAL-001", device.serial)
+        self.assertEqual(1, Device.objects.filter(name="rma-switch").count())
+
+        # Second sync: same IP, same hostname — replacement unit reports a different serial.
+        replaced_data = {
+            "10.1.1.60": {
+                "hostname": "rma-switch",
+                "serial": "NEW-SERIAL-999",
+                "device_type": "C9300-48P",
+                "mgmt_interface": "Vlan1",
+                "manufacturer": "Cisco",
+                "platform": "cisco_xe",
+                "network_driver": "cisco_xe",
+                "mask_length": 24,
+                "virtual_chassis": [
+                    {"switch": "1", "priority": "15"},
+                ],
+                "modules": [
+                    {"model": "C9300-48P", "serial": "NEW-SERIAL-999"},
+                ],
+            },
+        }
+        device_data.return_value = replaced_data
+
+        job_result = create_job_result_and_run_job(
+            module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
+        )
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
+
+        # Same row persists across the swap — pk unchanged, only the serial attribute updated.
+        device.refresh_from_db()
+        self.assertEqual(original_pk, device.pk)
+        self.assertEqual("NEW-SERIAL-999", device.serial)
+        self.assertEqual(1, Device.objects.filter(name="rma-switch").count())
