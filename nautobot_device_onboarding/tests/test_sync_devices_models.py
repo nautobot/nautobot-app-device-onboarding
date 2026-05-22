@@ -5,6 +5,7 @@ from unittest.mock import patch
 from nautobot.apps.testing import TransactionTestCase, create_job_result_and_run_job
 from nautobot.dcim.models import Device, Interface, VirtualChassis
 from nautobot.extras.choices import JobResultStatusChoices
+from nautobot.tenancy.models import Tenant
 
 from nautobot_device_onboarding.tests import utils
 from nautobot_device_onboarding.tests.fixtures import sync_devices_fixture
@@ -700,3 +701,103 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
         self.assertEqual(original_pk, device.pk)
         self.assertEqual("NEW-SERIAL-999", device.serial)
         self.assertEqual(1, Device.objects.filter(name="rma-switch").count())
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
+    def test_device_update__multi_tenant_same_name_location__job_fails_loudly(self, device_data):
+        """Documents the failure mode when two Devices share (name, location) under different tenants.
+
+        Surfaced by David Cates on Slack 2026-05-21. Nautobot's `Device` model only enforces
+        uniqueness on `(rack, position, face)` and `(virtual_chassis, vc_position)` —
+        `(name, location)` and `(name, location, tenant)` are NOT unique constraints. A
+        service-provider scenario where two customers share a physical site can legitimately
+        have e.g. Device(name="border-1", location="DC-East", tenant="Customer-A") AND
+        Device(name="border-1", location="DC-East", tenant="Customer-B") both exist.
+
+        `SyncDevicesDevice._get_or_create_device()` and `update()` both call
+        `Device.objects.get(name=..., location=...)` without a tenant filter, so when a sync
+        re-discovers either of these devices the ORM lookup raises MultipleObjectsReturned.
+        `update()` wraps the error with a clear "Multiple devices found with name X and
+        location Y" message and the job aborts loudly — no silent data corruption, but no
+        sync either.
+
+        This is a pre-existing limitation of the app, not a regression of PR #567: the ORM
+        lookup ignored tenant under the old serial-as-identifier scheme as well. Pinned
+        here so the failure mode is visible in the test suite.
+        """
+        # device_1 (from the test helper) is "test device 1" at "Site A" with primary_ip4=192.1.1.10.
+        # Tag it with tenant_1 to make the multi-tenant scenario concrete.
+        self.testing_objects["device_1"].tenant = self.testing_objects["device_tenant_1"]
+        self.testing_objects["device_1"].validated_save()
+
+        # Create a second tenant and a colliding Device sharing (name, location) but under it.
+        second_tenant = Tenant.objects.create(name="Device Tenant 2")
+        Device.objects.create(
+            name=self.testing_objects["device_1"].name,
+            location=self.testing_objects["device_1"].location,
+            tenant=second_tenant,
+            device_type=self.testing_objects["device_1"].device_type,
+            role=self.testing_objects["device_1"].role,
+            status=self.testing_objects["status"],
+            serial="COLLISION-SERIAL",
+        )
+
+        # Sanity check: two devices now share (name, location).
+        self.assertEqual(
+            2,
+            Device.objects.filter(
+                name="test device 1",
+                location=self.testing_objects["location"],
+            ).count(),
+        )
+
+        # Run the sync against the IP that matches device_1. The Nautobot adapter loads
+        # device_1 into diffsync; the network-side record matches its (location, name)
+        # identifier, so diffsync calls update(); update()'s ORM lookup finds both rows
+        # and raises MultipleObjectsReturned.
+        device_data.return_value = sync_devices_fixture.sync_devices_mock_data_single_device_alternate_valid
+
+        job_form_inputs = {
+            "debug": True,
+            "connectivity_test": False,
+            "dryrun": False,
+            "csv_file": None,
+            "location": self.testing_objects["location"].pk,
+            "namespace": self.testing_objects["namespace"].pk,
+            "ip_addresses": "192.1.1.10",
+            "port": 22,
+            "timeout": 30,
+            "set_mgmt_only": True,
+            "update_devices_without_primary_ip": False,
+            "device_role": self.testing_objects["device_role"].pk,
+            "device_status": self.testing_objects["status"].pk,
+            "interface_status": self.testing_objects["status"].pk,
+            "ip_address_status": self.testing_objects["status"].pk,
+            "secrets_group": self.testing_objects["secrets_group"].pk,
+            "platform": None,
+            "memory_profiling": False,
+        }
+        job_result = create_job_result_and_run_job(
+            module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
+        )
+
+        # The job aborts.
+        self.assertEqual(job_result.status, JobResultStatusChoices.STATUS_FAILURE)
+
+        # The failure message identifies the multi-match condition.
+        log_messages = " ".join(job_result.job_log_entries.values_list("message", flat=True))
+        traceback = job_result.traceback or ""
+        self.assertTrue(
+            "Multiple devices" in log_messages
+            or "Multiple devices" in traceback
+            or "MultipleObjectsReturned" in traceback,
+            f"Expected a MultipleObjectsReturned-style failure; got log={log_messages!r} traceback={traceback!r}",
+        )
+
+        # No data was mutated — both rows still exist with their tenants intact.
+        self.assertEqual(
+            2,
+            Device.objects.filter(
+                name="test device 1",
+                location=self.testing_objects["location"],
+            ).count(),
+        )
