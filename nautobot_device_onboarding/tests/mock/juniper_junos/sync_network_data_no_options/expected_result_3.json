@@ -303,7 +303,7 @@
                             "ip_addresses": [{"ip_address": "123.65.226.112",
                                            "prefix_length": 32},
                                           {"ip_address": "fe80::5a00:bb0f:fc8c:11ff",
-                                              "prefix_length": 32}],
+                                              "prefix_length": 128}],
                             "lag": [],
                             "link_status": "True",
                             "mac_address": [],

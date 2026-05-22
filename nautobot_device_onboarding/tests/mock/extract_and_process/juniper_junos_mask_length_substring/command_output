@@ -1,0 +1,42 @@
+{
+    "configuration": {
+        "interfaces": {
+            "interface": [
+                {
+                    "name": "ge-1/0/0",
+                    "unit": [
+                        {
+                            "name": "0",
+                            "family": {
+                                "inet": {
+                                    "address": [
+                                        {
+                                            "name": "198.51.100.10/24"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "lo0",
+                    "unit": [
+                        {
+                            "name": "0",
+                            "family": {
+                                "inet": {
+                                    "address": [
+                                        {
+                                            "name": "198.51.100.1/32"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
