@@ -81,6 +81,67 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
             self.testing_objects["device_2"].name, list(self.job.devices_to_load.values_list("name", flat=True))
         )
 
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_network_data_adapters.sync_network_data_command_getter")
+    def test_master_role_flip_excludes_device_from_devices_to_load(self, command_getter_result):
+        """Documents the master-flip failure mode for stacked devices.
+
+        Surfaced by David Cates on Slack 2026-05-22. Sync Network Data builds its
+        `devices_to_load` queryset via `generate_device_queryset_from_command_getter_result`
+        in nautobot_device_onboarding/utils/diffsync_utils.py, which filters with
+        `Device.objects.filter(name__in=<hostnames>).filter(serial__in=<serials>)` —
+        the two `IN` clauses are joined by AND.
+
+        When a Cisco stack's master role moves between members, the chassis-level
+        serial reported by the device changes, but the Device row in Nautobot still
+        carries the old master's serial. The (name AND serial) filter rejects the
+        row, `devices_to_load` ends up empty, and the master's network data goes
+        through SyncNetworkDataDevice.create() which is a no-op (logs the
+        "not included in Nautobot devices selected for syncing" error). No data
+        corruption — the Device row is preserved — but the operator-visible result
+        is "enrichment silently didn't happen for this device."
+
+        Not a regression of PR #567. Neither `generate_device_queryset_from_command_getter_result`
+        nor `SyncNetworkDataDevice` was modified by that change; the same failure
+        path existed under the old serial-as-identifier scheme.
+
+        Operator recovery: run Sync Devices first to update the master's serial in
+        Nautobot ( PR #567 makes that path clean — see
+        `test_device_update__serial_changes_on_same_name_location__success` ), then
+        Sync Network Data picks it up on the next run.
+        """
+        # device_1 is set up by the test helper with name="demo-cisco-1" and
+        # serial="9ABUXU581111". Simulate the master-flip scenario: hostname stays the
+        # same ( Cisco StackWise keeps the stack hostname even when the master moves ),
+        # but the chassis-level serial reported by `show version` is now the new
+        # master's serial.
+        command_getter_result.return_value = {
+            "demo-cisco-1": {
+                "serial": "FLIPPED-MASTER-SERIAL",
+                "interfaces": {},
+            },
+        }
+
+        self.sync_network_data_adapter.execute_command_getter()
+
+        # The (name AND serial) filter excludes device_1 because its stored serial
+        # ( "9ABUXU581111" ) doesn't match the serial just reported by the device
+        # ( "FLIPPED-MASTER-SERIAL" ). devices_to_load is empty even though the
+        # device exists in Nautobot under its original hostname.
+        self.assertEqual(0, self.job.devices_to_load.count())
+
+        # The discovered hostname is still present in command_getter_result — so the
+        # network-side adapter would still produce a SyncNetworkDataDevice for it,
+        # but with no matching Nautobot-side record diffsync would land on
+        # SyncNetworkDataDevice.create() ( a no-op that logs the
+        # "not included in Nautobot devices selected for syncing" error ).
+        self.assertIn("demo-cisco-1", self.job.command_getter_result)
+        self.assertEqual("FLIPPED-MASTER-SERIAL", self.job.command_getter_result["demo-cisco-1"]["serial"])
+
+        # device_1 is not mutated by this failed sync attempt.
+        self.testing_objects["device_1"].refresh_from_db()
+        self.assertEqual("9ABUXU581111", self.testing_objects["device_1"].serial)
+        self.assertEqual("demo-cisco-1", self.testing_objects["device_1"].name)
+
     def test_load_devices(self):
         """Test loading device data returned from command getter into the diffsync store."""
         self.sync_network_data_adapter.load_devices()
