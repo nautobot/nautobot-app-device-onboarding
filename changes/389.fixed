@@ -1,0 +1,3 @@
+Add role to the IP-Address model.
+Added jinja filter to parse the output of 'show ip interface'.
+Add the ability to assign a secondary IP-address to an interface.
