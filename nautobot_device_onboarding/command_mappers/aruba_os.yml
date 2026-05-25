@@ -14,7 +14,7 @@ sync_devices:
     commands:
       - command: "show lldp info local-device"
         parser: "textfsm"
-        jpath: "[*].model"
+        jpath: "[*].pid"
   mgmt_interface:
     commands:
       - command: "show ip"
