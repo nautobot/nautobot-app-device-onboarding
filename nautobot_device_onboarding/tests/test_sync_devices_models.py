@@ -3,7 +3,7 @@
 from unittest.mock import patch
 
 from nautobot.apps.testing import TransactionTestCase, create_job_result_and_run_job
-from nautobot.dcim.models import Device, Interface
+from nautobot.dcim.models import Device, DeviceType, Interface, Manufacturer, Platform
 from nautobot.extras.choices import JobResultStatusChoices
 
 from nautobot_device_onboarding.tests import utils
@@ -166,3 +166,71 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
 
         old_mgmt_interface = Interface.objects.get(device=device, name="GigabitEthernet1")
         self.assertNotIn("192.1.1.10", list(old_mgmt_interface.ip_addresses.all().values_list("host", flat=True)))
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
+    def test_device_create__form_platform_scopes_device_type_lookup__success(self, device_data):
+        """During create, the DeviceType lookup is scoped to the form Platform's Manufacturer.
+
+        Two DeviceTypes share the same model name under different Manufacturers; the form
+        Platform's Manufacturer is what disambiguates which one the device gets.
+        Test data already creates CSR1000V17 so re-using that model rather than adding to the test data.
+        """
+        palo_mfr, _ = Manufacturer.objects.get_or_create(name="Palo Alto")
+        palo_platform, _ = Platform.objects.get_or_create(
+            name="Palo Alto PanOS",
+            defaults={"manufacturer": palo_mfr, "network_driver": "paloalto_panos"},
+        )
+        palo_devicetype, _ = DeviceType.objects.get_or_create(
+            model="CSR1000V17",
+            manufacturer=palo_mfr,
+            defaults={"part_number": "CSR1000V17"},
+        )
+        self.assertEqual(DeviceType.objects.filter(model="CSR1000V17").count(), 2)
+
+        device_data.return_value = {
+            "192.1.1.50": {
+                "hostname": "palo-fw-1",
+                "serial": "SN-PALO-001",
+                "device_type": "CSR1000V17",
+                "mgmt_interface": "management",
+                "manufacturer": "Palo Alto",
+                "platform": "paloalto_panos",
+                "network_driver": "paloalto_panos",
+                "mask_length": 24,
+            },
+        }
+
+        job_form_inputs = {
+            "debug": True,
+            "connectivity_test": False,
+            "dryrun": False,
+            "csv_file": None,
+            "location": self.testing_objects["location"].pk,
+            "namespace": self.testing_objects["namespace"].pk,
+            "ip_addresses": "192.1.1.50",
+            "port": 22,
+            "timeout": 30,
+            "set_mgmt_only": True,
+            "update_devices_without_primary_ip": True,
+            "device_role": self.testing_objects["device_role"].pk,
+            "device_status": self.testing_objects["status"].pk,
+            "device_tenant": self.testing_objects["device_tenant_1"].pk,
+            "interface_status": self.testing_objects["status"].pk,
+            "ip_address_status": self.testing_objects["status"].pk,
+            "secrets_group": self.testing_objects["secrets_group"].pk,
+            "platform": palo_platform.pk,
+            "memory_profiling": False,
+            "fail_job_on_task_failure": False,
+        }
+        job_result = create_job_result_and_run_job(
+            module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
+        )
+
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
+        device = Device.objects.get(serial="SN-PALO-001")
+        self.assertEqual(device.device_type.pk, palo_devicetype.pk)
+        self.assertEqual(device.device_type.manufacturer.name, "Palo Alto")

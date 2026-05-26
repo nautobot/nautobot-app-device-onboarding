@@ -119,6 +119,7 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
                 adapter=self,
                 pk=device.pk,
                 device_type__model=device.device_type.model,
+                device_type__manufacturer__name=device.device_type.manufacturer.name,
                 location__name=device.location.name,
                 name=device.name,
                 platform__name=device.platform.name if device.platform else "",
@@ -211,10 +212,13 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                 self.job.logger.debug(f"loading manufacturer data for {ip_address}")
             onboarding_manufacturer = None
             try:
-                onboarding_manufacturer = self.manufacturer(
-                    adapter=self,
-                    name=self.device_data[ip_address]["manufacturer"],
+                form_platform = self.job.ip_address_inventory[ip_address].get("platform")
+                manufacturer_name = (
+                    form_platform.manufacturer.name
+                    if form_platform and form_platform.manufacturer
+                    else self.device_data[ip_address]["manufacturer"]
                 )
+                onboarding_manufacturer = self.manufacturer(adapter=self, name=manufacturer_name)
             except KeyError as err:
                 self.job.logger.error(
                     f"{ip_address}: Unable to load Manufacturer due to a missing key in returned data, {err.args}"
@@ -232,11 +236,24 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                 self.job.logger.debug(f"loading platform data for {ip_address}")
             onboarding_platform = None
             try:
+                form_platform = self.job.ip_address_inventory[ip_address].get("platform")
+                if form_platform:
+                    name = form_platform.name
+                    manufacturer_name = (
+                        form_platform.manufacturer.name
+                        if form_platform.manufacturer
+                        else self.device_data[ip_address]["manufacturer"]
+                    )
+                    network_driver = form_platform.network_driver or self.device_data[ip_address]["network_driver"]
+                else:
+                    name = self.device_data[ip_address]["platform"]
+                    manufacturer_name = self.device_data[ip_address]["manufacturer"]
+                    network_driver = self.device_data[ip_address]["network_driver"]
                 onboarding_platform = self.platform(
                     adapter=self,
-                    name=self.device_data[ip_address]["platform"],
-                    manufacturer__name=self.device_data[ip_address]["manufacturer"],
-                    network_driver=self.device_data[ip_address]["network_driver"],
+                    name=name,
+                    manufacturer__name=manufacturer_name,
+                    network_driver=network_driver,
                 )
             except KeyError as err:
                 self.job.logger.error(
@@ -255,11 +272,17 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                 self.job.logger.debug(f"loading device_type data for {ip_address}")
             onboarding_device_type = None
             try:
+                form_platform = self.job.ip_address_inventory[ip_address].get("platform")
+                manufacturer_name = (
+                    form_platform.manufacturer.name
+                    if form_platform and form_platform.manufacturer
+                    else self.device_data[ip_address]["manufacturer"]
+                )
                 onboarding_device_type = self.device_type(
                     adapter=self,
                     model=self.device_data[ip_address]["device_type"],
                     part_number=self.device_data[ip_address]["device_type"],
-                    manufacturer__name=self.device_data[ip_address]["manufacturer"],
+                    manufacturer__name=manufacturer_name,
                 )
             except KeyError as err:
                 self.job.logger.error(
@@ -309,6 +332,11 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                 onboarding_device = self.device(
                     adapter=self,
                     device_type__model=self.device_data[ip_address]["device_type"],
+                    device_type__manufacturer__name=(
+                        platform.manufacturer.name
+                        if platform and platform.manufacturer
+                        else self.device_data[ip_address]["manufacturer"]
+                    ),
                     location__name=location.name,
                     name=self.device_data[ip_address]["hostname"],
                     platform__name=(platform.name if platform else self.device_data[ip_address]["platform"]),

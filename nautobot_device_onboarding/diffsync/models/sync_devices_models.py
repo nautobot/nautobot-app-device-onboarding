@@ -25,6 +25,7 @@ class SyncDevicesDevice(DiffSyncModel):
     )
     _attributes = (
         "device_type__model",
+        "device_type__manufacturer__name",
         "mask_length",
         "primary_ip4__host",
         "primary_ip4__status__name",
@@ -41,6 +42,7 @@ class SyncDevicesDevice(DiffSyncModel):
     serial: str
 
     device_type__model: Optional[str] = None
+    device_type__manufacturer__name: Optional[str] = None
     mask_length: Optional[int] = None
     primary_ip4__host: Optional[str] = None
     primary_ip4__status__name: Optional[str] = None
@@ -90,7 +92,10 @@ class SyncDevicesDevice(DiffSyncModel):
                 status=job_form_attrs["device_status"],
                 tenant=job_form_attrs["device_tenant"],
                 role=job_form_attrs["device_role"],
-                device_type=DeviceType.objects.get(model=attrs["device_type__model"]),
+                device_type=DeviceType.objects.get(
+                    model=attrs["device_type__model"],
+                    manufacturer=platform.manufacturer,
+                ),
                 name=ids["name"],
                 platform=platform,
                 secrets_group=job_form_attrs["secrets_group"],
@@ -147,7 +152,10 @@ class SyncDevicesDevice(DiffSyncModel):
         device.location = job_form_attrs["location"]
         device.status = job_form_attrs["device_status"]
         device.role = job_form_attrs["device_role"]
-        device.device_type = DeviceType.objects.get(model=attrs["device_type__model"])
+        device.device_type = DeviceType.objects.get(
+            model=attrs["device_type__model"],
+            manufacturer=platform.manufacturer,
+        )
         device.platform = platform
         device.secrets_group = job_form_attrs["secrets_group"]
         device.serial = ids["serial"]
@@ -224,10 +232,17 @@ class SyncDevicesDevice(DiffSyncModel):
 
         if self.adapter.job.debug:
             self.adapter.job.logger.debug(f"Updating {device.name} with attrs: {attrs}")
-        if attrs.get("device_type__model"):
-            device.device_type = DeviceType.objects.get(model=attrs.get("device_type__model"))
-        if attrs.get("platform__name"):
-            device.platform = Platform.objects.get(name=attrs.get("platform__name"))
+
+        new_platform = Platform.objects.get(name=attrs["platform__name"]) if attrs.get("platform__name") else None
+
+        if attrs.get("device_type__model") or attrs.get("device_type__manufacturer__name"):
+            target_platform = new_platform or device.platform
+            device.device_type = DeviceType.objects.get(
+                model=attrs.get("device_type__model") or device.device_type.model,
+                manufacturer=target_platform.manufacturer if target_platform else None,
+            )
+        if new_platform:
+            device.platform = new_platform
         if attrs.get("role__name"):
             device.role = Role.objects.get(name=attrs.get("role__name"))
         if attrs.get("status__name"):
