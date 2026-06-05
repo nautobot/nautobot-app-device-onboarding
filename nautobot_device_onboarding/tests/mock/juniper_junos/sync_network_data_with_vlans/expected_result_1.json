@@ -1435,7 +1435,7 @@
                 },
                 {
                     "ip_address": "fe80::6af3:8e0f:fc30:d2ae",
-                    "prefix_length": 32
+                    "prefix_length": 128
                 }
             ],
             "lag": [],
