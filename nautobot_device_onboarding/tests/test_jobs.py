@@ -273,6 +273,7 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
             "sync_vrf_to_prefix": False,
             "sync_cables": True,
             "sync_software_version": True,
+            "update_devices_with_changed_serial": False,
             "namespace": self.testing_objects["namespace"].pk,
             "interface_status": self.testing_objects["status"].pk,
             "ip_address_status": self.testing_objects["status"].pk,
@@ -321,6 +322,97 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
 
                 if interface_data["vrf"]:
                     self.assertEqual(interface.vrf.name, interface_data["vrf"]["name"])
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_network_data_adapters.sync_network_data_command_getter")
+    def test_update_devices_with_changed_serial_toggle__absorbs_serial_drift(self, device_data):
+        """With update_devices_with_changed_serial=True, a serial-drifted device's row gets
+        its serial updated and its interfaces enriched in a single SND run.
+
+        Counterpart to test_master_role_flip_excludes_device_from_devices_to_load in
+        test_sync_network_data_adapters.py (which pins the toggle=False failure mode at the
+        adapter level). This test pins the toggle=True success path end-to-end.
+
+        Mechanism (after the trial-branch Delta 2):
+          - utils/diffsync_utils.py loosens the queryset filter when the toggle is on, so
+            the serial-drifted device makes it into devices_to_load.
+          - SyncNetworkDataDevice identity is now (name,) only, so source (name, NEW_SERIAL)
+            and target (name, OLD_SERIAL) match on diffsync identity.
+          - Diffsync calls update() — `serial` is in _attributes, so the new serial is
+            written to the Device row. Interface children process normally.
+        """
+        drifted_data = {
+            "demo-cisco-1": {
+                "serial": "MASTER-FLIPPED-SERIAL",
+                "interfaces": {
+                    "GigabitEthernet99": {
+                        "type": "100base-tx",
+                        "ip_addresses": [],
+                        "mac_address": "aa:bb:cc:dd:ee:ff",
+                        "mtu": "1500",
+                        "description": "empirical-test-interface",
+                        "link_status": True,
+                        "802.1Q_mode": "access",
+                        "lag": "",
+                        "untagged_vlan": None,
+                        "tagged_vlans": [],
+                        "vrf": None,
+                    },
+                },
+            },
+        }
+        device_data.return_value = drifted_data
+
+        device_1 = self.testing_objects["device_1"]
+        self.assertEqual("9ABUXU581111", device_1.serial)
+
+        job_form_inputs = {
+            "debug": True,
+            "connectivity_test": False,
+            "dryrun": False,
+            "sync_vlans": False,
+            "sync_vrfs": False,
+            "sync_vrf_to_prefix": False,
+            "sync_cables": False,
+            "sync_software_version": False,
+            "update_devices_with_changed_serial": True,
+            "namespace": self.testing_objects["namespace"].pk,
+            "interface_status": self.testing_objects["status"].pk,
+            "ip_address_status": self.testing_objects["status"].pk,
+            "default_prefix_status": self.testing_objects["status"].pk,
+            "devices": [device_1.id],
+            "location": None,
+            "device_role": None,
+            "platform": None,
+            "memory_profiling": False,
+            "fail_job_on_task_failure": False,
+        }
+        job_result = create_job_result_and_run_job(
+            module="nautobot_device_onboarding.jobs", name="SSOTSyncNetworkData", **job_form_inputs
+        )
+
+        log_messages = list(job_result.job_log_entries.values_list("message", flat=True))
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, log_messages),
+        )
+
+        device_1.refresh_from_db()
+
+        # Serial was absorbed by the sync — the drifted value is now stored in Nautobot.
+        self.assertEqual("MASTER-FLIPPED-SERIAL", device_1.serial)
+
+        # Interface enrichment proceeded — the new interface was created on the existing row.
+        self.assertTrue(
+            device_1.interfaces.filter(name="GigabitEthernet99").exists(),
+            "GigabitEthernet99 should have been created on demo-cisco-1",
+        )
+
+        # No "not included in Nautobot devices selected for syncing" error — diffsync identity
+        # matched on hostname alone, so SyncNetworkDataDevice.create() (the no-op error path)
+        # was never reached.
+        not_included_logs = [m for m in log_messages if "not included" in m]
+        self.assertEqual(0, len(not_included_logs), not_included_logs)
 
     @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
     @patch.dict("os.environ", {"DEVICE_USER": "admin", "DEVICE_PASS": "admin"})
@@ -420,6 +512,7 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
             "sync_vrf_to_prefix": False,
             "sync_cables": True,
             "sync_software_version": True,
+            "update_devices_with_changed_serial": False,
             "namespace": self.testing_objects["namespace"].pk,
             "interface_status": self.testing_objects["status"].pk,
             "ip_address_status": self.testing_objects["status"].pk,
@@ -538,6 +631,7 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
             "sync_vrf_to_prefix": False,
             "sync_cables": False,
             "sync_software_version": True,
+            "update_devices_with_changed_serial": False,
             "namespace": self.testing_objects["namespace"].pk,
             "interface_status": self.testing_objects["status"].pk,
             "ip_address_status": self.testing_objects["status"].pk,

@@ -5,6 +5,7 @@ from unittest.mock import patch
 from nautobot.apps.testing import TransactionTestCase, create_job_result_and_run_job
 from nautobot.dcim.models import Device, DeviceType, Interface, Manufacturer, Platform, VirtualChassis
 from nautobot.extras.choices import JobResultStatusChoices
+from nautobot.tenancy.models import Tenant
 
 from nautobot_device_onboarding.tests import utils
 from nautobot_device_onboarding.tests.fixtures import sync_devices_fixture
@@ -538,3 +539,337 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
 
         # All 3 should be in the VC
         self.assertEqual(3, vc.members.count())
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
+    def test_device_update__standalone_becomes_vc_master__success(self, device_data):
+        """A device first onboarded as standalone, then re-onboarded as the master of a stack.
+
+        The network adapter reports a different serial for the same chassis on the second sync
+        ( e.g. modules[0].serial vs the chassis-level serial, which the parser pulls from
+        different fields and can differ ). Without operator opt-in the second sync would create
+        a duplicate Device row, leaving the existing standalone unchanged and the VC-attachment
+        logic in update() never reached.
+
+        Note: requires `update_devices_without_primary_ip=True` on the form. The flag's
+        `_get_or_create_device()` code path is serial-blind in its ORM lookup, so it covers
+        serial drift in addition to its original primary-IP-mismatch purpose. This is the
+        opt-in path the maintainer's plan relies on for the standalone->stack transition.
+        """
+        # First sync: device appears as a single-module ( standalone ) device.
+        initial_data = {
+            "10.1.1.50": {
+                "hostname": "transition-switch",
+                "serial": "CHASSIS-SERIAL-A",
+                "device_type": "C9300-48P",
+                "mgmt_interface": "Vlan1",
+                "manufacturer": "Cisco",
+                "platform": "cisco_xe",
+                "network_driver": "cisco_xe",
+                "mask_length": 24,
+                "virtual_chassis": [
+                    {"switch": "1", "priority": "15"},
+                ],
+                "modules": [
+                    {"model": "C9300-48P", "serial": "CHASSIS-SERIAL-A"},
+                ],
+            },
+        }
+        device_data.return_value = initial_data
+
+        job_form_inputs = {
+            "debug": True,
+            "connectivity_test": False,
+            "dryrun": False,
+            "csv_file": None,
+            "location": self.testing_objects["location"].pk,
+            "namespace": self.testing_objects["namespace"].pk,
+            "ip_addresses": "10.1.1.50",
+            "port": 22,
+            "timeout": 30,
+            "set_mgmt_only": True,
+            "update_devices_without_primary_ip": True,
+            "device_role": self.testing_objects["device_role"].pk,
+            "device_status": self.testing_objects["status"].pk,
+            "interface_status": self.testing_objects["status"].pk,
+            "ip_address_status": self.testing_objects["status"].pk,
+            "secrets_group": self.testing_objects["secrets_group"].pk,
+            "platform": None,
+            "memory_profiling": False,
+        }
+        job_result = create_job_result_and_run_job(
+            module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
+        )
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
+
+        # Capture the pk of the standalone device. This is the row that must persist across the
+        # transition — if diffsync calls create() instead of update() on the second sync, the
+        # refresh_from_db() below will raise DoesNotExist.
+        standalone_device = Device.objects.get(name="transition-switch")
+        original_pk = standalone_device.pk
+        self.assertIsNone(standalone_device.virtual_chassis)
+        self.assertEqual("CHASSIS-SERIAL-A", standalone_device.serial)
+        self.assertEqual(1, Device.objects.filter(name="transition-switch").count())
+
+        # Second sync: same IP, same hostname — but now reports as a 3-member stack, and
+        # modules[0].serial differs from the chassis-level serial on the first run. This is the
+        # parser-field-divergence scenario that motivated moving serial out of the identifiers.
+        stack_data = {
+            "10.1.1.50": {
+                "hostname": "transition-switch",
+                "serial": "MODULE-SERIAL-B",
+                "device_type": "C9300-48P",
+                "mgmt_interface": "Vlan1",
+                "manufacturer": "Cisco",
+                "platform": "cisco_xe",
+                "network_driver": "cisco_xe",
+                "mask_length": 24,
+                "virtual_chassis": [
+                    {"switch": "1", "priority": "15"},
+                    {"switch": "2", "priority": "14"},
+                    {"switch": "3", "priority": "1"},
+                ],
+                "modules": [
+                    {"model": "C9300-48P", "serial": "MODULE-SERIAL-B"},
+                    {"model": "C9300-24P", "serial": "MODULE-SERIAL-C"},
+                    {"model": "C9300-48P", "serial": "MODULE-SERIAL-D"},
+                ],
+            },
+        }
+        device_data.return_value = stack_data
+
+        job_result = create_job_result_and_run_job(
+            module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
+        )
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
+
+        # Master Device row from the first sync must still exist with the same pk — proving
+        # diffsync called update() ( not delete+create ).
+        standalone_device.refresh_from_db()
+        self.assertEqual(original_pk, standalone_device.pk)
+
+        # The same row is now the master of a 3-member VirtualChassis.
+        vc = VirtualChassis.objects.get(name="transition-switch")
+        self.assertEqual(standalone_device, vc.master)
+        self.assertEqual(vc, standalone_device.virtual_chassis)
+        self.assertEqual(1, standalone_device.vc_position)
+
+        # No duplicate of the original device — only 1 device with the master's name, and
+        # 3 devices total in the stack.
+        self.assertEqual(1, Device.objects.filter(name="transition-switch").count())
+        self.assertEqual(3, Device.objects.filter(virtual_chassis=vc).count())
+
+        # The master Device's serial attribute was updated to reflect modules[0].serial from
+        # the second sync.
+        self.assertEqual("MODULE-SERIAL-B", standalone_device.serial)
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
+    def test_device_update__serial_changes_on_same_name_location__success(self, device_data):
+        """Re-onboarding the same ( location, name ) with a different serial updates the row.
+
+        Covers the device-refresh / RMA scenario: a standalone chassis is swapped out for a
+        replacement unit. The new unit reports a different serial but is brought up under the
+        same hostname and management IP. Without operator opt-in the second sync would create
+        a duplicate Device row instead of updating the existing one.
+
+        Note: requires `update_devices_without_primary_ip=True` on the form. See the note in
+        test_device_update__standalone_becomes_vc_master__success for context on why the flag
+        covers serial drift.
+        """
+        # First sync: standalone device with original serial.
+        initial_data = {
+            "10.1.1.60": {
+                "hostname": "rma-switch",
+                "serial": "OLD-SERIAL-001",
+                "device_type": "C9300-48P",
+                "mgmt_interface": "Vlan1",
+                "manufacturer": "Cisco",
+                "platform": "cisco_xe",
+                "network_driver": "cisco_xe",
+                "mask_length": 24,
+                "virtual_chassis": [
+                    {"switch": "1", "priority": "15"},
+                ],
+                "modules": [
+                    {"model": "C9300-48P", "serial": "OLD-SERIAL-001"},
+                ],
+            },
+        }
+        device_data.return_value = initial_data
+
+        job_form_inputs = {
+            "debug": True,
+            "connectivity_test": False,
+            "dryrun": False,
+            "csv_file": None,
+            "location": self.testing_objects["location"].pk,
+            "namespace": self.testing_objects["namespace"].pk,
+            "ip_addresses": "10.1.1.60",
+            "port": 22,
+            "timeout": 30,
+            "set_mgmt_only": True,
+            "update_devices_without_primary_ip": True,
+            "device_role": self.testing_objects["device_role"].pk,
+            "device_status": self.testing_objects["status"].pk,
+            "interface_status": self.testing_objects["status"].pk,
+            "ip_address_status": self.testing_objects["status"].pk,
+            "secrets_group": self.testing_objects["secrets_group"].pk,
+            "platform": None,
+            "memory_profiling": False,
+        }
+        job_result = create_job_result_and_run_job(
+            module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
+        )
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
+
+        device = Device.objects.get(name="rma-switch")
+        original_pk = device.pk
+        self.assertEqual("OLD-SERIAL-001", device.serial)
+        self.assertEqual(1, Device.objects.filter(name="rma-switch").count())
+
+        # Second sync: same IP, same hostname — replacement unit reports a different serial.
+        replaced_data = {
+            "10.1.1.60": {
+                "hostname": "rma-switch",
+                "serial": "NEW-SERIAL-999",
+                "device_type": "C9300-48P",
+                "mgmt_interface": "Vlan1",
+                "manufacturer": "Cisco",
+                "platform": "cisco_xe",
+                "network_driver": "cisco_xe",
+                "mask_length": 24,
+                "virtual_chassis": [
+                    {"switch": "1", "priority": "15"},
+                ],
+                "modules": [
+                    {"model": "C9300-48P", "serial": "NEW-SERIAL-999"},
+                ],
+            },
+        }
+        device_data.return_value = replaced_data
+
+        job_result = create_job_result_and_run_job(
+            module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
+        )
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
+
+        # Same row persists across the swap — pk unchanged, only the serial attribute updated.
+        device.refresh_from_db()
+        self.assertEqual(original_pk, device.pk)
+        self.assertEqual("NEW-SERIAL-999", device.serial)
+        self.assertEqual(1, Device.objects.filter(name="rma-switch").count())
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
+    def test_device_update__multi_tenant_same_name_location__job_fails_loudly(self, device_data):
+        """Documents the failure mode when two Devices share (name, location) under different tenants.
+
+        Surfaced by David Cates on Slack 2026-05-21. Nautobot's `Device` model only enforces
+        uniqueness on `(rack, position, face)` and `(virtual_chassis, vc_position)` —
+        `(name, location)` and `(name, location, tenant)` are NOT unique constraints. A
+        service-provider scenario where two customers share a physical site can legitimately
+        have e.g. Device(name="border-1", location="DC-East", tenant="Customer-A") AND
+        Device(name="border-1", location="DC-East", tenant="Customer-B") both exist.
+
+        `SyncDevicesDevice._get_or_create_device()` and `update()` both call
+        `Device.objects.get(name=..., location=...)` without a tenant filter, so when a sync
+        re-discovers either of these devices the ORM lookup raises MultipleObjectsReturned.
+        `update()` wraps the error with a clear "Multiple devices found with name X and
+        location Y" message and the job aborts loudly — no silent data corruption, but no
+        sync either.
+
+        This is a pre-existing limitation of the app, not a regression of PR #567: the ORM
+        lookup ignored tenant under the old serial-as-identifier scheme as well. Pinned
+        here so the failure mode is visible in the test suite.
+        """
+        # device_1 (from the test helper) is "test device 1" at "Site A" with primary_ip4=192.1.1.10.
+        # Tag it with tenant_1 to make the multi-tenant scenario concrete.
+        self.testing_objects["device_1"].tenant = self.testing_objects["device_tenant_1"]
+        self.testing_objects["device_1"].validated_save()
+
+        # Create a second tenant and a colliding Device sharing (name, location) but under it.
+        second_tenant = Tenant.objects.create(name="Device Tenant 2")
+        Device.objects.create(
+            name=self.testing_objects["device_1"].name,
+            location=self.testing_objects["device_1"].location,
+            tenant=second_tenant,
+            device_type=self.testing_objects["device_1"].device_type,
+            role=self.testing_objects["device_1"].role,
+            status=self.testing_objects["status"],
+            serial="COLLISION-SERIAL",
+        )
+
+        # Sanity check: two devices now share (name, location).
+        self.assertEqual(
+            2,
+            Device.objects.filter(
+                name="test device 1",
+                location=self.testing_objects["location"],
+            ).count(),
+        )
+
+        # Run the sync against the IP that matches device_1. The Nautobot adapter loads
+        # device_1 into diffsync; the network-side record matches its (location, name)
+        # identifier, so diffsync calls update(); update()'s ORM lookup finds both rows
+        # and raises MultipleObjectsReturned.
+        device_data.return_value = sync_devices_fixture.sync_devices_mock_data_single_device_alternate_valid
+
+        job_form_inputs = {
+            "debug": True,
+            "connectivity_test": False,
+            "dryrun": False,
+            "csv_file": None,
+            "location": self.testing_objects["location"].pk,
+            "namespace": self.testing_objects["namespace"].pk,
+            "ip_addresses": "192.1.1.10",
+            "port": 22,
+            "timeout": 30,
+            "set_mgmt_only": True,
+            "update_devices_without_primary_ip": False,
+            "device_role": self.testing_objects["device_role"].pk,
+            "device_status": self.testing_objects["status"].pk,
+            "interface_status": self.testing_objects["status"].pk,
+            "ip_address_status": self.testing_objects["status"].pk,
+            "secrets_group": self.testing_objects["secrets_group"].pk,
+            "platform": None,
+            "memory_profiling": False,
+        }
+        job_result = create_job_result_and_run_job(
+            module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
+        )
+
+        # The job aborts.
+        self.assertEqual(job_result.status, JobResultStatusChoices.STATUS_FAILURE)
+
+        # The failure message identifies the multi-match condition.
+        log_messages = " ".join(job_result.job_log_entries.values_list("message", flat=True))
+        traceback = job_result.traceback or ""
+        self.assertTrue(
+            "Multiple devices" in log_messages
+            or "Multiple devices" in traceback
+            or "MultipleObjectsReturned" in traceback,
+            f"Expected a MultipleObjectsReturned-style failure; got log={log_messages!r} traceback={traceback!r}",
+        )
+
+        # No data was mutated — both rows still exist with their tenants intact.
+        self.assertEqual(
+            2,
+            Device.objects.filter(
+                name="test device 1",
+                location=self.testing_objects["location"],
+            ).count(),
+        )

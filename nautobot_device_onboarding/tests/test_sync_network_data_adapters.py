@@ -85,10 +85,10 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
         """Test loading device data returned from command getter into the diffsync store."""
         self.sync_network_data_adapter.load_devices()
 
-        # test loaded devices
+        # test loaded devices — diffsync identity for SyncNetworkDataDevice is (name,) only;
+        # serial is an attribute since the trial branch's Delta 2 move.
         for hostname, device_data in self.job.command_getter_result.items():
-            unique_id = f"{hostname}__{device_data['serial']}"
-            diffsync_obj = self.sync_network_data_adapter.get("device", unique_id)
+            diffsync_obj = self.sync_network_data_adapter.get("device", hostname)
             self.assertEqual(hostname, diffsync_obj.name)
             self.assertEqual(device_data["serial"], diffsync_obj.serial)
 

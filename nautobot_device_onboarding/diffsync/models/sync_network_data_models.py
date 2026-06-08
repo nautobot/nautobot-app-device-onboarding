@@ -52,11 +52,11 @@ class SyncNetworkDataDevice(FilteredNautobotModel):
 
     _modelname = "device"
     _model = Device
-    _identifiers = (
-        "name",
+    _identifiers = ("name",)
+    _attributes = (
         "serial",
+        "last_network_data_sync",
     )
-    _attributes = ("last_network_data_sync",)
     _children = {"interface": "all_interfaces"}
 
     name: str

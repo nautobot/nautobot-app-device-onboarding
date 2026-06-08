@@ -300,8 +300,9 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
     )
     update_devices_without_primary_ip = BooleanVar(
         default=False,
-        description="If a device at the specified location already exists in Nautobot but the primary ip address "
-        "does not match an ip address entered, update this device with the sync.",
+        description="If a device at the specified location already exists in Nautobot, update it with the sync "
+        "when its primary IP address or its stored serial number does not match what the device reports "
+        "(e.g. after a stack master role flip, hardware swap, or a previously-standalone device joining a stack).",
     )
     device_role = ObjectVar(
         model=Role,
@@ -639,6 +640,13 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
     )
     sync_cables = BooleanVar(default=False, description="Sync cables between interfaces via a LLDP or CDP.")
     sync_software_version = BooleanVar(default=False, description="Sync software version from device.")
+    update_devices_with_changed_serial = BooleanVar(
+        default=False,
+        description="If a device at the specified location already exists in Nautobot but the serial number "
+        "reported by the device differs from the stored serial (e.g. after a stack master role flip or "
+        "hardware swap), include this device in the sync anyway. Without this flag the device is excluded "
+        "from `devices_to_load` because the queryset filter requires both name and serial to match.",
+    )
     namespace = ObjectVar(
         model=Namespace,
         required=True,
@@ -715,6 +723,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         sync_vrf_to_prefix,
         sync_cables,
         sync_software_version,
+        update_devices_with_changed_serial,
         namespace,
         interface_status,
         ip_address_status,
@@ -736,6 +745,7 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         self.sync_vrf_to_prefix = sync_vrf_to_prefix
         self.sync_cables = sync_cables
         self.sync_software_version = sync_software_version
+        self.update_devices_with_changed_serial = update_devices_with_changed_serial
         self.namespace = namespace
         self.interface_status = interface_status
         self.ip_address_status = ip_address_status
