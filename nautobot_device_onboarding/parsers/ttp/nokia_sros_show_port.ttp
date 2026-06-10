@@ -1,0 +1,10 @@
+<group name="port_status" method="table">
+{{ ignore("Ports on Slot .*") }}
+{{ ignore("=+") }}
+{{ ignore("Port .*Port.*MDIMDX") }}
+{{ ignore("Port .*Admin.*Link.*") }}
+{{ ignore("Id.*State.*") }}
+{{ ignore("-+") }}
+{{ port_id }}         {{ admin_state }}    {{ link_state }}  {{ oper_state }}      {{ cfg_mtu }}  {{ oper_mtu }}  {{ ignore(".*") }}
+{{ port_id }}         {{ admin_state }}    {{ link_state }}  {{ oper_state }}
+</group>

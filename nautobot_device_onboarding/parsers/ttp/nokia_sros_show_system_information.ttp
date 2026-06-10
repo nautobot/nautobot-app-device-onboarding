@@ -1,0 +1,2 @@
+System Name : {{ hostname }}
+System Type : {{ device_type | ORPHRASE }}
