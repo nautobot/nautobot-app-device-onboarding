@@ -245,6 +245,10 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
 
     def test_load_software_versions(self):
         """Test loading software version data returned from command getter into the diffsync store."""
+        # In production, execute_command_getter() populates devices_to_load via
+        # generate_device_queryset_from_command_getter_result(). This test calls
+        # load_software_versions() directly, so set the queryset up by hand.
+        self.job.devices_to_load = Device.objects.filter(name__in=list(self.job.command_getter_result.keys()))
         self.sync_network_data_adapter.load_software_versions()
         for _, device_data in self.job.command_getter_result.items():
             device_data = self.job.command_getter_result["demo-cisco-1"]
@@ -258,7 +262,7 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
         self.sync_network_data_adapter.load_software_version_to_device()
         for _, device_data in self.job.command_getter_result.items():
             device = Device.objects.get(serial=device_data["serial"])
-            unique_id = f"{device.name}__{device.serial}"
+            unique_id = device.name
             diffsync_obj = self.sync_network_data_adapter.get("software_version_to_device", unique_id)
             self.assertEqual(device_data["software_version"], diffsync_obj.software_version__version)
 
@@ -442,7 +446,7 @@ class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
         """Test loading Nautobot software version device assignments into the Diffsync store."""
         self.sync_network_data_adapter.load_software_version_to_device()
         for device in Device.objects.filter(name__in=["demo-cisco-1", "demo-cisco-2"]):
-            unique_id = f"{device.name}__{device.serial}"
+            unique_id = device.name
             diffsync_obj = self.sync_network_data_adapter.get("software_version_to_device", unique_id)
             self.assertEqual(device.software_version.version, diffsync_obj.software_version__version)
 

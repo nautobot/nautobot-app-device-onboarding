@@ -379,7 +379,6 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
             network_software_version_to_device = self.software_version_to_device(
                 adapter=self,
                 name=device.name,
-                serial=device.serial,
                 software_version__version=device.software_version.version if device.software_version else "",
             )
             network_software_version_to_device.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
@@ -1080,21 +1079,26 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
         ) in self.job.command_getter_result.items():
             if self.job.debug:
                 self.job.logger.debug(f"Loading Software Versions from {hostname}")
-            if device_data["software_version"]:
-                # TODO: This fails if no device exists that matches the serial retrieved from "show version"
-                #       This should:
-                #         - Track the device object from Nautobot since the user already provided it
-                #         - Fail gracefully if the above is not possible
-                device = Device.objects.get(serial=device_data["serial"])
-                try:
-                    network_software_version = self.software_version(
-                        adapter=self,
-                        platform__name=device.platform.name,
-                        version=device_data["software_version"],
-                    )
-                    self.add(network_software_version)
-                except diffsync.exceptions.ObjectAlreadyExists:
-                    continue
+            if not device_data["software_version"]:
+                continue
+            # Look up by hostname against the job's pre-filtered devices, not by discovered
+            # serial. Serial may legitimately differ between Nautobot and discovery (stack
+            # master flip, RMA, standalone→stack), and a serial-coupled lookup would crash
+            # the entire load() chain with Device.DoesNotExist.
+            try:
+                device = self.job.devices_to_load.get(name=hostname)
+            except Device.DoesNotExist:
+                self.job.logger.warning("%s: device not in filter set, skipping software version load.", hostname)
+                continue
+            try:
+                network_software_version = self.software_version(
+                    adapter=self,
+                    platform__name=device.platform.name,
+                    version=device_data["software_version"],
+                )
+                self.add(network_software_version)
+            except diffsync.exceptions.ObjectAlreadyExists:
+                continue
 
     def load_software_version_to_device(self):
         """Load software version to device assignments into the Diffsync store."""
@@ -1109,7 +1113,6 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                     network_software_version_to_device = self.software_version_to_device(
                         adapter=self,
                         name=hostname,
-                        serial=device_data["serial"],
                         software_version__version=device_data["software_version"],
                     )
                     self.add(network_software_version_to_device)

@@ -787,25 +787,26 @@ class SyncNetworkSoftwareVersionToDevice(DiffSyncModel):
 
     _model = Device
     _modelname = "software_version_to_device"
-    _identifiers = (
-        "name",
-        "serial",
-    )
+    _identifiers = ("name",)
     _attributes = ("software_version__version",)
 
     name: str
-    serial: str
     software_version__version: str
 
     def _get_and_assign_sofware_version(self, adapter, attrs):
         """Assign a software version to a device."""
         try:
-            device = Device.objects.get(**self.get_identifiers())
+            # Look up by hostname against the job's pre-filtered devices, not by serial.
+            # Serial may legitimately differ between Nautobot and discovery (stack master
+            # flip, RMA, standalone→stack), so a (name, serial)-coupled lookup would
+            # silently miss the update. The user already selected the devices via the
+            # job form — devices_to_load is the authoritative scope.
+            device = adapter.job.devices_to_load.get(name=self.name)
         except ObjectDoesNotExist:
             adapter.job.logger.error(
-                "Failed to assign software version to %s. No device with name '%s' was found.", self.name, self.name
+                "Failed to assign software version to %s. No matching device in the job's filter set.", self.name
             )
-            raise diffsync_exceptions.ObjectNotCreated
+            raise diffsync_exceptions.ObjectNotUpdated
         try:
             software_version = SoftwareVersion.objects.get(
                 version=attrs["software_version__version"], platform=device.platform
