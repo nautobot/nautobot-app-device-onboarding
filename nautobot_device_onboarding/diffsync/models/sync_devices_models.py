@@ -87,17 +87,19 @@ class SyncDevicesDevice(DiffSyncModel):
             update_devices_without_primary_ip = job_form_attrs["update_devices_without_primary_ip"]
             if update_devices_without_primary_ip:
                 adapter.job.logger.warning(
-                    f"Device {device.name} at location {location.name} already exists in Nautobot "
-                    "but the primary ip address either does not exist, or doesn't match an entered ip address. "
-                    "This device will be updated. This update may result in multiple IP Address assignments "
-                    "to an interface on the device."
+                    f"Device {device.name} at location {location.name} already exists in Nautobot, "
+                    "but its primary IP address or serial number differs from what the device reported "
+                    "(e.g. after a stack master role flip, hardware swap, RMA, or re-IP). "
+                    "This device will be updated. The update may result in multiple IP Address "
+                    "assignments to an interface on the device."
                 )
                 device = cls._update_device_with_attrs(device, platform, ids, attrs, adapter)
             else:
                 adapter.job.logger.warning(
-                    f"Device {device.name} at location {location.name} already exists in Nautobot "
-                    "but the primary ip address either does not exist, or doesn't match an entered ip address. "
-                    "IP Address, this device will be skipped."
+                    f"Device {device.name} at location {location.name} already exists in Nautobot, "
+                    "but its primary IP address or serial number differs from what the device reported. "
+                    "This device will be skipped. To allow the update, enable the "
+                    "'Update devices without primary IP' option on the job form."
                 )
                 return None
 
