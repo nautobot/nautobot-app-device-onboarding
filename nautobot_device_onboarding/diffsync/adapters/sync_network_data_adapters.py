@@ -597,6 +597,32 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
             )
             raise ValidationError("Unexpected data returned from CommandGetter.")
 
+    def _exclude_filtered_out_devices(self):
+        """Drop discovery entries for hostnames that didn't pass the queryset filter.
+
+        Without this, every load_*() method in this adapter iterates over
+        self.job.command_getter_result for ALL discovered hostnames — including those
+        excluded from devices_to_load by the (name, serial) filter when
+        update_devices_with_changed_serial is OFF. The result was silent writes of
+        interfaces, cables, IPs, VLANs, etc. for devices the user explicitly opted out
+        of via the filter. Mutating the shared dict here also propagates the filter to
+        the Nautobot adapter's load_ip_addresses (which iterates the same dict), since
+        that adapter runs after this one in the SSOT base flow.
+        """
+        if self.job.devices_to_load is None:
+            return
+        valid_names = set(self.job.devices_to_load.values_list("name", flat=True))
+        excluded = sorted(h for h in self.job.command_getter_result if h not in valid_names)
+        if not excluded:
+            return
+        self.job.logger.warning(
+            "Excluded %d device(s) from network data sync — name/serial mismatch with "
+            "Nautobot and update_devices_with_changed_serial is OFF: %s",
+            len(excluded),
+            ", ".join(excluded),
+        )
+        self.job.command_getter_result = {h: d for h, d in self.job.command_getter_result.items() if h in valid_names}
+
     def _process_mac_address(self, mac_address):
         """Convert a mac address to match the value stored by Nautobot."""
         if mac_address:
@@ -1122,6 +1148,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
     def load(self):
         """Load network data."""
         self.execute_command_getter()
+        self._exclude_filtered_out_devices()
         self.load_ip_addresses()
         if self.job.sync_vlans:
             self.load_vlans()
