@@ -5,7 +5,7 @@ sync_devices:
       commands:
         - command: "show interface mgmt"
           parser: "textfsm"
-          jpath: "[*].ipv4_mask"
+          jpath: "[*].ipv4_prefix_length"
   hostname:
     commands:
       - command: "show system"
@@ -39,6 +39,18 @@ sync_devices:
         jpath: "[?contains(ip_address, `{{ obj }}/`)].ip_address"
         post_processor: "{% if obj %}{{ obj[0].split('/')[1] }}{% else %}{{ oobm_mask }}{% endif %}"
         iterable_type: "int"
+  virtual_chassis:
+    commands:
+      - command: "show vsf detail"
+        parser: "textfsm"
+        jpath: "[?member_id != 'Stack'].{switch: member_id, priority: status }"
+        post_processor: '{% set result=[] %}{% for item in obj %}{{ result.append({"switch": item.switch, "priority": "10" if item.priority|lower == "conductor" else "0"}) or "" }}{% endfor %}{{ result | tojson }}'
+  modules:
+    commands:
+      - command: "show module"
+        parser: "textfsm"
+        jpath: "[?module_type=='Management'].{model: model, cardtype: cardtype, serial: serial}"
+        post_processor: '{% set result=[] %}{% for item in obj %}{{ result.append({"model": (item.model ~ " " ~ item.cardtype), "serial": item.serial}) or "" }}{% endfor %}{{ result | tojson }}'
 sync_network_data:
   pre_processor:
     vlan_map:
@@ -47,6 +59,12 @@ sync_network_data:
           parser: "textfsm"
           jpath: "[*].[$vlan_id$,vlan_name]"
           post_processor: "{{ obj | flatten_list_of_dict_from_value('vlan_name') | tojson }}"
+    mgmt_iface:
+      commands:
+        - command: "show interface mgmt"
+          parser: "textfsm"
+          jpath: "[*]"
+          post_processor: "{% if obj %}{{ obj[0] | tojson }}{% else %}{{ {} | tojson }}{% endif %}"
   software_version:
     commands:
       - command: "show system"
@@ -63,19 +81,19 @@ sync_network_data:
       - command: "show interface"
         parser: "textfsm"
         jpath: "[*].interface"
-        post_processor: "{% set result={} %}{% for interface in obj %}{{ result.update({interface: {}}) or '' }}{% endfor %}{{ result | tojson }}"
+        post_processor: "{% set result={} %}{% for interface in obj %}{{ result.update({interface: {}}) or '' }}{% endfor %}{% if mgmt_iface %}{{ result.update({'mgmt': {}}) or '' }}{% endif %}{{ result | tojson }}"
   interfaces__type:
     commands:
       - command: "show interface"
         parser: "textfsm"
         jpath: "[?interface=='{{ current_key }}'].hw_type"
-        post_processor: "{% if 'lag' in current_key %}{{ 'lag' }}{% else %}{{ obj[0] | lower | map_interface_type }}{% endif %}"
+        post_processor: "{% if current_key == 'mgmt' %}{{ 'virtual' }}{% elif 'lag' in current_key %}{{ 'lag' }}{% else %}{{ obj[0] | lower | map_interface_type }}{% endif %}"
   interfaces__ip_addresses:
     commands:
       - command: "show interface"
         parser: "textfsm"
         jpath: "[?interface=='{{ current_key }}'].{ip_address: ip_address}"
-        post_processor: "{% if obj and obj[0]['ip_address'] and '/' in obj[0]['ip_address'] %}{% set cidr = obj[0]['ip_address'].split('/') %}{% set ip = cidr[0] %}{% set mask = cidr[1] | int %}{{ obj[0].update({'ip_address': ip, 'prefix_length': mask}) or obj | tojson }}{% else %}{{ obj | tojson }}{% endif %}"
+        post_processor: "{% if current_key == 'mgmt' %}{% if mgmt_iface and mgmt_iface.ipv4_address and mgmt_iface.ipv4_prefix_length %}{{ [{'ip_address': mgmt_iface.ipv4_address, 'prefix_length': mgmt_iface.ipv4_prefix_length | int}] | tojson }}{% else %}[]{% endif %}{% elif obj and obj[0]['ip_address'] and '/' in obj[0]['ip_address'] %}{% set cidr = obj[0]['ip_address'].split('/') %}{% set ip = cidr[0] %}{% set mask = cidr[1] | int %}{{ obj[0].update({'ip_address': ip, 'prefix_length': mask}) or obj | tojson }}{% else %}{{ obj | tojson }}{% endif %}"
         iterable_type: "list"
   interfaces__mtu:
     commands:
@@ -88,17 +106,19 @@ sync_network_data:
       - command: "show interface"
         parser: "textfsm"
         jpath: "[?interface=='{{ current_key }}'].mac_address"
+        iterable_type: "str"
   interfaces__description:
     commands:
       - command: "show interface"
         parser: "textfsm"
         jpath: "[?interface=='{{ current_key }}'].interface_desc"
+        iterable_type: "str"
   interfaces__link_status:
     commands:
       - command: "show interface"
         parser: "textfsm"
         jpath: "[?interface=='{{ current_key }}'].link_status"
-        post_processor: "{{ obj[0] | interface_status_to_bool }}"
+        post_processor: "{% if current_key == 'mgmt' %}true{% else %}{{ (obj[0] | interface_status_to_bool) | tojson }}{% endif %}"
   interfaces__802.1Q_mode:
     commands:
       - command: "show interface"
@@ -117,8 +137,13 @@ sync_network_data:
     commands:
       - command: "show vrf"
         parser: "textfsm"
-        jpath: "[?contains(@.vrf_interfaces, `{{ current_key }}`)].{name:vrf_name}"
-        post_processor: "{% if obj | length > 0 %}{{ obj[0] | key_exist_or_default('name') | tojson }}{% else %}{{ {} | tojson }}{% endif %}"
+        jpath: "[?interface == `{{ current_key }}`].{name: vrf}"
+        post_processor: >-
+          {% if obj | length > 0 %}
+          {{ obj[0] | key_exist_or_default('name') | tojson }}
+          {% else %}
+          {{ {} | tojson }}
+          {% endif %}
         iterable_type: "dict"
   interfaces__tagged_vlans:
     commands:

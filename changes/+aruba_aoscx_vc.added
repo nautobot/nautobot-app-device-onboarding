@@ -1,0 +1,2 @@
+Added Virtual Chassis support for Aruba AOS-CX devices in the Sync Devices From Network job, via `show vsf detail` (VSF stacks).
+Added module-based device_type detection for Aruba AOS-CX devices in the Sync Devices From Network job, via `show module`.
