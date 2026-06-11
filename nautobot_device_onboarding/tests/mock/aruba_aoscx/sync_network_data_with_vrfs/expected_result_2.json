@@ -9,7 +9,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:67",
             "mtu": "1500",
             "type": "1000base-t",
@@ -24,7 +24,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:60",
             "mtu": "1500",
             "type": "1000base-t",
@@ -39,7 +39,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:5d",
             "mtu": "1500",
             "type": "1000base-t",
@@ -54,7 +54,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:5e",
             "mtu": "1500",
             "type": "1000base-t",
@@ -69,7 +69,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:5b",
             "mtu": "1500",
             "type": "1000base-t",
@@ -84,7 +84,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:5c",
             "mtu": "1500",
             "type": "1000base-t",
@@ -99,7 +99,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:59",
             "mtu": "1500",
             "type": "1000base-t",
@@ -114,7 +114,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:5a",
             "mtu": "1500",
             "type": "1000base-t",
@@ -129,7 +129,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:57",
             "mtu": "1500",
             "type": "1000base-t",
@@ -144,7 +144,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:58",
             "mtu": "1500",
             "type": "1000base-t",
@@ -159,7 +159,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:55",
             "mtu": "1500",
             "type": "1000base-t",
@@ -174,7 +174,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:68",
             "mtu": "1500",
             "type": "1000base-t",
@@ -189,7 +189,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:56",
             "mtu": "1500",
             "type": "1000base-t",
@@ -204,7 +204,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:53",
             "mtu": "1500",
             "type": "1000base-t",
@@ -219,7 +219,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:54",
             "mtu": "1500",
             "type": "1000base-t",
@@ -234,7 +234,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:51",
             "mtu": "1500",
             "type": "1000base-t",
@@ -249,7 +249,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:52",
             "mtu": "1500",
             "type": "1000base-t",
@@ -264,7 +264,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "False",
+            "link_status": false,
             "mac_address": "4c:d5:87:ab:cc:50",
             "mtu": "1500",
             "type": "1000base-t",
@@ -279,7 +279,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "False",
+            "link_status": false,
             "mac_address": "4c:d5:87:ab:cc:4f",
             "mtu": "1500",
             "type": "1000base-t",
@@ -294,7 +294,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "False",
+            "link_status": false,
             "mac_address": "4c:d5:87:ab:cc:4e",
             "mtu": "1500",
             "type": "1000base-t",
@@ -309,7 +309,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "False",
+            "link_status": false,
             "mac_address": "4c:d5:87:ab:cc:4d",
             "mtu": "1500",
             "type": "1000base-t",
@@ -324,7 +324,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:65",
             "mtu": "1500",
             "type": "1000base-t",
@@ -339,7 +339,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:66",
             "mtu": "1500",
             "type": "1000base-t",
@@ -354,7 +354,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:63",
             "mtu": "1500",
             "type": "1000base-t",
@@ -369,7 +369,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:64",
             "mtu": "1500",
             "type": "1000base-t",
@@ -384,7 +384,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:61",
             "mtu": "1500",
             "type": "1000base-t",
@@ -399,7 +399,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:62",
             "mtu": "1500",
             "type": "1000base-t",
@@ -414,7 +414,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:5f",
             "mtu": "1500",
             "type": "1000base-t",
@@ -429,7 +429,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "False",
+            "link_status": false,
             "mac_address": "4c:d5:87:ab:cc:40",
             "mtu": "",
             "type": "1000base-t",
@@ -447,7 +447,7 @@
                 }
             ],
             "lag": "",
-            "link_status": "True",
+            "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:40",
             "mtu": "",
             "type": "1000base-t",
