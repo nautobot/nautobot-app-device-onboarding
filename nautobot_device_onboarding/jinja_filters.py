@@ -204,7 +204,7 @@ def parse_junos_ip_address(item):
                 if is_ip(item[0]["ip_address"][i]):
                     result.append(
                         {
-                            "prefix_length": 32,
+                            "prefix_length": 128 if ":" in item[0]["ip_address"][i] else 32,
                             "ip_address": item[0]["ip_address"][i],
                         }
                     )

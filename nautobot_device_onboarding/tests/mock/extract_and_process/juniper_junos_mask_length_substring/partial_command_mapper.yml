@@ -1,0 +1,6 @@
+---
+command: "show configuration interfaces | display json"
+parser: "none"
+jpath: "configuration.interfaces.interface[].unit[?family.inet.address[?contains(name, `{{ obj }}/`)]][].family.*.address[][].name"
+post_processor: "{{ obj[0].split('/')[1] }}"
+iterable_type: "int"
