@@ -68,6 +68,49 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
         )
         self.assertNotIn("demo-cisco-4", self.job.command_getter_result.keys())
 
+    def test_exclude_filtered_out_devices_no_devices_to_load(self):
+        """When devices_to_load is None, the helper returns early without mutating command_getter_result."""
+        self.assertIsNone(self.job.devices_to_load)
+        original_keys = set(self.job.command_getter_result.keys())
+
+        self.sync_network_data_adapter._exclude_filtered_out_devices()  # pylint: disable=protected-access
+
+        self.assertEqual(set(self.job.command_getter_result.keys()), original_keys)
+
+    def test_exclude_filtered_out_devices_all_valid(self):
+        """When every hostname in command_getter_result is in devices_to_load, the helper is a no-op."""
+        self.job.devices_to_load = Device.objects.filter(name__in=list(self.job.command_getter_result.keys()))
+        original_keys = set(self.job.command_getter_result.keys())
+        self.job.logger = MagicMock()
+
+        self.sync_network_data_adapter._exclude_filtered_out_devices()  # pylint: disable=protected-access
+
+        self.assertEqual(set(self.job.command_getter_result.keys()), original_keys)
+        self.job.logger.warning.assert_not_called()
+
+    def test_exclude_filtered_out_devices_prunes_excluded(self):
+        """Hostnames absent from devices_to_load are removed from command_getter_result and a warning is logged.
+
+        Regression test for the Site 3 leak — without this guard, every load_*() method iterates
+        command_getter_result for ALL discovered hostnames, including those excluded by the
+        (name, serial) queryset filter, silently writing interfaces / cables / IPs against them.
+        """
+        # Keep demo-cisco-1, exclude demo-cisco-2 — both are in command_getter_result, only the
+        # first is in devices_to_load (simulates demo-cisco-2 failing the (name, serial) filter).
+        self.assertIn("demo-cisco-1", self.job.command_getter_result)
+        self.assertIn("demo-cisco-2", self.job.command_getter_result)
+        self.job.devices_to_load = Device.objects.filter(name="demo-cisco-1")
+        self.job.logger = MagicMock()
+
+        self.sync_network_data_adapter._exclude_filtered_out_devices()  # pylint: disable=protected-access
+
+        self.assertIn("demo-cisco-1", self.job.command_getter_result)
+        self.assertNotIn("demo-cisco-2", self.job.command_getter_result)
+        self.job.logger.warning.assert_called_once()
+        # The warning message names the excluded hostname so operators can investigate.
+        warning_args = str(self.job.logger.warning.call_args)
+        self.assertIn("demo-cisco-2", warning_args)
+
     @patch("nautobot_device_onboarding.diffsync.adapters.sync_network_data_adapters.sync_network_data_command_getter")
     def test_execute_command_getter(self, command_getter_result):
         """Test execute command getter."""
