@@ -119,6 +119,48 @@ class SyncDevicesNetworkAdapterTestCase(TransactionTestCase):
         result = sync_devices_command_getter(job=self.job, log_level="INFO")
         self.assertEqual(result, {})
 
+    @patch("nautobot_device_onboarding.nornir_plays.command_getter.InitNornir")
+    @patch("nautobot_device_onboarding.nornir_plays.command_getter._set_inventory")
+    def test_command_getter_set_inventory_exc_info_respects_fail_job_on_task_failure(self, set_inventory, init_nornir):
+        """When _set_inventory returns an exception, the host is skipped unless fail_job_on_task_failure raises."""
+        # Simulate a host that fails inventory construction (e.g. no connectivity / autodetection failure):
+        # _set_inventory returns an empty inventory and a non-None exception.
+        set_inventory.return_value = ({}, Exception("Autodetection failed"))
+
+        nornir_obj = MagicMock()
+        nr_with_processors = MagicMock()
+        nornir_obj.with_processors.return_value = nr_with_processors
+        # The task run itself does not fail; only inventory construction did.
+        nr_with_processors.run.return_value = SimpleNamespace(failed=False, failed_hosts={})
+        init_nornir.return_value.__enter__.return_value = nornir_obj
+
+        processed_ip_address_attrs = {
+            "original_ip_address": "10.1.1.10",
+            "location": self.testing_objects["location"],
+            "namespace": self.testing_objects["namespace"],
+            "port": 22,
+            "timeout": 30,
+            "update_devices_without_primary_ip": True,
+            "device_role": self.testing_objects["device_role"],
+            "device_status": self.testing_objects["status"],
+            "device_tenant": self.testing_objects["device_tenant_1"],
+            "interface_status": self.testing_objects["status"],
+            "ip_address_status": self.testing_objects["status"],
+            "secrets_group": self.testing_objects["secrets_group"],
+            "platform": None,
+        }
+        self.job.ip_address_inventory = {"10.1.1.10": processed_ip_address_attrs}
+
+        with self.subTest(fail_job_on_task_failure=True):
+            self.job.fail_job_on_task_failure = True
+            with self.assertRaises(RuntimeError):
+                sync_devices_command_getter(job=self.job, log_level="INFO")
+
+        with self.subTest(fail_job_on_task_failure=False):
+            self.job.fail_job_on_task_failure = False
+            result = sync_devices_command_getter(job=self.job, log_level="INFO")
+            self.assertEqual(result, {})
+
     @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
     def test_load_respects_form_supplied_platform_manufacturer(self, device_data):
         """When the job form supplies a Platform, its Manufacturer.name wins over the processor-derived value."""
