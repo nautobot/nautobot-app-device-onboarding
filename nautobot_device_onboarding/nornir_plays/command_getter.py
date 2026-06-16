@@ -338,6 +338,10 @@ def sync_devices_command_getter(job, log_level):
                         logger.error(
                             f"Unable to onboard {values['original_ip_address']}, failed with exception {exc_info}"
                         )
+                        if job.fail_job_on_task_failure:
+                            raise RuntimeError(
+                                f"Unable to onboard {values['original_ip_address']}, failed with exception {exc_info}."
+                            ) from exc_info
                         continue
                 nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
             result = nr_with_processors.run(
