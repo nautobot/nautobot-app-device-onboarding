@@ -379,7 +379,6 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
             network_software_version_to_device = self.software_version_to_device(
                 adapter=self,
                 name=device.name,
-                serial=device.serial,
                 software_version__version=device.software_version.version if device.software_version else "",
             )
             network_software_version_to_device.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
@@ -597,6 +596,32 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                 "Data returned from CommandGetter is not the correct type. No devices will be onboarded"
             )
             raise ValidationError("Unexpected data returned from CommandGetter.")
+
+    def _exclude_filtered_out_devices(self):
+        """Drop discovery entries for hostnames that didn't pass the queryset filter.
+
+        Without this, every load_*() method in this adapter iterates over
+        self.job.command_getter_result for ALL discovered hostnames — including those
+        excluded from devices_to_load by the (name, serial) filter when
+        update_devices_with_changed_serial is OFF. The result was silent writes of
+        interfaces, cables, IPs, VLANs, etc. for devices the user explicitly opted out
+        of via the filter. Mutating the shared dict here also propagates the filter to
+        the Nautobot adapter's load_ip_addresses (which iterates the same dict), since
+        that adapter runs after this one in the SSOT base flow.
+        """
+        if self.job.devices_to_load is None:
+            return
+        valid_names = set(self.job.devices_to_load.values_list("name", flat=True))
+        excluded = sorted(h for h in self.job.command_getter_result if h not in valid_names)
+        if not excluded:
+            return
+        self.job.logger.warning(
+            "Excluded %d device(s) from network data sync — name/serial mismatch with "
+            "Nautobot and update_devices_with_changed_serial is OFF: %s",
+            len(excluded),
+            ", ".join(excluded),
+        )
+        self.job.command_getter_result = {h: d for h, d in self.job.command_getter_result.items() if h in valid_names}
 
     def _process_mac_address(self, mac_address):
         """Convert a mac address to match the value stored by Nautobot."""
@@ -1080,21 +1105,26 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
         ) in self.job.command_getter_result.items():
             if self.job.debug:
                 self.job.logger.debug(f"Loading Software Versions from {hostname}")
-            if device_data["software_version"]:
-                # TODO: This fails if no device exists that matches the serial retrieved from "show version"
-                #       This should:
-                #         - Track the device object from Nautobot since the user already provided it
-                #         - Fail gracefully if the above is not possible
-                device = Device.objects.get(serial=device_data["serial"])
-                try:
-                    network_software_version = self.software_version(
-                        adapter=self,
-                        platform__name=device.platform.name,
-                        version=device_data["software_version"],
-                    )
-                    self.add(network_software_version)
-                except diffsync.exceptions.ObjectAlreadyExists:
-                    continue
+            if not device_data["software_version"]:
+                continue
+            # Look up by hostname against the job's pre-filtered devices, not by discovered
+            # serial. Serial may legitimately differ between Nautobot and discovery (stack
+            # master flip, RMA, standalone→stack), and a serial-coupled lookup would crash
+            # the entire load() chain with Device.DoesNotExist.
+            try:
+                device = self.job.devices_to_load.get(name=hostname)
+            except Device.DoesNotExist:
+                self.job.logger.warning("%s: device not in filter set, skipping software version load.", hostname)
+                continue
+            try:
+                network_software_version = self.software_version(
+                    adapter=self,
+                    platform__name=device.platform.name,
+                    version=device_data["software_version"],
+                )
+                self.add(network_software_version)
+            except diffsync.exceptions.ObjectAlreadyExists:
+                continue
 
     def load_software_version_to_device(self):
         """Load software version to device assignments into the Diffsync store."""
@@ -1109,7 +1139,6 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                     network_software_version_to_device = self.software_version_to_device(
                         adapter=self,
                         name=hostname,
-                        serial=device_data["serial"],
                         software_version__version=device_data["software_version"],
                     )
                     self.add(network_software_version_to_device)
@@ -1119,6 +1148,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
     def load(self):
         """Load network data."""
         self.execute_command_getter()
+        self._exclude_filtered_out_devices()
         self.load_ip_addresses()
         if self.job.sync_vlans:
             self.load_vlans()

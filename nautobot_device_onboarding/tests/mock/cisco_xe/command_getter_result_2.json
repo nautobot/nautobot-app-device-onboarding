@@ -6226,5 +6226,7 @@
             ]
         }
     ],
-    "show ip vrf interfaces": []
+    "show ip vrf interfaces": [],
+    "show switch detail": [],
+    "show module": []
 }

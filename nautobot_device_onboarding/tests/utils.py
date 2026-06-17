@@ -328,6 +328,9 @@ def sync_devices_ensure_required_nautobot_objects():
     device_type, _ = DeviceType.objects.get_or_create(
         model="CSR1000V17", part_number="CSR1000V17", manufacturer=manufacturer
     )
+    # DeviceTypes for virtual chassis / switch stack testing
+    DeviceType.objects.get_or_create(model="C9300-48P", manufacturer=manufacturer)
+    DeviceType.objects.get_or_create(model="C9300-24P", manufacturer=manufacturer)
     device_1, _ = Device.objects.get_or_create(
         name="test device 1",
         serial="test-serial-abc",
@@ -442,6 +445,13 @@ def sync_devices_ensure_required_nautobot_objects__jobs_testing():
     device_role.validated_save()
 
     device_tenant_1, _ = Tenant.objects.get_or_create(name="Device Tenant 1")
+    manufacturer, _ = Manufacturer.objects.get_or_create(name="Cisco")
+
+    Platform.objects.get_or_create(name="cisco_ios", network_driver="cisco_ios", manufacturer=manufacturer)
+
+    # DeviceTypes used by sync_devices_mock_data_valid fixture
+    DeviceType.objects.get_or_create(model="CSR1000V2", manufacturer=manufacturer)
+    DeviceType.objects.get_or_create(model="CSR1000V17", manufacturer=manufacturer)
 
     testing_objects["status"] = status
     testing_objects["secrets_group"] = secrets_group
