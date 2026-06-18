@@ -15,7 +15,7 @@ from django.db.models import Q
 from nautobot.dcim.choices import InterfaceTypeChoices
 from nautobot.dcim.models import Cable, Device, Interface, Location, Platform, SoftwareVersion
 from nautobot.extras.models import Status
-from nautobot.ipam.models import VLAN, VRF, IPAddress, IPAddressToInterface
+from nautobot.ipam.models import VLAN, VRF, IPAddress, IPAddressToInterface, Namespace, Prefix
 from nautobot_ssot.contrib import CustomFieldAnnotation, NautobotModel
 
 from nautobot_device_onboarding.constants import ONBOARDING_DEVICE_MODULE_RECURSION_LIMIT
@@ -52,11 +52,11 @@ class SyncNetworkDataDevice(FilteredNautobotModel):
 
     _modelname = "device"
     _model = Device
-    _identifiers = (
-        "name",
+    _identifiers = ("name",)
+    _attributes = (
         "serial",
+        "last_network_data_sync",
     )
-    _attributes = ("last_network_data_sync",)
     _children = {"interface": "all_interfaces"}
 
     name: str
@@ -653,6 +653,58 @@ class SyncNetworkDataVrfToInterface(DiffSyncModel):
         return super().update(attrs)
 
 
+class SyncNetworkDataPrefixToVrf(DiffSyncModel):
+    """Shared data model representing a Prefix-to-VRF association.
+
+    Additive-only by contract: a single sync only sees a subset of devices, so the
+    absence of an interface for a VRF cannot be used to infer that the prefix-to-VRF
+    link should be removed. The destination adapter sets SKIP_UNMATCHED_DST on these
+    records so diffsync never emits a delete; update is a no-op because the identifier
+    *is* the association — there are no fields to mutate.
+    """
+
+    _modelname = "prefix_to_vrf"
+    _identifiers = ("namespace__name", "prefix", "vrf__name")
+
+    namespace__name: str
+    prefix: str
+    vrf__name: str
+
+    @classmethod
+    def create(cls, adapter, ids, attrs):
+        """Add the VRF to the parent prefix's vrfs M2M."""
+        try:
+            namespace = Namespace.objects.get(name=ids["namespace__name"])
+        except ObjectDoesNotExist as err:
+            adapter.job.logger.error(
+                f"Failed to associate prefix [{ids['prefix']}] with vrf [{ids['vrf__name']}]: "
+                f"namespace [{ids['namespace__name']}] not found."
+            )
+            raise diffsync_exceptions.ObjectNotCreated(err)
+        try:
+            prefix = Prefix.objects.get(prefix=ids["prefix"], namespace=namespace)
+        except ObjectDoesNotExist as err:
+            adapter.job.logger.error(
+                f"Failed to associate prefix [{ids['prefix']}] with vrf [{ids['vrf__name']}]: "
+                f"prefix not found in namespace [{ids['namespace__name']}]."
+            )
+            raise diffsync_exceptions.ObjectNotCreated(err)
+        try:
+            vrf = VRF.objects.get(name=ids["vrf__name"], namespace=namespace)
+        except ObjectDoesNotExist as err:
+            adapter.job.logger.error(
+                f"Failed to associate prefix [{ids['prefix']}] with vrf [{ids['vrf__name']}]: "
+                f"vrf not found in namespace [{ids['namespace__name']}]."
+            )
+            raise diffsync_exceptions.ObjectNotCreated(err)
+        try:
+            prefix.vrfs.add(vrf)
+        except ValidationError as err:
+            adapter.job.logger.error(f"Failed to associate prefix [{prefix}] with vrf [{vrf}], {err}")
+            raise diffsync_exceptions.ObjectNotCreated(err)
+        return super().create(adapter, ids, attrs)
+
+
 class SyncNetworkDataCable(FilteredNautobotModel):
     """Shared data model representing a cable between two interfaces."""
 
@@ -735,25 +787,26 @@ class SyncNetworkSoftwareVersionToDevice(DiffSyncModel):
 
     _model = Device
     _modelname = "software_version_to_device"
-    _identifiers = (
-        "name",
-        "serial",
-    )
+    _identifiers = ("name",)
     _attributes = ("software_version__version",)
 
     name: str
-    serial: str
     software_version__version: str
 
     def _get_and_assign_sofware_version(self, adapter, attrs):
         """Assign a software version to a device."""
         try:
-            device = Device.objects.get(**self.get_identifiers())
+            # Look up by hostname against the job's pre-filtered devices, not by serial.
+            # Serial may legitimately differ between Nautobot and discovery (stack master
+            # flip, RMA, standalone→stack), so a (name, serial)-coupled lookup would
+            # silently miss the update. The user already selected the devices via the
+            # job form — devices_to_load is the authoritative scope.
+            device = adapter.job.devices_to_load.get(name=self.name)
         except ObjectDoesNotExist:
             adapter.job.logger.error(
-                "Failed to assign software version to %s. No device with name '%s' was found.", self.name, self.name
+                "Failed to assign software version to %s. No matching device in the job's filter set.", self.name
             )
-            raise diffsync_exceptions.ObjectNotCreated
+            raise diffsync_exceptions.ObjectNotUpdated
         try:
             software_version = SoftwareVersion.objects.get(
                 version=attrs["software_version__version"], platform=device.platform

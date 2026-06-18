@@ -910,5 +910,7 @@
             "outgoing_acl": "",
             "inbound_acl": ""
         }
-    ]
+    ],
+    "show switch detail": [],
+    "show inventory": []
 }
