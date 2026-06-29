@@ -10,6 +10,13 @@ This document describes all new features and changes in the release. The format 
 <!-- towncrier release notes start -->
 
 
+## [v4.4.6 (2026-06-29)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.4.6)
+
+### Fixed
+
+- [#572](https://github.com/nautobot/nautobot-app-device-onboarding/issues/572) - Fix Junos IPv6 Loopback network mask discovery.
+- [#572](https://github.com/nautobot/nautobot-app-device-onboarding/issues/572) - Fix Junos management Interface and IP address discovery when additional sub-string IP exists on device.
+
 ## [v4.4.5 (2026-05-06)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.4.5)
 
 ### Fixed
