@@ -216,6 +216,80 @@ Optional Fields:
     device_type: Device Type UUID
     continue_on_failure: Boolean
 
+### Onboarding Switch Stacks (Virtual Chassis)
+
+The `Sync Devices From Network` job supports onboarding Cisco IOS-XE StackWise switch stacks as Nautobot Virtual Chassis objects. When a device is detected as part of a multi-member stack, the job will:
+
+1. Create a Virtual Chassis object named after the stack master's hostname
+2. Create Device objects for each stack member with the appropriate device type based on the module model
+3. Assign the correct `vc_position` and `vc_priority` to each member
+4. Set the stack master as the Virtual Chassis master
+5. Assign the management IP and interface only to the master device
+6. Only the master device will have the Secrets Group assigned
+
+#### Stack Member Naming Convention
+
+- The master device (switch 1) uses the hostname discovered from the device
+- Member devices are named using the pattern `{hostname}:{member_number}` (e.g., `stack-switch-1:2`, `stack-switch-1:3`)
+
+#### Standalone Devices
+
+If a device returns stack information but only has a single member, it will be onboarded as a regular standalone device without creating a Virtual Chassis.
+
+#### Enabling Switch Stack Support for a Platform
+
+Switch stack support requires adding `virtual_chassis` and `modules` definitions to the platform's command mapper YAML file.
+
+##### Platforms with Built-in Support
+
+Currently, no platforms have virtual chassis support enabled by default. To enable switch stack onboarding, you must add the required command definitions to your platform's command mapper YAML file.
+
+##### Adding Virtual Chassis Support
+
+To enable switch stack support for a platform, add the `virtual_chassis` and `modules` keys to the `sync_devices` section of the platform's command mapper YAML file. See [App YAML Overrides](./app_yaml_overrides.md) for instructions on creating override files.
+
+**Example for Cisco IOS-XE (cisco_xe.yml):**
+
+```yaml
+sync_devices:
+  # ... existing fields (hostname, serial, device_type, etc.) ...
+  virtual_chassis:
+    commands:
+      - command: "show switch detail"
+        parser: "textfsm"
+        jpath: "[*]"
+  modules:
+    commands:
+      - command: "show module"
+        parser: "textfsm"
+        jpath: "[*]"
+```
+
+##### Required Data Format
+
+The commands must return data in a specific format for virtual chassis onboarding to work correctly:
+
+- **`virtual_chassis`**: Must return a list of objects with at least:
+    - `switch`: The member number in the stack (e.g., "1", "2", "3")
+    - `priority`: The stack priority value
+
+- **`modules`**: Must return a list of objects with at least:
+    - `model`: The device model/part number for each stack member
+    - `serial`: The serial number for each stack member
+
+The order of items in each list must correspond - index 0 in `virtual_chassis` matches index 0 in `modules`, and so on.
+
+##### Devices That Don't Support Stack Commands
+
+If a device does not support the configured stack commands (e.g., a Cisco CSR router receiving "show switch detail"), the command will return an error. The app handles this gracefully:
+
+1. The error response (e.g., `% Invalid input detected at`) is detected
+2. The result is set to an empty list
+3. The device is onboarded as a standalone device (not part of a Virtual Chassis)
+4. No errors are raised and the sync continues normally
+
+This means you can safely add virtual chassis support to a platform's command mapper even if some devices of that platform type don't support stacking - those devices will simply be onboarded as standalone devices.
+
 ### Onboarding Interface, Vlans, IPs Etc.
 
 #### Enhance Existing Device

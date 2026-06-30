@@ -8,7 +8,12 @@ import diffsync
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db.models import Model
-from nautobot.dcim.models import Device, DeviceType, Manufacturer, Platform
+from nautobot.dcim.models import (
+    Device,
+    DeviceType,
+    Manufacturer,
+    Platform,
+)
 
 from nautobot_device_onboarding.diffsync.models import sync_devices_models
 from nautobot_device_onboarding.nornir_plays.command_getter import (
@@ -26,8 +31,9 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
     platform = sync_devices_models.SyncDevicesPlatform
     device = sync_devices_models.SyncDevicesDevice
     device_type = sync_devices_models.SyncDevicesDeviceType
+    virtual_chassis = sync_devices_models.SyncDevicesVirtualChassis
 
-    top_level = ["manufacturer", "platform", "device_type", "device"]
+    top_level = ["manufacturer", "platform", "device_type", "virtual_chassis", "device"]
 
     # This dictionary acts as an ORM cache.
     _cache: DefaultDict[str, Dict[ParameterSet, Model]]
@@ -101,6 +107,38 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
             if self.job.debug:
                 self.job.logger.debug(f"DeviceType: {device_type.model} loaded.")
 
+    def load_virtual_chassis(self, device):
+        """Add Nautobot Virtual Chassis objects as DiffSync."""
+        onboarding_vc = self.virtual_chassis(
+            name=device.virtual_chassis.name,
+            master__name=device.virtual_chassis.master.name if device.virtual_chassis.master_id else "",
+        )
+        for vc_member in device.virtual_chassis.members.all().exclude(
+            id=device.id
+        ):  # The originating device is loaded in load_devices
+            onboarding_device = self.device(
+                adapter=self,
+                pk=vc_member.pk,
+                device_type__model=vc_member.device_type.model,
+                location__name=vc_member.location.name,
+                name=vc_member.name,
+                platform__name=vc_member.platform.name if vc_member.platform_id else "",
+                primary_ip4__host=device.primary_ip4.host if device.primary_ip4_id else "",
+                role__name=vc_member.role.name,
+                status__name=vc_member.status.name,
+                mask_length=(device.primary_ip4.mask_length if device.primary_ip4_id else None),
+                serial=vc_member.serial,
+                virtual_chassis__name=vc_member.virtual_chassis.name,
+                vc_position=vc_member.vc_position,
+                vc_priority=vc_member.vc_priority,
+            )
+            self.add(onboarding_device)
+            if self.job.debug:
+                self.job.logger.debug(f"Device: {vc_member.name} loaded.")
+        self.add(onboarding_vc)
+        if self.job.debug:
+            self.job.logger.debug(f"Virtual Chassis: {onboarding_vc.name} loaded.")
+
     def load_devices(self):
         """Load device data from Nautobot."""
         if self.job.debug:
@@ -115,22 +153,27 @@ class SyncDevicesNautobotAdapter(diffsync.Adapter):
                 if device.primary_ip4 in interface.ip_addresses.all():
                     interfaces = [interface.name]
                     break
+            if device.virtual_chassis_id:
+                self.load_virtual_chassis(device)
             onboarding_device = self.device(
                 adapter=self,
                 pk=device.pk,
                 device_type__model=device.device_type.model,
                 location__name=device.location.name,
                 name=device.name,
-                platform__name=device.platform.name if device.platform else "",
-                primary_ip4__host=device.primary_ip4.host if device.primary_ip4 else "",
-                primary_ip4__status__name=(device.primary_ip4.status.name if device.primary_ip4 else ""),
+                platform__name=device.platform.name if device.platform_id else "",
+                primary_ip4__host=device.primary_ip4.host if device.primary_ip4_id else "",
+                primary_ip4__status__name=(device.primary_ip4.status.name if device.primary_ip4_id else ""),
                 role__name=device.role.name,
                 status__name=device.status.name,
                 tenant__name=device.tenant.name if device.tenant else None,
-                secrets_group__name=(device.secrets_group.name if device.secrets_group else ""),
+                secrets_group__name=(device.secrets_group.name if device.secrets_group_id else ""),
                 interfaces=interfaces,
-                mask_length=(device.primary_ip4.mask_length if device.primary_ip4 else None),
+                mask_length=(device.primary_ip4.mask_length if device.primary_ip4_id else None),
                 serial=device.serial,
+                virtual_chassis__name=(device.virtual_chassis.name if device.virtual_chassis_id else None),
+                vc_position=device.vc_position,
+                vc_priority=device.vc_priority,
             )
             self.add(onboarding_device)
             if self.job.debug:
@@ -151,8 +194,9 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
     platform = sync_devices_models.SyncDevicesPlatform
     device = sync_devices_models.SyncDevicesDevice
     device_type = sync_devices_models.SyncDevicesDeviceType
+    virtual_chassis = sync_devices_models.SyncDevicesVirtualChassis
 
-    top_level = ["manufacturer", "platform", "device_type", "device"]
+    top_level = ["manufacturer", "platform", "device_type", "device", "virtual_chassis"]
 
     def __init__(self, job, sync, *args, **kwargs):
         """Initialize the SyncDevicesNetworkAdapter."""
@@ -296,6 +340,8 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                 self.job.logger.debug(f"loading device data for {ip_address}")
             platform = None  # If an exception is caught below, the platform must still be set.
             onboarding_device = None
+            onboarding_members = []
+            onboarding_vc = None
             try:
                 job_form_attrs = self.job.ip_address_inventory[ip_address]
                 location = job_form_attrs["location"]
@@ -306,22 +352,75 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                 device_tenant = job_form_attrs["device_tenant"]
                 secrets_group = job_form_attrs["secrets_group"]
 
-                onboarding_device = self.device(
-                    adapter=self,
-                    device_type__model=self.device_data[ip_address]["device_type"],
-                    location__name=location.name,
-                    name=self.device_data[ip_address]["hostname"],
-                    platform__name=(platform.name if platform else self.device_data[ip_address]["platform"]),
-                    primary_ip4__host=ip_address,
-                    primary_ip4__status__name=primary_ip4__status.name,
-                    role__name=device_role.name,
-                    status__name=device_status.name,
-                    tenant__name=device_tenant.name if device_tenant else None,
-                    secrets_group__name=secrets_group.name,
-                    interfaces=[self.device_data[ip_address]["mgmt_interface"]],
-                    mask_length=int(self.device_data[ip_address]["mask_length"]),
-                    serial=self.device_data[ip_address]["serial"],
-                )
+                virtual_chassis_data = self.device_data[ip_address].get("virtual_chassis", [])
+                if isinstance(virtual_chassis_data, list) and len(virtual_chassis_data) > 1:
+                    # Virtual Chassis detected
+                    onboarding_vc = self.virtual_chassis(
+                        name=self.device_data[ip_address]["hostname"],
+                        master__name=self.device_data[ip_address]["hostname"],
+                    )
+                    # Create Virtual Chassis members
+                    for index, vc_member in enumerate(virtual_chassis_data):
+                        if index == 0:
+                            onboarding_device = self.device(
+                                adapter=self,
+                                device_type__model=self.device_data[ip_address]["modules"][index]["model"],
+                                location__name=location.name,
+                                name=self.device_data[ip_address]["hostname"],
+                                platform__name=(
+                                    platform.name if platform else self.device_data[ip_address]["platform"]
+                                ),
+                                primary_ip4__host=ip_address,
+                                primary_ip4__status__name=primary_ip4__status.name,
+                                role__name=device_role.name,
+                                status__name=device_status.name,
+                                tenant__name=device_tenant.name if device_tenant else None,
+                                secrets_group__name=secrets_group.name,
+                                interfaces=[self.device_data[ip_address]["mgmt_interface"]],
+                                mask_length=int(self.device_data[ip_address]["mask_length"]),
+                                serial=self.device_data[ip_address]["modules"][index]["serial"],
+                                virtual_chassis__name=(self.device_data[ip_address]["hostname"]),
+                                vc_position=int(vc_member["switch"]),
+                                vc_priority=int(vc_member["priority"]),
+                            )
+                        else:
+                            onboarding_members.append(
+                                self.device(
+                                    adapter=self,
+                                    device_type__model=self.device_data[ip_address]["modules"][index]["model"],
+                                    location__name=location.name,
+                                    name=f"{self.device_data[ip_address]['hostname']}:{index+1}",
+                                    platform__name=(
+                                        platform.name if platform else self.device_data[ip_address]["platform"]
+                                    ),
+                                    primary_ip4__host=ip_address,
+                                    role__name=device_role.name,
+                                    status__name=device_status.name,
+                                    tenant__name=device_tenant.name if device_tenant else None,
+                                    serial=self.device_data[ip_address]["modules"][index]["serial"],
+                                    virtual_chassis__name=(self.device_data[ip_address]["hostname"]),
+                                    vc_position=int(vc_member["switch"]),
+                                    vc_priority=int(vc_member["priority"]),
+                                )
+                            )
+                else:
+                    # Standalone device
+                    onboarding_device = self.device(
+                        adapter=self,
+                        device_type__model=self.device_data[ip_address]["device_type"],
+                        location__name=location.name,
+                        name=self.device_data[ip_address]["hostname"],
+                        platform__name=(platform.name if platform else self.device_data[ip_address]["platform"]),
+                        primary_ip4__host=ip_address,
+                        primary_ip4__status__name=primary_ip4__status.name,
+                        role__name=device_role.name,
+                        status__name=device_status.name,
+                        tenant__name=device_tenant.name if device_tenant else None,
+                        secrets_group__name=secrets_group.name,
+                        interfaces=[self.device_data[ip_address]["mgmt_interface"]],
+                        mask_length=int(self.device_data[ip_address]["mask_length"]),
+                        serial=self.device_data[ip_address]["serial"],
+                    )
             except KeyError as err:
                 self.job.logger.error(
                     f"{ip_address}: Unable to load Device due to a missing key in returned data, {err.args}, {err}"
@@ -354,6 +453,25 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                             f"[Serial Number: {self.device_data[ip_address]['serial']}, "
                             f"IP Address: {ip_address}]"
                         )
+                    if len(onboarding_members) > 0:
+                        successful_vc_member_load = False
+                        for member in onboarding_members:
+                            try:
+                                self.add(member)
+                                if self.job.debug:
+                                    self.job.logger.debug(f"Device: {member.name} loaded.")
+                                successful_vc_member_load = True
+                            except diffsync.ObjectAlreadyExists:
+                                self.job.logger.error(
+                                    f"Device: {member.name} has already been loaded! "
+                                    f"Duplicate devices will not be synced. "
+                                    f"[Serial Number: {member.serial}"
+                                )
+                        if successful_vc_member_load:
+                            try:
+                                self.add(onboarding_vc)
+                            except diffsync.ObjectAlreadyExists:
+                                pass
                 else:
                     self._add_ip_address_to_failed_list(ip_address=ip_address)
                     if self.job.debug:

@@ -3,7 +3,7 @@
 from unittest.mock import patch
 
 from nautobot.apps.testing import TransactionTestCase, create_job_result_and_run_job
-from nautobot.dcim.models import Device, Interface
+from nautobot.dcim.models import Device, Interface, VirtualChassis
 from nautobot.extras.choices import JobResultStatusChoices
 
 from nautobot_device_onboarding.tests import utils
@@ -166,3 +166,115 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
 
         old_mgmt_interface = Interface.objects.get(device=device, name="GigabitEthernet1")
         self.assertNotIn("192.1.1.10", list(old_mgmt_interface.ip_addresses.all().values_list("host", flat=True)))
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
+    def test_device_create__virtual_chassis__success(self, device_data):
+        """Test creating a virtual chassis / switch stack with the 'Sync Devices From Network' job."""
+        device_data.return_value = sync_devices_fixture.sync_devices_mock_data_virtual_chassis
+
+        job_form_inputs = {
+            "debug": True,
+            "connectivity_test": False,
+            "dryrun": False,
+            "csv_file": None,
+            "location": self.testing_objects["location"].pk,
+            "namespace": self.testing_objects["namespace"].pk,
+            "ip_addresses": "10.1.1.20",
+            "port": 22,
+            "timeout": 30,
+            "set_mgmt_only": True,
+            "update_devices_without_primary_ip": False,
+            "device_role": self.testing_objects["device_role"].pk,
+            "device_status": self.testing_objects["status"].pk,
+            "interface_status": self.testing_objects["status"].pk,
+            "ip_address_status": self.testing_objects["status"].pk,
+            "secrets_group": self.testing_objects["secrets_group"].pk,
+            "platform": None,
+            "memory_profiling": False,
+        }
+        job_result = create_job_result_and_run_job(
+            module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
+        )
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
+
+        # Verify master device was created
+        master_device = Device.objects.get(serial="STACK001")
+        self.assertEqual("stack-switch-1", master_device.name)
+        self.assertEqual("C9300-48P", master_device.device_type.model)
+        self.assertEqual("10.1.1.20", master_device.primary_ip4.host)
+        self.assertIsNotNone(master_device.virtual_chassis)
+        self.assertEqual(1, master_device.vc_position)
+        self.assertEqual(15, master_device.vc_priority)
+
+        # Verify virtual chassis was created
+        vc = VirtualChassis.objects.get(name="stack-switch-1")
+        self.assertEqual(master_device, vc.master)
+
+        # Verify member 2 was created
+        member2 = Device.objects.get(serial="STACK002")
+        self.assertEqual("stack-switch-1:2", member2.name)
+        self.assertEqual("C9300-24P", member2.device_type.model)
+        self.assertEqual(vc, member2.virtual_chassis)
+        self.assertEqual(2, member2.vc_position)
+        self.assertEqual(14, member2.vc_priority)
+        self.assertIsNone(member2.secrets_group)  # VC members should not have secrets group
+
+        # Verify member 3 was created
+        member3 = Device.objects.get(serial="STACK003")
+        self.assertEqual("stack-switch-1:3", member3.name)
+        self.assertEqual("C9300-48P", member3.device_type.model)
+        self.assertEqual(vc, member3.virtual_chassis)
+        self.assertEqual(3, member3.vc_position)
+        self.assertEqual(1, member3.vc_priority)
+        self.assertIsNone(member3.secrets_group)  # VC members should not have secrets group
+
+        # Verify only master has primary IP
+        self.assertIsNone(member2.primary_ip4)
+        self.assertIsNone(member3.primary_ip4)
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
+    def test_device_create__standalone__success(self, device_data):
+        """Test creating a standalone device (single member, not a stack) with the 'Sync Devices From Network' job."""
+        device_data.return_value = sync_devices_fixture.sync_devices_mock_data_standalone
+
+        job_form_inputs = {
+            "debug": True,
+            "connectivity_test": False,
+            "dryrun": False,
+            "csv_file": None,
+            "location": self.testing_objects["location"].pk,
+            "namespace": self.testing_objects["namespace"].pk,
+            "ip_addresses": "10.1.1.21",
+            "port": 22,
+            "timeout": 30,
+            "set_mgmt_only": True,
+            "update_devices_without_primary_ip": False,
+            "device_role": self.testing_objects["device_role"].pk,
+            "device_status": self.testing_objects["status"].pk,
+            "interface_status": self.testing_objects["status"].pk,
+            "ip_address_status": self.testing_objects["status"].pk,
+            "secrets_group": self.testing_objects["secrets_group"].pk,
+            "platform": None,
+            "memory_profiling": False,
+        }
+        job_result = create_job_result_and_run_job(
+            module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
+        )
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
+
+        # Verify standalone device was created without virtual chassis
+        device = Device.objects.get(serial="STANDALONE001")
+        self.assertEqual("standalone-switch-1", device.name)
+        self.assertEqual("C9300-48P", device.device_type.model)
+        self.assertEqual("10.1.1.21", device.primary_ip4.host)
+        self.assertIsNone(device.virtual_chassis)  # Standalone device should not be in a VC
+        self.assertIsNone(device.vc_position)
+        self.assertIsNone(device.vc_priority)
