@@ -136,11 +136,11 @@ class SyncNetworkDataIPAddress(DiffSyncModel):
     """Shared data model representing an IPAddress."""
 
     _modelname = "ip_address"
-    _identifiers = ("host",)
+    _identifiers = ("host", "namespace")
     _attributes = ("type", "ip_version", "mask_length", "status__name")
 
     host: str
-
+    namespace: str
     mask_length: int
     type: str
     ip_version: int
@@ -152,7 +152,7 @@ class SyncNetworkDataIPAddress(DiffSyncModel):
         diffsync_utils.get_or_create_ip_address(
             host=ids["host"],
             mask_length=attrs["mask_length"],
-            namespace=adapter.job.namespace,
+            namespace=Namespace.objects.get(name=ids["namespace"]),
             default_ip_status=adapter.job.ip_address_status,
             default_prefix_status=adapter.job.default_prefix_status,
             job=adapter.job,
@@ -162,15 +162,21 @@ class SyncNetworkDataIPAddress(DiffSyncModel):
     def update(self, attrs):
         """Update an existing IPAddress object."""
         try:
-            ip_address = IPAddress.objects.get(host=self.host, parent__namespace=self.adapter.job.namespace)
+            ip_address = IPAddress.objects.get(
+                host=self.host,
+                parent__namespace__name=self.namespace,
+            )
         except ObjectDoesNotExist as err:
             self.adapter.job.logger.error(f"{self} failed to update, {err}")
+            return super().update(attrs)
+
         if attrs.get("mask_length"):
             ip_address.mask_length = attrs["mask_length"]
         if attrs.get("status__name"):
             ip_address.status = Status.objects.get(name=attrs["status__name"])
         if attrs.get("ip_version"):
             ip_address.ip_version = attrs["ip_version"]
+
         try:
             ip_address.validated_save()
         except ValidationError as err:
@@ -184,11 +190,17 @@ class SyncNetworkDataIPAddressToInterface(FilteredNautobotModel):
 
     _modelname = "ipaddress_to_interface"
     _model = IPAddressToInterface
-    _identifiers = ("interface__device__name", "interface__name", "ip_address__host")
+    _identifiers = (
+        "interface__device__name",
+        "interface__name",
+        "ip_address__host",
+        "ip_address__parent__namespace__name",
+    )
 
     interface__device__name: str
     interface__name: str
     ip_address__host: str
+    ip_address__parent__namespace__name: str
 
     @classmethod
     def _get_queryset(cls, adapter: "Adapter"):
