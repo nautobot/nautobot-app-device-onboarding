@@ -3,3 +3,5 @@ ip-address: {{ ip_address }}
 netmask: {{ netmask }}
 serial: {{ serial }}
 model: {{ model }}
+sw-version: {{ version }}
+mac-address: {{ mac_address }}
