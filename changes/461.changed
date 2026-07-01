@@ -1,0 +1,1 @@
+Changed interface link status mapping in Cisco to only report "admin down" as not Enabled
