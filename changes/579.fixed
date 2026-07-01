@@ -1,0 +1,1 @@
+Fixed Sync Network Data wiping the OOBM management interface IP attachment and clearing `primary_ip4` on Aruba AOS-CX devices whose primary IP lives on the dedicated `mgmt` port. The mapper now reads `show interface mgmt` and reconciles the OOBM port as a virtual interface with its IP attachment preserved across syncs.
