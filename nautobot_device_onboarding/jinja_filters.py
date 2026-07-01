@@ -167,7 +167,7 @@ def get_vlan_data(item, vlan_mapping, tag_type):  # pylint: disable=too-many-ret
                 trunk_vlans = [current_item["trunking_vlans"]]
             else:
                 trunk_vlans = current_item["trunking_vlans"]
-            if "none" in trunk_vlans:
+            if any(isinstance(v, str) and v.lower() == "none" for v in trunk_vlans):
                 return []
             return [
                 {"id": str(vid), "name": vlan_mapping.get(str(vid), f"VLAN{str(vid).zfill(4)}")}
@@ -204,7 +204,7 @@ def parse_junos_ip_address(item):
                 if is_ip(item[0]["ip_address"][i]):
                     result.append(
                         {
-                            "prefix_length": 32,
+                            "prefix_length": 128 if ":" in item[0]["ip_address"][i] else 32,
                             "ip_address": item[0]["ip_address"][i],
                         }
                     )

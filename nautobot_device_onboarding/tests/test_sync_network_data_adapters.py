@@ -68,6 +68,49 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
         )
         self.assertNotIn("demo-cisco-4", self.job.command_getter_result.keys())
 
+    def test_exclude_filtered_out_devices_no_devices_to_load(self):
+        """When devices_to_load is None, the helper returns early without mutating command_getter_result."""
+        self.assertIsNone(self.job.devices_to_load)
+        original_keys = set(self.job.command_getter_result.keys())
+
+        self.sync_network_data_adapter._exclude_filtered_out_devices()  # pylint: disable=protected-access
+
+        self.assertEqual(set(self.job.command_getter_result.keys()), original_keys)
+
+    def test_exclude_filtered_out_devices_all_valid(self):
+        """When every hostname in command_getter_result is in devices_to_load, the helper is a no-op."""
+        self.job.devices_to_load = Device.objects.filter(name__in=list(self.job.command_getter_result.keys()))
+        original_keys = set(self.job.command_getter_result.keys())
+        self.job.logger = MagicMock()
+
+        self.sync_network_data_adapter._exclude_filtered_out_devices()  # pylint: disable=protected-access
+
+        self.assertEqual(set(self.job.command_getter_result.keys()), original_keys)
+        self.job.logger.warning.assert_not_called()
+
+    def test_exclude_filtered_out_devices_prunes_excluded(self):
+        """Hostnames absent from devices_to_load are removed from command_getter_result and a warning is logged.
+
+        Regression test for the Site 3 leak — without this guard, every load_*() method iterates
+        command_getter_result for ALL discovered hostnames, including those excluded by the
+        (name, serial) queryset filter, silently writing interfaces / cables / IPs against them.
+        """
+        # Keep demo-cisco-1, exclude demo-cisco-2 — both are in command_getter_result, only the
+        # first is in devices_to_load (simulates demo-cisco-2 failing the (name, serial) filter).
+        self.assertIn("demo-cisco-1", self.job.command_getter_result)
+        self.assertIn("demo-cisco-2", self.job.command_getter_result)
+        self.job.devices_to_load = Device.objects.filter(name="demo-cisco-1")
+        self.job.logger = MagicMock()
+
+        self.sync_network_data_adapter._exclude_filtered_out_devices()  # pylint: disable=protected-access
+
+        self.assertIn("demo-cisco-1", self.job.command_getter_result)
+        self.assertNotIn("demo-cisco-2", self.job.command_getter_result)
+        self.job.logger.warning.assert_called_once()
+        # The warning message names the excluded hostname so operators can investigate.
+        warning_args = str(self.job.logger.warning.call_args)
+        self.assertIn("demo-cisco-2", warning_args)
+
     @patch("nautobot_device_onboarding.diffsync.adapters.sync_network_data_adapters.sync_network_data_command_getter")
     def test_execute_command_getter(self, command_getter_result):
         """Test execute command getter."""
@@ -85,10 +128,10 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
         """Test loading device data returned from command getter into the diffsync store."""
         self.sync_network_data_adapter.load_devices()
 
-        # test loaded devices
+        # test loaded devices — diffsync identity for SyncNetworkDataDevice is (name,) only;
+        # serial is an attribute since the trial branch's Delta 2 move.
         for hostname, device_data in self.job.command_getter_result.items():
-            unique_id = f"{hostname}__{device_data['serial']}"
-            diffsync_obj = self.sync_network_data_adapter.get("device", unique_id)
+            diffsync_obj = self.sync_network_data_adapter.get("device", hostname)
             self.assertEqual(hostname, diffsync_obj.name)
             self.assertEqual(device_data["serial"], diffsync_obj.serial)
 
@@ -119,9 +162,10 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
                 if interface_data["ip_addresses"]:
                     for ip_address in interface_data["ip_addresses"]:
                         if ip_address["ip_address"]:
-                            unique_id = ip_address["ip_address"]
+                            unique_id = f"{ip_address['ip_address']}__{self.job.namespace.name}"
                             diffsync_obj = self.sync_network_data_adapter.get("ip_address", unique_id)
                             self.assertEqual(ip_address["ip_address"], diffsync_obj.host)
+                            self.assertEqual(self.job.namespace.name, diffsync_obj.namespace)
                             self.assertEqual(4, diffsync_obj.ip_version)
                             self.assertEqual(int(ip_address["prefix_length"]), diffsync_obj.mask_length)
                             self.assertEqual(self.job.ip_address_status.name, diffsync_obj.status__name)
@@ -168,11 +212,14 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
             for interface_name, interface_data in device_data["interfaces"].items():
                 for ip_address in interface_data["ip_addresses"]:
                     if ip_address["ip_address"]:
-                        unique_id = f"{hostname}__{interface_name}__{ip_address['ip_address']}"
+                        unique_id = (
+                            f"{hostname}__{interface_name}__{ip_address['ip_address']}__{self.job.namespace.name}"
+                        )
                         diffsync_obj = self.sync_network_data_adapter.get("ipaddress_to_interface", unique_id)
                         self.assertEqual(hostname, diffsync_obj.interface__device__name)
                         self.assertEqual(interface_name, diffsync_obj.interface__name)
                         self.assertEqual(ip_address["ip_address"], diffsync_obj.ip_address__host)
+                        self.assertEqual(self.job.namespace.name, diffsync_obj.ip_address__parent__namespace__name)
 
     def test_load_tagged_vlans_to_interface(self):
         """Test loading tagged vlan interface assignments into the Diffsync store."""
@@ -245,6 +292,10 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
 
     def test_load_software_versions(self):
         """Test loading software version data returned from command getter into the diffsync store."""
+        # In production, execute_command_getter() populates devices_to_load via
+        # generate_device_queryset_from_command_getter_result(). This test calls
+        # load_software_versions() directly, so set the queryset up by hand.
+        self.job.devices_to_load = Device.objects.filter(name__in=list(self.job.command_getter_result.keys()))
         self.sync_network_data_adapter.load_software_versions()
         for _, device_data in self.job.command_getter_result.items():
             device_data = self.job.command_getter_result["demo-cisco-1"]
@@ -258,7 +309,7 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
         self.sync_network_data_adapter.load_software_version_to_device()
         for _, device_data in self.job.command_getter_result.items():
             device = Device.objects.get(serial=device_data["serial"])
-            unique_id = f"{device.name}__{device.serial}"
+            unique_id = device.name
             diffsync_obj = self.sync_network_data_adapter.get("software_version_to_device", unique_id)
             self.assertEqual(device_data["software_version"], diffsync_obj.software_version__version)
 
@@ -319,12 +370,13 @@ class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
             host__in=ip_address_hosts,
             parent__namespace__name=self.job.namespace.name,
         ):
-            unique_id = f"{ip_address.host}"
+            unique_id = f"{ip_address.host}__{ip_address.parent.namespace.name}"
             diffsync_obj = self.sync_network_data_adapter.get("ip_address", unique_id)
             self.assertEqual(ip_address.host, diffsync_obj.host)
             self.assertEqual(ip_address.ip_version, diffsync_obj.ip_version)
             self.assertEqual(ip_address.mask_length, diffsync_obj.mask_length)
             self.assertEqual(self.job.ip_address_status.name, diffsync_obj.status__name)
+            self.assertEqual(ip_address.parent.namespace.name, diffsync_obj.namespace)
 
     def test_load_vlans(self):
         """Test loading Nautobot vlan data into the diffsync store."""
@@ -442,7 +494,7 @@ class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
         """Test loading Nautobot software version device assignments into the Diffsync store."""
         self.sync_network_data_adapter.load_software_version_to_device()
         for device in Device.objects.filter(name__in=["demo-cisco-1", "demo-cisco-2"]):
-            unique_id = f"{device.name}__{device.serial}"
+            unique_id = device.name
             diffsync_obj = self.sync_network_data_adapter.get("software_version_to_device", unique_id)
             self.assertEqual(device.software_version.version, diffsync_obj.software_version__version)
 

@@ -402,7 +402,7 @@
                 },
                 {
                     "ip_address": "fe80::2a8a:1c0f:fc56:9bff",
-                    "prefix_length": 32
+                    "prefix_length": 128
                 }
             ],
             "lag": [],
