@@ -40,8 +40,9 @@ class TestTransformNoGitRepo(unittest.TestCase):
             "aruba_os",
             "brocade_fastiron",
             "hp_procurve",
+            "nokia_sros",
         ]
-        self.assertEqual(sorted(default_mappers), list(sorted(command_mappers.keys())))
+        self.assertEqual(sorted(default_mappers), sorted(command_mappers.keys()))
 
     def test_load_command_mappers_from_dir(self):
         command_mappers = load_command_mappers_from_dir(self.yaml_file_dir)
