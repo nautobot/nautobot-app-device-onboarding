@@ -1,1 +1,0 @@
-Fix Sync Device Job to raise if platform auto-discovery fails and fail_job_on_task_failure is set to True.
