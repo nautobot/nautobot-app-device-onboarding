@@ -4,8 +4,10 @@ This document describes all new features and changes in the release. The format 
 
 ## Release Overview
 
-- Major features or milestones
-- Changes to compatibility with Nautobot and/or other apps, libraries etc.
+- Added support for onboarding switch stacks as Virtual Chassis objects for Cisco IOS and IOS-XE platforms.
+- Stricter device matching now requires both hostname and serial by default, with a new `Update Devices With Changed Serial` toggle to opt back into hostname-only matching.
+- Added an optional `Sync VRF to Prefix` toggle to the Sync Network Data From Network job.
+- Numerous bug fixes across VRF assignment, VLAN/trunk handling, namespace-scoped IP lookups, and Junos discovery.
 
 <!-- towncrier release notes start -->
 
