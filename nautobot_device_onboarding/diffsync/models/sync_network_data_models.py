@@ -18,7 +18,10 @@ from nautobot.extras.models import Status
 from nautobot.ipam.models import VLAN, VRF, IPAddress, IPAddressToInterface, Namespace, Prefix
 from nautobot_ssot.contrib import CustomFieldAnnotation, NautobotModel
 
-from nautobot_device_onboarding.constants import ONBOARDING_DEVICE_MODULE_RECURSION_LIMIT
+from nautobot_device_onboarding.constants import (
+    MANAGED_OWNER_KEY,
+    ONBOARDING_DEVICE_MODULE_RECURSION_LIMIT,
+)
 from nautobot_device_onboarding.utils import diffsync_utils
 
 
@@ -860,4 +863,65 @@ class SyncNetworkSoftwareVersionToDevice(DiffSyncModel):
 
     def delete(self):
         """Prevent device deletion."""
+        return None
+
+
+class SyncNetworkDataConfigContext(DiffSyncModel):
+    """Shared data model representing the device-onboarding-managed local config context slice.
+
+    Supplemental show-command data declared under the `config_context` mapper key is written to
+    a Device under a single managed top-level key, local_config_context_data[MANAGED_OWNER_KEY]
+    (i.e. `device_onboarding`). Only this app's key is read, diffed, and written; every other
+    top-level key on the device (Git-sourced, manual, scoped contexts) is preserved.
+
+    Additive-only: delete() is a no-op so a sync can never strip a device's config context.
+    """
+
+    _modelname = "config_context"
+    _model = Device
+    _identifiers = ("device__name",)
+    _attributes = ("data",)
+
+    device__name: str
+    data: Optional[dict] = None
+
+    @classmethod
+    def _write(cls, adapter, device_name, data, not_saved_exc):
+        """Write the managed blob to the device's local config context under MANAGED_OWNER_KEY."""
+        try:
+            device = adapter.job.devices_to_load.get(name=device_name)
+        except ObjectDoesNotExist as err:
+            adapter.job.logger.error(
+                "Failed to write config context to %s. No matching device in the job's filter set.", device_name
+            )
+            raise not_saved_exc(err)
+        local_data = device.local_config_context_data or {}
+        local_data[MANAGED_OWNER_KEY] = data or {}
+        device.local_config_context_data = local_data
+        try:
+            device.validated_save()
+        except ValidationError as err:
+            adapter.job.logger.error(f"Failed to write config context to device [{device_name}], {err}")
+            raise not_saved_exc(err)
+
+    @classmethod
+    def create(cls, adapter, ids, attrs):
+        """Write the managed config-context blob to the device."""
+        cls._write(adapter, ids["device__name"], attrs.get("data"), diffsync_exceptions.ObjectNotCreated)
+        return super().create(adapter, ids, attrs)
+
+    def update(self, attrs):
+        """Replace the managed config-context blob on the device."""
+        if "data" in attrs:
+            self._write(
+                self.adapter,
+                self.get_identifiers()["device__name"],
+                attrs["data"],
+                diffsync_exceptions.ObjectNotUpdated,
+            )
+        return super().update(attrs)
+
+    def delete(self):
+        """Prevent config-context deletion (additive-only contract)."""
+        self.adapter.job.logger.warning(f"{self} config context will not be deleted.")
         return None

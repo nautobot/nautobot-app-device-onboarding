@@ -16,6 +16,7 @@ from nautobot_ssot.contrib import NautobotAdapter
 from netaddr import EUI, mac_unix_expanded
 from netutils.interface import canonical_interface_name
 
+from nautobot_device_onboarding.constants import MANAGED_OWNER_KEY
 from nautobot_device_onboarding.diffsync.models import sync_network_data_models
 from nautobot_device_onboarding.nornir_plays.command_getter import (
     sync_network_data_command_getter,
@@ -58,6 +59,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
     cable = sync_network_data_models.SyncNetworkDataCable
     software_version = sync_network_data_models.SyncNetworkSoftwareVersion
     software_version_to_device = sync_network_data_models.SyncNetworkSoftwareVersionToDevice
+    config_context = sync_network_data_models.SyncNetworkDataConfigContext
 
     primary_ips = None
 
@@ -75,6 +77,7 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
         "cable",
         "software_version",
         "software_version_to_device",
+        "config_context",
     ]
 
     def _cache_primary_ips(self, device_queryset):
@@ -384,6 +387,23 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
             network_software_version_to_device.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
             self.add(network_software_version_to_device)
 
+    def load_config_context(self):
+        """Load the device-onboarding-managed config context slice from each device.
+
+        Reads ONLY local_config_context_data[MANAGED_OWNER_KEY] so the diff is bounded to this
+        app's namespace — other config-context sources (Git data sources, manual entry, scoped
+        ConfigContext objects) never enter the comparison. Scoped to devices_to_load.
+        """
+        for device in self.job.devices_to_load:
+            managed = (device.local_config_context_data or {}).get(MANAGED_OWNER_KEY, {})
+            config_context = self.config_context(
+                adapter=self,
+                device__name=device.name,
+                data=managed or {},
+            )
+            config_context.model_flags = DiffSyncModelFlags.SKIP_UNMATCHED_DST
+            self.add(config_context)
+
     def _handle_single_parameter(self, parameters, parameter_name, database_object, diffsync_model):
         """Overload parameter handling to add special handling for modular interfaces."""
         if parameter_name == "device__name":
@@ -437,6 +457,9 @@ class SyncNetworkDataNautobotAdapter(FilteredNautobotAdapter):
             elif model_name == "software_version_to_device":
                 if self.job.sync_software_version:
                     self.load_software_version_to_device()
+            elif model_name == "config_context":
+                if self.job.sync_config_context:
+                    self.load_config_context()
             else:
                 diffsync_model = self._get_diffsync_class(model_name)
                 self._load_objects(diffsync_model)
@@ -518,6 +541,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
     cable = sync_network_data_models.SyncNetworkDataCable
     software_version = sync_network_data_models.SyncNetworkSoftwareVersion
     software_version_to_device = sync_network_data_models.SyncNetworkSoftwareVersionToDevice
+    config_context = sync_network_data_models.SyncNetworkDataConfigContext
 
     top_level = [
         "ip_address",
@@ -533,6 +557,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
         "cable",
         "software_version",
         "software_version_to_device",
+        "config_context",
     ]
 
     def _handle_failed_devices(self, device_data):
@@ -1145,6 +1170,25 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                 except diffsync.exceptions.ObjectAlreadyExists:
                     continue
 
+    def load_config_context(self):
+        """Load supplemental config-context data collected from each device.
+
+        Iterates the pruned command_getter_result (after _exclude_filtered_out_devices), so
+        excluded/serial-drifted devices never contribute config context.
+        """
+        for hostname, device_data in self.job.command_getter_result.items():
+            if self.job.debug:
+                self.job.logger.debug(f"Loading config context from {hostname}")
+            try:
+                config_context = self.config_context(
+                    adapter=self,
+                    device__name=hostname,
+                    data=device_data.get("config_context", {}),
+                )
+                self.add(config_context)
+            except diffsync.exceptions.ObjectAlreadyExists:
+                continue
+
     def load(self):
         """Load network data."""
         self.execute_command_getter()
@@ -1170,3 +1214,5 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
             self.load_software_versions()
         if self.job.sync_software_version:
             self.load_software_version_to_device()
+        if self.job.sync_config_context:
+            self.load_config_context()
