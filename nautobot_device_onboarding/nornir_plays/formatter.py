@@ -128,6 +128,7 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
     sync_vrfs = host.defaults.data.get("sync_vrfs", False)
     sync_cables = host.defaults.data.get("sync_cables", False)
     sync_software_version = host.defaults.data.get("sync_software_version", False)
+    sync_config_context = host.defaults.data.get("sync_config_context", False)
     get_context_from_pre_processor = {}
     if command_info_dict.get("pre_processor"):
         for pre_processor_name, field_data in command_info_dict["pre_processor"].items():
@@ -159,6 +160,31 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
         if not sync_software_version and ssot_field == "software_version":
             continue
         if ssot_field == "pre_processor":
+            continue
+        if ssot_field == "config_context":
+            # config_context holds a map of independent subfields, each with its own command(s).
+            # Collect them under a single "config_context" key; the consumer namespaces it on write.
+            if sync_config_context:
+                result_dict["config_context"] = {}
+                for subfield, subdef in field_data.items():
+                    sub_commands = subdef["commands"]
+                    if isinstance(sub_commands, dict):
+                        sub_commands = [sub_commands]
+                    for show_command_dict in sub_commands:
+                        # A device may not support every config_context command (no OSPF, no SNMP,
+                        # unsupported platform command). A failed/absent command is missing from
+                        # command_outputs_dict; .get() yields None, which extract_and_post_process
+                        # normalizes to an empty result for the declared iterable_type instead of
+                        # raising KeyError and aborting extraction for the whole host.
+                        command_output = command_outputs_dict.get(show_command_dict["command"])
+                        _, current_field_post = extract_and_post_process(
+                            command_output,
+                            show_command_dict,
+                            {"obj": host.name, "original_host": host.name},
+                            show_command_dict.get("iterable_type"),
+                            job_debug,
+                        )
+                        result_dict["config_context"][subfield] = current_field_post
             continue
         if isinstance(field_data["commands"], dict):
             # only one command is specified as a dict force it to a list.

@@ -64,7 +64,9 @@ def deduplicate_command_list(data):
     return unique_list
 
 
-def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables, sync_software_version):
+def _get_commands_to_run(
+    yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables, sync_software_version, sync_config_context=False
+):
     """Using merged command mapper info and look up all commands that need to be run."""
     all_commands = []
     for key, value in yaml_parsed_info.items():
@@ -80,6 +82,16 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables, s
                 else:
                     if isinstance(current_root_key, dict):
                         all_commands.append(current_root_key)
+        elif key == "config_context":
+            # config_context's value is a map of subfields, each holding its own command(s).
+            if not sync_config_context:
+                continue
+            for _subfield, subdef in value.items():
+                sub_commands = subdef.get("commands")
+                if isinstance(sub_commands, list):
+                    all_commands.extend(sub_commands)
+                elif isinstance(sub_commands, dict):
+                    all_commands.append(sub_commands)
         else:
             # Deduplicate commands + parser key
             current_root_key = value.get("commands")
@@ -141,6 +153,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
         getattr(nautobot_job, "sync_vrfs", False),
         getattr(nautobot_job, "sync_cables", False),
         getattr(nautobot_job, "sync_software_version", False),
+        getattr(nautobot_job, "sync_config_context", False),
     )
     if (
         getattr(nautobot_job, "sync_cables", False)
@@ -387,6 +400,7 @@ def sync_network_data_command_getter(job, log_level):
                         "sync_vrfs": job.sync_vrfs,
                         "sync_cables": job.sync_cables,
                         "sync_software_version": job.sync_software_version,
+                        "sync_config_context": job.sync_config_context,
                     },
                 },
             },

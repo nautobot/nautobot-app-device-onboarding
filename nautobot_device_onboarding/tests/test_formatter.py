@@ -844,3 +844,111 @@ class TestFormatterSyncNetworkDataWithSoftware(unittest.TestCase):
                                 job_debug=False,
                             )
                             self.assertEqual(expected_parsed_result, actual_result)
+
+
+class TestFormatterSyncNetworkDataConfigContext(unittest.TestCase):
+    """Tests for the config_context reserved-key extraction in perform_data_extraction."""
+
+    def setUp(self):
+        # Only the config_context section is exercised. The shipped mappers intentionally do not
+        # include a config_context block, so source it from the mock cisco_ios mapper fixture.
+        with open(
+            os.path.join(MOCK_DIR, "command_mappers", "mock_cisco_ios.yml"), "r", encoding="utf-8"
+        ) as mapper_file:
+            mock_mapper = yaml.safe_load(mapper_file)
+        self.config_context_mapper = {"config_context": mock_mapper["sync_network_data"]["config_context"]}
+        self.command_outputs = {
+            "show ip ospf neighbor": [
+                {
+                    "neighbor_id": "2.2.2.2",
+                    "priority": "1",
+                    "state": "FULL/DR",
+                    "dead_time": "00:00:39",
+                    "ip_address": "10.0.0.2",
+                    "interface": "GigabitEthernet0/1",
+                },
+                {
+                    "neighbor_id": "1.1.1.1",
+                    "priority": "1",
+                    "state": "FULL/BDR",
+                    "dead_time": "00:00:38",
+                    "ip_address": "10.0.0.1",
+                    "interface": "GigabitEthernet0/0",
+                },
+            ],
+            # parser: raw stores the output under a "raw" key.
+            "show running-config | include snmp-server community": {
+                "raw": "snmp-server community public RO\nsnmp-server community private RW\n"
+            },
+        }
+
+    def _make_host(self, sync_config_context):
+        return Host(
+            name="198.51.100.1",
+            hostname="198.51.100.1",
+            port=22,
+            username="username",
+            password="password",  # nosec
+            platform="cisco_ios",
+            defaults=Defaults(data={"sync_config_context": sync_config_context}),
+        )
+
+    def test_config_context_extracted_when_enabled(self):
+        host = self._make_host(sync_config_context=True)
+        result = perform_data_extraction(host, self.config_context_mapper, self.command_outputs, job_debug=False)
+        expected = {
+            "config_context": {
+                "ip_ospf_neighbors": [
+                    {
+                        "neighbor_id": "1.1.1.1",
+                        "ip_address": "10.0.0.1",
+                        "interface": "GigabitEthernet0/0",
+                        "state": "FULL/BDR",
+                    },
+                    {
+                        "neighbor_id": "2.2.2.2",
+                        "ip_address": "10.0.0.2",
+                        "interface": "GigabitEthernet0/1",
+                        "state": "FULL/DR",
+                    },
+                ],
+                "snmp_communities": [
+                    {"community": "snmp-server community private RW"},
+                    {"community": "snmp-server community public RO"},
+                ],
+            }
+        }
+        self.assertEqual(expected, result)
+
+    def test_config_context_omitted_when_disabled(self):
+        host = self._make_host(sync_config_context=False)
+        result = perform_data_extraction(host, self.config_context_mapper, self.command_outputs, job_debug=False)
+        self.assertNotIn("config_context", result)
+
+    def test_config_context_is_json_round_trippable(self):
+        host = self._make_host(sync_config_context=True)
+        result = perform_data_extraction(host, self.config_context_mapper, self.command_outputs, job_debug=False)
+        self.assertEqual(json.loads(json.dumps(result)), result)
+
+    def test_config_context_empty_when_device_has_no_data(self):
+        """A device with no OSPF neighbors / no SNMP communities yields stable empty subfields."""
+        host = self._make_host(sync_config_context=True)
+        empty_outputs = {
+            "show ip ospf neighbor": [],
+            "show running-config | include snmp-server community": {"raw": ""},
+        }
+        result = perform_data_extraction(host, self.config_context_mapper, empty_outputs, job_debug=False)
+        self.assertEqual(result, {"config_context": {"ip_ospf_neighbors": [], "snmp_communities": []}})
+        # The empty shape must round-trip so the next sync diffs clean instead of perpetually updating.
+        self.assertEqual(json.loads(json.dumps(result)), result)
+
+    def test_config_context_missing_command_output_does_not_raise(self):
+        """A subfield whose command failed/was not returned is skipped to an empty result, not a KeyError."""
+        host = self._make_host(sync_config_context=True)
+        # The SNMP command output is absent entirely (command failed or unsupported on the device).
+        partial_outputs = {"show ip ospf neighbor": self.command_outputs["show ip ospf neighbor"]}
+        result = perform_data_extraction(host, self.config_context_mapper, partial_outputs, job_debug=False)
+        # The missing subfield normalizes to an empty list...
+        self.assertEqual(result["config_context"]["snmp_communities"], [])
+        # ...while the subfield that did return data is still populated.
+        self.assertEqual(len(result["config_context"]["ip_ospf_neighbors"]), 2)
