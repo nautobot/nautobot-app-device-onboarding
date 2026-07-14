@@ -119,6 +119,7 @@ class TestTransformWithGitRepo(TransactionTestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             with self.settings(GIT_ROOT=tempdir):
                 MockGitRepo.side_effect = self.populate_repo
+                MockGitRepo.return_value.__enter__.return_value = MockGitRepo.return_value
                 MockGitRepo.return_value.checkout.return_value = (
                     self.COMMIT_HEXSHA,
                     True,
