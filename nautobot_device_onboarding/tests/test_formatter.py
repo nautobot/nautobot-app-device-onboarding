@@ -6,6 +6,7 @@ import unittest
 from unittest.mock import patch
 
 import yaml
+from nautobot.extras.models import GitRepository
 from nornir.core.inventory import ConnectionOptions, Defaults, Host
 
 from nautobot_device_onboarding.nornir_plays.formatter import (
@@ -402,10 +403,10 @@ class TestFormatterExtractAndProcess(unittest.TestCase):
 class TestFormatterSyncDevices(unittest.TestCase):
     """Tests to ensure formatter is working for sync devices 'ssot job'."""
 
-    @patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository")
-    def setUp(self, mock_repo):
+    @patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository.objects.get")
+    def setUp(self, mock_repo_get):
         # Load the application command_mapper files
-        mock_repo.return_value = 0
+        mock_repo_get.side_effect = GitRepository.DoesNotExist
         self.platform_parsing_info = add_platform_parsing_info()
         self.host = Host(
             name="198.51.100.1",
@@ -493,10 +494,10 @@ class TestFormatterSyncNetworkDataNoOptions(unittest.TestCase):
 
     maxDiff = None
 
-    @patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository")
-    def setUp(self, mock_repo):
+    @patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository.objects.get")
+    def setUp(self, mock_repo_get):
         # Load the application command_mapper files
-        mock_repo.return_value = 0
+        mock_repo_get.side_effect = GitRepository.DoesNotExist
         self.platform_parsing_info = add_platform_parsing_info()
         self.host = Host(
             name="198.51.100.1",
@@ -566,10 +567,10 @@ class TestFormatterSyncNetworkDataWithVrfs(unittest.TestCase):
 
     maxDiff = None
 
-    @patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository")
-    def setUp(self, mock_repo):
+    @patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository.objects.get")
+    def setUp(self, mock_repo_get):
         # Load the application command_mapper files
-        mock_repo.return_value = 0
+        mock_repo_get.side_effect = GitRepository.DoesNotExist
         self.platform_parsing_info = add_platform_parsing_info()
         self.host = Host(
             name="198.51.100.1",
@@ -639,10 +640,10 @@ class TestFormatterSyncNetworkDataWithVlans(unittest.TestCase):
 
     maxDiff = None
 
-    @patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository")
-    def setUp(self, mock_repo):
+    @patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository.objects.get")
+    def setUp(self, mock_repo_get):
         # Load the application command_mapper files
-        mock_repo.return_value = 0
+        mock_repo_get.side_effect = GitRepository.DoesNotExist
         self.platform_parsing_info = add_platform_parsing_info()
         self.host = Host(
             name="198.51.100.1",
@@ -711,10 +712,10 @@ class TestFormatterSyncNetworkDataWithVlans(unittest.TestCase):
 class TestFormatterSyncNetworkDataAll(unittest.TestCase):
     """Tests to ensure formatter is working for sync devices 'ssot job'."""
 
-    @patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository")
-    def setUp(self, mock_repo):
+    @patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository.objects.get")
+    def setUp(self, mock_repo_get):
         # Load the application command_mapper files
-        mock_repo.return_value = 0
+        mock_repo_get.side_effect = GitRepository.DoesNotExist
         self.platform_parsing_info = add_platform_parsing_info()
         self.host = Host(
             name="198.51.100.1",
@@ -777,10 +778,10 @@ class TestFormatterSyncNetworkDataAll(unittest.TestCase):
 class TestFormatterSyncNetworkDataWithSoftware(unittest.TestCase):
     """Tests to ensure formatter is working for sync devices 'ssot job'."""
 
-    @patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository")
-    def setUp(self, mock_repo):
+    @patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository.objects.get")
+    def setUp(self, mock_repo_get):
         # Load the application command_mapper files
-        mock_repo.return_value = 0
+        mock_repo_get.side_effect = GitRepository.DoesNotExist
         self.platform_parsing_info = add_platform_parsing_info()
         self.host = Host(
             name="198.51.100.1",
