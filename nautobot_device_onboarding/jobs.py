@@ -61,7 +61,7 @@ from nautobot_device_onboarding.nornir_plays.empty_inventory import EmptyInvento
 from nautobot_device_onboarding.nornir_plays.inventory_creator import _set_inventory
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 from nautobot_device_onboarding.nornir_plays.processor import TroubleshootingProcessor
-from nautobot_device_onboarding.utils.helper import onboarding_task_fqdn_to_ip
+from nautobot_device_onboarding.utils.helper import add_content_type, onboarding_task_fqdn_to_ip
 
 InventoryPluginRegister.register("empty-inventory", EmptyInventory)
 
@@ -300,8 +300,9 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
     )
     update_devices_without_primary_ip = BooleanVar(
         default=False,
-        description="If a device at the specified location already exists in Nautobot but the primary ip address "
-        "does not match an ip address entered, update this device with the sync.",
+        description="If a device at the specified location already exists in Nautobot, update it with the sync "
+        "when its primary IP address or its stored serial number does not match what the device reports "
+        "(e.g. after a stack master role flip, hardware swap, or a previously-standalone device joining a stack).",
     )
     device_role = ObjectVar(
         model=Role,
@@ -382,6 +383,8 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             self.logger.error("The CSV file contains no data!")
             return None
 
+        location_type_ids = set()
+
         self.logger.info("Processing CSV data...")
         processing_failed = False
         processed_csv_data = {}
@@ -397,6 +400,14 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                 else:
                     query = query = f"location_name: {row.get('location_name')}"
                     location = Location.objects.get(name=row["location_name"].strip(), parent=None)
+
+                # Check and add content type if needed (only once per location type)
+                location_type = location.location_type
+                if location_type.id not in location_type_ids:
+                    if not location_type.content_types.filter(app_label="dcim", model="device").exists():
+                        add_content_type(self, model_to_add=Device, target_object=location_type)
+                    location_type_ids.add(location_type.id)
+
                 query = f"device_role: {row.get('device_role_name')}"
                 device_role = Role.objects.get(
                     name=row["device_role_name"].strip(),
@@ -577,6 +588,11 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                     # TODO: We're only raising an exception if a csv file is not provided. Is that correct?
                     raise ValueError("Platform.network_driver missing")
 
+            if location:
+                location_type = location.location_type
+                if not location_type.content_types.filter(app_label="dcim", model="device").exists():
+                    add_content_type(self, model_to_add=Device, target_object=location_type)
+
             for ip_address in ip_addresses.replace(" ", "").split(","):
                 resolved = self._validate_ip_address(ip_address)
                 self.ip_address_inventory[resolved] = {"original_ip_address": ip_address, **default_values}
@@ -615,8 +631,22 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
     )
     sync_vlans = BooleanVar(default=False, description="Sync VLANs and interface VLAN assignments.")
     sync_vrfs = BooleanVar(default=False, description="Sync VRFs and interface VRF assignments.")
+    sync_vrf_to_prefix = BooleanVar(
+        default=False,
+        description=(
+            "Associate each interface's VRF with the parent prefix of the interface's IP addresses. "
+            "Requires 'Sync VRFs'. Associations are add-only; stale prefix/VRF links are not removed."
+        ),
+    )
     sync_cables = BooleanVar(default=False, description="Sync cables between interfaces via a LLDP or CDP.")
     sync_software_version = BooleanVar(default=False, description="Sync software version from device.")
+    update_devices_with_changed_serial = BooleanVar(
+        default=False,
+        description="If a device at the specified location already exists in Nautobot but the serial number "
+        "reported by the device differs from the stored serial (e.g. after a stack master role flip or "
+        "hardware swap), include this device in the sync anyway. Without this flag the device is excluded "
+        "from `devices_to_load` because the queryset filter requires both name and serial to match.",
+    )
     namespace = ObjectVar(
         model=Namespace,
         required=True,
@@ -690,8 +720,10 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         connectivity_test,
         sync_vlans,
         sync_vrfs,
+        sync_vrf_to_prefix,
         sync_cables,
         sync_software_version,
+        update_devices_with_changed_serial,
         namespace,
         interface_status,
         ip_address_status,
@@ -710,8 +742,10 @@ class SSOTSyncNetworkData(DataSource):  # pylint: disable=too-many-instance-attr
         self.connectivity_test = connectivity_test
         self.sync_vlans = sync_vlans
         self.sync_vrfs = sync_vrfs
+        self.sync_vrf_to_prefix = sync_vrf_to_prefix
         self.sync_cables = sync_cables
         self.sync_software_version = sync_software_version
+        self.update_devices_with_changed_serial = update_devices_with_changed_serial
         self.namespace = namespace
         self.interface_status = interface_status
         self.ip_address_status = ip_address_status

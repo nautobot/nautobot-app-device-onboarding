@@ -30,6 +30,16 @@ sync_devices:
         jpath: "[?ip_address=='{{ obj }}'].prefix_length"
         post_processor: "{{ obj | unique | first }}"
         iterable_type: "int"
+  virtual_chassis:
+    commands:
+      - command: "show switch detail"
+        parser: "textfsm"
+        jpath: "[*].{switch: switch, priority: priority}"
+  modules:
+    commands:
+      - command: "show module"
+        parser: "textfsm"
+        jpath: "[*].{model: model, serial: serial}"
 sync_network_data:
   pre_processor:
     vlan_map:
@@ -104,7 +114,7 @@ sync_network_data:
     commands:
       - command: "show ip vrf interfaces"
         parser: "textfsm"
-        jpath: "[?interface=='{{ current_key | abbreviated_interface_name(addl_reverse_map={'VirtualPortGroup': 'Vi'}) }}'].{name:vrf}"
+        jpath: "[?interface=='{{ current_key | abbreviated_interface_name(addl_name_map={'Vlan': 'VLAN'}, addl_reverse_map={'VirtualPortGroup': 'Vi'}) }}'].{name:vrf}"
         post_processor: "{% if obj | length > 0 %}{{ obj[0] | key_exist_or_default('name') | tojson }}{% else %}{{ obj }}{% endif %}"
         iterable_type: "dict"
   interfaces__tagged_vlans:
