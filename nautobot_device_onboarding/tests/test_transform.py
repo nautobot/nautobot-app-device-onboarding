@@ -2,28 +2,37 @@
 
 import os
 import tempfile
-import unittest
 from unittest import mock
 
 import yaml
+from django.core.exceptions import ObjectDoesNotExist
+from nautobot.apps.testing import TestCase, TransactionTestCase
 from nautobot.core.jobs import GitRepositorySync
-from nautobot.core.testing import TransactionTestCase, run_job_for_testing
+from nautobot.core.testing import run_job_for_testing
 from nautobot.extras.choices import JobResultStatusChoices
 from nautobot.extras.models import GitRepository, JobResult
 
-from nautobot_device_onboarding.constants import ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER
-from nautobot_device_onboarding.nornir_plays.transform import add_platform_parsing_info, load_command_mappers_from_dir
+from nautobot_device_onboarding.constants import (
+    ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER,
+)
+from nautobot_device_onboarding.nornir_plays.transform import (
+    add_platform_parsing_info,
+    get_git_repo,
+    load_command_mappers_from_dir,
+)
 
 MOCK_DIR = os.path.join("nautobot_device_onboarding", "tests", "mock")
 
 
-class TestTransformNoGitRepo(unittest.TestCase):
+class TestTransformNoGitRepo(TestCase):
     """Testing the transform helpers with no git repo overloads."""
 
     def setUp(self):
         self.yaml_file_dir = f"{MOCK_DIR}/command_mappers/"
 
-    def test_add_platform_parsing_info_sane_defaults(self):
+    @mock.patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository.objects.get")
+    def test_add_platform_parsing_info_sane_defaults(self, mock_repo_get):
+        mock_repo_get.side_effect = ObjectDoesNotExist
         command_mappers = add_platform_parsing_info()
         default_mappers = [
             "cisco_ios",
@@ -73,12 +82,22 @@ class TestTransformWithGitRepo(TransactionTestCase):
         """Simple helper to populate a mock repo with some data."""
         os.makedirs(path, exist_ok=True)
         os.makedirs(os.path.join(path, "onboarding_command_mappers"), exist_ok=True)
-        with open(os.path.join(path, "onboarding_command_mappers", "foo_bar.yml"), "w", encoding="utf-8") as fd:  # pylint:disable=invalid-name
+        with open(
+            os.path.join(path, "onboarding_command_mappers", "foo_bar.yml"),
+            "w",
+            encoding="utf-8",
+        ) as fd:  # pylint:disable=invalid-name
             yaml.dump(
                 {
                     "sync_devices": {
                         "serial": {
-                            "commands": [{"command": "show version", "parser": "textfsm", "jpath": "[*].serial"}]
+                            "commands": [
+                                {
+                                    "command": "show version",
+                                    "parser": "textfsm",
+                                    "jpath": "[*].serial",
+                                }
+                            ]
                         }
                     }
                 },
@@ -100,7 +119,11 @@ class TestTransformWithGitRepo(TransactionTestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             with self.settings(GIT_ROOT=tempdir):
                 MockGitRepo.side_effect = self.populate_repo
-                MockGitRepo.return_value.checkout.return_value = (self.COMMIT_HEXSHA, True)
+                MockGitRepo.return_value.__enter__.return_value = MockGitRepo.return_value
+                MockGitRepo.return_value.checkout.return_value = (
+                    self.COMMIT_HEXSHA,
+                    True,
+                )
 
                 # Run the Git operation and refresh the object from the DB
                 job_model = GitRepositorySync().job_model
@@ -109,7 +132,10 @@ class TestTransformWithGitRepo(TransactionTestCase):
                 self.assertEqual(
                     job_result.status,
                     JobResultStatusChoices.STATUS_SUCCESS,
-                    (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+                    (
+                        job_result.traceback,
+                        list(job_result.job_log_entries.values_list("message", flat=True)),
+                    ),
                 )
                 mock_load_command_mappers.side_effect = [
                     {"foo_bar": {"sync_devices": "serial"}},
@@ -121,3 +147,83 @@ class TestTransformWithGitRepo(TransactionTestCase):
                 }
                 merged_mappers = add_platform_parsing_info()
                 self.assertEqual(expected_dict, merged_mappers)
+
+
+@mock.patch("nautobot.extras.datasources.git.GitRepo")
+class GetGitRepoTestCase(TestCase):
+    """Testing the get_git_repo helper function."""
+
+    def setUp(self):
+        # Create a clean state before each test
+        super().setUp()
+        # Clean up any existing repos to ensure a fresh state (safe option)
+        GitRepository.objects.filter(provided_contents__contains=ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER).delete()
+        self.repo = GitRepository(
+            name="Test Git Repo",
+            remote_url="http://localhost/git.git",
+            provided_contents=[ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER],
+        )
+        self.repo.save()
+        return mock.DEFAULT
+
+    def test_get_git_repo_success(self, *args, **kwargs):
+        """
+        Scenario: A single repository exists with the correct content identifier.
+        Expected: The function returns that specific repository object.
+        """
+
+        result = get_git_repo()
+
+        self.assertIsNotNone(result)
+        self.assertEqual(result, self.repo)
+        self.assertEqual(result.name, self.repo.name)
+
+    def test_get_git_repo_success_with_multiple_contents(self, *args, **kwargs):
+        """
+        Scenario: A repository provides the mappers AND other content (e.g., jobs).
+        Expected: The function still finds it because we use `__contains`.
+        """
+        result = get_git_repo()
+        result.provided_contents.append("some_other_content")
+        result.save()
+        self.assertIsNotNone(result)
+        self.assertEqual(result, self.repo)
+
+    def test_get_git_repo_multiple_exist(self, *args, **kwargs):
+        """
+        Scenario: Two repositories claim to provide the command mappers.
+        Expected: Returns None (catches MultipleObjectsReturned) to avoid ambiguity.
+        """
+        # Create Repo 1
+        new_repo = GitRepository(
+            name="repo-1",
+            slug="repo-1",
+            remote_url="http://github.com/test/repo1.git",
+            provided_contents=[ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER],
+        )
+        new_repo.save()
+
+        result = get_git_repo()
+
+        self.assertIsNone(result)
+        # clean up
+        new_repo.delete()
+
+    def test_get_git_repo_none_exists(self, *args, **kwargs):
+        """
+        Scenario: No repository exists with that specific content identifier.
+        Expected: Returns None (catches ObjectDoesNotExist).
+        """
+        # delete existing test repo
+        self.repo.delete()
+        # Create a repo that does NOT have the right content
+        irr_repo = GitRepository(
+            name="irrelevant-repo",
+            remote_url="http://github.com/test/irr_repo.git",
+            provided_contents=["some_other_content"],
+        )
+        irr_repo.save()
+        result = get_git_repo()
+        self.assertIsNone(result)
+        # clean up
+        irr_repo.delete()
