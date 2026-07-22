@@ -1,1 +1,0 @@
-Fixed VRF assignment lookup for VLAN SVI interfaces on Cisco IOS-XE devices in the Sync Network Data From Network job.
