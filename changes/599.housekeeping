@@ -1,0 +1,1 @@
+Fixed test failures due to trying to add cables to interfaces of type `TYPE_VIRTUAL`.
