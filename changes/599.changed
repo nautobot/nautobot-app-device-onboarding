@@ -1,1 +1,1 @@
-Changed `TYPE_VIRTUAL` Interface Objects To `TYPE_1GE_FIXED`.
+Fixed test failures due to trying to add cables to interfaces of type `TYPE_VIRTUAL`.
