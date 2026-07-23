@@ -836,7 +836,7 @@ class DeviceOnboardingTroubleshootingJob(Job):
         ip_addresses = kwargs["ip_addresses"].replace(" ", "").split(",")
         port = kwargs["port"]
         platform = kwargs["platform"]
-        username, password = (  # pylint:disable=unused-variable
+        username, password, secret = (  # pylint:disable=unused-variable
             _parse_credentials(kwargs["secrets_group"], logger=logger)
         )
         kwargs["connectivity_test"] = False
@@ -852,7 +852,7 @@ class DeviceOnboardingTroubleshootingJob(Job):
             ) as nornir_obj:
                 for entered_ip in ip_addresses:
                     single_host_inventory_constructed, _ = _set_inventory(
-                        entered_ip, platform, port, username, password
+                        entered_ip, platform, port, username, password, secret
                     )
                     nornir_obj.inventory.hosts.update(single_host_inventory_constructed)
                 nr_with_processors = nornir_obj.with_processors([TroubleshootingProcessor(compiled_results)])

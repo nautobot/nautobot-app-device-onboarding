@@ -62,6 +62,24 @@ The new SSoT based jobs each use their own Nornir inventories.
 !!! info
     The main reason for mentioning this is that this has the possiblity of conflicting with Golden Config plugin settings if `CredentialsEnvVars` or `CredentialsSettingsVars` are in use. At this time the recommentation is to migrate to using Nautobot Secrets Groups, which is the general pattern Nautobot is moving towards into the future.
 
+#### Enable Secret Support
+
+For devices that require privileged mode (e.g., Cisco IOS), the `Sync Devices from Network` job supports an **enable secret** sourced from Nautobot Secrets Groups.
+
+To use this feature, create a Secrets Group with the following three secrets:
+
+| Secret Type | Description |
+|---|
+| `Username` | Device login username |
+| `Password` | Device login password |
+| `Secret` | Enable/privileged mode password |
+
+All three secrets must use the **Generic** access type.
+
+When the `Secret` type is defined in the Secrets Group, it is automatically passed to Netmiko's connection options as the `secret` parameter, enabling the job to enter privileged mode before executing commands. If the `Secret` type is not defined, the job falls back to using the `Password` value as the enable secret.
+
+Assign the Secrets Group to the device(s) you want to onboard. The `Sync Devices from Network` job will automatically retrieve and use the enable secret during connection.
+
 ### Onboarding a Device
 
 Navigate to the `Jobs` page from the nautobot navigation bar. Run `Sync Devices From Network` to get basic device and information onboarding, followed by `Sync Network Data From Network` to add additional details from the network to these devices. E.g. Interfaces, IPs, VRFs, VLANs.
