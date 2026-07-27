@@ -11,6 +11,8 @@ This document describes all new features and changes in the release. The format 
 
 <!-- towncrier release notes start -->
 
+## [v5.4.1 (2026-07-27)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v5.4.1)
+
 ## [v5.4.0 (2026-07-01)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v5.4.0)
 
 ### Added
