@@ -4,6 +4,7 @@ edit_uri: "edit/main/docs"
 site_dir: "nautobot_device_onboarding/static/nautobot_device_onboarding/docs"
 site_name: "Device Onboarding Documentation"
 site_url: "https://docs.nautobot.com/projects/device-onboarding/en/latest/"
+exclude_docs: "superpowers/**"
 repo_url: "https://github.com/nautobot/nautobot-app-device-onboarding"
 copyright: "Copyright &copy; The Authors"
 theme:
