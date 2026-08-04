@@ -47,6 +47,7 @@ class TestNetmikoEnableModeConfiguration(unittest.TestCase):
         yaml_data = {
             platform: {"sync_devices": {"hostname": {"commands": {"command": "show version", "parser": "raw"}}}}
         }
+        logger = MagicMock(name="logger")
 
         with override_settings(
             PLUGINS_CONFIG={
@@ -62,17 +63,22 @@ class TestNetmikoEnableModeConfiguration(unittest.TestCase):
                     "nautobot_device_onboarding.nornir_plays.command_getter._get_commands_to_run",
                     return_value=[{"command": "show version", "parser": "raw"}],
                 ):
-                    netmiko_send_commands(task, yaml_data, "sync_devices", MagicMock(), job)
-        return task.run.call_args.kwargs["enable"]
+                    netmiko_send_commands(task, yaml_data, "sync_devices", logger, job)
+        return task.run.call_args.kwargs["enable"], logger
 
     def test_empty_allow_list_disables_enable_mode(self):
-        self.assertFalse(self._run_single_raw_command("juniper_junos", []))
+        enable, _ = self._run_single_raw_command("juniper_junos", [])
+        self.assertFalse(enable)
 
     def test_listed_logical_platform_enables_enable_mode(self):
-        self.assertTrue(self._run_single_raw_command("cisco_platform_1", ["cisco_platform_1"]))
+        enable, logger = self._run_single_raw_command("cisco_platform_1", ["cisco_platform_1"])
+        self.assertTrue(enable)
+        logger.info.assert_called_once_with("Platform 'cisco_platform_1' enable mode: enabled")
 
     def test_unlisted_logical_platform_disables_enable_mode(self):
-        self.assertFalse(self._run_single_raw_command("cisco_platform_2", ["cisco_platform_1"]))
+        enable, logger = self._run_single_raw_command("cisco_platform_2", ["cisco_platform_1"])
+        self.assertFalse(enable)
+        logger.info.assert_called_once_with("Platform 'cisco_platform_2' enable mode: disabled")
 
 
 class TestGetCommandsToRun(unittest.TestCase):

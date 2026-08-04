@@ -132,6 +132,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
     if task.host.platform not in get_all_network_driver_mappings().keys() or not "cisco_wlc_ssh":
         return Result(host=task.host, result=f"{task.host.name} has a unsupported platform set.", failed=True)
     enable_mode = _platform_requires_enable_mode(task.host.platform)
+    logger.info(f"Platform '{task.host.platform}' enable mode: {'enabled' if enable_mode else 'disabled'}")
     if not command_getter_yaml_data[task.host.platform].get(command_getter_job):
         return Result(
             host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True
