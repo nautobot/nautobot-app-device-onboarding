@@ -12,6 +12,7 @@ from netmiko.exceptions import NetmikoAuthenticationException, NetmikoTimeoutExc
 from nornir.core.exceptions import NornirSubTaskError
 from nornir.core.task import Result
 
+from nautobot_device_onboarding import NautobotDeviceOnboardingConfig
 from nautobot_device_onboarding.nornir_plays.command_getter import (
     _get_commands_to_run,
     _parse_credentials,
@@ -20,6 +21,14 @@ from nautobot_device_onboarding.nornir_plays.command_getter import (
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 
 MOCK_DIR = os.path.join("nautobot_device_onboarding", "tests", "mock")
+
+
+class TestNetmikoEnableModeConfiguration(unittest.TestCase):
+    """Test the Netmiko enable mode configuration defaults."""
+
+    def test_enable_mode_platforms_default_to_empty_list(self):
+        """Ensure enable mode remains opt-in by default."""
+        self.assertEqual(NautobotDeviceOnboardingConfig.default_settings["netmiko_enable_mode_platforms"], [])
 
 
 class TestGetCommandsToRun(unittest.TestCase):

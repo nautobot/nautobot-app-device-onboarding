@@ -1,1 +1,94 @@
-true
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/nautobot/nautobot-app-device-onboarding/develop/nautobot_device_onboarding/app-config-schema.json",
+    "$comment": "TBD: Update $id, replace `develop` with the future release tag",
+    "type": "object",
+    "properties": {
+        "netmiko_enable_mode_platforms": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "default": []
+        },
+        "create_platform_if_missing": {
+            "type": "boolean",
+            "default": true
+        },
+        "create_manufacturer_if_missing": {
+            "type": "boolean",
+            "default": true
+        },
+        "create_device_type_if_missing": {
+            "type": "boolean",
+            "default": true
+        },
+        "create_device_role_if_missing": {
+            "type": "boolean",
+            "default": true
+        },
+        "default_device_role": {
+            "type": "string",
+            "default": "network"
+        },
+        "default_device_role_color": {
+            "type": "string",
+            "default": "ff0000"
+        },
+        "default_management_interface": {
+            "type": "string",
+            "default": "PLACEHOLDER"
+        },
+        "default_management_prefix_length": {
+            "type": "integer",
+            "default": 0
+        },
+        "default_device_status": {
+            "type": "string",
+            "default": "Active"
+        },
+        "default_ip_status": {
+            "type": "string",
+            "default": "Active"
+        },
+        "create_management_interface_if_missing": {
+            "type": "boolean",
+            "default": true
+        },
+        "skip_device_type_on_update": {
+            "type": "boolean",
+            "default": false
+        },
+        "skip_manufacturer_on_update": {
+            "type": "boolean",
+            "default": false
+        },
+        "platform_map": {
+            "type": "object",
+            "default": {}
+        },
+        "assign_secrets_group": {
+            "type": "boolean",
+            "default": false
+        },
+        "set_management_only_interface": {
+            "type": "boolean",
+            "default": false
+        },
+        "onboarding_extensions_map": {
+            "type": "object",
+            "properties": {
+                "ios": {
+                    "type": "string",
+                    "default": "nautobot_device_onboarding.onboarding_extensions.ios"
+                }
+            },
+            "additionalProperties": false
+        },
+        "object_match_strategy": {
+            "type": "string",
+            "default": "loose"
+        }
+    },
+    "additionalProperties": false
+}
