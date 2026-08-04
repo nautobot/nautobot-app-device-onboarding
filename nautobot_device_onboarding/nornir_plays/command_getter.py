@@ -118,6 +118,12 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables, s
     return deduplicate_command_list(all_commands)
 
 
+def _platform_requires_enable_mode(platform: str) -> bool:
+    """Return whether Netmiko enable mode is configured for a logical platform."""
+    enabled_platforms = settings.PLUGINS_CONFIG["nautobot_device_onboarding"].get("netmiko_enable_mode_platforms", [])
+    return platform in enabled_platforms
+
+
 @close_threaded_db_connections
 def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_getter_job: str, logger, nautobot_job):
     """Run commands specified in PLATFORM_COMMAND_MAP."""
@@ -125,6 +131,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
         return Result(host=task.host, result=f"{task.host.name} has no platform set.", failed=True)
     if task.host.platform not in get_all_network_driver_mappings().keys() or not "cisco_wlc_ssh":
         return Result(host=task.host, result=f"{task.host.name} has a unsupported platform set.", failed=True)
+    enable_mode = _platform_requires_enable_mode(task.host.platform)
     if not command_getter_yaml_data[task.host.platform].get(command_getter_job):
         return Result(
             host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True
@@ -160,7 +167,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                 name=command["command"],
                 command_string=command["command"],
                 read_timeout=60,
-                enable=True,
+                enable=enable_mode,
                 **send_command_kwargs,
             )
             if nautobot_job.debug:

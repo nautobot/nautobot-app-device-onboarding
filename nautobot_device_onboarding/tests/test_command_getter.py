@@ -2,9 +2,12 @@
 
 import os
 import unittest
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import yaml
+from django.conf import settings
+from django.test import override_settings
 from nautobot.apps.testing import TransactionTestCase
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Secret, SecretsGroup, SecretsGroupAssociation
@@ -29,6 +32,47 @@ class TestNetmikoEnableModeConfiguration(unittest.TestCase):
     def test_enable_mode_platforms_default_to_empty_list(self):
         """Ensure enable mode remains opt-in by default."""
         self.assertEqual(NautobotDeviceOnboardingConfig.default_settings["netmiko_enable_mode_platforms"], [])
+
+    def _run_single_raw_command(self, platform, enabled_platforms):
+        task = MagicMock()
+        task.host.name = "test-host"
+        task.host.hostname = "198.51.100.1"
+        task.host.port = 22
+        task.host.platform = platform
+        task.host.data = {}
+        task.host.data["platform_parsing_info"] = {}
+        task.results = [MagicMock()]
+        task.run.return_value.result = "show version output"
+        job = SimpleNamespace(connectivity_test=False, debug=False, fail_job_on_task_failure=False)
+        yaml_data = {
+            platform: {"sync_devices": {"hostname": {"commands": {"command": "show version", "parser": "raw"}}}}
+        }
+
+        with override_settings(
+            PLUGINS_CONFIG={
+                **settings.PLUGINS_CONFIG,
+                "nautobot_device_onboarding": {"netmiko_enable_mode_platforms": enabled_platforms},
+            }
+        ):
+            with patch(
+                "nautobot_device_onboarding.nornir_plays.command_getter.get_all_network_driver_mappings",
+                return_value={platform: {}},
+            ):
+                with patch(
+                    "nautobot_device_onboarding.nornir_plays.command_getter._get_commands_to_run",
+                    return_value=[{"command": "show version", "parser": "raw"}],
+                ):
+                    netmiko_send_commands(task, yaml_data, "sync_devices", MagicMock(), job)
+        return task.run.call_args.kwargs["enable"]
+
+    def test_empty_allow_list_disables_enable_mode(self):
+        self.assertFalse(self._run_single_raw_command("juniper_junos", []))
+
+    def test_listed_logical_platform_enables_enable_mode(self):
+        self.assertTrue(self._run_single_raw_command("cisco_platform_1", ["cisco_platform_1"]))
+
+    def test_unlisted_logical_platform_disables_enable_mode(self):
+        self.assertFalse(self._run_single_raw_command("cisco_platform_2", ["cisco_platform_1"]))
 
 
 class TestGetCommandsToRun(unittest.TestCase):
