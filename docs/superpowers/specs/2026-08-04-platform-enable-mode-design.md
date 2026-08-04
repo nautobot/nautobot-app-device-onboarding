@@ -51,6 +51,11 @@ The shared `netmiko_send_commands()` task resolves enable mode from `task.host.p
 
 This replaces the existing unconditional `enable=True` behavior.
 
+For operational visibility, the shared task logs one info-level message per
+host before its commands run, including the logical platform and resolved
+enable-mode state. The message uses the existing `NornirLogger.info()` path so
+it is visible in normal job logs without logging credentials.
+
 Example result:
 
 | Logical platform | Configured list | Netmiko `enable` |
@@ -91,6 +96,7 @@ Add focused tests around the shared command task to assert the `enable` argument
 - `cisco_platform_1` in the allow-list sends `enable=True`.
 - Unlisted `cisco_platform_2` sends `enable=False`.
 - Existing enable-secret parsing and inventory tests remain unchanged and pass.
+- The shared task logs the resolved platform and enable-mode state once per host at info level.
 
 When an integration environment needs device credentials, use the ignored `development/creds.env` file. Do not add actual credentials to the repository or use that file to store the platform-policy configuration.
 
