@@ -1,2 +1,0 @@
-Fix Junos IPv6 Loopback network mask discovery.
-Fix Junos management Interface and IP address discovery when additional sub-string IP exists on device.
