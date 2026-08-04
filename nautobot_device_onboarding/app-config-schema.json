@@ -83,7 +83,9 @@
                     "default": "nautobot_device_onboarding.onboarding_extensions.ios"
                 }
             },
-            "additionalProperties": false
+            "additionalProperties": {
+                "type": "string"
+            }
         },
         "object_match_strategy": {
             "type": "string",
