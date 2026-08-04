@@ -44,7 +44,9 @@ By default, the plugin uses the credentials defined in the main `nautobot_config
 For the SSoT onboarding based jobs SecretGroups are required.
 
 !!! info
-    **Enable Secret:** For devices requiring privileged mode (e.g., Cisco IOS), add a `Secret` type to your Secrets Group in addition to `Username` and `Password`. The `Secret` type holds the enable/privileged mode password and is automatically used by the `Sync Devices from Network` job. If `Secret` is not defined, the job falls back to using the `Password` value as the enable secret.
+    **Enable Secret:** For devices requiring privileged mode (e.g., Cisco IOS), add a `Secret` type to your Secrets Group in addition to `Username` and `Password`. The Secret value is supplied to Netmiko as the enable password. Netmiko enters enable mode only when the device's logical platform is listed in `netmiko_enable_mode_platforms`; an unlisted platform, such as `juniper_junos`, does not attempt a Cisco-style enable command. If `Secret` is not defined, the job falls back to using the `Password` value as the enable secret. Configure these credentials through the existing Nautobot Secrets mechanisms; `netmiko_enable_mode_platforms` only selects which platforms use enable mode.
+
+    The optional `netmiko_enable_mode_platforms` allow-list is disabled by default (`[]`). For example, setting it to `['cisco_platform_1']` enables mode only for that logical platform. `cisco_platform_1` and `cisco_platform_2` must be distinct Nautobot Platform `network_driver` values, must have matching command mapper files, and must map through Netmiko aliases as documented in [Custom Command Mapper Per Device Platform](../dev/custom_command_mapper_per_platform.md).
 
 ## How can I update the optional arguments for NAPALM?
 

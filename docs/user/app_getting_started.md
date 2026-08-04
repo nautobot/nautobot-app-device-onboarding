@@ -76,7 +76,15 @@ To use this feature, create a Secrets Group with the following three secrets:
 
 All three secrets must use the **Generic** access type.
 
-When the `Secret` type is defined in the Secrets Group, it is automatically passed to Netmiko's connection options as the `secret` parameter, enabling the job to enter privileged mode before executing commands. If the `Secret` type is not defined, the job falls back to using the `Password` value as the enable secret.
+The Secret value is supplied to Netmiko as the enable password. Netmiko enters enable mode only when the device's logical platform is listed in `netmiko_enable_mode_platforms`; an unlisted platform, such as `juniper_junos`, does not attempt a Cisco-style enable command.
+
+The optional `netmiko_enable_mode_platforms` allow-list is disabled by default (`[]`). For example:
+
+```python
+"netmiko_enable_mode_platforms": ["cisco_platform_1"],
+```
+
+`cisco_platform_1` and `cisco_platform_2` must be distinct Nautobot Platform `network_driver` values, must have matching command mapper files, and must map through Netmiko aliases as documented in [Custom Command Mapper Per Device Platform](../dev/custom_command_mapper_per_platform.md). With only `cisco_platform_1` listed, only that platform enters enable mode. Configure the Secrets Group and its username, login password, and enable password through the existing Nautobot Secrets mechanisms; the allow-list does not store or configure secrets.
 
 Assign the Secrets Group to the device(s) you want to onboard. The `Sync Devices from Network` job will automatically retrieve and use the enable secret during connection.
 
