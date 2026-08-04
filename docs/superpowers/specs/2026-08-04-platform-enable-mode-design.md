@@ -71,6 +71,18 @@ The existing `Username`, `Password`, and optional `Secret` credential flow remai
 
 An empty list is valid. A listed identifier that does not match any selected device platform is harmless: no device enables mode for that entry. Invalid configuration types are rejected by the app configuration schema before jobs run.
 
+## Pre-Implementation Synchronization and Baseline Verification
+
+Before changing application code for this feature:
+
+1. Fetch the latest `upstream` repository state.
+2. Merge the latest `upstream/develop` into the feature branch.
+3. Resolve merge conflicts without discarding the approved design document or unrelated user changes.
+4. Run the full project test suite with `invoke tests` against the merged branch.
+5. Begin implementation only after the merge completes and the baseline test suite succeeds.
+
+If the merge or baseline test suite fails, stop feature implementation and report the failure. Diagnose any failure before proposing a repair; do not attribute a failure to this feature before code for the feature exists.
+
 ## Tests
 
 Add focused tests around the shared command task to assert the `enable` argument passed to `netmiko_send_command`:
