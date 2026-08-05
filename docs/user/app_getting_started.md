@@ -76,15 +76,15 @@ To use this feature, create a Secrets Group with the following three secrets:
 
 All three secrets must use the **Generic** access type.
 
-The Secret value is supplied to Netmiko as the enable password. Netmiko enters enable mode only when the device's selected Nautobot Platform `slug` is listed in `netmiko_enable_mode_platforms`; an unlisted Platform does not attempt a Cisco-style enable command.
+The Secret value is supplied to Netmiko as the enable password. Netmiko enters enable mode only when the device's selected Nautobot Platform `name` is listed in `netmiko_enable_mode_platforms`; an unlisted Platform does not attempt a Cisco-style enable command.
 
 The optional `netmiko_enable_mode_platforms` allow-list is disabled by default (`[]`). For example:
 
 ```python
-"netmiko_enable_mode_platforms": ["cisco_2960"],
+"netmiko_enable_mode_platforms": ["cisco_c2960"],
 ```
 
-The list contains Nautobot Platform `slug` values. For a Platform with slug `cisco_2960` and Netmiko mapping `cisco_ios`, enable mode is selected with `['cisco_2960']`, not `['cisco_ios']`. Two Platform slugs can share the `cisco_ios` Netmiko mapping and still receive independent enable-mode policies. `Sync Devices` auto-detection has no selected Platform slug, so enable mode remains disabled for that path. Configure the Secrets Group and its username, login password, and enable password through the existing Nautobot Secrets mechanisms; the allow-list does not store or configure secrets.
+The list contains Nautobot Platform `name` values. For a Platform with name `cisco_c2960` and Netmiko mapping `cisco_ios`, enable mode is selected with `["cisco_c2960"]`, not `["cisco_ios"]`. The Platform name `cisco_c2960` is matched independently from the Netmiko mapping `cisco_ios`, so two Platform names can share that mapping and still receive independent enable-mode policies. Generated values such as `cisco-c2960_4784` are natural slugs, not configuration keys, and should not be configured. `Sync Devices` auto-detection has no selected Platform name, so enable mode remains disabled for that path. Configure the Secrets Group and its username, login password, and enable password through the existing Nautobot Secrets mechanisms; the allow-list does not store or configure secrets.
 
 Assign the Secrets Group to the device(s) you want to onboard. The `Sync Devices from Network` job will automatically retrieve and use the enable secret during connection.
 
