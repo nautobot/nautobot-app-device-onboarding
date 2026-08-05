@@ -42,7 +42,7 @@ class TestInventoryCreator(unittest.TestCase):
         self.assertNotIn("nautobot_platform_slug", inv["198.51.100.1"].data)
         self.assertIsNone(exception)
 
-    def test_set_inventory_specified_platform(self):
+    def test_set_inventory_specified_platform_preserves_natural_slug(self):
         inv, exception = _set_inventory(self.host_ip, self.platform, self.port, self.username, self.password)
         self.assertEqual(inv["198.51.100.1"].platform, "cisco_xe")
         self.assertEqual(inv["198.51.100.1"].data["nautobot_platform_slug"], self.platform.natural_slug)
