@@ -41,7 +41,7 @@ def _set_inventory(
     inv = {}
     if platform:
         platform_guess_exc = None
-        platform_slug = platform.slug
+        platform_slug = platform.natural_slug
         platform = platform.network_driver_mappings.get("netmiko")
     else:
         platform_slug = None

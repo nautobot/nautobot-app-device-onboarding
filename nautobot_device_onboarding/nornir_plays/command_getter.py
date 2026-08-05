@@ -123,7 +123,7 @@ def _get_nautobot_platform_slug(task: Task) -> str | None:
     platform_slug = task.host.data.get("nautobot_platform_slug")
     if platform_slug is not None:
         return platform_slug
-    return getattr(getattr(task.host.data.get("obj"), "platform", None), "slug", None)
+    return getattr(getattr(task.host.data.get("obj"), "platform", None), "natural_slug", None)
 
 
 def _platform_requires_enable_mode(platform: str | None) -> bool:

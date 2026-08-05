@@ -84,8 +84,8 @@ class TestNetmikoEnableModeConfiguration(unittest.TestCase):
         self.assertFalse(enable)
         logger.info.assert_called_once_with("Nautobot Platform 'cisco_3850' enable mode: disabled")
 
-    def test_orm_inventory_platform_slug_enables_enable_mode(self):
-        device = SimpleNamespace(platform=SimpleNamespace(slug="cisco_2960"))
+    def test_orm_inventory_platform_natural_slug_enables_enable_mode(self):
+        device = SimpleNamespace(platform=SimpleNamespace(natural_slug="cisco_2960"))
         enable, _ = self._run_single_raw_command("cisco_ios", ["cisco_2960"], {"obj": device})
         self.assertTrue(enable)
 
