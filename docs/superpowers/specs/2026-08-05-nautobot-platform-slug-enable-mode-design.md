@@ -33,7 +33,8 @@ PLUGINS_CONFIG = {
 }
 ```
 
-Each value is a Nautobot Platform `slug`. The list remains opt-in: when it is
+Each value is a Nautobot Platform `natural_slug` (the slug shown by Nautobot).
+The list remains opt-in: when it is
 missing or empty, `enable=False` for every device. When it contains
 `cisco_2960`, only devices assigned that Nautobot Platform use `enable=True`.
 
@@ -48,11 +49,11 @@ transport behavior.
 The shared command task resolves a Nautobot Platform slug as follows:
 
 1. For `Sync Devices From Network`, `_set_inventory()` saves the explicitly
-   selected Platform slug in the constructed Nornir host data before using its
+   selected Platform `natural_slug` in the constructed Nornir host data before using its
    `network_driver_mappings["netmiko"]` value as the host platform.
 2. For `Sync Network Data From Network`, the Nautobot ORM inventory already
    stores the Device object in `task.host.data["obj"]`; the task reads
-   `device.platform.slug` from that object.
+   `device.platform.natural_slug` from that object.
 3. The allow-list comparison and info-level log use this resolved slug.
 
 If a `Sync Devices From Network` run uses auto-detection and has no explicitly

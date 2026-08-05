@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- Allow-list values are Nautobot Platform `slug` strings, not `network_driver` or Netmiko device-type values.
+- Allow-list values are Nautobot Platform `natural_slug` strings (the Nautobot UI slug), not `network_driver` or Netmiko device-type values.
 - Missing or empty `netmiko_enable_mode_platforms` must resolve to `enable=False`.
 - An auto-detected Sync Devices host without an explicitly selected Platform must resolve to `enable=False`.
 - Do not alter command-mapper lookup, Netmiko connection-driver selection, enable-secret handling, or the original NAPALM onboarding job.
@@ -28,16 +28,16 @@
 
 **Interfaces:**
 - Produces: `Host.data["nautobot_platform_slug"]: str` for an explicitly selected Sync Devices Platform.
-- Produces: `_get_nautobot_platform_slug(task: Task) -> str | None`, which reads `task.host.data["nautobot_platform_slug"]` first, then `task.host.data["obj"].platform.slug` for Nautobot ORM inventory hosts.
+- Produces: `_get_nautobot_platform_slug(task: Task) -> str | None`, which reads `task.host.data["nautobot_platform_slug"]` first, then `task.host.data["obj"].platform.natural_slug` for Nautobot ORM inventory hosts.
 - Consumes: `task.host.platform` unchanged as the network-driver key for command mapper lookup and Netmiko transport.
 
 - [ ] **Step 1: Write the failing inventory-metadata tests**
 
-  In `TestInventoryCreator`, set `self.platform.slug = "cisco_2960"`. Extend `test_set_inventory_specified_platform()` to assert both the existing Netmiko platform result and the preserved slug:
+  In `TestInventoryCreator`, use a Platform whose name produces `cisco_2960` as its `natural_slug`. Extend `test_set_inventory_specified_platform()` to assert both the existing Netmiko platform result and the preserved natural slug:
 
   ```python
   self.assertEqual(inv["198.51.100.1"].platform, self.platform.name)
-  self.assertEqual(inv["198.51.100.1"].data["nautobot_platform_slug"], "cisco_2960")
+  self.assertEqual(inv["198.51.100.1"].data["nautobot_platform_slug"], self.platform.natural_slug)
   ```
 
   Extend `test_set_inventory_no_platform()` to assert that auto-detection creates no `nautobot_platform_slug` value:
@@ -98,16 +98,16 @@
 
 - [ ] **Step 5: Implement the smallest policy-key separation**
 
-  In `_set_inventory()`, save the input Platform's slug before replacing the local `platform` variable with its Netmiko mapping. Supply that value as Host data only when a Platform was explicitly selected:
+  In `_set_inventory()`, save the input Platform's `natural_slug` before replacing the local `platform` variable with its Netmiko mapping. Supply that value as Host data only when a Platform was explicitly selected:
 
   ```python
-  platform_slug = platform.slug if platform else None
+  platform_slug = platform.natural_slug if platform else None
   # retain existing platform = platform.network_driver_mappings.get("netmiko") flow
   host_data = {"nautobot_platform_slug": platform_slug} if platform_slug else {}
   # pass data=host_data to Host(...)
   ```
 
-  In `command_getter.py`, add `_get_nautobot_platform_slug()` before `_platform_requires_enable_mode()`. It must prefer the explicit `nautobot_platform_slug`, then safely read `obj.platform.slug`, and return `None` without querying the database when neither exists. Update `_platform_requires_enable_mode()` to accept `str | None` and return false for `None`.
+  In `command_getter.py`, add `_get_nautobot_platform_slug()` before `_platform_requires_enable_mode()`. It must prefer the explicit `nautobot_platform_slug`, then safely read `obj.platform.natural_slug`, and return `None` without querying the database when neither exists. Update `_platform_requires_enable_mode()` to accept `str | None` and return false for `None`.
 
   In `netmiko_send_commands()`, resolve the slug once, pass it to `_platform_requires_enable_mode()`, and log either:
 
