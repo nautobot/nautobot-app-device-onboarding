@@ -118,10 +118,18 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables, s
     return deduplicate_command_list(all_commands)
 
 
-def _platform_requires_enable_mode(platform: str) -> bool:
+def _get_nautobot_platform_slug(task: Task) -> str | None:
+    """Return the Nautobot Platform slug associated with a task host."""
+    platform_slug = task.host.data.get("nautobot_platform_slug")
+    if platform_slug is not None:
+        return platform_slug
+    return getattr(getattr(task.host.data.get("obj"), "platform", None), "slug", None)
+
+
+def _platform_requires_enable_mode(platform: str | None) -> bool:
     """Return whether Netmiko enable mode is configured for a logical platform."""
     enabled_platforms = settings.PLUGINS_CONFIG["nautobot_device_onboarding"].get("netmiko_enable_mode_platforms", [])
-    return platform in enabled_platforms
+    return platform is not None and platform in enabled_platforms
 
 
 @close_threaded_db_connections
@@ -131,8 +139,12 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
         return Result(host=task.host, result=f"{task.host.name} has no platform set.", failed=True)
     if task.host.platform not in get_all_network_driver_mappings().keys() or not "cisco_wlc_ssh":
         return Result(host=task.host, result=f"{task.host.name} has a unsupported platform set.", failed=True)
-    enable_mode = _platform_requires_enable_mode(task.host.platform)
-    logger.info(f"Platform '{task.host.platform}' enable mode: {'enabled' if enable_mode else 'disabled'}")
+    platform_slug = _get_nautobot_platform_slug(task)
+    enable_mode = _platform_requires_enable_mode(platform_slug)
+    if platform_slug is not None:
+        logger.info(f"Nautobot Platform '{platform_slug}' enable mode: {'enabled' if enable_mode else 'disabled'}")
+    else:
+        logger.info(f"Nautobot Platform unavailable; enable mode: {'enabled' if enable_mode else 'disabled'}")
     if not command_getter_yaml_data[task.host.platform].get(command_getter_job):
         return Result(
             host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True
