@@ -1,9 +1,9 @@
-# Nautobot Platform Slug Enable-Mode Policy
+# Nautobot Platform Name Enable-Mode Policy
 
 ## Purpose
 
 Make `netmiko_enable_mode_platforms` select devices by their Nautobot Platform
-slug, rather than by the Netmiko driver. This permits multiple Nautobot
+name, rather than by the Netmiko driver. This permits multiple Nautobot
 Platforms, such as `cisco_2960` and `cisco_3850`, to share `cisco_ios` for SSH
 while having different enable-mode policies.
 
@@ -33,8 +33,7 @@ PLUGINS_CONFIG = {
 }
 ```
 
-Each value is a Nautobot Platform `natural_slug` (the slug shown by Nautobot).
-The list remains opt-in: when it is
+Each value is the unique Nautobot Platform `name`. The list remains opt-in: when it is
 missing or empty, `enable=False` for every device. When it contains
 `cisco_2960`, only devices assigned that Nautobot Platform use `enable=True`.
 
@@ -46,18 +45,18 @@ command mappers and establish the Netmiko connection. In the reported case it
 is `cisco_ios`; changing it would alter established command-mapper and
 transport behavior.
 
-The shared command task resolves a Nautobot Platform slug as follows:
+The shared command task resolves a Nautobot Platform name as follows:
 
 1. For `Sync Devices From Network`, `_set_inventory()` saves the explicitly
-   selected Platform `natural_slug` in the constructed Nornir host data before using its
+   selected Platform `name` in the constructed Nornir host data before using its
    `network_driver_mappings["netmiko"]` value as the host platform.
 2. For `Sync Network Data From Network`, the Nautobot ORM inventory already
    stores the Device object in `task.host.data["obj"]`; the task reads
-   `device.platform.natural_slug` from that object.
-3. The allow-list comparison and info-level log use this resolved slug.
+   `device.platform.name` from that object.
+3. The allow-list comparison and info-level log use this resolved name.
 
 If a `Sync Devices From Network` run uses auto-detection and has no explicitly
-selected Platform, there is no Nautobot Platform slug to match. Its enable
+selected Platform, there is no Nautobot Platform name to match. Its enable
 mode is therefore `False`. This is the safe default and preserves opt-in
 behavior.
 
@@ -65,6 +64,10 @@ For a device on Platform `cisco_2960` with Netmiko mapping `cisco_ios`, the
 log will state `Nautobot Platform 'cisco_2960' enable mode: enabled` when
 `cisco_2960` is listed. It will not report the Netmiko driver as the policy
 key.
+
+The implementation does not fall back to `natural_slug`. Platform names are
+the supported configuration key because natural slugs can be transformed and
+can include a primary-key suffix that differs between environments.
 
 ## Error Handling
 
@@ -79,26 +82,26 @@ Focused tests will verify:
 - a selected `cisco_2960` Platform with Netmiko mapping `cisco_ios` sends
   `enable=True` when `cisco_2960` is listed;
 - another Platform sharing `cisco_ios` sends `enable=False` when unlisted;
-- a Sync Network Data host resolves its slug from `task.host.data["obj"]`;
+- a Sync Network Data host resolves its Platform name from `task.host.data["obj"]`;
 - an auto-detected Sync Devices host without a Nautobot Platform sends
   `enable=False`;
-- the info log identifies the Nautobot Platform slug and resolved state.
+- the info log identifies the Nautobot Platform name and resolved state.
 
 ## Documentation
 
 Update the existing configuration and enable-secret guidance so it states
-unambiguously that allow-list entries are Nautobot Platform slugs. Documentation
+unambiguously that allow-list entries are Nautobot Platform names. Documentation
 will distinguish this policy key from the Platform's Netmiko network-driver
 mapping and retain the default-disabled explanation.
 
 ## Acceptance Criteria
 
 - `netmiko_enable_mode_platforms=["cisco_2960"]` enables Netmiko mode for a
-  device on Nautobot Platform `cisco_2960`, even when its Netmiko mapping is
-  `cisco_ios`.
+  device whose Nautobot Platform name is `cisco_2960`, even when its Netmiko
+  mapping is `cisco_ios`.
 - A second Nautobot Platform sharing the same `cisco_ios` mapping remains
-  disabled unless its own slug is listed.
-- Both SSoT jobs use Nautobot Platform slugs for the decision.
+  disabled unless its own name is listed.
+- Both SSoT jobs use Nautobot Platform names for the decision.
 - Auto-detected Sync Devices hosts without an assigned Platform remain
   disabled.
 - Command-mapper selection, Netmiko driver selection, and secrets behavior are
