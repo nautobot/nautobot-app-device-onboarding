@@ -76,15 +76,15 @@ To use this feature, create a Secrets Group with the following three secrets:
 
 All three secrets must use the **Generic** access type.
 
-The Secret value is supplied to Netmiko as the enable password. Netmiko enters enable mode only when the device's logical platform is listed in `netmiko_enable_mode_platforms`; an unlisted platform, such as `juniper_junos`, does not attempt a Cisco-style enable command.
+The Secret value is supplied to Netmiko as the enable password. Netmiko enters enable mode only when the device's selected Nautobot Platform `slug` is listed in `netmiko_enable_mode_platforms`; an unlisted Platform does not attempt a Cisco-style enable command.
 
 The optional `netmiko_enable_mode_platforms` allow-list is disabled by default (`[]`). For example:
 
 ```python
-"netmiko_enable_mode_platforms": ["cisco_platform_1"],
+"netmiko_enable_mode_platforms": ["cisco_2960"],
 ```
 
-`cisco_platform_1` and `cisco_platform_2` must be distinct Nautobot Platform `network_driver` values, must have matching command mapper files, and must map through Netmiko aliases as documented in [Custom Command Mapper Per Device Platform](../dev/custom_command_mapper_per_platform.md). With only `cisco_platform_1` listed, only that platform enters enable mode. Configure the Secrets Group and its username, login password, and enable password through the existing Nautobot Secrets mechanisms; the allow-list does not store or configure secrets.
+The list contains Nautobot Platform `slug` values. For a Platform with slug `cisco_2960` and Netmiko mapping `cisco_ios`, enable mode is selected with `['cisco_2960']`, not `['cisco_ios']`. Two Platform slugs can share the `cisco_ios` Netmiko mapping and still receive independent enable-mode policies. `Sync Devices` auto-detection has no selected Platform slug, so enable mode remains disabled for that path. Configure the Secrets Group and its username, login password, and enable password through the existing Nautobot Secrets mechanisms; the allow-list does not store or configure secrets.
 
 Assign the Secrets Group to the device(s) you want to onboard. The `Sync Devices from Network` job will automatically retrieve and use the enable secret during connection.
 

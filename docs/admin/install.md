@@ -106,7 +106,7 @@ Although the app can run without providing any settings, the app behavior can be
 - `skip_manufacturer_on_update` boolean (default False), If True, an existing Nautobot device will not get its manufacturer updated. If False, manufacturer will be updated with one discovered on a device.
 - `assign_secrets_group` boolean (default False), If True, the credentials used to connect to the device will be assigned as the secrets group for the device upon creation. If False, no secrets group will be assigned.
 - `set_management_only_interface` boolean (default False), If True, the interface that is created or updated will be set to management only. If False, the interface will be set to not be management only.
-- `netmiko_enable_mode_platforms` list of strings (default []), logical platform/network-driver identifiers for which the SSoT jobs call Netmiko enable mode. All unlisted platforms run commands with enable mode disabled.
+- `netmiko_enable_mode_platforms` list of strings (default []), Nautobot Platform `slug` values for which the SSoT jobs call Netmiko enable mode. All unlisted Platforms run commands with enable mode disabled.
 - `platform_map` (dictionary), mapping of an **auto-detected** Netmiko platform to the **Nautobot slug** name of your Platform. The dictionary should be in the format:
     ```python
     {
@@ -130,9 +130,9 @@ PLUGINS_CONFIG = {
     "default_ip_status": "Active",
     "default_device_role": "leaf",
     "skip_device_type_on_update": True,
-    "netmiko_enable_mode_platforms": ["cisco_platform_1"],
+    "netmiko_enable_mode_platforms": ["cisco_2960"],
   }
 }
 ```
 
-`netmiko_enable_mode_platforms` is an optional allow-list and is disabled by default. Use the logical platform/network-driver identifiers configured in Nautobot, rather than the underlying Netmiko device type. For example, `cisco_platform_1` and `cisco_platform_2` must be distinct Nautobot Platform `network_driver` values, must have matching command mapper files, and must map through Netmiko aliases as documented in [Custom Command Mapper Per Device Platform](../dev/custom_command_mapper_per_platform.md). With only `cisco_platform_1` listed, only that platform enters enable mode. Configure the username, login password, and enable password through the existing Nautobot Secrets mechanisms; this list only selects which platforms use enable mode.
+`netmiko_enable_mode_platforms` is an optional allow-list of Nautobot Platform `slug` values and is disabled by default. For a Platform with slug `cisco_2960` and Netmiko mapping `cisco_ios`, enable mode is selected with `['cisco_2960']`, not `['cisco_ios']`. Two Platform slugs can share the `cisco_ios` Netmiko mapping and still receive independent enable-mode policies. `Sync Devices` auto-detection has no selected Platform slug, so enable mode remains disabled for that path. Configure the username, login password, and enable password through the existing Nautobot Secrets mechanisms; this list only selects which platforms use enable mode.
