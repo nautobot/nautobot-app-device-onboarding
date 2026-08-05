@@ -70,27 +70,28 @@ class TestNetmikoEnableModeConfiguration(unittest.TestCase):
         enable, _ = self._run_single_raw_command("cisco_ios", [])
         self.assertFalse(enable)
 
-    def test_listed_nautobot_platform_slug_enables_enable_mode(self):
+    def test_listed_nautobot_platform_name_enables_enable_mode(self):
         enable, logger = self._run_single_raw_command(
-            "cisco_ios", ["cisco_2960"], {"nautobot_platform_slug": "cisco_2960"}
+            "cisco_ios", ["cisco_c2960"], {"nautobot_platform_name": "cisco_c2960"}
         )
         self.assertTrue(enable)
-        logger.info.assert_called_once_with("Nautobot Platform 'cisco_2960' enable mode: enabled")
+        logger.info.assert_called_once_with("Nautobot Platform 'cisco_c2960' enable mode: enabled")
 
-    def test_unlisted_nautobot_platform_slug_disables_enable_mode(self):
+    def test_unlisted_nautobot_platform_name_sharing_transport_disables_enable_mode(self):
         enable, logger = self._run_single_raw_command(
-            "cisco_ios", ["cisco_2960"], {"nautobot_platform_slug": "cisco_3850"}
+            "cisco_ios", ["cisco_c2960"], {"nautobot_platform_name": "cisco_c3850"}
         )
         self.assertFalse(enable)
-        logger.info.assert_called_once_with("Nautobot Platform 'cisco_3850' enable mode: disabled")
+        logger.info.assert_called_once_with("Nautobot Platform 'cisco_c3850' enable mode: disabled")
 
-    def test_orm_inventory_platform_natural_slug_enables_enable_mode(self):
-        device = SimpleNamespace(platform=SimpleNamespace(natural_slug="cisco_2960"))
-        enable, _ = self._run_single_raw_command("cisco_ios", ["cisco_2960"], {"obj": device})
+    def test_orm_inventory_platform_name_enables_enable_mode(self):
+        device = SimpleNamespace(platform=SimpleNamespace(name="cisco_c2960"))
+        enable, logger = self._run_single_raw_command("cisco_ios", ["cisco_c2960"], {"obj": device})
         self.assertTrue(enable)
+        logger.info.assert_called_once_with("Nautobot Platform 'cisco_c2960' enable mode: enabled")
 
-    def test_missing_nautobot_platform_slug_disables_enable_mode(self):
-        enable, logger = self._run_single_raw_command("cisco_ios", ["cisco_2960"], {})
+    def test_missing_nautobot_platform_name_disables_enable_mode(self):
+        enable, logger = self._run_single_raw_command("cisco_ios", ["cisco_c2960"], {})
         self.assertFalse(enable)
         logger.info.assert_called_once_with("Nautobot Platform unavailable; enable mode: disabled")
 

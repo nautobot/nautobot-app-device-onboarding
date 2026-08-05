@@ -41,10 +41,10 @@ def _set_inventory(
     inv = {}
     if platform:
         platform_guess_exc = None
-        platform_slug = platform.natural_slug
+        platform_name = platform.name
         platform = platform.network_driver_mappings.get("netmiko")
     else:
-        platform_slug = None
+        platform_name = None
         platform, platform_guess_exc = guess_netmiko_device_type(host_ip, username, password, port)
 
     # Merge secret with NETMIKO_EXTRAS
@@ -52,7 +52,7 @@ def _set_inventory(
     if secret:
         extras["secret"] = secret
 
-    host_data = {"nautobot_platform_slug": platform_slug} if platform_slug else {}
+    host_data = {"nautobot_platform_name": platform_name} if platform_name else {}
     host = Host(
         name=host_ip,
         hostname=host_ip,

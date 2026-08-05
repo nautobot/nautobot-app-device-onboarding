@@ -17,7 +17,7 @@ class TestInventoryCreator(unittest.TestCase):
         self.username = "admin"
         self.password = "password"  # nosec
         self.port = 22
-        self.platform = Platform(name="cisco_2960", network_driver="cisco_xe")
+        self.platform = Platform(name="cisco_c2960", network_driver="cisco_xe")
 
     @patch("nautobot_device_onboarding.nornir_plays.inventory_creator.SSHDetect")
     def test_guess_device_type_success(self, mock_sshdetect):
@@ -39,13 +39,14 @@ class TestInventoryCreator(unittest.TestCase):
         inv, exception = _set_inventory(self.host_ip, None, self.port, self.username, self.password)
 
         self.assertEqual(inv["198.51.100.1"].platform, "cisco_ios")
-        self.assertNotIn("nautobot_platform_slug", inv["198.51.100.1"].data)
+        self.assertNotIn("nautobot_platform_name", inv["198.51.100.1"].data)
         self.assertIsNone(exception)
 
-    def test_set_inventory_specified_platform_preserves_natural_slug(self):
+    def test_set_inventory_specified_platform_preserves_platform_name(self):
         inv, exception = _set_inventory(self.host_ip, self.platform, self.port, self.username, self.password)
         self.assertEqual(inv["198.51.100.1"].platform, "cisco_xe")
-        self.assertEqual(inv["198.51.100.1"].data["nautobot_platform_slug"], self.platform.natural_slug)
+        self.assertEqual(inv["198.51.100.1"].data["nautobot_platform_name"], "cisco_c2960")
+        self.assertNotIn("nautobot_platform_slug", inv["198.51.100.1"].data)
         self.assertIsNone(exception)
 
     @patch("nautobot_device_onboarding.nornir_plays.inventory_creator.NETMIKO_EXTRAS", {"custom_setting": "enabled"})
