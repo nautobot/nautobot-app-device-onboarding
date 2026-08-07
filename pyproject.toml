@@ -38,7 +38,7 @@ ntc-templates = ">=9.0.0"
 netutils = "^1.9.1"
 ttp = "^0.9.0"
 # Used for local development
-nautobot = ">=3.0.0,<4.0.0"
+nautobot = ">=3.1.0,<4.0.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "*"
@@ -50,7 +50,6 @@ pylint-django = ">=2.5.4"
 pylint-nautobot = ">=0.3.1"
 ruff = "0.5.5"
 yamllint = "*"
-toml = "*"
 # Python implementation of markdownlint
 pymarkdownlnt = "~0.9.30"
 Markdown = "*"
@@ -81,7 +80,7 @@ mkdocs-glightbox = "~0.5.2"
 all = [
 ]
 
-[tool.pylint.master]
+[tool.pylint.main]
 # Include the pylint_django plugin to avoid spurious warnings about Django patterns
 load-plugins = "pylint_django, pylint_nautobot"
 ignore = ".venv"
