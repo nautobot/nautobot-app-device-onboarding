@@ -123,10 +123,10 @@ class TestTransformWithGitRepo(TransactionTestCase):
         with tempfile.TemporaryDirectory() as tempdir:
             with self.settings(GIT_ROOT=tempdir):
                 MockGitRepo.side_effect = self.populate_repo
-                MockGitRepo.return_value.checkout.return_value = (
-                    self.COMMIT_HEXSHA,
-                    True,
-                )
+                # Nautobot >= 3.1.7 uses `with GitRepo(...) as repo_helper`; older versions
+                # assign the instance directly. Stub both so the test works on either.
+                MockGitRepo.return_value.checkout.return_value = (self.COMMIT_HEXSHA, True)
+                MockGitRepo.return_value.__enter__.return_value.checkout.return_value = (self.COMMIT_HEXSHA, True)
 
                 # Run the Git operation and refresh the object from the DB
                 job_model = GitRepositorySync().job_model
