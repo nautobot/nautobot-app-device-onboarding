@@ -11,7 +11,7 @@ except ImportError:
 from diffsync import Adapter, DiffSyncModel
 from diffsync import exceptions as diffsync_exceptions
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist, ValidationError
-from django.db.models import Q
+from django.db.models import ProtectedError, Q
 from nautobot.dcim.choices import InterfaceTypeChoices
 from nautobot.dcim.models import Cable, Device, Interface, Location, Platform, SoftwareVersion
 from nautobot.extras.models import Status
@@ -717,8 +717,20 @@ class SyncNetworkDataPrefixToVrf(DiffSyncModel):
         return super().create(adapter, ids, attrs)
 
 
-class SyncNetworkDataCable(FilteredNautobotModel):
-    """Shared data model representing a cable between two interfaces."""
+class SyncNetworkDataCable(DiffSyncModel):
+    """Shared data model representing a cable between two interfaces.
+
+    CRUD is implemented here rather than inherited from `FilteredNautobotModel` because a cable's
+    terminations can't be expressed as ORM field lookups across all supported Nautobot versions.
+    Nautobot 3.2 replaced the `Cable.termination_a`/`termination_b` GenericForeignKeys with properties
+    backed by the `CableToCableTermination` join table, so the generic `NautobotModel` CRUD - which
+    introspects `Cable._meta.get_field("termination_a")` - raises `FieldDoesNotExist` there. The
+    `termination_a=`/`termination_b=` constructor kwargs used below work on both 3.0 (direct
+    GenericForeignKey assignment) and 3.2 (materialized into join rows by `Cable.save()`).
+
+    Only `dcim.interface` terminations are supported; both adapters filter cables down to
+    interface-to-interface links before loading them.
+    """
 
     _modelname = "cable"
     _model = Cable
@@ -745,6 +757,59 @@ class SyncNetworkDataCable(FilteredNautobotModel):
     termination_b__name: str
 
     status__name: str
+
+    pk: Optional[UUID] = None
+
+    @staticmethod
+    def _get_termination(ids, side):
+        """Look up the interface terminating side `"a"` or `"b"` of the cable."""
+        return Interface.objects.get(
+            device__name=ids[f"termination_{side}__device__name"],
+            name=ids[f"termination_{side}__name"],
+        )
+
+    @classmethod
+    def create(cls, adapter, ids, attrs):
+        """Create a new cable between two interfaces."""
+        try:
+            termination_a = cls._get_termination(ids, "a")
+            termination_b = cls._get_termination(ids, "b")
+            status = Status.objects.get(name=attrs["status__name"])
+        except (ObjectDoesNotExist, MultipleObjectsReturned) as err:
+            adapter.job.logger.error(
+                f"Failed to create cable "
+                f"[{ids['termination_a__device__name']} {ids['termination_a__name']}] -> "
+                f"[{ids['termination_b__device__name']} {ids['termination_b__name']}], {err}"
+            )
+            raise diffsync_exceptions.ObjectNotCreated(err)
+        try:
+            cable = Cable(termination_a=termination_a, termination_b=termination_b, status=status)
+            cable.validated_save()
+        except ValidationError as err:
+            adapter.job.logger.error(f"Failed to create cable [{termination_a}] -> [{termination_b}], {err}")
+            raise diffsync_exceptions.ObjectNotCreated(err)
+        return super().create(adapter, ids, attrs)
+
+    def update(self, attrs):
+        """Update the status of an existing cable."""
+        if "status__name" in attrs:
+            try:
+                cable = Cable.objects.get(pk=self.pk)
+                cable.status = Status.objects.get(name=attrs["status__name"])
+                cable.validated_save()
+            except (ObjectDoesNotExist, ValidationError) as err:
+                self.adapter.job.logger.error(f"Failed to update cable {self}, {err}")
+                raise diffsync_exceptions.ObjectNotUpdated(err)
+        return super().update(attrs)
+
+    def delete(self):
+        """Delete an existing cable."""
+        try:
+            Cable.objects.get(pk=self.pk).delete()
+        except (ObjectDoesNotExist, ProtectedError) as err:
+            self.adapter.job.logger.error(f"Failed to delete cable {self}, {err}")
+            raise diffsync_exceptions.ObjectNotDeleted(err)
+        return super().delete()
 
 
 class SyncNetworkSoftwareVersion(DiffSyncModel):
