@@ -111,12 +111,8 @@ class TestTransformWithGitRepo(TransactionTestCase):
         ).count()
         self.assertEqual(1, repo_count)
 
-    @mock.patch(
-        "nautobot_device_onboarding.nornir_plays.transform.load_command_mappers_from_dir"
-    )
-    def test_pull_git_repository_and_refresh_data_with_valid_data(
-        self, mock_load_command_mappers, MockGitRepo
-    ):  # pylint:disable=invalid-name
+    @mock.patch("nautobot_device_onboarding.nornir_plays.transform.load_command_mappers_from_dir")
+    def test_pull_git_repository_and_refresh_data_with_valid_data(self, mock_load_command_mappers, MockGitRepo):  # pylint:disable=invalid-name
         """
         The test_pull_git_repository_and_refresh_data job should succeed if valid data is present in the repo.
         """
@@ -137,9 +133,7 @@ class TestTransformWithGitRepo(TransactionTestCase):
                     JobResultStatusChoices.STATUS_SUCCESS,
                     (
                         job_result.traceback,
-                        list(
-                            job_result.job_log_entries.values_list("message", flat=True)
-                        ),
+                        list(job_result.job_log_entries.values_list("message", flat=True)),
                     ),
                 )
                 mock_load_command_mappers.side_effect = [
@@ -162,9 +156,7 @@ class GetGitRepoTestCase(TestCase):
         # Create a clean state before each test
         super().setUp()
         # Clean up any existing repos to ensure a fresh state (safe option)
-        GitRepository.objects.filter(
-            provided_contents__contains=ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER
-        ).delete()
+        GitRepository.objects.filter(provided_contents__contains=ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER).delete()
         self.repo = GitRepository(
             name="Test Git Repo",
             remote_url="http://localhost/git.git",
