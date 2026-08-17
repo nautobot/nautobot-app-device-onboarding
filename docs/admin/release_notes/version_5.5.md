@@ -4,11 +4,10 @@ This document describes all new features and changes in the release. The format 
 
 ## Release Overview
 
-- Major features or milestones
-- Changes to compatibility with Nautobot and/or other apps, libraries etc.
+- Increased the minimum version of Nautobot to 3.1.0.
+- Added support for Cable sync in Nautobot 3.2.0 and higher.
 
 <!-- towncrier release notes start -->
-
 ## [v5.5.0 (2026-08-17)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v5.5.0)
 
 ### Fixed
