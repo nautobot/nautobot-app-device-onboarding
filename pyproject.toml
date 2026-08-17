@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-device-onboarding"
-version = "5.4.1"
+version = "5.5.0"
 description = "A app for Nautobot to easily onboard new devices."
 authors = ["Network to Code, LLC <info@networktocode.com>"]
 license = "Apache-2.0"
@@ -36,9 +36,9 @@ jdiff = ">=1.0.1,<2.0.0"
 ntc-templates = ">=9.0.0"
 # Netutils pin is needed for https://github.com/networktocode/netutils/pull/553
 netutils = "^1.9.1"
-ttp = "^0.9.0"
+ttp = ">=0.10.0,<0.11.0"
 # Used for local development
-nautobot = ">=3.0.0,<4.0.0"
+nautobot = ">=3.1.0,<4.0.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "*"
@@ -50,12 +50,11 @@ pylint-django = ">=2.5.4"
 pylint-nautobot = ">=0.3.1"
 ruff = "0.5.5"
 yamllint = "*"
-toml = "*"
 # Python implementation of markdownlint
 pymarkdownlnt = "~0.9.30"
 Markdown = "*"
 towncrier = ">=23.6.0,<=24.8.0"
-fakenos = { git = "https://github.com/fakenos/fakenos", branch = "master", python = ">=3.11,<3.14" }
+fakenos = { git = "https://github.com/fakenos/fakenos", branch = "master", python = ">=3.11,<3.15" }
 to-json-schema = "*"
 jsonschema = "*"
 djlint = ">=1.36.4,<2.0.0"
@@ -81,7 +80,7 @@ mkdocs-glightbox = "~0.5.2"
 all = [
 ]
 
-[tool.pylint.master]
+[tool.pylint.main]
 # Include the pylint_django plugin to avoid spurious warnings about Django patterns
 load-plugins = "pylint_django, pylint_nautobot"
 ignore = ".venv"
@@ -185,7 +184,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.towncrier]
 package = "nautobot"
 directory = "changes"
-filename = "docs/admin/release_notes/version_5.4.md"
+filename = "docs/admin/release_notes/version_5.5.md"
 template = "development/towncrier_template.j2"
 start_string = "<!-- towncrier release notes start -->"
 issue_format = "[#{issue}](https://github.com/nautobot/nautobot-app-device-onboarding/issues/{issue})"
