@@ -11,6 +11,22 @@ This document describes all new features and changes in the release. The format 
 
 <!-- towncrier release notes start -->
 
+## [v5.4.2 (2026-08-17)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v5.4.2)
+
+### Fixed
+
+- [#277](https://github.com/nautobot/nautobot-app-device-onboarding/issues/277) - Refactors get_git_repo to use .get() for better error handling.
+- [#604](https://github.com/nautobot/nautobot-app-device-onboarding/issues/604) - Fixed cable sync failing in Nautobot v3.2.0 and higher.
+
+### Dependencies
+
+- [#605](https://github.com/nautobot/nautobot-app-device-onboarding/issues/605) - Bumped ttp minimum to 0.10.0 for compatibility with nornir-nautobot 4.4.0 and Python 3.14.
+
+### Housekeeping
+
+- [#604](https://github.com/nautobot/nautobot-app-device-onboarding/issues/604) - Fixed unit test failing in Nautobot v3.1.7 and higher.
+- Rebaked from the cookie `nautobot-app-v3.1.4`.
+
 ## [v5.4.1 (2026-07-27)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v5.4.1)
 
 ## [v5.4.0 (2026-07-01)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v5.4.0)
