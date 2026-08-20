@@ -1,0 +1,1 @@
+Raised the `nautobot-plugin-nornir` constraint to `>=3.2.4,<4.0.0`, which is the first release that merges a supplied `nornir_settings` dictionary over the app defaults.

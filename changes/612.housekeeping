@@ -1,0 +1,1 @@
+Removed the redundant `runner` key from the `nautobot_plugin_nornir` block in the development config and the install documentation, because `nautobot-plugin-nornir` now supplies that value as an app default.
