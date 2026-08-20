@@ -61,12 +61,6 @@ For the `Sync Data from Network` job to work the below must be added to the `PLU
     "nautobot_plugin_nornir": {
         "nornir_settings": {
             "credentials": "nautobot_plugin_nornir.plugins.credentials.nautobot_secrets.CredentialsNautobotSecrets",
-            "runner": {
-                "plugin": "threaded",
-                "options": {
-                    "num_workers": 20,
-                },
-            },
         },
     },
 ```
