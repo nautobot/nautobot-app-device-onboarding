@@ -1,1 +1,1 @@
-Raised the `nautobot-plugin-nornir` constraint to `>=3.2.4,<4.0.0`, which is the first release that merges a supplied `nornir_settings` dictionary over the app defaults.
+Raised the `nautobot-plugin-nornir` constraint to `>=3.2.4,<4.0.0`, which is the first release that merges a supplied `nornir_settings` dictionary over its own defaults. The re-lock also moves `pylint-nautobot` to 1.0.0, which replaces the `pylint` 2.x development toolchain on Python 3.14 with `pylint` 4.x.
