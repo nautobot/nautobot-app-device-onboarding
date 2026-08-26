@@ -1,0 +1,1 @@
+Fixed the Sync Devices and Sync Network Data jobs to ensure Git-provided command mappers are synced before running.
