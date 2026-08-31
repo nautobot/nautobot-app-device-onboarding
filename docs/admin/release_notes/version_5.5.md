@@ -8,6 +8,17 @@ This document describes all new features and changes in the release. The format 
 - Added support for Cable sync in Nautobot 3.2.0 and higher.
 
 <!-- towncrier release notes start -->
+
+## [v5.5.1 (2026-08-31)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v5.5.1)
+
+### Fixed
+
+- [#609](https://github.com/nautobot/nautobot-app-device-onboarding/issues/609) - Fixed the Sync Devices and Sync Network Data jobs to ensure Git-provided command mappers are synced before running.
+
+### Housekeeping
+
+- Updated CODEOWNERS file.
+
 ## [v5.5.0 (2026-08-17)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v5.5.0)
 
 ### Fixed
