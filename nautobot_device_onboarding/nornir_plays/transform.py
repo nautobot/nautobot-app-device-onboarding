@@ -1,15 +1,19 @@
 """Adds command mapper, platform parsing info."""
 
+import logging
 import os
 
 import yaml
 from django.core.exceptions import MultipleObjectsReturned, ObjectDoesNotExist
+from nautobot.extras.datasources import ensure_git_repository
 from nautobot.extras.models import GitRepository
 
 from nautobot_device_onboarding.constants import (
     ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER,
     ONBOARDING_COMMAND_MAPPERS_REPOSITORY_FOLDER,
 )
+
+LOGGER = logging.getLogger(__name__)
 
 DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), "command_mappers"))
 
@@ -41,14 +45,68 @@ def get_git_repo_parser_path(parser_type):
     return None
 
 
-def add_platform_parsing_info():
-    """Merges platform command mapper from repo or defaults."""
+def ensure_command_mappers_repo(repository_record, logger=None, raise_on_error=False):
+    """Ensure the command mappers Git repository is cloned on the worker running this job.
+
+    Args:
+        repository_record (GitRepository): Repository to ensure the state of.
+        logger (NornirLogger): Optional logger to write results to the job result log.
+        raise_on_error (bool): Re-raise instead of falling back to the app provided defaults.
+
+    Returns:
+        bool: True if the local clone is usable, False otherwise.
+    """
+    logger = logger or LOGGER
+    try:
+        ensure_git_repository(repository_record, head=repository_record.current_head or None)
+    except Exception as err:  # pylint: disable=broad-exception-caught
+        logger.error(
+            f"Failed to refresh command mapper Git repository '{repository_record.name}' on this worker: {err}"
+        )
+        if raise_on_error:
+            raise
+        logger.warning(
+            "Falling back to the app provided default command mappers. Command mappers and parsers "
+            f"from '{repository_record.name}' will NOT be applied."
+        )
+        return False
+    logger.debug(
+        f"Command mapper Git repository '{repository_record.name}' is present at "
+        f"{repository_record.filesystem_path}."
+    )
+    return True
+
+
+def add_platform_parsing_info(logger=None, raise_on_repo_error=False):
+    """Merges platform command mapper from repo or defaults.
+
+    Args:
+        logger (NornirLogger): Optional logger to write results to the job result log.
+        raise_on_repo_error (bool): Fail instead of falling back to the app provided defaults when
+            the Git repository cannot be refreshed or read.
+
+    Returns:
+        dict: Command mappers keyed by network driver.
+    """
+    logger = logger or LOGGER
+    command_mappers_repo_path = {}
     repository_record = get_git_repo()
     if repository_record:
-        repo_data_dir = os.path.join(repository_record.filesystem_path, ONBOARDING_COMMAND_MAPPERS_REPOSITORY_FOLDER)
-        command_mappers_repo_path = load_command_mappers_from_dir(repo_data_dir)
-    else:
-        command_mappers_repo_path = {}
+        if ensure_command_mappers_repo(repository_record, logger=logger, raise_on_error=raise_on_repo_error):
+            repo_data_dir = os.path.join(
+                repository_record.filesystem_path, ONBOARDING_COMMAND_MAPPERS_REPOSITORY_FOLDER
+            )
+            if os.path.isdir(repo_data_dir):
+                command_mappers_repo_path = load_command_mappers_from_dir(repo_data_dir)
+            else:
+                message = (
+                    f"Git repository '{repository_record.name}' does not contain the expected directory "
+                    f"'{ONBOARDING_COMMAND_MAPPERS_REPOSITORY_FOLDER}' at {repo_data_dir}. Using the app "
+                    "provided default command mappers only."
+                )
+                logger.error(message)
+                if raise_on_repo_error:
+                    raise FileNotFoundError(message)
     command_mapper_defaults = load_command_mappers_from_dir(DATA_DIR)
     merged_command_mappers = {**command_mapper_defaults, **command_mappers_repo_path}
     return merged_command_mappers

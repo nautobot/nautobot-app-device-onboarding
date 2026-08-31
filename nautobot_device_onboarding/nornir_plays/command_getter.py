@@ -316,6 +316,10 @@ def sync_devices_command_getter(job, log_level):
             logging={"enabled": False},
             inventory={
                 "plugin": "empty-inventory",
+                "options": {
+                    "logger": logger,
+                    "raise_on_repo_error": job.fail_job_on_task_failure,
+                },
             },
         ) as nornir_obj:
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, job)])
@@ -385,7 +389,9 @@ def sync_network_data_command_getter(job, log_level):
                     "credentials_class": NORNIR_SETTINGS.get("credentials"),
                     "queryset": qs,
                     "defaults": {
-                        "platform_parsing_info": add_platform_parsing_info(),
+                        "platform_parsing_info": add_platform_parsing_info(
+                            logger=logger, raise_on_repo_error=job.fail_job_on_task_failure
+                        ),
                         "network_driver_mappings": list(get_all_network_driver_mappings().keys()),
                         "sync_vlans": job.sync_vlans,
                         "sync_vrfs": job.sync_vrfs,

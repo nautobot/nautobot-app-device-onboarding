@@ -14,8 +14,10 @@ from nautobot.extras.models import GitRepository, JobResult
 
 from nautobot_device_onboarding.constants import (
     ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER,
+    ONBOARDING_COMMAND_MAPPERS_REPOSITORY_FOLDER,
 )
 from nautobot_device_onboarding.nornir_plays.transform import (
+    DATA_DIR,
     add_platform_parsing_info,
     get_git_repo,
     load_command_mappers_from_dir,
@@ -29,6 +31,14 @@ class TestTransformNoGitRepo(TestCase):
 
     def setUp(self):
         self.yaml_file_dir = f"{MOCK_DIR}/command_mappers/"
+
+    @mock.patch("nautobot_device_onboarding.nornir_plays.transform.ensure_git_repository")
+    @mock.patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository.objects.get")
+    def test_add_platform_parsing_info_no_git_repo_skips_ensure(self, mock_repo_get, mock_ensure):
+        """With no command mapper repo, the git repo must never be touched."""
+        mock_repo_get.side_effect = ObjectDoesNotExist
+        add_platform_parsing_info()
+        mock_ensure.assert_not_called()
 
     @mock.patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository.objects.get")
     def test_add_platform_parsing_info_sane_defaults(self, mock_repo_get):
@@ -146,6 +156,88 @@ class TestTransformWithGitRepo(TransactionTestCase):
                 }
                 merged_mappers = add_platform_parsing_info()
                 self.assertEqual(expected_dict, merged_mappers)
+
+
+@mock.patch("nautobot.extras.datasources.git.GitRepo")
+class TestEnsureCommandMappersRepo(TestCase):
+    """Testing that the command mapper repo is cloned on the worker running the job."""
+
+    def setUp(self):
+        super().setUp()
+        GitRepository.objects.filter(provided_contents__contains=ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER).delete()
+        self.repo = GitRepository(
+            name="Test Git Repo",
+            remote_url="http://localhost/git.git",
+            provided_contents=[ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER],
+        )
+        self.repo.save()
+        self.default_mappers = load_command_mappers_from_dir(DATA_DIR)
+        self.logger = mock.MagicMock()
+        return mock.DEFAULT
+
+    @staticmethod
+    def populate_repo(repository_record, *args, **kwargs):
+        """Simulate ensure_git_repository cloning the repo onto this worker."""
+        mappers_dir = os.path.join(repository_record.filesystem_path, ONBOARDING_COMMAND_MAPPERS_REPOSITORY_FOLDER)
+        os.makedirs(mappers_dir, exist_ok=True)
+        with open(os.path.join(mappers_dir, "foo_bar.yml"), "w", encoding="utf-8") as file_handle:
+            yaml.dump({"sync_devices": {"serial": {"commands": []}}}, file_handle)
+        return True
+
+    @mock.patch("nautobot_device_onboarding.nornir_plays.transform.ensure_git_repository")
+    def test_add_platform_parsing_info_ensures_repo_on_worker(self, mock_ensure, *args):
+        """The repo must be refreshed on whichever worker is executing the job."""
+        with tempfile.TemporaryDirectory() as tempdir:
+            with self.settings(GIT_ROOT=tempdir):
+                mock_ensure.side_effect = self.populate_repo
+                add_platform_parsing_info(logger=self.logger)
+        mock_ensure.assert_called_once_with(self.repo, head=self.repo.current_head or None)
+
+    @mock.patch("nautobot_device_onboarding.nornir_plays.transform.ensure_git_repository")
+    def test_add_platform_parsing_info_clones_when_filesystem_path_missing(self, mock_ensure, *args):
+        """Regression test for #609: a worker with no local clone must not raise FileNotFoundError."""
+        with tempfile.TemporaryDirectory() as tempdir:
+            with self.settings(GIT_ROOT=tempdir):
+                # The repo directory does not exist until ensure_git_repository creates it.
+                self.assertFalse(os.path.isdir(self.repo.filesystem_path))
+                mock_ensure.side_effect = self.populate_repo
+                command_mappers = add_platform_parsing_info(logger=self.logger)
+        self.assertIn("foo_bar", command_mappers)
+        self.assertEqual(sorted([*self.default_mappers, "foo_bar"]), sorted(command_mappers))
+        self.logger.error.assert_not_called()
+
+    @mock.patch("nautobot_device_onboarding.nornir_plays.transform.ensure_git_repository")
+    def test_add_platform_parsing_info_missing_dir_after_ensure_falls_back(self, mock_ensure, *args):
+        """A repo without an onboarding_command_mappers directory logs an error instead of raising."""
+        with tempfile.TemporaryDirectory() as tempdir:
+            with self.settings(GIT_ROOT=tempdir):
+                mock_ensure.return_value = False
+                command_mappers = add_platform_parsing_info(logger=self.logger)
+        self.assertEqual(sorted(self.default_mappers), sorted(command_mappers))
+        self.logger.error.assert_called_once()
+        self.assertIn(ONBOARDING_COMMAND_MAPPERS_REPOSITORY_FOLDER, self.logger.error.call_args[0][0])
+
+    @mock.patch("nautobot_device_onboarding.nornir_plays.transform.ensure_git_repository")
+    def test_add_platform_parsing_info_ensure_failure_logs_error_and_falls_back(self, mock_ensure, *args):
+        """A git failure must be surfaced as an error, not silently swallowed."""
+        mock_ensure.side_effect = Exception("authentication failed")
+        with tempfile.TemporaryDirectory() as tempdir:
+            with self.settings(GIT_ROOT=tempdir):
+                command_mappers = add_platform_parsing_info(logger=self.logger)
+        self.assertEqual(sorted(self.default_mappers), sorted(command_mappers))
+        self.logger.error.assert_called_once()
+        self.assertIn("authentication failed", self.logger.error.call_args[0][0])
+        self.logger.warning.assert_called_once()
+
+    @mock.patch("nautobot_device_onboarding.nornir_plays.transform.ensure_git_repository")
+    def test_add_platform_parsing_info_ensure_failure_raises_when_fail_job_on_task_failure(self, mock_ensure, *args):
+        """With the job's fail fast option set, a git failure must fail the job."""
+        mock_ensure.side_effect = Exception("authentication failed")
+        with tempfile.TemporaryDirectory() as tempdir:
+            with self.settings(GIT_ROOT=tempdir):
+                with self.assertRaises(Exception):
+                    add_platform_parsing_info(logger=self.logger, raise_on_repo_error=True)
+        self.logger.error.assert_called_once()
 
 
 @mock.patch("nautobot.extras.datasources.git.GitRepo")
