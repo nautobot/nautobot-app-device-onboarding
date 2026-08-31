@@ -1,0 +1,1 @@
+Added an opt-in "Sync Config Context" option to the Sync Network Data From Network job that collects supplemental show-command data declared under a `config_context` key in the command mapper and writes it to each device's local config context under a managed `device_onboarding` key.

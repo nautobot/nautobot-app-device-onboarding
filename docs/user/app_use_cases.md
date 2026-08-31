@@ -342,6 +342,36 @@ Required Fields:
     devices: Location UUID
 
 
+### Onboarding Supplemental Data into Config Context
+
+The `Sync Network Data From Network` job can collect additional show-command data that Nautobot does not model natively (for example OSPF neighbors or SNMP communities) and write it to each device's local config context. This is opt-in via the `Sync Config Context` checkbox on the job form.
+
+To collect a piece of data, add a `config_context` key to the platform's command mapper under `sync_network_data`. Each entry beneath it is a named subfield following the same `commands` / `parser` / `jpath` / `post_processor` / `iterable_type` contract as any other mapper field:
+
+```yaml
+sync_network_data:
+  config_context:
+    ip_ospf_neighbors:
+      commands:
+        - command: "show ip ospf neighbor"
+          parser: "textfsm"
+          jpath: "[*].{neighbor_id: neighbor_id, ip_address: ip_address, interface: interface, state: state}"
+          post_processor: "{{ obj | sort(attribute='neighbor_id') | list | tojson }}"
+          iterable_type: "list"
+```
+
+When the job runs with `Sync Config Context` enabled, the collected data is written to the device's local config context under a single managed top-level key, `device_onboarding`:
+
+```json
+{
+  "device_onboarding": {
+    "ip_ospf_neighbors": [{"neighbor_id": "1.1.1.1", "ip_address": "10.0.0.1", "interface": "GigabitEthernet0/0", "state": "FULL/BDR"}]
+  }
+}
+```
+
+This behavior is additive: only the `device_onboarding` key is read, compared, and written. Any other keys in the device's local config context (for example data sourced from a Git repository or entered manually) are preserved, and the job never deletes config context. For predictable diffs across repeated syncs, sort list output deterministically in the `post_processor` (as shown above). If the device has a Config Context Schema assigned, the merged local config context must still satisfy it.
+
 ### Using Git(Datasources) to Override the Apps Defaults
 
 #### YAML Overrides

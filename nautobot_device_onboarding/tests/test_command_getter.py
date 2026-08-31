@@ -239,6 +239,33 @@ class TestGetCommandsToRun(unittest.TestCase):
         ]
         self.assertEqual(get_commands_to_run, expected_commands_to_run)
 
+    def test_deduplicate_command_list_sync_data_config_context(self):
+        """With sync_config_context on, the config_context subfield commands are included."""
+        get_commands_to_run = _get_commands_to_run(
+            self.expected_data["sync_network_data"],
+            sync_vlans=False,
+            sync_vrfs=False,
+            sync_cables=False,
+            sync_software_version=False,
+            sync_config_context=True,
+        )
+        commands = [command["command"] for command in get_commands_to_run]
+        self.assertIn("show ip ospf neighbor", commands)
+        self.assertIn("show running-config | include snmp-server community", commands)
+
+    def test_deduplicate_command_list_sync_data_no_config_context(self):
+        """With sync_config_context off (default), the config_context commands are excluded."""
+        get_commands_to_run = _get_commands_to_run(
+            self.expected_data["sync_network_data"],
+            sync_vlans=False,
+            sync_vrfs=False,
+            sync_cables=False,
+            sync_software_version=False,
+        )
+        commands = [command["command"] for command in get_commands_to_run]
+        self.assertNotIn("show ip ospf neighbor", commands)
+        self.assertNotIn("show running-config | include snmp-server community", commands)
+
 
 @patch("nautobot_device_onboarding.nornir_plays.command_getter.NornirLogger", MagicMock())
 class TestSSHCredParsing(TransactionTestCase):

@@ -324,6 +324,110 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
                     self.assertEqual(interface.vrf.name, interface_data["vrf"]["name"])
 
     @patch("nautobot_device_onboarding.diffsync.adapters.sync_network_data_adapters.sync_network_data_command_getter")
+    def test_sync_network_data_config_context(self, device_data):
+        """With sync_config_context on, collected data is written to the device's local config context."""
+        # Shallow-merge a config_context blob onto one device without mutating the shared fixture.
+        mock_data = dict(sync_network_data_fixture.sync_network_mock_data_valid)
+        mock_data["demo-cisco-1"] = {
+            **mock_data["demo-cisco-1"],
+            "config_context": {"ip_ospf_neighbors": [{"neighbor_id": "1.1.1.1"}]},
+        }
+        device_data.return_value = mock_data
+        devices = ["demo-cisco-1", "demo-cisco-2", "demo-cisco-4"]
+        device_ids_to_sync = list(Device.objects.filter(name__in=devices).values_list("id", flat=True))
+
+        job_form_inputs = {
+            "debug": True,
+            "connectivity_test": False,
+            "dryrun": False,
+            "sync_vlans": False,
+            "sync_vrfs": False,
+            "sync_vrf_to_prefix": False,
+            "sync_cables": False,
+            "sync_software_version": False,
+            "sync_config_context": True,
+            "update_devices_with_changed_serial": False,
+            "namespace": self.testing_objects["namespace"].pk,
+            "interface_status": self.testing_objects["status"].pk,
+            "ip_address_status": self.testing_objects["status"].pk,
+            "default_prefix_status": self.testing_objects["status"].pk,
+            "devices": device_ids_to_sync,
+            "location": None,
+            "device_role": None,
+            "platform": None,
+            "memory_profiling": False,
+            "fail_job_on_task_failure": False,
+        }
+        job_result = create_job_result_and_run_job(
+            module="nautobot_device_onboarding.jobs", name="SSOTSyncNetworkData", **job_form_inputs
+        )
+
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
+        device = Device.objects.get(name="demo-cisco-1")
+        self.assertEqual(
+            device.local_config_context_data["device_onboarding"],
+            {"ip_ospf_neighbors": [{"neighbor_id": "1.1.1.1"}]},
+        )
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_network_data_adapters.sync_network_data_command_getter")
+    def test_sync_network_data_config_context_disabled_leaves_existing_key_untouched(self, device_data):
+        """With sync_config_context off, an existing managed key is neither updated nor deleted."""
+        # Pre-seed the device with a managed slice and an unrelated sibling key.
+        existing = {"device_onboarding": {"ip_ospf_neighbors": [{"neighbor_id": "0.0.0.0"}]}, "manual": "keep"}
+        device = Device.objects.get(name="demo-cisco-1")
+        device.local_config_context_data = dict(existing)
+        device.validated_save()
+
+        # The source still reports fresh config context; with the flag off it must be ignored entirely.
+        mock_data = dict(sync_network_data_fixture.sync_network_mock_data_valid)
+        mock_data["demo-cisco-1"] = {
+            **mock_data["demo-cisco-1"],
+            "config_context": {"ip_ospf_neighbors": [{"neighbor_id": "1.1.1.1"}]},
+        }
+        device_data.return_value = mock_data
+        devices = ["demo-cisco-1", "demo-cisco-2", "demo-cisco-4"]
+        device_ids_to_sync = list(Device.objects.filter(name__in=devices).values_list("id", flat=True))
+
+        job_form_inputs = {
+            "debug": True,
+            "connectivity_test": False,
+            "dryrun": False,
+            "sync_vlans": False,
+            "sync_vrfs": False,
+            "sync_vrf_to_prefix": False,
+            "sync_cables": False,
+            "sync_software_version": False,
+            "sync_config_context": False,
+            "update_devices_with_changed_serial": False,
+            "namespace": self.testing_objects["namespace"].pk,
+            "interface_status": self.testing_objects["status"].pk,
+            "ip_address_status": self.testing_objects["status"].pk,
+            "default_prefix_status": self.testing_objects["status"].pk,
+            "devices": device_ids_to_sync,
+            "location": None,
+            "device_role": None,
+            "platform": None,
+            "memory_profiling": False,
+            "fail_job_on_task_failure": False,
+        }
+        job_result = create_job_result_and_run_job(
+            module="nautobot_device_onboarding.jobs", name="SSOTSyncNetworkData", **job_form_inputs
+        )
+
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
+        device.refresh_from_db()
+        # The managed slice is untouched (not overwritten with the source data) and the sibling survives.
+        self.assertEqual(device.local_config_context_data, existing)
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_network_data_adapters.sync_network_data_command_getter")
     def test_update_devices_with_changed_serial_toggle__absorbs_serial_drift(self, device_data):
         """With update_devices_with_changed_serial=True, a serial-drifted device's row gets
         its serial updated and its interfaces enriched in a single SND run.
