@@ -4,6 +4,7 @@ edit_uri: "edit/main/docs"
 site_dir: "nautobot_device_onboarding/static/nautobot_device_onboarding/docs"
 site_name: "Device Onboarding Documentation"
 site_url: "https://docs.nautobot.com/projects/device-onboarding/en/latest/"
+exclude_docs: "superpowers/**"
 repo_url: "https://github.com/nautobot/nautobot-app-device-onboarding"
 copyright: "Copyright &copy; The Authors"
 theme:
@@ -135,6 +136,7 @@ nav:
           - v1.0: "admin/release_notes/version_1.0.md"
   - Developer Guide:
       - Extending the App: "dev/extending.md"
+      - Custom Command Mapper Per Platform: "dev/custom_command_mapper_per_platform.md"
       - YAML Overrides: "user/app_yaml_overrides.md"
       - Onboarding Extensions: "dev/onboarding_extensions.md"
       - Contributing to the App: "dev/contributing.md"
