@@ -31,3 +31,274 @@ sync_devices:
         jpath: "[*].netmask"
         post_processor: "{{ obj[0] | netmask_to_cidr }}"
         iterable_type: "int"
+sync_network_data:
+  pre_processor:
+    mgmt_interface_name:
+      commands:
+        - command: "show interface management | match Name"
+          parser: "raw"
+          jpath: "raw"
+          post_processor: >-
+           {{ (obj.split('Name: ', 1)[1].strip() if 'Name: ' in obj else '') | tojson }}
+    mgmt_ip_data:
+      commands:
+        - command: "show system info"
+          parser: "ttp"
+          jpath: "[0].{ip_address: ip_address, netmask: netmask}"
+          post_processor: >-
+            {% set ip = obj.ip_address if obj.ip_address is defined else '' %}
+            {% set netmask = obj.netmask if obj.netmask is defined else '' %}
+            {% set cidr = netmask | netmask_to_cidr if netmask else '' %}
+            {{ {'ip_address': ip, 'prefix_length': cidr} | tojson }}
+          iterable_type: "dict"
+
+    mgmt_mac_address:
+      commands:
+        - command: "show system info"
+          parser: "ttp"
+          jpath: "[0].mac_address"
+          post_processor: >-
+            {% if obj %}
+            {{ obj | tojson }}
+            {% else %}
+            {{ '' | tojson }}
+            {% endif %}
+          iterable_type: "str"
+
+  software_version:
+    commands:
+      - command: "show system info"
+        parser: "ttp"
+        jpath: "[*].version"
+        post_processor: >-
+          {% if obj | length > 0 %}
+            {{ obj[0] | tojson }}
+          {% else %}
+            {{ '' | tojson }}
+          {% endif %}
+
+  serial:
+    commands:
+      - command: "show system info"
+        parser: "ttp"
+        jpath: "[*].serial"
+        post_processor: >-
+          {% if obj | length > 0 %}
+            {{ obj[0] | tojson }}
+          {% else %}
+            {{ '' | tojson }}
+          {% endif %}
+  interfaces:
+    root_key: true
+    commands:
+      - command: "show interface all"
+        parser: "textfsm"
+        jpath: "[*].interface"
+        post_processor: >-
+          {% set result = {} %}
+          {% for interface in obj %}
+          {{ result.update({interface: {}}) or '' }}
+          {% endfor %}
+          {% if mgmt_interface_name is defined and mgmt_interface_name %}
+          {{ result.update({mgmt_interface_name: {}}) or '' }}
+          {% endif %}
+          {{ result | tojson }}
+  interfaces__type:
+    commands:
+      - command: "show interface logical"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].interface"
+        post_processor: >-
+          {% set name = current_key %}
+          {% if mgmt_interface_name is defined and mgmt_interface_name and name == mgmt_interface_name %}
+            {{ '1000base-t' | tojson }}
+          {% elif name[:8] == 'ethernet' and '.' not in name %}
+            {{ '1000base-t' | tojson }}
+          {% elif name[:2] == 'ae' and '.' not in name %}
+            {{ 'lag' | tojson }}
+          {% elif name[:2] == 'ae' and '.' in name %}
+            {{ 'virtual' | tojson }}
+          {% elif name[:8] == 'ethernet' and '.' in name %}
+            {{ 'virtual' | tojson }}
+          {% elif name[:8] == 'loopback' %}
+            {{ 'virtual' | tojson }}
+          {% elif name[:6] == 'tunnel' %}
+            {{ 'tunnel' | tojson }}
+          {% elif name == 'vlan' %}
+            {{ 'virtual' | tojson }}
+          {% else %}
+            {{ 'other' | tojson }}
+          {% endif %}
+        iterable_type: "str"
+
+  interfaces__ip_addresses:
+    commands:
+      - command: "show interface logical"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].ip_address"
+        post_processor: >-
+          {% set result = [] %}
+          {% if mgmt_interface_name is defined and mgmt_interface_name and current_key == mgmt_interface_name %}
+            {% if mgmt_ip_data is defined and mgmt_ip_data.ip_address is defined and mgmt_ip_data.ip_address and mgmt_ip_data.prefix_length != '' %}
+              {% set _ = result.append({'ip_address': mgmt_ip_data.ip_address, 'prefix_length': mgmt_ip_data.prefix_length | int}) %}
+            {% endif %}
+          {% else %}
+            {% for ip in obj %}
+              {% if ip != 'N/A' and '/' in ip %}
+                {% set parts = ip.split('/') %}
+                {% if parts | length == 2 %}
+                  {% set _ = result.append({'ip_address': parts[0], 'prefix_length': parts[1] | int}) %}
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+          {{ result | tojson }}
+        iterable_type: "list"
+
+  interfaces__mac_address:
+    commands:
+      - command: "show interface hardware"
+        parser: "textfsm"
+        jpath: "[*].{interface: interface, mac_address: mac_address}"
+        post_processor: >-
+          {% if mgmt_interface_name is defined and mgmt_interface_name and current_key == mgmt_interface_name %}
+            {{ mgmt_mac_address | default('') | tojson }}
+          {% else %}
+            {% set target = current_key %}
+            {% set parent = current_key.split('.')[0] %}
+            {% set ns = namespace(mac='') %}
+            {% for row in obj %}
+              {% if row.interface == target %}
+                {% set ns.mac = row.mac_address %}
+              {% endif %}
+            {% endfor %}
+            {% if ns.mac == '' %}
+              {% for row in obj %}
+                {% if row.interface == parent %}
+                  {% set ns.mac = row.mac_address %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+            {{ ns.mac | tojson }}
+          {% endif %}
+
+  interfaces__mtu:
+    commands:
+      - command: "show interface logical"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].interface"
+        post_processor: "{{ '' | tojson }}"
+        iterable_type: "str"
+
+  interfaces__description:
+    commands:
+      - command: "show interface logical"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].interface"
+        post_processor: "{{ '' | tojson }}"
+        iterable_type: "str"
+
+  interfaces__link_status:
+    commands:
+      - command: "show interface hardware"
+        parser: "textfsm"
+        jpath: "[*].{interface: interface, state: state}"
+        post_processor: >-
+          {% if mgmt_interface_name is defined and mgmt_interface_name and current_key == mgmt_interface_name %}
+            {{ true | tojson }}
+          {% else %}
+            {% set target = current_key %}
+            {% set parent = current_key.split('.')[0] %}
+            {% set ns = namespace(state='') %}
+            {% for row in obj %}
+              {% if row.interface == target %}
+                {% set ns.state = row.state %}
+              {% endif %}
+            {% endfor %}
+            {% if ns.state == '' %}
+              {% for row in obj %}
+                {% if row.interface == parent %}
+                  {% set ns.state = row.state %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+            {% if 'up' in ns.state %}
+              {{ true | tojson }}
+            {% else %}
+              {{ false | tojson }}
+            {% endif %}
+          {% endif %}
+
+  interfaces__802.1Q_mode:
+    commands:
+      - command: "show interface logical"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].{interface: interface, vlan_id: vlan_id}"
+        post_processor: >-
+          {% if mgmt_interface_name is defined and mgmt_interface_name and current_key == mgmt_interface_name %}
+            {{ '' | tojson }}
+          {% elif obj | length == 0 %}
+            {{ '' | tojson }}
+          {% else %}
+            {% set row = obj[0] %}
+            {% if '.' in row.interface and row.vlan_id != '0' %}
+              {{ 'tagged' | tojson }}
+            {% else %}
+              {{ '' | tojson }}
+            {% endif %}
+          {% endif %}
+        iterable_type: "str"
+
+  interfaces__lag:
+    commands:
+      - command: "show lacp aggregate-ethernet all"
+        parser: "textfsm"
+        jpath: "[?contains(member_interface, '{{ current_key }}')].bundle_name | [0]"
+        post_processor: >-
+          {{ (obj if obj else '') | tojson }}
+        iterable_type: "str"
+
+  interfaces__tagged_vlans:
+    commands:
+      - command: "show interface logical"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].{interface: interface, vlan_id: vlan_id}"
+        post_processor: >-
+          {% set result = [] %}
+          {% if not (mgmt_interface_name is defined and mgmt_interface_name and current_key == mgmt_interface_name) %}
+            {% if obj | length > 0 %}
+              {% set row = obj[0] %}
+              {% if '.' in row.interface and row.vlan_id != '0' %}
+                {% set _ = result.append({'name': 'VLAN' ~ row.vlan_id, 'id': row.vlan_id}) %}
+              {% endif %}
+            {% endif %}
+          {% endif %}
+          {{ result | tojson }}
+
+  interfaces__untagged_vlan:
+    commands:
+      - command: "show interface logical"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].interface"
+        post_processor: "{{ {} | tojson }}"
+        iterable_type: "dict"
+
+  interfaces__vrf:
+    commands:
+      - command: "show interface logical"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].forwarding"
+        post_processor: >-
+          {% if mgmt_interface_name is defined and mgmt_interface_name and current_key == mgmt_interface_name %}
+            {{ {} | tojson }}
+          {% elif obj | length > 0 %}
+            {% set fwd = obj[0] %}
+            {% if fwd[:3] == 'vr:' %}
+              {{ {'name': fwd[3:], 'rd': ''} | tojson }}
+            {% else %}
+              {{ {} | tojson }}
+            {% endif %}
+          {% else %}
+            {{ {} | tojson }}
+          {% endif %}
+        iterable_type: "dict"
