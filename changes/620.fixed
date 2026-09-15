@@ -1,0 +1,1 @@
+Fixed Aruba AOS-CX interface speed not being synchronized by the `Sync Network Data From Network` job.
