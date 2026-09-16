@@ -12,6 +12,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:67",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/10": {
@@ -26,6 +27,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:60",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/11": {
@@ -40,6 +42,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:5d",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/12": {
@@ -54,6 +57,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:5e",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/13": {
@@ -68,6 +72,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:5b",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/14": {
@@ -82,6 +87,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:5c",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/15": {
@@ -96,6 +102,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:59",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/16": {
@@ -110,6 +117,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:5a",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/17": {
@@ -124,6 +132,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:57",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/18": {
@@ -138,6 +147,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:58",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/19": {
@@ -152,6 +162,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:55",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/2": {
@@ -166,6 +177,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:68",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/20": {
@@ -180,6 +192,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:56",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/21": {
@@ -194,6 +207,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:53",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/22": {
@@ -208,6 +222,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:54",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/23": {
@@ -222,6 +237,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:51",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/24": {
@@ -236,6 +252,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:52",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/25": {
@@ -250,6 +267,7 @@
             "link_status": "False",
             "mac_address": "4c:d5:87:ab:cc:50",
             "mtu": "1500",
+            "port_type": "lc",
             "type": "1000base-t"
         },
         "1/1/26": {
@@ -264,6 +282,7 @@
             "link_status": "False",
             "mac_address": "4c:d5:87:ab:cc:4f",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/27": {
@@ -278,6 +297,7 @@
             "link_status": "False",
             "mac_address": "4c:d5:87:ab:cc:4e",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/28": {
@@ -292,6 +312,7 @@
             "link_status": "False",
             "mac_address": "4c:d5:87:ab:cc:4d",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/3": {
@@ -306,6 +327,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:65",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/4": {
@@ -320,6 +342,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:66",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/5": {
@@ -334,6 +357,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:63",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/6": {
@@ -348,6 +372,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:64",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/7": {
@@ -362,6 +387,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:61",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/8": {
@@ -376,6 +402,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:62",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "1/1/9": {
@@ -390,6 +417,7 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:5f",
             "mtu": "1500",
+            "port_type": "8p8c",
             "type": "1000base-t"
         },
         "vlan1": {
@@ -404,7 +432,8 @@
             "link_status": "False",
             "mac_address": "4c:d5:87:ab:cc:40",
             "mtu": "",
-            "type": "1000base-t"
+            "port_type": "",
+            "type": "virtual"
         },
         "vlan100": {
             "802.1Q_mode": "access",
@@ -419,7 +448,8 @@
             "link_status": "True",
             "mac_address": "4c:d5:87:ab:cc:40",
             "mtu": "",
-            "type": "1000base-t"
+            "port_type": "",
+            "type": "virtual"
         }
     },
     "serial": "TW41LZ788B"

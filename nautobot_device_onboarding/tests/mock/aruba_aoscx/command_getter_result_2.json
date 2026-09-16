@@ -1330,5 +1330,111 @@
             "neighbor_interface": ""
         }
     ],
-    "show interface mgmt": []
+    "show interface mgmt": [],
+    "show interface dom detail": [
+        {
+            "interface": "1/1/25",
+            "iface_type": "SFP+SR",
+            "channel": [],
+            "temperature": "35.5C",
+            "temp_high_alarm_trig": "false",
+            "temp_low_alarm_trig": "false",
+            "temp_high_warn_trig": "false",
+            "temp_low_warn_trig": "false",
+            "temp_high_alarm_threshold": "90.0C",
+            "temp_low_alarm_threshold": "-10.0C",
+            "temp_high_warn_threshold": "80.0C",
+            "temp_low_warn_threshold": "0.0C",
+            "voltage": "3.3V",
+            "volt_high_alarm_trig": "false",
+            "volt_low_alarm_trig": "false",
+            "volt_high_warn_trig": "false",
+            "volt_low_warn_trig": "false",
+            "volt_high_alarm_threshold": "3.7V",
+            "volt_low_alarm_threshold": "3.0V",
+            "volt_high_warn_threshold": "3.6V",
+            "volt_low_warn_threshold": "3.1V",
+            "tx_bias": [
+                "6.0mA"
+            ],
+            "tx_bias_high_alarm_trig": [
+                "false"
+            ],
+            "tx_bias_low_alarm_trig": [
+                "false"
+            ],
+            "tx_bias_high_warn_trig": [
+                "false"
+            ],
+            "tx_bias_low_warn_trig": [
+                "false"
+            ],
+            "tx_bias_high_alarm_threshold": [
+                "10.0mA"
+            ],
+            "tx_bias_low_alarm_threshold": [
+                "2.0mA"
+            ],
+            "tx_bias_high_warn_threshold": [
+                "9.0mA"
+            ],
+            "tx_bias_low_warn_threshold": [
+                "2.5mA"
+            ],
+            "rx_mw": [
+                "0.5000mW"
+            ],
+            "rx_high_alarm_trig": [
+                "false"
+            ],
+            "rx_low_alarm_trig": [
+                "false"
+            ],
+            "rx_high_warn_trig": [
+                "false"
+            ],
+            "rx_low_warn_trig": [
+                "false"
+            ],
+            "rx_high_alarm_threshold": [
+                "1.0000mW"
+            ],
+            "rx_low_alarm_threshold": [
+                "0.0100mW"
+            ],
+            "rx_high_warn_threshold": [
+                "0.8000mW"
+            ],
+            "rx_low_warn_threshold": [
+                "0.0200mW"
+            ],
+            "tx_mw": [
+                "0.5500mW"
+            ],
+            "tx_high_alarm_trig": [
+                "false"
+            ],
+            "tx_low_alarm_trig": [
+                "false"
+            ],
+            "tx_high_warn_trig": [
+                "false"
+            ],
+            "tx_low_warn_trig": [
+                "false"
+            ],
+            "tx_high_alarm_threshold": [
+                "1.0000mW"
+            ],
+            "tx_low_alarm_threshold": [
+                "0.0100mW"
+            ],
+            "tx_high_warn_threshold": [
+                "0.8000mW"
+            ],
+            "tx_low_warn_threshold": [
+                "0.0200mW"
+            ]
+        }
+    ]
 }
