@@ -8,7 +8,7 @@ from nautobot.apps.choices import InterfaceModeChoices
 from netutils.ip import is_ip
 from netutils.vlan import vlanconfig_to_list
 
-from nautobot_device_onboarding.constants import INTERFACE_TYPE_MAP_STATIC
+from nautobot_device_onboarding.constants import INTERFACE_PORT_TYPE_MAP_STATIC, INTERFACE_TYPE_MAP_STATIC
 
 # https://docs.nautobot.com/projects/core/en/stable/development/apps/api/platform-features/jinja2-filters/
 
@@ -19,6 +19,22 @@ logger = logging.getLogger(__name__)
 def map_interface_type(interface_type):
     """Map interface type to a Nautobot type."""
     return INTERFACE_TYPE_MAP_STATIC.get(interface_type, "other")
+
+
+@library.filter
+def map_port_type(port_type):
+    """Map a raw transceiver/port indicator to a Nautobot port_type (physical connector).
+
+    Unlike `map_interface_type`, an unmatched value returns an empty string rather than
+    "other": Nautobot rejects `port_type` on virtual/wireless interfaces, so staying silent
+    is safer than guessing on interfaces this mapping wasn't meant to cover.
+    """
+    normalized = (port_type or "").lower()
+    if "da" in normalized:
+        # Direct-attach copper (DAC/twinax) cable assembly, e.g. "sfp+da3": the cable is
+        # permanently attached to the module, so there's no separate connector to report.
+        return ""
+    return INTERFACE_PORT_TYPE_MAP_STATIC.get(normalized, "")
 
 
 @library.filter
