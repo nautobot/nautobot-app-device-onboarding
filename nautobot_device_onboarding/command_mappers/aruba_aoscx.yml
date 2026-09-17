@@ -64,6 +64,13 @@ sync_network_data:
         parser: "textfsm"
         jpath: "[*].interface"
         post_processor: "{% set result={} %}{% for interface in obj %}{{ result.update({interface: {}}) or '' }}{% endfor %}{{ result | tojson }}"
+  interfaces__speed:
+    commands:
+      - command: "show interface"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].speed"
+        post_processor: "{% if obj and obj[0] %}{{ obj[0] | parse_speed_to_kbps }}{% else %}{{ obj }}{% endif %}"
+        iterable_type: "int"
   interfaces__type:
     commands:
       - command: "show interface"
