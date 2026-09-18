@@ -9,6 +9,12 @@ This document describes all new features and changes in the release. The format 
 
 <!-- towncrier release notes start -->
 
+## [v5.5.2 (2026-09-18)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v5.5.2)
+
+### Added
+
+- [#585](https://github.com/nautobot/nautobot-app-device-onboarding/issues/585) - Added Sync Network Data support for Palo Alto PAN-OS in the `paloalto_panos.yml` command mapper, covering interfaces (name, type, IP addresses, MAC, MTU, description, link status, 802.1Q mode, LAG membership, tagged/untagged VLANs, VRF membership), software version, and serial number.
+
 ## [v5.5.1 (2026-08-31)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v5.5.1)
 
 ### Fixed
