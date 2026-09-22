@@ -100,5 +100,7 @@
             "aggregated_interfaces": []
         }
     ],
-    "show interface mgmt": []
+    "show interface mgmt": [],
+    "show vsf detail": [],
+    "show module": []
 }
