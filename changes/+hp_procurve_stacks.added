@@ -1,0 +1,1 @@
+Added Virtual Chassis support for HP ProCurve devices in the Sync Devices From Network job, via `show vsf detail` (VSF stacks), including module-based model and serial detection for each stack member.

@@ -1,4 +1,5 @@
 {
+    "show vsf detail": [],
     "show system": [
         {
             "name": "PROCSW0101",
@@ -28,16 +29,16 @@
         {
             "chassis_id": "f8 60 f1 9b 97 85        ",
             "sys_name": "PROCSW0101",
-            "model": "J9776A",
+            "pid": "J9776A",
             "mgmt_ip": "198.51.100.1"
         }
     ],
     "show ip": [
         {
-            "intf_name": "DEFAULT_VLAN",
+            "vlan_name": "DEFAULT_VLAN",
             "intf_config": "Manual",
             "ip_address": "198.51.100.1",
-            "ip_mask": "255.255.254.0"
+            "subnet_mask": "255.255.254.0"
         }
     ],
     "show vlans": [
@@ -622,8 +623,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "2",
@@ -632,8 +633,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "3",
@@ -642,8 +643,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "4",
@@ -652,8 +653,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "5",
@@ -662,8 +663,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "6",
@@ -672,8 +673,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "7",
@@ -682,8 +683,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "8",
@@ -692,8 +693,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "9",
@@ -702,8 +703,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "10",
@@ -712,8 +713,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "11",
@@ -722,8 +723,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "12",
@@ -732,8 +733,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "13",
@@ -742,8 +743,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "14",
@@ -752,8 +753,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "15",
@@ -762,8 +763,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "16",
@@ -772,8 +773,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "17",
@@ -782,8 +783,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "18",
@@ -792,8 +793,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "19",
@@ -802,8 +803,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "20",
@@ -812,8 +813,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "21",
@@ -822,8 +823,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "22",
@@ -832,8 +833,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "23",
@@ -842,8 +843,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "24",
@@ -852,8 +853,8 @@
             "config_mode": "Auto",
             "speed": "1000FDx",
             "type": "100/1000T",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "25",
@@ -862,8 +863,8 @@
             "config_mode": "",
             "speed": "",
             "type": "",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "26",
@@ -872,8 +873,8 @@
             "config_mode": "",
             "speed": "",
             "type": "",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "27",
@@ -882,8 +883,8 @@
             "config_mode": "",
             "speed": "",
             "type": "",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         },
         {
             "port": "28",
@@ -892,8 +893,8 @@
             "config_mode": "",
             "speed": "",
             "type": "",
-            "tagged": "No",
-            "untagged": "1"
+            "vlan_tagged": "No",
+            "vlan_untagged": "1"
         }
     ],
     "show lldp info remote-device detail": [
