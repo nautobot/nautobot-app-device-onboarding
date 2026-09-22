@@ -130,7 +130,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
             host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True
         )
     if nautobot_job.connectivity_test:
-        if not tcp_ping(task.host.hostname, task.host.port):
+        if not tcp_ping(task.host.hostname, task.host.port if task.host.port else 22):
             return Result(
                 host=task.host, result=f"{task.host.name} failed connectivity check via tcp_ping.", failed=True
             )
@@ -316,6 +316,10 @@ def sync_devices_command_getter(job, log_level):
             logging={"enabled": False},
             inventory={
                 "plugin": "empty-inventory",
+                "options": {
+                    "logger": logger,
+                    "raise_on_repo_error": job.fail_job_on_task_failure,
+                },
             },
         ) as nornir_obj:
             nr_with_processors = nornir_obj.with_processors([CommandGetterProcessor(logger, compiled_results, job)])
@@ -338,6 +342,10 @@ def sync_devices_command_getter(job, log_level):
                         logger.error(
                             f"Unable to onboard {values['original_ip_address']}, failed with exception {exc_info}"
                         )
+                        if job.fail_job_on_task_failure:
+                            raise RuntimeError(
+                                f"Unable to onboard {values['original_ip_address']}, failed with exception {exc_info}."
+                            ) from exc_info
                         continue
                 nr_with_processors.inventory.hosts.update(single_host_inventory_constructed)
             result = nr_with_processors.run(
@@ -381,7 +389,9 @@ def sync_network_data_command_getter(job, log_level):
                     "credentials_class": NORNIR_SETTINGS.get("credentials"),
                     "queryset": qs,
                     "defaults": {
-                        "platform_parsing_info": add_platform_parsing_info(),
+                        "platform_parsing_info": add_platform_parsing_info(
+                            logger=logger, raise_on_repo_error=job.fail_job_on_task_failure
+                        ),
                         "network_driver_mappings": list(get_all_network_driver_mappings().keys()),
                         "sync_vlans": job.sync_vlans,
                         "sync_vrfs": job.sync_vrfs,

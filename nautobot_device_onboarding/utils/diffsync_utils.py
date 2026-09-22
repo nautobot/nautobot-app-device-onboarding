@@ -23,9 +23,16 @@ def generate_device_queryset_from_command_getter_result(job, command_getter_resu
             if job.debug:
                 job.logger.debug(f"{hostname}: {device_data}")
             continue
-    device_queryset = Device.objects.filter(name__in=devices_to_sync_hostnames).filter(
-        serial__in=devices_to_sync_serial_numbers
-    )
+    if getattr(job, "update_devices_with_changed_serial", False):
+        # Operator opted in to serial-drift tolerance. Drop the serial constraint and scope by
+        # `job.filtered_devices` (which the job's run() already builds from the form's
+        # location/role/platform/devices filters) to avoid pulling in same-hostname Devices from
+        # outside the operator's intended scope.
+        device_queryset = job.filtered_devices.filter(name__in=devices_to_sync_hostnames)
+    else:
+        device_queryset = Device.objects.filter(name__in=devices_to_sync_hostnames).filter(
+            serial__in=devices_to_sync_serial_numbers
+        )
     return device_queryset, devices_with_errors
 
 

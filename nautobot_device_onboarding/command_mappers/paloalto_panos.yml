@@ -51,6 +51,7 @@ sync_network_data:
             {% set cidr = netmask | netmask_to_cidr if netmask else '' %}
             {{ {'ip_address': ip, 'prefix_length': cidr} | tojson }}
           iterable_type: "dict"
+
     mgmt_mac_address:
       commands:
         - command: "show system info"
@@ -63,6 +64,7 @@ sync_network_data:
             {{ '' | tojson }}
             {% endif %}
           iterable_type: "str"
+
   software_version:
     commands:
       - command: "show system info"
@@ -74,6 +76,7 @@ sync_network_data:
           {% else %}
             {{ '' | tojson }}
           {% endif %}
+
   serial:
     commands:
       - command: "show system info"
@@ -127,6 +130,7 @@ sync_network_data:
             {{ 'other' | tojson }}
           {% endif %}
         iterable_type: "str"
+
   interfaces__ip_addresses:
     commands:
       - command: "show interface logical"
@@ -150,6 +154,7 @@ sync_network_data:
           {% endif %}
           {{ result | tojson }}
         iterable_type: "list"
+
   interfaces__mac_address:
     commands:
       - command: "show interface hardware"
@@ -176,6 +181,7 @@ sync_network_data:
             {% endif %}
             {{ ns.mac | tojson }}
           {% endif %}
+
   interfaces__mtu:
     commands:
       - command: "show interface logical"
@@ -183,6 +189,7 @@ sync_network_data:
         jpath: "[?interface=='{{ current_key }}'].interface"
         post_processor: "{{ '' | tojson }}"
         iterable_type: "str"
+
   interfaces__description:
     commands:
       - command: "show interface logical"
@@ -190,6 +197,7 @@ sync_network_data:
         jpath: "[?interface=='{{ current_key }}'].interface"
         post_processor: "{{ '' | tojson }}"
         iterable_type: "str"
+
   interfaces__link_status:
     commands:
       - command: "show interface hardware"
@@ -220,6 +228,7 @@ sync_network_data:
               {{ false | tojson }}
             {% endif %}
           {% endif %}
+
   interfaces__802.1Q_mode:
     commands:
       - command: "show interface logical"
@@ -239,6 +248,7 @@ sync_network_data:
             {% endif %}
           {% endif %}
         iterable_type: "str"
+
   interfaces__lag:
     commands:
       - command: "show lacp aggregate-ethernet all"
@@ -247,6 +257,7 @@ sync_network_data:
         post_processor: >-
           {{ (obj if obj else '') | tojson }}
         iterable_type: "str"
+
   interfaces__tagged_vlans:
     commands:
       - command: "show interface logical"
@@ -263,6 +274,7 @@ sync_network_data:
             {% endif %}
           {% endif %}
           {{ result | tojson }}
+
   interfaces__untagged_vlan:
     commands:
       - command: "show interface logical"
@@ -270,6 +282,7 @@ sync_network_data:
         jpath: "[?interface=='{{ current_key }}'].interface"
         post_processor: "{{ {} | tojson }}"
         iterable_type: "dict"
+
   interfaces__vrf:
     commands:
       - command: "show interface logical"

@@ -2204,5 +2204,7 @@
             "ip_address": "N/A",
             "vrf": "TestVRF"
         }
-    ]
+    ],
+    "show switch detail": [],
+    "show module": []
 }

@@ -59,6 +59,9 @@ class TestDiffSyncUtils(TestCase):
         cls.testing_objects["location"].name = "Site B"
         cls.mock_job.logger.error.return_value = None
         cls.mock_job.logger.warning.return_value = None
+        # Explicitly set the new toggle False on the mock; otherwise MagicMock auto-truthy
+        # makes generate_device_queryset_from_command_getter_result take the loose-filter branch.
+        cls.mock_job.update_devices_with_changed_serial = False
 
     def test_generate_device_queryset_from_command_getter_result(self):
         """Test generating a queryset from data returned from command getter."""

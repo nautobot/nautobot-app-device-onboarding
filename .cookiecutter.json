@@ -1,6 +1,6 @@
 {
     "cookiecutter": {
-        "codeowner_github_usernames": "@glennmatthews @dav-c @jeffkala @scetron",
+        "codeowner_github_usernames": "@glennmatthews @dav-c @jeffkala @scetron @cdtomkins",
         "full_name": "Network to Code, LLC",
         "email": "info@networktocode.com",
         "github_org": "nautobot",
@@ -19,12 +19,12 @@
         "_drift_manager": {
             "template": "https://github.com/nautobot/cookiecutter-nautobot-app.git",
             "template_dir": "nautobot-app",
-            "template_ref": "nautobot-app-v3.0.0",
+            "template_ref": "nautobot-app-v3.1.4",
             "cookie_dir": "",
             "pull_request_strategy": "create",
             "post_actions": [],
             "draft": false,
-            "baked_commit_ref": "ef1be219c8a2a68e9df31c95fe992549df070f00",
+            "baked_commit_ref": "93b8a01f91f875c4cb52134f91c75e355fa469eb",
             "drift_managed_branch": "develop"
         }
     }

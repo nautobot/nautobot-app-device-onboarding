@@ -3,7 +3,7 @@
 from unittest.mock import patch
 
 from nautobot.apps.testing import TransactionTestCase, create_job_result_and_run_job
-from nautobot.dcim.models import Device, Interface, VirtualChassis
+from nautobot.dcim.models import Device, DeviceType, Interface, Manufacturer, Platform, VirtualChassis
 from nautobot.extras.choices import JobResultStatusChoices
 from nautobot.tenancy.models import Tenant
 
@@ -164,6 +164,74 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
 
         old_mgmt_interface = Interface.objects.get(device=device, name="GigabitEthernet1")
         self.assertNotIn("192.1.1.10", list(old_mgmt_interface.ip_addresses.all().values_list("host", flat=True)))
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
+    def test_device_create__form_platform_scopes_device_type_lookup__success(self, device_data):
+        """During create, the DeviceType lookup is scoped to the form Platform's Manufacturer.
+
+        Two DeviceTypes share the same model name under different Manufacturers; the form
+        Platform's Manufacturer is what disambiguates which one the device gets.
+        Test data already creates CSR1000V17 so re-using that model rather than adding to the test data.
+        """
+        palo_mfr, _ = Manufacturer.objects.get_or_create(name="Palo Alto")
+        palo_platform, _ = Platform.objects.get_or_create(
+            name="Palo Alto PanOS",
+            defaults={"manufacturer": palo_mfr, "network_driver": "paloalto_panos"},
+        )
+        palo_devicetype, _ = DeviceType.objects.get_or_create(
+            model="CSR1000V17",
+            manufacturer=palo_mfr,
+            defaults={"part_number": "CSR1000V17"},
+        )
+        self.assertEqual(DeviceType.objects.filter(model="CSR1000V17").count(), 2)
+
+        device_data.return_value = {
+            "192.1.1.50": {
+                "hostname": "palo-fw-1",
+                "serial": "SN-PALO-001",
+                "device_type": "CSR1000V17",
+                "mgmt_interface": "management",
+                "manufacturer": "Palo Alto",
+                "platform": "paloalto_panos",
+                "network_driver": "paloalto_panos",
+                "mask_length": 24,
+            },
+        }
+
+        job_form_inputs = {
+            "debug": True,
+            "connectivity_test": False,
+            "dryrun": False,
+            "csv_file": None,
+            "location": self.testing_objects["location"].pk,
+            "namespace": self.testing_objects["namespace"].pk,
+            "ip_addresses": "192.1.1.50",
+            "port": 22,
+            "timeout": 30,
+            "set_mgmt_only": True,
+            "update_devices_without_primary_ip": True,
+            "device_role": self.testing_objects["device_role"].pk,
+            "device_status": self.testing_objects["status"].pk,
+            "device_tenant": self.testing_objects["device_tenant_1"].pk,
+            "interface_status": self.testing_objects["status"].pk,
+            "ip_address_status": self.testing_objects["status"].pk,
+            "secrets_group": self.testing_objects["secrets_group"].pk,
+            "platform": palo_platform.pk,
+            "memory_profiling": False,
+            "fail_job_on_task_failure": False,
+        }
+        job_result = create_job_result_and_run_job(
+            module="nautobot_device_onboarding.jobs", name="SSOTSyncDevices", **job_form_inputs
+        )
+
+        self.assertEqual(
+            job_result.status,
+            JobResultStatusChoices.STATUS_SUCCESS,
+            (job_result.traceback, list(job_result.job_log_entries.values_list("message", flat=True))),
+        )
+        device = Device.objects.get(serial="SN-PALO-001")
+        self.assertEqual(device.device_type.pk, palo_devicetype.pk)
+        self.assertEqual(device.device_type.manufacturer.name, "Palo Alto")
 
     @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
     def test_device_create__virtual_chassis__success(self, device_data):
@@ -476,15 +544,16 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
     def test_device_update__standalone_becomes_vc_master__success(self, device_data):
         """A device first onboarded as standalone, then re-onboarded as the master of a stack.
 
-        Proves the change in PR #567: with `serial` as an attribute ( not an identifier ), the
-        next sync matches on ( location, name ) and updates the existing Device row — even when
-        the network adapter reports a different serial for the same chassis on the second sync
+        The network adapter reports a different serial for the same chassis on the second sync
         ( e.g. modules[0].serial vs the chassis-level serial, which the parser pulls from
-        different fields and can differ ).
-
-        Under the previous design ( serial in `_identifiers` ), the second sync would have seen
-        a new device and called create() — ending up with a duplicate, with the VC-attachment
+        different fields and can differ ). Without operator opt-in the second sync would create
+        a duplicate Device row, leaving the existing standalone unchanged and the VC-attachment
         logic in update() never reached.
+
+        Note: requires `update_devices_without_primary_ip=True` on the form. The flag's
+        `_get_or_create_device()` code path is serial-blind in its ORM lookup, so it covers
+        serial drift in addition to its original primary-IP-mismatch purpose. This is the
+        opt-in path the maintainer's plan relies on for the standalone->stack transition.
         """
         # First sync: device appears as a single-module ( standalone ) device.
         initial_data = {
@@ -518,7 +587,7 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
             "port": 22,
             "timeout": 30,
             "set_mgmt_only": True,
-            "update_devices_without_primary_ip": False,
+            "update_devices_without_primary_ip": True,
             "device_role": self.testing_objects["device_role"].pk,
             "device_status": self.testing_objects["status"].pk,
             "interface_status": self.testing_objects["status"].pk,
@@ -607,9 +676,12 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
 
         Covers the device-refresh / RMA scenario: a standalone chassis is swapped out for a
         replacement unit. The new unit reports a different serial but is brought up under the
-        same hostname and management IP. With `serial` as an attribute, the second sync matches
-        the existing Device row on ( location, name ) and updates the serial — no duplicate,
-        no delete+create.
+        same hostname and management IP. Without operator opt-in the second sync would create
+        a duplicate Device row instead of updating the existing one.
+
+        Note: requires `update_devices_without_primary_ip=True` on the form. See the note in
+        test_device_update__standalone_becomes_vc_master__success for context on why the flag
+        covers serial drift.
         """
         # First sync: standalone device with original serial.
         initial_data = {
@@ -643,7 +715,7 @@ class SyncDevicesDeviceTestCase(TransactionTestCase):
             "port": 22,
             "timeout": 30,
             "set_mgmt_only": True,
-            "update_devices_without_primary_ip": False,
+            "update_devices_without_primary_ip": True,
             "device_role": self.testing_objects["device_role"].pk,
             "device_status": self.testing_objects["status"].pk,
             "interface_status": self.testing_objects["status"].pk,

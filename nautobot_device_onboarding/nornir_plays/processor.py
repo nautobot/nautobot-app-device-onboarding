@@ -7,6 +7,7 @@ from nornir.core.inventory import Host
 from nornir.core.task import MultiResult, Task
 from nornir_nautobot.plugins.processors import BaseLoggingProcessor
 
+from nautobot_device_onboarding.constants import NETWORK_DRIVER_TO_MANUFACTURER
 from nautobot_device_onboarding.nornir_plays.formatter import extract_show_data
 from nautobot_device_onboarding.nornir_plays.schemas import NETWORK_DATA_SCHEMA, NETWORK_DEVICES_SCHEMA
 from nautobot_device_onboarding.utils.helper import close_threaded_db_connections
@@ -26,7 +27,11 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         if not self.data.get(host.name):
             self.data[host.name] = {
                 "platform": host.platform,
-                "manufacturer": host.platform.split("_")[0].title() if host.platform else "PLACEHOLDER",
+                "manufacturer": (
+                    NETWORK_DRIVER_TO_MANUFACTURER.get(host.platform, host.platform.split("_")[0].title())
+                    if host.platform
+                    else "PLACEHOLDER"
+                ),
                 "network_driver": host.platform,
             }
 

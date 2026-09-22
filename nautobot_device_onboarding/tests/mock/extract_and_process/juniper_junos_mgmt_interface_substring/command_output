@@ -1,0 +1,81 @@
+{
+    "interface-information": [
+        {
+            "physical-interface": [
+                {
+                    "name": [
+                        {
+                            "data": "ge-1/0/0"
+                        }
+                    ],
+                    "logical-interface": [
+                        {
+                            "name": [
+                                {
+                                    "data": "ge-1/0/0.0"
+                                }
+                            ],
+                            "address-family": [
+                                {
+                                    "address-family-name": [
+                                        {
+                                            "data": "inet"
+                                        }
+                                    ],
+                                    "interface-address": [
+                                        {
+                                            "ifa-local": [
+                                                {
+                                                    "data": "198.51.100.10"
+                                                }
+                                            ],
+                                            "ifa-destination": [
+                                                {
+                                                    "data": "198.51.100.0/24"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": [
+                        {
+                            "data": "lo0"
+                        }
+                    ],
+                    "logical-interface": [
+                        {
+                            "name": [
+                                {
+                                    "data": "lo0.0"
+                                }
+                            ],
+                            "address-family": [
+                                {
+                                    "address-family-name": [
+                                        {
+                                            "data": "inet"
+                                        }
+                                    ],
+                                    "interface-address": [
+                                        {
+                                            "ifa-local": [
+                                                {
+                                                    "data": "198.51.100.1"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

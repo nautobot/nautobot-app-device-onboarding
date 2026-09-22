@@ -8,7 +8,8 @@ from nautobot.apps.choices import InterfaceTypeChoices
 from nautobot.apps.testing import TransactionTestCase
 from nautobot.dcim.models import Device, DeviceType, Interface, Manufacturer, Platform, VirtualChassis
 from nautobot.extras.models import JobResult
-from nautobot.ipam.models import IPAddress, IPAddressToInterface
+from nautobot.ipam.choices import PrefixTypeChoices
+from nautobot.ipam.models import IPAddress, IPAddressToInterface, Prefix
 
 from nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters import (
     SyncDevicesNautobotAdapter,
@@ -70,7 +71,7 @@ class SyncDevicesNetworkAdapterTestCase(TransactionTestCase):
         returned_device_data = self.sync_devices_adapter.device_data
 
         for device_ip, data in returned_device_data.items():
-            unique_id = f"{self.testing_objects['location'].name}__{data['hostname']}"
+            unique_id = f"{self.testing_objects['location'].name}__{data['hostname']}__{data['serial']}"
             diffsync_device = self.sync_devices_adapter.get("device", unique_id)
             self.assertEqual(data["device_type"], diffsync_device.device_type__model)
             self.assertEqual(self.testing_objects["location"].name, diffsync_device.location__name)
@@ -120,6 +121,99 @@ class SyncDevicesNetworkAdapterTestCase(TransactionTestCase):
 
         result = sync_devices_command_getter(job=self.job, log_level="INFO")
         self.assertEqual(result, {})
+
+    @patch("nautobot_device_onboarding.nornir_plays.command_getter.InitNornir")
+    @patch("nautobot_device_onboarding.nornir_plays.command_getter._set_inventory")
+    def test_command_getter_set_inventory_exc_info_respects_fail_job_on_task_failure(self, set_inventory, init_nornir):
+        """When _set_inventory returns an exception, the host is skipped unless fail_job_on_task_failure raises."""
+        # Simulate a host that fails inventory construction (e.g. no connectivity / autodetection failure):
+        # _set_inventory returns an empty inventory and a non-None exception.
+        set_inventory.return_value = ({}, Exception("Autodetection failed"))
+
+        nornir_obj = MagicMock()
+        nr_with_processors = MagicMock()
+        nornir_obj.with_processors.return_value = nr_with_processors
+        # The task run itself does not fail; only inventory construction did.
+        nr_with_processors.run.return_value = SimpleNamespace(failed=False, failed_hosts={})
+        init_nornir.return_value.__enter__.return_value = nornir_obj
+
+        processed_ip_address_attrs = {
+            "original_ip_address": "10.1.1.10",
+            "location": self.testing_objects["location"],
+            "namespace": self.testing_objects["namespace"],
+            "port": 22,
+            "timeout": 30,
+            "update_devices_without_primary_ip": True,
+            "device_role": self.testing_objects["device_role"],
+            "device_status": self.testing_objects["status"],
+            "device_tenant": self.testing_objects["device_tenant_1"],
+            "interface_status": self.testing_objects["status"],
+            "ip_address_status": self.testing_objects["status"],
+            "secrets_group": self.testing_objects["secrets_group"],
+            "platform": None,
+        }
+        self.job.ip_address_inventory = {"10.1.1.10": processed_ip_address_attrs}
+
+        with self.subTest(fail_job_on_task_failure=True):
+            self.job.fail_job_on_task_failure = True
+            with self.assertRaises(RuntimeError):
+                sync_devices_command_getter(job=self.job, log_level="INFO")
+
+        with self.subTest(fail_job_on_task_failure=False):
+            self.job.fail_job_on_task_failure = False
+            result = sync_devices_command_getter(job=self.job, log_level="INFO")
+            self.assertEqual(result, {})
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
+    def test_load_respects_form_supplied_platform_manufacturer(self, device_data):
+        """When the job form supplies a Platform, its Manufacturer.name wins over the processor-derived value."""
+        palo_mfr, _ = Manufacturer.objects.get_or_create(name="Palo Alto")
+        palo_platform, _ = Platform.objects.get_or_create(
+            name="Palo Alto PanOS",
+            defaults={"manufacturer": palo_mfr, "network_driver": "paloalto_panos"},
+        )
+        device_data.return_value = {
+            "10.1.1.50": {
+                "hostname": "palo-fw-1",
+                "serial": "SN-PALO-001",
+                "device_type": "PA-220",
+                "mgmt_interface": "management",
+                "manufacturer": "Paloalto",
+                "platform": "paloalto_panos",
+                "network_driver": "paloalto_panos",
+                "mask_length": 24,
+            },
+        }
+
+        self.job.debug = True
+        processed_ip_address_attrs = {
+            "location": self.testing_objects["location"],
+            "namespace": self.testing_objects["namespace"],
+            "port": 22,
+            "timeout": 30,
+            "update_devices_without_primary_ip": True,
+            "device_role": self.testing_objects["device_role"],
+            "device_status": self.testing_objects["status"],
+            "device_tenant": self.testing_objects["device_tenant_1"],
+            "interface_status": self.testing_objects["status"],
+            "ip_address_status": self.testing_objects["status"],
+            "secrets_group": self.testing_objects["secrets_group"],
+            "set_mgmt_only": False,
+            "platform": palo_platform,
+        }
+        self.job.ip_address_inventory = {"10.1.1.50": processed_ip_address_attrs}
+
+        self.sync_devices_adapter.load()
+
+        self.assertTrue(self.sync_devices_adapter.get("manufacturer", "Palo Alto"))
+        with self.assertRaises(ObjectNotFound):
+            self.sync_devices_adapter.get("manufacturer", "Paloalto")
+
+        diff_platform = self.sync_devices_adapter.get("platform", "Palo Alto PanOS")
+        self.assertEqual(diff_platform.manufacturer__name, "Palo Alto")
+
+        diff_device_type = self.sync_devices_adapter.get("device_type", "PA-220__Palo Alto")
+        self.assertEqual(diff_device_type.manufacturer__name, "Palo Alto")
 
 
 class SyncDevicesNautobotAdapterTestCase(TransactionTestCase):
@@ -179,7 +273,7 @@ class SyncDevicesNautobotAdapterTestCase(TransactionTestCase):
             self.assertEqual(device_type.part_number, diffsync_obj.part_number)
 
         for device in Device.objects.filter(primary_ip4__host__in=list(self.job.ip_address_inventory)):
-            unique_id = f"{device.location.name}__{device.name}"
+            unique_id = f"{device.location.name}__{device.name}__{device.serial}"
             diffsync_obj = self.sync_devices_adapter.get("device", unique_id)
             self.assertEqual(device.location.name, diffsync_obj.location__name)
             self.assertEqual(device.name, diffsync_obj.name)
@@ -245,7 +339,7 @@ class SyncDevicesNetworkAdapterVirtualChassisTestCase(TransactionTestCase):
         self.sync_devices_adapter.load()
 
         # Verify the master device was loaded
-        master_unique_id = f"{self.testing_objects['location'].name}__stack-switch-1"
+        master_unique_id = f"{self.testing_objects['location'].name}__stack-switch-1__STACK001"
         diffsync_master = self.sync_devices_adapter.get("device", master_unique_id)
         self.assertEqual("stack-switch-1", diffsync_master.name)
         self.assertEqual("C9300-48P", diffsync_master.device_type__model)
@@ -256,7 +350,7 @@ class SyncDevicesNetworkAdapterVirtualChassisTestCase(TransactionTestCase):
         self.assertEqual(15, diffsync_master.vc_priority)
 
         # Verify member 2 was loaded
-        member2_unique_id = f"{self.testing_objects['location'].name}__stack-switch-1:2"
+        member2_unique_id = f"{self.testing_objects['location'].name}__stack-switch-1:2__STACK002"
         diffsync_member2 = self.sync_devices_adapter.get("device", member2_unique_id)
         self.assertEqual("stack-switch-1:2", diffsync_member2.name)
         self.assertEqual("C9300-24P", diffsync_member2.device_type__model)
@@ -266,7 +360,7 @@ class SyncDevicesNetworkAdapterVirtualChassisTestCase(TransactionTestCase):
         self.assertEqual(14, diffsync_member2.vc_priority)
 
         # Verify member 3 was loaded
-        member3_unique_id = f"{self.testing_objects['location'].name}__stack-switch-1:3"
+        member3_unique_id = f"{self.testing_objects['location'].name}__stack-switch-1:3__STACK003"
         diffsync_member3 = self.sync_devices_adapter.get("device", member3_unique_id)
         self.assertEqual("stack-switch-1:3", diffsync_member3.name)
         self.assertEqual("C9300-48P", diffsync_member3.device_type__model)
@@ -309,7 +403,7 @@ class SyncDevicesNetworkAdapterVirtualChassisTestCase(TransactionTestCase):
         self.sync_devices_adapter.load()
 
         # Verify the standalone device was loaded as a regular device (not as virtual chassis)
-        device_unique_id = f"{self.testing_objects['location'].name}__standalone-switch-1"
+        device_unique_id = f"{self.testing_objects['location'].name}__standalone-switch-1__STANDALONE001"
         diffsync_device = self.sync_devices_adapter.get("device", device_unique_id)
         self.assertEqual("standalone-switch-1", diffsync_device.name)
         self.assertEqual("C9300-48P", diffsync_device.device_type__model)
@@ -347,7 +441,7 @@ class SyncDevicesNetworkAdapterVirtualChassisTestCase(TransactionTestCase):
 
         # The master (conductor) is switch 2 (serial CONDUCTOR002), NOT switch 1
         # It should get the hostname and primary IP
-        master_uid = f"{self.testing_objects['location'].name}__vsf-stack-1"
+        master_uid = f"{self.testing_objects['location'].name}__vsf-stack-1__CONDUCTOR002"
         diffsync_master = self.sync_devices_adapter.get("device", master_uid)
         self.assertEqual("vsf-stack-1", diffsync_master.name)
         self.assertEqual("C9300-24P", diffsync_master.device_type__model)
@@ -358,7 +452,7 @@ class SyncDevicesNetworkAdapterVirtualChassisTestCase(TransactionTestCase):
         self.assertEqual(15, diffsync_master.vc_priority)
 
         # Switch 1 (standby) should be a member, named by its switch number
-        member1_uid = f"{self.testing_objects['location'].name}__vsf-stack-1:1"
+        member1_uid = f"{self.testing_objects['location'].name}__vsf-stack-1:1__STANDBY001"
         diffsync_member1 = self.sync_devices_adapter.get("device", member1_uid)
         self.assertEqual("vsf-stack-1:1", diffsync_member1.name)
         self.assertEqual("C9300-48P", diffsync_member1.device_type__model)
@@ -366,7 +460,7 @@ class SyncDevicesNetworkAdapterVirtualChassisTestCase(TransactionTestCase):
         self.assertEqual(1, diffsync_member1.vc_position)
 
         # Switch 3 should be a member
-        member3_uid = f"{self.testing_objects['location'].name}__vsf-stack-1:3"
+        member3_uid = f"{self.testing_objects['location'].name}__vsf-stack-1:3__MEMBER003"
         diffsync_member3 = self.sync_devices_adapter.get("device", member3_uid)
         self.assertEqual("vsf-stack-1:3", diffsync_member3.name)
         self.assertEqual("MEMBER003", diffsync_member3.serial)
@@ -436,7 +530,7 @@ class SyncDevicesNetworkAdapterVirtualChassisTestCase(TransactionTestCase):
 
         # Should be loaded as a standalone device, not failed
         self.assertNotIn("10.1.1.31", self.sync_devices_adapter.failed_ip_addresses)
-        device_uid = f"{self.testing_objects['location'].name}__bad-stack-2"
+        device_uid = f"{self.testing_objects['location'].name}__bad-stack-2__BADSTACK002"
         diffsync_device = self.sync_devices_adapter.get("device", device_uid)
         self.assertEqual("bad-stack-2", diffsync_device.name)
         self.assertEqual("BADSTACK002", diffsync_device.serial)
@@ -555,8 +649,6 @@ class SyncDevicesNautobotAdapterVirtualChassisTestCase(TransactionTestCase):
         )
 
         # Assign a primary IP to the master so it's picked up by load_devices
-        from nautobot.ipam.choices import PrefixTypeChoices
-        from nautobot.ipam.models import Prefix
 
         Prefix.objects.get_or_create(
             prefix="10.99.99.0/24",
@@ -589,7 +681,7 @@ class SyncDevicesNautobotAdapterVirtualChassisTestCase(TransactionTestCase):
         self.assertEqual("vc-master", diffsync_vc.master__name)
 
         # Verify the master device was loaded with VC attrs
-        master_uid = f"{self.testing_objects['location'].name}__vc-master"
+        master_uid = f"{self.testing_objects['location'].name}__vc-master__VCMASTER001"
         diffsync_master = self.sync_devices_adapter.get("device", master_uid)
         self.assertEqual("vc-master", diffsync_master.name)
         self.assertEqual("existing-vc", diffsync_master.virtual_chassis__name)
@@ -598,7 +690,7 @@ class SyncDevicesNautobotAdapterVirtualChassisTestCase(TransactionTestCase):
         self.assertEqual("10.99.99.1", diffsync_master.primary_ip4__host)
 
         # Verify the member device was loaded with VC attrs
-        member_uid = f"{self.testing_objects['location'].name}__vc-member-2"
+        member_uid = f"{self.testing_objects['location'].name}__vc-member-2__VCMEMBER002"
         diffsync_member = self.sync_devices_adapter.get("device", member_uid)
         self.assertEqual("vc-member-2", diffsync_member.name)
         self.assertEqual("existing-vc", diffsync_member.virtual_chassis__name)

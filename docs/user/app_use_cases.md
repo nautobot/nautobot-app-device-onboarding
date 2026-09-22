@@ -40,8 +40,11 @@ For the platforms where SSH auto-detection does not work, the user will need to:
 
 The Onboarding App will automatically create Platforms for vendor operating systems where platform auto-detection works. The picture below shows the details of auto-created Platforms for `cisco_ios` and `juniper_junos`.
 
-![cisco_ios_platform](../images/platform_cisco_ios.png)
-![juniper_junos_platform](../images/platform_juniper_junos.png)
+![cisco_ios_platform](../images/platform_cisco_ios_light.png#only-light){ .on-glb }
+![cisco_ios_platform](../images/platform_cisco_ios_dark.png#only-dark){ .on-glb }
+
+![juniper_junos_platform](../images/platform_juniper_junos_light.png#only-light){ .on-glb }
+![juniper_junos_platform](../images/platform_juniper_junos_dark.png#only-dark){ .on-glb }
 
 ### Passing Custom Nornir Connection Options
 
@@ -218,37 +221,51 @@ Optional Fields:
 
 ### Onboarding Switch Stacks (Virtual Chassis)
 
-The `Sync Devices From Network` job supports onboarding Cisco IOS-XE StackWise switch stacks as Nautobot Virtual Chassis objects. When a device is detected as part of a multi-member stack, the job will:
+The `Sync Devices From Network` job supports onboarding Cisco IOS and Cisco IOS-XE switch stacks as Nautobot Virtual Chassis objects. When a device is detected as part of a multi-member stack, the job will:
 
 1. Create a Virtual Chassis object named after the stack master's hostname
 2. Create Device objects for each stack member with the appropriate device type based on the module model
 3. Assign the correct `vc_position` and `vc_priority` to each member
-4. Set the stack master as the Virtual Chassis master
+4. Set the stack master as the Virtual Chassis master (the master may be any member, not necessarily switch 1)
 5. Assign the management IP and interface only to the master device
-6. Only the master device will have the Secrets Group assigned
+6. Only the master device receives the Secrets Group assignment
+
+#### Master Identification by Serial
+
+The stack master is identified by matching the chassis-level serial returned by `show version` against the per-member serials returned by `show module`. This correctly identifies the master even when the conductor is not switch 1 (e.g. after a master role move in a 4-member stack).
 
 #### Stack Member Naming Convention
 
-- The master device (switch 1) uses the hostname discovered from the device
-- Member devices are named using the pattern `{hostname}:{member_number}` (e.g., `stack-switch-1:2`, `stack-switch-1:3`)
+- The master device uses the hostname discovered from the device
+- Member devices are named using the pattern `{hostname}:{member_number}` (e.g. `stack-switch-1:2`, `stack-switch-1:3`)
 
-#### Standalone Devices
+#### Standalone Devices and Provisioned-But-Absent Slots
 
-If a device returns stack information but only has a single member, it will be onboarded as a regular standalone device without creating a Virtual Chassis.
+If a device returns stack information but only has a single member, it is onboarded as a regular standalone device without creating a Virtual Chassis. The same applies when a stack has provisioned but currently absent slots (e.g. a slot reserved for a future member): only the present members are onboarded, and a stack of one present member is treated as standalone.
 
-#### Enabling Switch Stack Support for a Platform
+#### Updating Devices Whose Serial Has Changed
 
-Switch stack support requires adding `virtual_chassis` and `modules` definitions to the platform's command mapper YAML file.
+By default, `Sync Devices From Network` and `Sync Network Data From Network` both require an exact match of **both** hostname and serial to identify an existing Nautobot Device. Devices whose discovered serial differs from the Nautobot record are skipped with a warning rather than having their serial silently rewritten.
 
-##### Platforms with Built-in Support
+This default is intentionally conservative — a hostname collision with a device of the same name in another part of the inventory should not result in that other device's data being overwritten. However, for Virtual Chassis the chassis-level serial reported by the master device legitimately changes when the master role moves between stack members. To allow those devices to keep syncing, enable the **Update Devices With Changed Serial** toggle on the job form.
 
-Currently, no platforms have virtual chassis support enabled by default. To enable switch stack onboarding, you must add the required command definitions to your platform's command mapper YAML file.
+When the toggle is **ON**:
 
-##### Adding Virtual Chassis Support
+- Matching falls back to hostname only
+- Matching is scoped to the job's filter set (location, role, platform, devices), so a same-hostname collision outside the operator's selection cannot be touched
+- The discovered serial is written to the matched Nautobot Device
 
-To enable switch stack support for a platform, add the `virtual_chassis` and `modules` keys to the `sync_devices` section of the platform's command mapper YAML file. See [App YAML Overrides](./app_yaml_overrides.md) for instructions on creating override files.
+When the toggle is **OFF** (default):
 
-**Example for Cisco IOS-XE (cisco_xe.yml):**
+- Serial-drifted devices are excluded from `Sync Devices` at the queryset level
+- On `Sync Network Data`, the same devices are also excluded from related-object loads (interfaces, VLANs, VRFs, IPs, cables), so their discovery data does not leak into Nautobot through other paths
+- A warning lists the excluded hostnames so operators can flip the toggle if drift was expected
+
+#### Enabling Switch Stack Support for a New Platform
+
+Cisco IOS and Cisco IOS-XE include the required `virtual_chassis` and `modules` definitions in their command mapper YAML files out of the box. To enable switch stack support for an additional platform, add the `virtual_chassis` and `modules` keys to the `sync_devices` section of the platform's command mapper YAML file. See [App YAML Overrides](./app_yaml_overrides.md) for instructions on creating override files.
+
+**Example (Cisco IOS-XE):**
 
 ```yaml
 sync_devices:
@@ -257,12 +274,12 @@ sync_devices:
     commands:
       - command: "show switch detail"
         parser: "textfsm"
-        jpath: "[*]"
+        jpath: "[*].{switch: switch, priority: priority}"
   modules:
     commands:
       - command: "show module"
         parser: "textfsm"
-        jpath: "[*]"
+        jpath: "[*].{model: model, serial: serial}"
 ```
 
 ##### Required Data Format
@@ -270,25 +287,18 @@ sync_devices:
 The commands must return data in a specific format for virtual chassis onboarding to work correctly:
 
 - **`virtual_chassis`**: Must return a list of objects with at least:
-    - `switch`: The member number in the stack (e.g., "1", "2", "3")
+    - `switch`: The member number in the stack (e.g. "1", "2", "3")
     - `priority`: The stack priority value
 
 - **`modules`**: Must return a list of objects with at least:
     - `model`: The device model/part number for each stack member
     - `serial`: The serial number for each stack member
 
-The order of items in each list must correspond - index 0 in `virtual_chassis` matches index 0 in `modules`, and so on.
+The order of items in each list must correspond — index 0 in `virtual_chassis` matches index 0 in `modules`, and so on.
 
 ##### Devices That Don't Support Stack Commands
 
-If a device does not support the configured stack commands (e.g., a Cisco CSR router receiving "show switch detail"), the command will return an error. The app handles this gracefully:
-
-1. The error response (e.g., `% Invalid input detected at`) is detected
-2. The result is set to an empty list
-3. The device is onboarded as a standalone device (not part of a Virtual Chassis)
-4. No errors are raised and the sync continues normally
-
-This means you can safely add virtual chassis support to a platform's command mapper even if some devices of that platform type don't support stacking - those devices will simply be onboarded as standalone devices.
+If a device does not support the configured stack commands (e.g. a Cisco CSR router receiving `show switch detail`), the command will return an error like `% Invalid input detected at`. The app detects this, treats the result as empty, and onboards the device as standalone — no error is raised and the sync continues normally. This means switch-stack support can be safely added to a platform's command mapper even if some devices of that platform type don't support stacking.
 
 ### Onboarding Interface, Vlans, IPs Etc.
 
@@ -305,6 +315,14 @@ An existing device's data can be expanded to include additional objects by:
     The SSoT Job's ID (UUID) will be different per Nautobot instance. 
 
 During a successful network data sync process, a devices related objects will be created in Nautobot with all interfaces, their IP addresses, and optionally VLANs, and VRFs.
+
+#### Sync VRF to Prefix (Optional)
+
+The `Sync Network Data From Network` job supports an optional **Sync VRF to Prefix** toggle that, when enabled, additively associates each interface's VRF with the parent prefix of the interface's IP addresses. This populates the `ipam.Prefix.vrfs` many-to-many relationship that the sync historically left unwritten.
+
+This toggle requires **Sync VRFs** to also be enabled, since it depends on the VRF objects discovered by that path. The association is additive only — VRFs already linked to a prefix by other means are not removed.
+
+Enable this toggle when your IPAM model relies on the `Prefix.vrfs` link being kept in sync from discovered configuration (e.g. when downstream automation reads `Prefix.vrfs` to scope IP allocations per VRF).
 
 #### Consult the Status of the Sync Network Data SSoT Job
 

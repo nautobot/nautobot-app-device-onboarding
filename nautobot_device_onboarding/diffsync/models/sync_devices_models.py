@@ -32,10 +32,11 @@ class SyncDevicesDevice(DiffSyncModel):
     _identifiers = (
         "location__name",
         "name",
+        "serial",
     )
     _attributes = (
-        "serial",
         "device_type__model",
+        "device_type__manufacturer__name",
         "mask_length",
         "primary_ip4__host",
         "primary_ip4__status__name",
@@ -55,6 +56,7 @@ class SyncDevicesDevice(DiffSyncModel):
     serial: str
 
     device_type__model: Optional[str] = None
+    device_type__manufacturer__name: Optional[str] = None
     mask_length: Optional[int] = None
     primary_ip4__host: Optional[str] = None
     primary_ip4__status__name: Optional[str] = None
@@ -85,17 +87,19 @@ class SyncDevicesDevice(DiffSyncModel):
             update_devices_without_primary_ip = job_form_attrs["update_devices_without_primary_ip"]
             if update_devices_without_primary_ip:
                 adapter.job.logger.warning(
-                    f"Device {device.name} at location {location.name} already exists in Nautobot "
-                    "but the primary ip address either does not exist, or doesn't match an entered ip address. "
-                    "This device will be updated. This update may result in multiple IP Address assignments "
-                    "to an interface on the device."
+                    f"Device {device.name} at location {location.name} already exists in Nautobot, "
+                    "but its primary IP address or serial number differs from what the device reported "
+                    "(e.g. after a stack master role flip, hardware swap, RMA, or re-IP). "
+                    "This device will be updated. The update may result in multiple IP Address "
+                    "assignments to an interface on the device."
                 )
                 device = cls._update_device_with_attrs(device, platform, ids, attrs, adapter)
             else:
                 adapter.job.logger.warning(
-                    f"Device {device.name} at location {location.name} already exists in Nautobot "
-                    "but the primary ip address either does not exist, or doesn't match an entered ip address. "
-                    "IP Address, this device will be skipped."
+                    f"Device {device.name} at location {location.name} already exists in Nautobot, "
+                    "but its primary IP address or serial number differs from what the device reported. "
+                    "This device will be skipped. To allow the update, enable the "
+                    "'Update devices without primary IP' option on the job form."
                 )
                 return None
 
@@ -107,11 +111,14 @@ class SyncDevicesDevice(DiffSyncModel):
                 status=job_form_attrs["device_status"],
                 tenant=job_form_attrs["device_tenant"],
                 role=job_form_attrs["device_role"],
-                device_type=DeviceType.objects.get(model=attrs["device_type__model"]),
+                device_type=DeviceType.objects.get(
+                    model=attrs["device_type__model"],
+                    manufacturer=platform.manufacturer,
+                ),
                 name=ids["name"],
                 platform=platform,
                 secrets_group=job_form_attrs["secrets_group"],
-                serial=attrs["serial"],
+                serial=ids["serial"],
             )
             device.validated_save()
         return device
@@ -164,10 +171,13 @@ class SyncDevicesDevice(DiffSyncModel):
         device.location = job_form_attrs["location"]
         device.status = job_form_attrs["device_status"]
         device.role = job_form_attrs["device_role"]
-        device.device_type = DeviceType.objects.get(model=attrs["device_type__model"])
+        device.device_type = DeviceType.objects.get(
+            model=attrs["device_type__model"],
+            manufacturer=platform.manufacturer,
+        )
         device.platform = platform
         device.secrets_group = job_form_attrs["secrets_group"]
-        device.serial = attrs["serial"]
+        device.serial = ids["serial"]
 
         return device
 
@@ -268,10 +278,17 @@ class SyncDevicesDevice(DiffSyncModel):
             self.adapter.job.logger.debug(f"Updating {device.name} with attrs: {attrs}")
         if attrs.get("serial"):
             device.serial = attrs["serial"]
-        if attrs.get("device_type__model"):
-            device.device_type = DeviceType.objects.get(model=attrs.get("device_type__model"))
-        if attrs.get("platform__name"):
-            device.platform = Platform.objects.get(name=attrs.get("platform__name"))
+
+        new_platform = Platform.objects.get(name=attrs["platform__name"]) if attrs.get("platform__name") else None
+
+        if attrs.get("device_type__model") or attrs.get("device_type__manufacturer__name"):
+            target_platform = new_platform or device.platform
+            device.device_type = DeviceType.objects.get(
+                model=attrs.get("device_type__model") or device.device_type.model,
+                manufacturer=target_platform.manufacturer if target_platform else None,
+            )
+        if new_platform:
+            device.platform = new_platform
         if attrs.get("role__name"):
             device.role = Role.objects.get(name=attrs.get("role__name"))
         if attrs.get("status__name"):
@@ -361,10 +378,7 @@ class SyncDevicesDevice(DiffSyncModel):
                 device.primary_ip4 = new_ip_address
         try:
             device.validated_save()
-            # Use device.virtual_chassis.name (post-save) rather than self.virtual_chassis__name,
-            # which still reflects the pre-update Nautobot state — None when a standalone device
-            # is becoming a VC master through this update path.
-            if device.virtual_chassis and self.name == device.virtual_chassis.name:
+            if device.virtual_chassis and self.name == self.virtual_chassis__name:
                 vc = device.virtual_chassis
                 vc.master = device
                 vc.validated_save()

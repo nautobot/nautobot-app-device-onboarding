@@ -104,7 +104,7 @@
                             "ip_addresses": [{"ip_address": "198.51.100.1",
                                             "prefix_length": 32},
                                            {"ip_address": "fe80::e65d:370f:fcfb:794a",
-                                              "prefix_length": 32}],
+                                              "prefix_length": 128}],
                             "lag": [],
                             "link_status": "True",
                             "mac_address": [],

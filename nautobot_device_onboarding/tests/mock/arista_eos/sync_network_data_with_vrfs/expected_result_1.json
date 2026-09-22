@@ -43,12 +43,7 @@
         "Ethernet4": {
             "802.1Q_mode": "tagged",
             "description": "",
-            "ip_addresses": [
-                {
-                    "ip_address": "0.0.0.0",
-                    "prefix_length": 0
-                }
-            ],
+            "ip_addresses": [],
             "lag": [],
             "link_status": "True",
             "mac_address": "52:54:00:91:1e:bf",
@@ -56,6 +51,36 @@
             "type": "1000base-t",
             "vrf": {
                 "name": "jeff"
+            }
+        },
+        "Ethernet5": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "5.5.5.5",
+                    "prefix_length": 24
+                },
+                {
+                    "ip_address": "5.5.6.6",
+                    "prefix_length": 24
+                },
+                {
+                    "ip_address": "2.2.2.3",
+                    "prefix_length": 24
+                },
+                {
+                    "ip_address": "2.3.3.4",
+                    "prefix_length": 24
+                }
+            ],
+            "lag": [],
+            "link_status": "True",
+            "mac_address": "52:54:00:91:1e:bb",
+            "mtu": "1500",
+            "type": "1000base-t",
+            "vrf": {
+                "name": "default"
             }
         },
         "Management1": {
