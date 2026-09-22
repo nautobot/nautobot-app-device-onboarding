@@ -1,0 +1,7 @@
+{
+    "hostname": "panos-fw-02",
+    "serial": "001234567890",
+    "device_type": "PA-3410",
+    "mgmt_interface": "Management Interface",
+    "mask_length": 24
+}

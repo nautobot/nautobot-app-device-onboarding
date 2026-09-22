@@ -167,22 +167,22 @@ def sync_network_data_ensure_required_nautobot_objects():
         software_version=software_version_2,
     )
     interface_1, _ = Interface.objects.get_or_create(
-        module=device_1_module, name="GigabitEthernet1", status=status, type=InterfaceTypeChoices.TYPE_VIRTUAL
+        module=device_1_module, name="GigabitEthernet1", status=status, type=InterfaceTypeChoices.TYPE_1GE_FIXED
     )
     interface_1.mode = InterfaceModeChoices.MODE_TAGGED
     interface_1.tagged_vlans.add(vlan_1)
     interface_1.validated_save()
     interface_2, _ = Interface.objects.get_or_create(
-        device=device_2, name="GigabitEthernet1", status=status, type=InterfaceTypeChoices.TYPE_VIRTUAL
+        device=device_2, name="GigabitEthernet1", status=status, type=InterfaceTypeChoices.TYPE_1GE_FIXED
     )
     interface_3, _ = Interface.objects.get_or_create(
-        device=device_3, name="GigabitEthernet1", status=status, type=InterfaceTypeChoices.TYPE_VIRTUAL
+        device=device_3, name="GigabitEthernet1", status=status, type=InterfaceTypeChoices.TYPE_1GE_FIXED
     )
     interface_4, _ = Interface.objects.get_or_create(
-        device=device_1, name="GigabitEthernet2", status=status, type=InterfaceTypeChoices.TYPE_VIRTUAL
+        device=device_1, name="GigabitEthernet2", status=status, type=InterfaceTypeChoices.TYPE_1GE_FIXED
     )
     interface_5, _ = Interface.objects.get_or_create(
-        device=device_4, name="GigabitEthernet2", status=status, type=InterfaceTypeChoices.TYPE_VIRTUAL
+        device=device_4, name="GigabitEthernet2", status=status, type=InterfaceTypeChoices.TYPE_1GE_FIXED
     )
     IPAddressToInterface.objects.get_or_create(interface=interface_1, ip_address=ip_address_1)
     device_1.primary_ip4 = ip_address_1
@@ -352,14 +352,14 @@ def sync_devices_ensure_required_nautobot_objects():
         secrets_group=secrets_group,
     )
     interface_1, _ = Interface.objects.get_or_create(
-        device=device_1, name="GigabitEthernet1", status=status, type=InterfaceTypeChoices.TYPE_VIRTUAL
+        device=device_1, name="GigabitEthernet1", status=status, type=InterfaceTypeChoices.TYPE_1GE_FIXED
     )
     IPAddressToInterface.objects.get_or_create(interface=interface_1, ip_address=ip_address_1)
     device_1.primary_ip4 = ip_address_1
     device_1.validated_save()
 
     interface_2, _ = Interface.objects.get_or_create(
-        device=device_2, name="GigabitEthernet1", status=status, type=InterfaceTypeChoices.TYPE_VIRTUAL
+        device=device_2, name="GigabitEthernet1", status=status, type=InterfaceTypeChoices.TYPE_1GE_FIXED
     )
     IPAddressToInterface.objects.get_or_create(interface=interface_2, ip_address=ip_address_2)
     device_2.primary_ip4 = ip_address_2

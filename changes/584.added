@@ -1,0 +1,1 @@
+Added Sync Network Data support for Palo Alto PAN-OS in the `paloalto_panos.yml` command mapper, covering interfaces (name, type, IP addresses, MAC, MTU, description, link status, 802.1Q mode, LAG membership, tagged/untagged VLANs, VRF membership), software version, and serial number.

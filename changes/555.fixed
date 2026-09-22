@@ -1,1 +1,0 @@
-Fixed erroneous Manufacturer (Paloalto) created, and Duplicate DeviceType exception when the same model exists under multiple manufacturers.

@@ -36,22 +36,22 @@ Regardless, the Onboarding App greatly simplifies the onboarding process by allo
 
 |     Interfaces          | Cisco IOS          | Cisco XE           | Cisco NXOS         | Cisco XR | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  | Palo Alto Panos | Aruba AOSCX | Aruba OS | Brocade/Ruckus Fastiron | HP Procurve |
 | ----------------------- | :----------------: |  :--------------:  |  :--------------:  | :-: | :--------------:  |  :--------------:  |  :--------------:  | :-: | :-: | :--------------: | :--------------: | :--------------: | :--------------: |
-| Name           | ✅ | ✅ | ✅ | 🧪 | ❌ | ✅ | ✅ | 🧪 | ❌ | ✅ | 🧪 | 🧪 | 🧪 |
-| IP Address     | ✅ | ✅ | ✅ | 🧪 | ❌ | ✅ | ✅ | 🧪 | ❌ | ✅ | 🧪 | 🧪 | 🧪 |
-| Type           | ✅ | ✅ | ✅ | 🧪 | ❌ | ✅ | ✅ | 🧪 | ❌ | ✅ | 🧪 | 🧪 | 🧪 |
-| MTU            | ✅ | ✅ | ✅ | 🧪 | ❌ | ✅ | ✅ | 🧪 | ❌ | ✅ | 🧪 | 🧪 | 🧪 |
+| Name           | ✅ | ✅ | ✅ | 🧪 | ❌ | ✅ | ✅ | 🧪 | 🧪 | ✅ | 🧪 | 🧪 | 🧪 |
+| IP Address     | ✅ | ✅ | ✅ | 🧪 | ❌ | ✅ | ✅ | 🧪 | 🧪 | ✅ | 🧪 | 🧪 | 🧪 |
+| Type           | ✅ | ✅ | ✅ | 🧪 | ❌ | ✅ | ✅ | 🧪 | 🧪 | ✅ | 🧪 | 🧪 | 🧪 |
+| MTU            | ✅ | ✅ | ✅ | 🧪 | ❌ | ✅ | ✅ | 🧪 | 🧪 | ✅ | 🧪 | 🧪 | 🧪 |
 | Description    | ✅ | ✅ | ✅ | 🧪 | ❌ | ✅ | ✅ | 🧪 | ❌ | ✅ | 🧪 | 🧪 | 🧪 |
-| Mac Address    | ✅ | ✅ | ✅ | 🧪 | ❌ | ✅ | ✅ | 🧪 | ❌ | ✅ | 🧪 | 🧪 | 🧪 |
-| Link Status    | ✅ | ✅ | ✅ | 🧪 | ❌ | ✅ | ✅ | 🧪 | ❌ | ✅ | 🧪 | 🧪 | 🧪 |
-| 802.1Q mode    | ✅ | ✅ | ✅ | 🧪 | ❌ | ✅ | ✅ | 🧪 | ❌ | ✅ | 🧪 | 🧪 | 🧪 |
-| Lag Member     | ✅ | ✅ | ✅ | 🧪 | ❌ | ✅ | ✅ | 🧪 | ❌ | ✅ | 🧪 | 🧪 | 🧪 |
-| Vrf Membership | ✅ | ✅ | ✅ | 🧪 | ❌ | ✅ | ✅ | 🧪 | ❌ | ✅ | 🧪 | 🧪 | 🧪 |
-| Software Version | ✅ | ✅ | ✅  | 🧪 | ❌ | ✅ | ✅ | 🧪 | ❌ | ✅ | 🧪 | 🧪 | 🧪 | 🧪 |
+| Mac Address    | ✅ | ✅ | ✅ | 🧪 | ❌ | ✅ | ✅ | 🧪 | 🧪 | ✅ | 🧪 | 🧪 | 🧪 |
+| Link Status    | ✅ | ✅ | ✅ | 🧪 | ❌ | ✅ | ✅ | 🧪 | 🧪 | ✅ | 🧪 | 🧪 | 🧪 |
+| 802.1Q mode    | ✅ | ✅ | ✅ | 🧪 | ❌ | ✅ | ✅ | 🧪 | 🧪 | ✅ | 🧪 | 🧪 | 🧪 |
+| Lag Member     | ✅ | ✅ | ✅ | 🧪 | ❌ | ✅ | ✅ | 🧪 | 🧪 | ✅ | 🧪 | 🧪 | 🧪 |
+| Vrf Membership | ✅ | ✅ | ✅ | 🧪 | ❌ | ✅ | ✅ | 🧪 | 🧪 | ✅ | 🧪 | 🧪 | 🧪 |
+| Software Version | ✅ | ✅ | ✅  | 🧪 | ❌ | ✅ | ✅ | 🧪 | 🧪 | ✅ | 🧪 | 🧪 | 🧪 | 🧪 |
 
 |     VLANS          | Cisco IOS          | Cisco XE           | Cisco XR           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  | Palo Alto Panos | Aruba AOSCX | Aruba OS | Brocade/Ruckus Fastiron | HP Procurve |
 | ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: | :-: | :--------------: | :--------------: | :--------------: | :--------------: |
 | Untagged VLANs       | ✅ | ✅ | ❌ | ✅ | ❌ | ✅ | ✅ | 🧪 | ❌ | ✅ | 🧪 | 🧪 | 🧪 |
-| Tagged VLANs        | ✅ | ✅ | ❌ | ✅ | ❌ | ✅ | ✅ | 🧪 | ❌ | ✅ | 🧪 | 🧪 | 🧪 |
+| Tagged VLANs        | ✅ | ✅ | ❌ | ✅ | ❌ | ✅ | ✅ | 🧪 | 🧪 | ✅ | 🧪 | 🧪 | 🧪 |
 
 |     Cabling          | Cisco IOS          | Cisco XE           | Cisco XR           | Cisco NXOS         | Cisco WLC          | Juniper Junos      | Arista EOS         | F5  | Palo Alto Panos | Aruba AOSCX | Aruba OS | Brocade/Ruckus Fastiron | HP Procurve |
 | ----------------------- | :----------------: |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  |  :--------------:  | :-: | :-: | :--------------: | :--------------: | :--------------: | :--------------: |
