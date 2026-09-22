@@ -91,10 +91,13 @@ sync_network_data:
         iterable_type: "int"
   interfaces__type:
     commands:
+      # AOS-CX reports hw_type "Ethernet" for both physical ports and VLAN SVIs alike (unlike,
+      # e.g., Cisco's "Ethernet SVI"), so hw_type alone can't tell them apart here. Fall back to
+      # matching the interface name itself, the same way the 'lag' case below already does.
       - command: "show interface"
         parser: "textfsm"
         jpath: "[?interface=='{{ current_key }}'].hw_type"
-        post_processor: "{% if current_key == 'mgmt' %}{{ 'virtual' }}{% elif 'lag' in current_key %}{{ 'lag' }}{% else %}{{ obj[0] | lower | map_interface_type }}{% endif %}"
+        post_processor: "{% if current_key == 'mgmt' %}{{ 'virtual' }}{% elif 'lag' in current_key %}{{ 'lag' }}{% elif 'vlan' in current_key or 'loopback' in current_key %}{{ 'virtual' }}{% else %}{{ obj[0] | lower | map_interface_type }}{% endif %}"
   interfaces__ip_addresses:
     commands:
       - command: "show interface"
