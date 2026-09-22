@@ -110,6 +110,7 @@ class SyncNetworkDataInterface(FilteredNautobotModel):
     _attributes = (
         "status__name",
         "type",
+        "port_type",
         "mac_address",
         "mtu",
         # "parent_interface__name",
@@ -123,6 +124,7 @@ class SyncNetworkDataInterface(FilteredNautobotModel):
 
     status__name: Optional[str] = None
     type: Optional[str] = None
+    port_type: Optional[str] = None
     mac_address: Optional[str] = None
     mtu: Optional[str] = None
     parent_interface__name: Optional[str] = None

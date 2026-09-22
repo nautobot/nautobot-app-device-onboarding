@@ -65,6 +65,16 @@ sync_network_data:
           parser: "textfsm"
           jpath: "[*]"
           post_processor: "{% if obj %}{{ obj[0] | tojson }}{% else %}{{ {} | tojson }}{% endif %}"
+    # Global {interface: transceiver_type} map built once from "show interface dom detail" (the
+    # AOS-CX transceiver/DOM info command). Interfaces without a transceiver inserted don't appear
+    # in this output at all ("% No DOM information available"), so this map only covers populated
+    # SFP/SFP+/QSFP slots. interfaces__port_type below falls back to hw_type for everything else.
+    port_type_map:
+      commands:
+        - command: "show interface dom detail"
+          parser: "textfsm"
+          jpath: "[*].[$interface$,iface_type]"
+          post_processor: "{{ obj | flatten_list_of_dict_from_value('iface_type') | tojson }}"
   software_version:
     commands:
       - command: "show system"
@@ -88,6 +98,17 @@ sync_network_data:
         parser: "textfsm"
         jpath: "[?interface=='{{ current_key }}'].hw_type"
         post_processor: "{% if current_key == 'mgmt' %}{{ 'virtual' }}{% elif 'lag' in current_key %}{{ 'lag' }}{% else %}{{ obj[0] | lower | map_interface_type }}{% endif %}"
+  interfaces__port_type:
+    commands:
+      # Reuses the same command/jpath as interfaces__type (hw_type) as its fallback source, since
+      # AOS-CX only reports the real connector (via port_type_map, above) when a transceiver is
+      # physically inserted. Virtual, mgmt, and LAG interfaces have no physical connector, so
+      # they're skipped entirely rather than guessed at.
+      - command: "show interface"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].hw_type"
+        post_processor: "{% if current_key == 'mgmt' or 'vlan' in current_key or 'loopback' in current_key or 'lag' in current_key %}{{ '' }}{% elif current_key in port_type_map %}{{ port_type_map[current_key] | lower | map_port_type }}{% elif obj %}{{ obj[0] | lower | map_port_type }}{% else %}{{ '' }}{% endif %}"
+        iterable_type: "str"
   interfaces__ip_addresses:
     commands:
       - command: "show interface"
