@@ -1,0 +1,1 @@
+Fixed Aruba AOS-CX VLAN SVI interfaces being classified as "1000base-t" instead of "virtual" during Sync Network Data From Network.

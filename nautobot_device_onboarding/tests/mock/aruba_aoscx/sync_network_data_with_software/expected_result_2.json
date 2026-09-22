@@ -404,7 +404,7 @@
             "link_status": false,
             "mac_address": "4c:d5:87:ab:cc:40",
             "mtu": "",
-            "type": "1000base-t"
+            "type": "virtual"
         },
         "vlan100": {
             "802.1Q_mode": "access",
@@ -419,7 +419,7 @@
             "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:40",
             "mtu": "",
-            "type": "1000base-t"
+            "type": "virtual"
         }
     },
     "serial": "TW41LZ788B",

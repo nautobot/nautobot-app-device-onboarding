@@ -610,7 +610,7 @@
             "mac_address": "4c:d5:87:ab:cc:40",
             "mtu": "",
             "tagged_vlans": [],
-            "type": "1000base-t",
+            "type": "virtual",
             "untagged_vlan": {}
         },
         "vlan100": {
@@ -627,7 +627,7 @@
             "mac_address": "4c:d5:87:ab:cc:40",
             "mtu": "",
             "tagged_vlans": [],
-            "type": "1000base-t",
+            "type": "virtual",
             "untagged_vlan": {}
         }
     },
