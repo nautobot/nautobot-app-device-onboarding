@@ -639,7 +639,7 @@
             "mtu": "",
             "port_type": "",
             "tagged_vlans": [],
-            "type": "1000base-t",
+            "type": "virtual",
             "untagged_vlan": {}
         },
         "vlan100": {
@@ -657,7 +657,7 @@
             "mtu": "",
             "port_type": "",
             "tagged_vlans": [],
-            "type": "1000base-t",
+            "type": "virtual",
             "untagged_vlan": {}
         }
     },
