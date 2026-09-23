@@ -87,7 +87,8 @@ sync_network_data:
       - command: "show interface"
         parser: "textfsm"
         jpath: "[?interface=='{{ current_key }}'].speed"
-        post_processor: "{% if obj and obj[0] %}{{ obj[0] | parse_speed_to_kbps }}{% else %}{{ obj }}{% endif %}"
+        # VLAN SVIs report an empty speed; render nothing so no speed is set instead of failing the int cast.
+        post_processor: "{% set speed = obj[0] | parse_speed_to_kbps if obj else none %}{% if speed is not none %}{{ speed }}{% endif %}"
         iterable_type: "int"
   interfaces__type:
     commands:

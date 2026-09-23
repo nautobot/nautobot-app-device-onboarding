@@ -87,7 +87,7 @@
             "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:5c",
             "mtu": "1500",
-            "speed": 1000000,
+            "speed": 100000,
             "type": "1000base-t"
         },
         "1/1/15": {
@@ -132,7 +132,7 @@
             "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:57",
             "mtu": "1500",
-            "speed": 1000000,
+            "speed": 100000,
             "type": "1000base-t"
         },
         "1/1/18": {
@@ -177,7 +177,7 @@
             "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:68",
             "mtu": "1500",
-            "speed": 1000000,
+            "speed": 100000,
             "type": "1000base-t"
         },
         "1/1/20": {
@@ -207,7 +207,7 @@
             "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:53",
             "mtu": "1500",
-            "speed": 1000000,
+            "speed": 10000,
             "type": "1000base-t"
         },
         "1/1/22": {
@@ -327,7 +327,7 @@
             "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:65",
             "mtu": "1500",
-            "speed": 0,
+            "speed": 1000000,
             "type": "1000base-t"
         },
         "1/1/4": {
@@ -432,7 +432,7 @@
             "link_status": false,
             "mac_address": "4c:d5:87:ab:cc:40",
             "mtu": "",
-            "speed": 1000000,
+            "speed": [],
             "type": "virtual"
         },
         "vlan100": {
@@ -448,7 +448,7 @@
             "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:40",
             "mtu": "",
-            "speed": 1000000,
+            "speed": [],
             "type": "virtual"
         }
     },
