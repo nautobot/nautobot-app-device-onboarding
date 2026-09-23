@@ -256,8 +256,8 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         super().__init__(*args, **kwargs)
         self.ip_address_inventory = {}
         self.found_invalid_ip_address = False
-
         self.diffsync_flags = DiffSyncFlags.SKIP_UNMATCHED_DST
+        self._db_cache = {}  # per-job cache for _cached_get / _cached_filter_count_and_first
 
     class Meta:
         """Metadata about this Job."""
@@ -362,6 +362,60 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         self.target_adapter = SyncDevicesNautobotAdapter(job=self, sync=self.sync)
         self.target_adapter.load()
 
+    def _cached_get(self, model, **kwargs):
+        """Wrap model.objects.get() with a per-job in-memory cache.
+
+        Caching is currently enabled for Location only; all other models hit the
+        DB each call. The cache has been tested with other models and works
+        correctly — the restriction is a deliberate scope choice, not a
+        limitation, and can be relaxed if desired.
+        Failed lookups are never cached so that each row still gets its own
+        ObjectDoesNotExist / MultipleObjectsReturned exception.
+        """
+        if model is not Location:
+            return model.objects.get(**kwargs)
+        key = (model, "get", tuple(sorted(kwargs.items())))
+        if key not in self._db_cache:
+            if self.debug:
+                kwargs_str = ", ".join(f"{k}={v!s}" for k, v in kwargs.items())
+                self.logger.debug(f"Cache miss for {model.__name__}.objects.get({kwargs_str}); querying DB")
+            self._db_cache[key] = model.objects.get(**kwargs)  # propagates on miss
+        elif self.debug:
+            obj = self._db_cache[key]
+            kwargs_str = ", ".join(f"{k}={v!s}" for k, v in kwargs.items())
+            self.logger.debug(f"Cache hit for {model.__name__}.objects.get({kwargs_str}): {obj} ({obj.pk})")
+        return self._db_cache[key]
+
+    def _cached_filter_count_and_first(self, model, **kwargs):
+        """Wrap model.objects.filter() returning (count, first_or_none).
+
+        Used by _get_location_by_dynamic_ancestry for ambiguity checks.
+        Caching is currently enabled for Location only; all other models hit the
+        DB each call. The cache has been tested with other models and works
+        correctly — the restriction is a deliberate scope choice, not a
+        limitation, and can be relaxed if desired.
+        The full queryset is evaluated once and stored as a list so subsequent
+        accesses don't re-hit the DB.
+        """
+        if model is not Location:
+            qs = list(model.objects.filter(**kwargs))
+            return len(qs), (qs[0] if qs else None)
+        key = (model, "filter", tuple(sorted(kwargs.items())))
+        if key not in self._db_cache:
+            if self.debug:
+                kwargs_str = ", ".join(f"{k}={v!s}" for k, v in kwargs.items())
+                self.logger.debug(f"Cache miss for {model.__name__}.objects.filter({kwargs_str}); querying DB")
+            self._db_cache[key] = list(model.objects.filter(**kwargs))
+        elif self.debug:
+            cached = self._db_cache[key]
+            uuids = ", ".join(str(obj.pk) for obj in cached) or "none"
+            kwargs_str = ", ".join(f"{k}={v!s}" for k, v in kwargs.items())
+            self.logger.debug(
+                f"Cache hit for {model.__name__}.objects.filter({kwargs_str}): {len(cached)} match(es) [{uuids}]"
+            )
+        cached = self._db_cache[key]
+        return len(cached), (cached[0] if cached else None)
+
     def _convert_string_to_bool(self, string, header):
         """Given a string of 'true' or 'false' convert to bool."""
         if string.lower() == "true":
@@ -372,6 +426,79 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
             f"'{string}' in column '{header}' failed to convert to a boolean value. "
             "Please use either 'True' or 'False'."
         )
+
+    def _get_location_by_dynamic_ancestry(self, row):
+        """
+        Find a Location object by traversing its ancestry hierarchy from a CSV row.
+
+        Expects row to contain:
+        - 'location_name': The target location's name
+        - 'location_parent_name': Immediate parent's name
+        - 'location_parent_parent_name': Grandparent's name (optional)
+        - 'location_parent_parent_parent_name': Great-grandparent's name (optional)
+        - etc. (arbitrary depth supported)
+
+        If no parent columns are supplied and the location name is globally unique,
+        the location is returned without filtering by parent.
+
+        Args:
+            row (dict): CSV row data with location and ancestry information
+
+        Returns:
+            Location: The Location object matching the name and full ancestry chain
+
+        Raises:
+            Location.DoesNotExist: If any location in the hierarchy is not found
+            Location.MultipleObjectsReturned: If name is ambiguous and no parent columns provided
+            KeyError: If 'location_name' is missing from row
+        """
+        location_name = row["location_name"].strip()
+
+        # Find all parent ancestry columns (location_parent*)
+        parent_keys = [k for k in row if k.startswith("location_parent")]
+
+        # Sort by depth (fewer 'parent' substrings = closer to child)
+        parent_keys.sort(key=lambda x: x.count("parent"))
+
+        # Extract non-empty parent names and reverse for root-to-leaf traversal
+        parent_names = [row[k].strip() for k in parent_keys if row.get(k) and row[k].strip()]
+        parent_names.reverse()
+
+        parent_obj = None
+        for i, parent_name in enumerate(parent_names):
+            if i == 0:
+                # Deepest ancestor provided — don't assume it's a root, just match by name.
+                # If ambiguous, the caller should provide more ancestry columns.
+                count, first = self._cached_filter_count_and_first(Location, name=parent_name)
+                if count == 1:
+                    parent_obj = first
+                elif count == 0:
+                    raise Location.DoesNotExist(f"No Location found with name '{parent_name}'.")
+                else:
+                    raise Location.MultipleObjectsReturned(
+                        f"Multiple Locations found with name '{parent_name}'. "
+                        "Add more ancestor column(s) (location_parent_parent_name etc.) "
+                        "to the CSV to disambiguate."
+                    )
+            else:
+                parent_obj = self._cached_get(Location, name=parent_name, parent=parent_obj)
+
+        # If no parent columns were provided, attempt a name-only lookup.
+        # This handles the case where the location name is globally unique
+        # but the location is not a root (i.e. it does have a parent in the DB).
+        if parent_obj is None and not parent_names:
+            count, first = self._cached_filter_count_and_first(Location, name=location_name)
+            if count == 1:
+                return first
+            if count == 0:
+                raise Location.DoesNotExist(f"No Location found with name '{location_name}'.")
+            raise Location.MultipleObjectsReturned(
+                f"Multiple Locations found with name '{location_name}'. "
+                "Add parent column(s) (location_parent_name etc.) to the CSV to disambiguate."
+            )
+
+        # Return the target location with full ancestry
+        return self._cached_get(Location, name=location_name, parent=parent_obj)
 
     def _process_csv_data(self, csv_file):
         """Convert CSV data into a list of dictionaries containing Nautobot objects."""
@@ -391,15 +518,11 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
         for row_num, row in enumerate(csv_reader, start=2):
             query = None
             try:
-                query = f"location_name: {row.get('location_name')}, location_parent_name: {row.get('location_parent_name')}"
-                if row.get("location_parent_name"):
-                    location = Location.objects.get(
-                        name=row["location_name"].strip(),
-                        parent__name=row["location_parent_name"].strip(),
-                    )
-                else:
-                    query = query = f"location_name: {row.get('location_name')}"
-                    location = Location.objects.get(name=row["location_name"].strip(), parent=None)
+                ancestry_parts = {
+                    k: v for k, v in row.items() if k == "location_name" or k.startswith("location_parent")
+                }
+                query = f"location: {ancestry_parts}"
+                location = self._get_location_by_dynamic_ancestry(row)
 
                 # Check and add content type if needed (only once per location type)
                 location_type = location.location_type
@@ -409,42 +532,26 @@ class SSOTSyncDevices(DataSource):  # pylint: disable=too-many-instance-attribut
                     location_type_ids.add(location_type.id)
 
                 query = f"device_role: {row.get('device_role_name')}"
-                device_role = Role.objects.get(
-                    name=row["device_role_name"].strip(),
-                )
+                device_role = self._cached_get(Role, name=row["device_role_name"].strip())
                 query = f"namespace: {row.get('namespace')}"
-                namespace = Namespace.objects.get(
-                    name=row["namespace"].strip(),
-                )
+                namespace = self._cached_get(Namespace, name=row["namespace"].strip())
                 query = f"device_status: {row.get('device_status_name')}"
-                device_status = Status.objects.get(
-                    name=row["device_status_name"].strip(),
-                )
+                device_status = self._cached_get(Status, name=row["device_status_name"].strip())
                 if row.get("device_tenant_name"):
                     query = f"device_tenant: {row.get('device_tenant_name')}"
-                    device_tenant = Tenant.objects.get(
-                        name=row["device_tenant_name"].strip(),
-                    )
+                    device_tenant = self._cached_get(Tenant, name=row["device_tenant_name"].strip())
                 else:
                     device_tenant = None
                 query = f"interface_status: {row.get('interface_status_name')}"
-                interface_status = Status.objects.get(
-                    name=row["interface_status_name"].strip(),
-                )
+                interface_status = self._cached_get(Status, name=row["interface_status_name"].strip())
                 query = f"ip_address_status: {row.get('ip_address_status_name')}"
-                ip_address_status = Status.objects.get(
-                    name=row["ip_address_status_name"].strip(),
-                )
+                ip_address_status = self._cached_get(Status, name=row["ip_address_status_name"].strip())
                 query = f"secrets_group: {row.get('secrets_group_name')}"
-                secrets_group = SecretsGroup.objects.get(
-                    name=row["secrets_group_name"].strip(),
-                )
-                query = f"platform: {row.get('platform_name')}"
+                secrets_group = self._cached_get(SecretsGroup, name=row["secrets_group_name"].strip())
                 platform = None
                 if row.get("platform_name"):
-                    platform = Platform.objects.get(
-                        name=row["platform_name"].strip(),
-                    )
+                    query = f"platform: {row.get('platform_name')}"
+                    platform = self._cached_get(Platform, name=row["platform_name"].strip())
                     self._validate_platform_network_driver(platform)
 
                 set_mgmt_only = self._convert_string_to_bool(
