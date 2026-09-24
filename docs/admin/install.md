@@ -125,10 +125,10 @@ Modify `nautobot_config.py` with settings of your choice. Example settings are s
 ```python
 # Example settings In your nautobot_config.py
 PLUGINS_CONFIG = {
-  "nautobot_device_onboarding": {
-    "default_ip_status": "Active",
-    "default_device_role": "leaf",
-    "skip_device_type_on_update": True,
-  }
+    "nautobot_device_onboarding": {
+        "default_ip_status": "Active",
+        "default_device_role": "leaf",
+        "skip_device_type_on_update": True,
+    }
 }
 ```
