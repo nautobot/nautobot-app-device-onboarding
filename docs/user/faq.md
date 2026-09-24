@@ -90,8 +90,7 @@ Device Onboarding 4.0 uses Netmiko as the automation engine that queries the dev
 PLUGINS_CONFIG = {
     "nautobot_device_onboarding": {},
     "nautobot_plugin_nornir": {
-        "nornir_settings": {
-            "... omitted ..."},
+        "nornir_settings": {"... omitted ..."},
         "connection_options": {
             "netmiko": {
                 "extras": {  # <==== passed into the connection setup.
