@@ -55,9 +55,7 @@ class OnboardingDriverExtensions:
                 "vsx": vsx_data,
             }
 
-            logger.info(
-                f"Virtual chassis data collected: VSF={bool(vsf_data)}, VSX={bool(vsx_data)}"
-            )
+            logger.info(f"Virtual chassis data collected: VSF={bool(vsf_data)}, VSX={bool(vsx_data)}")
 
         except Exception as e:
             logger.warning(f"Failed to collect virtual chassis data: {e}")
@@ -118,9 +116,7 @@ class OnboardingDriverExtensions:
         try:
             # Parse using ntc-templates
             # Template: aruba_aoscx_show_vsf_detail.textfsm (exists since v2.3.0)
-            parsed_list = parse_raw_text(
-                raw_output, platform="aruba_aoscx", command="show vsf detail"
-            )
+            parsed_list = parse_raw_text(raw_output, platform="aruba_aoscx", command="show vsf detail")
 
             if not parsed_list:
                 logger.debug("VSF output parsed empty (likely standalone)")
@@ -200,9 +196,7 @@ class OnboardingDriverExtensions:
             # Template: aruba_aoscx_show_vsx_detail.textfsm
             # NOTE: Template does NOT exist yet in ntc-templates v2.x
             # Requires PR to upstream ntc-templates repo first
-            parsed_list = parse_raw_text(
-                raw_output, platform="aruba_aoscx", command="show vsx detail"
-            )
+            parsed_list = parse_raw_text(raw_output, platform="aruba_aoscx", command="show vsx detail")
 
             if not parsed_list:
                 logger.debug("VSX output parsed empty (not a VSX device)")
@@ -226,9 +220,7 @@ class OnboardingDriverExtensions:
 
         except Exception as e:
             # Expected until VSX template is added to ntc-templates
-            logger.debug(
-                f"VSX TextFSM parsing failed (template may not exist yet): {e}"
-            )
+            logger.debug(f"VSX TextFSM parsing failed (template may not exist yet): {e}")
             return {}
 
 
@@ -240,9 +232,7 @@ class ArubaAoscxOnboarding:
     Executes without active NAPALM connection.
     """
 
-    def __init__(
-        self, device: Device, driver_addon_result: Optional[Dict[str, Any]] = None
-    ):
+    def __init__(self, device: Device, driver_addon_result: Optional[Dict[str, Any]] = None):
         """
         Initialize onboarding handler.
 
@@ -276,11 +266,7 @@ class ArubaAoscxOnboarding:
         members = self.vsf_data.get("members", [])
 
         # VSF stack if topology != standalone and we have multiple members
-        return (
-            topology is not None
-            and topology.lower() not in ["none", "standalone", ""]
-            and len(members) > 1
-        )
+        return topology is not None and topology.lower() not in ["none", "standalone", ""] and len(members) > 1
 
     def _is_vsx_pair(self) -> bool:
         """
@@ -306,8 +292,7 @@ class ArubaAoscxOnboarding:
             stack_name = self.vsf_data.get("stack_name", self.device.name)
 
             self.logger.info(
-                f"Onboarding VSF stack '{stack_name}': "
-                f"{len(members)} members, conductor={conductor_member_id}"
+                f"Onboarding VSF stack '{stack_name}': {len(members)} members, conductor={conductor_member_id}"
             )
 
             # Create child device for each non-conductor member
@@ -324,9 +309,7 @@ class ArubaAoscxOnboarding:
         except Exception as e:
             self.logger.error(f"VSF stack onboarding failed: {e}")
 
-    def _create_vsf_member_device(
-        self, member_info: Dict[str, Any]
-    ) -> Optional[Device]:
+    def _create_vsf_member_device(self, member_info: Dict[str, Any]) -> Optional[Device]:
         """
         Create Device object for a VSF stack member.
 
@@ -378,14 +361,10 @@ class ArubaAoscxOnboarding:
             )
 
             # Tag as VSF member
-            vsf_tag, _ = Tag.objects.get_or_create(
-                name="vsf-member", defaults={"slug": "vsf-member"}
-            )
+            vsf_tag, _ = Tag.objects.get_or_create(name="vsf-member", defaults={"slug": "vsf-member"})
             child_device.tags.add(vsf_tag)
 
-            self.logger.info(
-                f"✅ Created VSF member device: {member_device_name} (SN: {serial})"
-            )
+            self.logger.info(f"✅ Created VSF member device: {member_device_name} (SN: {serial})")
             return child_device
 
         except Exception as e:
@@ -409,14 +388,10 @@ class ArubaAoscxOnboarding:
             peer_ip = self.vsx_data.get("peer_ip")
             isl_status = self.vsx_data.get("isl_status")
 
-            self.logger.info(
-                f"Onboarding VSX pair: role={system_role}, peer_ip={peer_ip}, isl={isl_status}"
-            )
+            self.logger.info(f"Onboarding VSX pair: role={system_role}, peer_ip={peer_ip}, isl={isl_status}")
 
             # Tag device as VSX member
-            vsx_tag, _ = Tag.objects.get_or_create(
-                name="vsx-member", defaults={"slug": "vsx-member"}
-            )
+            vsx_tag, _ = Tag.objects.get_or_create(name="vsx-member", defaults={"slug": "vsx-member"})
             self.device.tags.add(vsx_tag)
 
             # Add role-specific tag
