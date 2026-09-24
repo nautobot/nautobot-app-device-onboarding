@@ -13,8 +13,8 @@ import logging
 from typing import Any, Dict, Optional
 
 from napalm.base.exceptions import CommandErrorException
-from nautobot.dcim.models import Device, Status
-from nautobot.extras.models import Tag
+from nautobot.dcim.models import Device
+from nautobot.extras.models import Status, Tag
 
 logger = logging.getLogger("rq.worker")
 
