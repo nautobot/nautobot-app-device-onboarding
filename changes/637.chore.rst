@@ -1,0 +1,1 @@
+Updated ruff dependency from 0.5.5 to 0.16.8 to align with latest stable release and resolve CI formatting discrepancies.
