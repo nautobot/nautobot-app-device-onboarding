@@ -71,8 +71,7 @@ def ensure_command_mappers_repo(repository_record, logger=None, raise_on_error=F
         )
         return False
     logger.debug(
-        f"Command mapper Git repository '{repository_record.name}' is present at "
-        f"{repository_record.filesystem_path}."
+        f"Command mapper Git repository '{repository_record.name}' is present at {repository_record.filesystem_path}."
     )
     return True
 
