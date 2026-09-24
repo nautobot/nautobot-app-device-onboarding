@@ -48,7 +48,7 @@ ipython = "*"
 pylint = "*"
 pylint-django = ">=2.5.4"
 pylint-nautobot = ">=0.3.1"
-ruff = "0.5.5"
+ruff = "0.16.8"
 yamllint = "*"
 # Python implementation of markdownlint
 pymarkdownlnt = "~0.9.30"
