@@ -1,0 +1,238 @@
+{
+  "interfaces": {
+    "1/1/1": {
+      "802.1Q_mode": "",
+      "description": "to NOKIA-TEST1",
+      "ip_addresses": [],
+      "lag": "",
+      "link_status": "True",
+      "mac_address": "",
+      "mtu": "1572",
+      "tagged_vlans": [],
+      "type": "1000base-t",
+      "untagged_vlan": {}
+    },
+    "1/1/2": {
+      "802.1Q_mode": "",
+      "description": "10/100/Gig Ethernet SFP",
+      "ip_addresses": [],
+      "lag": "",
+      "link_status": "False",
+      "mac_address": "",
+      "mtu": "1514",
+      "tagged_vlans": [],
+      "type": "1000base-t",
+      "untagged_vlan": {}
+    },
+    "1/1/3": {
+      "802.1Q_mode": "",
+      "description": "to NOKIA-TEST2",
+      "ip_addresses": [],
+      "lag": "",
+      "link_status": "True",
+      "mac_address": "",
+      "mtu": "1518",
+      "tagged_vlans": [],
+      "type": "1000base-t",
+      "untagged_vlan": {}
+    },
+    "1/1/4": {
+      "802.1Q_mode": "",
+      "description": "to NOKIA-TEST3",
+      "ip_addresses": [],
+      "lag": "",
+      "link_status": "True",
+      "mac_address": "",
+      "mtu": "1514",
+      "tagged_vlans": [],
+      "type": "1000base-t",
+      "untagged_vlan": {}
+    },
+    "1/1/5": {
+      "802.1Q_mode": "",
+      "description": "10/100/Gig Ethernet SFP",
+      "ip_addresses": [],
+      "lag": "",
+      "link_status": "False",
+      "mac_address": "",
+      "mtu": "1514",
+      "tagged_vlans": [],
+      "type": "1000base-t",
+      "untagged_vlan": {}
+    },
+    "1/1/6": {
+      "802.1Q_mode": "",
+      "description": "10/100/Gig Ethernet SFP",
+      "ip_addresses": [],
+      "lag": "",
+      "link_status": "False",
+      "mac_address": "",
+      "mtu": "1514",
+      "tagged_vlans": [],
+      "type": "1000base-t",
+      "untagged_vlan": {}
+    },
+    "1/1/7": {
+      "802.1Q_mode": "",
+      "description": "10/100/Gig Ethernet SFP",
+      "ip_addresses": [],
+      "lag": "",
+      "link_status": "False",
+      "mac_address": "",
+      "mtu": "1514",
+      "tagged_vlans": [],
+      "type": "1000base-t",
+      "untagged_vlan": {}
+    },
+    "1/1/8": {
+      "802.1Q_mode": "",
+      "description": "10/100/Gig Ethernet SFP",
+      "ip_addresses": [],
+      "lag": "",
+      "link_status": "False",
+      "mac_address": "",
+      "mtu": "1514",
+      "tagged_vlans": [],
+      "type": "1000base-t",
+      "untagged_vlan": {}
+    },
+    "1/2/1": {
+      "802.1Q_mode": "",
+      "description": "to NOKIA-TEST4",
+      "ip_addresses": [],
+      "lag": "",
+      "link_status": "True",
+      "mac_address": "",
+      "mtu": "1572",
+      "tagged_vlans": [],
+      "type": "1000base-t",
+      "untagged_vlan": {}
+    },
+    "1/2/2": {
+      "802.1Q_mode": "",
+      "description": "10/100/Gig Ethernet SFP",
+      "ip_addresses": [],
+      "lag": "",
+      "link_status": "False",
+      "mac_address": "",
+      "mtu": "1514",
+      "tagged_vlans": [],
+      "type": "1000base-t",
+      "untagged_vlan": {}
+    },
+    "1/2/3": {
+      "802.1Q_mode": "",
+      "description": "to NOKIA-TEST5",
+      "ip_addresses": [],
+      "lag": "",
+      "link_status": "True",
+      "mac_address": "",
+      "mtu": "1518",
+      "tagged_vlans": [],
+      "type": "1000base-t",
+      "untagged_vlan": {}
+    },
+    "1/2/4": {
+      "802.1Q_mode": "",
+      "description": "10/100/Gig Ethernet SFP",
+      "ip_addresses": [],
+      "lag": "",
+      "link_status": "False",
+      "mac_address": "",
+      "mtu": "1514",
+      "tagged_vlans": [],
+      "type": "1000base-t",
+      "untagged_vlan": {}
+    },
+    "1/2/5": {
+      "802.1Q_mode": "",
+      "description": "10/100/Gig Ethernet SFP",
+      "ip_addresses": [],
+      "lag": "",
+      "link_status": "False",
+      "mac_address": "",
+      "mtu": "1514",
+      "tagged_vlans": [],
+      "type": "1000base-t",
+      "untagged_vlan": {}
+    },
+    "1/2/6": {
+      "802.1Q_mode": "",
+      "description": "10/100/Gig Ethernet SFP",
+      "ip_addresses": [],
+      "lag": "",
+      "link_status": "False",
+      "mac_address": "",
+      "mtu": "1514",
+      "tagged_vlans": [],
+      "type": "1000base-t",
+      "untagged_vlan": {}
+    },
+    "1/2/7": {
+      "802.1Q_mode": "",
+      "description": "10/100/Gig Ethernet SFP",
+      "ip_addresses": [],
+      "lag": "",
+      "link_status": "False",
+      "mac_address": "",
+      "mtu": "1514",
+      "tagged_vlans": [],
+      "type": "1000base-t",
+      "untagged_vlan": {}
+    },
+    "1/2/8": {
+      "802.1Q_mode": "",
+      "description": "10/100/Gig Ethernet SFP",
+      "ip_addresses": [],
+      "lag": "",
+      "link_status": "False",
+      "mac_address": "",
+      "mtu": "1514",
+      "tagged_vlans": [],
+      "type": "1000base-t",
+      "untagged_vlan": {}
+    },
+    "A/1": {
+      "802.1Q_mode": "",
+      "description": "10/100 Ethernet TX",
+      "ip_addresses": [],
+      "lag": "",
+      "link_status": "False",
+      "mac_address": "",
+      "mtu": "1514",
+      "tagged_vlans": [],
+      "type": "1000base-t",
+      "untagged_vlan": {}
+    },
+    "B/1": {
+      "802.1Q_mode": "",
+      "description": "10/100 Ethernet TX",
+      "ip_addresses": [],
+      "lag": "",
+      "link_status": "False",
+      "mac_address": "",
+      "mtu": "1514",
+      "tagged_vlans": [],
+      "type": "1000base-t",
+      "untagged_vlan": {}
+    },
+    "system": {
+      "802.1Q_mode": "",
+      "description": "",
+      "ip_addresses": [
+        {
+          "ip_address": "10.33.1.79",
+          "prefix_length": "32"
+        }
+      ],
+      "lag": "",
+      "link_status": "False",
+      "mac_address": "",
+      "mtu": "",
+      "tagged_vlans": [],
+      "type": "1000base-t",
+      "untagged_vlan": {}
+    }
+  },
+  "serial": "NS1004S0400"
+}

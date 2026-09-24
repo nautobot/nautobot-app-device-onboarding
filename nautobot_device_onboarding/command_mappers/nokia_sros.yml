@@ -1,0 +1,130 @@
+---
+sync_devices:
+  pre_processor:
+    system_interface:
+      commands:
+        - command: "show router interface system"
+          parser: "raw"
+          jpath: "raw"
+          iterable_type: "dict"
+          post_processor: |
+            {% set ns = namespace(result={}, current='') %}
+            {% for line in obj.split('\n') %}
+              {% set stripped = line.strip() %}
+              {% if not stripped or stripped.startswith('=') or stripped.startswith('-') or stripped.startswith('Interface Table') or stripped.startswith('Interface-Name') or stripped.startswith('IP-Address') or stripped.startswith('Interfaces') %}
+              {% elif '/' in stripped and stripped[0].isdigit() and ns.current and not ns.result %}
+                {% set ip_cidr = stripped.split()[0].split('/') %}
+                {% set ns.result = {'name': ns.current, 'ip_address': ip_cidr[0], 'cidr': ip_cidr[1]} %}
+              {% else %}
+                {% set ns.current = stripped.split()[0] %}
+              {% endif %}
+            {% endfor %}
+            {{ ns.result | tojson }}
+  hostname:
+    commands:
+      - command: "show system information"
+        parser: "ttp"
+        jpath: "[0].hostname" # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj | upper }}"
+  serial:
+    commands:
+      - command: "show chassis detail"
+        parser: "ttp"
+        jpath: "[0][0].serial || [0].serial" # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj if obj else 'UNKNOWN' }}"
+  device_type:
+    commands:
+      - command: "show system information"
+        parser: "ttp"
+        jpath: "[0].device_type" # yamllint disable-line rule:quoted-strings
+        post_processor: "{{ obj | upper }}"
+  mgmt_interface:
+    commands:
+      - command: "show router interface system"
+        parser: "raw"
+        jpath: "raw"
+        post_processor: "{{ system_interface.get('name', 'system') if system_interface else 'system' }}"
+  mask_length:
+    commands:
+      - command: "show router interface system"
+        parser: "raw"
+        jpath: "raw"
+        post_processor: "{{ system_interface.get('cidr', 32) if system_interface else 32 }}"
+        iterable_type: "int"
+sync_network_data:
+  pre_processor:
+    router_interfaces:
+      commands:
+        - command: "show router interface system"
+          parser: "raw"
+          jpath: "raw"
+          post_processor: |
+            {% set ns = namespace(result=[], current='') %}
+            {% for line in obj.split('\n') %}
+              {% set stripped = line.strip() %}
+              {% if not stripped or stripped.startswith('=') or stripped.startswith('-') or stripped.startswith('Interface Table') or stripped.startswith('Interface-Name') or stripped.startswith('IP-Address') or stripped.startswith('Interfaces') %}
+              {% elif '/' in stripped and stripped[0].isdigit() and ns.current %}
+                {% set ip_cidr = stripped.split()[0].split('/') %}
+                {{ ns.result.append({'name': ns.current, 'ip_address': ip_cidr[0], 'cidr': ip_cidr[1]}) or '' }}
+                {% set ns.current = '' %}
+              {% else %}
+                {% set ns.current = stripped.split()[0] %}
+              {% endif %}
+            {% endfor %}
+            {{ ns.result | tojson }}
+  serial:
+    commands:
+      - command: "show chassis detail"
+        parser: "ttp"
+        jpath: "[0][0].serial || [0].serial"
+        post_processor: "{{ obj if obj else 'UNKNOWN' }}"
+        iterable_type: "str"
+  interfaces:
+    root_key: true
+    commands:
+      - command: "show port description"
+        parser: "ttp"
+        jpath: "[0].port_descriptions[?port_id && contains(port_id, '/')].port_id"
+        post_processor: |
+          {% set result={} %}{% for interface in obj %}{{ result.update({interface: {'ip_addresses': [], 'mac_address': '', 'lag': '', 'link_status': False, 'description': '', 'type': '', 'mtu': '', '802.1Q_mode': '', 'tagged_vlans': [], 'untagged_vlan': {}}}) or '' }}{% endfor %}
+          {% if router_interfaces %}{% for router_interface in router_interfaces %}{% set name = router_interface.get('name') %}{% if name %}{{ result.update({name: {'ip_addresses': [], 'mac_address': '', 'lag': '', 'link_status': False, 'description': '', 'type': '', 'mtu': '', '802.1Q_mode': '', 'tagged_vlans': [], 'untagged_vlan': {}}}) or '' }}{% endif %}{% endfor %}{% endif %}
+          {{ result | tojson }}
+  interfaces__ip_addresses:
+    commands:
+      - command: "show router interface system"
+        parser: "raw"
+        jpath: "raw"
+        post_processor: "{% set match = router_interfaces | selectattr('name', 'equalto', current_key) | list %}{% if match %}{{ [{'ip_address': match[0].ip_address, 'prefix_length': match[0].cidr}] | tojson }}{% else %}[]{% endif %}"
+  interfaces__type:
+    commands:
+      - command: "show port"
+        parser: "ttp"
+        jpath: "[0].port_status[?port_id && contains(port_id, '/') && port_id=='{{ current_key }}'].port_id"
+        post_processor: "{{ 'ethernet' | map_interface_type }}"
+        iterable_type: "str"
+  interfaces__description:
+    commands:
+      - command: "show port description"
+        parser: "ttp"
+        jpath: "[0].port_descriptions[?port_id && contains(port_id, '/') && port_id=='{{ current_key }}'].description"
+        post_processor: "{{ obj[0] if obj else '' }}"
+        iterable_type: "str"
+  interfaces__link_status:
+    commands:
+      - command: "show port"
+        parser: "ttp"
+        jpath: "[0].port_status[?port_id && contains(port_id, '/') && port_id=='{{ current_key }}'].oper_state"
+        post_processor: "{% if obj %}{{ obj[0] | interface_status_to_bool }}{% else %}False{% endif %}"
+  interfaces__mtu:
+    commands:
+      - command: "show port"
+        parser: "ttp"
+        jpath: "[0].port_status[?port_id && contains(port_id, '/') && port_id=='{{ current_key }}']"
+        post_processor: "{% if obj %}{% set entry = obj[0] %}{{ entry.get('cfg_mtu') or entry.get('oper_mtu') or '' }}{% else %}{{ '' }}{% endif %}"
+        iterable_type: "str"
+  software_version:
+    commands:
+      - command: "show version"
+        parser: "ttp"
+        jpath: "[0].version"
+        iterable_type: "str"
