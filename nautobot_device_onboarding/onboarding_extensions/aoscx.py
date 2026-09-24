@@ -138,7 +138,9 @@ class OnboardingDriverExtensions:
                 "members": vsf_entry.get("members", []),
             }
 
-            logger.debug(f"VSF textfsm parsed: {len(result.get('members', []))} members")
+            logger.debug(
+                f"VSF textfsm parsed: {len(result.get('members', []))} members"
+            )
             return result
 
         except Exception as e:  # pylint: disable=broad-exception-caught
@@ -346,7 +348,9 @@ class ArubaAoscxOnboarding:
             status_str = member_info.get("status", "Member").lower()
 
             if not member_id or not serial:
-                self.logger.warning(f"Incomplete member data: id={member_id}, sn={serial}")
+                self.logger.warning(
+                    f"Incomplete member data: id={member_id}, sn={serial}"
+                )
                 return None
 
             # Generate member device name: "6100-1" → "6100-2", "6100-3", etc.
