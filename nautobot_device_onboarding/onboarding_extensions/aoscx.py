@@ -13,7 +13,6 @@ import logging
 from typing import Any, Dict, Optional
 
 from napalm.base.exceptions import CommandErrorException
-
 from nautobot.dcim.models import Device, Status
 from nautobot.extras.models import Tag
 
@@ -259,7 +258,6 @@ class ArubaAoscxOnboarding:
 
     def onboarding(self) -> None:
         """Execute virtual chassis onboarding logic."""
-
         # Check if device is part of a virtual chassis
         if self._is_vsf_stack():
             self._onboard_vsf_stack()
