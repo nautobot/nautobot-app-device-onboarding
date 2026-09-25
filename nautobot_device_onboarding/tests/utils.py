@@ -214,13 +214,12 @@ def sync_network_data_ensure_required_nautobot_objects():
         location=location,
     )
 
-    cable_to_circuit_1, _ = Cable.objects.get_or_create(
-        termination_a_type=ContentType.objects.get_for_model(Interface),
-        termination_a_id=interface_4.id,
-        termination_b_type=ContentType.objects.get_for_model(CircuitTermination),
-        termination_b_id=circuit_termination_1.id,
+    cable_to_circuit_1 = Cable(
+        termination_a=interface_4,
+        termination_b=circuit_termination_1,
         status=status,
     )
+    cable_to_circuit_1.validated_save()
 
     testing_objects["status"] = status
     testing_objects["secrets_group"] = secrets_group
