@@ -62,6 +62,32 @@ The new SSoT based jobs each use their own Nornir inventories.
 !!! info
     The main reason for mentioning this is that this has the possiblity of conflicting with Golden Config plugin settings if `CredentialsEnvVars` or `CredentialsSettingsVars` are in use. At this time the recommentation is to migrate to using Nautobot Secrets Groups, which is the general pattern Nautobot is moving towards into the future.
 
+#### Enable Secret Support
+
+For devices that require privileged mode (e.g., Cisco IOS), the `Sync Devices from Network` job supports an **enable secret** sourced from Nautobot Secrets Groups.
+
+To use this feature, create a Secrets Group with the following three secrets:
+
+| Secret Type | Description |
+|---|
+| `Username` | Device login username |
+| `Password` | Device login password |
+| `Secret` | Enable/privileged mode password |
+
+All three secrets must use the **Generic** access type.
+
+The Secret value is supplied to Netmiko as the enable password. Netmiko enters enable mode only when the device's selected Nautobot Platform `name` is listed in `netmiko_enable_mode_platforms`; an unlisted Platform does not attempt a Cisco-style enable command.
+
+The optional `netmiko_enable_mode_platforms` allow-list is disabled by default (`[]`). For example:
+
+```python
+"netmiko_enable_mode_platforms": ["cisco_c2960"],
+```
+
+The list contains Nautobot Platform `name` values. For a Platform with name `cisco_c2960` and Netmiko mapping `cisco_ios`, enable mode is selected with `["cisco_c2960"]`, not `["cisco_ios"]`. The Platform name `cisco_c2960` is matched independently from the Netmiko mapping `cisco_ios`, so two Platform names can share that mapping and still receive independent enable-mode policies. Generated values such as `cisco-c2960_4784` are natural slugs, not configuration keys, and should not be configured. `Sync Devices` auto-detection has no selected Platform name, so enable mode remains disabled for that path. Configure the Secrets Group and its username, login password, and enable password through the existing Nautobot Secrets mechanisms; the allow-list does not store or configure secrets.
+
+Assign the Secrets Group to the device(s) you want to onboard. The `Sync Devices from Network` job will automatically retrieve and use the enable secret during connection.
+
 ### Onboarding a Device
 
 Navigate to the `Jobs` page from the nautobot navigation bar. Run `Sync Devices From Network` to get basic device and information onboarding, followed by `Sync Network Data From Network` to add additional details from the network to these devices. E.g. Interfaces, IPs, VRFs, VLANs.
