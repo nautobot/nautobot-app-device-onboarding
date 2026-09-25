@@ -5,6 +5,7 @@ from itertools import chain
 
 from django_jinja import library
 from nautobot.apps.choices import InterfaceModeChoices
+from netutils.bandwidth import name_to_bits
 from netutils.ip import is_ip
 from netutils.vlan import vlanconfig_to_list
 
@@ -210,6 +211,22 @@ def parse_junos_ip_address(item):
                     )
             return result
     return []
+
+
+@library.filter
+def parse_speed_to_kbps(speed_value):
+    """Convert a device-reported speed string (e.g. '10000 Mb/s') into Kbps as required by Nautobot.
+
+    Returns None when the value is empty/unparseable (e.g. VLAN SVIs on Aruba AOS-CX report an
+    empty speed string) so the attribute is simply left unset instead of raising or storing 0.
+    """
+    if not speed_value or not speed_value.strip():
+        return None
+    try:
+        return name_to_bits(speed_value.strip()) // 1000
+    except ValueError:
+        logger.warning("Unable to parse interface speed value %r into Kbps.", speed_value)
+        return None
 
 
 @library.filter

@@ -665,6 +665,11 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
 
     def load_interface(self, hostname, interface_name, interface_data):
         """Load an interface into the DiffSync store."""
+        # Nautobot does not allow a speed to be set on LAG or virtual interfaces.
+        # An empty/unparseable speed is normalized to an empty list by the formatter.
+        speed = interface_data.get("speed")
+        if not isinstance(speed, int) or interface_data["type"] in ("lag", "virtual"):
+            speed = None
         network_interface = self.interface(
             adapter=self,
             name=interface_name,
@@ -676,6 +681,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
             description=interface_data["description"],
             enabled=interface_data["link_status"],
             mode=interface_data["802.1Q_mode"],
+            speed=speed,
             parent_interface__name=None,
             lag__name=None,
             # untagged_vlan__name=self._get_vlan_name(interface_data=interface_data),
