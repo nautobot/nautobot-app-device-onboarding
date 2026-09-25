@@ -4,8 +4,8 @@ This document describes all new features and changes in the release. The format 
 
 ## Release Overview
 
-- Major features or milestones
-- Changes to compatibility with Nautobot and/or other apps, libraries etc.
+- Added Sync Network Data support for Palo Alto PAN-OS.
+- Added Sync Devices From Network support for Aruba AOS-CX Virtual Chassis (VSF).
 
 <!-- towncrier release notes start -->
 
