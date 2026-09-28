@@ -44,9 +44,7 @@ By default, the plugin uses the credentials defined in the main `nautobot_config
 For the SSoT onboarding based jobs SecretGroups are required.
 
 !!! info
-    **Enable Secret:** For devices requiring privileged mode (e.g., Cisco IOS), add a `Secret` type to your Secrets Group in addition to `Username` and `Password`. The Secret value is supplied to Netmiko as the enable password. Netmiko enters enable mode only when the device's selected Nautobot Platform `name` is listed in `netmiko_enable_mode_platforms`; an unlisted Platform does not attempt a Cisco-style enable command. If `Secret` is not defined, the job falls back to using the `Password` value as the enable secret. Configure these credentials through the existing Nautobot Secrets mechanisms; `netmiko_enable_mode_platforms` only selects which Platforms use enable mode.
-
-    The optional `netmiko_enable_mode_platforms` allow-list contains Nautobot Platform `name` values and is disabled by default (`[]`). For a Platform with name `cisco_c2960` and Netmiko mapping `cisco_ios`, setting it to `["cisco_c2960"]` enables mode for that Platform, not `["cisco_ios"]`. The Platform name `cisco_c2960` is matched independently from the Netmiko mapping `cisco_ios`, so two Platform names can share that mapping and still receive independent enable-mode policies. Generated values such as `cisco-c2960_4784` are natural slugs, not configuration keys, and should not be configured. `Sync Devices` auto-detection has no selected Platform name, so enable mode remains disabled for that path.
+    **Enable Secret:** For devices requiring privileged mode (e.g., Cisco IOS), see the [Enable Secret Support](app_getting_started.md#enable-secret-support) section in Getting Started for configuration details on Secrets Groups and the `netmiko_enable_mode_platforms` setting.
 
 ## How can I update the optional arguments for NAPALM?
 

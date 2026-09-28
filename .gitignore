@@ -311,3 +311,7 @@ public
 /nautobot_device_onboarding/static/nautobot_device_onboarding/docs
 # Avoid accidental commit of analytics template override generated via ./docs/insert-analytics.sh
 docs/assets/overrides/main.html
+
+# Superpowers planning files
+.superpowers/
+docs/superpowers/
