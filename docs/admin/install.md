@@ -106,10 +106,11 @@ Although the app can run without providing any settings, the app behavior can be
 - `skip_manufacturer_on_update` boolean (default False), If True, an existing Nautobot device will not get its manufacturer updated. If False, manufacturer will be updated with one discovered on a device.
 - `assign_secrets_group` boolean (default False), If True, the credentials used to connect to the device will be assigned as the secrets group for the device upon creation. If False, no secrets group will be assigned.
 - `set_management_only_interface` boolean (default False), If True, the interface that is created or updated will be set to management only. If False, the interface will be set to not be management only.
-- `platform_map` (dictionary), mapping of an **auto-detected** Netmiko platform to the **Nautobot slug** name of your Platform. The dictionary should be in the format:
+- `netmiko_enable_mode_platforms` list of strings (default []), Nautobot Platform `name` values for which the SSoT jobs call Netmiko enable mode. All unlisted Platforms run commands with enable mode disabled.
+- `platform_map` (dictionary), mapping of an **auto-detected** Netmiko platform to the **Nautobot Platform name** of your Platform. The dictionary should be in the format:
     ```python
     {
-      <Netmiko Platform>: <Nautobot Slug>
+      <Netmiko Platform>: <Nautobot Platform Name>
     }
     ```
 - `onboarding_extensions_map` (dictionary), mapping of a NAPALM driver name to the loadable Python module used as an onboarding extension. The dictionary should be in the format:
@@ -129,6 +130,9 @@ PLUGINS_CONFIG = {
     "default_ip_status": "Active",
     "default_device_role": "leaf",
     "skip_device_type_on_update": True,
+    "netmiko_enable_mode_platforms": ["cisco_c2960"],
   }
 }
 ```
+
+`netmiko_enable_mode_platforms` is an optional allow-list of Nautobot Platform `name` values and is disabled by default (`[]`). For a Platform with name `cisco_c2960` and Netmiko mapping `cisco_ios`, enable mode is selected with `["cisco_c2960"]`, not `["cisco_ios"]`. The Platform name `cisco_c2960` is matched independently from the Netmiko mapping `cisco_ios`, so two Platform names can share that mapping and still receive independent enable-mode policies. Generated values such as `cisco-c2960_4784` are natural slugs, not configuration keys, and should not be configured. `Sync Devices` auto-detection has no selected Platform name, so enable mode remains disabled for that path. Configure the username, login password, and enable password through the existing Nautobot Secrets mechanisms; this list only selects which platforms use enable mode.

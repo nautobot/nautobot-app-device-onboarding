@@ -35,15 +35,24 @@ def guess_netmiko_device_type(
 
 
 def _set_inventory(
-    host_ip: str, platform: str, port: str, username: str, password: str
+    host_ip: str, platform: str, port: str, username: str, password: str, secret: str = None
 ) -> Tuple[Dict, Union[Exception, None]]:
     """Construct Nornir Inventory."""
     inv = {}
     if platform:
         platform_guess_exc = None
+        platform_name = platform.name
         platform = platform.network_driver_mappings.get("netmiko")
     else:
+        platform_name = None
         platform, platform_guess_exc = guess_netmiko_device_type(host_ip, username, password, port)
+
+    # Merge secret with NETMIKO_EXTRAS
+    extras = {**NETMIKO_EXTRAS}
+    if secret:
+        extras["secret"] = secret
+
+    host_data = {"nautobot_platform_name": platform_name} if platform_name else {}
     host = Host(
         name=host_ip,
         hostname=host_ip,
@@ -51,6 +60,7 @@ def _set_inventory(
         username=username,
         password=password,
         platform=platform,
+        data=host_data,
         connection_options={
             "netmiko": ConnectionOptions(
                 hostname=host_ip,
@@ -58,7 +68,7 @@ def _set_inventory(
                 username=username,
                 password=password,
                 platform=platform,
-                extras=NETMIKO_EXTRAS,
+                extras=extras,
             )
         },
     )

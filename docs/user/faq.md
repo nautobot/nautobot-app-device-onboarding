@@ -43,6 +43,9 @@ By default, the plugin uses the credentials defined in the main `nautobot_config
 
 For the SSoT onboarding based jobs SecretGroups are required.
 
+!!! info
+    **Enable Secret:** For devices requiring privileged mode (e.g., Cisco IOS), see the [Enable Secret Support](app_getting_started.md#enable-secret-support) section in Getting Started for configuration details on Secrets Groups and the `netmiko_enable_mode_platforms` setting.
+
 ## How can I update the optional arguments for NAPALM?
 
 Optional arguments are often used to define a `secret` for Cisco devices and other connection parameters. By default, app will use a provided secret for each onboarding task. If such one is not provided, for tasks with a declared platform app will read optional arguments from Nautobot if they are defined at a platform level. Last resort of optional arguments is `settings.NAPALM_ARGS`.

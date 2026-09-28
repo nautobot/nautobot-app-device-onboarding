@@ -118,6 +118,20 @@ def _get_commands_to_run(yaml_parsed_info, sync_vlans, sync_vrfs, sync_cables, s
     return deduplicate_command_list(all_commands)
 
 
+def _get_nautobot_platform_name(task: Task) -> str | None:
+    """Return the Nautobot Platform name associated with a task host."""
+    platform_name = task.host.data.get("nautobot_platform_name")
+    if platform_name is not None:
+        return platform_name
+    return getattr(getattr(task.host.data.get("obj"), "platform", None), "name", None)
+
+
+def _platform_requires_enable_mode(platform_name: str | None) -> bool:
+    """Return whether Netmiko enable mode is configured for a Nautobot Platform name."""
+    enabled_platforms = settings.PLUGINS_CONFIG["nautobot_device_onboarding"].get("netmiko_enable_mode_platforms", [])
+    return platform_name is not None and platform_name in enabled_platforms
+
+
 @close_threaded_db_connections
 def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_getter_job: str, logger, nautobot_job):
     """Run commands specified in PLATFORM_COMMAND_MAP."""
@@ -125,6 +139,12 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
         return Result(host=task.host, result=f"{task.host.name} has no platform set.", failed=True)
     if task.host.platform not in get_all_network_driver_mappings().keys() or not "cisco_wlc_ssh":
         return Result(host=task.host, result=f"{task.host.name} has a unsupported platform set.", failed=True)
+    platform_name = _get_nautobot_platform_name(task)
+    enable_mode = _platform_requires_enable_mode(platform_name)
+    if platform_name is not None:
+        logger.info(f"Nautobot Platform '{platform_name}' enable mode: {'enabled' if enable_mode else 'disabled'}")
+    else:
+        logger.info(f"Nautobot Platform unavailable; enable mode: {'enabled' if enable_mode else 'disabled'}")
     if not command_getter_yaml_data[task.host.platform].get(command_getter_job):
         return Result(
             host=task.host, result=f"{task.host.name} has missing definitions in command_mapper YAML file.", failed=True
@@ -160,6 +180,7 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
                 name=command["command"],
                 command_string=command["command"],
                 read_timeout=60,
+                enable=enable_mode,
                 **send_command_kwargs,
             )
             if nautobot_job.debug:
@@ -273,9 +294,9 @@ def netmiko_send_commands(task: Task, command_getter_yaml_data: Dict, command_ge
 
 
 @lru_cache(maxsize=None)
-def _parse_credentials(secrets_group: Union[SecretsGroup, None], logger: NornirLogger = None) -> Tuple[str, str]:
-    """Parse creds from either secretsgroup or settings, return tuple of username/password."""
-    username, password = None, None
+def _parse_credentials(secrets_group: Union[SecretsGroup, None], logger: NornirLogger = None) -> Tuple[str, str, str]:
+    """Parse creds from either secretsgroup or settings, return tuple of username/password/secret."""
+    username, password, secret = None, None, None
     if secrets_group:
         logger.info(f"Parsing credentials from Secrets Group: {secrets_group.name}")
         try:
@@ -291,9 +312,23 @@ def _parse_credentials(secrets_group: Union[SecretsGroup, None], logger: NornirL
             pass
         except Exception as e:  # pylint: disable=broad-exception-caught
             logger.debug(f"Error processing credentials from secrets group {secrets_group.name}: {e}")
+        # Try to get the enable secret (TYPE_SECRET)
+        try:
+            secret = secrets_group.get_secret_value(
+                access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
+                secret_type=SecretsGroupSecretTypeChoices.TYPE_SECRET,
+            )
+        except SecretsGroupAssociation.DoesNotExist:
+            pass
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logger.debug(f"Error processing enable secret from secrets group {secrets_group.name}: {e}")
     else:
         username = settings.NAPALM_USERNAME
         password = settings.NAPALM_PASSWORD
+
+    # Fallback: use password as secret if not defined
+    if not secret:
+        secret = password
 
     missing_creds = []
     for cred_var in ["username", "password"]:
@@ -301,7 +336,7 @@ def _parse_credentials(secrets_group: Union[SecretsGroup, None], logger: NornirL
             missing_creds.append(cred_var)
     if missing_creds:
         logger.debug(f"Missing credentials for {missing_creds}")
-    return (username, password)
+    return (username, password, secret)
 
 
 def sync_devices_command_getter(job, log_level):
@@ -328,7 +363,7 @@ def sync_devices_command_getter(job, log_level):
                 secrets_group = values["secrets_group"]
                 if secrets_group:
                     # The _parse_credentials function is cached. This prevents unnecessary repeat calls to secrets providers.
-                    username, password = _parse_credentials(secrets_group, logger=logger)
+                    username, password, secret = _parse_credentials(secrets_group, logger=logger)
                     if not username or not password:
                         logger.error(f"Unable to onboard {values['original_ip_address']}, failed to parse credentials")
                     single_host_inventory_constructed, exc_info = _set_inventory(
@@ -337,6 +372,7 @@ def sync_devices_command_getter(job, log_level):
                         port=values["port"],
                         username=username,
                         password=password,
+                        secret=secret,
                     )
                     if exc_info:
                         logger.error(
