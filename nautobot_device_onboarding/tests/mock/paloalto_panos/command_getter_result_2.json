@@ -1,0 +1,479 @@
+{
+    "show system info": "[\n    {\n        \"hostname\": \"panos-fw-02\",\n        \"ip_address\": \"192.0.2.10\",\n        \"mac_address\": \"00:00:5e:00:53:16\",\n        \"model\": \"PA-3410\",\n        \"netmask\": \"255.255.255.0\",\n        \"serial\": \"001234567890\",\n        \"version\": \"11.1.10-h1\"\n    }\n]",
+    "show interface management | match Name": {
+        "raw": "Name: Management Interface"
+    },
+    "show interface all": [
+        {
+            "interface": "ethernet1/8",
+            "id": "23",
+            "speed": "1000",
+            "duplex": "full",
+            "state": "up",
+            "fec": "auto",
+            "mac_address": "02:00:00:00:01:17",
+            "vsys": "",
+            "zone": "",
+            "forwarding": "",
+            "vlan_id": "",
+            "ip_address": []
+        },
+        {
+            "interface": "ethernet1/13",
+            "id": "28",
+            "speed": "1000",
+            "duplex": "full",
+            "state": "up",
+            "fec": "auto",
+            "mac_address": "02:00:00:00:01:1c",
+            "vsys": "",
+            "zone": "",
+            "forwarding": "",
+            "vlan_id": "",
+            "ip_address": []
+        },
+        {
+            "interface": "ethernet1/19",
+            "id": "34",
+            "speed": "10000",
+            "duplex": "full",
+            "state": "up",
+            "fec": "auto",
+            "mac_address": "02:00:00:00:01:22",
+            "vsys": "",
+            "zone": "",
+            "forwarding": "",
+            "vlan_id": "",
+            "ip_address": []
+        },
+        {
+            "interface": "ethernet1/20",
+            "id": "35",
+            "speed": "10000",
+            "duplex": "full",
+            "state": "up",
+            "fec": "auto",
+            "mac_address": "02:00:00:00:01:23",
+            "vsys": "",
+            "zone": "",
+            "forwarding": "",
+            "vlan_id": "",
+            "ip_address": []
+        },
+        {
+            "interface": "ae1",
+            "id": "64",
+            "speed": "[n/a]",
+            "duplex": "[n/a]",
+            "state": "up",
+            "fec": "[n/a]",
+            "mac_address": "02:00:00:00:01:40",
+            "vsys": "",
+            "zone": "",
+            "forwarding": "",
+            "vlan_id": "",
+            "ip_address": []
+        },
+        {
+            "interface": "ha1-a",
+            "id": "5",
+            "speed": "1000",
+            "duplex": "full",
+            "state": "up",
+            "fec": "ukn",
+            "mac_address": "00:00:5e:00:53:b5",
+            "vsys": "",
+            "zone": "",
+            "forwarding": "",
+            "vlan_id": "",
+            "ip_address": []
+        },
+        {
+            "interface": "loopback",
+            "id": "3",
+            "speed": "[n/a]",
+            "duplex": "[n/a]",
+            "state": "up",
+            "fec": "[n/a]",
+            "mac_address": "02:00:00:00:01:03",
+            "vsys": "",
+            "zone": "",
+            "forwarding": "",
+            "vlan_id": "",
+            "ip_address": []
+        },
+        {
+            "interface": "ethernet1/8",
+            "id": "23",
+            "speed": "",
+            "duplex": "",
+            "state": "",
+            "fec": "",
+            "mac_address": "",
+            "vsys": "3",
+            "zone": "ZONE_TECH",
+            "forwarding": "vr:DEFAULT",
+            "vlan_id": "0",
+            "ip_address": [
+                "198.51.100.101/28"
+            ]
+        },
+        {
+            "interface": "ethernet1/8.81",
+            "id": "300",
+            "speed": "",
+            "duplex": "",
+            "state": "",
+            "fec": "",
+            "mac_address": "",
+            "vsys": "3",
+            "zone": "ZONE_TECH",
+            "forwarding": "vr:DEFAULT",
+            "vlan_id": "81",
+            "ip_address": [
+                "198.51.100.29/27"
+            ]
+        },
+        {
+            "interface": "ethernet1/8.82",
+            "id": "301",
+            "speed": "",
+            "duplex": "",
+            "state": "",
+            "fec": "",
+            "mac_address": "",
+            "vsys": "3",
+            "zone": "ZONE_TECH",
+            "forwarding": "vr:DEFAULT",
+            "vlan_id": "82",
+            "ip_address": [
+                "198.51.100.29/27"
+            ]
+        },
+        {
+            "interface": "ethernet1/13",
+            "id": "28",
+            "speed": "",
+            "duplex": "",
+            "state": "",
+            "fec": "",
+            "mac_address": "",
+            "vsys": "5",
+            "zone": "ZONE_UNTRUST",
+            "forwarding": "vr:GUEST",
+            "vlan_id": "0",
+            "ip_address": [
+                "203.0.113.14/29",
+                "203.0.113.14/29"
+            ]
+        },
+        {
+            "interface": "ethernet1/13.81",
+            "id": "304",
+            "speed": "",
+            "duplex": "",
+            "state": "",
+            "fec": "",
+            "mac_address": "",
+            "vsys": "2",
+            "zone": "ZONE_TRUST",
+            "forwarding": "vr:DEFAULT",
+            "vlan_id": "81",
+            "ip_address": [
+                "198.51.100.28/27"
+            ]
+        },
+        {
+            "interface": "ethernet1/13.82",
+            "id": "305",
+            "speed": "",
+            "duplex": "",
+            "state": "",
+            "fec": "",
+            "mac_address": "",
+            "vsys": "2",
+            "zone": "ZONE_TRUST",
+            "forwarding": "vr:DEFAULT",
+            "vlan_id": "82",
+            "ip_address": [
+                "198.51.100.28/27"
+            ]
+        },
+        {
+            "interface": "ae1",
+            "id": "64",
+            "speed": "",
+            "duplex": "",
+            "state": "",
+            "fec": "",
+            "mac_address": "",
+            "vsys": "2",
+            "zone": "",
+            "forwarding": "N/A",
+            "vlan_id": "0",
+            "ip_address": [
+                "N/A"
+            ]
+        },
+        {
+            "interface": "ae1.99",
+            "id": "267",
+            "speed": "",
+            "duplex": "",
+            "state": "",
+            "fec": "",
+            "mac_address": "",
+            "vsys": "2",
+            "zone": "ZONE_TRUST",
+            "forwarding": "vr:DEFAULT",
+            "vlan_id": "99",
+            "ip_address": [
+                "203.0.113.94/28"
+            ]
+        },
+        {
+            "interface": "ha1-a",
+            "id": "5",
+            "speed": "",
+            "duplex": "",
+            "state": "",
+            "fec": "",
+            "mac_address": "",
+            "vsys": "0",
+            "zone": "",
+            "forwarding": "ha",
+            "vlan_id": "0",
+            "ip_address": [
+                "203.0.113.1/30"
+            ]
+        },
+        {
+            "interface": "loopback",
+            "id": "3",
+            "speed": "",
+            "duplex": "",
+            "state": "",
+            "fec": "",
+            "mac_address": "",
+            "vsys": "1",
+            "zone": "",
+            "forwarding": "N/A",
+            "vlan_id": "0",
+            "ip_address": [
+                "N/A"
+            ]
+        },
+        {
+            "interface": "loopback.99",
+            "id": "297",
+            "speed": "",
+            "duplex": "",
+            "state": "",
+            "fec": "",
+            "mac_address": "",
+            "vsys": "2",
+            "zone": "ZONE_TRUST",
+            "forwarding": "vr:DEFAULT",
+            "vlan_id": "0",
+            "ip_address": [
+                "198.51.100.99/32"
+            ]
+        }
+    ],
+    "show interface hardware": [
+        {
+            "interface": "ethernet1/8",
+            "id": "23",
+            "speed": "1000/full",
+            "duplex": "up",
+            "state": "auto",
+            "mac_address": "02:00:00:00:01:17"
+        },
+        {
+            "interface": "ethernet1/13",
+            "id": "28",
+            "speed": "1000/full",
+            "duplex": "up",
+            "state": "auto",
+            "mac_address": "02:00:00:00:01:1c"
+        },
+        {
+            "interface": "ethernet1/19",
+            "id": "34",
+            "speed": "10000/full",
+            "duplex": "up",
+            "state": "auto",
+            "mac_address": "02:00:00:00:01:22"
+        },
+        {
+            "interface": "ethernet1/20",
+            "id": "35",
+            "speed": "10000/full",
+            "duplex": "up",
+            "state": "auto",
+            "mac_address": "02:00:00:00:01:23"
+        },
+        {
+            "interface": "ae1",
+            "id": "64",
+            "speed": "[n/a]",
+            "duplex": "[n/a]",
+            "state": "up/[n/a]",
+            "mac_address": "02:00:00:00:01:40"
+        },
+        {
+            "interface": "ha1-a",
+            "id": "5",
+            "speed": "1000/full",
+            "duplex": "up",
+            "state": "ukn",
+            "mac_address": "00:00:5e:00:53:b5"
+        },
+        {
+            "interface": "loopback",
+            "id": "3",
+            "speed": "[n/a]",
+            "duplex": "[n/a]",
+            "state": "up/[n/a]",
+            "mac_address": "02:00:00:00:01:03"
+        }
+    ],
+    "show interface logical": [
+        {
+            "interface": "ethernet1/8",
+            "id": "23",
+            "vsys": "3",
+            "zone": "ZONE_TECH",
+            "forwarding": "vr:DEFAULT",
+            "vlan_id": "0",
+            "ip_address": "198.51.100.101/28"
+        },
+        {
+            "interface": "ethernet1/8.81",
+            "id": "300",
+            "vsys": "3",
+            "zone": "ZONE_TECH",
+            "forwarding": "vr:DEFAULT",
+            "vlan_id": "81",
+            "ip_address": "198.51.100.29/27"
+        },
+        {
+            "interface": "ethernet1/8.82",
+            "id": "301",
+            "vsys": "3",
+            "zone": "ZONE_TECH",
+            "forwarding": "vr:DEFAULT",
+            "vlan_id": "82",
+            "ip_address": "198.51.100.29/27"
+        },
+        {
+            "interface": "ethernet1/13",
+            "id": "28",
+            "vsys": "5",
+            "zone": "ZONE_UNTRUST",
+            "forwarding": "vr:GUEST",
+            "vlan_id": "0",
+            "ip_address": "203.0.113.14/29"
+        },
+        {
+            "interface": "ethernet1/13.81",
+            "id": "304",
+            "vsys": "2",
+            "zone": "ZONE_TRUST",
+            "forwarding": "vr:DEFAULT",
+            "vlan_id": "81",
+            "ip_address": "198.51.100.28/27"
+        },
+        {
+            "interface": "ethernet1/13.82",
+            "id": "305",
+            "vsys": "2",
+            "zone": "ZONE_TRUST",
+            "forwarding": "vr:DEFAULT",
+            "vlan_id": "82",
+            "ip_address": "198.51.100.28/27"
+        },
+        {
+            "interface": "ae1",
+            "id": "64",
+            "vsys": "2",
+            "zone": "",
+            "forwarding": "N/A",
+            "vlan_id": "0",
+            "ip_address": "N/A"
+        },
+        {
+            "interface": "ae1.99",
+            "id": "267",
+            "vsys": "2",
+            "zone": "ZONE_TRUST",
+            "forwarding": "vr:DEFAULT",
+            "vlan_id": "99",
+            "ip_address": "203.0.113.94/28"
+        },
+        {
+            "interface": "ha1-a",
+            "id": "5",
+            "vsys": "0",
+            "zone": "",
+            "forwarding": "ha",
+            "vlan_id": "0",
+            "ip_address": "203.0.113.1/30"
+        },
+        {
+            "interface": "loopback",
+            "id": "3",
+            "vsys": "1",
+            "zone": "",
+            "forwarding": "N/A",
+            "vlan_id": "0",
+            "ip_address": "N/A"
+        },
+        {
+            "interface": "loopback.99",
+            "id": "297",
+            "vsys": "2",
+            "zone": "ZONE_TRUST",
+            "forwarding": "vr:DEFAULT",
+            "vlan_id": "0",
+            "ip_address": "198.51.100.99/32"
+        }
+    ],
+    "show lacp aggregate-ethernet all": [
+        {
+            "bundle_name": "ae1",
+            "member_interface": [
+                "ethernet1/19",
+                "ethernet1/20"
+            ],
+            "bundled": [
+                "yes",
+                "yes"
+            ],
+            "receive_state": [
+                "Current",
+                "Current"
+            ],
+            "mux_state": [
+                "Tx_Rx",
+                "Tx_Rx"
+            ],
+            "selection_state": [
+                "Selected",
+                "Selected"
+            ],
+            "status": "Enabled",
+            "mode": "Active",
+            "rate": "Slow",
+            "max_port": "8",
+            "fast_failover": "Disabled",
+            "pre_negotiation": "Enabled",
+            "local_system_priority": "32768",
+            "local_system_mac": "02:00:5e:00:81:01",
+            "local_key": "64",
+            "partner_system_priority": "65534",
+            "partner_system_mac": "02:00:5e:00:99:00",
+            "partner_key": "113"
+        }
+    ]
+}

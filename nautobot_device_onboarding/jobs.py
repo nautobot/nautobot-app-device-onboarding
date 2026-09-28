@@ -848,6 +848,7 @@ class DeviceOnboardingTroubleshootingJob(Job):
                 logging={"enabled": False},
                 inventory={
                     "plugin": "empty-inventory",
+                    "options": {"logger": logger},
                 },
             ) as nornir_obj:
                 for entered_ip in ip_addresses:

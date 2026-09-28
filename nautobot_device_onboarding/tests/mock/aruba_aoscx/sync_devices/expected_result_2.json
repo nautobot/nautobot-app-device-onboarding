@@ -3,5 +3,7 @@
     "hostname": "AOSCXSW01",
     "mask_length": 25,
     "mgmt_interface": "vlan100",
-    "serial": "TW41LZ788B"
+    "modules": [],
+    "serial": "TW41LZ788B",
+    "virtual_chassis": []
 }
