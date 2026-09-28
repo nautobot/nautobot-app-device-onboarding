@@ -1,5 +1,6 @@
 """Test Cisco Support adapter."""
 
+import copy
 from unittest.mock import MagicMock, patch
 
 from django.contrib.contenttypes.models import ContentType
@@ -313,6 +314,15 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
             diffsync_obj = self.sync_network_data_adapter.get("software_version_to_device", unique_id)
             self.assertEqual(device_data["software_version"], diffsync_obj.software_version__version)
 
+    def test_load_config_context(self):
+        """Network adapter loads collected config_context blobs into the diffsync store."""
+        self.job.command_getter_result["demo-cisco-1"]["config_context"] = {
+            "ip_ospf_neighbors": [{"neighbor_id": "1.1.1.1"}]
+        }
+        self.sync_network_data_adapter.load_config_context()
+        diffsync_obj = self.sync_network_data_adapter.get("config_context", "demo-cisco-1")
+        self.assertEqual(diffsync_obj.data, {"ip_ospf_neighbors": [{"neighbor_id": "1.1.1.1"}]})
+
 
 class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
     """Test SyncNetworkDataNautobotAdapter class."""
@@ -513,3 +523,98 @@ class SyncNetworkDataNautobotAdapterTestCase(TransactionTestCase):
                 self.sync_network_data_adapter.primary_ips[device.id],
                 device.primary_ip.id if device.primary_ip else None,
             )
+
+    def test_load_config_context_reads_only_managed_slice(self):
+        """Nautobot adapter loads only the device_onboarding slice, ignoring other top-level keys."""
+        device = Device.objects.get(name="demo-cisco-1")
+        device.local_config_context_data = {
+            "ntp": ["192.0.2.1"],
+            "device_onboarding": {"ip_ospf_neighbors": [{"neighbor_id": "1.1.1.1"}]},
+        }
+        device.validated_save()
+
+        self.sync_network_data_adapter.load_config_context()
+
+        diffsync_obj = self.sync_network_data_adapter.get("config_context", "demo-cisco-1")
+        self.assertEqual(diffsync_obj.data, {"ip_ospf_neighbors": [{"neighbor_id": "1.1.1.1"}]})
+
+    def test_config_context_create_preserves_unmanaged_keys(self):
+        """Writing the managed slice leaves sibling and other top-level keys intact."""
+        device = Device.objects.get(name="demo-cisco-1")
+        device.local_config_context_data = {
+            "ntp": ["192.0.2.1"],
+            "other_tool": {"foo": "bar"},
+            "device_onboarding": {"stale": True},
+        }
+        device.validated_save()
+
+        new_data = {"ip_ospf_neighbors": [{"neighbor_id": "2.2.2.2"}]}
+        self.sync_network_data_adapter.config_context.create(
+            self.sync_network_data_adapter, {"device__name": "demo-cisco-1"}, {"data": new_data}
+        )
+
+        device.refresh_from_db()
+        self.assertEqual(device.local_config_context_data["ntp"], ["192.0.2.1"])
+        self.assertEqual(device.local_config_context_data["other_tool"], {"foo": "bar"})
+        self.assertEqual(device.local_config_context_data["device_onboarding"], new_data)
+
+    def test_config_context_delete_is_noop(self):
+        """delete() never strips a device's config context (additive-only contract)."""
+        self.job.logger = MagicMock()
+        device = Device.objects.get(name="demo-cisco-1")
+        device.local_config_context_data = {"device_onboarding": {"x": 1}}
+        device.validated_save()
+
+        instance = self.sync_network_data_adapter.config_context(
+            adapter=self.sync_network_data_adapter, device__name="demo-cisco-1", data={"x": 1}
+        )
+        self.assertIsNone(instance.delete())
+
+        device.refresh_from_db()
+        self.assertEqual(device.local_config_context_data["device_onboarding"], {"x": 1})
+
+    def test_config_context_diff_is_idempotent(self):
+        """A device whose managed slice already equals the collected data produces no diff (no perpetual update)."""
+        blob = {
+            "ip_ospf_neighbors": [
+                {"neighbor_id": "1.1.1.1", "ip_address": "10.0.12.2", "interface": "Ethernet0/1", "state": "FULL/  -"}
+            ],
+            "snmp_communities": [{"community": "snmp-server community public RO"}],
+        }
+        device = Device.objects.get(name="demo-cisco-1")
+        device.local_config_context_data = {"device_onboarding": blob}
+        device.validated_save()
+
+        # Deep-copy the shared fixture before seeding the source side so the mutation doesn't leak.
+        self.job.command_getter_result = copy.deepcopy(sync_network_data_fixture.sync_network_mock_data_valid)
+        self.job.command_getter_result["demo-cisco-1"]["config_context"] = copy.deepcopy(blob)
+
+        nautobot_adapter = self.sync_network_data_adapter
+        nautobot_adapter.load_config_context()
+        network_adapter = SyncNetworkDataNetworkAdapter(job=self.job, sync=None)
+        network_adapter.load_config_context()
+
+        # Source (network) already equals destination (Nautobot): the config_context model must not diff.
+        diff = network_adapter.diff_to(nautobot_adapter)
+        self.assertFalse(diff.has_diffs(), diff.summary())
+
+    def test_config_context_update_replaces_managed_slice(self):
+        """update() swaps the managed slice for the latest collected data and leaves sibling keys intact."""
+        device = Device.objects.get(name="demo-cisco-1")
+        device.local_config_context_data = {
+            "manual": "keep",
+            "device_onboarding": {"ip_ospf_neighbors": [{"neighbor_id": "1.1.1.1"}]},
+        }
+        device.validated_save()
+
+        new_data = {"ip_ospf_neighbors": [{"neighbor_id": "9.9.9.9"}]}
+        instance = self.sync_network_data_adapter.config_context(
+            adapter=self.sync_network_data_adapter,
+            device__name="demo-cisco-1",
+            data={"ip_ospf_neighbors": [{"neighbor_id": "1.1.1.1"}]},
+        )
+        instance.update({"data": new_data})
+
+        device.refresh_from_db()
+        self.assertEqual(device.local_config_context_data["device_onboarding"], new_data)
+        self.assertEqual(device.local_config_context_data["manual"], "keep")

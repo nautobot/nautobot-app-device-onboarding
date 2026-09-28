@@ -25,6 +25,13 @@ NETMIKO_TO_NAPALM_STATIC = {
 # This is used in the new SSoT based jobs. Soon PYATS should be supported.
 SUPPORTED_COMMAND_PARSERS = ["textfsm", "ttp"]
 
+# Sync Network Data config-context enrichment. Supplemental show-command data declared under
+# the `config_context` mapper key is written to a Device's local config context under a single
+# managed top-level key (local_config_context_data[MANAGED_OWNER_KEY]), so this app only ever
+# reads/diffs/writes its own slice and never collides with other config-context sources
+# (Git data sources, manual entry, or scoped ConfigContext objects).
+MANAGED_OWNER_KEY = "device_onboarding"
+
 # This should potentially be removed and used nautobot core directly choices.
 # from nautobot.dcim.choices import InterfaceTypeChoices
 # InterfaceTypeChoices.as_dict() doesn't directly fit yet.  Seems like maybe netutils needs the "human readible" nb choices.
