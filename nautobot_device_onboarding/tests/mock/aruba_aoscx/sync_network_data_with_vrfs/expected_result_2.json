@@ -432,7 +432,7 @@
             "link_status": false,
             "mac_address": "4c:d5:87:ab:cc:40",
             "mtu": "",
-            "type": "1000base-t",
+            "type": "virtual",
             "vrf": {
                 "name": "default"
             }
@@ -450,7 +450,7 @@
             "link_status": true,
             "mac_address": "4c:d5:87:ab:cc:40",
             "mtu": "",
-            "type": "1000base-t",
+            "type": "virtual",
             "vrf": {
                 "name": "default"
             }
