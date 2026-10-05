@@ -1,0 +1,1 @@
+Aligned the HP ProCurve command mapper with the ntc-templates 9.2.0 parser schema (`vlan_name`, `subnet_mask`, `vlan_untagged`, `vlan_tagged`, and `pid` column names) and raised the `ntc-templates` minimum to `>=9.2.0`.

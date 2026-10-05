@@ -613,7 +613,7 @@ files = [
     {file = "cffi-2.1.1-cp315-cp315t-win_arm64.whl", hash = "sha256:d18e5ac0f2f03f4f518d3e23db0f0cad7faa1da8620e9c09461d443bbf6e6692"},
     {file = "cffi-2.1.1.tar.gz", hash = "sha256:dd31f52ea1086513bb9df30f8fcee9b8918323ae067a3d5b78bc826a000712be"},
 ]
-markers = {main = "platform_python_implementation != \"PyPy\"", dev = "python_version >= \"3.11\" and platform_python_implementation != \"PyPy\""}
+markers = {main = "platform_python_implementation != \"PyPy\"", dev = "platform_python_implementation != \"PyPy\" and python_version >= \"3.11\""}
 
 [package.dependencies]
 pycparser = {version = "*", markers = "implementation_name != \"PyPy\""}
@@ -4805,7 +4805,7 @@ description = "Cross-platform lib for process and system monitoring."
 optional = false
 python-versions = ">=3.6"
 groups = ["dev"]
-markers = "python_version >= \"3.11\" and sys_platform != \"emscripten\" and sys_platform != \"cygwin\""
+markers = "sys_platform != \"emscripten\" and sys_platform != \"cygwin\" and python_version >= \"3.11\""
 files = [
     {file = "psutil-7.2.2-cp313-cp313t-macosx_10_13_x86_64.whl", hash = "sha256:2edccc433cbfa046b980b0df0171cd25bcaeb3a68fe9022db0979e7aa74a826b"},
     {file = "psutil-7.2.2-cp313-cp313t-macosx_11_0_arm64.whl", hash = "sha256:e78c8603dcd9a04c7364f1a3e670cea95d51ee865e4efb3556a3a63adef958ea"},
@@ -4972,7 +4972,7 @@ files = [
     {file = "pycparser-3.0-py3-none-any.whl", hash = "sha256:b727414169a36b7d524c1c3e31839a521725078d7b2ff038656844266160a992"},
     {file = "pycparser-3.0.tar.gz", hash = "sha256:600f49d217304a5902ac3c37e1281c9fe94e4d0489de643a9504c5cdfdfc6b29"},
 ]
-markers = {main = "implementation_name != \"PyPy\" and platform_python_implementation != \"PyPy\"", dev = "python_version >= \"3.11\" and platform_python_implementation != \"PyPy\" and implementation_name != \"PyPy\""}
+markers = {main = "platform_python_implementation != \"PyPy\" and implementation_name != \"PyPy\"", dev = "platform_python_implementation != \"PyPy\" and implementation_name != \"PyPy\" and python_version >= \"3.11\""}
 
 [[package]]
 name = "pydantic"
@@ -7447,4 +7447,4 @@ all = []
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.15"
-content-hash = "1c27269b3920985c3068ea14ca705defc0e22f0f003ed9f2ababc130a483b88a"
+content-hash = "2e0d64ac86dbf4cfb89267273f3f041adbb5be6bc70e588b2d4444825be3f758"
