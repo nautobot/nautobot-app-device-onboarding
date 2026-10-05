@@ -671,6 +671,10 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
             device__name=hostname,
             status__name=self.job.interface_status.name,
             type=interface_data["type"],
+            # `port_type` is only produced by command mappers that have been updated to report it
+            # (currently aruba_aoscx). Other platforms' interface_data dicts won't have the key yet,
+            # so fall back to an empty string rather than raising a KeyError.
+            port_type=interface_data.get("port_type", ""),
             mac_address=self._process_mac_address(mac_address=interface_data["mac_address"]),
             mtu=interface_data["mtu"] if interface_data["mtu"] else "1500",
             description=interface_data["description"],

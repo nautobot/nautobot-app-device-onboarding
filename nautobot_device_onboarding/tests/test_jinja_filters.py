@@ -15,6 +15,7 @@ from nautobot_device_onboarding.jinja_filters import (
     interface_status_to_bool,
     key_exist_or_default,
     map_interface_type,
+    map_port_type,
     nxos_switchport_mode_to_nautobot_interface_mode,
     parse_junos_ip_address,
     remove_fqdn,
@@ -31,6 +32,27 @@ class TestJinjaFilters(unittest.TestCase):
     def test_map_interface_type_valid_key(self):
         """Map interface type to a Nautobot type."""
         self.assertEqual(map_interface_type("ethernet"), "1000base-t")
+
+    def test_map_port_type_default(self):
+        """Unmatched values return an empty string, not 'other'."""
+        self.assertEqual(map_port_type("foo"), "")
+
+    def test_map_port_type_copper_fallback(self):
+        """A fixed copper Ethernet port (no transceiver) maps to an RJ-45 (8p8c) connector."""
+        self.assertEqual(map_port_type("ethernet"), "8p8c")
+
+    def test_map_port_type_sfp_plus_sr(self):
+        """An SFP+SR optical transceiver maps to an LC connector."""
+        self.assertEqual(map_port_type("sfp+sr"), "lc")
+
+    def test_map_port_type_qsfp_plus_sr4(self):
+        """A QSFP+SR4 parallel-optics transceiver maps to an MPO connector."""
+        self.assertEqual(map_port_type("qsfp+sr4"), "mpo")
+
+    def test_map_port_type_direct_attach_copper(self):
+        """A direct-attach copper (DAC/twinax) cable has no separate connector to report."""
+        self.assertEqual(map_port_type("sfp+da3"), "")
+        self.assertEqual(map_port_type("SFP+DA3"), "")
 
     def test_extract_prefix_valid_without_slash(self):
         """Extract the prefix length from the IP/Prefix. E.g 192.168.1.1/24."""
