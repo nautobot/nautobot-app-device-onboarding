@@ -1,7 +1,5 @@
 """Diffsync models."""
 
-from typing import Optional
-
 from diffsync import DiffSyncModel
 from django.core.exceptions import (
     MultipleObjectsReturned,
@@ -55,21 +53,21 @@ class SyncDevicesDevice(DiffSyncModel):
     location__name: str
     serial: str
 
-    device_type__model: Optional[str] = None
-    device_type__manufacturer__name: Optional[str] = None
-    mask_length: Optional[int] = None
-    primary_ip4__host: Optional[str] = None
-    primary_ip4__status__name: Optional[str] = None
-    platform__name: Optional[str] = None
-    role__name: Optional[str] = None
-    secrets_group__name: Optional[str] = None
-    status__name: Optional[str] = None
-    tenant__name: Optional[str] = None
-    virtual_chassis__name: Optional[str] = None
-    vc_position: Optional[int] = None
-    vc_priority: Optional[int] = None
+    device_type__model: str | None = None
+    device_type__manufacturer__name: str | None = None
+    mask_length: int | None = None
+    primary_ip4__host: str | None = None
+    primary_ip4__status__name: str | None = None
+    platform__name: str | None = None
+    role__name: str | None = None
+    secrets_group__name: str | None = None
+    status__name: str | None = None
+    tenant__name: str | None = None
+    virtual_chassis__name: str | None = None
+    vc_position: int | None = None
+    vc_priority: int | None = None
 
-    interfaces: Optional[list] = None
+    interfaces: list | None = None
 
     @classmethod
     def _get_or_create_device(cls, adapter, ids, attrs):
@@ -283,9 +281,9 @@ class SyncDevicesDevice(DiffSyncModel):
 
         if attrs.get("device_type__model") or attrs.get("device_type__manufacturer__name"):
             target_platform = new_platform or device.platform
-            device.device_type = DeviceType.objects.get(
+            device.device_type = DeviceType.objects.get_or_create(
                 model=attrs.get("device_type__model") or device.device_type.model,
-                manufacturer=target_platform.manufacturer if target_platform else None,
+                manufacturer=target_platform.manufacturer if target_platform else device.device_type.manufacturer,
             )
         if new_platform:
             device.platform = new_platform
@@ -348,34 +346,33 @@ class SyncDevicesDevice(DiffSyncModel):
                 )
         elif self.virtual_chassis__name and self.name != self.virtual_chassis__name:
             pass  # VC member — skip IP/interface updates
-        else:
-            # Update the primary ip address only
-            # This edge case is unlikely to occur. A device with primary_ip that doesn't mach what was entered
-            # on the job form should be filtered out of the sync and later caught by _get_or_create_device()
-            if attrs.get("primary_ip4__host"):
-                if not attrs.get("mask_length"):
-                    attrs["mask_length"] = device.primary_ip4.mask_length
+        # Update the primary ip address only
+        # This edge case is unlikely to occur. A device with primary_ip that doesn't mach what was entered
+        # on the job form should be filtered out of the sync and later caught by _get_or_create_device()
+        elif attrs.get("primary_ip4__host"):
+            if not attrs.get("mask_length"):
+                attrs["mask_length"] = device.primary_ip4.mask_length
 
-                job_form_attrs = self.adapter.job.ip_address_inventory[attrs["primary_ip4__host"]]
-                new_ip_address = diffsync_utils.get_or_create_ip_address(
-                    host=attrs["primary_ip4__host"],
-                    mask_length=attrs["mask_length"],
-                    namespace=job_form_attrs["namespace"],
-                    default_ip_status=job_form_attrs["ip_address_status"],
-                    default_prefix_status=job_form_attrs["ip_address_status"],
-                    job=self.adapter.job,
-                )
-                self._remove_old_interface_assignment(device=device, ip_address=device.primary_ip4)
-                existing_interface = self._get_or_create_interface(
-                    adapter=self.adapter,
-                    device=device,
-                    ip_address=new_ip_address,
-                    interface_name=self.get_attrs()["interfaces"][0],
-                )
-                self._get_or_create_ip_address_to_interface(
-                    adapter=self.adapter, ip_address=new_ip_address, interface=existing_interface
-                )
-                device.primary_ip4 = new_ip_address
+            job_form_attrs = self.adapter.job.ip_address_inventory[attrs["primary_ip4__host"]]
+            new_ip_address = diffsync_utils.get_or_create_ip_address(
+                host=attrs["primary_ip4__host"],
+                mask_length=attrs["mask_length"],
+                namespace=job_form_attrs["namespace"],
+                default_ip_status=job_form_attrs["ip_address_status"],
+                default_prefix_status=job_form_attrs["ip_address_status"],
+                job=self.adapter.job,
+            )
+            self._remove_old_interface_assignment(device=device, ip_address=device.primary_ip4)
+            existing_interface = self._get_or_create_interface(
+                adapter=self.adapter,
+                device=device,
+                ip_address=new_ip_address,
+                interface_name=self.get_attrs()["interfaces"][0],
+            )
+            self._get_or_create_ip_address_to_interface(
+                adapter=self.adapter, ip_address=new_ip_address, interface=existing_interface
+            )
+            device.primary_ip4 = new_ip_address
         try:
             device.validated_save()
             if device.virtual_chassis and self.name == self.virtual_chassis__name:
@@ -421,8 +418,8 @@ class SyncDevicesPlatform(NautobotModel):
 
     name: str
 
-    network_driver: Optional[str] = None
-    manufacturer__name: Optional[str] = None
+    network_driver: str | None = None
+    manufacturer__name: str | None = None
 
 
 class SyncDevicesVirtualChassis(DiffSyncModel):
@@ -435,7 +432,7 @@ class SyncDevicesVirtualChassis(DiffSyncModel):
 
     name: str
 
-    master__name: Optional[str] = None
+    master__name: str | None = None
 
     @classmethod
     def create(cls, adapter, ids, attrs):
