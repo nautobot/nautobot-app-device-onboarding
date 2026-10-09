@@ -1,0 +1,7 @@
+<group name="port_descriptions" method="table">
+{{ ignore("Port Descriptions on Slot .*") }}
+{{ ignore("=+") }}
+{{ ignore("Port Id.*") }}
+{{ ignore("-+") }}
+{{ port_id | default('') }}          {{ description | ORPHRASE }}
+</group>
