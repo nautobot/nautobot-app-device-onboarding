@@ -1310,11 +1310,14 @@
     "show interface | begin lag": [],
     "show vrf": [
         {
-            "vrf_name": "default",
-            "vrf_interfaces": [
-                "vlan1",
-                "vlan100"
-            ]
+            "vrf": "default",
+            "interface": "vlan1",
+            "status": "up"
+        },
+        {
+            "vrf": "default",
+            "interface": "vlan100",
+            "status": "up"
         }
     ],
     "show lldp neighbor-info detail": [
@@ -1330,5 +1333,7 @@
             "neighbor_interface": ""
         }
     ],
-    "show interface mgmt": []
+    "show interface mgmt": [],
+    "show vsf detail": [],
+    "show module": []
 }

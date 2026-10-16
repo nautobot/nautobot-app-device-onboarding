@@ -47,6 +47,16 @@ class CommandGetterProcessor(BaseLoggingProcessor):
         Returns:
             None
         """
+        try:
+            self._process_result(task, host, result)
+        finally:
+            # The base processor releases the exception frames a failed task pins and
+            # reclaims the file descriptors held by driver reference cycles. Run it on
+            # every path, including the early return in `_process_result`.
+            super().task_instance_completed(task, host, result)
+
+    def _process_result(self, task: Task, host: Host, result: MultiResult) -> None:
+        """Parse the command output for `host` into the data the SSoT adapters consume."""
         parsed_command_outputs = {}
         self.logger.info(
             f"Task instance completed. Task Name: {task.name}",
@@ -134,3 +144,4 @@ class TroubleshootingProcessor(BaseLoggingProcessor):
         # [1:] because result 1 is the (network_send_commands ) task which runs all the subtask, it has no result.
         for res in result[1:]:
             self.data[res.name] = res.result
+        super().task_instance_completed(task, host, result)

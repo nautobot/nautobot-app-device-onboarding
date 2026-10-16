@@ -3,5 +3,7 @@
     "hostname": "SW-CORE",
     "mask_length": 24,
     "mgmt_interface": "vlan100",
-    "serial": "SG9BKN123V"
+    "modules": [],
+    "serial": "SG9BKN123V",
+    "virtual_chassis": []
 }
