@@ -1,0 +1,1 @@
+Added Aruba AOS-CX VSF (Virtual Switching Fabric) Virtual Chassis support for 6100 series switches, enabling auto-creation of child devices for non-conductor stack members.
