@@ -36,9 +36,20 @@ For the platforms where SSH auto-detection does not work, the user will need to:
 
 1. Select the platform in the job inputs form.
 
+### Platform Selection
+
+The `Sync Devices` job uses the first rule below that applies to a device to choose its Platform:
+
+1. If a Platform is selected in the job inputs form, or set with `platform_name` in the CSV file, the job uses that Platform.
+2. If an existing Platform's name is the auto-detected Netmiko driver (for example `cisco_ios`), the job uses that Platform.
+3. If an existing Platform's `Network driver` is the auto-detected Netmiko driver, the job uses that Platform. When more than one Platform has that `Network driver`, the job uses the first one ordered by name and logs a warning that names both Platforms.
+4. Otherwise, the job creates a new Platform. Its name and `Network driver` are the auto-detected Netmiko driver, and its Manufacturer is derived from the driver (for example `Cisco` from `cisco_ios`).
+
+The job does not change the name, `Network driver`, or Manufacturer of a Platform it finds with rule 2 or rule 3. For example, an existing Platform named `Cisco IOS` with a `Network driver` of `cisco_ios` is assigned to auto-detected `cisco_ios` devices, and the job does not create a second Platform named `cisco_ios`.
+
 ### IOS and Junos Auto-Created Platforms
 
-The Onboarding App will automatically create Platforms for vendor operating systems where platform auto-detection works. The picture below shows the details of auto-created Platforms for `cisco_ios` and `juniper_junos`.
+When rule 4 of [Platform Selection](#platform-selection) applies, the Onboarding App automatically creates Platforms for vendor operating systems where platform auto-detection works. The picture below shows the details of auto-created Platforms for `cisco_ios` and `juniper_junos`.
 
 ![cisco_ios_platform](../images/platform_cisco_ios_light.png#only-light){ .on-glb }
 ![cisco_ios_platform](../images/platform_cisco_ios_dark.png#only-dark){ .on-glb }

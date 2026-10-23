@@ -206,6 +206,37 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
         self.sync = sync
         self.device_data = None
         self.failed_ip_addresses = []
+        self.platform_names = set()
+        self.platforms_by_network_driver = {}
+
+    def _load_platform_lookups(self):
+        """Build in-memory lookups of existing Platforms by name and by network_driver."""
+        for platform in Platform.objects.select_related("manufacturer").order_by("name"):
+            self.platform_names.add(platform.name)
+            if not platform.network_driver:
+                continue
+            first_platform = self.platforms_by_network_driver.setdefault(platform.network_driver, platform)
+            if first_platform != platform:
+                self.job.logger.warning(
+                    "Platforms '%s' and '%s' share network driver '%s'; using the first.",
+                    first_platform.name,
+                    platform.name,
+                    platform.network_driver,
+                )
+
+    def _get_platform(self, ip_address):
+        """Return the existing Platform to use for a device, or None if a new Platform should be created.
+
+        A Platform supplied on the job form or CSV is used first. Otherwise, if no Platform is named after the
+        discovered network driver, an existing Platform with a matching `network_driver` is used.
+        """
+        form_platform = self.job.ip_address_inventory[ip_address].get("platform")
+        if form_platform:
+            return form_platform
+        network_driver = self.device_data[ip_address].get("network_driver")
+        if network_driver in self.platform_names:
+            return None
+        return self.platforms_by_network_driver.get(network_driver)
 
     def _handle_failed_devices(self, device_data):
         """
@@ -256,10 +287,10 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                 self.job.logger.debug(f"loading manufacturer data for {ip_address}")
             onboarding_manufacturer = None
             try:
-                form_platform = self.job.ip_address_inventory[ip_address].get("platform")
+                existing_platform = self._get_platform(ip_address)
                 manufacturer_name = (
-                    form_platform.manufacturer.name
-                    if form_platform and form_platform.manufacturer
+                    existing_platform.manufacturer.name
+                    if existing_platform and existing_platform.manufacturer
                     else self.device_data[ip_address]["manufacturer"]
                 )
                 onboarding_manufacturer = self.manufacturer(adapter=self, name=manufacturer_name)
@@ -281,6 +312,7 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
             onboarding_platform = None
             try:
                 form_platform = self.job.ip_address_inventory[ip_address].get("platform")
+                existing_platform = self._get_platform(ip_address)
                 if form_platform:
                     name = form_platform.name
                     manufacturer_name = (
@@ -289,6 +321,11 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                         else self.device_data[ip_address]["manufacturer"]
                     )
                     network_driver = form_platform.network_driver or self.device_data[ip_address]["network_driver"]
+                elif existing_platform:
+                    # Load the matched Platform with its stored values so the sync never updates it.
+                    name = existing_platform.name
+                    manufacturer_name = existing_platform.manufacturer.name if existing_platform.manufacturer else None
+                    network_driver = existing_platform.network_driver
                 else:
                     name = self.device_data[ip_address]["platform"]
                     manufacturer_name = self.device_data[ip_address]["manufacturer"]
@@ -316,10 +353,10 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                 self.job.logger.debug(f"loading device_type data for {ip_address}")
             onboarding_device_type = None
             try:
-                form_platform = self.job.ip_address_inventory[ip_address].get("platform")
+                existing_platform = self._get_platform(ip_address)
                 manufacturer_name = (
-                    form_platform.manufacturer.name
-                    if form_platform and form_platform.manufacturer
+                    existing_platform.manufacturer.name
+                    if existing_platform and existing_platform.manufacturer
                     else self.device_data[ip_address]["manufacturer"]
                 )
                 onboarding_device_type = self.device_type(
@@ -375,7 +412,10 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                 device_tenant = job_form_attrs["device_tenant"]
                 secrets_group = job_form_attrs["secrets_group"]
                 hostname = self.device_data[ip_address]["hostname"]
-                platform_name = platform.name if platform else self.device_data[ip_address]["platform"]
+                existing_platform = self._get_platform(ip_address)
+                platform_name = (
+                    existing_platform.name if existing_platform else self.device_data[ip_address]["platform"]
+                )
                 virtual_chassis_data = self.device_data[ip_address].get("virtual_chassis", [])
                 modules_data = self.device_data[ip_address].get("modules", [])
                 if isinstance(virtual_chassis_data, list) and len(virtual_chassis_data) > 1:
@@ -512,8 +552,8 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
                         adapter=self,
                         device_type__model=self.device_data[ip_address]["device_type"],
                         device_type__manufacturer__name=(
-                            platform.manufacturer.name
-                            if platform and platform.manufacturer
+                            existing_platform.manufacturer.name
+                            if existing_platform and existing_platform.manufacturer
                             else self.device_data[ip_address]["manufacturer"]
                         ),
                         location__name=location.name,
@@ -604,6 +644,7 @@ class SyncDevicesNetworkAdapter(diffsync.Adapter):
     def load(self):
         """Load network data."""
         self.execute_command_getter()
+        self._load_platform_lookups()
         self.load_manufacturers()
         self.load_platforms()
         self.load_device_types()

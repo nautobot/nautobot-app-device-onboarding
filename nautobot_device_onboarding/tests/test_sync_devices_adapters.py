@@ -215,6 +215,74 @@ class SyncDevicesNetworkAdapterTestCase(TransactionTestCase):
         diff_device_type = self.sync_devices_adapter.get("device_type", "PA-220__Palo Alto")
         self.assertEqual(diff_device_type.manufacturer__name, "Palo Alto")
 
+    def _load_discovered_arista_device(self, device_data):
+        """Load one auto-detected `arista_eos` device with no Platform supplied on the job form."""
+        device_data.return_value = {
+            "10.1.1.60": {
+                "hostname": "arista-1",
+                "serial": "SN-ARISTA-001",
+                "device_type": "DCS-7050",
+                "mgmt_interface": "Management1",
+                "manufacturer": "Arista",
+                "platform": "arista_eos",
+                "network_driver": "arista_eos",
+                "mask_length": 24,
+            },
+        }
+        self.job.debug = True
+        self.job.ip_address_inventory = {
+            "10.1.1.60": {
+                "location": self.testing_objects["location"],
+                "namespace": self.testing_objects["namespace"],
+                "port": 22,
+                "timeout": 30,
+                "update_devices_without_primary_ip": True,
+                "device_role": self.testing_objects["device_role"],
+                "device_status": self.testing_objects["status"],
+                "device_tenant": None,
+                "interface_status": self.testing_objects["status"],
+                "ip_address_status": self.testing_objects["status"],
+                "secrets_group": self.testing_objects["secrets_group"],
+                "platform": None,
+            },
+        }
+        network_adapter = SyncDevicesNetworkAdapter(job=self.job, sync=None)
+        network_adapter.load()
+        return network_adapter
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
+    def test_load_uses_existing_platform_matched_by_network_driver(self, device_data):
+        """A discovered network driver uses the existing Platform with that `network_driver` and never changes it."""
+        arista_mfr, _ = Manufacturer.objects.get_or_create(name="Arista Networks")
+        for manufacturer in (arista_mfr, None):
+            with self.subTest(manufacturer=manufacturer):
+                Platform.objects.filter(network_driver="arista_eos").delete()
+                Platform.objects.create(name="Arista EOS", network_driver="arista_eos", manufacturer=manufacturer)
+
+                network_adapter = self._load_discovered_arista_device(device_data)
+
+                diff_device = network_adapter.get(
+                    "device", f"{self.testing_objects['location'].name}__arista-1__SN-ARISTA-001"
+                )
+                self.assertEqual(diff_device.platform__name, "Arista EOS")
+
+                nautobot_adapter = SyncDevicesNautobotAdapter(job=self.job, sync=None)
+                nautobot_adapter.load()
+                platform_diff = network_adapter.diff_to(nautobot_adapter).dict().get("platform", {})
+                self.assertNotIn("Arista EOS", platform_diff)
+                self.assertNotIn("arista_eos", platform_diff)
+
+    @patch("nautobot_device_onboarding.diffsync.adapters.sync_devices_adapters.sync_devices_command_getter")
+    def test_load_uses_first_platform_by_name_when_network_driver_is_shared(self, device_data):
+        Platform.objects.create(name="Arista B", network_driver="arista_eos")
+        Platform.objects.create(name="Arista A", network_driver="arista_eos")
+
+        network_adapter = self._load_discovered_arista_device(device_data)
+
+        self.assertTrue(network_adapter.get("platform", "Arista A"))
+        with self.assertRaises(ObjectNotFound):
+            network_adapter.get("platform", "Arista B")
+
 
 class SyncDevicesNautobotAdapterTestCase(TransactionTestCase):
     """Test SyncDevicesNautobotAdapter class."""
