@@ -2,9 +2,12 @@
 
 import os
 import unittest
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import yaml
+from django.conf import settings
+from django.test import override_settings
 from nautobot.apps.testing import TransactionTestCase
 from nautobot.extras.choices import SecretsGroupAccessTypeChoices, SecretsGroupSecretTypeChoices
 from nautobot.extras.models import Secret, SecretsGroup, SecretsGroupAssociation
@@ -12,6 +15,7 @@ from netmiko.exceptions import NetmikoAuthenticationException, NetmikoTimeoutExc
 from nornir.core.exceptions import NornirSubTaskError
 from nornir.core.task import Result
 
+from nautobot_device_onboarding import NautobotDeviceOnboardingConfig
 from nautobot_device_onboarding.nornir_plays.command_getter import (
     _get_commands_to_run,
     _parse_credentials,
@@ -20,6 +24,76 @@ from nautobot_device_onboarding.nornir_plays.command_getter import (
 from nautobot_device_onboarding.nornir_plays.logger import NornirLogger
 
 MOCK_DIR = os.path.join("nautobot_device_onboarding", "tests", "mock")
+
+
+class TestNetmikoEnableModeConfiguration(unittest.TestCase):
+    """Test the Netmiko enable mode configuration defaults."""
+
+    def test_enable_mode_platforms_default_to_empty_list(self):
+        """Ensure enable mode remains opt-in by default."""
+        self.assertEqual(NautobotDeviceOnboardingConfig.default_settings["netmiko_enable_mode_platforms"], [])
+
+    def _run_single_raw_command(self, platform, enabled_platforms, host_data=None):
+        task = MagicMock()
+        task.host.name = "test-host"
+        task.host.hostname = "198.51.100.1"
+        task.host.port = 22
+        task.host.platform = platform
+        task.host.data = host_data or {}
+        task.host.data["platform_parsing_info"] = {}
+        task.results = [MagicMock()]
+        task.run.return_value.result = "show version output"
+        job = SimpleNamespace(connectivity_test=False, debug=False, fail_job_on_task_failure=False)
+        yaml_data = {
+            platform: {"sync_devices": {"hostname": {"commands": {"command": "show version", "parser": "raw"}}}}
+        }
+        logger = MagicMock(name="logger")
+
+        with override_settings(
+            PLUGINS_CONFIG={
+                **settings.PLUGINS_CONFIG,
+                "nautobot_device_onboarding": {"netmiko_enable_mode_platforms": enabled_platforms},
+            }
+        ):
+            with patch(
+                "nautobot_device_onboarding.nornir_plays.command_getter.get_all_network_driver_mappings",
+                return_value={platform: {}},
+            ):
+                with patch(
+                    "nautobot_device_onboarding.nornir_plays.command_getter._get_commands_to_run",
+                    return_value=[{"command": "show version", "parser": "raw"}],
+                ):
+                    netmiko_send_commands(task, yaml_data, "sync_devices", logger, job)
+        return task.run.call_args.kwargs["enable"], logger
+
+    def test_empty_allow_list_disables_enable_mode(self):
+        enable, _ = self._run_single_raw_command("cisco_ios", [])
+        self.assertFalse(enable)
+
+    def test_listed_nautobot_platform_name_enables_enable_mode(self):
+        enable, logger = self._run_single_raw_command(
+            "cisco_ios", ["cisco_c2960"], {"nautobot_platform_name": "cisco_c2960"}
+        )
+        self.assertTrue(enable)
+        logger.info.assert_called_once_with("Nautobot Platform 'cisco_c2960' enable mode: enabled")
+
+    def test_unlisted_nautobot_platform_name_sharing_transport_disables_enable_mode(self):
+        enable, logger = self._run_single_raw_command(
+            "cisco_ios", ["cisco_c2960"], {"nautobot_platform_name": "cisco_c3850"}
+        )
+        self.assertFalse(enable)
+        logger.info.assert_called_once_with("Nautobot Platform 'cisco_c3850' enable mode: disabled")
+
+    def test_orm_inventory_platform_name_enables_enable_mode(self):
+        device = SimpleNamespace(platform=SimpleNamespace(name="cisco_c2960"))
+        enable, logger = self._run_single_raw_command("cisco_ios", ["cisco_c2960"], {"obj": device})
+        self.assertTrue(enable)
+        logger.info.assert_called_once_with("Nautobot Platform 'cisco_c2960' enable mode: enabled")
+
+    def test_missing_nautobot_platform_name_disables_enable_mode(self):
+        enable, logger = self._run_single_raw_command("cisco_ios", ["cisco_c2960"], {})
+        self.assertFalse(enable)
+        logger.info.assert_called_once_with("Nautobot Platform unavailable; enable mode: disabled")
 
 
 class TestGetCommandsToRun(unittest.TestCase):
@@ -254,6 +328,9 @@ class TestSSHCredParsing(TransactionTestCase):
         password_secret, _ = Secret.objects.get_or_create(
             name="password", provider="environment-variable", parameters={"variable": "DEVICE_PASS"}
         )
+        enable_secret, _ = Secret.objects.get_or_create(
+            name="enable_secret", provider="environment-variable", parameters={"variable": "DEVICE_SECRET"}
+        )
         self.secrets_group, _ = SecretsGroup.objects.get_or_create(name="test secrets group")
         SecretsGroupAssociation.objects.get_or_create(
             secrets_group=self.secrets_group,
@@ -267,15 +344,47 @@ class TestSSHCredParsing(TransactionTestCase):
             access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
             secret_type=SecretsGroupSecretTypeChoices.TYPE_PASSWORD,
         )
+        # Create a separate secrets group with enable secret for testing
+        self.secrets_group_with_secret, _ = SecretsGroup.objects.get_or_create(name="test secrets group with enable")
+        SecretsGroupAssociation.objects.get_or_create(
+            secrets_group=self.secrets_group_with_secret,
+            secret=username_secret,
+            access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
+            secret_type=SecretsGroupSecretTypeChoices.TYPE_USERNAME,
+        )
+        SecretsGroupAssociation.objects.get_or_create(
+            secrets_group=self.secrets_group_with_secret,
+            secret=password_secret,
+            access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
+            secret_type=SecretsGroupSecretTypeChoices.TYPE_PASSWORD,
+        )
+        SecretsGroupAssociation.objects.get_or_create(
+            secrets_group=self.secrets_group_with_secret,
+            secret=enable_secret,
+            access_type=SecretsGroupAccessTypeChoices.TYPE_GENERIC,
+            secret_type=SecretsGroupSecretTypeChoices.TYPE_SECRET,
+        )
 
     @patch.dict(os.environ, {"DEVICE_USER": "admin", "DEVICE_PASS": "worstP$$w0rd"})
     def test_parse_user_and_pass(self):
-        """Extract correct user and password from secretgroup env-vars"""
+        """Extract correct user and password from secretgroup env-vars, enable secret falls back to password"""
         assert _parse_credentials(
             secrets_group=self.secrets_group, logger=NornirLogger(job_result=MagicMock(), log_level=1)
         ) == (
             "admin",
             "worstP$$w0rd",
+            "worstP$$w0rd",  # enable secret falls back to password when not defined
+        )
+
+    @patch.dict(os.environ, {"DEVICE_USER": "admin", "DEVICE_PASS": "worstP$$w0rd", "DEVICE_SECRET": "enableP$$w0rd"})
+    def test_parse_user_pass_and_secret(self):
+        """Extract correct user, password, and enable secret from secretgroup env-vars"""
+        assert _parse_credentials(
+            secrets_group=self.secrets_group_with_secret, logger=NornirLogger(job_result=MagicMock(), log_level=1)
+        ) == (
+            "admin",
+            "worstP$$w0rd",
+            "enableP$$w0rd",
         )
 
     @patch.dict(os.environ, {"DEVICE_USER": "admin"})
@@ -284,18 +393,19 @@ class TestSSHCredParsing(TransactionTestCase):
         mock_job_result = MagicMock()
         assert _parse_credentials(
             secrets_group=self.secrets_group, logger=NornirLogger(job_result=mock_job_result, log_level=1)
-        ) == ("admin", None)
+        ) == ("admin", None, None)  # secret is also None when password is None
         mock_job_result.log.assert_called_with("Missing credentials for ['password']", level_choice="debug")
 
     @patch(
         "nautobot_device_onboarding.nornir_plays.command_getter.settings",
-        MagicMock(NAPALM_USERNAME="napalm_admin", NAPALM_PASSWORD="napalamP$$w0rd"),
+        MagicMock(NAPALM_USERNAME="napalm_admin", NAPALM_PASSWORD="napalmP$$w0rd"),
     )
     def test_parse_napalm_creds(self):
-        """When no secrets group is provided, fallback to napalm creds"""
+        """When no secrets group is provided, fallback to napalm creds, enable secret falls back to password"""
         assert _parse_credentials(secrets_group=None, logger=NornirLogger(job_result=None, log_level=1)) == (
             "napalm_admin",
-            "napalamP$$w0rd",
+            "napalmP$$w0rd",
+            "napalmP$$w0rd",  # enable secret falls back to password
         )
 
 

@@ -338,3 +338,8 @@ GEMINI.md
 .ollama/
 # https://github.com/kirodotdev/Kiro
 .kiro/
+
+# Superpowers planning files
+.superpowers/
+docs/superpowers/
+
