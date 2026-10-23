@@ -35,24 +35,28 @@ class TestJinjaFilters(unittest.TestCase):
 
     def test_map_port_type_default(self):
         """Unmatched values return an empty string, not 'other'."""
-        self.assertEqual(map_port_type("foo"), "")
+        self.assertEqual(map_port_type("foo", "aruba_aoscx"), "")
+
+    def test_map_port_type_unsupported_platform(self):
+        """A platform absent from the port type map returns an empty string."""
+        self.assertEqual(map_port_type("ethernet", "foo"), "")
 
     def test_map_port_type_copper_fallback(self):
         """A fixed copper Ethernet port (no transceiver) maps to an RJ-45 (8p8c) connector."""
-        self.assertEqual(map_port_type("ethernet"), "8p8c")
+        self.assertEqual(map_port_type("ethernet", "aruba_aoscx"), "8p8c")
 
     def test_map_port_type_sfp_plus_sr(self):
         """An SFP+SR optical transceiver maps to an LC connector."""
-        self.assertEqual(map_port_type("sfp+sr"), "lc")
+        self.assertEqual(map_port_type("sfp+sr", "aruba_aoscx"), "lc")
 
     def test_map_port_type_qsfp_plus_sr4(self):
         """A QSFP+SR4 parallel-optics transceiver maps to an MPO connector."""
-        self.assertEqual(map_port_type("qsfp+sr4"), "mpo")
+        self.assertEqual(map_port_type("qsfp+sr4", "aruba_aoscx"), "mpo")
 
     def test_map_port_type_direct_attach_copper(self):
         """A direct-attach copper (DAC/twinax) cable has no separate connector to report."""
-        self.assertEqual(map_port_type("sfp+da3"), "")
-        self.assertEqual(map_port_type("SFP+DA3"), "")
+        self.assertEqual(map_port_type("sfp+da3", "aruba_aoscx"), "")
+        self.assertEqual(map_port_type("SFP+DA3", "aruba_aoscx"), "")
 
     def test_extract_prefix_valid_without_slash(self):
         """Extract the prefix length from the IP/Prefix. E.g 192.168.1.1/24."""

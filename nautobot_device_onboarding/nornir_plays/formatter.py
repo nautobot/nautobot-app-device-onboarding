@@ -143,7 +143,7 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
                 _, current_field_post = extract_and_post_process(
                     command_outputs_dict[show_command_dict["command"]],
                     show_command_dict,
-                    {"obj": host.name, "original_host": host.name},
+                    {"obj": host.name, "original_host": host.name, "platform": host.platform},
                     final_iterable_type,
                     job_debug,
                 )
@@ -168,7 +168,7 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
         for show_command_dict in loop_commands:
             final_iterable_type = show_command_dict.get("iterable_type")
             if field_data.get("root_key"):
-                original_context = {"obj": host.name, "original_host": host.name}
+                original_context = {"obj": host.name, "original_host": host.name, "platform": host.platform}
                 merged_context = {**original_context, **get_context_from_pre_processor}
                 root_key_pre, root_key_post = extract_and_post_process(
                     command_outputs_dict[show_command_dict["command"]],
@@ -189,7 +189,12 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
                         # a list of data that we want to become our nested key. E.g. current_key "Ethernet1/1"
                         # These get passed into the render context for the template render to allow nested jpaths to use
                         # the current_key context for more flexible jpath queries.
-                        original_context = {"current_key": current_key, "obj": host.name, "original_host": host.name}
+                        original_context = {
+                            "current_key": current_key,
+                            "obj": host.name,
+                            "original_host": host.name,
+                            "platform": host.platform,
+                        }
                         merged_context = {**original_context, **get_context_from_pre_processor}
                         _, current_key_post = extract_and_post_process(
                             command_outputs_dict[show_command_dict["command"]],
@@ -200,7 +205,7 @@ def perform_data_extraction(host, command_info_dict, command_outputs_dict, job_d
                         )
                         result_dict[field_nesting[0]][current_key][field_nesting[1]] = current_key_post
                 else:
-                    original_context = {"obj": host.name, "original_host": host.name}
+                    original_context = {"obj": host.name, "original_host": host.name, "platform": host.platform}
                     merged_context = {**original_context, **get_context_from_pre_processor}
                     _, current_field_post = extract_and_post_process(
                         command_outputs_dict[show_command_dict["command"]],
