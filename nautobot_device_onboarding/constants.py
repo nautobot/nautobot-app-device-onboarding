@@ -86,6 +86,12 @@ ARUBA_AOSCX_INTERFACE_PORT_TYPE_MAP_STATIC = {
     "ethernet": "8p8c",
 }
 
+# Port type maps keyed by platform, consumed by map_port_type() in jinja_filters.py.
+# A platform absent from this dict gets an empty port_type rather than a guess.
+PORT_TYPE_MAP_STATIC = {
+    "aruba_aoscx": ARUBA_AOSCX_INTERFACE_PORT_TYPE_MAP_STATIC,
+}
+
 # The git repository data source content identifier for custom command mappers.
 ONBOARDING_COMMAND_MAPPERS_CONTENT_IDENTIFIER = "nautobot_device_onboarding.onboarding_command_mappers"
 
