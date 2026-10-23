@@ -9,8 +9,8 @@ from netutils.ip import is_ip
 from netutils.vlan import vlanconfig_to_list
 
 from nautobot_device_onboarding.constants import (
-    ARUBA_AOSCX_INTERFACE_PORT_TYPE_MAP_STATIC,
     INTERFACE_TYPE_MAP_STATIC,
+    PORT_TYPE_MAP_STATIC,
 )
 
 # https://docs.nautobot.com/projects/core/en/stable/development/apps/api/platform-features/jinja2-filters/
@@ -25,19 +25,24 @@ def map_interface_type(interface_type):
 
 
 @library.filter
-def map_port_type(port_type):
-    """Map a raw Aruba AOS-CX transceiver/port indicator to a Nautobot port_type (physical connector).
+def map_port_type(port_type, platform):
+    """Map a raw transceiver/port indicator to a Nautobot port_type (physical connector).
 
-    Unlike `map_interface_type`, an unmatched value returns an empty string rather than
-    "other": Nautobot rejects `port_type` on virtual/wireless interfaces, so staying silent
-    is safer than guessing on interfaces this mapping wasn't meant to cover.
+    The mapping is selected per platform through PORT_TYPE_MAP_STATIC, so that new platforms
+    can be added without changing this filter.
+
+    Unlike `map_interface_type`, an unmatched value or an unsupported platform returns an
+    empty string rather than "other": Nautobot rejects `port_type` on virtual/wireless
+    interfaces, so staying silent is safer than guessing on interfaces this mapping wasn't
+    meant to cover.
     """
     normalized = (port_type or "").lower()
-    if "da" in normalized:
+    if platform == "aruba_aoscx" and "da" in normalized:
         # Direct-attach copper (DAC/twinax) cable assembly, e.g. "sfp+da3": the cable is
         # permanently attached to the module, so there's no separate connector to report.
         return ""
-    return ARUBA_AOSCX_INTERFACE_PORT_TYPE_MAP_STATIC.get(normalized, "")
+    platform_map = PORT_TYPE_MAP_STATIC.get(platform, {})
+    return platform_map.get(normalized, "")
 
 
 @library.filter
