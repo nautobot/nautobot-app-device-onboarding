@@ -17,6 +17,7 @@ from nautobot_device_onboarding.jinja_filters import (
     map_interface_type,
     nxos_switchport_mode_to_nautobot_interface_mode,
     parse_junos_ip_address,
+    parse_speed_to_kbps,
     remove_fqdn,
 )
 
@@ -290,3 +291,33 @@ class TestJinjaFilters(unittest.TestCase):
     def test_remove_fqdn(self):
         """Remove the FQDN from the hostname."""
         self.assertEqual(remove_fqdn("foo.example.com"), "foo")
+
+    def test_parse_speed_to_kbps_mbps(self):
+        """Convert a device-reported Mb/s speed string into Kbps."""
+        self.assertEqual(parse_speed_to_kbps("1000 Mb/s"), 1000000)
+
+    def test_parse_speed_to_kbps_10gbps(self):
+        """Convert a device-reported 10 Gb speed string into Kbps."""
+        self.assertEqual(parse_speed_to_kbps("10000 Mb/s"), 10000000)
+
+    def test_parse_speed_to_kbps_zero(self):
+        """A reported speed of 0 is still a valid, parsable speed."""
+        self.assertEqual(parse_speed_to_kbps("0 Mb/s"), 0)
+
+    def test_parse_speed_to_kbps_empty_string(self):
+        """An empty speed string (e.g. VLAN SVIs on AOS-CX) returns None."""
+        self.assertIsNone(parse_speed_to_kbps(""))
+
+    def test_parse_speed_to_kbps_whitespace_only(self):
+        """A whitespace-only speed string returns None."""
+        self.assertIsNone(parse_speed_to_kbps("   "))
+
+    def test_parse_speed_to_kbps_none(self):
+        """A None speed value returns None."""
+        self.assertIsNone(parse_speed_to_kbps(None))
+
+    @unittest.mock.patch("nautobot_device_onboarding.jinja_filters.logger")
+    def test_parse_speed_to_kbps_unparseable_value_logs_warning(self, mock_logger):
+        """An unparseable speed value returns None and logs a warning instead of raising."""
+        self.assertIsNone(parse_speed_to_kbps("not-a-speed"))
+        mock_logger.warning.assert_called_once()
