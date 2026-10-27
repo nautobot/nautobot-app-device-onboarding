@@ -59,6 +59,7 @@ class TestTransformNoGitRepo(TestCase):
             "aruba_os",
             "brocade_fastiron",
             "hp_procurve",
+            "mikrotik_routeros",
         ]
         self.assertEqual(sorted(default_mappers), list(sorted(command_mappers.keys())))
 

@@ -1,0 +1,25 @@
+<doc>
+Generic RouterOS "print detail" parser. Records are matched on their number, flags and ";;;" comment,
+and the key=value attributes are expanded by a macro so attribute order or new attributes between
+RouterOS releases (v6/v7) do not drop records. Attribute names use "_" instead of "-".
+</doc>
+
+<macro>
+def routeros_attributes(data):
+    import re
+    attributes = data.pop("attributes", "")
+    for key, quoted, plain in re.findall(r'([a-z0-9.-]+)=(?:"([^"]*)"|(\S*))', attributes):
+        data.setdefault(key.replace("-", "_"), quoted if quoted else plain)
+    data["comment"] = " ".join(data.get("comment", "").split())
+    data.setdefault("flags", "")
+    return data
+</macro>
+
+<group name="vlans*" macro="routeros_attributes">
+{{ number | re("[ \t]*[0-9]+") | strip | _start_ }} {{ flags | re("[A-Z](?:[A-Z ]*[A-Z])?") | replace(" ", "") }} ;;; {{ comment | re(".+") | joinmatches(" ") }}
+{{ number | re("[ \t]*[0-9]+") | strip | _start_ }} ;;; {{ comment | re(".+") | joinmatches(" ") }}
+{{ number | re("[ \t]*[0-9]+") | strip | _start_ }} {{ flags | re("[A-Z](?:[A-Z ]*[A-Z])?") | replace(" ", "") }} {{ attributes | re("[a-z0-9-]+=.*") | joinmatches(" ") }}
+{{ number | re("[ \t]*[0-9]+") | strip | _start_ }} {{ attributes | re("[a-z0-9-]+=.*") | joinmatches(" ") }}
+{{ attributes | re("[ \t]*[a-z0-9-]+=.*") | joinmatches(" ") }}
+{{ comment | re("[ \t]*[^=\n]+") | joinmatches(" ") }}
+</group>

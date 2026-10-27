@@ -1,0 +1,267 @@
+---
+# Commands are issued without the leading "/" so TTP template names stay valid filenames;
+# RouterOS accepts this from the root menu and ntc-templates treats the "/" as optional.
+# Verified against RouterOS 6.49.23 and 7.24.3 output. "print detail" and "key: value" output is
+# parsed with the order-independent TTP templates in parsers/ttp because attributes and formats
+# change between releases (e.g. 7.x adds a VRF column to "ip address print").
+sync_devices:
+  pre_processor:
+    board_name:
+      commands:
+        - command: "system resource print"
+          parser: "ttp"
+          jpath: "[0].system[?key=='board-name'].value"
+          iterable_type: "str"
+    license_id:
+      commands:
+        - command: "system license print"
+          parser: "ttp"
+          # CHR reports a system-id, RouterBOARDs a software-id.
+          jpath: "[0].system[?key=='system-id' || key=='software-id'].value"
+          iterable_type: "str"
+  hostname:
+    commands:
+      # "system identity print" wraps names containing spaces one character per line on 7.x.
+      - command: ":put [/system identity get name]"
+        parser: "raw"
+        jpath: "raw"
+        post_processor: "{{ obj | trim }}"
+        iterable_type: "str"
+  serial:
+    commands:
+      - command: "system routerboard print"
+        parser: "textfsm"
+        jpath: "[*].serial_number"
+        # CHR/x86 have no RouterBOARD serial, fall back to the license id.
+        post_processor: "{% if obj and obj[0] %}{{ obj[0] }}{% else %}{{ license_id }}{% endif %}"
+        iterable_type: "str"
+  device_type:
+    commands:
+      - command: "system routerboard print"
+        parser: "textfsm"
+        jpath: "[*].hardware_model"
+        # CHR/x86 report "routerboard: no" without a model, fall back to the resource board-name.
+        post_processor: "{% if obj and obj[0] %}{{ obj[0] }}{% else %}{{ board_name }}{% endif %}"
+        iterable_type: "str"
+  mgmt_interface:
+    commands:
+      - command: "ip address print detail"
+        parser: "ttp"
+        jpath: "[0].addresses[?starts_with(address, '{{ obj }}/')].interface"
+        iterable_type: "str"
+  mask_length:
+    commands:
+      - command: "ip address print detail"
+        parser: "ttp"
+        jpath: "[0].addresses[?starts_with(address, '{{ obj }}/')].address"
+        post_processor: "{% if obj %}{{ obj[0].split('/') | last }}{% endif %}"
+        iterable_type: "int"
+sync_network_data:
+  pre_processor:
+    license_id:
+      commands:
+        - command: "system license print"
+          parser: "ttp"
+          jpath: "[0].system[?key=='system-id' || key=='software-id'].value"
+          iterable_type: "str"
+    hostname:
+      commands:
+        - command: ":put [/system identity get name]"
+          parser: "raw"
+          jpath: "raw"
+          post_processor: "{{ obj | trim }}"
+          iterable_type: "str"
+    physical_ports:
+      commands:
+        - command: "interface print detail"
+          parser: "ttp"
+          jpath: "[0].interfaces[?type=='ether'].name"
+          # A dict, so a single port is not collapsed into a plain string.
+          post_processor: "{% set result = {} %}{% for port in obj %}{% set _ = result.update({port: true}) %}{% endfor %}{{ result | tojson }}"
+          iterable_type: "dict"
+    vlan_subinterfaces:
+      commands:
+        - command: "interface vlan print detail"
+          parser: "ttp"
+          jpath: "[0].vlans[*].{parent: interface, vid: vlan_id}"
+          iterable_type: "list"
+    bridge_vlans:
+      commands:
+        - command: "interface bridge vlan print detail"
+          parser: "ttp"
+          # current-* include the dynamic entries RouterOS adds for port PVIDs.
+          jpath: "[0].bridge_vlans[*].{vids: vlan_ids, tagged: current_tagged, untagged: current_untagged}"
+          iterable_type: "list"
+    v6_vrfs:
+      commands:
+        - command: "ip route vrf print"
+          parser: "ttp"
+          # RouterOS 6.x only; 7.x reports the VRF on each interface instead.
+          jpath: "[0].vrfs[*].{name: routing_mark, interfaces: interfaces}"
+          iterable_type: "list"
+  serial:
+    commands:
+      - command: "system routerboard print"
+        parser: "textfsm"
+        jpath: "[*].serial_number"
+        post_processor: "{% if obj and obj[0] %}{{ obj[0] }}{% else %}{{ license_id }}{% endif %}"
+        iterable_type: "str"
+  interfaces:
+    root_key: true
+    commands:
+      - command: "interface print detail"
+        parser: "ttp"
+        # Dynamic interfaces (PPP/L2TP sessions etc.) come and go, and 7.x VRFs show up as interfaces.
+        jpath: "[0].interfaces[?!contains(flags, 'D') && type!='vrf'].name"
+        post_processor: "{% set result={} %}{% for interface in obj %}{{ result.update({interface: {}}) or '' }}{% endfor %}{{ result | tojson }}"
+  interfaces__type:
+    commands:
+      - command: "interface print detail"
+        parser: "ttp"
+        jpath: "[0].interfaces[?name=='{{ current_key }}'].type"
+        post_processor: |
+          {% set if_type = obj | first %}
+          {% set name = current_key | lower %}
+          {% if if_type == 'ether' %}
+          {% if name.startswith('qsfp28') %}
+          {{-'100gbase-x-qsfp28'-}}
+          {% elif name.startswith('qsfpplus') %}
+          {{-'40gbase-x-qsfpp'-}}
+          {% elif name.startswith('sfp28') %}
+          {{-'25gbase-x-sfp28'-}}
+          {% elif name.startswith('sfp-sfpplus') or name.startswith('sfpplus') %}
+          {{-'10gbase-x-sfpp'-}}
+          {% elif name.startswith('sfp') %}
+          {{-'1000base-x-sfp'-}}
+          {% else %}
+          {{-'1000base-t'-}}
+          {% endif %}
+          {% else %}
+          {{-{'bridge': 'bridge', 'bond': 'lag', 'vlan': 'virtual', 'loopback': 'virtual', 'vrrp': 'virtual', 'veth': 'virtual', 'lte': 'lte',
+              'gre-tunnel': 'tunnel', 'gre6-tunnel': 'tunnel', 'eoip-tunnel': 'tunnel', 'eoipv6-tunnel': 'tunnel', 'ipip-tunnel': 'tunnel',
+              'ipipv6-tunnel': 'tunnel', '6to4-tunnel': 'tunnel', 'vxlan': 'tunnel', 'wg': 'tunnel', 'pppoe-out': 'tunnel', 'pptp-out': 'tunnel',
+              'l2tp-out': 'tunnel', 'sstp-out': 'tunnel', 'ovpn-out': 'tunnel'}.get(if_type, 'other')-}}
+          {% endif %}
+        iterable_type: "str"
+  interfaces__ip_addresses:
+    commands:
+      - command: "ip address print detail"
+        parser: "ttp"
+        jpath: "[0].addresses[?interface=='{{ current_key }}'].{address: address, flags: flags}"
+        # Skip disabled (X) and invalid (I) addresses.
+        post_processor: |
+          {% set result = [] %}
+          {% for entry in obj %}
+            {% if 'X' not in entry['flags'] and 'I' not in entry['flags'] %}
+              {% set _ = result.append({'ip_address': entry['address'].split('/') | first, 'prefix_length': entry['address'].split('/') | last}) %}
+            {% endif %}
+          {% endfor %}
+          {{ result | tojson }}
+        iterable_type: "list"
+  interfaces__mtu:
+    commands:
+      - command: "interface print detail"
+        parser: "ttp"
+        jpath: "[0].interfaces[?name=='{{ current_key }}'].{mtu: mtu, actual_mtu: actual_mtu}"
+        # Bridges and some tunnels report mtu=auto, actual-mtu is the effective value.
+        post_processor: "{% set entry = obj | first %}{% if entry['actual_mtu'] %}{{ entry['actual_mtu'] }}{% elif entry['mtu'] | string | int(0) %}{{ entry['mtu'] }}{% else %}{{ '1500' }}{% endif %}"
+        iterable_type: "str"
+  interfaces__mac_address:
+    commands:
+      - command: "interface print detail"
+        parser: "ttp"
+        jpath: "[0].interfaces[?name=='{{ current_key }}'].mac_address"
+        iterable_type: "str"
+  interfaces__description:
+    commands:
+      - command: "interface print detail"
+        parser: "ttp"
+        jpath: "[0].interfaces[?name=='{{ current_key }}'].comment"
+        iterable_type: "str"
+  interfaces__link_status:
+    commands:
+      - command: "interface print detail"
+        parser: "ttp"
+        jpath: "[0].interfaces[?name=='{{ current_key }}'].flags"
+        post_processor: "{{ 'R' in obj | first }}"
+  interfaces__802.1Q_mode:
+    commands:
+      - command: "interface print detail"
+        parser: "ttp"
+        jpath: "[0].interfaces[?name=='{{ current_key }}'].name"
+        # Tagged: parent of VLAN interfaces or tagged bridge VLAN member. Access: untagged bridge member only.
+        post_processor: |
+          {%- set ns = namespace(tagged=false, untagged=false) -%}
+          {%- for vlan in vlan_subinterfaces if vlan['parent'] == current_key -%}{%- set ns.tagged = true -%}{%- endfor -%}
+          {%- for vlan in bridge_vlans -%}
+            {%- if current_key in (vlan['tagged'] or '').split(',') -%}{%- set ns.tagged = true -%}{%- endif -%}
+            {%- if current_key in (vlan['untagged'] or '').split(',') -%}{%- set ns.untagged = true -%}{%- endif -%}
+          {%- endfor -%}
+          {%- if ns.tagged -%}{{- 'tagged' -}}{%- elif ns.untagged -%}{{- 'access' -}}{%- endif -%}
+        iterable_type: "str"
+  interfaces__lag:
+    commands:
+      - command: "interface bonding print detail"
+        parser: "ttp"
+        jpath: "[0].bonds[*].{name: name, slaves: slaves}"
+        post_processor: "{% for bond in obj %}{% if current_key in (bond['slaves'] or '').split(',') %}{{ bond['name'] }}{% endif %}{% endfor %}"
+        iterable_type: "str"
+  interfaces__vrf:
+    commands:
+      - command: "interface print detail"
+        parser: "ttp"
+        # 7.x prints vrf= on each interface, 6.x lists VRF member interfaces under "ip route vrf".
+        jpath: "[0].interfaces[?name=='{{ current_key }}'].vrf"
+        post_processor: |
+          {%- set ns = namespace(vrf=obj[0] if obj else '') -%}
+          {%- for vrf in v6_vrfs if current_key in (vrf['interfaces'] or '').split(',') -%}{%- set ns.vrf = vrf['name'] -%}{%- endfor -%}
+          {%- if ns.vrf and ns.vrf != 'main' -%}{{- {'name': ns.vrf} | tojson -}}{%- else -%}{{- {} | tojson -}}{%- endif -%}
+        iterable_type: "dict"
+  interfaces__tagged_vlans:
+    commands:
+      - command: "interface print detail"
+        parser: "ttp"
+        jpath: "[0].interfaces[?name=='{{ current_key }}'].name"
+        # RouterOS has no global VLAN names, so use the same VLANxxxx naming as get_vlan_data.
+        post_processor: |
+          {%- set vids = [] -%}
+          {%- for vlan in vlan_subinterfaces if vlan['parent'] == current_key -%}{%- set _ = vids.append(vlan['vid'] | int) -%}{%- endfor -%}
+          {%- for vlan in bridge_vlans if vlan['vids'] and current_key in (vlan['tagged'] or '').split(',') -%}{%- set _ = vids.extend(vlan['vids'] | vlanconfig_to_list) -%}{%- endfor -%}
+          {%- set result = [] -%}
+          {%- for vid in vids | unique | sort -%}{%- set _ = result.append({'id': vid | string, 'name': 'VLAN' ~ (vid | string).zfill(4)}) -%}{%- endfor -%}
+          {{- result | tojson -}}
+  interfaces__untagged_vlan:
+    commands:
+      - command: "interface print detail"
+        parser: "ttp"
+        jpath: "[0].interfaces[?name=='{{ current_key }}'].name"
+        post_processor: |
+          {%- set vids = [] -%}
+          {%- for vlan in bridge_vlans if vlan['vids'] and current_key in (vlan['untagged'] or '').split(',') -%}{%- set _ = vids.extend(vlan['vids'] | vlanconfig_to_list) -%}{%- endfor -%}
+          {%- if vids -%}{{- {'id': vids[0] | string, 'name': 'VLAN' ~ (vids[0] | string).zfill(4)} | tojson -}}{%- else -%}{{- {} | tojson -}}{%- endif -%}
+        iterable_type: "dict"
+  software_version:
+    commands:
+      - command: "system resource print"
+        parser: "ttp"
+        jpath: "[0].system[?key=='version'].value"
+        # "7.24.3 (stable)" -> "7.24.3"
+        post_processor: "{{ (obj | first).split(' ') | first }}"
+        iterable_type: "str"
+  cables:
+    commands:
+      - command: "ip neighbor print detail"
+        parser: "textfsm"
+        jpath: "[*].{local_interface: interface, remote_interface: interface_name, remote_device: identity}"
+        # Local interface is "<port>,<bridge or bond>" for member ports and 7.x reports remote member ports as
+        # "<bridge or bond>/<port>". Neighbors seen on VLAN/bridge interfaces and the device itself are skipped.
+        post_processor: |
+          {%- set result = [] -%}
+          {%- for neighbor in obj -%}
+            {%- set local = (neighbor['local_interface'] or '').split(',') | first -%}
+            {%- if neighbor['remote_interface'] and neighbor['remote_device'] and local in physical_ports and neighbor['remote_device'] != hostname -%}
+              {%- set cable = {'local_interface': local, 'remote_interface': neighbor['remote_interface'].split('/') | last, 'remote_device': neighbor['remote_device'] | remove_fqdn} -%}
+              {%- if cable not in result -%}{%- set _ = result.append(cable) -%}{%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+          {{- result | tojson -}}

@@ -1,0 +1,415 @@
+{
+    "interfaces": {
+        "Lo0": {
+            "802.1Q_mode": "",
+            "description": "Loopback",
+            "ip_addresses": [
+                {
+                    "ip_address": "100.100.0.106",
+                    "prefix_length": "32"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "bridge",
+            "untagged_vlan": {}
+        },
+        "Lo1": {
+            "802.1Q_mode": "",
+            "description": "INET Loopback",
+            "ip_addresses": [
+                {
+                    "ip_address": "1.1.1.1",
+                    "prefix_length": "32"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "bridge",
+            "untagged_vlan": {}
+        },
+        "bond1": {
+            "802.1Q_mode": "tagged",
+            "description": "Link to",
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "1500",
+            "tagged_vlans": [
+                {
+                    "id": "1",
+                    "name": "VLAN0001"
+                },
+                {
+                    "id": "2",
+                    "name": "VLAN0002"
+                }
+            ],
+            "type": "lag",
+            "untagged_vlan": {}
+        },
+        "ether1": {
+            "802.1Q_mode": "",
+            "description": "Management Port - 4G OOB",
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "1000base-t",
+            "untagged_vlan": {}
+        },
+        "pppoe-out1": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "100.64.247.75",
+                    "prefix_length": "32"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1400",
+            "tagged_vlans": [],
+            "type": "tunnel",
+            "untagged_vlan": {}
+        },
+        "sfp-sfpplus1": {
+            "802.1Q_mode": "tagged",
+            "description": "Uplink",
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "9216",
+            "tagged_vlans": [
+                {
+                    "id": "111",
+                    "name": "VLAN0111"
+                },
+                {
+                    "id": "975",
+                    "name": "VLAN0975"
+                }
+            ],
+            "type": "10gbase-x-sfpp",
+            "untagged_vlan": {}
+        },
+        "sfp-sfpplus10": {
+            "802.1Q_mode": "",
+            "description": "Link to",
+            "ip_addresses": [],
+            "lag": "bond1",
+            "link_status": "True",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "9216",
+            "tagged_vlans": [],
+            "type": "10gbase-x-sfpp",
+            "untagged_vlan": {}
+        },
+        "sfp-sfpplus11": {
+            "802.1Q_mode": "tagged",
+            "description": "Cust",
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "9216",
+            "tagged_vlans": [
+                {
+                    "id": "4050",
+                    "name": "VLAN4050"
+                }
+            ],
+            "type": "10gbase-x-sfpp",
+            "untagged_vlan": {}
+        },
+        "sfp-sfpplus12": {
+            "802.1Q_mode": "",
+            "description": "Cust",
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "9216",
+            "tagged_vlans": [],
+            "type": "10gbase-x-sfpp",
+            "untagged_vlan": {}
+        },
+        "sfp-sfpplus2": {
+            "802.1Q_mode": "",
+            "description": "Spare Optic",
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "9216",
+            "tagged_vlans": [],
+            "type": "10gbase-x-sfpp",
+            "untagged_vlan": {}
+        },
+        "sfp-sfpplus3": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "9216",
+            "tagged_vlans": [],
+            "type": "10gbase-x-sfpp",
+            "untagged_vlan": {}
+        },
+        "sfp-sfpplus4": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "9216",
+            "tagged_vlans": [],
+            "type": "10gbase-x-sfpp",
+            "untagged_vlan": {}
+        },
+        "sfp-sfpplus5": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "9216",
+            "tagged_vlans": [],
+            "type": "10gbase-x-sfpp",
+            "untagged_vlan": {}
+        },
+        "sfp-sfpplus6": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "9216",
+            "tagged_vlans": [],
+            "type": "10gbase-x-sfpp",
+            "untagged_vlan": {}
+        },
+        "sfp-sfpplus7": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "9216",
+            "tagged_vlans": [],
+            "type": "10gbase-x-sfpp",
+            "untagged_vlan": {}
+        },
+        "sfp-sfpplus8": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "9216",
+            "tagged_vlans": [],
+            "type": "10gbase-x-sfpp",
+            "untagged_vlan": {}
+        },
+        "sfp-sfpplus9": {
+            "802.1Q_mode": "",
+            "description": "Link to",
+            "ip_addresses": [],
+            "lag": "bond1",
+            "link_status": "True",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "9216",
+            "tagged_vlans": [],
+            "type": "10gbase-x-sfpp",
+            "untagged_vlan": {}
+        },
+        "sfp28-1": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "9216",
+            "tagged_vlans": [],
+            "type": "25gbase-x-sfp28",
+            "untagged_vlan": {}
+        },
+        "sfp28-2": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "9216",
+            "tagged_vlans": [],
+            "type": "25gbase-x-sfp28",
+            "untagged_vlan": {}
+        },
+        "vlan10@vlan975@sfp-sfpplus1": {
+            "802.1Q_mode": "",
+            "description": "MGMT Uplink YDCE-M1",
+            "ip_addresses": [
+                {
+                    "ip_address": "198.51.100.1",
+                    "prefix_length": "24"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "1574",
+            "tagged_vlans": [],
+            "type": "virtual",
+            "untagged_vlan": {}
+        },
+        "vlan111@sfp-sfpplus1": {
+            "802.1Q_mode": "",
+            "description": "INET: IX",
+            "ip_addresses": [
+                {
+                    "ip_address": "1.1.1.66",
+                    "prefix_length": "25"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "virtual",
+            "untagged_vlan": {}
+        },
+        "vlan11@vlan975@sfp-sfpplus1": {
+            "802.1Q_mode": "",
+            "description": "INET: IX",
+            "ip_addresses": [
+                {
+                    "ip_address": "1.1.1.26",
+                    "prefix_length": "30"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "virtual",
+            "untagged_vlan": {}
+        },
+        "vlan12@vlan975@sfp-sfpplus1": {
+            "802.1Q_mode": "",
+            "description": "INET: IX",
+            "ip_addresses": [
+                {
+                    "ip_address": "1.1.1.30",
+                    "prefix_length": "30"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "1500",
+            "tagged_vlans": [],
+            "type": "virtual",
+            "untagged_vlan": {}
+        },
+        "vlan1@bond1": {
+            "802.1Q_mode": "",
+            "description": "MGMT",
+            "ip_addresses": [
+                {
+                    "ip_address": "100.64.5.1",
+                    "prefix_length": "30"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "1574",
+            "tagged_vlans": [],
+            "type": "virtual",
+            "untagged_vlan": {}
+        },
+        "vlan2@bond1": {
+            "802.1Q_mode": "",
+            "description": "INET",
+            "ip_addresses": [
+                {
+                    "ip_address": "1.1.1.121",
+                    "prefix_length": "30"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "1574",
+            "tagged_vlans": [],
+            "type": "virtual",
+            "untagged_vlan": {}
+        },
+        "vlan4050@sfp-sfpplus11": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "1.1.1.49",
+                    "prefix_length": "30"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "9212",
+            "tagged_vlans": [],
+            "type": "virtual",
+            "untagged_vlan": {}
+        },
+        "vlan975@sfp-sfpplus1": {
+            "802.1Q_mode": "tagged",
+            "description": "Intercap",
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "AA:BB:CC:11:22:33",
+            "mtu": "1500",
+            "tagged_vlans": [
+                {
+                    "id": "10",
+                    "name": "VLAN0010"
+                },
+                {
+                    "id": "11",
+                    "name": "VLAN0011"
+                },
+                {
+                    "id": "12",
+                    "name": "VLAN0012"
+                }
+            ],
+            "type": "virtual",
+            "untagged_vlan": {}
+        }
+    },
+    "serial": "HEB08XXXXXA"
+}

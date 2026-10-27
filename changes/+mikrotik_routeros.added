@@ -1,0 +1,1 @@
+Added MikroTik RouterOS (`mikrotik_routeros`) support for the Sync Devices From Network and Sync Network Data From Network jobs, verified against RouterOS 6.49 and 7.24 output, including bridge VLAN filtering, VRFs (v6 and v7) and CHR serial numbers, with order-independent TTP templates for RouterOS `print detail` output.

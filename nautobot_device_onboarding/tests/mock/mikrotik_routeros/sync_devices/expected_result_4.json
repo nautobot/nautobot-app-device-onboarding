@@ -1,0 +1,7 @@
+{
+    "device_type": "CHR QEMU QEMU Virtual Machine",
+    "hostname": "lab chr7",
+    "mask_length": 24,
+    "mgmt_interface": "ether1",
+    "serial": "S0kqwgg8L7L"
+}

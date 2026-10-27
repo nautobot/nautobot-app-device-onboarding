@@ -1,0 +1,7 @@
+{
+    "device_type": "RB750Gr3",
+    "hostname": "hEX-branch01",
+    "mask_length": 24,
+    "mgmt_interface": "vlan100",
+    "serial": "CC210E592C82"
+}

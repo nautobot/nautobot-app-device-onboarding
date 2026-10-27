@@ -1,0 +1,7 @@
+{
+    "device_type": "CCR2004-1G-12S+2XS",
+    "hostname": "Mikrotik-Device_Name",
+    "mask_length": 24,
+    "mgmt_interface": "vlan10@vlan975@sfp-sfpplus1",
+    "serial": "HEB08XXXXXA"
+}

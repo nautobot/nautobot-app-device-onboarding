@@ -1,0 +1,440 @@
+{
+    ":put [/system identity get name]": {
+        "raw": "hEX-branch01\n"
+    },
+    "interface bonding print detail": [
+        {
+            "bonds": [
+                {
+                    "arp": "enabled",
+                    "arp_interval": "100ms",
+                    "arp_ip_targets": "",
+                    "arp_timeout": "auto",
+                    "comment": "Uplink to access switch",
+                    "down_delay": "0ms",
+                    "flags": "R",
+                    "lacp_rate": "30secs",
+                    "link_monitoring": "mii",
+                    "mac_address": "CC:2D:E0:10:00:03",
+                    "mii_interval": "100ms",
+                    "min_links": "0",
+                    "mode": "802.3ad",
+                    "mtu": "1500",
+                    "name": "bond1",
+                    "number": "0",
+                    "primary": "none",
+                    "slaves": "ether3,ether4",
+                    "transmit_hash_policy": "layer-2-and-3",
+                    "up_delay": "0ms"
+                }
+            ]
+        }
+    ],
+    "interface bridge vlan print detail": [
+        {}
+    ],
+    "interface print detail": [
+        {
+            "interfaces": [
+                {
+                    "actual_mtu": "1500",
+                    "comment": "WAN",
+                    "default_name": "ether1",
+                    "flags": "R",
+                    "l2mtu": "1596",
+                    "last_link_up_time": "jan/02/2025",
+                    "link_downs": "0",
+                    "mac_address": "CC:2D:E0:10:00:01",
+                    "max_l2mtu": "2028",
+                    "mtu": "1500",
+                    "name": "ether1",
+                    "number": "0",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "",
+                    "default_name": "ether2",
+                    "flags": "R",
+                    "l2mtu": "1596",
+                    "last_link_up_time": "jan/02/2025",
+                    "link_downs": "0",
+                    "mac_address": "CC:2D:E0:10:00:02",
+                    "max_l2mtu": "2028",
+                    "mtu": "1500",
+                    "name": "ether2",
+                    "number": "1",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "",
+                    "default_name": "ether3",
+                    "flags": "RS",
+                    "l2mtu": "1596",
+                    "last_link_up_time": "jan/02/2025",
+                    "link_downs": "0",
+                    "mac_address": "CC:2D:E0:10:00:03",
+                    "max_l2mtu": "2028",
+                    "mtu": "1500",
+                    "name": "ether3",
+                    "number": "2",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "",
+                    "default_name": "ether4",
+                    "flags": "RS",
+                    "l2mtu": "1596",
+                    "last_link_up_time": "jan/02/2025",
+                    "link_downs": "0",
+                    "mac_address": "CC:2D:E0:10:00:04",
+                    "max_l2mtu": "2028",
+                    "mtu": "1500",
+                    "name": "ether4",
+                    "number": "3",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "",
+                    "default_name": "ether5",
+                    "flags": "X",
+                    "l2mtu": "1596",
+                    "link_downs": "0",
+                    "mac_address": "CC:2D:E0:10:00:05",
+                    "max_l2mtu": "2028",
+                    "mtu": "1500",
+                    "name": "ether5",
+                    "number": "4",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "LAN bridge",
+                    "flags": "R",
+                    "l2mtu": "1596",
+                    "last_link_up_time": "jan/02/2025",
+                    "link_downs": "0",
+                    "mac_address": "CC:2D:E0:10:00:02",
+                    "mtu": "auto",
+                    "name": "bridge1",
+                    "number": "5",
+                    "type": "bridge"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "Uplink to access switch",
+                    "flags": "R",
+                    "l2mtu": "1596",
+                    "last_link_up_time": "jan/02/2025",
+                    "link_downs": "0",
+                    "mac_address": "CC:2D:E0:10:00:03",
+                    "mtu": "1500",
+                    "name": "bond1",
+                    "number": "6",
+                    "type": "bond"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "MGMT",
+                    "flags": "R",
+                    "l2mtu": "1592",
+                    "last_link_up_time": "jan/02/2025",
+                    "link_downs": "0",
+                    "mac_address": "CC:2D:E0:10:00:03",
+                    "mtu": "1500",
+                    "name": "vlan100",
+                    "number": "7",
+                    "type": "vlan"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "",
+                    "flags": "R",
+                    "l2mtu": "1592",
+                    "last_link_up_time": "jan/02/2025",
+                    "link_downs": "0",
+                    "mac_address": "CC:2D:E0:10:00:03",
+                    "mtu": "1500",
+                    "name": "vlan200",
+                    "number": "8",
+                    "type": "vlan"
+                },
+                {
+                    "actual_mtu": "1476",
+                    "comment": "",
+                    "flags": "R",
+                    "l2mtu": "65535",
+                    "last_link_up_time": "jan/02/2025",
+                    "link_downs": "0",
+                    "mtu": "auto",
+                    "name": "gre-tunnel1",
+                    "number": "9",
+                    "type": "gre-tunnel"
+                },
+                {
+                    "actual_mtu": "1480",
+                    "comment": "",
+                    "flags": "DR",
+                    "last_link_up_time": "jan/03/2025",
+                    "link_downs": "0",
+                    "mtu": "1480",
+                    "name": "<pppoe-user1>",
+                    "number": "10",
+                    "type": "pppoe-in"
+                }
+            ]
+        }
+    ],
+    "interface vlan print detail": [
+        {
+            "vlans": [
+                {
+                    "arp": "enabled",
+                    "arp_timeout": "auto",
+                    "comment": "MGMT",
+                    "flags": "R",
+                    "interface": "bond1",
+                    "l2mtu": "1592",
+                    "loop_protect": "default",
+                    "loop_protect_disable_time": "5m",
+                    "loop_protect_send_interval": "5s",
+                    "loop_protect_status": "off",
+                    "mac_address": "CC:2D:E0:10:00:03",
+                    "mtu": "1500",
+                    "name": "vlan100",
+                    "number": "0",
+                    "use_service_tag": "no",
+                    "vlan_id": "100"
+                },
+                {
+                    "arp": "enabled",
+                    "arp_timeout": "auto",
+                    "comment": "",
+                    "flags": "R",
+                    "interface": "bond1",
+                    "l2mtu": "1592",
+                    "loop_protect": "default",
+                    "loop_protect_disable_time": "5m",
+                    "loop_protect_send_interval": "5s",
+                    "loop_protect_status": "off",
+                    "mac_address": "CC:2D:E0:10:00:03",
+                    "mtu": "1500",
+                    "name": "vlan200",
+                    "number": "1",
+                    "use_service_tag": "no",
+                    "vlan_id": "200"
+                }
+            ]
+        }
+    ],
+    "ip address print detail": [
+        {
+            "addresses": [
+                {
+                    "actual_interface": "vlan100",
+                    "address": "198.51.100.1/24",
+                    "comment": "",
+                    "flags": "",
+                    "interface": "vlan100",
+                    "network": "198.51.100.0",
+                    "number": "0"
+                },
+                {
+                    "actual_interface": "ether1",
+                    "address": "203.0.113.2/30",
+                    "comment": "WAN",
+                    "flags": "",
+                    "interface": "ether1",
+                    "network": "203.0.113.0",
+                    "number": "1"
+                },
+                {
+                    "actual_interface": "bridge1",
+                    "address": "192.168.88.1/24",
+                    "comment": "",
+                    "flags": "",
+                    "interface": "bridge1",
+                    "network": "192.168.88.0",
+                    "number": "2"
+                },
+                {
+                    "actual_interface": "gre-tunnel1",
+                    "address": "10.255.0.1/30",
+                    "comment": "",
+                    "flags": "",
+                    "interface": "gre-tunnel1",
+                    "network": "10.255.0.0",
+                    "number": "3"
+                },
+                {
+                    "actual_interface": "vlan200",
+                    "address": "10.10.10.1/24",
+                    "comment": "",
+                    "flags": "X",
+                    "interface": "vlan200",
+                    "network": "10.10.10.0",
+                    "number": "4"
+                }
+            ]
+        }
+    ],
+    "ip neighbor print detail": [
+        {
+            "age": "21s",
+            "board": "CCR1009-7G-1C-1S+",
+            "identity": "isp-cpe01.example.net",
+            "interface": "ether1",
+            "interface_name": "ether7",
+            "ip_address": "203.0.113.1",
+            "ipv4_address": "203.0.113.1",
+            "ipv6": "",
+            "ipv6_address": "",
+            "mac_address": "CC:2D:E0:20:00:01",
+            "number": "0",
+            "platform": "MikroTik",
+            "software_id": "ABCD-1234",
+            "system_caps": "bridge,router",
+            "system_caps_enabled": "router",
+            "system_description": "MikroTik RouterOS 6.49.10 (long-term) CCR1009-7G-1C-1S+",
+            "unpack": "none",
+            "uptime": "12w3d4h10m2s",
+            "version": "6.49.10 (long-term)"
+        },
+        {
+            "age": "37s",
+            "board": "RBcAPGi-5acD2nD",
+            "identity": "lan-ap01",
+            "interface": "ether2,bridge1",
+            "interface_name": "ether1",
+            "ip_address": "",
+            "ipv4_address": "",
+            "ipv6": "",
+            "ipv6_address": "",
+            "mac_address": "CC:2D:E0:30:00:01",
+            "number": "1",
+            "platform": "MikroTik",
+            "software_id": "EFGH-5678",
+            "system_caps": "bridge,wlan-ap,router",
+            "system_caps_enabled": "bridge,wlan-ap",
+            "system_description": "MikroTik RouterOS 6.49.10 (long-term) RBcAPGi-5acD2nD",
+            "unpack": "none",
+            "uptime": "1d8h37m17s",
+            "version": "6.49.10 (long-term)"
+        }
+    ],
+    "ip route vrf print": [
+        {}
+    ],
+    "system license print": [
+        {
+            "system": [
+                {
+                    "key": "software-id",
+                    "value": "CC21-0E59"
+                },
+                {
+                    "key": "upgradable-to",
+                    "value": "v7.x"
+                },
+                {
+                    "key": "nlevel",
+                    "value": "4"
+                },
+                {
+                    "key": "features",
+                    "value": ""
+                }
+            ]
+        }
+    ],
+    "system resource print": [
+        {
+            "system": [
+                {
+                    "key": "uptime",
+                    "value": "6w5d11h55m45s"
+                },
+                {
+                    "key": "version",
+                    "value": "6.49.10 (long-term)"
+                },
+                {
+                    "key": "build-time",
+                    "value": "Dec/03/2021 12:15:05"
+                },
+                {
+                    "key": "free-memory",
+                    "value": "40.2MiB"
+                },
+                {
+                    "key": "total-memory",
+                    "value": "64.0MiB"
+                },
+                {
+                    "key": "cpu",
+                    "value": "MIPS 24Kc V7.4"
+                },
+                {
+                    "key": "cpu-count",
+                    "value": "1"
+                },
+                {
+                    "key": "cpu-frequency",
+                    "value": "650MHz"
+                },
+                {
+                    "key": "cpu-load",
+                    "value": "1%"
+                },
+                {
+                    "key": "free-hdd-space",
+                    "value": "1196.0KiB"
+                },
+                {
+                    "key": "total-hdd-space",
+                    "value": "16.0MiB"
+                },
+                {
+                    "key": "write-sect-since-reboot",
+                    "value": "44663"
+                },
+                {
+                    "key": "write-sect-total",
+                    "value": "572180"
+                },
+                {
+                    "key": "bad-blocks",
+                    "value": "0%"
+                },
+                {
+                    "key": "architecture-name",
+                    "value": "mipsbe"
+                },
+                {
+                    "key": "board-name",
+                    "value": "hEX PoE lite"
+                },
+                {
+                    "key": "platform",
+                    "value": "MikroTik"
+                }
+            ]
+        }
+    ],
+    "system routerboard print": [
+        {
+            "board_name": "hEX",
+            "current_firmware": "6.49",
+            "factory_firmware": "6.48",
+            "firmware_type": "mt7621L",
+            "hardware_model": "RB750Gr3",
+            "revision": "r4",
+            "routerboard": "yes",
+            "serial_number": "CC210E592C82",
+            "upgrade_firmware": "6.49"
+        }
+    ]
+}

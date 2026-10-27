@@ -1,0 +1,126 @@
+{
+    "interfaces": {
+        "bond1": {
+            "802.1Q_mode": "tagged",
+            "description": "Uplink to access switch",
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "CC:2D:E0:10:00:03",
+            "mtu": "1500",
+            "type": "lag"
+        },
+        "bridge1": {
+            "802.1Q_mode": "",
+            "description": "LAN bridge",
+            "ip_addresses": [
+                {
+                    "ip_address": "192.168.88.1",
+                    "prefix_length": "24"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "CC:2D:E0:10:00:02",
+            "mtu": "1500",
+            "type": "bridge"
+        },
+        "ether1": {
+            "802.1Q_mode": "",
+            "description": "WAN",
+            "ip_addresses": [
+                {
+                    "ip_address": "203.0.113.2",
+                    "prefix_length": "30"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "CC:2D:E0:10:00:01",
+            "mtu": "1500",
+            "type": "1000base-t"
+        },
+        "ether2": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "CC:2D:E0:10:00:02",
+            "mtu": "1500",
+            "type": "1000base-t"
+        },
+        "ether3": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": "bond1",
+            "link_status": "True",
+            "mac_address": "CC:2D:E0:10:00:03",
+            "mtu": "1500",
+            "type": "1000base-t"
+        },
+        "ether4": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": "bond1",
+            "link_status": "True",
+            "mac_address": "CC:2D:E0:10:00:04",
+            "mtu": "1500",
+            "type": "1000base-t"
+        },
+        "ether5": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "False",
+            "mac_address": "CC:2D:E0:10:00:05",
+            "mtu": "1500",
+            "type": "1000base-t"
+        },
+        "gre-tunnel1": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [
+                {
+                    "ip_address": "10.255.0.1",
+                    "prefix_length": "30"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "",
+            "mtu": "1476",
+            "type": "tunnel"
+        },
+        "vlan100": {
+            "802.1Q_mode": "",
+            "description": "MGMT",
+            "ip_addresses": [
+                {
+                    "ip_address": "198.51.100.1",
+                    "prefix_length": "24"
+                }
+            ],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "CC:2D:E0:10:00:03",
+            "mtu": "1500",
+            "type": "virtual"
+        },
+        "vlan200": {
+            "802.1Q_mode": "",
+            "description": "",
+            "ip_addresses": [],
+            "lag": "",
+            "link_status": "True",
+            "mac_address": "CC:2D:E0:10:00:03",
+            "mtu": "1500",
+            "type": "virtual"
+        }
+    },
+    "serial": "CC210E592C82",
+    "software_version": "6.49.10"
+}

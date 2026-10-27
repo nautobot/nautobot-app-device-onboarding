@@ -25,6 +25,9 @@ class TestManufacturerDerivation(unittest.TestCase):
     def test_paloalto_panos_maps_to_palo_alto(self):
         self.assertEqual(self._run("paloalto_panos")["manufacturer"], "Palo Alto")
 
+    def test_mikrotik_routeros_maps_to_mikrotik(self):
+        self.assertEqual(self._run("mikrotik_routeros")["manufacturer"], "MikroTik")
+
     def test_juniper_junos_legacy_mapping_preserved(self):
         self.assertEqual(self._run("juniper_junos")["manufacturer"], "Juniper")
 

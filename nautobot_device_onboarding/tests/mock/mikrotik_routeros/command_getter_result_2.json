@@ -1,0 +1,884 @@
+{
+    ":put [/system identity get name]": {
+        "raw": "Mikrotik-Device_Name\n"
+    },
+    "interface bonding print detail": [
+        {
+            "bonds": [
+                {
+                    "arp": "enabled",
+                    "arp_interval": "100ms",
+                    "arp_ip_targets": "",
+                    "arp_timeout": "auto",
+                    "comment": "Link to Mikrotik",
+                    "down_delay": "0ms",
+                    "flags": "R",
+                    "lacp_rate": "30secs",
+                    "link_monitoring": "mii",
+                    "mac_address": "48:A9:8A:5D:24:05",
+                    "mii_interval": "100ms",
+                    "min_links": "0",
+                    "mode": "802.3ad",
+                    "mtu": "1500",
+                    "name": "bond1",
+                    "number": "0",
+                    "primary": "none",
+                    "slaves": "sfp-sfpplus9,sfp-sfpplus10",
+                    "transmit_hash_policy": "layer-2",
+                    "up_delay": "0ms"
+                }
+            ]
+        }
+    ],
+    "interface bridge vlan print detail": [
+        {}
+    ],
+    "interface print detail": [
+        {
+            "interfaces": [
+                {
+                    "actual_mtu": "1500",
+                    "comment": "Management Port - 4G OOB",
+                    "default_name": "ether1",
+                    "flags": "R",
+                    "id": "1",
+                    "ifindex": "7",
+                    "ifname": "eth0",
+                    "l2mtu": "1600",
+                    "last_link_down_time": "2024-10-08",
+                    "last_link_up_time": "2024-10-08",
+                    "link_downs": "166",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "max_l2mtu": "9586",
+                    "mtu": "1500",
+                    "name": "ether1",
+                    "number": "0",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "9216",
+                    "comment": "Uplink",
+                    "default_name": "sfp-sfpplus1",
+                    "flags": "R",
+                    "id": "2",
+                    "ifindex": "9",
+                    "ifname": "eth1",
+                    "l2mtu": "9216",
+                    "last_link_up_time": "2024-07-23",
+                    "link_downs": "0",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "max_l2mtu": "9578",
+                    "mtu": "9216",
+                    "name": "sfp-sfpplus1",
+                    "number": "1",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "9216",
+                    "comment": "Spare Optic",
+                    "default_name": "sfp-sfpplus2",
+                    "flags": "X",
+                    "id": "3",
+                    "ifindex": "10",
+                    "ifname": "eth2",
+                    "l2mtu": "9216",
+                    "link_downs": "0",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "max_l2mtu": "9578",
+                    "mtu": "9216",
+                    "name": "sfp-sfpplus2",
+                    "number": "2",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "9216",
+                    "comment": "",
+                    "default_name": "sfp-sfpplus3",
+                    "flags": "X",
+                    "id": "4",
+                    "ifindex": "11",
+                    "ifname": "eth3",
+                    "l2mtu": "9216",
+                    "link_downs": "0",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "max_l2mtu": "9578",
+                    "mtu": "9216",
+                    "name": "sfp-sfpplus3",
+                    "number": "3",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "9216",
+                    "comment": "",
+                    "default_name": "sfp-sfpplus4",
+                    "flags": "X",
+                    "id": "5",
+                    "ifindex": "12",
+                    "ifname": "eth4",
+                    "l2mtu": "9216",
+                    "link_downs": "0",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "max_l2mtu": "9578",
+                    "mtu": "9216",
+                    "name": "sfp-sfpplus4",
+                    "number": "4",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "9216",
+                    "comment": "",
+                    "default_name": "sfp-sfpplus5",
+                    "flags": "X",
+                    "id": "6",
+                    "ifindex": "13",
+                    "ifname": "eth5",
+                    "l2mtu": "9216",
+                    "link_downs": "0",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "max_l2mtu": "9578",
+                    "mtu": "9216",
+                    "name": "sfp-sfpplus5",
+                    "number": "5",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "9216",
+                    "comment": "",
+                    "default_name": "sfp-sfpplus6",
+                    "flags": "X",
+                    "id": "7",
+                    "ifindex": "14",
+                    "ifname": "eth6",
+                    "l2mtu": "9216",
+                    "link_downs": "0",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "max_l2mtu": "9578",
+                    "mtu": "9216",
+                    "name": "sfp-sfpplus6",
+                    "number": "6",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "9216",
+                    "comment": "",
+                    "default_name": "sfp-sfpplus7",
+                    "flags": "X",
+                    "id": "8",
+                    "ifindex": "15",
+                    "ifname": "eth7",
+                    "l2mtu": "9216",
+                    "link_downs": "0",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "max_l2mtu": "9578",
+                    "mtu": "9216",
+                    "name": "sfp-sfpplus7",
+                    "number": "7",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "9216",
+                    "comment": "",
+                    "default_name": "sfp-sfpplus8",
+                    "flags": "X",
+                    "id": "9",
+                    "ifindex": "16",
+                    "ifname": "eth8",
+                    "l2mtu": "9216",
+                    "link_downs": "0",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "max_l2mtu": "9578",
+                    "mtu": "9216",
+                    "name": "sfp-sfpplus8",
+                    "number": "8",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "9216",
+                    "comment": "Link to",
+                    "default_name": "sfp-sfpplus9",
+                    "flags": "RS",
+                    "id": "10",
+                    "ifindex": "17",
+                    "ifname": "eth9",
+                    "l2mtu": "9216",
+                    "last_link_down_time": "2024-08-23",
+                    "last_link_up_time": "2024-08-23",
+                    "link_downs": "4",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "max_l2mtu": "9578",
+                    "mtu": "9216",
+                    "name": "sfp-sfpplus9",
+                    "number": "9",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "9216",
+                    "comment": "Link to",
+                    "default_name": "sfp-sfpplus10",
+                    "flags": "RS",
+                    "id": "11",
+                    "ifindex": "18",
+                    "ifname": "eth10",
+                    "l2mtu": "9216",
+                    "last_link_down_time": "2024-08-23",
+                    "last_link_up_time": "2024-08-23",
+                    "link_downs": "5",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "max_l2mtu": "9578",
+                    "mtu": "9216",
+                    "name": "sfp-sfpplus10",
+                    "number": "10",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "9216",
+                    "comment": "Cust",
+                    "default_name": "sfp-sfpplus11",
+                    "flags": "R",
+                    "id": "12",
+                    "ifindex": "19",
+                    "ifname": "eth11",
+                    "l2mtu": "9216",
+                    "last_link_down_time": "2024-08-29",
+                    "last_link_up_time": "2024-09-19",
+                    "link_downs": "1",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "max_l2mtu": "9578",
+                    "mtu": "9216",
+                    "name": "sfp-sfpplus11",
+                    "number": "11",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "9216",
+                    "comment": "Cust",
+                    "default_name": "sfp-sfpplus12",
+                    "flags": "X",
+                    "id": "13",
+                    "ifindex": "20",
+                    "ifname": "eth12",
+                    "l2mtu": "9216",
+                    "link_downs": "0",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "max_l2mtu": "9578",
+                    "mtu": "9216",
+                    "name": "sfp-sfpplus12",
+                    "number": "12",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "9216",
+                    "comment": "",
+                    "default_name": "sfp28-1",
+                    "flags": "X",
+                    "id": "14",
+                    "ifindex": "21",
+                    "ifname": "eth13",
+                    "l2mtu": "9216",
+                    "link_downs": "0",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "max_l2mtu": "9578",
+                    "mtu": "9216",
+                    "name": "sfp28-1",
+                    "number": "13",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "9216",
+                    "comment": "",
+                    "default_name": "sfp28-2",
+                    "flags": "X",
+                    "id": "15",
+                    "ifindex": "22",
+                    "ifname": "eth14",
+                    "l2mtu": "9216",
+                    "link_downs": "0",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "max_l2mtu": "9578",
+                    "mtu": "9216",
+                    "name": "sfp28-2",
+                    "number": "14",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "Loopback",
+                    "flags": "R",
+                    "id": "23",
+                    "ifindex": "24",
+                    "ifname": "br0",
+                    "l2mtu": "65535",
+                    "last_link_up_time": "2024-07-23",
+                    "link_downs": "0",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "mtu": "auto",
+                    "name": "Lo0",
+                    "number": "15",
+                    "type": "bridge"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "INET Loopback",
+                    "flags": "R",
+                    "id": "27",
+                    "ifindex": "36",
+                    "ifname": "br1",
+                    "l2mtu": "65535",
+                    "last_link_up_time": "2024-07-23",
+                    "link_downs": "0",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "mtu": "auto",
+                    "name": "Lo1",
+                    "number": "16",
+                    "type": "bridge",
+                    "vrf": "INET"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "Link to",
+                    "flags": "R",
+                    "id": "24",
+                    "ifindex": "23",
+                    "ifname": "bond24",
+                    "l2mtu": "9216",
+                    "last_link_down_time": "2024-08-23",
+                    "last_link_up_time": "2024-08-23",
+                    "link_downs": "3",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "mtu": "1500",
+                    "name": "bond1",
+                    "number": "17",
+                    "type": "bond"
+                },
+                {
+                    "actual_mtu": "1400",
+                    "comment": "",
+                    "flags": "R",
+                    "id": "20",
+                    "ifindex": "25948",
+                    "ifname": "ppp25889",
+                    "last_link_down_time": "2024-10-08",
+                    "last_link_up_time": "2024-10-08",
+                    "link_downs": "7208",
+                    "mtu": "1400",
+                    "name": "pppoe-out1",
+                    "number": "18",
+                    "type": "pppoe-out"
+                },
+                {
+                    "actual_mtu": "1574",
+                    "comment": "MGMT",
+                    "flags": "R",
+                    "id": "25",
+                    "ifindex": "27",
+                    "ifname": "vlan25",
+                    "l2mtu": "9212",
+                    "last_link_down_time": "2024-08-23",
+                    "last_link_up_time": "2024-08-23",
+                    "link_downs": "3",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "mtu": "1574",
+                    "name": "vlan1@bond1",
+                    "number": "19",
+                    "type": "vlan"
+                },
+                {
+                    "actual_mtu": "1574",
+                    "comment": "INET",
+                    "flags": "R",
+                    "id": "26",
+                    "ifindex": "28",
+                    "ifname": "vlan26",
+                    "l2mtu": "9212",
+                    "last_link_down_time": "2024-08-23",
+                    "last_link_up_time": "2024-08-23",
+                    "link_downs": "3",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "mtu": "1574",
+                    "name": "vlan2@bond1",
+                    "number": "20",
+                    "type": "vlan",
+                    "vrf": "INET"
+                },
+                {
+                    "actual_mtu": "1574",
+                    "comment": "MGMT Uplink YDCE-M1",
+                    "flags": "R",
+                    "id": "22",
+                    "ifindex": "33",
+                    "ifname": "vlan22",
+                    "l2mtu": "9208",
+                    "last_link_up_time": "2024-07-23",
+                    "link_downs": "0",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "mtu": "1574",
+                    "name": "vlan10@vlan975@sfp-sfpplus1",
+                    "number": "21",
+                    "type": "vlan"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "INET: IX",
+                    "flags": "R",
+                    "id": "21",
+                    "ifindex": "31",
+                    "ifname": "vlan21",
+                    "l2mtu": "9208",
+                    "last_link_up_time": "2024-07-23",
+                    "link_downs": "0",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "mtu": "1500",
+                    "name": "vlan11@vlan975@sfp-sfpplus1",
+                    "number": "22",
+                    "type": "vlan",
+                    "vrf": "INET"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "INET: IX",
+                    "flags": "R",
+                    "id": "29",
+                    "ifindex": "38",
+                    "ifname": "vlan29",
+                    "l2mtu": "9208",
+                    "last_link_up_time": "2024-07-23",
+                    "link_downs": "0",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "mtu": "1500",
+                    "name": "vlan12@vlan975@sfp-sfpplus1",
+                    "number": "23",
+                    "type": "vlan",
+                    "vrf": "INET"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "INET: IX",
+                    "flags": "R",
+                    "id": "18",
+                    "ifindex": "26",
+                    "ifname": "vlan18",
+                    "l2mtu": "9212",
+                    "last_link_up_time": "2024-07-23",
+                    "link_downs": "0",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "mtu": "1500",
+                    "name": "vlan111@sfp-sfpplus1",
+                    "number": "24",
+                    "type": "vlan",
+                    "vrf": "INET"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "Intercap",
+                    "flags": "R",
+                    "id": "16",
+                    "ifindex": "25",
+                    "ifname": "vlan16",
+                    "l2mtu": "9212",
+                    "last_link_up_time": "2024-07-23",
+                    "link_downs": "0",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "mtu": "1500",
+                    "name": "vlan975@sfp-sfpplus1",
+                    "number": "25",
+                    "type": "vlan"
+                },
+                {
+                    "actual_mtu": "9212",
+                    "comment": "",
+                    "flags": "R",
+                    "id": "30",
+                    "ifindex": "239",
+                    "ifname": "vlan30",
+                    "l2mtu": "9212",
+                    "last_link_down_time": "2024-08-29",
+                    "last_link_up_time": "2024-09-19",
+                    "link_downs": "1",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "mtu": "9212",
+                    "name": "vlan4050@sfp-sfpplus11",
+                    "number": "26",
+                    "type": "vlan",
+                    "vrf": "INET"
+                }
+            ]
+        }
+    ],
+    "interface vlan print detail": [
+        {
+            "vlans": [
+                {
+                    "arp": "enabled",
+                    "arp_timeout": "auto",
+                    "comment": "MGMT",
+                    "flags": "R",
+                    "interface": "bond1",
+                    "l2mtu": "9212",
+                    "loop_protect": "default",
+                    "loop_protect_disable_time": "5m",
+                    "loop_protect_send_interval": "5s",
+                    "loop_protect_status": "off",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "mtu": "1574",
+                    "name": "vlan1@bond1",
+                    "number": "0",
+                    "use_service_tag": "no",
+                    "vlan_id": "1"
+                },
+                {
+                    "arp": "enabled",
+                    "arp_timeout": "auto",
+                    "comment": "INET",
+                    "flags": "R",
+                    "interface": "bond1",
+                    "l2mtu": "9212",
+                    "loop_protect": "default",
+                    "loop_protect_disable_time": "5m",
+                    "loop_protect_send_interval": "5s",
+                    "loop_protect_status": "off",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "mtu": "1574",
+                    "name": "vlan2@bond1",
+                    "number": "1",
+                    "use_service_tag": "no",
+                    "vlan_id": "2"
+                },
+                {
+                    "arp": "enabled",
+                    "arp_timeout": "auto",
+                    "comment": "MGMT",
+                    "flags": "R",
+                    "interface": "vlan975@sfp-sfpplus1",
+                    "l2mtu": "9208",
+                    "loop_protect": "default",
+                    "loop_protect_disable_time": "5m",
+                    "loop_protect_send_interval": "5s",
+                    "loop_protect_status": "off",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "mtu": "1574",
+                    "name": "vlan10@vlan975@sfp-sfpplus1",
+                    "number": "2",
+                    "use_service_tag": "no",
+                    "vlan_id": "10"
+                },
+                {
+                    "arp": "enabled",
+                    "arp_timeout": "auto",
+                    "comment": "INET",
+                    "flags": "R",
+                    "interface": "vlan975@sfp-sfpplus1",
+                    "l2mtu": "9208",
+                    "loop_protect": "default",
+                    "loop_protect_disable_time": "5m",
+                    "loop_protect_send_interval": "5s",
+                    "loop_protect_status": "off",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "mtu": "1500",
+                    "name": "vlan11@vlan975@sfp-sfpplus1",
+                    "number": "3",
+                    "use_service_tag": "no",
+                    "vlan_id": "11"
+                },
+                {
+                    "arp": "enabled",
+                    "arp_timeout": "auto",
+                    "comment": "INET",
+                    "flags": "R",
+                    "interface": "vlan975@sfp-sfpplus1",
+                    "l2mtu": "9208",
+                    "loop_protect": "default",
+                    "loop_protect_disable_time": "5m",
+                    "loop_protect_send_interval": "5s",
+                    "loop_protect_status": "off",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "mtu": "1500",
+                    "name": "vlan12@vlan975@sfp-sfpplus1",
+                    "number": "4",
+                    "use_service_tag": "no",
+                    "vlan_id": "12"
+                },
+                {
+                    "arp": "enabled",
+                    "arp_timeout": "auto",
+                    "comment": "INET",
+                    "flags": "R",
+                    "interface": "sfp-sfpplus1",
+                    "l2mtu": "9212",
+                    "loop_protect": "default",
+                    "loop_protect_disable_time": "5m",
+                    "loop_protect_send_interval": "5s",
+                    "loop_protect_status": "off",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "mtu": "1500",
+                    "name": "vlan111@sfp-sfpplus1",
+                    "number": "5",
+                    "use_service_tag": "no",
+                    "vlan_id": "111"
+                },
+                {
+                    "arp": "enabled",
+                    "arp_timeout": "auto",
+                    "comment": "Intercap",
+                    "flags": "R",
+                    "interface": "sfp-sfpplus1",
+                    "l2mtu": "9212",
+                    "loop_protect": "default",
+                    "loop_protect_disable_time": "5m",
+                    "loop_protect_send_interval": "5s",
+                    "loop_protect_status": "off",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "mtu": "1500",
+                    "name": "vlan975@sfp-sfpplus1",
+                    "number": "6",
+                    "use_service_tag": "no",
+                    "vlan_id": "975"
+                },
+                {
+                    "arp": "enabled",
+                    "arp_timeout": "auto",
+                    "comment": "",
+                    "flags": "R",
+                    "interface": "sfp-sfpplus11",
+                    "l2mtu": "9212",
+                    "loop_protect": "default",
+                    "loop_protect_disable_time": "5m",
+                    "loop_protect_send_interval": "5s",
+                    "loop_protect_status": "off",
+                    "mac_address": "AA:BB:CC:11:22:33",
+                    "mtu": "9212",
+                    "name": "vlan4050@sfp-sfpplus11",
+                    "number": "7",
+                    "use_service_tag": "no",
+                    "vlan_id": "4050"
+                }
+            ]
+        }
+    ],
+    "ip address print detail": [
+        {
+            "addresses": [
+                {
+                    "actual_interface": "vlan11@vlan975@sfp-sfpplus1",
+                    "address": "1.1.1.26/30",
+                    "comment": "INET Uplink",
+                    "flags": "",
+                    "interface": "vlan11@vlan975@sfp-sfpplus1",
+                    "network": "1.1.1.24",
+                    "number": "0"
+                },
+                {
+                    "actual_interface": "vlan10@vlan975@sfp-sfpplus1",
+                    "address": "198.51.100.1/24",
+                    "comment": "MGMT Uplink",
+                    "flags": "",
+                    "interface": "vlan10@vlan975@sfp-sfpplus1",
+                    "network": "198.51.100.0",
+                    "number": "1"
+                },
+                {
+                    "actual_interface": "Lo0",
+                    "address": "100.100.0.106/32",
+                    "comment": "MGMT Loopback",
+                    "flags": "",
+                    "interface": "Lo0",
+                    "network": "100.100.0.106",
+                    "number": "2"
+                },
+                {
+                    "actual_interface": "vlan4050@sfp-sfpplus11",
+                    "address": "1.1.1.49/30",
+                    "comment": "Cust",
+                    "flags": "",
+                    "interface": "vlan4050@sfp-sfpplus11",
+                    "network": "1.1.1.48",
+                    "number": "3"
+                },
+                {
+                    "actual_interface": "vlan1@bond1",
+                    "address": "100.64.5.1/30",
+                    "comment": "MGMT Link",
+                    "flags": "",
+                    "interface": "vlan1@bond1",
+                    "network": "100.64.5.0",
+                    "number": "4"
+                },
+                {
+                    "actual_interface": "vlan2@bond1",
+                    "address": "1.1.1.121/30",
+                    "comment": "INET Link",
+                    "flags": "",
+                    "interface": "vlan2@bond1",
+                    "network": "1.1.1.120",
+                    "number": "5"
+                },
+                {
+                    "actual_interface": "Lo1",
+                    "address": "1.1.1.1/32",
+                    "comment": "INET Loopback",
+                    "flags": "",
+                    "interface": "Lo1",
+                    "network": "1.1.1.1",
+                    "number": "6"
+                },
+                {
+                    "actual_interface": "vlan12@vlan975@sfp-sfpplus1",
+                    "address": "1.1.1.30/30",
+                    "comment": "INET Uplink",
+                    "flags": "",
+                    "interface": "vlan12@vlan975@sfp-sfpplus1",
+                    "network": "1.1.1.28",
+                    "number": "7"
+                },
+                {
+                    "actual_interface": "vlan111@sfp-sfpplus1",
+                    "address": "1.1.1.66/25",
+                    "comment": "INET",
+                    "flags": "",
+                    "interface": "vlan111@sfp-sfpplus1",
+                    "network": "1.1.1.0",
+                    "number": "8"
+                },
+                {
+                    "actual_interface": "pppoe-out1",
+                    "address": "100.64.247.75/32",
+                    "comment": "",
+                    "flags": "D",
+                    "interface": "pppoe-out1",
+                    "network": "100.64.1.248",
+                    "number": "9"
+                }
+            ]
+        }
+    ],
+    "ip neighbor print detail": [
+        {
+            "age": "7s",
+            "board": "RB450Gx4",
+            "identity": "core-rtr01.example.com",
+            "interface": "sfp-sfpplus1",
+            "interface_name": "ether1",
+            "ip_address": "1.2.4.5",
+            "ipv4_address": "1.2.4.5",
+            "ipv6": "yes",
+            "ipv6_address": "2001:0db8:11a3:09d7:1f34:8a2e:07a0:765d",
+            "mac_address": "12:34:56:78:90:AB",
+            "number": "0",
+            "platform": "MikroTik",
+            "software_id": "AAAA-BBBB",
+            "system_caps": "bridge,router",
+            "system_caps_enabled": "router",
+            "system_description": "MikroTik RouterOS 7.15.1 (stable) 2024-06-07 12:49:11 RB450Gx4",
+            "unpack": "none",
+            "uptime": "1d8h37m20s",
+            "version": "7.15.1 (stable) 2024-06-07 12:49:11"
+        }
+    ],
+    "ip route vrf print": [
+        {}
+    ],
+    "system license print": [
+        {
+            "system": [
+                {
+                    "key": "software-id",
+                    "value": "HEB0-8XXX"
+                },
+                {
+                    "key": "nlevel",
+                    "value": "6"
+                },
+                {
+                    "key": "features",
+                    "value": ""
+                }
+            ]
+        }
+    ],
+    "system resource print": [
+        {
+            "system": [
+                {
+                    "key": "uptime",
+                    "value": "10w2d6h21m59s"
+                },
+                {
+                    "key": "version",
+                    "value": "7.12.2 (stable)"
+                },
+                {
+                    "key": "build-time",
+                    "value": "Dec/20/2023 08:41:00"
+                },
+                {
+                    "key": "factory-software",
+                    "value": "7.6"
+                },
+                {
+                    "key": "free-memory",
+                    "value": "3704.1MiB"
+                },
+                {
+                    "key": "total-memory",
+                    "value": "4032.0MiB"
+                },
+                {
+                    "key": "cpu",
+                    "value": "ARM64"
+                },
+                {
+                    "key": "cpu-count",
+                    "value": "4"
+                },
+                {
+                    "key": "cpu-load",
+                    "value": "36%"
+                },
+                {
+                    "key": "free-hdd-space",
+                    "value": "104.4MiB"
+                },
+                {
+                    "key": "total-hdd-space",
+                    "value": "128.0MiB"
+                },
+                {
+                    "key": "write-sect-since-reboot",
+                    "value": "54120"
+                },
+                {
+                    "key": "write-sect-total",
+                    "value": "291965"
+                },
+                {
+                    "key": "bad-blocks",
+                    "value": "0%"
+                },
+                {
+                    "key": "architecture-name",
+                    "value": "arm64"
+                },
+                {
+                    "key": "board-name",
+                    "value": "CCR2004-1G-12S+2XS"
+                },
+                {
+                    "key": "platform",
+                    "value": "MikroTik"
+                }
+            ]
+        }
+    ],
+    "system routerboard print": [
+        {
+            "board_name": "CCR2004-1G-12S+2XS",
+            "current_firmware": "7.12.2",
+            "factory_firmware": "7.6",
+            "firmware_type": "al52390",
+            "hardware_model": "CCR2004-1G-12S+2XS",
+            "revision": "r2",
+            "routerboard": "yes",
+            "serial_number": "HEB08XXXXXA",
+            "upgrade_firmware": "7.12.2"
+        }
+    ]
+}

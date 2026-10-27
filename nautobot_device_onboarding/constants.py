@@ -61,5 +61,6 @@ ONBOARDING_DEVICE_MODULE_RECURSION_LIMIT = 4
 # Network driver -> Nautobot Manufacturer display name. Override only where
 # `token.split("_")[0].title()` would produce the wrong canonical name.
 NETWORK_DRIVER_TO_MANUFACTURER = {
+    "mikrotik_routeros": "MikroTik",
     "paloalto_panos": "Palo Alto",
 }

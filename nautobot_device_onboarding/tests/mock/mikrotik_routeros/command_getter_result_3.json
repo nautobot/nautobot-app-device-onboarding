@@ -1,0 +1,808 @@
+{
+    ":put [/system identity get name]": {
+        "raw": "lab chr6"
+    },
+    "interface bonding print detail": [
+        {
+            "bonds": [
+                {
+                    "arp": "enabled",
+                    "arp_interval": "100ms",
+                    "arp_ip_targets": "",
+                    "arp_timeout": "auto",
+                    "comment": "Bond to lab chr7",
+                    "down_delay": "0ms",
+                    "flags": "R",
+                    "lacp_rate": "30secs",
+                    "link_monitoring": "mii",
+                    "mac_address": "54:05:AB:CD:12:32",
+                    "mii_interval": "100ms",
+                    "min_links": "0",
+                    "mode": "802.3ad",
+                    "mtu": "1500",
+                    "name": "bond1",
+                    "number": "0",
+                    "primary": "none",
+                    "slaves": "ether2,ether3",
+                    "transmit_hash_policy": "layer-2",
+                    "up_delay": "0ms"
+                }
+            ]
+        }
+    ],
+    "interface bridge vlan print detail": [
+        {
+            "bridge_vlans": [
+                {
+                    "bridge": "br-lan",
+                    "comment": "",
+                    "current_tagged": "",
+                    "current_untagged": "br-lan,ether6",
+                    "flags": "D",
+                    "number": "0",
+                    "tagged": "",
+                    "untagged": "",
+                    "vlan_ids": "1"
+                },
+                {
+                    "bridge": "br-lan",
+                    "comment": "",
+                    "current_tagged": "br-lan,ether6",
+                    "current_untagged": "ether7",
+                    "flags": "",
+                    "number": "1",
+                    "tagged": "br-lan,ether6",
+                    "untagged": "ether7",
+                    "vlan_ids": "10"
+                },
+                {
+                    "bridge": "br-lan",
+                    "comment": "",
+                    "current_tagged": "br-lan,ether6",
+                    "current_untagged": "",
+                    "flags": "",
+                    "number": "2",
+                    "tagged": "br-lan,ether6",
+                    "untagged": "",
+                    "vlan_ids": "20,30"
+                }
+            ]
+        }
+    ],
+    "interface print detail": [
+        {
+            "interfaces": [
+                {
+                    "actual_mtu": "1500",
+                    "comment": "Management",
+                    "default_name": "ether1",
+                    "flags": "R",
+                    "last_link_up_time": "oct/27/2026",
+                    "link_downs": "0",
+                    "mac_address": "54:05:AB:CD:12:31",
+                    "mtu": "1500",
+                    "name": "ether1",
+                    "number": "0",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "",
+                    "default_name": "ether2",
+                    "flags": "RS",
+                    "last_link_up_time": "oct/27/2026",
+                    "link_downs": "0",
+                    "mac_address": "54:05:AB:CD:12:32",
+                    "mtu": "1500",
+                    "name": "ether2",
+                    "number": "1",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "",
+                    "default_name": "ether3",
+                    "flags": "RS",
+                    "last_link_up_time": "oct/27/2026",
+                    "link_downs": "0",
+                    "mac_address": "54:05:AB:CD:12:33",
+                    "mtu": "1500",
+                    "name": "ether3",
+                    "number": "2",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "",
+                    "default_name": "ether4",
+                    "flags": "R",
+                    "last_link_up_time": "oct/27/2026",
+                    "link_downs": "0",
+                    "mac_address": "54:05:AB:CD:12:34",
+                    "mtu": "1500",
+                    "name": "ether4",
+                    "number": "3",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "",
+                    "default_name": "ether5",
+                    "flags": "R",
+                    "last_link_up_time": "oct/27/2026",
+                    "link_downs": "0",
+                    "mac_address": "54:05:AB:CD:12:35",
+                    "mtu": "1500",
+                    "name": "ether5",
+                    "number": "4",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "",
+                    "default_name": "ether6",
+                    "flags": "RS",
+                    "last_link_up_time": "oct/27/2026",
+                    "link_downs": "0",
+                    "mac_address": "54:05:AB:CD:12:36",
+                    "mtu": "1500",
+                    "name": "ether6",
+                    "number": "5",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "",
+                    "default_name": "ether7",
+                    "flags": "RS",
+                    "last_link_up_time": "oct/27/2026",
+                    "link_downs": "0",
+                    "mac_address": "54:05:AB:CD:12:37",
+                    "mtu": "1500",
+                    "name": "ether7",
+                    "number": "6",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "",
+                    "default_name": "ether8",
+                    "flags": "X",
+                    "last_link_down_time": "oct/27/2026",
+                    "last_link_up_time": "oct/27/2026",
+                    "link_downs": "1",
+                    "mac_address": "54:05:AB:CD:12:38",
+                    "mtu": "1500",
+                    "name": "ether8",
+                    "number": "7",
+                    "type": "ether"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "Loopback",
+                    "flags": "R",
+                    "l2mtu": "65535",
+                    "last_link_up_time": "oct/27/2026",
+                    "link_downs": "0",
+                    "mac_address": "BE:9E:75:46:EF:76",
+                    "mtu": "auto",
+                    "name": "Lo0",
+                    "number": "8",
+                    "type": "bridge"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "Bond to lab chr7",
+                    "flags": "R",
+                    "l2mtu": "1500",
+                    "last_link_up_time": "oct/27/2026",
+                    "link_downs": "0",
+                    "mac_address": "54:05:AB:CD:12:32",
+                    "mtu": "1500",
+                    "name": "bond1",
+                    "number": "9",
+                    "type": "bond"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "LAN bridge",
+                    "flags": "R",
+                    "l2mtu": "65535",
+                    "last_link_up_time": "oct/27/2026",
+                    "link_downs": "0",
+                    "mac_address": "54:05:AB:CD:12:37",
+                    "mtu": "auto",
+                    "name": "br-lan",
+                    "number": "10",
+                    "type": "bridge"
+                },
+                {
+                    "actual_mtu": "1472",
+                    "comment": "",
+                    "flags": "R",
+                    "l2mtu": "65535",
+                    "last_link_up_time": "oct/27/2026",
+                    "link_downs": "0",
+                    "mtu": "auto",
+                    "name": "gre-tunnel1",
+                    "number": "11",
+                    "type": "gre-tunnel"
+                },
+                {
+                    "actual_mtu": "1500",
+                    "comment": "",
+                    "flags": "R",
+                    "l2mtu": "65531",
+                    "last_link_up_time": "oct/27/2026",
+                    "link_downs": "0",
+                    "mac_address": "54:05:AB:CD:12:37",
+                    "mtu": "1500",
+                    "name": "vlan10-irb",
+                    "number": "12",
+                    "type": "vlan"
+                },
+                {
+                    "actual_mtu": "1496",
+                    "comment": "MGMT",
+                    "flags": "R",
+                    "l2mtu": "1496",
+                    "last_link_up_time": "oct/27/2026",
+                    "link_downs": "0",
+                    "mac_address": "54:05:AB:CD:12:32",
+                    "mtu": "1496",
+                    "name": "vlan100",
+                    "number": "13",
+                    "type": "vlan"
+                },
+                {
+                    "actual_mtu": "1496",
+                    "comment": "",
+                    "flags": "R",
+                    "l2mtu": "1496",
+                    "last_link_up_time": "oct/27/2026",
+                    "link_downs": "0",
+                    "mac_address": "54:05:AB:CD:12:32",
+                    "mtu": "1496",
+                    "name": "vlan200",
+                    "number": "14",
+                    "type": "vlan"
+                }
+            ]
+        }
+    ],
+    "interface vlan print detail": [
+        {
+            "vlans": [
+                {
+                    "arp": "enabled",
+                    "arp_timeout": "auto",
+                    "comment": "",
+                    "flags": "R",
+                    "interface": "br-lan",
+                    "l2mtu": "65531",
+                    "loop_protect": "default",
+                    "loop_protect_disable_time": "5m",
+                    "loop_protect_send_interval": "5s",
+                    "loop_protect_status": "off",
+                    "mac_address": "54:05:AB:CD:12:37",
+                    "mtu": "1500",
+                    "name": "vlan10-irb",
+                    "number": "0",
+                    "use_service_tag": "no",
+                    "vlan_id": "10"
+                },
+                {
+                    "arp": "enabled",
+                    "arp_timeout": "auto",
+                    "comment": "MGMT",
+                    "flags": "R",
+                    "interface": "bond1",
+                    "l2mtu": "1496",
+                    "loop_protect": "default",
+                    "loop_protect_disable_time": "5m",
+                    "loop_protect_send_interval": "5s",
+                    "loop_protect_status": "off",
+                    "mac_address": "54:05:AB:CD:12:32",
+                    "mtu": "1496",
+                    "name": "vlan100",
+                    "number": "1",
+                    "use_service_tag": "no",
+                    "vlan_id": "100"
+                },
+                {
+                    "arp": "enabled",
+                    "arp_timeout": "auto",
+                    "comment": "",
+                    "flags": "R",
+                    "interface": "bond1",
+                    "l2mtu": "1496",
+                    "loop_protect": "default",
+                    "loop_protect_disable_time": "5m",
+                    "loop_protect_send_interval": "5s",
+                    "loop_protect_status": "off",
+                    "mac_address": "54:05:AB:CD:12:32",
+                    "mtu": "1496",
+                    "name": "vlan200",
+                    "number": "2",
+                    "use_service_tag": "no",
+                    "vlan_id": "200"
+                }
+            ]
+        }
+    ],
+    "ip address print detail": [
+        {
+            "addresses": [
+                {
+                    "actual_interface": "ether1",
+                    "address": "198.51.100.1/24",
+                    "comment": "",
+                    "flags": "D",
+                    "interface": "ether1",
+                    "network": "198.51.100.0",
+                    "number": "0"
+                },
+                {
+                    "actual_interface": "vlan10-irb",
+                    "address": "192.168.10.1/24",
+                    "comment": "",
+                    "flags": "",
+                    "interface": "vlan10-irb",
+                    "network": "192.168.10.0",
+                    "number": "1"
+                },
+                {
+                    "actual_interface": "gre-tunnel1",
+                    "address": "10.255.0.1/30",
+                    "comment": "",
+                    "flags": "",
+                    "interface": "gre-tunnel1",
+                    "network": "10.255.0.0",
+                    "number": "2"
+                },
+                {
+                    "actual_interface": "Lo0",
+                    "address": "10.0.0.6/32",
+                    "comment": "",
+                    "flags": "",
+                    "interface": "Lo0",
+                    "network": "10.0.0.6",
+                    "number": "3"
+                },
+                {
+                    "actual_interface": "vlan100",
+                    "address": "10.100.0.1/24",
+                    "comment": "",
+                    "flags": "",
+                    "interface": "vlan100",
+                    "network": "10.100.0.0",
+                    "number": "4"
+                },
+                {
+                    "actual_interface": "vlan200",
+                    "address": "10.200.0.1/24",
+                    "comment": "Customer VRF",
+                    "flags": "",
+                    "interface": "vlan200",
+                    "network": "10.200.0.0",
+                    "number": "5"
+                },
+                {
+                    "actual_interface": "ether4",
+                    "address": "10.99.99.1/24",
+                    "comment": "",
+                    "flags": "X",
+                    "interface": "ether4",
+                    "network": "10.99.99.0",
+                    "number": "6"
+                }
+            ]
+        }
+    ],
+    "ip neighbor print detail": [
+        {
+            "age": "1m50s",
+            "board": "CHR",
+            "identity": "lab chr6",
+            "interface": "ether1",
+            "interface_name": "ether1",
+            "ip_address": "10.231.0.2",
+            "ipv4_address": "10.231.0.2",
+            "ipv6": "no",
+            "ipv6_address": "",
+            "mac_address": "54:05:AB:CD:12:31",
+            "number": "0",
+            "platform": "MikroTik",
+            "software_id": "uk43JNQTF7F",
+            "system_caps": "",
+            "system_caps_enabled": "",
+            "system_description": "",
+            "unpack": "none",
+            "uptime": "1h2m35s",
+            "version": "6.49.23 (stable)"
+        },
+        {
+            "age": "29s",
+            "board": "CHR",
+            "identity": "lab chr7",
+            "interface": "ether1",
+            "interface_name": "ether1",
+            "ip_address": "10.231.0.200",
+            "ipv4_address": "10.231.0.200",
+            "ipv6": "yes",
+            "ipv6_address": "fe80::42:aff:fee7:71",
+            "mac_address": "02:42:0A:E7:00:71",
+            "number": "1",
+            "platform": "MikroTik",
+            "software_id": "S0kqwgg8L7L",
+            "system_caps": "",
+            "system_caps_enabled": "",
+            "system_description": "",
+            "unpack": "none",
+            "uptime": "6m28s",
+            "version": "7.24.3 (stable) 2026-09-14 07:40:48"
+        },
+        {
+            "age": "1m50s",
+            "board": "CHR",
+            "identity": "lab chr6",
+            "interface": "ether2,bond1",
+            "interface_name": "bond1/ether2",
+            "ip_address": "",
+            "ipv4_address": "",
+            "ipv6": "no",
+            "ipv6_address": "",
+            "mac_address": "54:05:AB:CD:12:32",
+            "number": "2",
+            "platform": "MikroTik",
+            "software_id": "uk43JNQTF7F",
+            "system_caps": "",
+            "system_caps_enabled": "",
+            "system_description": "",
+            "unpack": "none",
+            "uptime": "1h2m35s",
+            "version": "6.49.23 (stable)"
+        },
+        {
+            "age": "29s",
+            "board": "CHR",
+            "identity": "lab chr7",
+            "interface": "ether2,bond1",
+            "interface_name": "bond1/ether2",
+            "ip_address": "fe80::42:aff:fee7:171",
+            "ipv4_address": "",
+            "ipv6": "yes",
+            "ipv6_address": "fe80::42:aff:fee7:171",
+            "mac_address": "02:42:0A:E7:01:71",
+            "number": "3",
+            "platform": "MikroTik",
+            "software_id": "S0kqwgg8L7L",
+            "system_caps": "",
+            "system_caps_enabled": "",
+            "system_description": "",
+            "unpack": "none",
+            "uptime": "6m28s",
+            "version": "7.24.3 (stable) 2026-09-14 07:40:48"
+        },
+        {
+            "age": "1m50s",
+            "board": "CHR",
+            "identity": "lab chr6",
+            "interface": "ether4",
+            "interface_name": "ether4",
+            "ip_address": "",
+            "ipv4_address": "",
+            "ipv6": "no",
+            "ipv6_address": "",
+            "mac_address": "54:05:AB:CD:12:34",
+            "number": "4",
+            "platform": "MikroTik",
+            "software_id": "uk43JNQTF7F",
+            "system_caps": "",
+            "system_caps_enabled": "",
+            "system_description": "",
+            "unpack": "none",
+            "uptime": "1h2m35s",
+            "version": "6.49.23 (stable)"
+        },
+        {
+            "age": "29s",
+            "board": "CHR",
+            "identity": "lab chr7",
+            "interface": "ether4",
+            "interface_name": "vlan10-irb",
+            "ip_address": "192.168.20.1",
+            "ipv4_address": "192.168.20.1",
+            "ipv6": "yes",
+            "ipv6_address": "",
+            "mac_address": "02:42:0A:E7:03:71",
+            "number": "5",
+            "platform": "MikroTik",
+            "software_id": "S0kqwgg8L7L",
+            "system_caps": "",
+            "system_caps_enabled": "",
+            "system_description": "",
+            "unpack": "none",
+            "uptime": "6m28s",
+            "version": "7.24.3 (stable) 2026-09-14 07:40:48"
+        },
+        {
+            "age": "1m50s",
+            "board": "CHR",
+            "identity": "lab chr6",
+            "interface": "ether5",
+            "interface_name": "ether5",
+            "ip_address": "",
+            "ipv4_address": "",
+            "ipv6": "no",
+            "ipv6_address": "",
+            "mac_address": "54:05:AB:CD:12:35",
+            "number": "6",
+            "platform": "MikroTik",
+            "software_id": "uk43JNQTF7F",
+            "system_caps": "",
+            "system_caps_enabled": "",
+            "system_description": "",
+            "unpack": "none",
+            "uptime": "1h2m35s",
+            "version": "6.49.23 (stable)"
+        },
+        {
+            "age": "29s",
+            "board": "CHR",
+            "identity": "lab chr7",
+            "interface": "ether5",
+            "interface_name": "br-lan/ether5",
+            "ip_address": "fe80::42:aff:fee7:371",
+            "ipv4_address": "",
+            "ipv6": "yes",
+            "ipv6_address": "fe80::42:aff:fee7:371",
+            "mac_address": "02:42:0A:E7:04:71",
+            "number": "7",
+            "platform": "MikroTik",
+            "software_id": "S0kqwgg8L7L",
+            "system_caps": "",
+            "system_caps_enabled": "",
+            "system_description": "",
+            "unpack": "none",
+            "uptime": "6m28s",
+            "version": "7.24.3 (stable) 2026-09-14 07:40:48"
+        },
+        {
+            "age": "1m50s",
+            "board": "CHR",
+            "identity": "lab chr6",
+            "interface": "ether6,br-lan",
+            "interface_name": "br-lan/ether6",
+            "ip_address": "",
+            "ipv4_address": "",
+            "ipv6": "no",
+            "ipv6_address": "",
+            "mac_address": "54:05:AB:CD:12:36",
+            "number": "8",
+            "platform": "MikroTik",
+            "software_id": "uk43JNQTF7F",
+            "system_caps": "",
+            "system_caps_enabled": "",
+            "system_description": "",
+            "unpack": "none",
+            "uptime": "1h2m35s",
+            "version": "6.49.23 (stable)"
+        },
+        {
+            "age": "1m3s",
+            "board": "CHR",
+            "identity": "lab chr6",
+            "interface": "vlan10-irb",
+            "interface_name": "vlan10-irb",
+            "ip_address": "192.168.10.1",
+            "ipv4_address": "192.168.10.1",
+            "ipv6": "no",
+            "ipv6_address": "",
+            "mac_address": "54:05:AB:CD:12:37",
+            "number": "9",
+            "platform": "MikroTik",
+            "software_id": "uk43JNQTF7F",
+            "system_caps": "",
+            "system_caps_enabled": "",
+            "system_description": "",
+            "unpack": "none",
+            "uptime": "53m35s",
+            "version": "6.49.23 (stable)"
+        },
+        {
+            "age": "1m50s",
+            "board": "CHR",
+            "identity": "lab chr6",
+            "interface": "vlan100",
+            "interface_name": "vlan100",
+            "ip_address": "10.100.0.1",
+            "ipv4_address": "10.100.0.1",
+            "ipv6": "no",
+            "ipv6_address": "",
+            "mac_address": "54:05:AB:CD:12:32",
+            "number": "10",
+            "platform": "MikroTik",
+            "software_id": "uk43JNQTF7F",
+            "system_caps": "",
+            "system_caps_enabled": "",
+            "system_description": "",
+            "unpack": "none",
+            "uptime": "1h2m35s",
+            "version": "6.49.23 (stable)"
+        },
+        {
+            "age": "29s",
+            "board": "CHR",
+            "identity": "lab chr7",
+            "interface": "vlan100",
+            "interface_name": "vlan100",
+            "ip_address": "10.100.0.2",
+            "ipv4_address": "10.100.0.2",
+            "ipv6": "yes",
+            "ipv6_address": "",
+            "mac_address": "02:42:0A:E7:01:71",
+            "number": "11",
+            "platform": "MikroTik",
+            "software_id": "S0kqwgg8L7L",
+            "system_caps": "",
+            "system_caps_enabled": "",
+            "system_description": "",
+            "unpack": "none",
+            "uptime": "6m28s",
+            "version": "7.24.3 (stable) 2026-09-14 07:40:48"
+        },
+        {
+            "age": "1m50s",
+            "board": "CHR",
+            "identity": "lab chr6",
+            "interface": "vlan200",
+            "interface_name": "vlan200",
+            "ip_address": "10.200.0.1",
+            "ipv4_address": "10.200.0.1",
+            "ipv6": "no",
+            "ipv6_address": "",
+            "mac_address": "54:05:AB:CD:12:32",
+            "number": "12",
+            "platform": "MikroTik",
+            "software_id": "uk43JNQTF7F",
+            "system_caps": "",
+            "system_caps_enabled": "",
+            "system_description": "",
+            "unpack": "none",
+            "uptime": "1h2m35s",
+            "version": "6.49.23 (stable)"
+        },
+        {
+            "age": "29s",
+            "board": "CHR",
+            "identity": "lab chr7",
+            "interface": "vlan200",
+            "interface_name": "vlan200",
+            "ip_address": "10.200.0.2",
+            "ipv4_address": "10.200.0.2",
+            "ipv6": "yes",
+            "ipv6_address": "",
+            "mac_address": "02:42:0A:E7:01:71",
+            "number": "13",
+            "platform": "MikroTik",
+            "software_id": "S0kqwgg8L7L",
+            "system_caps": "",
+            "system_caps_enabled": "",
+            "system_description": "",
+            "unpack": "none",
+            "uptime": "6m28s",
+            "version": "7.24.3 (stable) 2026-09-14 07:40:48"
+        }
+    ],
+    "ip route vrf print": [
+        {
+            "vrfs": [
+                {
+                    "comment": "",
+                    "flags": "",
+                    "interfaces": "vlan200",
+                    "number": "0",
+                    "routing_mark": "CUST"
+                }
+            ]
+        }
+    ],
+    "system license print": [
+        {
+            "system": [
+                {
+                    "key": "system-id",
+                    "value": "uk43JNQTF7F"
+                },
+                {
+                    "key": "level",
+                    "value": "free"
+                }
+            ]
+        }
+    ],
+    "system resource print": [
+        {
+            "system": [
+                {
+                    "key": "uptime",
+                    "value": "1h4m25s"
+                },
+                {
+                    "key": "version",
+                    "value": "6.49.23 (stable)"
+                },
+                {
+                    "key": "build-time",
+                    "value": "Oct/07/2026 16:05:16"
+                },
+                {
+                    "key": "free-memory",
+                    "value": "446.5MiB"
+                },
+                {
+                    "key": "total-memory",
+                    "value": "480.0MiB"
+                },
+                {
+                    "key": "cpu",
+                    "value": "QEMU"
+                },
+                {
+                    "key": "cpu-count",
+                    "value": "4"
+                },
+                {
+                    "key": "cpu-frequency",
+                    "value": "1000MHz"
+                },
+                {
+                    "key": "cpu-load",
+                    "value": "22%"
+                },
+                {
+                    "key": "free-hdd-space",
+                    "value": "32.0MiB"
+                },
+                {
+                    "key": "total-hdd-space",
+                    "value": "63.5MiB"
+                },
+                {
+                    "key": "write-sect-since-reboot",
+                    "value": "448"
+                },
+                {
+                    "key": "write-sect-total",
+                    "value": "449"
+                },
+                {
+                    "key": "architecture-name",
+                    "value": "x86_64"
+                },
+                {
+                    "key": "board-name",
+                    "value": "CHR"
+                },
+                {
+                    "key": "platform",
+                    "value": "MikroTik"
+                }
+            ]
+        }
+    ],
+    "system routerboard print": [
+        {
+            "board_name": "",
+            "current_firmware": "",
+            "factory_firmware": "",
+            "firmware_type": "",
+            "hardware_model": "",
+            "revision": "",
+            "routerboard": "no",
+            "serial_number": "",
+            "upgrade_firmware": ""
+        }
+    ]
+}

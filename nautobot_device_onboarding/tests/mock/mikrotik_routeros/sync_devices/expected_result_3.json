@@ -1,0 +1,7 @@
+{
+    "device_type": "CHR",
+    "hostname": "lab chr6",
+    "mask_length": 24,
+    "mgmt_interface": "ether1",
+    "serial": "uk43JNQTF7F"
+}
