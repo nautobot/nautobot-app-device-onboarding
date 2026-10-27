@@ -116,6 +116,7 @@ class SyncNetworkDataInterface(FilteredNautobotModel):
         "mode",
         "enabled",
         "description",
+        "speed",
     )
 
     device__name: str
@@ -130,6 +131,7 @@ class SyncNetworkDataInterface(FilteredNautobotModel):
     mode: Optional[str] = None
     enabled: Optional[bool] = None
     description: Optional[str] = None
+    speed: Optional[int] = None
 
 
 class SyncNetworkDataIPAddress(DiffSyncModel):

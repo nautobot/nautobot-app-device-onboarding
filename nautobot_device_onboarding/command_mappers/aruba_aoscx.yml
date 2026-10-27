@@ -82,6 +82,14 @@ sync_network_data:
         parser: "textfsm"
         jpath: "[*].interface"
         post_processor: "{% set result={} %}{% for interface in obj %}{{ result.update({interface: {}}) or '' }}{% endfor %}{% if mgmt_iface %}{{ result.update({'mgmt': {}}) or '' }}{% endif %}{{ result | tojson }}"
+  interfaces__speed:
+    commands:
+      - command: "show interface"
+        parser: "textfsm"
+        jpath: "[?interface=='{{ current_key }}'].speed"
+        # VLAN SVIs report an empty speed; render nothing so no speed is set instead of failing the int cast.
+        post_processor: "{% set speed = obj[0] | parse_speed_to_kbps if obj else none %}{% if speed is not none %}{{ speed }}{% endif %}"
+        iterable_type: "int"
   interfaces__type:
     commands:
       # AOS-CX reports hw_type "Ethernet" for both physical ports and VLAN SVIs alike (unlike,
