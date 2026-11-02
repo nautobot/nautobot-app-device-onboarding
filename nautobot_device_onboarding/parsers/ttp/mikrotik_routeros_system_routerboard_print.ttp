@@ -1,0 +1,8 @@
+<doc>
+Generic RouterOS "key: value" print output, one {"key", "value"} entry per line. Keys keep RouterOS
+names (e.g. "board-name") so new or reformatted lines between RouterOS releases do not break parsing.
+</doc>
+
+<group name="system*">
+{{ key | re("[ \t]*[a-z0-9-]+") | strip }}: {{ value | re(".*") | strip }}
+</group>

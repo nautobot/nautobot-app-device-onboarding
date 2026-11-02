@@ -11,7 +11,7 @@
             "type": "lag"
         },
         "bridge1": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "LAN bridge",
             "ip_addresses": [
                 {
@@ -41,7 +41,7 @@
             "type": "1000base-t"
         },
         "ether2": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "access",
             "description": "",
             "ip_addresses": [],
             "lag": "",
@@ -71,7 +71,7 @@
             "type": "1000base-t"
         },
         "ether5": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "",
             "ip_addresses": [],
             "lag": "",

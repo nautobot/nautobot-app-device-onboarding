@@ -846,3 +846,53 @@ class TestFormatterSyncNetworkDataWithSoftware(unittest.TestCase):
                                 job_debug=False,
                             )
                             self.assertEqual(expected_parsed_result, actual_result)
+
+
+class TestFormatterMikrotikRouterosCables(unittest.TestCase):
+    """MikroTik neighbors become cables on physical ports, with vendor port names kept intact."""
+
+    @patch("nautobot_device_onboarding.nornir_plays.transform.GitRepository.objects.get")
+    def setUp(self, mock_repo_get):
+        mock_repo_get.side_effect = GitRepository.DoesNotExist
+        self.command_mapper = add_platform_parsing_info()["mikrotik_routeros"]["sync_network_data"]
+        self.host = Host(
+            name="198.51.100.1",
+            hostname="198.51.100.1",
+            platform="mikrotik_routeros",
+            connection_options={
+                "netmiko": ConnectionOptions(hostname="198.51.100.1", platform="mikrotik_routeros"),
+            },
+            defaults=Defaults(data={"sync_vlans": False, "sync_vrfs": False, "sync_cables": True}),
+        )
+
+    def _cables(self, fixture):
+        with open(f"{MOCK_DIR}/mikrotik_routeros/{fixture}", "r", encoding="utf-8") as command_info:
+            command_outputs = json.loads(command_info.read())
+        return perform_data_extraction(self.host, self.command_mapper, command_outputs, job_debug=False)["cables"]
+
+    def test_cables_keep_non_mikrotik_port_names(self):
+        self.assertEqual(
+            self._cables("command_getter_result_1.json"),
+            [
+                {"local_interface": "ether1", "remote_device": "isp-cpe01", "remote_interface": "ether7"},
+                {"local_interface": "ether2", "remote_device": "lan-ap01", "remote_interface": "ether1"},
+                {
+                    "local_interface": "ether5",
+                    "remote_device": "dist-sw01",
+                    "remote_interface": "GigabitEthernet1/0/24",
+                },
+            ],
+        )
+
+    def test_cables_use_mikrotik_member_port_and_skip_virtual_and_self(self):
+        # RouterOS 7 reports "bond1/ether2" for the neighbor's member port, VLAN interface neighbors are skipped
+        # and the router's own announcements (identity "lab chr6") are ignored.
+        self.assertEqual(
+            self._cables("command_getter_result_3.json"),
+            [
+                {"local_interface": "ether1", "remote_device": "lab chr7", "remote_interface": "ether1"},
+                {"local_interface": "ether2", "remote_device": "lab chr7", "remote_interface": "ether2"},
+                {"local_interface": "ether4", "remote_device": "lab chr7", "remote_interface": "vlan10-irb"},
+                {"local_interface": "ether5", "remote_device": "lab chr7", "remote_interface": "ether5"},
+            ],
+        )

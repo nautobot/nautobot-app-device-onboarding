@@ -31,7 +31,43 @@
         }
     ],
     "interface bridge vlan print detail": [
-        {}
+        {
+            "bridge_vlans": [
+                {
+                    "bridge": "bridge1",
+                    "comment": "",
+                    "current_tagged": "bridge1,ether5",
+                    "current_untagged": "ether2",
+                    "flags": "",
+                    "number": "0",
+                    "tagged": "bridge1,ether5",
+                    "untagged": "ether2",
+                    "vlan_ids": "10"
+                },
+                {
+                    "bridge": "bridge1",
+                    "comment": "all other VLANs on the trunk",
+                    "current_tagged": "bridge1,ether5",
+                    "current_untagged": "",
+                    "flags": "",
+                    "number": "1",
+                    "tagged": "bridge1,ether5",
+                    "untagged": "",
+                    "vlan_ids": "2-9,11-4094"
+                },
+                {
+                    "bridge": "bridge1",
+                    "comment": "",
+                    "current_tagged": "",
+                    "current_untagged": "ether5",
+                    "flags": "D",
+                    "number": "2",
+                    "tagged": "",
+                    "untagged": "",
+                    "vlan_ids": "1"
+                }
+            ]
+        }
     ],
     "interface print detail": [
         {
@@ -283,46 +319,66 @@
     ],
     "ip neighbor print detail": [
         {
-            "age": "21s",
-            "board": "CCR1009-7G-1C-1S+",
-            "identity": "isp-cpe01.example.net",
-            "interface": "ether1",
-            "interface_name": "ether7",
-            "ip_address": "203.0.113.1",
-            "ipv4_address": "203.0.113.1",
-            "ipv6": "",
-            "ipv6_address": "",
-            "mac_address": "CC:2D:E0:20:00:01",
-            "number": "0",
-            "platform": "MikroTik",
-            "software_id": "ABCD-1234",
-            "system_caps": "bridge,router",
-            "system_caps_enabled": "router",
-            "system_description": "MikroTik RouterOS 6.49.10 (long-term) CCR1009-7G-1C-1S+",
-            "unpack": "none",
-            "uptime": "12w3d4h10m2s",
-            "version": "6.49.10 (long-term)"
-        },
-        {
-            "age": "37s",
-            "board": "RBcAPGi-5acD2nD",
-            "identity": "lan-ap01",
-            "interface": "ether2,bridge1",
-            "interface_name": "ether1",
-            "ip_address": "",
-            "ipv4_address": "",
-            "ipv6": "",
-            "ipv6_address": "",
-            "mac_address": "CC:2D:E0:30:00:01",
-            "number": "1",
-            "platform": "MikroTik",
-            "software_id": "EFGH-5678",
-            "system_caps": "bridge,wlan-ap,router",
-            "system_caps_enabled": "bridge,wlan-ap",
-            "system_description": "MikroTik RouterOS 6.49.10 (long-term) RBcAPGi-5acD2nD",
-            "unpack": "none",
-            "uptime": "1d8h37m17s",
-            "version": "6.49.10 (long-term)"
+            "neighbors": [
+                {
+                    "address": "203.0.113.1",
+                    "address4": "203.0.113.1",
+                    "age": "21s",
+                    "board": "CCR1009-7G-1C-1S+",
+                    "comment": "",
+                    "flags": "",
+                    "identity": "isp-cpe01.example.net",
+                    "interface": "ether1",
+                    "interface_name": "ether7",
+                    "mac_address": "CC:2D:E0:20:00:01",
+                    "number": "0",
+                    "platform": "MikroTik",
+                    "software_id": "ABCD-1234",
+                    "system_caps": "bridge,router",
+                    "system_caps_enabled": "router",
+                    "system_description": "MikroTik RouterOS 6.49.10 (long-term) CCR1009-7G-1C-1S+",
+                    "unpack": "none",
+                    "uptime": "12w3d4h10m2s",
+                    "version": "6.49.10 (long-term)"
+                },
+                {
+                    "age": "37s",
+                    "board": "RBcAPGi-5acD2nD",
+                    "comment": "",
+                    "flags": "",
+                    "identity": "lan-ap01",
+                    "interface": "ether2,bridge1",
+                    "interface_name": "ether1",
+                    "mac_address": "CC:2D:E0:30:00:01",
+                    "number": "1",
+                    "platform": "MikroTik",
+                    "software_id": "EFGH-5678",
+                    "system_caps": "bridge,wlan-ap,router",
+                    "system_caps_enabled": "bridge,wlan-ap",
+                    "system_description": "MikroTik RouterOS 6.49.10 (long-term) RBcAPGi-5acD2nD",
+                    "unpack": "none",
+                    "uptime": "1d8h37m17s",
+                    "version": "6.49.10 (long-term)"
+                },
+                {
+                    "address": "192.0.2.20",
+                    "address4": "192.0.2.20",
+                    "age": "24s",
+                    "comment": "",
+                    "discovered_by": "lldp",
+                    "flags": "",
+                    "identity": "dist-sw01.example.com",
+                    "interface": "ether5,bridge1",
+                    "interface_name": "GigabitEthernet1/0/24",
+                    "mac_address": "00:1B:2C:3D:4E:5F",
+                    "number": "2",
+                    "platform": "Cisco IOS",
+                    "system_caps": "bridge,router",
+                    "system_caps_enabled": "bridge",
+                    "system_description": "Cisco IOS Software, C2960X Software",
+                    "version": "15.2(7)E8"
+                }
+            ]
         }
     ],
     "ip route vrf print": [
@@ -426,15 +482,44 @@
     ],
     "system routerboard print": [
         {
-            "board_name": "hEX",
-            "current_firmware": "6.49",
-            "factory_firmware": "6.48",
-            "firmware_type": "mt7621L",
-            "hardware_model": "RB750Gr3",
-            "revision": "r4",
-            "routerboard": "yes",
-            "serial_number": "CC210E592C82",
-            "upgrade_firmware": "6.49"
+            "system": [
+                {
+                    "key": "routerboard",
+                    "value": "yes"
+                },
+                {
+                    "key": "board-name",
+                    "value": "hEX"
+                },
+                {
+                    "key": "model",
+                    "value": "RB750Gr3"
+                },
+                {
+                    "key": "revision",
+                    "value": "r4"
+                },
+                {
+                    "key": "serial-number",
+                    "value": "CC210E592C82"
+                },
+                {
+                    "key": "firmware-type",
+                    "value": "mt7621L"
+                },
+                {
+                    "key": "factory-firmware",
+                    "value": "6.48"
+                },
+                {
+                    "key": "current-firmware",
+                    "value": "6.49"
+                },
+                {
+                    "key": "upgrade-firmware",
+                    "value": "6.49"
+                }
+            ]
         }
     ]
 }

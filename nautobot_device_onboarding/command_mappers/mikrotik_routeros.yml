@@ -30,16 +30,16 @@ sync_devices:
   serial:
     commands:
       - command: "system routerboard print"
-        parser: "textfsm"
-        jpath: "[*].serial_number"
+        parser: "ttp"
+        jpath: "[0].system[?key=='serial-number'].value"
         # CHR/x86 have no RouterBOARD serial, fall back to the license id.
         post_processor: "{% if obj and obj[0] %}{{ obj[0] }}{% else %}{{ license_id }}{% endif %}"
         iterable_type: "str"
   device_type:
     commands:
       - command: "system routerboard print"
-        parser: "textfsm"
-        jpath: "[*].hardware_model"
+        parser: "ttp"
+        jpath: "[0].system[?key=='model'].value"
         # CHR/x86 report "routerboard: no" without a model, fall back to the resource board-name.
         post_processor: "{% if obj and obj[0] %}{{ obj[0] }}{% else %}{{ board_name }}{% endif %}"
         iterable_type: "str"
@@ -85,13 +85,26 @@ sync_network_data:
           parser: "ttp"
           jpath: "[0].vlans[*].{parent: interface, vid: vlan_id}"
           iterable_type: "list"
-    bridge_vlans:
+    bridge_port_vlans:
       commands:
         - command: "interface bridge vlan print detail"
           parser: "ttp"
           # current-* include the dynamic entries RouterOS adds for port PVIDs.
           jpath: "[0].bridge_vlans[*].{vids: vlan_ids, tagged: current_tagged, untagged: current_untagged}"
-          iterable_type: "list"
+          # {port: {"tagged": [vid, ...], "untagged": [vid, ...]}}, VLAN ranges such as "2-9,11-4094" expanded once.
+          post_processor: |
+            {%- set ports = {} -%}
+            {%- for vlan in obj if vlan['vids'] -%}
+              {%- set vids = vlan['vids'] | vlanconfig_to_list -%}
+              {%- for membership in ('tagged', 'untagged') -%}
+                {%- for port in (vlan[membership] or '').split(',') if port -%}
+                  {%- if port not in ports -%}{%- set _ = ports.update({port: {'tagged': [], 'untagged': []}}) -%}{%- endif -%}
+                  {%- set _ = ports[port][membership].extend(vids) -%}
+                {%- endfor -%}
+              {%- endfor -%}
+            {%- endfor -%}
+            {{- ports | tojson -}}
+          iterable_type: "dict"
     v6_vrfs:
       commands:
         - command: "ip route vrf print"
@@ -102,8 +115,8 @@ sync_network_data:
   serial:
     commands:
       - command: "system routerboard print"
-        parser: "textfsm"
-        jpath: "[*].serial_number"
+        parser: "ttp"
+        jpath: "[0].system[?key=='serial-number'].value"
         post_processor: "{% if obj and obj[0] %}{{ obj[0] }}{% else %}{{ license_id }}{% endif %}"
         iterable_type: "str"
   interfaces:
@@ -189,15 +202,15 @@ sync_network_data:
       - command: "interface print detail"
         parser: "ttp"
         jpath: "[0].interfaces[?name=='{{ current_key }}'].name"
-        # Tagged: parent of VLAN interfaces or tagged bridge VLAN member. Access: untagged bridge member only.
+        # Tagged-all: bridge member carrying every VLAN 2-4094. Tagged: parent of VLAN interfaces or tagged bridge
+        # VLAN member. Access: untagged bridge member only.
         post_processor: |
-          {%- set ns = namespace(tagged=false, untagged=false) -%}
-          {%- for vlan in vlan_subinterfaces if vlan['parent'] == current_key -%}{%- set ns.tagged = true -%}{%- endfor -%}
-          {%- for vlan in bridge_vlans -%}
-            {%- if current_key in (vlan['tagged'] or '').split(',') -%}{%- set ns.tagged = true -%}{%- endif -%}
-            {%- if current_key in (vlan['untagged'] or '').split(',') -%}{%- set ns.untagged = true -%}{%- endif -%}
-          {%- endfor -%}
-          {%- if ns.tagged -%}{{- 'tagged' -}}{%- elif ns.untagged -%}{{- 'access' -}}{%- endif -%}
+          {%- set port = bridge_port_vlans.get(current_key, {'tagged': [], 'untagged': []}) -%}
+          {%- set carried = (port['tagged'] + port['untagged']) | unique | select('ge', 2) | list | length -%}
+          {%- if carried >= 4093 -%}{{- 'tagged-all' -}}
+          {%- elif port['tagged'] or vlan_subinterfaces | selectattr('parent', 'equalto', current_key) | list -%}{{- 'tagged' -}}
+          {%- elif port['untagged'] -%}{{- 'access' -}}
+          {%- endif -%}
         iterable_type: "str"
   interfaces__lag:
     commands:
@@ -223,12 +236,14 @@ sync_network_data:
         parser: "ttp"
         jpath: "[0].interfaces[?name=='{{ current_key }}'].name"
         # RouterOS has no global VLAN names, so use the same VLANxxxx naming as get_vlan_data.
+        # Tagged-all ports carry no tagged list, like get_vlan_data.
         post_processor: |
-          {%- set vids = [] -%}
-          {%- for vlan in vlan_subinterfaces if vlan['parent'] == current_key -%}{%- set _ = vids.append(vlan['vid'] | int) -%}{%- endfor -%}
-          {%- for vlan in bridge_vlans if vlan['vids'] and current_key in (vlan['tagged'] or '').split(',') -%}{%- set _ = vids.extend(vlan['vids'] | vlanconfig_to_list) -%}{%- endfor -%}
+          {%- set port = bridge_port_vlans.get(current_key, {'tagged': [], 'untagged': []}) -%}
           {%- set result = [] -%}
-          {%- for vid in vids | unique | sort -%}{%- set _ = result.append({'id': vid | string, 'name': 'VLAN' ~ (vid | string).zfill(4)}) -%}{%- endfor -%}
+          {%- if ((port['tagged'] + port['untagged']) | unique | select('ge', 2) | list | length) < 4093 -%}
+            {%- set vids = port['tagged'] + vlan_subinterfaces | selectattr('parent', 'equalto', current_key) | map(attribute='vid') | map('int') | list -%}
+            {%- for vid in vids | unique | sort -%}{%- set _ = result.append({'id': vid | string, 'name': 'VLAN' ~ (vid | string).zfill(4)}) -%}{%- endfor -%}
+          {%- endif -%}
           {{- result | tojson -}}
   interfaces__untagged_vlan:
     commands:
@@ -236,8 +251,7 @@ sync_network_data:
         parser: "ttp"
         jpath: "[0].interfaces[?name=='{{ current_key }}'].name"
         post_processor: |
-          {%- set vids = [] -%}
-          {%- for vlan in bridge_vlans if vlan['vids'] and current_key in (vlan['untagged'] or '').split(',') -%}{%- set _ = vids.extend(vlan['vids'] | vlanconfig_to_list) -%}{%- endfor -%}
+          {%- set vids = bridge_port_vlans.get(current_key, {'untagged': []})['untagged'] -%}
           {%- if vids -%}{{- {'id': vids[0] | string, 'name': 'VLAN' ~ (vids[0] | string).zfill(4)} | tojson -}}{%- else -%}{{- {} | tojson -}}{%- endif -%}
         iterable_type: "dict"
   software_version:
@@ -251,16 +265,18 @@ sync_network_data:
   cables:
     commands:
       - command: "ip neighbor print detail"
-        parser: "textfsm"
-        jpath: "[*].{local_interface: interface, remote_interface: interface_name, remote_device: identity}"
-        # Local interface is "<port>,<bridge or bond>" for member ports and 7.x reports remote member ports as
-        # "<bridge or bond>/<port>". Neighbors seen on VLAN/bridge interfaces and the device itself are skipped.
+        parser: "ttp"
+        jpath: "[0].neighbors[*].{local_interface: interface, remote_interface: interface_name, remote_device: identity, platform: platform}"
+        # Local interface is "<port>,<bridge or bond>" for member ports and MikroTik neighbors report their member
+        # ports as "<bridge or bond>/<port>" (other vendors use "/" in port names, e.g. "GigabitEthernet1/0/1").
+        # Neighbors seen on VLAN/bridge interfaces and the device itself are skipped.
         post_processor: |
           {%- set result = [] -%}
           {%- for neighbor in obj -%}
             {%- set local = (neighbor['local_interface'] or '').split(',') | first -%}
             {%- if neighbor['remote_interface'] and neighbor['remote_device'] and local in physical_ports and neighbor['remote_device'] != hostname -%}
-              {%- set cable = {'local_interface': local, 'remote_interface': neighbor['remote_interface'].split('/') | last, 'remote_device': neighbor['remote_device'] | remove_fqdn} -%}
+              {%- set remote_interface = neighbor['remote_interface'].split('/') | last if neighbor['platform'] == 'MikroTik' else neighbor['remote_interface'] -%}
+              {%- set cable = {'local_interface': local, 'remote_interface': remote_interface, 'remote_device': neighbor['remote_device'] | remove_fqdn} -%}
               {%- if cable not in result -%}{%- set _ = result.append(cable) -%}{%- endif -%}
             {%- endif -%}
           {%- endfor -%}

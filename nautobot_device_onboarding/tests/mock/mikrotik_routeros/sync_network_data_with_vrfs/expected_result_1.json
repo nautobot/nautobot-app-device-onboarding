@@ -12,7 +12,7 @@
             "vrf": {}
         },
         "bridge1": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "LAN bridge",
             "ip_addresses": [
                 {
@@ -44,7 +44,7 @@
             "vrf": {}
         },
         "ether2": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "access",
             "description": "",
             "ip_addresses": [],
             "lag": "",
@@ -77,7 +77,7 @@
             "vrf": {}
         },
         "ether5": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "",
             "ip_addresses": [],
             "lag": "",

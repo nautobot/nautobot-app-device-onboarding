@@ -752,25 +752,31 @@
     ],
     "ip neighbor print detail": [
         {
-            "age": "7s",
-            "board": "RB450Gx4",
-            "identity": "core-rtr01.example.com",
-            "interface": "sfp-sfpplus1",
-            "interface_name": "ether1",
-            "ip_address": "1.2.4.5",
-            "ipv4_address": "1.2.4.5",
-            "ipv6": "yes",
-            "ipv6_address": "2001:0db8:11a3:09d7:1f34:8a2e:07a0:765d",
-            "mac_address": "12:34:56:78:90:AB",
-            "number": "0",
-            "platform": "MikroTik",
-            "software_id": "AAAA-BBBB",
-            "system_caps": "bridge,router",
-            "system_caps_enabled": "router",
-            "system_description": "MikroTik RouterOS 7.15.1 (stable) 2024-06-07 12:49:11 RB450Gx4",
-            "unpack": "none",
-            "uptime": "1d8h37m20s",
-            "version": "7.15.1 (stable) 2024-06-07 12:49:11"
+            "neighbors": [
+                {
+                    "address": "1.2.4.5",
+                    "address4": "1.2.4.5",
+                    "address6": "2001:0db8:11a3:09d7:1f34:8a2e:07a0:765d",
+                    "age": "7s",
+                    "board": "RB450Gx4",
+                    "comment": "",
+                    "flags": "",
+                    "identity": "core-rtr01.example.com",
+                    "interface": "sfp-sfpplus1",
+                    "interface_name": "ether1",
+                    "ipv6": "yes",
+                    "mac_address": "12:34:56:78:90:AB",
+                    "number": "0",
+                    "platform": "MikroTik",
+                    "software_id": "AAAA-BBBB",
+                    "system_caps": "bridge,router",
+                    "system_caps_enabled": "router",
+                    "system_description": "MikroTik RouterOS 7.15.1 (stable) 2024-06-07 12:49:11 RB450Gx4",
+                    "unpack": "none",
+                    "uptime": "1d8h37m20s",
+                    "version": "7.15.1 (stable) 2024-06-07 12:49:11"
+                }
+            ]
         }
     ],
     "ip route vrf print": [
@@ -870,15 +876,44 @@
     ],
     "system routerboard print": [
         {
-            "board_name": "CCR2004-1G-12S+2XS",
-            "current_firmware": "7.12.2",
-            "factory_firmware": "7.6",
-            "firmware_type": "al52390",
-            "hardware_model": "CCR2004-1G-12S+2XS",
-            "revision": "r2",
-            "routerboard": "yes",
-            "serial_number": "HEB08XXXXXA",
-            "upgrade_firmware": "7.12.2"
+            "system": [
+                {
+                    "key": "routerboard",
+                    "value": "yes"
+                },
+                {
+                    "key": "board-name",
+                    "value": "CCR2004-1G-12S+2XS"
+                },
+                {
+                    "key": "model",
+                    "value": "CCR2004-1G-12S+2XS"
+                },
+                {
+                    "key": "revision",
+                    "value": "r2"
+                },
+                {
+                    "key": "serial-number",
+                    "value": "HEB08XXXXXA"
+                },
+                {
+                    "key": "firmware-type",
+                    "value": "al52390"
+                },
+                {
+                    "key": "factory-firmware",
+                    "value": "7.6"
+                },
+                {
+                    "key": "current-firmware",
+                    "value": "7.12.2"
+                },
+                {
+                    "key": "upgrade-firmware",
+                    "value": "7.12.2"
+                }
+            ]
         }
     ]
 }

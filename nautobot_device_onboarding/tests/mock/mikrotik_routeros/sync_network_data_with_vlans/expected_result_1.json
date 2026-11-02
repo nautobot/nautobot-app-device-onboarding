@@ -22,7 +22,7 @@
             "untagged_vlan": {}
         },
         "bridge1": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "LAN bridge",
             "ip_addresses": [
                 {
@@ -56,7 +56,7 @@
             "untagged_vlan": {}
         },
         "ether2": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "access",
             "description": "",
             "ip_addresses": [],
             "lag": "",
@@ -65,7 +65,10 @@
             "mtu": "1500",
             "tagged_vlans": [],
             "type": "1000base-t",
-            "untagged_vlan": {}
+            "untagged_vlan": {
+                "id": "10",
+                "name": "VLAN0010"
+            }
         },
         "ether3": {
             "802.1Q_mode": "",
@@ -92,7 +95,7 @@
             "untagged_vlan": {}
         },
         "ether5": {
-            "802.1Q_mode": "",
+            "802.1Q_mode": "tagged-all",
             "description": "",
             "ip_addresses": [],
             "lag": "",
@@ -101,7 +104,10 @@
             "mtu": "1500",
             "tagged_vlans": [],
             "type": "1000base-t",
-            "untagged_vlan": {}
+            "untagged_vlan": {
+                "id": "1",
+                "name": "VLAN0001"
+            }
         },
         "gre-tunnel1": {
             "802.1Q_mode": "",
