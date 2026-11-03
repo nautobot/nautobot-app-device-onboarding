@@ -1,5 +1,6 @@
 """Test Cisco Support adapter."""
 
+import copy
 from unittest.mock import MagicMock, patch
 
 from django.contrib.contenttypes.models import ContentType
@@ -245,6 +246,17 @@ class SyncNetworkDataNetworkAdapterTestCase(TransactionTestCase):
                     self.assertEqual(interface_data["untagged_vlan"], diffsync_obj.untagged_vlan)
                 else:
                     self.assertEqual({}, diffsync_obj.untagged_vlan)
+
+    def test_load_untagged_vlan_to_interface_empty_list(self):
+        """An untagged vlan returned as an empty list should be loaded as an empty dict instead of failing."""
+        self.job.command_getter_result = copy.deepcopy(self.job.command_getter_result)
+        hostname = next(iter(self.job.command_getter_result))
+        interface_name = next(iter(self.job.command_getter_result[hostname]["interfaces"]))
+        self.job.command_getter_result[hostname]["interfaces"][interface_name]["untagged_vlan"] = []
+
+        self.sync_network_data_adapter.load_untagged_vlan_to_interface()
+        diffsync_obj = self.sync_network_data_adapter.get("untagged_vlan_to_interface", f"{hostname}__{interface_name}")
+        self.assertEqual({}, diffsync_obj.untagged_vlan)
 
     def test_load_lag_to_interface(self):
         """Test loading lag interface assignments into the Diffsync store."""

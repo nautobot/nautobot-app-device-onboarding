@@ -886,7 +886,7 @@ class SyncNetworkDataNetworkAdapter(diffsync.Adapter):
                         adapter=self,
                         device__name=hostname,
                         name=interface_name,
-                        untagged_vlan=interface_data["untagged_vlan"],
+                        untagged_vlan=interface_data["untagged_vlan"] or {}, # empty dict instead of empty list when no untagged vlan
                     )
                     self.add(network_untagged_vlan_to_interface)
 
