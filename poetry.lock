@@ -5988,25 +5988,27 @@ paramiko = "*"
 
 [[package]]
 name = "scrapli"
-version = "2026.10.14"
-description = "Fast, flexible, sync/async, Python 3.10+ screen scraping client specifically for network devices"
+version = "2026.2.20"
+description = "Fast, flexible, sync/async, Python 3.7+ screen scraping client specifically for network devices"
 optional = false
-python-versions = ">=3.10"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "scrapli-2026.10.14-py3-none-macosx_11_0_arm64.whl", hash = "sha256:0ee963ca2a26baf19fa5bafb4065648bceb6d787bef66f39cf6ca0a97fe13cf8"},
-    {file = "scrapli-2026.10.14-py3-none-manylinux2010_x86_64.whl", hash = "sha256:d35780ef4dae478dfb08889e99d0519201003ae170a4824ecabbef789c4f49f5"},
-    {file = "scrapli-2026.10.14-py3-none-manylinux2014_aarch64.whl", hash = "sha256:e640c5fbe1eb441256ae07de46f4b389bd6baf50c06cc800bac1d7db927de9ce"},
-    {file = "scrapli-2026.10.14-py3-none-musllinux_1_1_aarch64.whl", hash = "sha256:cc301b381da9e054f7cbd523f660f15e92d34da7c249f2683c5787f7ba8dbd1b"},
-    {file = "scrapli-2026.10.14-py3-none-musllinux_1_1_x86_64.whl", hash = "sha256:769c114d8e3fbecdbe1431515146974a07dc42337b85e846f87e60f90275a15f"},
-    {file = "scrapli-2026.10.14.tar.gz", hash = "sha256:85479f5a944595166d624e4aca6919309b1d3a869f4289361b0e9a42a15049dc"},
+    {file = "scrapli-2026.2.20-py3-none-any.whl", hash = "sha256:abbe6f0d70e9b59166e590a74335781e4b5987a488403e08110ce75321a255af"},
+    {file = "scrapli-2026.2.20.tar.gz", hash = "sha256:b6f8492110601c11ca8394d8540814464bb97681b87e92b30bb6853b5213558a"},
 ]
 
 [package.extras]
-dev = ["black (>=25.1.0,<27.0.0)", "genie (>=20.2)", "isort (>=6.0.1,<10.0.0)", "mypy (>=1.15.0,<3.0.0)", "nox (==2026.8.17)", "ntc-templates (>=1.1.0,<10.0.0)", "pyats (>=20.2)", "pytest (>=8.3.5,<10.0.0)", "pytest-asyncio (>=0.26.0,<2.0.0)", "pytest-cov (>=6.1.1,<8.0.0)", "ruff (>=0.11.8,<1.0.0)", "textfsm (>=1.1.0,<3.0.0)"]
-full = ["genie (>=20.2)", "ntc-templates (>=1.1.0,<10.0.0)", "pyats (>=20.2)", "textfsm (>=1.1.0,<3.0.0)"]
-genie = ["genie (>=20.2)", "pyats (>=20.2)"]
-textfsm = ["ntc-templates (>=1.1.0,<10.0.0)", "textfsm (>=1.1.0,<3.0.0)"]
+asyncssh = ["asyncssh (>=2.2.1,<3.0.0)"]
+community = ["scrapli_community (>=2021.01.30)"]
+dev = ["asyncssh (>=2.2.1,<3.0.0)", "black (>=23.3.0,<25.0.0)", "darglint (>=1.8.1,<2.0.0)", "genie (>=20.2) ; sys_platform != \"win32\" and python_version < \"3.13\"", "isort (>=5.10.1,<6.0.0)", "mypy (>=1.4.1,<2.0.0)", "nox (==2024.4.15)", "ntc-templates (>=1.1.0,<8.0.0)", "paramiko (>=2.6.0,<4.0.0)", "pyats (>=20.2) ; sys_platform != \"win32\" and python_version < \"3.13\"", "pydocstyle (>=6.1.1,<7.0.0)", "pyfakefs (>=5.4.1,<6.0.0)", "pylint (>=3.0.0,<4.0.0)", "pytest (>=7.0.0,<8.0.0)", "pytest-asyncio (>=0.17.0,<1.0.0)", "pytest-cov (>=3.0.0,<5.0.0)", "scrapli-cfg (==2023.7.30)", "scrapli-replay (==2023.7.30)", "scrapli_community (>=2021.01.30)", "ssh2-python (>=0.23.0,<2.0.0) ; python_version < \"3.12\"", "textfsm (>=1.1.0,<2.0.0)", "toml (>=0.10.2,<1.0.0)", "ttp (>=0.5.0,<1.0.0)", "types-paramiko (>=2.8.6,<4.0.0)"]
+dev-darwin = ["asyncssh (>=2.2.1,<3.0.0)", "black (>=23.3.0,<25.0.0)", "darglint (>=1.8.1,<2.0.0)", "genie (>=20.2) ; sys_platform != \"win32\" and python_version < \"3.13\"", "isort (>=5.10.1,<6.0.0)", "mypy (>=1.4.1,<2.0.0)", "nox (==2024.4.15)", "ntc-templates (>=1.1.0,<8.0.0)", "paramiko (>=2.6.0,<4.0.0)", "pyats (>=20.2) ; sys_platform != \"win32\" and python_version < \"3.13\"", "pydocstyle (>=6.1.1,<7.0.0)", "pyfakefs (>=5.4.1,<6.0.0)", "pylint (>=3.0.0,<4.0.0)", "pytest (>=7.0.0,<8.0.0)", "pytest-asyncio (>=0.17.0,<1.0.0)", "pytest-cov (>=3.0.0,<5.0.0)", "scrapli-cfg (==2023.7.30)", "scrapli-replay (==2023.7.30)", "scrapli_community (>=2021.01.30)", "textfsm (>=1.1.0,<2.0.0)", "toml (>=0.10.2,<1.0.0)", "ttp (>=0.5.0,<1.0.0)", "types-paramiko (>=2.8.6,<4.0.0)"]
+docs = ["mdx-gh-links (>=0.2,<1.0)", "mkdocs (>=1.2.3,<2.0.0)", "mkdocs-gen-files (>=0.4.0,<1.0.0)", "mkdocs-literate-nav (>=0.5.0,<1.0.0)", "mkdocs-material (>=8.1.6,<10.0.0)", "mkdocs-material-extensions (>=1.0.3,<2.0.0)", "mkdocs-section-index (>=0.3.4,<1.0.0)", "mkdocstrings[python] (>=0.19.0,<1.0.0)"]
+genie = ["genie (>=20.2) ; sys_platform != \"win32\" and python_version < \"3.13\"", "pyats (>=20.2) ; sys_platform != \"win32\" and python_version < \"3.13\""]
+paramiko = ["paramiko (>=2.6.0,<4.0.0)"]
+ssh2 = ["ssh2-python (>=0.23.0,<2.0.0) ; python_version < \"3.12\""]
+textfsm = ["ntc-templates (>=1.1.0,<8.0.0)", "textfsm (>=1.1.0,<2.0.0)"]
+ttp = ["ttp (>=0.5.0,<1.0.0)"]
 
 [[package]]
 name = "scrapli-cfg"
@@ -6819,4 +6821,4 @@ all = []
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.10,<3.13"
-content-hash = "9f0df7a5ad14cd5a1016811694e00c6fb59d5dcee83b7641e7217012fe6c1ba8"
+content-hash = "e067c9b68fbe06bb09499e617e284d4bfaecfec73f31ce4667e8cb03f1da01dd"
