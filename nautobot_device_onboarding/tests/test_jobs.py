@@ -392,7 +392,9 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
                     name="SSOTSyncDevices",
                     **sync_devices_job_form_inputs,
                 )
-                sync_network_data_job_form_inputs["devices"] = Device.objects.filter(name="fake-nxos-01")
+                sync_network_data_job_form_inputs["devices"] = list(
+                    Device.objects.filter(name="fake-nxos-01").values_list("pk", flat=True)
+                )
                 create_job_result_and_run_job(
                     module="nautobot_device_onboarding.jobs",
                     name="SSOTSyncNetworkData",
@@ -509,7 +511,9 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
                     name="SSOTSyncDevices",
                     **sync_devices_job_form_inputs,
                 )
-                sync_network_data_job_form_inputs["devices"] = Device.objects.filter(name="fake-xe-01")
+                sync_network_data_job_form_inputs["devices"] = list(
+                    Device.objects.filter(name="fake-xe-01").values_list("pk", flat=True)
+                )
                 create_job_result_and_run_job(
                     module="nautobot_device_onboarding.jobs",
                     name="SSOTSyncNetworkData",
