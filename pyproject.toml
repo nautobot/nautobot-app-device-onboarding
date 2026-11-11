@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nautobot-device-onboarding"
-version = "4.4.6"
+version = "4.4.7"
 description = "A app for Nautobot to easily onboard new devices."
 authors = ["Network to Code, LLC <info@networktocode.com>"]
 license = "Apache-2.0"
@@ -37,6 +37,8 @@ ntc-templates = ">=9.0.0"
 # Netutils pin is needed for https://github.com/networktocode/netutils/pull/553
 netutils = "^1.9.1"
 ttp = ">=0.9.0,<0.11.0"
+# Scrapli 2026.10.x is a ground-up rewrite; the scrapli.driver and scrapli.factory modules that nornir-scrapli uses are gone.
+scrapli = ">=2024.1.30,<2026.2.21"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "*"

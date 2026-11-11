@@ -10,6 +10,16 @@ This document describes all new features and changes in the release. The format 
 <!-- towncrier release notes start -->
 
 
+## [v4.4.7 (2026-11-10)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.4.7)
+
+### Dependencies
+
+- Widen the ttp dependency range to include 0.10 minor version.
+
+### Housekeeping
+
+- Rebaked from the cookie `nautobot-app-v2.7.3`.
+
 ## [v4.4.6 (2026-06-29)](https://github.com/nautobot/nautobot-app-device-onboarding/releases/tag/v4.4.6)
 
 ### Fixed
