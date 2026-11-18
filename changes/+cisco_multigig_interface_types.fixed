@@ -1,0 +1,1 @@
+Fixed Cisco mGig (2.5G/5G) and 25G/40G/100G interfaces being onboarded with interface type `other`.

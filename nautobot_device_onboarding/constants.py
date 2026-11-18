@@ -30,7 +30,12 @@ SUPPORTED_COMMAND_PARSERS = ["textfsm", "ttp"]
 # InterfaceTypeChoices.as_dict() doesn't directly fit yet.  Seems like maybe netutils needs the "human readible" nb choices.
 INTERFACE_TYPE_MAP_STATIC = {
     "Gigabit Ethernet": "1000base-t",
+    "Two Gigabit Ethernet": "2.5gbase-t",
+    "Five Gigabit Ethernet": "5gbase-t",
     "Ten Gigabit Ethernet": "10gbase-t",
+    "Twenty Five Gigabit Ethernet": "25gbase-x-sfp28",
+    "Forty Gigabit Ethernet": "40gbase-x-qsfpp",
+    "Hundred Gigabit Ethernet": "100gbase-x-qsfp28",
     "Ethernet SVI": "virtual",
     "EtherChannel": "lag",
     "1000/10000 Ethernet": "1000base-t",
