@@ -579,15 +579,15 @@ class SSOTSyncNetworkDataTestCase(TransactionTestCase):
         self.assertSequenceEqual(eth1_62.tagged_vlans.values_list("vid", flat=True), [10, 20])
         self.assertEqual(eth1_62.untagged_vlan.vid, 1)
 
-        # VLANS 100-120 should be created for Ethernet1/63 -- switchport trunk allowed vlan 100-120
+        # Only VLANs that exist on the device are created for Ethernet1/63 -- switchport trunk allowed vlan 100-120
         eth1_63 = device_obj.interfaces.filter(name="Ethernet1/63").first()
         self.assertIsNotNone(eth1_63)
         self.assertEqual(eth1_63.mode, InterfaceModeChoices.MODE_TAGGED)
-        self.assertSequenceEqual(eth1_63.tagged_vlans.values_list("vid", flat=True), range(100, 121))
+        self.assertSequenceEqual(eth1_63.tagged_vlans.values_list("vid", flat=True), [100, 110, 120])
         self.assertEqual(eth1_63.untagged_vlan.vid, 1)
 
         self.assertEqual(
-            initial_vlans.union({1, 10, 20, *range(100, 121)}),
+            initial_vlans.union({1, 10, 20, 100, 110, 120}),
             set(VLAN.objects.values_list("vid", flat=True)),
         )
 
