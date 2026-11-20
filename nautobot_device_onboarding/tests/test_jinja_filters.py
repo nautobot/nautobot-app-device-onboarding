@@ -240,6 +240,26 @@ class TestJinjaFilters(unittest.TestCase):
         self.assertEqual(expected_value, actual_value)
 
     @unittest.mock.patch("nautobot_device_onboarding.jinja_filters.interface_mode_logic")
+    def test_get_vlan_data_tagged_range_only_existing_vlans(self, mock_mode):
+        """Trunk allowed ranges only yield VLANs that exist on the device."""
+        mock_mode.return_value = "tagged"
+        expected_value = [{"id": "10", "name": "DATA"}, {"id": "20", "name": "VOICE"}, {"id": "999", "name": "MGMT"}]
+        actual_value = get_vlan_data(
+            [{"access_vlan": "1", "trunking_vlans": ["1-1000"]}],
+            {"10": "DATA", "20": "VOICE", "999": "MGMT", "2000": "OUTSIDE"},
+            "tagged",
+        )
+        self.assertEqual(expected_value, actual_value)
+
+    @unittest.mock.patch("nautobot_device_onboarding.jinja_filters.interface_mode_logic")
+    def test_get_vlan_data_tagged_range_no_vlan_map(self, mock_mode):
+        """Without a VLAN database, fall back to expanding the full trunk range."""
+        mock_mode.return_value = "tagged"
+        expected_value = [{"id": "10", "name": "VLAN0010"}, {"id": "11", "name": "VLAN0011"}]
+        actual_value = get_vlan_data([{"access_vlan": "1", "trunking_vlans": ["10-11"]}], {}, "tagged")
+        self.assertEqual(expected_value, actual_value)
+
+    @unittest.mock.patch("nautobot_device_onboarding.jinja_filters.interface_mode_logic")
     def test_get_vlan_data_access_tagged_vlans_defined_trunking_as_str(self, mock_mode):
         """Get vlan information from an item."""
         mock_mode.return_value = "tagged"
@@ -248,18 +268,18 @@ class TestJinjaFilters(unittest.TestCase):
         self.assertEqual(expected_value, actual_value)
 
     @unittest.mock.patch("nautobot_device_onboarding.jinja_filters.interface_mode_logic")
-    def test_get_vlan_data_access_tagged_vlans_no_name_trunking_as_list(self, mock_mode):
-        """Get vlan information from an item."""
+    def test_get_vlan_data_tagged_vlan_missing_from_device_trunking_as_list(self, mock_mode):
+        """Trunk VLANs that don't exist in the device's VLAN database are skipped."""
         mock_mode.return_value = "tagged"
-        expected_value = [{"id": "12", "name": "VLAN0012"}]
+        expected_value = []
         actual_value = get_vlan_data([{"access_vlan": "10", "trunking_vlans": ["12"]}], {"10": "DATA"}, "tagged")
         self.assertEqual(expected_value, actual_value)
 
     @unittest.mock.patch("nautobot_device_onboarding.jinja_filters.interface_mode_logic")
-    def test_get_vlan_data_access_tagged_vlans_no_name_trunking_as_str(self, mock_mode):
-        """Get vlan information from an item."""
+    def test_get_vlan_data_tagged_vlan_missing_from_device_trunking_as_str(self, mock_mode):
+        """Trunk VLANs that don't exist in the device's VLAN database are skipped."""
         mock_mode.return_value = "tagged"
-        expected_value = [{"id": "12", "name": "VLAN0012"}]
+        expected_value = []
         actual_value = get_vlan_data([{"access_vlan": "10", "trunking_vlans": "12"}], {"10": "DATA"}, "tagged")
         self.assertEqual(expected_value, actual_value)
 

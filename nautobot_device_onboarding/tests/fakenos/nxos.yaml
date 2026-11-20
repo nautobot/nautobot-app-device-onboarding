@@ -393,6 +393,10 @@ commands:
       20   VOICE                            active    Eth1/61, Eth1/62, Eth1/63
       30   WLAN                             active    Eth1/61, Eth1/63
       40   PRINTERS                         active    Eth1/61, Eth1/63
+      100  SERVERS                          active    Eth1/61, Eth1/63
+      110  STORAGE                          active    Eth1/61, Eth1/63
+      120  BACKUP                           active    Eth1/61, Eth1/63
+      500  OUT_OF_RANGE                     active    Eth1/61
 
       VLAN Type         Vlan-mode
       ---- -----        ----------
@@ -401,6 +405,10 @@ commands:
       20   enet         CE
       30   enet         CE
       40   enet         CE
+      100  enet         CE
+      110  enet         CE
+      120  enet         CE
+      500  enet         CE
 
       Remote SPAN VLANs
       -------------------------------------------------------------------------------

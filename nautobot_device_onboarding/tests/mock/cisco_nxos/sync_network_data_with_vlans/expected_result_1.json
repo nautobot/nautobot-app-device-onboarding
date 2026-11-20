@@ -415,32 +415,7 @@
             "link_status": "True",
             "mac_address": "286f.7f7e.9a08",
             "mtu": "9216",
-            "tagged_vlans": [
-                {
-                    "id": "851",
-                    "name": "VLAN0851"
-                },
-                {
-                    "id": "852",
-                    "name": "VLAN0852"
-                },
-                {
-                    "id": "853",
-                    "name": "VLAN0853"
-                },
-                {
-                    "id": "854",
-                    "name": "VLAN0854"
-                },
-                {
-                    "id": "855",
-                    "name": "VLAN0855"
-                },
-                {
-                    "id": "856",
-                    "name": "VLAN0856"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
                 "id": "1",
@@ -511,32 +486,7 @@
             "link_status": "True",
             "mac_address": "286f.7f7e.9a09",
             "mtu": "9216",
-            "tagged_vlans": [
-                {
-                    "id": "851",
-                    "name": "VLAN0851"
-                },
-                {
-                    "id": "852",
-                    "name": "VLAN0852"
-                },
-                {
-                    "id": "853",
-                    "name": "VLAN0853"
-                },
-                {
-                    "id": "854",
-                    "name": "VLAN0854"
-                },
-                {
-                    "id": "855",
-                    "name": "VLAN0855"
-                },
-                {
-                    "id": "856",
-                    "name": "VLAN0856"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
                 "id": "1",
@@ -551,32 +501,7 @@
             "link_status": "True",
             "mac_address": "286f.7f7e.9a0a",
             "mtu": "9216",
-            "tagged_vlans": [
-                {
-                    "id": "851",
-                    "name": "VLAN0851"
-                },
-                {
-                    "id": "852",
-                    "name": "VLAN0852"
-                },
-                {
-                    "id": "853",
-                    "name": "VLAN0853"
-                },
-                {
-                    "id": "854",
-                    "name": "VLAN0854"
-                },
-                {
-                    "id": "855",
-                    "name": "VLAN0855"
-                },
-                {
-                    "id": "856",
-                    "name": "VLAN0856"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
                 "id": "1",
@@ -591,32 +516,7 @@
             "link_status": "True",
             "mac_address": "286f.7f7e.9a0b",
             "mtu": "9216",
-            "tagged_vlans": [
-                {
-                    "id": "851",
-                    "name": "VLAN0851"
-                },
-                {
-                    "id": "852",
-                    "name": "VLAN0852"
-                },
-                {
-                    "id": "853",
-                    "name": "VLAN0853"
-                },
-                {
-                    "id": "854",
-                    "name": "VLAN0854"
-                },
-                {
-                    "id": "855",
-                    "name": "VLAN0855"
-                },
-                {
-                    "id": "856",
-                    "name": "VLAN0856"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "1000base-t",
             "untagged_vlan": {
                 "id": "1",
@@ -755,50 +655,6 @@
                 {
                     "id": "1",
                     "name": "default"
-                },
-                {
-                    "id": "2",
-                    "name": "VLAN0002"
-                },
-                {
-                    "id": "3",
-                    "name": "VLAN0003"
-                },
-                {
-                    "id": "4",
-                    "name": "VLAN0004"
-                },
-                {
-                    "id": "5",
-                    "name": "VLAN0005"
-                },
-                {
-                    "id": "6",
-                    "name": "VLAN0006"
-                },
-                {
-                    "id": "7",
-                    "name": "VLAN0007"
-                },
-                {
-                    "id": "8",
-                    "name": "VLAN0008"
-                },
-                {
-                    "id": "9",
-                    "name": "VLAN0009"
-                },
-                {
-                    "id": "211",
-                    "name": "VLAN0211"
-                },
-                {
-                    "id": "212",
-                    "name": "VLAN0212"
-                },
-                {
-                    "id": "213",
-                    "name": "VLAN0213"
                 }
             ],
             "type": "1000base-t",
@@ -819,50 +675,6 @@
                 {
                     "id": "1",
                     "name": "default"
-                },
-                {
-                    "id": "2",
-                    "name": "VLAN0002"
-                },
-                {
-                    "id": "3",
-                    "name": "VLAN0003"
-                },
-                {
-                    "id": "4",
-                    "name": "VLAN0004"
-                },
-                {
-                    "id": "5",
-                    "name": "VLAN0005"
-                },
-                {
-                    "id": "6",
-                    "name": "VLAN0006"
-                },
-                {
-                    "id": "7",
-                    "name": "VLAN0007"
-                },
-                {
-                    "id": "8",
-                    "name": "VLAN0008"
-                },
-                {
-                    "id": "9",
-                    "name": "VLAN0009"
-                },
-                {
-                    "id": "211",
-                    "name": "VLAN0211"
-                },
-                {
-                    "id": "212",
-                    "name": "VLAN0212"
-                },
-                {
-                    "id": "213",
-                    "name": "VLAN0213"
                 }
             ],
             "type": "1000base-t",
@@ -883,50 +695,6 @@
                 {
                     "id": "1",
                     "name": "default"
-                },
-                {
-                    "id": "2",
-                    "name": "VLAN0002"
-                },
-                {
-                    "id": "3",
-                    "name": "VLAN0003"
-                },
-                {
-                    "id": "4",
-                    "name": "VLAN0004"
-                },
-                {
-                    "id": "5",
-                    "name": "VLAN0005"
-                },
-                {
-                    "id": "6",
-                    "name": "VLAN0006"
-                },
-                {
-                    "id": "7",
-                    "name": "VLAN0007"
-                },
-                {
-                    "id": "8",
-                    "name": "VLAN0008"
-                },
-                {
-                    "id": "9",
-                    "name": "VLAN0009"
-                },
-                {
-                    "id": "211",
-                    "name": "VLAN0211"
-                },
-                {
-                    "id": "212",
-                    "name": "VLAN0212"
-                },
-                {
-                    "id": "213",
-                    "name": "VLAN0213"
                 }
             ],
             "type": "1000base-t",
@@ -962,50 +730,6 @@
                 {
                     "id": "1",
                     "name": "default"
-                },
-                {
-                    "id": "2",
-                    "name": "VLAN0002"
-                },
-                {
-                    "id": "3",
-                    "name": "VLAN0003"
-                },
-                {
-                    "id": "4",
-                    "name": "VLAN0004"
-                },
-                {
-                    "id": "5",
-                    "name": "VLAN0005"
-                },
-                {
-                    "id": "6",
-                    "name": "VLAN0006"
-                },
-                {
-                    "id": "7",
-                    "name": "VLAN0007"
-                },
-                {
-                    "id": "8",
-                    "name": "VLAN0008"
-                },
-                {
-                    "id": "9",
-                    "name": "VLAN0009"
-                },
-                {
-                    "id": "211",
-                    "name": "VLAN0211"
-                },
-                {
-                    "id": "212",
-                    "name": "VLAN0212"
-                },
-                {
-                    "id": "213",
-                    "name": "VLAN0213"
                 }
             ],
             "type": "1000base-t",
@@ -1130,10 +854,6 @@
                 {
                     "id": "210",
                     "name": "Mgmt.FW"
-                },
-                {
-                    "id": "211",
-                    "name": "VLAN0211"
                 }
             ],
             "type": "1000base-t",
@@ -1162,10 +882,6 @@
                 {
                     "id": "210",
                     "name": "Mgmt.FW"
-                },
-                {
-                    "id": "211",
-                    "name": "VLAN0211"
                 }
             ],
             "type": "1000base-t",
@@ -1194,10 +910,6 @@
                 {
                     "id": "210",
                     "name": "Mgmt.FW"
-                },
-                {
-                    "id": "211",
-                    "name": "VLAN0211"
                 }
             ],
             "type": "1000base-t",
@@ -1226,10 +938,6 @@
                 {
                     "id": "210",
                     "name": "Mgmt.FW"
-                },
-                {
-                    "id": "211",
-                    "name": "VLAN0211"
                 }
             ],
             "type": "1000base-t",
@@ -2052,32 +1760,7 @@
             "link_status": "True",
             "mac_address": "286f.7f7e.9a0a",
             "mtu": "9216",
-            "tagged_vlans": [
-                {
-                    "id": "851",
-                    "name": "VLAN0851"
-                },
-                {
-                    "id": "852",
-                    "name": "VLAN0852"
-                },
-                {
-                    "id": "853",
-                    "name": "VLAN0853"
-                },
-                {
-                    "id": "854",
-                    "name": "VLAN0854"
-                },
-                {
-                    "id": "855",
-                    "name": "VLAN0855"
-                },
-                {
-                    "id": "856",
-                    "name": "VLAN0856"
-                }
-            ],
+            "tagged_vlans": [],
             "type": "lag",
             "untagged_vlan": {
                 "id": "1",
@@ -2220,50 +1903,6 @@
                 {
                     "id": "1",
                     "name": "default"
-                },
-                {
-                    "id": "2",
-                    "name": "VLAN0002"
-                },
-                {
-                    "id": "3",
-                    "name": "VLAN0003"
-                },
-                {
-                    "id": "4",
-                    "name": "VLAN0004"
-                },
-                {
-                    "id": "5",
-                    "name": "VLAN0005"
-                },
-                {
-                    "id": "6",
-                    "name": "VLAN0006"
-                },
-                {
-                    "id": "7",
-                    "name": "VLAN0007"
-                },
-                {
-                    "id": "8",
-                    "name": "VLAN0008"
-                },
-                {
-                    "id": "9",
-                    "name": "VLAN0009"
-                },
-                {
-                    "id": "211",
-                    "name": "VLAN0211"
-                },
-                {
-                    "id": "212",
-                    "name": "VLAN0212"
-                },
-                {
-                    "id": "213",
-                    "name": "VLAN0213"
                 }
             ],
             "type": "lag",
@@ -2345,10 +1984,6 @@
                 {
                     "id": "210",
                     "name": "Mgmt.FW"
-                },
-                {
-                    "id": "211",
-                    "name": "VLAN0211"
                 }
             ],
             "type": "lag",
