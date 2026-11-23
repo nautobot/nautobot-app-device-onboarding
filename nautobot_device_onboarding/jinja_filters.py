@@ -175,9 +175,7 @@ def get_vlan_data(item, vlan_mapping, tag_type):  # pylint: disable=too-many-ret
             # When the device's VLAN database is known, only keep VLANs that actually exist on it.
             if isinstance(vlan_mapping, dict) and vlan_mapping:
                 return [
-                    {"id": str(vid), "name": vlan_mapping[str(vid)]}
-                    for vid in allowed_vids
-                    if str(vid) in vlan_mapping
+                    {"id": str(vid), "name": vlan_mapping[str(vid)]} for vid in allowed_vids if str(vid) in vlan_mapping
                 ]
             return [{"id": str(vid), "name": f"VLAN{str(vid).zfill(4)}"} for vid in allowed_vids]
     return []
