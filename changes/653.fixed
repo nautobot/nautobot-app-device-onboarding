@@ -1,0 +1,1 @@
+Fixed Sync Network Data creating every VLAN in a trunk's allowed range instead of only the VLANs that exist on the device.

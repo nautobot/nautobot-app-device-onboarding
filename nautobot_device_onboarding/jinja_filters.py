@@ -170,10 +170,14 @@ def get_vlan_data(item, vlan_mapping, tag_type):  # pylint: disable=too-many-ret
                 trunk_vlans = current_item["trunking_vlans"]
             if any(isinstance(v, str) and v.lower() == "none" for v in trunk_vlans):
                 return []
-            return [
-                {"id": str(vid), "name": vlan_mapping.get(str(vid), f"VLAN{str(vid).zfill(4)}")}
-                for vid in list(chain.from_iterable([vlanconfig_to_list(vlan_stanza) for vlan_stanza in trunk_vlans]))
-            ]
+            allowed_vids = chain.from_iterable(vlanconfig_to_list(vlan_stanza) for vlan_stanza in trunk_vlans)
+            # A trunk's allowed range (e.g. "1-1000") can include VLANs that don't exist on the device.
+            # When the device's VLAN database is known, only keep VLANs that actually exist on it.
+            if isinstance(vlan_mapping, dict) and vlan_mapping:
+                return [
+                    {"id": str(vid), "name": vlan_mapping[str(vid)]} for vid in allowed_vids if str(vid) in vlan_mapping
+                ]
+            return [{"id": str(vid), "name": f"VLAN{str(vid).zfill(4)}"} for vid in allowed_vids]
     return []
 
 
