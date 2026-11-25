@@ -40,6 +40,7 @@ class NautobotDeviceOnboardingConfig(NautobotAppConfig):
             "ios": "nautobot_device_onboarding.onboarding_extensions.ios",
         },
         "object_match_strategy": "loose",
+        "netmiko_enable_mode_platforms": [],
     }
     docs_view_name = "plugins:nautobot_device_onboarding:docs"
     home_view_name = "extras:job_list"  # Jobs only for now. May change in the future.
