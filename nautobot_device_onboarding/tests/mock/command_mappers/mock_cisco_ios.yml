@@ -121,3 +121,18 @@ sync_network_data:
       - command: "show cdp neighbors detail"
         parser: "textfsm"
         jpath: "[*].{local_interface:local_interface, remote_interface:neighbor_interface, remote_device:neighbor_name}"
+  config_context:
+    ip_ospf_neighbors:
+      commands:
+        - command: "show ip ospf neighbor"
+          parser: "textfsm"
+          jpath: "[*].{neighbor_id: neighbor_id, ip_address: ip_address, interface: interface, state: state}"
+          post_processor: "{{ obj | sort(attribute='neighbor_id') | list | tojson }}"
+          iterable_type: "list"
+    snmp_communities:
+      commands:
+        - command: "show running-config | include snmp-server community"
+          parser: "raw"
+          jpath: "raw"
+          post_processor: "{% set result=[] %}{% for line in obj.splitlines() %}{% set entry=line|trim %}{% if entry %}{{ result.append({'community': entry}) or '' }}{% endif %}{% endfor %}{{ result | sort(attribute='community') | list | tojson }}"
+          iterable_type: "list"
