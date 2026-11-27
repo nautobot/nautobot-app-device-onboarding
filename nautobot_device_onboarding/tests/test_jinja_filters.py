@@ -33,6 +33,14 @@ class TestJinjaFilters(unittest.TestCase):
         """Map interface type to a Nautobot type."""
         self.assertEqual(map_interface_type("ethernet"), "1000base-t")
 
+    def test_map_interface_type_cisco_multigig(self):
+        """Map Cisco IOS-XE mGig and high-speed hardware types to Nautobot types."""
+        self.assertEqual(map_interface_type("Two Gigabit Ethernet"), "2.5gbase-t")
+        self.assertEqual(map_interface_type("Five Gigabit Ethernet"), "5gbase-t")
+        self.assertEqual(map_interface_type("Twenty Five Gigabit Ethernet"), "25gbase-x-sfp28")
+        self.assertEqual(map_interface_type("Forty Gigabit Ethernet"), "40gbase-x-qsfpp")
+        self.assertEqual(map_interface_type("Hundred Gigabit Ethernet"), "100gbase-x-qsfp28")
+
     def test_extract_prefix_valid_without_slash(self):
         """Extract the prefix length from the IP/Prefix. E.g 192.168.1.1/24."""
         self.assertEqual(extract_prefix("198.51.100.1"), "198.51.100.1")
