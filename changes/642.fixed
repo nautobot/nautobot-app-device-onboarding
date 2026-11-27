@@ -1,0 +1,1 @@
+Fixed issue when creating a device in a switch stack that doesn't have it's device type already created in Nautobot.
