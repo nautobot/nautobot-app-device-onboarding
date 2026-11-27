@@ -1,0 +1,1 @@
+Fixed the `Sync Network Data From Network` job failing to load untagged VLANs for Juniper Junos devices when the untagged VLAN was returned as an empty list.

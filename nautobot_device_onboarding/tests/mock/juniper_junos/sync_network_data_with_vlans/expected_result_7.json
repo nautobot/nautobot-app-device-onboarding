@@ -10,7 +10,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/0.0": {
             "802.1Q_mode": "",
@@ -22,7 +22,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/1": {
             "802.1Q_mode": "",
@@ -34,7 +34,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/1.0": {
             "802.1Q_mode": "",
@@ -46,7 +46,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/10": {
             "802.1Q_mode": "",
@@ -58,7 +58,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/10.0": {
             "802.1Q_mode": "",
@@ -70,7 +70,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/11": {
             "802.1Q_mode": "",
@@ -82,7 +82,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/11.0": {
             "802.1Q_mode": "",
@@ -94,7 +94,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/12": {
             "802.1Q_mode": "",
@@ -106,7 +106,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/12.0": {
             "802.1Q_mode": "",
@@ -118,7 +118,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/13": {
             "802.1Q_mode": "",
@@ -130,7 +130,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/13.0": {
             "802.1Q_mode": "",
@@ -142,7 +142,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/14": {
             "802.1Q_mode": "",
@@ -154,7 +154,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/14.0": {
             "802.1Q_mode": "",
@@ -166,7 +166,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/15": {
             "802.1Q_mode": "",
@@ -178,7 +178,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/15.0": {
             "802.1Q_mode": "",
@@ -190,7 +190,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/16": {
             "802.1Q_mode": "",
@@ -202,7 +202,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/16.0": {
             "802.1Q_mode": "",
@@ -214,7 +214,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/17": {
             "802.1Q_mode": "",
@@ -226,7 +226,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/17.0": {
             "802.1Q_mode": "",
@@ -238,7 +238,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/18": {
             "802.1Q_mode": "",
@@ -250,7 +250,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/18.0": {
             "802.1Q_mode": "",
@@ -262,7 +262,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/19": {
             "802.1Q_mode": "",
@@ -274,7 +274,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/19.0": {
             "802.1Q_mode": "",
@@ -286,7 +286,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/2": {
             "802.1Q_mode": "",
@@ -298,7 +298,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/2.0": {
             "802.1Q_mode": "",
@@ -310,7 +310,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/20": {
             "802.1Q_mode": "",
@@ -322,7 +322,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/20.0": {
             "802.1Q_mode": "",
@@ -334,7 +334,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/21": {
             "802.1Q_mode": "",
@@ -346,7 +346,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/21.0": {
             "802.1Q_mode": "",
@@ -358,7 +358,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/22": {
             "802.1Q_mode": "",
@@ -370,7 +370,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/22.0": {
             "802.1Q_mode": "",
@@ -382,7 +382,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/23": {
             "802.1Q_mode": "",
@@ -394,7 +394,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/23.0": {
             "802.1Q_mode": "",
@@ -406,7 +406,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/24": {
             "802.1Q_mode": "",
@@ -418,7 +418,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/24.0": {
             "802.1Q_mode": "",
@@ -430,7 +430,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/25": {
             "802.1Q_mode": "",
@@ -442,7 +442,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/25.0": {
             "802.1Q_mode": "",
@@ -454,7 +454,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/26": {
             "802.1Q_mode": "",
@@ -466,7 +466,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/26.0": {
             "802.1Q_mode": "",
@@ -478,7 +478,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/27": {
             "802.1Q_mode": "",
@@ -490,7 +490,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/27.0": {
             "802.1Q_mode": "",
@@ -502,7 +502,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/28": {
             "802.1Q_mode": "",
@@ -514,7 +514,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/28.0": {
             "802.1Q_mode": "",
@@ -526,7 +526,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/29": {
             "802.1Q_mode": "",
@@ -538,7 +538,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/29.0": {
             "802.1Q_mode": "",
@@ -550,7 +550,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/3": {
             "802.1Q_mode": "",
@@ -562,7 +562,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/3.0": {
             "802.1Q_mode": "",
@@ -574,7 +574,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/30": {
             "802.1Q_mode": "",
@@ -586,7 +586,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/30.0": {
             "802.1Q_mode": "",
@@ -598,7 +598,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/31": {
             "802.1Q_mode": "",
@@ -610,7 +610,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/31.0": {
             "802.1Q_mode": "",
@@ -622,7 +622,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/32": {
             "802.1Q_mode": "",
@@ -634,7 +634,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/32.0": {
             "802.1Q_mode": "",
@@ -646,7 +646,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/33": {
             "802.1Q_mode": "",
@@ -658,7 +658,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/33.0": {
             "802.1Q_mode": "",
@@ -670,7 +670,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/34": {
             "802.1Q_mode": "",
@@ -682,7 +682,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/34.0": {
             "802.1Q_mode": "",
@@ -694,7 +694,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/35": {
             "802.1Q_mode": "",
@@ -706,7 +706,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/35.0": {
             "802.1Q_mode": "",
@@ -718,7 +718,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/36": {
             "802.1Q_mode": "",
@@ -730,7 +730,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/36.0": {
             "802.1Q_mode": "",
@@ -742,7 +742,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/37": {
             "802.1Q_mode": "",
@@ -754,7 +754,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/37.0": {
             "802.1Q_mode": "",
@@ -766,7 +766,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/38": {
             "802.1Q_mode": "",
@@ -778,7 +778,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/38.0": {
             "802.1Q_mode": "",
@@ -790,7 +790,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/39": {
             "802.1Q_mode": "",
@@ -802,7 +802,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/39.0": {
             "802.1Q_mode": "",
@@ -814,7 +814,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/4": {
             "802.1Q_mode": "",
@@ -826,7 +826,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/4.0": {
             "802.1Q_mode": "",
@@ -838,7 +838,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/40": {
             "802.1Q_mode": "",
@@ -850,7 +850,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/40.0": {
             "802.1Q_mode": "",
@@ -862,7 +862,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/41": {
             "802.1Q_mode": "",
@@ -874,7 +874,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/41.0": {
             "802.1Q_mode": "",
@@ -886,7 +886,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/42": {
             "802.1Q_mode": "",
@@ -898,7 +898,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/42.0": {
             "802.1Q_mode": "",
@@ -910,7 +910,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/43": {
             "802.1Q_mode": "",
@@ -922,7 +922,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/43.0": {
             "802.1Q_mode": "",
@@ -934,7 +934,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/44": {
             "802.1Q_mode": "",
@@ -946,7 +946,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/44.0": {
             "802.1Q_mode": "",
@@ -958,7 +958,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/45": {
             "802.1Q_mode": "",
@@ -970,7 +970,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/45.0": {
             "802.1Q_mode": "",
@@ -982,7 +982,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/46": {
             "802.1Q_mode": "",
@@ -994,7 +994,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/46.0": {
             "802.1Q_mode": "",
@@ -1006,7 +1006,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/47": {
             "802.1Q_mode": "",
@@ -1018,7 +1018,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/47.0": {
             "802.1Q_mode": "",
@@ -1030,7 +1030,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/5": {
             "802.1Q_mode": "",
@@ -1042,7 +1042,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/5.0": {
             "802.1Q_mode": "",
@@ -1054,7 +1054,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/6": {
             "802.1Q_mode": "",
@@ -1066,7 +1066,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/6.0": {
             "802.1Q_mode": "",
@@ -1078,7 +1078,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/7": {
             "802.1Q_mode": "",
@@ -1090,7 +1090,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/7.0": {
             "802.1Q_mode": "",
@@ -1102,7 +1102,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/8": {
             "802.1Q_mode": "",
@@ -1114,7 +1114,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/8.0": {
             "802.1Q_mode": "",
@@ -1126,7 +1126,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/9": {
             "802.1Q_mode": "",
@@ -1138,7 +1138,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/0/9.0": {
             "802.1Q_mode": "",
@@ -1150,7 +1150,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/2/0": {
             "802.1Q_mode": "",
@@ -1162,7 +1162,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/2/0.0": {
             "802.1Q_mode": "",
@@ -1174,7 +1174,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/2/1": {
             "802.1Q_mode": "",
@@ -1186,7 +1186,7 @@
             "mtu": "",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/2/1.0": {
             "802.1Q_mode": "",
@@ -1198,7 +1198,7 @@
             "mtu": "",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/2/2": {
             "802.1Q_mode": "",
@@ -1210,7 +1210,7 @@
             "mtu": "",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/2/2.0": {
             "802.1Q_mode": "",
@@ -1222,7 +1222,7 @@
             "mtu": "",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/2/3": {
             "802.1Q_mode": "",
@@ -1234,7 +1234,7 @@
             "mtu": "",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-0/2/3.0": {
             "802.1Q_mode": "",
@@ -1246,7 +1246,7 @@
             "mtu": "",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/0": {
             "802.1Q_mode": "",
@@ -1258,7 +1258,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/0.0": {
             "802.1Q_mode": "",
@@ -1270,7 +1270,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/1": {
             "802.1Q_mode": "",
@@ -1282,7 +1282,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/1.0": {
             "802.1Q_mode": "",
@@ -1294,7 +1294,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/10": {
             "802.1Q_mode": "",
@@ -1306,7 +1306,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/10.0": {
             "802.1Q_mode": "",
@@ -1318,7 +1318,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/11": {
             "802.1Q_mode": "",
@@ -1330,7 +1330,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/11.0": {
             "802.1Q_mode": "",
@@ -1342,7 +1342,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/12": {
             "802.1Q_mode": "",
@@ -1354,7 +1354,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/12.0": {
             "802.1Q_mode": "",
@@ -1366,7 +1366,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/13": {
             "802.1Q_mode": "",
@@ -1378,7 +1378,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/13.0": {
             "802.1Q_mode": "",
@@ -1390,7 +1390,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/14": {
             "802.1Q_mode": "",
@@ -1402,7 +1402,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/14.0": {
             "802.1Q_mode": "",
@@ -1414,7 +1414,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/15": {
             "802.1Q_mode": "",
@@ -1426,7 +1426,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/15.0": {
             "802.1Q_mode": "",
@@ -1438,7 +1438,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/16": {
             "802.1Q_mode": "",
@@ -1450,7 +1450,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/16.0": {
             "802.1Q_mode": "",
@@ -1462,7 +1462,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/17": {
             "802.1Q_mode": "",
@@ -1474,7 +1474,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/17.0": {
             "802.1Q_mode": "",
@@ -1486,7 +1486,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/18": {
             "802.1Q_mode": "",
@@ -1498,7 +1498,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/18.0": {
             "802.1Q_mode": "",
@@ -1510,7 +1510,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/19": {
             "802.1Q_mode": "",
@@ -1522,7 +1522,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/19.0": {
             "802.1Q_mode": "",
@@ -1534,7 +1534,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/2": {
             "802.1Q_mode": "",
@@ -1546,7 +1546,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/2.0": {
             "802.1Q_mode": "",
@@ -1558,7 +1558,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/20": {
             "802.1Q_mode": "",
@@ -1570,7 +1570,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/20.0": {
             "802.1Q_mode": "",
@@ -1582,7 +1582,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/21": {
             "802.1Q_mode": "",
@@ -1594,7 +1594,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/21.0": {
             "802.1Q_mode": "",
@@ -1606,7 +1606,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/22": {
             "802.1Q_mode": "",
@@ -1618,7 +1618,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/22.0": {
             "802.1Q_mode": "",
@@ -1630,7 +1630,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/23": {
             "802.1Q_mode": "",
@@ -1642,7 +1642,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/23.0": {
             "802.1Q_mode": "",
@@ -1654,7 +1654,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/24": {
             "802.1Q_mode": "",
@@ -1666,7 +1666,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/24.0": {
             "802.1Q_mode": "",
@@ -1678,7 +1678,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/25": {
             "802.1Q_mode": "",
@@ -1690,7 +1690,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/25.0": {
             "802.1Q_mode": "",
@@ -1702,7 +1702,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/26": {
             "802.1Q_mode": "",
@@ -1714,7 +1714,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/26.0": {
             "802.1Q_mode": "",
@@ -1726,7 +1726,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/27": {
             "802.1Q_mode": "",
@@ -1738,7 +1738,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/27.0": {
             "802.1Q_mode": "",
@@ -1750,7 +1750,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/28": {
             "802.1Q_mode": "",
@@ -1762,7 +1762,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/28.0": {
             "802.1Q_mode": "",
@@ -1774,7 +1774,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/29": {
             "802.1Q_mode": "",
@@ -1786,7 +1786,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/29.0": {
             "802.1Q_mode": "",
@@ -1798,7 +1798,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/3": {
             "802.1Q_mode": "",
@@ -1810,7 +1810,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/3.0": {
             "802.1Q_mode": "",
@@ -1822,7 +1822,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/30": {
             "802.1Q_mode": "",
@@ -1834,7 +1834,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/30.0": {
             "802.1Q_mode": "",
@@ -1846,7 +1846,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/31": {
             "802.1Q_mode": "",
@@ -1858,7 +1858,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/31.0": {
             "802.1Q_mode": "",
@@ -1870,7 +1870,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/32": {
             "802.1Q_mode": "",
@@ -1882,7 +1882,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/32.0": {
             "802.1Q_mode": "",
@@ -1894,7 +1894,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/33": {
             "802.1Q_mode": "",
@@ -1906,7 +1906,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/33.0": {
             "802.1Q_mode": "",
@@ -1918,7 +1918,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/34": {
             "802.1Q_mode": "",
@@ -1930,7 +1930,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/34.0": {
             "802.1Q_mode": "",
@@ -1942,7 +1942,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/35": {
             "802.1Q_mode": "",
@@ -1954,7 +1954,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/35.0": {
             "802.1Q_mode": "",
@@ -1966,7 +1966,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/36": {
             "802.1Q_mode": "",
@@ -1978,7 +1978,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/36.0": {
             "802.1Q_mode": "",
@@ -1990,7 +1990,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/37": {
             "802.1Q_mode": "",
@@ -2002,7 +2002,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/37.0": {
             "802.1Q_mode": "",
@@ -2014,7 +2014,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/38": {
             "802.1Q_mode": "",
@@ -2026,7 +2026,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/38.0": {
             "802.1Q_mode": "",
@@ -2038,7 +2038,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/39": {
             "802.1Q_mode": "",
@@ -2050,7 +2050,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/39.0": {
             "802.1Q_mode": "",
@@ -2062,7 +2062,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/4": {
             "802.1Q_mode": "",
@@ -2074,7 +2074,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/4.0": {
             "802.1Q_mode": "",
@@ -2086,7 +2086,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/40": {
             "802.1Q_mode": "",
@@ -2098,7 +2098,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/40.0": {
             "802.1Q_mode": "",
@@ -2110,7 +2110,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/41": {
             "802.1Q_mode": "",
@@ -2122,7 +2122,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/41.0": {
             "802.1Q_mode": "",
@@ -2134,7 +2134,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/42": {
             "802.1Q_mode": "",
@@ -2146,7 +2146,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/42.0": {
             "802.1Q_mode": "",
@@ -2158,7 +2158,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/43": {
             "802.1Q_mode": "",
@@ -2170,7 +2170,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/43.0": {
             "802.1Q_mode": "",
@@ -2182,7 +2182,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/44": {
             "802.1Q_mode": "",
@@ -2194,7 +2194,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/44.0": {
             "802.1Q_mode": "",
@@ -2206,7 +2206,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/45": {
             "802.1Q_mode": "",
@@ -2218,7 +2218,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/45.0": {
             "802.1Q_mode": "",
@@ -2230,7 +2230,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/46": {
             "802.1Q_mode": "",
@@ -2242,7 +2242,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/46.0": {
             "802.1Q_mode": "",
@@ -2254,7 +2254,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/47": {
             "802.1Q_mode": "",
@@ -2266,7 +2266,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/47.0": {
             "802.1Q_mode": "",
@@ -2278,7 +2278,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/5": {
             "802.1Q_mode": "",
@@ -2290,7 +2290,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/5.0": {
             "802.1Q_mode": "",
@@ -2302,7 +2302,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/6": {
             "802.1Q_mode": "",
@@ -2314,7 +2314,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/6.0": {
             "802.1Q_mode": "",
@@ -2326,7 +2326,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/7": {
             "802.1Q_mode": "",
@@ -2338,7 +2338,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/7.0": {
             "802.1Q_mode": "",
@@ -2350,7 +2350,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/8": {
             "802.1Q_mode": "",
@@ -2362,7 +2362,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/8.0": {
             "802.1Q_mode": "",
@@ -2374,7 +2374,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/9": {
             "802.1Q_mode": "",
@@ -2386,7 +2386,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/0/9.0": {
             "802.1Q_mode": "",
@@ -2398,7 +2398,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/2/0": {
             "802.1Q_mode": "",
@@ -2410,7 +2410,7 @@
             "mtu": "",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "ge-1/2/0.0": {
             "802.1Q_mode": "",
@@ -2422,7 +2422,7 @@
             "mtu": "",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "irb": {
             "802.1Q_mode": "",
@@ -2434,7 +2434,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "irb.0": {
             "802.1Q_mode": "",
@@ -2451,7 +2451,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "irb.16": {
             "802.1Q_mode": "",
@@ -2468,7 +2468,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "vme": {
             "802.1Q_mode": "",
@@ -2480,7 +2480,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "vme.0": {
             "802.1Q_mode": "",
@@ -2497,7 +2497,7 @@
             "mtu": "1514",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "xe-0/2/0": {
             "802.1Q_mode": "",
@@ -2509,7 +2509,7 @@
             "mtu": "",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "xe-0/2/0.0": {
             "802.1Q_mode": "",
@@ -2521,7 +2521,7 @@
             "mtu": "",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "xe-0/2/1": {
             "802.1Q_mode": "",
@@ -2533,7 +2533,7 @@
             "mtu": "",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "xe-0/2/1.0": {
             "802.1Q_mode": "",
@@ -2545,7 +2545,7 @@
             "mtu": "",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "xe-0/2/2": {
             "802.1Q_mode": "",
@@ -2557,7 +2557,7 @@
             "mtu": "",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "xe-0/2/2.0": {
             "802.1Q_mode": "",
@@ -2569,7 +2569,7 @@
             "mtu": "",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "xe-0/2/3": {
             "802.1Q_mode": "",
@@ -2581,7 +2581,7 @@
             "mtu": "",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         },
         "xe-0/2/3.0": {
             "802.1Q_mode": "",
@@ -2593,7 +2593,7 @@
             "mtu": "",
             "tagged_vlans": [],
             "type": "other",
-            "untagged_vlan": []
+            "untagged_vlan": {}
         }
     },
     "serial": "PD3987654321"

@@ -105,15 +105,16 @@ sync_network_data:
   interfaces__tagged_vlans:
     commands:
       - command: "show vlans | display json"
-        parser: "textfsm"
+        parser: "none"
         jpath: "[?contains(interfaces, `{{ current_key }}`*)].{admin_mode: admin_mode, mode: mode, access_vlan: access_vlan, trunking_vlans: trunking_vlans, native_vlan: native_vlan}"
         post_processor: "{{ obj | get_vlan_data(vlan_map, 'tagged') | tojson }}"
   interfaces__untagged_vlan:
     commands:
       - command: "show vlans | display json"
-        parser: "textfsm"
+        parser: "none"
         jpath: "[?contains(interfaces, `{{ current_key }}`*)].{admin_mode: admin_mode, mode: mode, access_vlan: access_vlan, trunking_vlans: trunking_vlans, native_vlan: native_vlan}"
         post_processor: "{{ obj | get_vlan_data(vlan_map, 'untagged') | tojson }}"
+        iterable_type: "dict"
   cables:
     commands:
       - command: "show lldp neighbors | display json"
